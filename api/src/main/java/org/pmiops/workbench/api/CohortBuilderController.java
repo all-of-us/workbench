@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -40,6 +39,8 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,27 +52,34 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
-  private final CdrVersionService cdrVersionService;
   private final ElasticSearchService elasticSearchService;
   private final Provider<WorkbenchConfig> configProvider;
   private final CohortBuilderService cohortBuilderService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   CohortBuilderController(
-      CdrVersionService cdrVersionService,
       ElasticSearchService elasticSearchService,
       Provider<WorkbenchConfig> configProvider,
-      CohortBuilderService cohortBuilderService) {
-    this.cdrVersionService = cdrVersionService;
+      CohortBuilderService cohortBuilderService,
+      WorkspaceAuthService workspaceAuthService) {
     this.elasticSearchService = elasticSearchService;
     this.configProvider = configProvider;
     this.cohortBuilderService = cohortBuilderService;
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaAutoComplete(
-      Long cdrVersionId, String domain, String term, String type, Boolean standard, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace,
+      String workspaceId,
+      String domain,
+      String term,
+      String type,
+      Boolean standard,
+      Integer limit) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
     validateType(type);
     validateTerm(term);
@@ -84,8 +92,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findDrugBrandOrIngredientByValue(
-      Long cdrVersionId, String value, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, String value, Integer limit) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(cohortBuilderService.findDrugBrandOrIngredientByValue(value, limit)));
@@ -93,16 +102,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findDrugIngredientByConceptId(
-      Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, Long conceptId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CriteriaListResponse()
             .items(cohortBuilderService.findDrugIngredientByConceptId(conceptId)));
   }
 
   @Override
-  public ResponseEntity<AgeTypeCountListResponse> findAgeTypeCounts(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<AgeTypeCountListResponse> findAgeTypeCounts(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new AgeTypeCountListResponse().items(cohortBuilderService.findAgeTypeCounts()));
   }
@@ -112,8 +124,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    * SearchRequest}.
    */
   @Override
-  public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    DbCdrVersion cdrVersion = cdrVersionService.findAndSetCdrVersion(cdrVersionId);
+  public ResponseEntity<Long> countParticipants(
+      String workspaceNamespace, String workspaceId, SearchRequest request) {
+    DbCdrVersion cdrVersion =
+        workspaceAuthService
+            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER)
+            .getCdrVersion();
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
         && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
         && !isApproximate(request)) {
@@ -128,8 +145,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
-      Long cdrVersionId, String domain, String term, String surveyName, Integer limit) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace,
+      String workspaceId,
+      String domain,
+      String term,
+      String surveyName,
+      Integer limit) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain, surveyName);
     return ResponseEntity.ok(
         cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
@@ -137,8 +160,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaForCohortEdit(
-      Long cdrVersionId, String domain, CriteriaRequest request) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, String domain, CriteriaRequest request) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
@@ -149,8 +173,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaMenuListResponse> findCriteriaMenu(
-      Long cdrVersionId, Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, Long parentId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CriteriaMenuListResponse response =
         new CriteriaMenuListResponse()
             .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
@@ -158,16 +183,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataFiltersResponse> findDataFilters(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<DataFiltersResponse> findDataFilters(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new DataFiltersResponse().items(cohortBuilderService.findDataFilters()));
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> findStandardCriteriaByDomainAndConceptId(
-      Long cdrVersionId, String domain, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, String domain, Long conceptId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
     return ResponseEntity.ok(
         new CriteriaListResponse()
@@ -177,8 +205,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> findDemoChartInfo(
-      Long cdrVersionId, String genderOrSex, String age, SearchRequest request) {
-    DbCdrVersion cdrVersion = cdrVersionService.findAndSetCdrVersion(cdrVersionId);
+      String workspaceNamespace,
+      String workspaceId,
+      String genderOrSex,
+      String age,
+      SearchRequest request) {
+    DbCdrVersion cdrVersion =
+        workspaceAuthService
+            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER)
+            .getCdrVersion();
     GenderOrSexType genderOrSexType = validateGenderOrSexType(genderOrSex);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
@@ -203,8 +239,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DomainCount> findDomainCount(
-      Long cdrVersionId, String domain, String term) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, String domain, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
     validateTerm(term);
     Long count = cohortBuilderService.findDomainCount(domain, term);
@@ -213,16 +250,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DomainInfoResponse> findDomainInfos(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<DomainInfoResponse> findDomainInfos(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
   }
 
   @Override
   public ResponseEntity<CriteriaAttributeListResponse> findCriteriaAttributeByConceptId(
-      Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, Long conceptId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CriteriaAttributeListResponse()
             .items(cohortBuilderService.findCriteriaAttributeByConceptId(conceptId)));
@@ -230,8 +270,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaBy(
-      Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace,
+      String workspaceId,
+      String domain,
+      String type,
+      Boolean standard,
+      Long parentId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     validateDomain(domain);
     validateType(type);
     return ResponseEntity.ok(
@@ -240,29 +286,36 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ParticipantDemographics> findParticipantDemographics(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<ParticipantDemographics> findParticipantDemographics(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(cohortBuilderService.findParticipantDemographics());
   }
 
   @Override
-  public ResponseEntity<SurveyCount> findSurveyCount(Long cdrVersionId, String name, String term) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<SurveyCount> findSurveyCount(
+      String workspaceNamespace, String workspaceId, String name, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     Long surveyCount = cohortBuilderService.findSurveyCount(name, term);
     return ResponseEntity.ok(
         new SurveyCount().conceptCount(surveyCount == null ? 0 : surveyCount).name(name));
   }
 
   @Override
-  public ResponseEntity<SurveysResponse> findSurveyModules(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+  public ResponseEntity<SurveysResponse> findSurveyModules(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(new SurveysResponse().items(cohortBuilderService.findSurveyModules()));
   }
 
   @Override
   public ResponseEntity<SurveyVersionListResponse> findSurveyVersionByQuestionConceptId(
-      Long cdrVersionId, Long surveyConceptId, Long questionConceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+      String workspaceNamespace, String workspaceId, Long surveyConceptId, Long questionConceptId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new SurveyVersionListResponse()
             .items(
@@ -273,8 +326,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<SurveyVersionListResponse>
       findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-          Long cdrVersionId, Long surveyConceptId, Long questionConceptId, Long answerConceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
+          String workspaceNamespace,
+          String workspaceId,
+          Long surveyConceptId,
+          Long questionConceptId,
+          Long answerConceptId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new SurveyVersionListResponse()
             .items(

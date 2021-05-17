@@ -205,10 +205,10 @@ export class SearchBar extends React.Component<Props, State> {
     const {node: {domainId, isStandard, type}, searchTerms} = this.props;
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerms);
     this.setState({inputErrors: [], loading: true});
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const {id, namespace} = currentWorkspaceStore.getValue();
     const apiCall = domainId === Domain.DRUG.toString()
-      ? cohortBuilderApi().findDrugBrandOrIngredientByValue(+cdrVersionId, searchTerms)
-      : cohortBuilderApi().findCriteriaAutoComplete(+cdrVersionId, domainId, searchTerms, type, isStandard);
+      ? cohortBuilderApi().findDrugBrandOrIngredientByValue(namespace, id, searchTerms)
+      : cohortBuilderApi().findCriteriaAutoComplete(namespace, id, domainId, searchTerms, type, isStandard);
     apiCall.then(resp => {
       const optionNames: Array<string> = [];
       const options = resp.items.filter(option => {
@@ -233,8 +233,8 @@ export class SearchBar extends React.Component<Props, State> {
       setInput(option.name);
       this.setState({highlightedOption: null, options: null, optionSelected: true});
       if (option.type === CriteriaType.BRAND.toString()) {
-        const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-        cohortBuilderApi().findDrugIngredientByConceptId(cdrId, option.conceptId)
+        const {id, namespace} = currentWorkspaceStore.getValue();
+        cohortBuilderApi().findDrugIngredientByConceptId(namespace, id, option.conceptId)
           .then(resp => {
             if (resp.items.length) {
               const ingredients = resp.items.map(it => it.name);

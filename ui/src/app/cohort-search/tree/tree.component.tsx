@@ -194,17 +194,18 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     try {
       const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
       this.setState({loading: true});
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const workspace = currentWorkspaceStore.getValue();
+      const cdrVersionId = workspace.cdrVersionId;
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const promises = this.sendOnlyCriteriaType(domainId)
-          ? [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType)]
-          : [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)];
+          ? [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType)]
+          : [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType, isStandard, id)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
           standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
         };
-        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(+cdrVersionId, domainId, criteriaRequest));
+        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(workspace.namespace, workspace.id, domainId, criteriaRequest));
       }
       const [rootNodes, criteriaLookup] = await Promise.all(promises);
       if (criteriaLookup) {
@@ -269,10 +270,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   updatePpiSurveys(resp, selectedSurveyChild) {
     const {node: {domainId, isStandard, type}} = this.props;
-    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const {cdrVersionId, id, namespace} = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     if (selectedSurveyChild && selectedSurveyChild.length > 0) {
-      cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
+      cohortBuilderApi().findCriteriaBy(namespace, id, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
         .then(surveyResponse => this.setState({children: surveyResponse.items}));
     } else {
       this.setState({children: resp.items});
