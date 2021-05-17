@@ -453,7 +453,7 @@ interface State {
   selectedPreviewDomain: Domain;
 }
 
-export const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {

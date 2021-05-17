@@ -78,7 +78,7 @@ const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
-export const DataPage = withCurrentWorkspace()(class extends React.Component<
+export const DataComponent = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
     creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
