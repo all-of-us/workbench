@@ -3,6 +3,9 @@ FROM ubuntu:18.04
 #
 # Development requirements
 #
+# Java
+FROM adoptopenjdk:11-jre-hotspot
+
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
      curl \
@@ -21,15 +24,11 @@ RUN apt-get update && \
      ruby-dev \
      ruby-json \
      make \
-     wget \
      unzip \
      wait-for-it \
      && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Java
-FROM adoptopenjdk/openjdk11:jre
 
 ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
