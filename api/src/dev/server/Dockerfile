@@ -3,12 +3,6 @@ FROM ubuntu:18.04
 #
 # Development requirements
 #
-
-FROM adoptopenjdk:11-jre-hotspot
-RUN mkdir /opt/app
-COPY japp.jar /opt/app
-CMD ["java", "-jar", "/opt/app/japp.jar"]
-
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
      curl \
@@ -33,6 +27,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Java
+RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - ; \
+    add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ ; \
+    apt-get update && apt-get install -y adoptopenjdk-11-hotspot
 ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
