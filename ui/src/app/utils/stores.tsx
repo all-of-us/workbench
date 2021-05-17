@@ -18,7 +18,7 @@ export interface RouteDataStore {
 
 export const routeDataStore = atom<RouteDataStore>({});
 
-export interface AuthStore {
+interface AuthStore {
   authLoaded: boolean;
   isSignedIn: boolean;
 }
