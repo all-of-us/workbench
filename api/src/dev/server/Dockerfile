@@ -30,7 +30,6 @@ RUN apt-get update && \
 
 # Java
 FROM adoptopenjdk/openjdk11:jre
-ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
