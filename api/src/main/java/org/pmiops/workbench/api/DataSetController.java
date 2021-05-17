@@ -43,6 +43,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
@@ -293,12 +294,44 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    validateDataSetRequestResources(
-        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+    JSONObject notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
 
+    generateCodeCells(dataSetExportRequest, dbWorkspace).forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+
+    return ResponseEntity.ok(new ReadOnlyNotebookResponse()
+        .html(notebooksService.convertNotebookToHtml(notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> exportToNotebook(
+      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
+
+    String bucketName = fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace().getBucketName();
+
+    JSONObject notebookFile;
+
+    if (!dataSetExportRequest.getNewNotebook()) {
+      notebookFile =
+          notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
+      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
+    } else {
+      notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
+    }
+
+    generateCodeCells(dataSetExportRequest, dbWorkspace).forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+
+    notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
+
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private JSONObject createNotebookObject(KernelTypeEnum kernelTypeEnum) {
     JSONObject metaData = new JSONObject();
-
-    switch (dataSetExportRequest.getKernelType()) {
+    switch (kernelTypeEnum) {
       case PYTHON:
         break;
       case R:
@@ -318,141 +351,35 @@ public class DataSetController implements DataSetApiDelegate {
         break;
       default:
         throw new BadRequestException(
-            "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+            "Kernel Type " + kernelTypeEnum + " is not supported");
     }
 
+    return new JSONObject()
+        .put("cells", new JSONArray())
+        .put("metadata", metaData)
+        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+        // Specifically, here we create notebook version 4.2 (I believe)
+        // See https://nbformat.readthedocs.io/en/latest/api.html
+        .put("nbformat", 4)
+        .put("nbformat_minor", 2);
+  }
+
+  private List<JSONObject> generateCodeCells(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
     // TODO(calbach): Verify whether the request payload is ever expected to include a different
     // workspace ID.
     dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
-    Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
-
-    String qualifier = generateRandomEightCharacterQualifier();
-
-    List<String> queriesAsStrings =
-        dataSetService.generateCodeCells(
-            dataSetExportRequest.getKernelType(),
-            dataSetExportRequest.getDataSetRequest().getName(),
-            dbWorkspace.getCdrVersion().getName(),
-            qualifier,
-            queriesByDomain);
-
-    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
-      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-      }
-
-      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
-        throw new FailedPreconditionException(
-            "The workspace CDR version does not have whole genome data");
-      }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
-        throw new BadRequestException("Genomics code generation is only supported in Python");
-      }
-
-      // TODO(RW-6633): Add WGS codegen support.
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
-
-    JSONObject notebookFile =
-        new JSONObject()
-            .put("cells", new JSONArray())
-            .put("metadata", metaData)
-            // nbformat and nbformat_minor are the notebook major and minor version we are
-            // creating.
-            // Specifically, here we create notebook version 4.2 (I believe)
-            // See https://nbformat.readthedocs.io/en/latest/api.html
-            .put("nbformat", 4)
-            .put("nbformat_minor", 2);
-    for (String query : queriesAsStrings) {
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
-    }
-
-    return ResponseEntity.ok(new ReadOnlyNotebookResponse()
-        .html(notebooksService.convertNotebookToHtml(notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
-  }
-
-  @Override
-  public ResponseEntity<EmptyResponse> exportToNotebook(
-      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
-    DbWorkspace dbWorkspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
 
     validateDataSetRequestResources(
         dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
 
-    // This suppresses 'may not be initialized errors. We will always init to something else before
-    // used.
-    JSONObject notebookFile = new JSONObject();
-    FirecloudWorkspaceResponse workspace =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-    JSONObject metaData = new JSONObject();
-
-    if (!dataSetExportRequest.getNewNotebook()) {
-      notebookFile =
-          notebooksService.getNotebookContents(
-              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
-      try {
-        String language =
-            Optional.of(notebookFile.getJSONObject("metadata"))
-                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
-                .map(kernelSpec -> kernelSpec.getString("language"))
-                .orElse("Python");
-        if ("R".equals(language)) {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
-        } else {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-        }
-      } catch (JSONException e) {
-        // If we can't find metadata to parse, default to python.
-        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-      }
-    } else {
-      switch (dataSetExportRequest.getKernelType()) {
-        case PYTHON:
-          break;
-        case R:
-          metaData
-              .put(
-                  "kernelspec",
-                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
-              .put(
-                  "language_info",
-                  new JSONObject()
-                      .put("codemirror_mode", "r")
-                      .put("file_extension", ".r")
-                      .put("mimetype", "text/x-r-source")
-                      .put("name", "r")
-                      .put("pygments_lexer", "r")
-                      .put("version", "3.4.4"));
-          break;
-        default:
-          throw new BadRequestException(
-              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
-      }
-    }
-
-    // TODO(calbach): Verify whether the request payload is ever expected to include a different
-    // workspace ID.
-    dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    List<String> queriesAsStrings =
-        dataSetService.generateCodeCells(
-            dataSetExportRequest.getKernelType(),
-            dataSetExportRequest.getDataSetRequest().getName(),
-            dbWorkspace.getCdrVersion().getName(),
-            qualifier,
-            queriesByDomain);
-
     if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
       if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        throw new NotImplementedException();
       }
 
       if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
@@ -464,31 +391,17 @@ public class DataSetController implements DataSetApiDelegate {
       }
 
       // TODO(RW-6633): Add WGS codegen support.
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      throw new NotImplementedException();
     }
 
-    if (dataSetExportRequest.getNewNotebook()) {
-      notebookFile =
-          new JSONObject()
-              .put("cells", new JSONArray())
-              .put("metadata", metaData)
-              // nbformat and nbformat_minor are the notebook major and minor version we are
-              // creating.
-              // Specifically, here we create notebook version 4.2 (I believe)
-              // See https://nbformat.readthedocs.io/en/latest/api.html
-              .put("nbformat", 4)
-              .put("nbformat_minor", 2);
-    }
-    for (String query : queriesAsStrings) {
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
-    }
-
-    notebooksService.saveNotebook(
-        workspace.getWorkspace().getBucketName(),
-        dataSetExportRequest.getNotebookName(),
-        notebookFile);
-
-    return ResponseEntity.ok(new EmptyResponse());
+    return dataSetService.generateCodeCells(
+          dataSetExportRequest.getKernelType(),
+          dataSetExportRequest.getDataSetRequest().getName(),
+          dbWorkspace.getCdrVersion().getName(),
+          qualifier,
+          queriesByDomain)
+        .stream()
+        .map(this::createNotebookCodeCellWithString).collect(Collectors.toList());
   }
 
   /** Validate that the requested resources are contained by the given workspace. */

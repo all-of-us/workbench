@@ -43,7 +43,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
     const [rightPanelContent, setRightPanelContent] = useState(null);
-    const [loadingRightPanelContent, setLoadingRightPanelContent] = useState(false);
+    const [loadingNotebook, setIsLoadingNotebook] = useState(false);
 
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
@@ -98,7 +98,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     }
 
     function loadCodePreview(kernel: KernelTypeEnum) {
-      setLoadingRightPanelContent(true);
+      setIsLoadingNotebook(true);
       dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
         dataSetRequest: getDataSetRequest(),
         kernelType: kernel,
@@ -113,7 +113,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
         const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
         setRightPanelContent(iframe);
-        setLoadingRightPanelContent(false);
+        setIsLoadingNotebook(false);
       });
     }
 
@@ -121,19 +121,12 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       if (rightPanelContent) {
         setRightPanelContent(null);
       } else {
+        console.log(kernelType);
         AnalyticsTracker.DatasetBuilder.SeeCodePreview();
         loadCodePreview(kernelType);
       }
     }
 
-    // const errors = validate({notebookName}, {
-    //   notebookName: {
-    //     exclusion: {
-    //       within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
-    //       message: 'already exists'
-    //     }
-    //   }
-    // });
     const errors = {
       ...validate({notebookName}, {
         notebookName: {
@@ -151,9 +144,6 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         permission: ['Exporting to a notebook requires write access to the workspace']
       } : {})
     };
-    // errors.push({
-    //   billing: ACTION_DISABLED_INVALID_BILLING
-    // });
 
     const isNotebooksLoading = existingNotebooks === undefined;
 
@@ -168,6 +158,11 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     function onNotebookSelect(v) {
       setCreatingNewNotebook(v === '');
       setNotebookName(v);
+
+      setIsLoadingNotebook(true);
+      workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
+        .then(kernel => setKernelType(kernel))
+        .finally(() => setIsLoadingNotebook(false));
     }
 
     // TODO eric: handle export API error
@@ -196,7 +191,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
                     <RadioButton
                       style={{marginRight: '0.25rem'}}
                       data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                      disabled={loadingRightPanelContent}
+                      disabled={loadingNotebook}
                       checked={kernelType === kernelTypeEnum}
                       onChange={() => setKernelType(kernelTypeEnum)}
                     />
@@ -206,12 +201,12 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
               <Button type={'secondarySmall'}
-                      disabled={loadingRightPanelContent}
+                      disabled={loadingNotebook}
                       data-test-id='code-preview-button'
                       onClick={() => onCodePreviewClick()}>
                 {rightPanelContent ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
-              {loadingRightPanelContent && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
+              {loadingNotebook && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
             </FlexRow>
           </ModalBody>
           <ModalFooter>

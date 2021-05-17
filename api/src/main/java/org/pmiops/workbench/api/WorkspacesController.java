@@ -57,6 +57,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
@@ -706,6 +707,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
+  public ResponseEntity<KernelTypeEnum> getNotebookKernel(
+      String workspace, String workspaceName, String notebookName) {
+    return ResponseEntity.ok(notebooksService.getNotebookKernel(workspace, workspaceName, notebookName));
   }
 
   @Override

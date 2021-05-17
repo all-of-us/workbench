@@ -1728,6 +1728,24 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/FileDetail"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/kernel":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Get Kernel Type of notebook
+      operationId: getNotebookKernel
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            "$ref": "#/definitions/KernelTypeEnum"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"

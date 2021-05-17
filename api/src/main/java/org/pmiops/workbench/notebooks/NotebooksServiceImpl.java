@@ -7,9 +7,12 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -25,6 +28,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -228,6 +232,39 @@ public class NotebooksServiceImpl implements NotebooksService {
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
     return cloudStorageClient.readBlobAsJson(blob);
+  }
+
+  @Override
+  public KernelTypeEnum getNotebookKernel(JSONObject notebookFile) {
+    try {
+      String language = Optional.of(notebookFile.getJSONObject("metadata"))
+          .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+          .map(kernelSpec -> kernelSpec.getString("language"))
+          .orElse("Python");
+
+      if ("R".equals(language)) {
+        return KernelTypeEnum.R;
+      } else {
+        return KernelTypeEnum.PYTHON;
+      }
+    } catch (JSONException e) {
+      // If we can't find metadata to parse, default to python.
+      return KernelTypeEnum.PYTHON;
+    }
+  }
+
+  @Override
+  public KernelTypeEnum getNotebookKernel(String workspaceNamespace, String workspaceName, String notebookName) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
+
+    String bucketName =
+        fireCloudService
+            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
+
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
+    return getNotebookKernel(cloudStorageClient.readBlobAsJson(blob));
   }
 
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
