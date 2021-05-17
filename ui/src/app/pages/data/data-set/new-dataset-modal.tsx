@@ -7,9 +7,10 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
+  BillingAccountType, BillingStatus,
   DataSet,
   DataSetRequest,
-  KernelTypeEnum,
+  KernelTypeEnum, ResearchPurpose, Workspace, WorkspaceAccessLevel,
 } from 'generated/fetch';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
@@ -17,8 +18,13 @@ import * as fp from 'lodash/fp';
 
 import {validate} from 'validate.js';
 import {FlexRow} from '../../../components/flex';
+import {SmallHeader, styles as headerStyles} from '../../../components/headers';
+import {RadioButton, Select, TextInput} from '../../../components/inputs';
+import {Spinner} from '../../../components/spinners';
+import colors from '../../../styles/colors';
+import {AnalyticsTracker} from '../../../utils/analytics';
 import {WorkspaceData} from '../../../utils/workspace-data';
-import {ExportDataSet} from './export-data-set';
+// import {WorkspaceData} from '../../../utils/workspace-data';
 
 interface MyProps {
   closeFunction: Function;
@@ -36,9 +42,10 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
     const [isExporting, setIsExporting] = useState(false); // replace w/ undefined notebooks list? // test case - no notebooks in workspace
-    const [creatingNewNotebook, setCreatingNewNotebook] = useState(true); // replace w/ name inside notebooks list?
+    const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
     const [rightPanelContent, setRightPanelContent] = useState(null);
+    const [loadingRightPanelContent, setLoadingRightPanelContent] = useState(false);
 
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
@@ -80,6 +87,31 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       return dataSetRequest;
     }
 
+    function onCodePreviewClick() {
+      if (rightPanelContent) {
+        setRightPanelContent(null);
+      } else {
+        AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+        setLoadingRightPanelContent(true);
+        dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
+          dataSetRequest: getDataSetRequest(),
+          kernelType: kernelType,
+          newNotebook: false,
+          notebookName: '',
+        }).then(resp => {
+          const placeholder = document.createElement('html');
+          placeholder.innerHTML = resp.html;
+          placeholder.style.overflowY = 'scroll';
+          placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
+          placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
+          placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
+          const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+          setRightPanelContent(iframe);
+          setLoadingRightPanelContent(false);
+        });
+      }
+    }
+
     const errors = validate({notebookName}, {
       notebookName: {
         exclusion: {
@@ -89,24 +121,63 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       }
     });
 
+    const isNotebooksLoading = existingNotebooks === undefined;
+
+    const selectOptions = [{label: '(Create a new notebook)', value: ''}];
+    if (!isNotebooksLoading) {
+      selectOptions.push(...existingNotebooks.map(notebook => ({
+        value: notebook.name.slice(0, -6),
+        label: notebook.name.slice(0, -6)
+      })));
+    }
+
+    function onNotebookSelect(v) {
+      setCreatingNewNotebook(v === '');
+      setNotebookName(v);
+    }
+
     // TODO eric: handle export API error
-    return <Modal loading={isExporting} width={!rightPanelContent ? 450 : 1200}>
+    return <Modal loading={isExporting || isNotebooksLoading} width={!rightPanelContent ? 450 : 1200}>
       <FlexRow>
         <div style={{width: 'calc(450px - 2rem)'}}>
           <ModalTitle>Export Dataset</ModalTitle>
           <ModalBody>
 
-            <ExportDataSet
-              dataSetRequest={getDataSetRequest()}
-              notebookType={setKernelType}
-              newNotebook={setCreatingNewNotebook}
-              updateNotebookName={setNotebookName}
-              workspaceNamespace={workspace.namespace}
-              workspaceFirecloudName={workspace.id}
-              onSeeCodePreview={setRightPanelContent}
-              onHideCodePreview={() => setRightPanelContent(null)}
-            />
+            <div style={{marginTop: '1rem'}}>
+              <Select value={notebookName}
+                      options={selectOptions}
+                      onChange={(v) => onNotebookSelect(v)}/>
+            </div>
 
+            {creatingNewNotebook && <React.Fragment>
+                <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+                <TextInput onChange={setNotebookName}
+                           value={notebookName} data-test-id='notebook-name-input'/>
+                <div style={headerStyles.formLabel}>
+                    Select programming language
+                </div>
+              {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+                .map((kernelTypeEnum, i) =>
+                  <label key={i} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+                    <RadioButton
+                      style={{marginRight: '0.25rem'}}
+                      data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                      checked={kernelType === kernelTypeEnum}
+                      onChange={setKernelType}
+                    />
+                    {kernelTypeEnum}
+                  </label>)}
+            </React.Fragment>}
+
+            <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
+              <Button type={'secondarySmall'}
+                      disabled={loadingRightPanelContent}
+                      data-test-id='code-preview-button'
+                      onClick={() => onCodePreviewClick()}>
+                {rightPanelContent ? 'Hide Code Preview' : 'See Code Preview'}
+              </Button>
+              {loadingRightPanelContent && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
+            </FlexRow>
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
@@ -119,7 +190,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
                       data-test-id='save-data-set'
                       disabled={errors}
                       onClick={() => saveDataSet()}>
-                'Analyze'
+                Export
               </Button>
             </TooltipTrigger>
           </ModalFooter>

@@ -12,7 +12,7 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
-import {ExportDataSet} from './export-data-set';
+// import {ExportDataSet} from './export-data-set';
 
 interface Props {
   closeFunction: Function;
@@ -114,11 +114,11 @@ class ExportDataSetModal extends React.Component<
     return <Modal loading={loading}>
       <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
       <ModalBody>
-        <ExportDataSet dataSetRequest={this.datasetRequest}
-                       notebookType={(kernelTypeEnum) => this.setState({kernelType: kernelTypeEnum})}
-                       newNotebook={(newNotebookName) => this.setState({newNotebook: newNotebookName})}
-                       updateNotebookName={(name) => this.setState({notebookName: name})}
-                       workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceFirecloudName}/>
+        {/*<ExportDataSet dataSetRequest={this.datasetRequest}*/}
+        {/*               notebookType={(kernelTypeEnum) => this.setState({kernelType: kernelTypeEnum})}*/}
+        {/*               newNotebook={(newNotebookName) => this.setState({newNotebook: newNotebookName})}*/}
+        {/*               updateNotebookName={(name) => this.setState({notebookName: name})}*/}
+        {/*               workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceFirecloudName}/>*/}
       </ModalBody>
       <ModalFooter>
         <Button type='secondary'
