@@ -12,7 +12,7 @@ import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
-import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -449,7 +449,7 @@ interface State {
 
   includesAllParticipants: boolean;
   loadingResources: boolean;
-  openSaveModal: boolean;
+  openExportModal: boolean;
   openCreateModal: boolean;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
@@ -476,7 +476,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         domainValueSetLookup: new Map(),
         includesAllParticipants: false,
         loadingResources: true,
-        openSaveModal: false,
+        openExportModal: false,
         openCreateModal: false,
         previewList: new Map(),
         selectedCohortIds: [],
@@ -949,6 +949,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     async createDataset(name, desc) {
+      AnalyticsTracker.DatasetBuilder.Create();
       const {namespace, id} = this.props.workspace;
 
       return dataSetApi()
@@ -957,6 +958,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     async saveDataset() {
+      AnalyticsTracker.DatasetBuilder.Save();
       const {namespace, id} = this.props.workspace;
 
       this.setState({savingDataset: true});
@@ -1116,7 +1118,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         domainValueSetLookup,
         includesAllParticipants,
         loadingResources,
-        openSaveModal,
+        openExportModal,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -1336,10 +1338,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           <TooltipTrigger data-test-id='save-tooltip'
                           content='Requires Owner or Writer permission' disabled={this.canWrite}>
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-                    onClick ={() => this.setState({openSaveModal: true})}
+                    onClick ={() => this.setState({openExportModal: true})}
                     disabled={this.disableSave() || !this.canWrite}>
-              {!this.isCreatingNewDataset ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
-                'Update and Analyze' : 'Save and Analyze'}
+              Export
             </Button>
           </TooltipTrigger>
         </div>
@@ -1352,11 +1353,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                                     save={(name, desc) => this.createDataset(name, desc)}
                                                     close={() => this.setState({openCreateModal: false})}/>}
 
-        {openSaveModal && <NewDataSetModal dataset={dataSet}
-                                           closeFunction={() => {
-                                             this.setState({openSaveModal: false});
-                                           }}
-        />}
+        {openExportModal && <ExportDatasetModal dataset={dataSet}
+                                                closeFunction={() => this.setState({openExportModal: false})}/>}
       </React.Fragment>;
     }
   });

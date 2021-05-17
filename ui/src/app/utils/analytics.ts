@@ -64,6 +64,7 @@ export const AnalyticsTracker = {
   },
   DatasetBuilder: {
     OpenCreatePage: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Create Page'),
+    Create: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Create'),
     Save: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save'),
     SaveAndAnalyze: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save and Analyze', suffix),
     OpenEditPage: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Edit Page', suffix),

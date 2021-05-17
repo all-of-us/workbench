@@ -23,21 +23,18 @@ import {ACTION_DISABLED_INVALID_BILLING} from '../../../utils/strings';
 import {WorkspaceData} from '../../../utils/workspace-data';
 import {WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
 
-// TODO eric: rename these props
-
-interface MyProps {
+interface Props {
   closeFunction: Function;
   dataset: DataSet;
 }
 
-interface Props extends MyProps {
+// HocProps includes all props that are inherited through HOC
+interface HocProps extends Props {
   workspace: WorkspaceData;
 }
 
-// TODO eric: add billing locked to export button / functionality
-
-export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurrentWorkspace())(
-  ({workspace, dataset, closeFunction}: Props) => {
+export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCurrentWorkspace())(
+  ({workspace, dataset, closeFunction}: HocProps) => {
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
     const [isExporting, setIsExporting] = useState(false); // replace w/ undefined notebooks list? // test case - no notebooks in workspace
@@ -47,20 +44,9 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
 
-    useEffect(() => {
-      workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
-        .then(notebooks => setExistingNotebooks(notebooks))
-        .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
-    }, [workspace]);
+    async function exportDataset() {
+      AnalyticsTracker.DatasetBuilder.Export(kernelType);
 
-    useEffect(() => {
-      if (rightPanelContent) {
-        loadCodePreview(kernelType);
-      }
-    }, [kernelType]);
-
-    // TODO eric: rename
-    async function saveDataSet() {
       setErrorMsg(null);
       setIsExporting(true);
       try {
@@ -132,6 +118,35 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       }
     }
 
+    function onNotebookSelect(v) {
+      setCreatingNewNotebook(v === '');
+      setNotebookName(v);
+      setErrorMsg(null);
+
+      if (v === '') {
+        setCreatingNewNotebook(true);
+      } else {
+        setCreatingNewNotebook(false);
+        setIsLoadingNotebook(true);
+        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
+          .then(kernel => setKernelType(kernel))
+          .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
+          .finally(() => setIsLoadingNotebook(false));
+      }
+    }
+
+    useEffect(() => {
+      workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
+        .then(notebooks => setExistingNotebooks(notebooks))
+        .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
+    }, [workspace]);
+
+    useEffect(() => {
+      if (rightPanelContent) {
+        loadCodePreview(kernelType);
+      }
+    }, [kernelType]);
+
     const errors = {
       ...validate({notebookName}, {
         notebookName: {
@@ -160,24 +175,6 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       })));
     }
 
-    function onNotebookSelect(v) {
-      setCreatingNewNotebook(v === '');
-      setNotebookName(v);
-      setErrorMsg(null);
-
-      if (v === '') {
-        setCreatingNewNotebook(true);
-      } else {
-        setCreatingNewNotebook(false);
-        setIsLoadingNotebook(true);
-        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
-          .then(kernel => setKernelType(kernel))
-          .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
-          .finally(() => setIsLoadingNotebook(false));
-      }
-    }
-
-    // TODO eric: handle export API error
     return <Modal loading={isExporting || isNotebooksLoading} width={!rightPanelContent ? 450 : 1200}>
       <FlexRow>
         <div style={{width: 'calc(450px - 2rem)'}}>
@@ -233,7 +230,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
               <Button type='primary'
                       data-test-id='save-data-set'
                       disabled={!fp.isEmpty(errors)}
-                      onClick={() => saveDataSet()}>
+                      onClick={() => exportDataset()}>
                 Export
               </Button>
             </TooltipTrigger>

@@ -11,7 +11,7 @@ import {
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {NewDataSetModal} from './new-dataset-modal';
+import {ExportDatasetModal} from './export-dataset-modal';
 
 const prePackagedConceptSet = Array.of(PrePackagedConceptSetEnum.NONE);
 const workspaceNamespace = 'workspaceNamespace';
@@ -20,21 +20,12 @@ const workspaceId = 'workspaceId';
 let dataSet;
 
 const createNewDataSetModal = () => {
-  return <NewDataSetModal
+  return <ExportDatasetModal
     closeFunction={() => {}}
-    includesAllParticipants={false}
-    selectedConceptSetIds={[]}
-    selectedCohortIds={[]}
-    selectedDomainValuePairs={[]}
-    workspaceNamespace={workspaceNamespace}
-    workspaceId={workspaceId}
-    dataSet={dataSet}
-    prePackagedConceptSet={prePackagedConceptSet}
-    billingLocked={false}
-  />;
+    dataset={dataSet}/>;
 };
 
-describe('NewDataSetModal', () => {
+describe('ExportDatasetModal', () => {
   beforeEach(() => {
     window.open = jest.fn();
     dataSet = undefined;
@@ -155,4 +146,8 @@ describe('NewDataSetModal', () => {
       wrapper.find('[data-test-id="data-set-name-input"]').first().prop('value');
     expect(dataSetName).toBe(name);
   });
+
+  // change kernel type while code preview is open
+
+  // change kernel type while code preview is closed
 });
