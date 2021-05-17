@@ -81,7 +81,7 @@ cron:
   timezone: America/Chicago
   target: api
 - description: >
-    Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
+    Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
   url: /v1/cron/synchronizeUserAccess
   schedule: every day 23:00
   timezone: America/Chicago
