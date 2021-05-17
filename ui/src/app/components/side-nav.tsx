@@ -7,7 +7,6 @@ import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authoriti
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
-import {authStore, AuthStore, withStore} from'app/utils/stores';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -211,7 +210,6 @@ export interface SideNavProps {
   userAuditActive: boolean;
   workspaceAuditActive: boolean;
   workspacesActive: boolean;
-  authStore: AuthStore;
 }
 
 export interface SideNavState {
@@ -221,7 +219,7 @@ export interface SideNavState {
   userRef: React.RefObject<SideNavItem>;
 }
 
-export const SideNav = withStore(authStore, 'authStore')(class extends React.Component<SideNavProps, SideNavState> {
+export class SideNav extends React.Component<SideNavProps, SideNavState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -259,7 +257,7 @@ export const SideNav = withStore(authStore, 'authStore')(class extends React.Com
   }
 
   render() {
-    const {profile, authStore: {isSignedIn}} = this.props;
+    const {profile} = this.props;
     return <div style={styles.sideNav}>
       <SideNavItem
         hasProfileImage={true}
@@ -275,7 +273,6 @@ export const SideNav = withStore(authStore, 'authStore')(class extends React.Com
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
           active={this.props.profileActive}
-          disabled={!isSignedIn}
         />
       }
       {
@@ -380,4 +377,4 @@ export const SideNav = withStore(authStore, 'authStore')(class extends React.Com
       }
     </div>;
   }
-})
+}
