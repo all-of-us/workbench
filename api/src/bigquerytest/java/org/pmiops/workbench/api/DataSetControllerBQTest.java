@@ -291,7 +291,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(
                 new Cohort().id(dbCohort1.getCohortId()),
                 new Cohort().id(dbCohort2.getCohortId())));
-//    when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
+    //    when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
 
     conditionLinking1 =
         DbDSLinking.builder()
@@ -397,19 +397,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePython() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.CONDITION),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
@@ -423,17 +423,19 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 + "dataset_00000000_condition_sql <- paste(\"",
             DATASET_NAME, dbCdrVersion.getName());
 
-    String code = joinCodeCells(dataSetService.generateCodeCells(new DataSetExportRequest()
-    .kernelType(KernelTypeEnum.R)
-    .dataSetRequest(
-        createDataSetRequest(
-            ImmutableList.of(dbConditionConceptSet),
-            ImmutableList.of(dbCohort1),
-            ImmutableList.of(Domain.CONDITION),
-            false,
-            ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-    ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.R)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.CONDITION),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code).contains(expected);
 
@@ -457,94 +459,95 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodeTwoConceptSets() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 3, Domain.CONDITION);
   }
 
   @Test
   public void testGenerateCodeTwoCohorts() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(dbCohort1, dbCohort2),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet),
+                            ImmutableList.of(dbCohort1, dbCohort2),
+                            ImmutableList.of(Domain.CONDITION),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
   public void testGenerateCodeAllParticipants() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet),
-                    ImmutableList.of(),
-                    ImmutableList.of(Domain.CONDITION),
-                    true,
-                    ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet),
+                            ImmutableList.of(),
+                            ImmutableList.of(Domain.CONDITION),
+                            true,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }
 
   @Test
   public void testGenerateCodePrepackagedCohortDemographics() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.PERSON),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.PERSON))
-            ),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.PERSON),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.PERSON))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.PERSON);
   }
 
   @Test
   public void testGenerateCodePrepackagedCohortSurveys() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.SURVEY),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.SURVEY),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.SURVEY))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.SURVEY);
   }
@@ -553,38 +556,40 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   public void testGenerateCodePrepackagedConceptSetFitBit() {
     addFitbitInfoToDsLinkingTable();
 
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
-                    false,
-                    ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.FITBIT_HEART_RATE_LEVEL),
+                            false,
+                            ImmutableList.of(PrePackagedConceptSetEnum.NONE))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.FITBIT_HEART_RATE_LEVEL);
   }
 
   @Test
   public void testGenerateCodeTwoPrePackagedConceptSet() {
-    String code = joinCodeCells(dataSetService.generateCodeCells(
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                createDataSetRequest(
-                    ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
-                    ImmutableList.of(dbCohort1),
-                    ImmutableList.of(Domain.CONDITION),
-                    false,
-                    ImmutableList.of(
-                        PrePackagedConceptSetEnum.PERSON,
-                        PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
-        workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-    ));
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(dbConditionConceptSet, dbProcedureConceptSet),
+                            ImmutableList.of(dbCohort1),
+                            ImmutableList.of(Domain.CONDITION),
+                            false,
+                            ImmutableList.of(
+                                PrePackagedConceptSetEnum.PERSON,
+                                PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertAndExecutePythonQuery(code, 1, Domain.CONDITION);
   }

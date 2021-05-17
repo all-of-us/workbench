@@ -3,12 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -18,43 +16,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -75,7 +60,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -158,7 +142,8 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    dataSetService.validateDataSetPreviewRequestResources(dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
+    dataSetService.validateDataSetPreviewRequestResources(
+        dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
 
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
     TableResult queryResponse = dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
@@ -243,10 +228,15 @@ public class DataSetController implements DataSetApiDelegate {
 
     JSONObject notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
 
-    dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace).forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+    dataSetService
+        .generateCodeCells(dataSetExportRequest, dbWorkspace)
+        .forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
 
-    return ResponseEntity.ok(new ReadOnlyNotebookResponse()
-        .html(notebooksService.convertNotebookToHtml(notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
+    return ResponseEntity.ok(
+        new ReadOnlyNotebookResponse()
+            .html(
+                notebooksService.convertNotebookToHtml(
+                    notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
   }
 
   @Override
@@ -257,7 +247,11 @@ public class DataSetController implements DataSetApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
 
-    String bucketName = fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace().getBucketName();
+    String bucketName =
+        fireCloudService
+            .getWorkspace(workspaceNamespace, workspaceId)
+            .getWorkspace()
+            .getBucketName();
 
     JSONObject notebookFile;
 
@@ -269,7 +263,9 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    dataSetService.generateCodeCells(dataSetExportRequest, dbWorkspace).forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+    dataSetService
+        .generateCodeCells(dataSetExportRequest, dbWorkspace)
+        .forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
@@ -297,8 +293,7 @@ public class DataSetController implements DataSetApiDelegate {
                     .put("version", "3.4.4"));
         break;
       default:
-        throw new BadRequestException(
-            "Kernel Type " + kernelTypeEnum + " is not supported");
+        throw new BadRequestException("Kernel Type " + kernelTypeEnum + " is not supported");
     }
 
     return new JSONObject()

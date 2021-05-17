@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
@@ -237,10 +236,11 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public KernelTypeEnum getNotebookKernel(JSONObject notebookFile) {
     try {
-      String language = Optional.of(notebookFile.getJSONObject("metadata"))
-          .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
-          .map(kernelSpec -> kernelSpec.getString("language"))
-          .orElse("Python");
+      String language =
+          Optional.of(notebookFile.getJSONObject("metadata"))
+              .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+              .map(kernelSpec -> kernelSpec.getString("language"))
+              .orElse("Python");
 
       if ("R".equals(language)) {
         return KernelTypeEnum.R;
@@ -254,8 +254,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public KernelTypeEnum getNotebookKernel(String workspaceNamespace, String workspaceName, String notebookName) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
+  public KernelTypeEnum getNotebookKernel(
+      String workspaceNamespace, String workspaceName, String notebookName) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
 
     String bucketName =
         fireCloudService

@@ -47,7 +47,8 @@ public interface NotebooksService {
 
   KernelTypeEnum getNotebookKernel(JSONObject notebookFile);
 
-  KernelTypeEnum getNotebookKernel(String workspaceNamespace, String workspaceName, String notebookName);
+  KernelTypeEnum getNotebookKernel(
+      String workspaceNamespace, String workspaceName, String notebookName);
 
   void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
 

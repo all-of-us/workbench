@@ -33,7 +33,6 @@ import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.json.JSONObject;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -821,7 +820,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> generateCodeCells(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
+  public List<String> generateCodeCells(
+      DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
     // TODO(calbach): Verify whether the request payload is ever expected to include a different
     // workspace ID.
     dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -834,7 +834,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    if (DataSetExportRequest.GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+    if (DataSetExportRequest.GenomicsDataTypeEnum.WHOLE_GENOME.equals(
+        dataSetExportRequest.getGenomicsDataType())) {
       if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
         throw new NotImplementedException();
       }
@@ -858,7 +859,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         qualifier,
         queriesByDomain);
   }
-
 
   @Override
   @Transactional

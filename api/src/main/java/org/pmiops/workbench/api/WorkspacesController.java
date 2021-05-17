@@ -712,7 +712,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<KernelTypeEnum> getNotebookKernel(
       String workspace, String workspaceName, String notebookName) {
-    return ResponseEntity.ok(notebooksService.getNotebookKernel(workspace, workspaceName, notebookName));
+    return ResponseEntity.ok(
+        notebooksService.getNotebookKernel(workspace, workspaceName, notebookName));
   }
 
   @Override

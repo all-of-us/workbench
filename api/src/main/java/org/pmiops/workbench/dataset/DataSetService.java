@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import org.json.JSONObject;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -42,7 +40,8 @@ public interface DataSetService {
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
-  List<String> generateCodeCells(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace);
+  List<String> generateCodeCells(
+      DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace);
 
   DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
