@@ -76,7 +76,6 @@ const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const ParticipantsTablePage = withRouteData(ParticipantsTable);
-const ProfilePagePage = withRouteData(ProfilePage); // again bad sorry
 const QueryReportPage = withRouteData(QueryReport);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
@@ -197,6 +196,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             minimizeChrome: true
           }} />}
       />
+      <AppRoute path='/profile' component={() => <ProfilePage routeData={{title: 'Profile'}}/>}/>
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
       <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
@@ -204,10 +204,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-        />
-        <AppRoute
-          path='/profile'
-          component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
         />
         <AppRoute
           path='/workspaces'

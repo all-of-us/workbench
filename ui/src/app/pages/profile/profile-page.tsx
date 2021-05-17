@@ -34,6 +34,7 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {withRouteData} from 'app/components/app-router';
 
 
 // validators for validate.js
@@ -126,6 +127,7 @@ const getControlledTierContent = fp.flow(
 );
 
 export const ProfilePage = fp.flow(
+  withRouteData,
   withUserProfile(),
   withProfileErrorModal
   )(class extends React.Component<
