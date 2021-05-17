@@ -51,7 +51,6 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -117,6 +116,7 @@ public class DataSetServiceTest {
   @TestConfiguration
   @Import({DataSetMapperImpl.class, DataSetServiceImpl.class})
   @MockBean({
+    BigQueryService.class,
     CommonMappers.class,
     CohortService.class,
     ConceptBigQueryService.class,
