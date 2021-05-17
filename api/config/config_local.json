@@ -106,7 +106,7 @@
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
-    "enableAccessRenewal": false
+    "enableAccessRenewal": true
 
   },
   "featureFlags": {
