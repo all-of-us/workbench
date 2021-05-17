@@ -31,7 +31,7 @@ RUN apk --no-cache add \
     gcloud config set metrics/environment github_docker_image
 
 # Java for Swagger client generation
-RUN apk --no-cache add openjdk8-jre
+RUN apk --no-cache add adoptopenjdk-11-hotspot-jre
 
 # We touch yarn's config file here so that we can explicitly make sure
 # yarn has permission to read/write to it, even though its empty.

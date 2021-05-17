@@ -29,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH

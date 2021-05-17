@@ -225,9 +225,9 @@ task generate_appengine_cron_yaml(type: Exec) {
 }
 
 // Generate AppEngine Web Configration XML file
-task generate_appengine_web_xml(type: Exec) {
+task generate_appengine_yaml(type: Exec) {
   executable "ruby"
-  args "libproject/generate_appengine_web_xml.rb"
+  args "libproject/generate_appengine_yaml.rb"
 }
 
 
@@ -345,7 +345,7 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
+project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
         'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
