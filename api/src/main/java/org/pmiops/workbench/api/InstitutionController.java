@@ -94,6 +94,7 @@ public class InstitutionController implements InstitutionApiDelegate {
    * @return Returns whether the email is a valid institutional member.
    * @deprecated in favor of the newer POST checkEmail() endpoint
    */
+  @Deprecated
   @Override
   public ResponseEntity<CheckEmailResponse> deprecatedCheckEmail(
       final String shortName, final String email) {

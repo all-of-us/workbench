@@ -407,6 +407,7 @@ dependencies {
   compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
   compile "io.swagger:swagger-annotations:1.5.16"
   compile "javax.inject:javax.inject:1"
+
   compile "joda-time:joda-time:$project.ext.JODA_VERSION"
   compile "mysql:mysql-connector-java:8.0.16"
   compile "org.apache.commons:commons-collections4:4.4"
@@ -476,6 +477,7 @@ dependencies {
   generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
   generatedCompile 'io.gsonfire:gson-fire:1.8.3'
   generatedCompile 'org.threeten:threetenbp:1.3.5'
+  generatedCompile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
 
   // There is no jdk11, jdk8 still works for java 11.
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
