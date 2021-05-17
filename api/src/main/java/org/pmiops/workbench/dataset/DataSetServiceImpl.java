@@ -409,7 +409,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dataSetMapper.prePackagedConceptSetsFromStorage(dbDataset.getPrePackagedConceptSet()),
             dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
@@ -833,9 +833,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  // TODO(calbach): Remove direct testing of this - cover via public interface.
-  @VisibleForTesting
-  public List<DbDataset> getDbDataSets(
+  private List<DbDataset> getDbDataSets(
       long workspaceId, ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {

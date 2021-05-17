@@ -168,9 +168,6 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    // confirm that this value is no longer how we choose perimeters
-    workbenchConfig.firecloud.vpcServicePerimeterName = "something else";
-
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =

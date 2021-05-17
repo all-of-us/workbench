@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -254,6 +255,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     log.info(String.format("successfully audited %d users", users.size()));
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> synchronizeUserAccess() {
+    userService.getAllUsers().stream()
+        .forEach(
+            user ->
+                // This will update the access tiers for a given user, based on compliance rules
+                // If a user is no longer compliant it will remove them from an access tier
+                userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem()));
     return ResponseEntity.noContent().build();
   }
 

@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 
 import * as React from 'react';
 
@@ -10,7 +9,7 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -79,7 +78,7 @@ const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
-export const DataPage = withCurrentWorkspace()(class extends React.Component<
+export const DataComponent = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
     creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
@@ -278,12 +277,3 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     </React.Fragment>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class DataPageComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataPage, []);
-  }
-}

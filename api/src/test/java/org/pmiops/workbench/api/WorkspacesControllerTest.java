@@ -392,7 +392,6 @@ public class WorkspacesControllerTest extends SpringTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
-    workbenchConfig.firecloud.registeredDomainName = "allUsers";
     workbenchConfig.billing.accountId = "free-tier";
 
     testMockFactory = new TestMockFactory();

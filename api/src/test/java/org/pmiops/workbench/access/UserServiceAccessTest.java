@@ -232,7 +232,7 @@ public class UserServiceAccessTest {
         .isEqualTo(TierAccessStatus.ENABLED);
 
     // Simulate time passing, user is no longer compliant
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(1, ChronoUnit.DAYS));
+    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(2, ChronoUnit.DAYS));
     dbUser =
         userService.updateUserWithRetries(
             this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
