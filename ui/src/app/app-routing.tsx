@@ -65,6 +65,8 @@ const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
+const DataPagePage = withRouteData(DataPage); // so called because 'WorkspaceData' is a swagger model
+const DataSetPagePage = withRouteData(DataSetPage); // so called because 'DataSet' is a swagger model
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const DetailPagePage = withRouteData(DetailPage);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -287,7 +289,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/data'
-          component={() => <DataPage routeData={{
+          component={() => <DataPagePage routeData={{
             title: 'Data Page',
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data'
@@ -295,7 +297,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/data/data-sets'
-          component={() => <DataSetPage routeData={{
+          component={() => <DataSetPagePage routeData={{
             title: 'Dataset Page',
             breadcrumb: BreadcrumbType.Dataset,
             pageKey: 'datasetBuilder'
