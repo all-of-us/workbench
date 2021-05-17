@@ -22,7 +22,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from '../../../utils/strings';
 import {WorkspaceData} from '../../../utils/workspace-data';
 import {WorkspacePermissions, WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
 
-// import {WorkspaceData} from '../../../utils/workspace-data';
+// TODO eric: rename these props
 
 interface MyProps {
   closeFunction: Function;
@@ -51,7 +51,15 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
     }, [workspace]);
 
+    useEffect(() => {
+      if (rightPanelContent) {
+        loadCodePreview(kernelType);
+      }
+    }, [kernelType]);
+
+    // TODO eric: rename
     async function saveDataSet() {
+      console.log('did this run');
       setIsExporting(true);
       try {
         await dataSetApi().exportToNotebook(
@@ -76,13 +84,37 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     function getDataSetRequest(): DataSetRequest {
       const dataSetRequest: DataSetRequest = {
         name: '',
-        includesAllParticipants: dataset.includesAllParticipants,
-        conceptSetIds: dataset.conceptSets.map(cs => cs.id),
-        cohortIds: dataset.cohorts.map(c => c.id),
-        domainValuePairs: dataset.domainValuePairs,
-        prePackagedConceptSet: dataset.prePackagedConceptSet
+        ...(dataset.id ? {
+          dataSetId: dataset.id
+        } : {
+          includesAllParticipants: dataset.includesAllParticipants,
+          conceptSetIds: dataset.conceptSets.map(cs => cs.id),
+          cohortIds: dataset.cohorts.map(c => c.id),
+          domainValuePairs: dataset.domainValuePairs,
+          prePackagedConceptSet: dataset.prePackagedConceptSet
+        })
       };
       return dataSetRequest;
+    }
+
+    function loadCodePreview(kernel: KernelTypeEnum) {
+      setLoadingRightPanelContent(true);
+      dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
+        dataSetRequest: getDataSetRequest(),
+        kernelType: kernel,
+        newNotebook: false,
+        notebookName: '',
+      }).then(resp => {
+        const placeholder = document.createElement('html');
+        placeholder.innerHTML = resp.html;
+        placeholder.style.overflowY = 'scroll';
+        placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
+        placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
+        placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
+        const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+        setRightPanelContent(iframe);
+        setLoadingRightPanelContent(false);
+      });
     }
 
     function onCodePreviewClick() {
@@ -90,23 +122,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         setRightPanelContent(null);
       } else {
         AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-        setLoadingRightPanelContent(true);
-        dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
-          dataSetRequest: getDataSetRequest(),
-          kernelType: kernelType,
-          newNotebook: false,
-          notebookName: '',
-        }).then(resp => {
-          const placeholder = document.createElement('html');
-          placeholder.innerHTML = resp.html;
-          placeholder.style.overflowY = 'scroll';
-          placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
-          placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
-          placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
-          const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
-          setRightPanelContent(iframe);
-          setLoadingRightPanelContent(false);
-        });
+        loadCodePreview(kernelType);
       }
     }
 
@@ -121,6 +137,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     const errors = {
       ...validate({notebookName}, {
         notebookName: {
+          presence: {allowEmpty: false},
           exclusion: {
             within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
             message: 'already exists'
@@ -168,7 +185,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
 
             {creatingNewNotebook && <React.Fragment>
                 <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-                <TextInput onChange={setNotebookName}
+                <TextInput onChange={v => setNotebookName(v)}
                            value={notebookName} data-test-id='notebook-name-input'/>
                 <div style={headerStyles.formLabel}>
                     Select programming language
@@ -179,8 +196,9 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
                     <RadioButton
                       style={{marginRight: '0.25rem'}}
                       data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                      disabled={loadingRightPanelContent}
                       checked={kernelType === kernelTypeEnum}
-                      onChange={setKernelType}
+                      onChange={() => setKernelType(kernelTypeEnum)}
                     />
                     {kernelTypeEnum}
                   </label>)}

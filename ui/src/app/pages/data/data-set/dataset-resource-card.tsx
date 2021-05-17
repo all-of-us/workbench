@@ -17,6 +17,7 @@ import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
+import {NewDataSetModal} from './new-dataset-modal';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
@@ -144,10 +145,8 @@ export const DatasetResourceCard = fp.flow(
     const {resource, menuOnly} = this.props;
     return <React.Fragment>
       {this.state.showExportToNotebookModal &&
-      <ExportDataSetModal dataSet={resource.dataSet}
-                          workspaceNamespace={resource.workspaceNamespace}
-                          workspaceFirecloudName={resource.workspaceFirecloudName}
-                          closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
+          <NewDataSetModal dataset={resource.dataSet}
+                           closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
       }
       {this.state.showGenomicExtractionModal &&
       <GenomicExtractionModal dataSet={resource.dataSet}
