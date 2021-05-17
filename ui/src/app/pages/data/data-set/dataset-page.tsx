@@ -1358,7 +1358,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         {openSaveModal && <NewDataSetModal dataset={dataSet}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
-                                           }}/>}
+                                           }}
+        />}
       </React.Fragment>;
     }
   });

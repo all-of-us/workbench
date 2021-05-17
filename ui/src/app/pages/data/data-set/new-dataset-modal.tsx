@@ -1,4 +1,4 @@
-import {Button, Link} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
@@ -6,15 +6,10 @@ import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
-import {
-  BillingAccountType, BillingStatus,
-  DataSet,
-  DataSetRequest,
-  KernelTypeEnum, ResearchPurpose, Workspace, WorkspaceAccessLevel,
-} from 'generated/fetch';
-import {useEffect, useState} from 'react';
-import * as React from 'react';
+import {BillingStatus, DataSet, DataSetRequest, KernelTypeEnum,} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
 
 import {validate} from 'validate.js';
 import {FlexRow} from '../../../components/flex';
@@ -23,7 +18,10 @@ import {RadioButton, Select, TextInput} from '../../../components/inputs';
 import {Spinner} from '../../../components/spinners';
 import colors from '../../../styles/colors';
 import {AnalyticsTracker} from '../../../utils/analytics';
+import {ACTION_DISABLED_INVALID_BILLING} from '../../../utils/strings';
 import {WorkspaceData} from '../../../utils/workspace-data';
+import {WorkspacePermissions, WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
+
 // import {WorkspaceData} from '../../../utils/workspace-data';
 
 interface MyProps {
@@ -112,14 +110,33 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       }
     }
 
-    const errors = validate({notebookName}, {
-      notebookName: {
-        exclusion: {
-          within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
-          message: 'already exists'
+    // const errors = validate({notebookName}, {
+    //   notebookName: {
+    //     exclusion: {
+    //       within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
+    //       message: 'already exists'
+    //     }
+    //   }
+    // });
+    const errors = {
+      ...validate({notebookName}, {
+        notebookName: {
+          exclusion: {
+            within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
+            message: 'already exists'
+          }
         }
-      }
-    });
+      }),
+      ...(workspace.billingStatus === BillingStatus.INACTIVE ? {
+        billing: [ACTION_DISABLED_INVALID_BILLING]
+      } : {}),
+      ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ? {
+        permission: ['Exporting to a notebook requires write access to the workspace']
+      } : {})
+    };
+    // errors.push({
+    //   billing: ACTION_DISABLED_INVALID_BILLING
+    // });
 
     const isNotebooksLoading = existingNotebooks === undefined;
 
@@ -144,7 +161,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
           <ModalBody>
 
             <div style={{marginTop: '1rem'}}>
-              <Select value={notebookName}
+              <Select value={creatingNewNotebook ? '' : notebookName}
                       options={selectOptions}
                       onChange={(v) => onNotebookSelect(v)}/>
             </div>
@@ -188,7 +205,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
             <TooltipTrigger content={summarizeErrors(errors)}>
               <Button type='primary'
                       data-test-id='save-data-set'
-                      disabled={errors}
+                      disabled={!fp.isEmpty(errors)}
                       onClick={() => saveDataSet()}>
                 Export
               </Button>
