@@ -4,9 +4,13 @@ FROM ubuntu:18.04
 # Development requirements
 #
 
+FROM adoptopenjdk:11-jre-hotspot
+RUN mkdir /opt/app
+COPY japp.jar /opt/app
+CMD ["java", "-jar", "/opt/app/japp.jar"]
+
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-     adoptopenjdk-11-hotspot \
      curl \
      python \
      gcc \
