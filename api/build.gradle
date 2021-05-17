@@ -1,3 +1,6 @@
+import org.pmiops.workbench.tooling.GenerateAPIListingTask
+import org.pmiops.workbench.tooling.IncrementalHotSwapTask
+
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
