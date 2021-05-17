@@ -16,7 +16,6 @@ import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainValue;
-import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.ResourceType;
 
 public interface DataSetService {
@@ -32,13 +31,6 @@ public interface DataSetService {
   TableResult previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
-
-  List<String> generateCodeCells(
-      KernelTypeEnum kernelTypeEnum,
-      String dataSetName,
-      String cdrVersionName,
-      String qualifier,
-      Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
   List<String> generateCodeCells(
       DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace);

@@ -770,40 +770,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> generateCodeCells(
-      KernelTypeEnum kernelTypeEnum,
-      String dataSetName,
-      String cdrVersionName,
-      String qualifier,
-      Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
-    String prerequisites;
-    switch (kernelTypeEnum) {
-      case R:
-        prerequisites = "library(bigrquery)";
-        break;
-      case PYTHON:
-        prerequisites = "import pandas\n" + "import os";
-        break;
-      default:
-        throw new BadRequestException(
-            "Kernel Type " + kernelTypeEnum.toString() + " not supported");
-    }
-    return queryJobConfigurationMap.entrySet().stream()
-        .map(
-            entry ->
-                prerequisites
-                    + "\n\n"
-                    + generateNotebookUserCode(
-                        entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
-                        dataSetName,
-                        cdrVersionName,
-                        qualifier,
-                        kernelTypeEnum))
-        .collect(Collectors.toList());
-  }
-
-  @Override
   public DbDataset mustGetDbDataset(long workspaceId, long dataSetId) {
     return getDbDataSet(workspaceId, dataSetId)
         .<NotFoundException>orElseThrow(
@@ -852,12 +818,32 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new NotImplementedException();
     }
 
-    return generateCodeCells(
-        dataSetExportRequest.getKernelType(),
-        dataSetExportRequest.getDataSetRequest().getName(),
-        dbWorkspace.getCdrVersion().getName(),
-        qualifier,
-        queriesByDomain);
+    String prerequisites;
+    switch (dataSetExportRequest.getKernelType()) {
+      case R:
+        prerequisites = "library(bigrquery)";
+        break;
+      case PYTHON:
+        prerequisites = "import pandas\n" + "import os";
+        break;
+      default:
+        throw new BadRequestException(
+            "Kernel Type " + dataSetExportRequest.getKernelType().toString() + " not supported");
+    }
+
+    return queriesByDomain.entrySet().stream()
+        .map(
+            entry ->
+                prerequisites
+                    + "\n\n"
+                    + generateNotebookUserCode(
+                        entry.getValue(),
+                        Domain.fromValue(entry.getKey()),
+                        dataSetExportRequest.getDataSetRequest().getName(),
+                        dbWorkspace.getCdrVersion().getName(),
+                        qualifier,
+                        dataSetExportRequest.getKernelType()))
+        .collect(Collectors.toList());
   }
 
   @Override

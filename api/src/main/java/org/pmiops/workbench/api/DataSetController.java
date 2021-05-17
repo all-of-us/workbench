@@ -230,7 +230,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     dataSetService
         .generateCodeCells(dataSetExportRequest, dbWorkspace)
-        .forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+        .forEach(
+            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
@@ -265,7 +266,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     dataSetService
         .generateCodeCells(dataSetExportRequest, dbWorkspace)
-        .forEach(cell -> notebookFile.getJSONArray("cells").put(cell));
+        .forEach(
+            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
     notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
