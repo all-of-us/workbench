@@ -259,7 +259,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> expireNonCompliantUsers() {
+  public ResponseEntity<Void> synchronizeUserAccess() {
     userService.getAllUsers().stream()
         .forEach(
             user ->

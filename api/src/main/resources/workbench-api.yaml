@@ -1604,14 +1604,14 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/expireNonCompliantUsers":
+  "/v1/cron/synchronizeUserAccess":
     get:
       security: []
       tags:
       - offlineUser
       - cron
-      description: Check each user to ensure they still meet compliance guidelines. If they do not mark them as expired.
-      operationId: expireNonCompliantUsers
+      description: Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
+      operationId: synchronizeUserAccess
       responses:
         204:
           description: No Error
