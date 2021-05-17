@@ -21,6 +21,7 @@ RUN apt-get update && \
      ruby-dev \
      ruby-json \
      make \
+     wget \
      unzip \
      wait-for-it \
      && \
@@ -28,9 +29,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Java
-RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - ; \
-    add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ ; \
-    apt-get update && apt-get install -y adoptopenjdk-11-hotspot
+FROM adoptopenjdk/openjdk11:jre
 ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
