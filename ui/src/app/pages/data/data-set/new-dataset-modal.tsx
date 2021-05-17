@@ -15,6 +15,7 @@ import {validate} from 'validate.js';
 import {FlexRow} from '../../../components/flex';
 import {SmallHeader, styles as headerStyles} from '../../../components/headers';
 import {RadioButton, Select, TextInput} from '../../../components/inputs';
+import {ErrorMessage} from '../../../components/messages';
 import {Spinner} from '../../../components/spinners';
 import colors from '../../../styles/colors';
 import {AnalyticsTracker} from '../../../utils/analytics';
@@ -44,6 +45,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     const [notebookName, setNotebookName] = useState('');
     const [rightPanelContent, setRightPanelContent] = useState(null);
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
+    const [errorMsg, setErrorMsg] = useState(null);
 
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
@@ -59,7 +61,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
 
     // TODO eric: rename
     async function saveDataSet() {
-      console.log('did this run');
+      setErrorMsg(null);
       setIsExporting(true);
       try {
         await dataSetApi().exportToNotebook(
@@ -77,6 +79,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
       } catch (e) {
         console.error(e);
         setIsExporting(false);
+        setErrorMsg('The request cannot be completed. Please try again or contact Support in the left hand navigation');
       }
     }
 
@@ -99,6 +102,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
 
     function loadCodePreview(kernel: KernelTypeEnum) {
       setIsLoadingNotebook(true);
+      setErrorMsg(null);
       dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
         dataSetRequest: getDataSetRequest(),
         kernelType: kernel,
@@ -113,8 +117,9 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
         const iframe = <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
         setRightPanelContent(iframe);
-        setIsLoadingNotebook(false);
-      });
+      }).catch(() => {
+        setErrorMsg('Could not load code preview. Please try again or continue exporting to a notebook.');
+      }).finally(() => setIsLoadingNotebook(false));
     }
 
     function onCodePreviewClick() {
@@ -158,11 +163,18 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     function onNotebookSelect(v) {
       setCreatingNewNotebook(v === '');
       setNotebookName(v);
+      setErrorMsg(null);
 
-      setIsLoadingNotebook(true);
-      workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
-        .then(kernel => setKernelType(kernel))
-        .finally(() => setIsLoadingNotebook(false));
+      if (v === '') {
+        setCreatingNewNotebook(true);
+      } else {
+        setCreatingNewNotebook(false);
+        setIsLoadingNotebook(true);
+        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
+          .then(kernel => setKernelType(kernel))
+          .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
+          .finally(() => setIsLoadingNotebook(false));
+      }
     }
 
     // TODO eric: handle export API error
@@ -208,6 +220,8 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
               </Button>
               {loadingNotebook && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
             </FlexRow>
+
+            {errorMsg && <ErrorMessage iconSize={20}> {errorMsg} </ErrorMessage>}
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
