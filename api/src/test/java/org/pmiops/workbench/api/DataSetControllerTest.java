@@ -590,8 +590,9 @@ public class DataSetControllerTest {
             .addConceptSetIdsItem(conceptSet1.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.generateCode(
-        workspace.getNamespace(), workspace.getName(), KernelTypeEnum.PYTHON.toString(), dataSet);
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(), new DataSetExportRequest()
+        .kernelType(KernelTypeEnum.PYTHON)
+        .dataSetRequest(dataSet));
   }
 
   @Test(expected = BadRequestException.class)
@@ -602,8 +603,9 @@ public class DataSetControllerTest {
             .addCohortIdsItem(cohort.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.generateCode(
-        workspace.getNamespace(), workspace.getName(), KernelTypeEnum.PYTHON.toString(), dataSet);
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(), new DataSetExportRequest()
+        .kernelType(KernelTypeEnum.PYTHON)
+        .dataSetRequest(dataSet));
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
@@ -618,13 +620,9 @@ public class DataSetControllerTest {
 
     expectedException.expect(NotFoundException.class);
 
-    dataSetController
-        .generateCode(
-            workspace.getNamespace(),
-            workspace.getName(),
-            KernelTypeEnum.PYTHON.toString(),
-            dataSet)
-        .getBody();
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(), new DataSetExportRequest()
+        .kernelType(KernelTypeEnum.PYTHON)
+        .dataSetRequest(dataSet));
   }
 
   @Test
@@ -751,41 +749,39 @@ public class DataSetControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void generateCode_noAccess() {
-    dataSetController.generateCode(
-        noAccessWorkspace.getNamespace(),
-        noAccessWorkspace.getName(),
-        KernelTypeEnum.PYTHON.toString(),
-        new DataSetRequest().includesAllParticipants(true));
+    dataSetController.previewExportToNotebook(noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(),
+        new DataSetExportRequest()
+            .kernelType(KernelTypeEnum.PYTHON)
+            .dataSetRequest(new DataSetRequest()
+                .includesAllParticipants(true)));
   }
 
   @Test(expected = NotFoundException.class)
   public void generateCode_noAccessDataSet() {
-    dataSetController.generateCode(
-        workspace.getNamespace(),
-        workspace.getName(),
-        KernelTypeEnum.PYTHON.toString(),
-        new DataSetRequest().dataSetId(noAccessDataSet.getId()));
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(),
+        new DataSetExportRequest()
+            .kernelType(KernelTypeEnum.PYTHON)
+            .dataSetRequest(new DataSetRequest()
+                .dataSetId(noAccessDataSet.getId())));
   }
 
   @Test(expected = NotFoundException.class)
   public void generateCode_cohortInvalid() {
-    dataSetController.generateCode(
-        workspace.getNamespace(),
-        workspace.getName(),
-        KernelTypeEnum.PYTHON.toString(),
-        new DataSetRequest()
-            .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
-            .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId())));
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(),
+        new DataSetExportRequest()
+            .kernelType(KernelTypeEnum.PYTHON)
+            .dataSetRequest(new DataSetRequest()
+                .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+                .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId()))));
   }
 
   @Test(expected = NotFoundException.class)
   public void generateCode_conceptSetInvalid() {
-    dataSetController.generateCode(
-        workspace.getNamespace(),
-        workspace.getName(),
-        KernelTypeEnum.PYTHON.toString(),
-        new DataSetRequest()
-            .conceptSetIds(ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId())));
+    dataSetController.previewExportToNotebook(workspace.getNamespace(), workspace.getName(),
+        new DataSetExportRequest()
+            .kernelType(KernelTypeEnum.PYTHON)
+            .dataSetRequest(new DataSetRequest()
+                .conceptSetIds(ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId()))));
   }
 
   @Test

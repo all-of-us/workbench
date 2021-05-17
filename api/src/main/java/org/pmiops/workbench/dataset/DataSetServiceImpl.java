@@ -8,6 +8,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -26,10 +27,13 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.json.JSONObject;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -39,7 +43,10 @@ import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -52,10 +59,15 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -73,8 +85,10 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
@@ -192,13 +206,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final BigQueryService bigQueryService;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final CohortDao cohortDao;
+  private final CohortService cohortService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final ConceptSetDao conceptSetDao;
+  private final ConceptSetService conceptSetService;
   private final CohortQueryBuilder cohortQueryBuilder;
   private final DataSetDao dataSetDao;
   private final DSLinkingDao dsLinkingDao;
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
+  private final Provider<String> prefixProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
 
   @Autowired
@@ -207,24 +225,32 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       BigQueryService bigQueryService,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
+      CohortService cohortService,
       ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
+      ConceptSetService conceptSetService,
       CohortQueryBuilder cohortQueryBuilder,
       DataSetDao dataSetDao,
       DSLinkingDao dsLinkingDao,
       DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
+      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
+    this.cohortService = cohortService;
     this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
+    this.conceptSetService = conceptSetService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.dataSetDao = dataSetDao;
     this.dsLinkingDao = dsLinkingDao;
     this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
+    this.prefixProvider = prefixProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
   }
 
@@ -779,6 +805,62 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
+  public DbDataset mustGetDbDataset(long workspaceId, long dataSetId) {
+    return getDbDataSet(workspaceId, dataSetId)
+        .<NotFoundException>orElseThrow(
+            () -> {
+              throw new NotFoundException(
+                  String.format(
+                      "No DataSet found for workspaceId: %s, dataSetId: %s",
+                      workspaceId, dataSetId));
+            });
+  }
+
+  private String generateRandomEightCharacterQualifier() {
+    return prefixProvider.get();
+  }
+
+  @Override
+  public List<String> generateCodeCells(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
+    // TODO(calbach): Verify whether the request payload is ever expected to include a different
+    // workspace ID.
+    dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
+
+    validateDataSetRequestResources(
+        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+
+    Map<String, QueryJobConfiguration> queriesByDomain =
+        domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
+    if (DataSetExportRequest.GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        throw new NotImplementedException();
+      }
+
+      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have whole genome data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      // TODO(RW-6633): Add WGS codegen support.
+      throw new NotImplementedException();
+    }
+
+    return generateCodeCells(
+        dataSetExportRequest.getKernelType(),
+        dataSetExportRequest.getDataSetRequest().getName(),
+        dbWorkspace.getCdrVersion().getName(),
+        qualifier,
+        queriesByDomain);
+  }
+
+
+  @Override
   @Transactional
   public DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
@@ -985,6 +1067,51 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return fieldList.stream()
         .map(field -> new DomainValue().value(field.getName().toLowerCase()))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public void validateDataSetPreviewRequestResources(
+      long workspaceId, DataSetPreviewRequest request) {
+    validateCohortsInWorkspace(workspaceId, request.getCohortIds());
+    validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+  }
+
+  /** Validate that the requested resources are contained by the given workspace. */
+  private void validateDataSetRequestResources(long workspaceId, DataSetRequest request) {
+    if (request.getDataSetId() != null) {
+      mustGetDbDataset(workspaceId, request.getDataSetId());
+    } else {
+      validateCohortsInWorkspace(workspaceId, request.getCohortIds());
+      validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+    }
+  }
+
+  private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
+    if (CollectionUtils.isEmpty(cohortIds)) {
+      return;
+    }
+    List<Long> workspaceCohortIds =
+        cohortService.findByWorkspaceId(workspaceId).stream()
+            .map(Cohort::getId)
+            .collect(Collectors.toList());
+
+    if (!workspaceCohortIds.containsAll(cohortIds)) {
+      throw new NotFoundException("one or more of the requested cohorts were not found");
+    }
+  }
+
+  private void validateConceptSetsInWorkspace(
+      long workspaceId, @Nullable List<Long> conceptSetIds) {
+    if (CollectionUtils.isEmpty(conceptSetIds)) {
+      return;
+    }
+    List<Long> workspaceConceptSetIds =
+        conceptSetService.findByWorkspaceId(workspaceId).stream()
+            .map(ConceptSet::getId)
+            .collect(Collectors.toList());
+    if (!workspaceConceptSetIds.containsAll(conceptSetIds)) {
+      throw new NotFoundException("one or more of the requested concept sets were not found");
+    }
   }
 
   private SearchGroup createHasWgsSearchGroup() {

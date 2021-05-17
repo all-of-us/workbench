@@ -81,6 +81,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.inject.Provider;
+
 // TODO(calbach): Move this test to the correct package.
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -107,13 +109,17 @@ public class DataSetServiceTest {
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CohortDao cohortDao;
+  @Autowired private CohortService cohortService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetService conceptSetService;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private CohortQueryBuilder mockCohortQueryBuilder;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private Provider<String> prefixProvider;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -153,13 +159,17 @@ public class DataSetServiceTest {
             bigQueryService,
             cdrBigQuerySchemaConfigService,
             cohortDao,
+            cohortService,
             conceptBigQueryService,
             conceptSetDao,
+            conceptSetService,
             mockCohortQueryBuilder,
             dataSetDao,
             dsLinkingDao,
             dsDataDictionaryDao,
             dataSetMapper,
+            prefixProvider,
+            workbenchConfigProvider,
             CLOCK);
 
     cohort = buildSimpleCohort();
