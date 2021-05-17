@@ -154,7 +154,7 @@ export class ExportDataSet extends React.Component<Props, State> {
                       placeholder.innerHTML = resp.html;
                       placeholder.style.overflowY = 'scroll';
                       placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
-                      placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = 0;
+                      placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
                       placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
                       const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
                       this.props.onSeeCodePreview(iframe);

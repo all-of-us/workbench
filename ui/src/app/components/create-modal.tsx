@@ -35,6 +35,8 @@ interface Props {
   getExistingNames: () => Promise<string[]>;
   save: Function;
   close: Function;
+
+  alsoRequired: boolean;
 }
 
 export const CreateModal = ({entityName, title, getExistingNames, save, close}: Props) => {

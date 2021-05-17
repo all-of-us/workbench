@@ -1355,15 +1355,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                                     save={(name, desc) => this.createDataset(name, desc)}
                                                     close={() => this.setState({openCreateModal: false})}/>}
 
-        {openSaveModal && <NewDataSetModal dataSet={dataSet}
-
-                                           workspaceNamespace={namespace}
-                                           workspaceId={id}
-                                           billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
+        {openSaveModal && <NewDataSetModal dataset={dataSet}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
-                                           }}
-        />}
+                                           }}/>}
       </React.Fragment>;
     }
   });
