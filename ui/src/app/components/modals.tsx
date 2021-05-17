@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
-import {useSpring, animated} from 'react-spring';
+import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
 
 const styles = reactStyles({

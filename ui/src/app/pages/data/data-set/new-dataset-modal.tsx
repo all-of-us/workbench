@@ -6,7 +6,7 @@ import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
-import {BillingStatus, DataSet, DataSetRequest, KernelTypeEnum,} from 'generated/fetch';
+import {BillingStatus, DataSet, DataSetRequest, KernelTypeEnum, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
@@ -20,7 +20,7 @@ import colors from '../../../styles/colors';
 import {AnalyticsTracker} from '../../../utils/analytics';
 import {ACTION_DISABLED_INVALID_BILLING} from '../../../utils/strings';
 import {WorkspaceData} from '../../../utils/workspace-data';
-import {WorkspacePermissions, WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
+import {WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
 
 // TODO eric: rename these props
 
@@ -111,7 +111,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
         placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
         placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
         placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
-        const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+        const iframe = <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
         setRightPanelContent(iframe);
         setIsLoadingNotebook(false);
       });

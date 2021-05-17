@@ -30,8 +30,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   currentWorkspaceStore,
-  encodeURIComponentStrict,
-  navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl, urlParamsStore
+  navigateAndPreventDefaultIfNoKeysPressed
 } from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
@@ -39,7 +38,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
-  BillingStatus,
   CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
@@ -57,7 +55,6 @@ import {
 } from 'generated/fetch';
 import {CreateModal} from '../../../components/create-modal';
 import {withErrorModal, WithErrorModalProps} from '../../../components/with-error-modal';
-import {appendNotebookFileSuffix} from '../../analysis/util';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
