@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -19,7 +18,6 @@ import {
   formatDomain,
   formatDomainString,
   reactStyles,
-  ReactWrapperBase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
@@ -455,7 +453,7 @@ interface State {
   selectedPreviewDomain: Domain;
 }
 
-const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -1281,16 +1279,3 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       </React.Fragment>;
     }
   });
-
-export {
-  DataSetPage
-};
-
-@Component({
-  template: '<div #root></div>'
-})
-export class DataSetPageComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataSetPage, []);
-  }
-}
