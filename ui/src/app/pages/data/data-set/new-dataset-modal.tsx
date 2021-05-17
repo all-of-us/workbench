@@ -83,7 +83,7 @@ export const NewDataSetModal: (props: MyProps) => JSX.Element = fp.flow(withCurr
     // TODO eric: update export to notebook analytics trackers. AnalyticsTracker.DatasetBuilder.Analyze(this.state.kernelType);
     function getDataSetRequest(): DataSetRequest {
       const dataSetRequest: DataSetRequest = {
-        name: '',
+        name: dataset ? dataset.name : 'dataSet',
         ...(dataset.id ? {
           dataSetId: dataset.id
         } : {
