@@ -305,7 +305,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
-          component={() => <DataSetComponent routeData={{
+          component={() => <DataSetComponentPage routeData={{
             title: 'Edit Dataset',
             breadcrumb: BreadcrumbType.Dataset,
             pageKey: 'datasetBuilder'
