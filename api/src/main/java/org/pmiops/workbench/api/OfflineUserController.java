@@ -265,7 +265,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
             user ->
                 // This will update the access tiers for a given user, based on compliance rules
                 // If a user is no longer compliant it will remove them from an access tier
-                userService.updateUserWithRetries(Function.identity(), user, Agent.asAdmin(user)));
+                userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem()));
     return ResponseEntity.noContent().build();
   }
 
