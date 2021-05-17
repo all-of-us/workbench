@@ -1127,6 +1127,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         selectedDomainValuePairs,
         selectedPrepackagedConceptSets
       } = this.state;
+      const exportError = !this.canWrite ? 'Requires Owner or Writer permission' :
+        dataSetTouched ? 'Pending changes must be saved' : '';
+
       return <React.Fragment>
         {this.state.savingDataset && <SpinnerOverlay opacity={0.3}/>}
 
@@ -1335,11 +1338,12 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 </Button>}
             </TooltipTrigger>
 
-          <TooltipTrigger data-test-id='save-tooltip'
-                          content='Requires Owner or Writer permission' disabled={this.canWrite}>
+          <TooltipTrigger data-test-id='export-tooltip'
+                          content={exportError}
+                          disabled={!exportError}>
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
                     onClick ={() => this.setState({openExportModal: true})}
-                    disabled={this.disableSave() || !this.canWrite}>
+                    disabled={this.disableSave() || !!exportError}>
               Export
             </Button>
           </TooltipTrigger>
