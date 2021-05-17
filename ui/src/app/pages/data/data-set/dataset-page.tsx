@@ -1355,15 +1355,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                                     save={(name, desc) => this.createDataset(name, desc)}
                                                     close={() => this.setState({openCreateModal: false})}/>}
 
-        {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
-                                           selectedConceptSetIds={selectedConceptSetIds}
-                                           selectedCohortIds={selectedCohortIds}
-                                           selectedDomainValuePairs={selectedDomainValuePairs}
+        {openSaveModal && <NewDataSetModal dataSet={dataSet}
+
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                           prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
-                                           dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
                                            }}

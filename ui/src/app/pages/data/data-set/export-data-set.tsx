@@ -34,15 +34,6 @@ interface State {
   seePreview: boolean;
   loadingPreview: boolean;
 }
-const styles = {
-  codePreviewSelector: {
-    display: 'flex',
-    marginTop: '1rem'
-  },
-  codePreviewSelectorTab: {
-    width: '2.6rem'
-  }
-};
 
 export class ExportDataSet extends React.Component<Props, State> {
 
@@ -64,7 +55,6 @@ export class ExportDataSet extends React.Component<Props, State> {
 
   componentDidMount() {
     this.loadNotebooks();
-    this.generateQuery();
   }
 
   private async loadNotebooks() {
@@ -79,25 +69,6 @@ export class ExportDataSet extends React.Component<Props, State> {
     } finally {
       this.setState({notebooksLoading: false});
     }
-  }
-
-  async generateQuery() {
-    const {dataSetRequest, workspaceNamespace, workspaceFirecloudName} = this.props;
-    dataSetApi().generateCode(
-      workspaceNamespace,
-      workspaceFirecloudName,
-      KernelTypeEnum.Python.toString(),
-      dataSetRequest).then(pythonCode => {
-      this.setState(({queries}) => ({
-        queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
-    });
-    dataSetApi().generateCode(
-      workspaceNamespace,
-      workspaceFirecloudName,
-      KernelTypeEnum.R.toString(),
-      dataSetRequest).then(rCode => {
-      this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
-    });
   }
 
   setNotebookName(notebook) {
@@ -124,8 +95,6 @@ export class ExportDataSet extends React.Component<Props, State> {
       newNotebook,
       notebookName,
       notebooksLoading,
-      previewedKernelType,
-      queries,
       seePreview
     } = this.state;
     const selectOptions = [{label: '(Create a new notebook)', value: ''}]
