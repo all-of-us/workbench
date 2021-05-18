@@ -91,7 +91,6 @@ public class RdrExportServiceImplTest {
   public void setUp() {
     rdrExportService = spy(rdrExportService);
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
-    when(mockApiClient.setDebugging(true)).thenReturn(null);
 
     dbUserWithEmail = new DbUser();
     dbUserWithEmail.setUserId(1L);
