@@ -139,7 +139,6 @@ public class RdrExportServiceImpl implements RdrExportService {
           userIds.stream()
               .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
       rdrApiProvider.get().exportResearchers(rdrResearchersList);
 
       updateDbRdrExport(RdrEntity.USER, userIds);
@@ -166,7 +165,6 @@ public class RdrExportServiceImpl implements RdrExportService {
               .filter(Objects::nonNull)
               .collect(Collectors.toList());
       if (!rdrWorkspacesList.isEmpty()) {
-        rdrApiProvider.get().getApiClient().setDebugging(true);
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
         if (backfill != null && backfill != true) {
