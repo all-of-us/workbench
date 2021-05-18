@@ -1,9 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
-import com.google.common.base.Preconditions;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -234,8 +234,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return Optional.empty();
       }
       Long expiryDays = configProvider.get().accessRenewal.expiryDays;
-      Preconditions.checkNotNull(expiryDays,
-        "expected value for config key accessRenewal.expiryDays.expiryDays");
+      Preconditions.checkNotNull(
+          expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
       return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
