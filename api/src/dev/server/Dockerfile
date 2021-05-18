@@ -3,9 +3,6 @@ FROM ubuntu:18.04
 #
 # Development requirements
 #
-# Java
-FROM adoptopenjdk:11-jre-hotspot
-
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
      curl \
@@ -26,9 +23,16 @@ RUN apt-get update && \
      make \
      unzip \
      wait-for-it \
+     wget \
      && \
+     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - && \
+     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ && \
+     apt-get update \
+     apt-get install --no-install-recommends -y adoptopenjdk-11-hotspot \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
