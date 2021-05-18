@@ -599,7 +599,7 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 }
 
 // AppEngine plugin tasks
-project.tasks.bootRun.dependsOn project.tasks.startCronEmulator
+bootRun.dependsOn project.tasks.startCronEmulator
 //jettyStart {
 //  // This task has the side-effect of running a local server, and therefore
 //  // should not be cacheable.
