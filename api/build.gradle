@@ -391,7 +391,7 @@ dependencies {
   implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   implementation "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
-  implementation "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
+  implementation "org.hibernate:hibernate-core:${project.ext.HIBERNATE_VERSION}"
 
   // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
   // Kotlin dep, resulting in massive logspam.
