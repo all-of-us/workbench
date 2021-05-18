@@ -40,7 +40,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     const [isExporting, setIsExporting] = useState(false); // replace w/ undefined notebooks list? // test case - no notebooks in workspace
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
-    const [rightPanelContent, setRightPanelContent] = useState(null);
+    const [codePreview, setCodePreview] = useState(null);
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
 
@@ -53,7 +53,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         await dataSetApi().exportToNotebook(
           workspace.namespace, workspace.id,
           {
-            dataSetRequest: getDataSetRequest(),
+            dataSetRequest: createDataSetRequest(),
             kernelType: kernelType,
             notebookName: notebookName,
             newNotebook: creatingNewNotebook
@@ -69,12 +69,13 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
-    function getDataSetRequest(): DataSetRequest {
-      const dataSetRequest: DataSetRequest = {
-        name: dataset ? dataset.name : 'dataSet',
+    function createDataSetRequest(): DataSetRequest {
+      return {
+        name: dataset ? dataset.name : 'dataset',
         ...(dataset.id ? {
           dataSetId: dataset.id
         } : {
+          dataSetId: dataset.id,
           includesAllParticipants: dataset.includesAllParticipants,
           conceptSetIds: dataset.conceptSets.map(cs => cs.id),
           cohortIds: dataset.cohorts.map(c => c.id),
@@ -82,14 +83,13 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           prePackagedConceptSet: dataset.prePackagedConceptSet
         })
       };
-      return dataSetRequest;
     }
 
     function loadCodePreview(kernel: KernelTypeEnum) {
       setIsLoadingNotebook(true);
       setErrorMsg(null);
       dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
-        dataSetRequest: getDataSetRequest(),
+        dataSetRequest: createDataSetRequest(),
         kernelType: kernel,
         newNotebook: false,
         notebookName: '',
@@ -101,17 +101,16 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = '0';
         placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
         const iframe = <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
-        setRightPanelContent(iframe);
+        setCodePreview(iframe);
       }).catch(() => {
         setErrorMsg('Could not load code preview. Please try again or continue exporting to a notebook.');
       }).finally(() => setIsLoadingNotebook(false));
     }
 
     function onCodePreviewClick() {
-      if (rightPanelContent) {
-        setRightPanelContent(null);
+      if (codePreview) {
+        setCodePreview(null);
       } else {
-        console.log(kernelType);
         AnalyticsTracker.DatasetBuilder.SeeCodePreview();
         loadCodePreview(kernelType);
       }
@@ -141,7 +140,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     }, [workspace]);
 
     useEffect(() => {
-      if (rightPanelContent) {
+      if (codePreview) {
         loadCodePreview(kernelType);
       }
     }, [kernelType]);
@@ -174,7 +173,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       })));
     }
 
-    return <Modal loading={isExporting || isNotebooksLoading} width={!rightPanelContent ? 450 : 1200}>
+    return <Modal loading={isExporting || isNotebooksLoading} width={!codePreview ? 450 : 1200}>
       <FlexRow>
         <div style={{width: 'calc(450px - 2rem)'}}>
           <ModalTitle>Export Dataset</ModalTitle>
@@ -182,6 +181,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
             <div style={{marginTop: '1rem'}}>
               <Select value={creatingNewNotebook ? '' : notebookName}
+                      data-test-id='select-notebook'
                       options={selectOptions}
                       onChange={(v) => onNotebookSelect(v)}/>
             </div>
@@ -212,7 +212,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                       disabled={loadingNotebook}
                       data-test-id='code-preview-button'
                       onClick={() => onCodePreviewClick()}>
-                {rightPanelContent ? 'Hide Code Preview' : 'See Code Preview'}
+                {codePreview ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
               {loadingNotebook && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
             </FlexRow>
@@ -225,9 +225,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                     style={{marginRight: '2rem'}}>
               Cancel
             </Button>
-            <TooltipTrigger content={summarizeErrors(errors)}>
+            <TooltipTrigger content={summarizeErrors(errors)} data-test-id='export-dataset-tooltip'>
               <Button type='primary'
-                      data-test-id='save-data-set'
+                      data-test-id='export-data-set'
                       disabled={!fp.isEmpty(errors)}
                       onClick={() => exportDataset()}>
                 Export
@@ -236,9 +236,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           </ModalFooter>
         </div>
 
-        {rightPanelContent &&
+        {codePreview &&
         <div style={{flex: 1, marginLeft: '1rem'}}>
-          {rightPanelContent}
+          {codePreview}
         </div>}
       </FlexRow>
     </Modal>;

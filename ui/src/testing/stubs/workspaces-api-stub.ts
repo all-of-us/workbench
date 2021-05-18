@@ -7,7 +7,7 @@ import {
   CloneWorkspaceResponse,
   CopyRequest,
   EmptyResponse,
-  FileDetail,
+  FileDetail, KernelTypeEnum,
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
   ResourceType,
@@ -39,6 +39,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   notebookList: FileDetail[];
+  public notebookKernel: KernelTypeEnum;
   workspaceUserRoles: Map< string, UserRole[]>;
   recentWorkspaces: RecentWorkspaceResponse;
   newWorkspaceCount = 0;
@@ -68,6 +69,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
     workspaceId: string, extraHttpRequestParams?: any): Promise<Array<FileDetail>> {
     return new Promise<Array<FileDetail>>(resolve => {
       resolve(this.notebookList);
+    });
+  }
+
+  getNotebookKernel(workspaceNamespace: string, workspaceId: string, notebookName: string, options?: any): Promise<KernelTypeEnum> {
+    return new Promise<KernelTypeEnum>(resolve => {
+      resolve(this.notebookKernel);
     });
   }
 

@@ -6,31 +6,50 @@ import {
   DataSetApi,
   DataSetRequest,
   KernelTypeEnum,
-  PrePackagedConceptSetEnum,
   WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from '../../../../testing/stubs/workspaces';
+import {Select} from '../../../components/inputs';
+import {Tooltip} from '../../../components/popups';
+import {currentWorkspaceStore} from '../../../utils/navigation';
 import {ExportDatasetModal} from './export-dataset-modal';
 
-const prePackagedConceptSet = Array.of(PrePackagedConceptSetEnum.NONE);
-const workspaceNamespace = 'workspaceNamespace';
-const workspaceId = 'workspaceId';
-
-let dataSet;
-
-const createNewDataSetModal = () => {
-  return <ExportDatasetModal
-    closeFunction={() => {}}
-    dataset={dataSet}/>;
-};
-
 describe('ExportDatasetModal', () => {
+  let dataset;
+  let workspace;
+  let testProps;
+  let workspacesApiStub;
+  let datasetApiStub;
+
+  const component = (props) => {
+    return <ExportDatasetModal {...props}/>;
+  };
+
+  function findExportButton(wrapper) {
+    return wrapper.find('[data-test-id="export-data-set"]').first();
+  }
+
   beforeEach(() => {
     window.open = jest.fn();
-    dataSet = undefined;
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(DataSetApi, new DataSetApiStub());
+    dataset = {
+      id: 1,
+      name: 'Test Dataset Name'
+    };
+
+    workspacesApiStub = new WorkspacesApiStub();
+    registerApiClient(WorkspacesApi, workspacesApiStub);
+    datasetApiStub = new DataSetApiStub();
+    registerApiClient(DataSetApi, datasetApiStub);
+
+    workspace = workspaceDataStub;
+    currentWorkspaceStore.next(workspace);
+
+    testProps = {
+      closeFunction: () => {},
+      dataset: dataset
+    };
   });
 
   afterEach(() => {
@@ -38,116 +57,123 @@ describe('ExportDatasetModal', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(createNewDataSetModal());
+    const wrapper = mount(component(testProps));
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should only display code when button pressed', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    expect(wrapper.find('[data-test-id="code-text-box"]').exists()).toBeFalsy();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="code-preview-button"]')
-      .first().text()).toEqual('See Code Preview');
-    wrapper.find('[data-test-id="code-preview-button"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="code-preview-button"]')
-      .first().text()).toEqual('Hide Preview');
-  });
-
-  it('should not allow submission if no name specified', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
+  it('should export to a new notebook', async() => {
+    const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-
-    wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(createSpy).not.toHaveBeenCalled();
-    expect(exportSpy).not.toHaveBeenCalled();
-  });
-
-  it('should not export if export is not checked', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Dataset Name';
-
-    wrapper.find('[data-test-id="data-set-name-input"]')
-      .first().simulate('change', {target: {value: nameStub}});
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change', {target: {checked: false}});
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(createSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
-      name: nameStub,
-      includesAllParticipants: false,
-      description: '',
-      conceptSetIds: [],
-      cohortIds: [],
-      domainValuePairs: [],
-      prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.NONE)
-    });
-    expect(exportSpy).not.toHaveBeenCalled();
-  });
-
-  it('should not submit if export checked but no name or selected notebook', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Dataset Name';
-
-    wrapper.find('[data-test-id="data-set-name-input"]')
-      .first().simulate('change', {target: {value: nameStub}});
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(createSpy).not.toHaveBeenCalled();
-    expect(exportSpy).not.toHaveBeenCalled();
-  });
-
-  it('should submit if export is unchecked and name specified', async() => {
-    const wrapper = mount(createNewDataSetModal());
-    const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
-    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Dataset Name';
-    const notebookNameStub = 'Notebook Name';
-    const dataSetRequestStub: DataSetRequest = {
-      name: nameStub,
-      includesAllParticipants: false,
-      description: '',
-      conceptSetIds: [],
-      cohortIds: [],
-      domainValuePairs: [],
-      prePackagedConceptSet: Array.of(PrePackagedConceptSetEnum.NONE)
+    const expectedNotebookName = 'Notebook Name';
+    const expectedDatasetRequest: DataSetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name
     };
 
-    wrapper.find('[data-test-id="data-set-name-input"]')
-      .first().simulate('change', {target: {value: nameStub}});
-    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="notebook-name-input"]')
-      .first().simulate('change', {target: {value: notebookNameStub}});
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(createSpy).toHaveBeenCalled();
-    expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
-      dataSetRequest: dataSetRequestStub,
+      .first().simulate('change', {target: {value: expectedNotebookName}});
+    findExportButton(wrapper).simulate('click');
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+      dataSetRequest: expectedDatasetRequest,
       newNotebook: true,
-      notebookName: notebookNameStub,
+      notebookName: expectedNotebookName,
       kernelType: KernelTypeEnum.Python
     });
   });
 
-  it ('should have default dataSet name if dataset is passed as props', () => {
-    const name = 'Update Dataset';
-    dataSet = {...dataSet, name: name, description: 'dataset'};
-    const wrapper = mount(createNewDataSetModal());
-    const dataSetName  =
-      wrapper.find('[data-test-id="data-set-name-input"]').first().prop('value');
-    expect(dataSetName).toBe(name);
+
+  it('should disable export if no name is provided', async() => {
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    wrapper.find('[data-test-id="notebook-name-input"]').first()
+      .simulate('change', {target: {value: ''}});
+    findExportButton(wrapper).simulate('click');
+    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+    expect(exportSpy).not.toHaveBeenCalled();
+
+    findExportButton(wrapper).simulate('mouseenter');
+    expect(wrapper.find(Tooltip).text()).toBe('Notebook name can\'t be blank');
   });
 
-  // change kernel type while code preview is open
+  it('should disable export if a conflicting name is provided', async() => {
+    workspacesApiStub.notebookList = [
+      {
+        'name': 'existing notebook.ipynb'
+      }];
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-  // change kernel type while code preview is closed
+    wrapper.find('[data-test-id="notebook-name-input"]')
+      .first().simulate('change', {target: {value: 'existing notebook'}});
+    await waitOneTickAndUpdate(wrapper);
+    findExportButton(wrapper).simulate('click');
+    expect(findExportButton(wrapper).props().disabled).toBeTruthy();
+
+    findExportButton(wrapper).simulate('mouseenter');
+    expect(wrapper.find(Tooltip).text()).toBe('Notebook name already exists');
+    expect(exportSpy).not.toHaveBeenCalled();
+  });
+
+  it('should export to an existing notebook with the correct kernel type', async() => {
+    const expectedNotebookName = 'existing notebook';
+    dataset.name = expectedNotebookName;
+    workspacesApiStub.notebookList = [
+      {
+        'name': `${expectedNotebookName}.ipynb`
+      }];
+    workspacesApiStub.notebookKernel = KernelTypeEnum.R;
+
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: expectedNotebookName
+    };
+
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+
+    wrapper.find(Select).props().onChange(expectedNotebookName);
+    await waitOneTickAndUpdate(wrapper);
+
+    findExportButton(wrapper).simulate('click');
+
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+      dataSetRequest: expectedDatasetRequest,
+      newNotebook: false,
+      notebookName: expectedNotebookName,
+      kernelType: KernelTypeEnum.R
+    });
+  });
+
+  it('should show code preview, auto reload on kernel switch, and hide code preview', async() => {
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name
+    };
+    datasetApiStub.codePreview = {
+      html: '<div id="notebook">print("hello world!")</div>'
+    };
+    const wrapper = mount(component(testProps));
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+
+    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
+      dataSetRequest: expectedDatasetRequest,
+      kernelType: KernelTypeEnum.Python
+    }));
+    expect(wrapper.find('iframe').html()).toContain('hello world!');
+
+    wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
+      dataSetRequest: expectedDatasetRequest,
+      kernelType: KernelTypeEnum.R
+    }));
+
+    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('iframe').exists()).toBeFalsy();
+  });
 });
