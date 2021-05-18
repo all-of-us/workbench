@@ -241,7 +241,7 @@ task generate_appengine_web_xml(type: Exec) {
 // Spotless code linter plugin settings
 spotless {
   java {
-    googleJavaFormat('1.7')
+    googleJavaFormat()
     target fileTree('.') {
       include '**/*.java'
 
