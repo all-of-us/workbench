@@ -819,6 +819,8 @@ public class DataSetControllerTest {
                 .put("nbformat", 4)
                 .put("nbformat_minor", 2));
 
+    when(mockNotebooksService.getNotebookKernel(any())).thenReturn(KernelTypeEnum.PYTHON);
+
     DataSetExportRequest request =
         new DataSetExportRequest()
             .dataSetRequest(dataSet)

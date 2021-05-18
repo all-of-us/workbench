@@ -233,13 +233,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         spy(
             new DataSetController(
                 cdrVersionService,
-                cohortService,
-                conceptSetService,
                 dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,
-                prefixProvider,
                 genomicExtractionService,
                 workspaceAuthService,
                 workbenchConfigProvider));
