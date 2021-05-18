@@ -13,7 +13,7 @@ import { logger } from 'libs/logger';
 const modalTitleXpath =
   '//*[contains(normalize-space(),"Save Dataset") or contains(normalize-space(),"Update Dataset")]';
 
-export default class DatasetSaveModal extends Modal {
+export default class DatasetCreateModal extends Modal {
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }

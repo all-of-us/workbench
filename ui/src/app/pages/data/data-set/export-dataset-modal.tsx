@@ -190,23 +190,24 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
                 <TextInput onChange={v => setNotebookName(v)}
                            value={notebookName} data-test-id='notebook-name-input'/>
-                <div style={headerStyles.formLabel}>
-                    Select programming language
-                </div>
-              {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-                .map((kernelTypeEnum, i) =>
-                  <label key={i} style={
-                    {display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
-                    <RadioButton
-                      style={{marginRight: '0.25rem'}}
-                      data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                      disabled={loadingNotebook}
-                      checked={kernelType === kernelTypeEnum}
-                      onChange={() => setKernelType(kernelTypeEnum)}
-                    />
-                    {kernelTypeEnum}
-                  </label>)}
             </React.Fragment>}
+
+            <div style={headerStyles.formLabel}>
+              Select programming language
+            </div>
+            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+              .map((kernelTypeEnum, i) =>
+                <label key={i} style={
+                  {display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+                  <RadioButton
+                    style={{marginRight: '0.25rem'}}
+                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                    disabled={loadingNotebook || !creatingNewNotebook}
+                    checked={kernelType === kernelTypeEnum}
+                    onChange={() => setKernelType(kernelTypeEnum)}
+                  />
+                  {kernelTypeEnum}
+                </label>)}
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
               <Button type={'secondarySmall'}
