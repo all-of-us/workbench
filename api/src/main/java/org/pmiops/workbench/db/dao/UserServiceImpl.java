@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.base.Preconditions;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
@@ -233,9 +234,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return Optional.empty();
       }
       Long expiryDays = configProvider.get().accessRenewal.expiryDays;
-      if (expiryDays == null) {
-        throw new RuntimeException("config value accessRenewal.expiryDays.expiryDays is null");
-      }
+      Preconditions.checkNotNull(expiryDays,
+        "expected value for config key accessRenewal.expiryDays.expiryDays");
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
       return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
