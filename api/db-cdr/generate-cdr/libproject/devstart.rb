@@ -344,7 +344,6 @@ def publish_cdr_wgs(cmd_name, args)
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
-  app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
   tier = env.fetch(:accessTiers)[op.opts.tier]
   dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
@@ -357,7 +356,7 @@ def publish_cdr_wgs(cmd_name, args)
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
     bq_ingest(tier, source_project, op.opts.bq_dataset, WGS_TABLE_FILTER)
 
-    bq_update_acl(dest_dataset) do |acl_json, existing_groups, existing_users|
+    bq_update_acl(dest_dataset) do |acl_json, existing_groups, _existing_users|
       if existing_groups.include?(extraction_proxy_group)
         common.status "#{extraction_proxy_group} already in ACL, skipping..."
       else
