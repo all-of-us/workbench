@@ -334,54 +334,6 @@ public class GenomicExtractionServiceTest {
             });
   }
 
-  @Test
-  public void getExtractionJobs_noSquashAborting() throws ApiException {
-    OffsetDateTime submissionDate = OffsetDateTime.now();
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        createDbWgsExtractCromwellSubmission();
-    dbWgsExtractCromwellSubmission.setUserCost(new BigDecimal("2.05"));
-    dbWgsExtractCromwellSubmission.setTerraStatusEnum(TerraJobStatus.ABORTING);
-    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
-
-    OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
-
-    mockGetFirecloudSubmission(
-        new FirecloudSubmission()
-            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
-            .status(FirecloudSubmissionStatus.EVALUATING)
-            .addWorkflowsItem(
-                new FirecloudWorkflow()
-                    .statusLastChangedDate(completionTimestamp)
-                    .status(FirecloudWorkflowStatus.RUNNING))
-            .submissionDate(submissionDate));
-
-    GenomicExtractionJob wgsCohortExtractionJob =
-        genomicExtractionService
-            .getGenomicExtractionJobs(
-                targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
-            .get(0);
-
-    assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.ABORTING);
-
-    mockGetFirecloudSubmission(
-        new FirecloudSubmission()
-            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
-            .status(FirecloudSubmissionStatus.ABORTED)
-            .addWorkflowsItem(
-                new FirecloudWorkflow()
-                    .statusLastChangedDate(completionTimestamp)
-                    .status(FirecloudWorkflowStatus.ABORTED))
-            .submissionDate(submissionDate));
-
-    wgsCohortExtractionJob =
-        genomicExtractionService
-            .getGenomicExtractionJobs(
-                targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
-            .get(0);
-
-    assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.ABORTED);
-  }
-
   private DbWgsExtractCromwellSubmission createDbWgsExtractCromwellSubmission() {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         new DbWgsExtractCromwellSubmission();
@@ -478,14 +430,6 @@ public class GenomicExtractionServiceTest {
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
-
-    GenomicExtractionJob wgsCohortExtractionJob =
-        genomicExtractionService
-            .getGenomicExtractionJobs(
-                targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
-            .get(0);
-
-    assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.ABORTING);
   }
 
   private DbDataset createDataset() {

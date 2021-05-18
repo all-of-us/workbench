@@ -28,6 +28,14 @@ import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
 import {MenuItem} from './buttons';
 
+const spinStyles = {
+  animationName: 'spin',
+  animationDuration: '5000ms',
+  animationIterationCount: 'infinite',
+  animationTimingFunction: 'linear'
+}
+
+
 const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
     return {
@@ -35,10 +43,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'Processing extraction',
       style: {
         color: colors.success,
-        animationName: 'spin',
-        animationDuration: '5000ms',
-        animationIterationCount: 'infinite',
-        animationTimingFunction: 'linear'
+        ...spinStyles
       }
     };
   } else if (status === TerraJobStatus.SUCCEEDED) {
@@ -62,10 +67,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'Aborting this extraction. This may take a few minutes.',
       style: {
         color: colors.warning,
-        animationName: 'spin',
-        animationDuration: '5000ms',
-        animationIterationCount: 'infinite',
-        animationTimingFunction: 'linear'
+        ...spinStyles
       }
     };
   } else if (status === TerraJobStatus.ABORTED) {
