@@ -5,10 +5,6 @@ buildscript {
     dependencies {
         classpath 'org.liquibase:liquibase-gradle-plugin:2.0.4'
         classpath 'mysql:mysql-connector-java:5.1.37'
-
-        liquibaseRuntime 'org.liquibase:liquibase-core:3.10.0'
-        liquibaseRuntime("ch.qos.logback:logback-core:1.2.3")
-        liquibaseRuntime 'mysql:mysql-connector-java:5.1.37'
     }
 }
 apply plugin: 'org.liquibase.gradle'
@@ -17,6 +13,11 @@ def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 
+dependencies {
+    liquibaseRuntime 'org.liquibase:liquibase-core:3.10.0'
+    liquibaseRuntime("ch.qos.logback:logback-core:1.2.3")
+    liquibaseRuntime 'mysql:mysql-connector-java:5.1.37'
+}
 liquibase {
     activities {
         main {
