@@ -497,7 +497,7 @@ dependencies {
   __tools__Compile 'com.opencsv:opencsv:4.6'
 
   testCompile 'org.junit.jupiter:junit-jupiter:5.6.1'
-  testCompile 'org.mockito:mockito-core:2.18.3'
+  testCompile 'org.mockito:mockito-core:3.10.0'
   testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
   testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
   testCompile 'com.google.truth:truth:0.42'
