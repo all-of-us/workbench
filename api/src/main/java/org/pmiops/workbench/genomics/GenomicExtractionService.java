@@ -307,7 +307,5 @@ public class GenomicExtractionService {
             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
             cohortExtractionConfig.operationalTerraWorkspaceName,
             dbSubmission.get().getSubmissionId());
-
-    wgsExtractCromwellSubmissionDao.save(dbSubmission.get());
   }
 }
