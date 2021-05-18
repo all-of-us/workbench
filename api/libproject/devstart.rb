@@ -328,7 +328,7 @@ def start_local_api()
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
     common.status "Starting API server..."
-    common.run_inline %W{gradle appengineStart}
+    common.run_inline %W{gradle bootRun}
   end
 end
 
@@ -342,7 +342,7 @@ def stop_local_api()
   setup_local_environment
   common = Common.new
   common.status "Stopping API server..."
-  common.run_inline %W{gradle appengineStop}
+  common.run_inline %W{gradle -stop}
 end
 
 Common.register_command({
@@ -2947,7 +2947,7 @@ def start_api_and_incremental_build(cmd_name, args)
     bm = Benchmark.measure {
       # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
       # the application has finished starting.
-      common.run_inline %W{gradle --daemon appengineStart}
+      common.run_inline %W{gradle --daemon bootRun}
       common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
       # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
       # in the output.
