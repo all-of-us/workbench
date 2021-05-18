@@ -4,20 +4,6 @@ plugins {
 repositories {
     mavenCentral()
 }
-buildscript {
-    repositories {
-        // Bintray's repository - a fast Maven Central mirror & more
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'org.liquibase:liquibase-gradle-plugin:2.0.4'
-        classpath 'mysql:mysql-connector-java:5.1.37'
-    }
-}
-apply plugin: 'org.liquibase.gradle'
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
