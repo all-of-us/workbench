@@ -3,38 +3,6 @@ FROM ubuntu:18.04
 #
 # Development requirements
 #
-#RUN apt-get update && \
-#    apt-get install --no-install-recommends -y \
-#     curl \
-#     python \
-#     gcc \
-#     python-dev \
-#     python-setuptools \
-#     bash \
-#     libc6-i386 \
-#     openssh-client \
-#     git \
-#     gettext \
-#     mysql-server \
-#     mysql-client \
-#     ruby \
-#     ruby-dev \
-#     ruby-json \
-#     make \
-#     unzip \
-#     wait-for-it \
-#     apt-transport-https \
-#     software-properties-common \
-#     gnupg \
-#     wget \
-#     && \
-#     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - && \
-#     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ && \
-#     apt-get update \
-#     apt-get install --no-install-recommends -y adoptopenjdk-11-hotspot \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/*
-
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
      openjdk-11-jdk \
