@@ -48,7 +48,6 @@ buildscript {
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
     classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:6.0.1'
@@ -66,7 +65,6 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'kotlin'
-apply plugin: 'net.ltgt.apt-idea'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
