@@ -44,26 +44,30 @@ const styles = reactStyles({
 });
 
 export const Modal = ({width = 450, loading = false, ...props}) => {
-
-  const contentStyle = {...styles.modal, width};
-  const contentStyleSpring = useSpring({...contentStyle, from: {width: 450}});
-
   return <ReactModal
     parentSelector={() => document.getElementById('popup-root')}
     isOpen
-    style={{overlay: styles.overlay, content: {margin: 'auto'}}}
+    style={{overlay: styles.overlay, content: props.contentStyle || {...styles.modal, width}}}
     ariaHideApp={false}
     {...props}
   >
+    {props.children}
+    {loading && <SpinnerOverlay/>}
+  </ReactModal>;
+};
+
+
+export const AnimatedModal = ({width = 450, ...props}) => {
+  const contentStyle = {...styles.modal, width};
+  const contentStyleSpring = useSpring({...contentStyle, from: {width: 450}});
+
+  return <Modal contentStyle={{margin: 'auto'}} {...props}>
     <div>
       <animated.div style={contentStyleSpring}>
         {props.children}
-        {loading && <SpinnerOverlay/>}
       </animated.div>
-
     </div>
-
-  </ReactModal>;
+  </Modal>;
 };
 
 export const ModalTitle = withStyle(styles.modalTitle)('div');

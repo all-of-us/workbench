@@ -1,5 +1,5 @@
 import {Button} from 'app/components/buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {AnimatedModal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
@@ -177,7 +177,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       })));
     }
 
-    return <Modal loading={isExporting || isNotebooksLoading} width={!codePreview ? 450 : 1200}>
+    return <AnimatedModal loading={isExporting || isNotebooksLoading} width={!codePreview ? 450 : 1200}>
       <FlexRow>
         <div style={{width: 'calc(450px - 2rem)'}}>
           <ModalTitle>Export Dataset</ModalTitle>
@@ -247,6 +247,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           {codePreview}
         </div>}
       </FlexRow>
-    </Modal>;
+    </AnimatedModal>;
   });
 
