@@ -119,8 +119,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private DbCdrVersion cdrVersion;
 
-  private DbWorkspace dbWorkspace;
-
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private CloudStorageClient cloudStorageClient;
@@ -211,7 +209,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    dbWorkspace = new DbWorkspace();
+    DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setName("Saved workspace");
     dbWorkspace.setFirecloudName(WORKSPACE_ID);

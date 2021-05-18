@@ -69,7 +69,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class CohortBuilderControllerTest extends SpringTest {
 
   private CohortBuilderController controller;
-  private DbWorkspace dbWorkspace;
 
   @Mock private BigQueryService bigQueryService;
   @Mock private CloudStorageClient cloudStorageClient;
@@ -122,7 +121,7 @@ public class CohortBuilderControllerTest extends SpringTest {
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1l);
-    dbWorkspace = new DbWorkspace();
+    DbWorkspace dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setName("Saved workspace");
     dbWorkspace.setFirecloudName(WORKSPACE_ID);
