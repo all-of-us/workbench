@@ -3,15 +3,13 @@ import { waitUntilChanged } from 'utils/element-utils';
 import { makeRandomName } from 'utils/str-utils';
 import { waitForPropertyExists, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import RadioButton from 'app/element/radiobutton';
 import Textarea from 'app/element/textarea';
-import Textbox from 'app/element/textbox';
-import { Language, LinkText } from 'app/text-labels';
+import { LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { logger } from 'libs/logger';
 
 const modalTitleXpath =
-  '//*[contains(normalize-space(),"Save Dataset") or contains(normalize-space(),"Update Dataset")]';
+  '//*[contains(normalize-space(),"Create Dataset") or contains(normalize-space(),"Update Dataset")]';
 
 export default class DatasetCreateModal extends Modal {
   constructor(page: Page, xpath?: string) {
@@ -24,57 +22,46 @@ export default class DatasetCreateModal extends Modal {
   }
 
   /**
-   * Handle Save or Update dialog.
-   * @param notebookOpts {}
-   * @param {boolean} isUpdate If true, click Update button. If False, click Save button.
-   *
-   * <pre>
-   * {boolean} exportToNotebook If True, select Export To Notebook checkbox.
-   * {string} notebookName New notebook name to be created or select an existing notebook.
-   * {String} lang Notebook programming language.
-   * </pre>
+   * Handle Create dialog
    */
-  async saveDataset(
-    notebookOpts: { exportToNotebook?: boolean; notebookName?: string; lang?: Language } = {},
-    isUpdate = false
-  ): Promise<string> {
-    const { exportToNotebook = false, notebookName, lang = Language.Python } = notebookOpts;
+  async createDataset(): Promise<string> {
     const newDatasetName = makeRandomName();
 
-    const nameTextbox = this.waitForTextbox('Dataset Name');
+    const nameTextbox = this.waitForTextbox('DATASET NAME');
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
-    // Export to Notebook checkbox is checked by default
-    const exportCheckbox = this.waitForCheckbox('Export to notebook');
+    // // Export to Notebook checkbox is checked by default
+    // const exportCheckbox = this.waitForCheckbox('Export to notebook');
+    //
+    // if (exportToNotebook) {
+    //   // Export to notebook
+    //   const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
+    //   await notebookNameTextbox.type(notebookName);
+    //   const radioBtn = RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
+    //   await radioBtn.select();
+    // } else {
+    //   // Not export to notebook
+    //   await exportCheckbox.unCheck();
+    // }
+    // await waitWhileLoading(this.page);
 
-    if (exportToNotebook) {
-      // Export to notebook
-      const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
-      await notebookNameTextbox.type(notebookName);
-      const radioBtn = RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
-      await radioBtn.select();
-    } else {
-      // Not export to notebook
-      await exportCheckbox.unCheck();
-    }
+    // if (isUpdate) {
+    //   await this.clickButton(LinkText.Update, { waitForClose: true, waitForNav: true });
+    // } else {
+    //   await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
+    // }
+    await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
     await waitWhileLoading(this.page);
 
-    if (isUpdate) {
-      await this.clickButton(LinkText.Update, { waitForClose: true, waitForNav: true });
-    } else {
-      await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
-    }
-    await waitWhileLoading(this.page);
-
-    if (isUpdate) {
-      logger.info(`Updated Dataset "${newDatasetName}"`);
-    } else {
+    // if (isUpdate) {
+    //   logger.info(`Updated Dataset "${newDatasetName}"`);
+    // } else {
       logger.info(`Created Dataset "${newDatasetName}"`);
-    }
-    if (exportToNotebook) {
-      logger.info(`Created Notebook "${notebookName}"`);
-    }
+    // }
+    // if (exportToNotebook) {
+    //   logger.info(`Created Notebook "${notebookName}"`);
+    // }
     return newDatasetName;
   }
 

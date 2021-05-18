@@ -6,7 +6,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
-import DatasetSaveModal from 'app/modal/dataset-save-modal';
+import DatasetCreateModal from 'app/modal/dataset-create-modal';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
 import ConceptSetSearchPage from './conceptset-search-page';
@@ -96,18 +96,18 @@ export default class DatasetBuildPage extends AuthenticatedPage {
    * Click "Save and Analyze" button.
    * @returns Instance of DatasetSaveModal.
    */
-  async clickSaveAndAnalyzeButton(): Promise<DatasetSaveModal> {
-    const saveButton = Button.findByName(this.page, { name: 'Save and Analyze' });
-    await saveButton.waitUntilEnabled();
-    await saveButton.click();
+  async clickCreateButton(): Promise<DatasetCreateModal> {
+    const createButton = Button.findByName(this.page, { name: 'Create Dataset' });
+    await createButton.waitUntilEnabled();
+    await createButton.click();
     await waitWhileLoading(this.page);
-    const saveModal = new DatasetSaveModal(this.page);
-    await saveModal.waitForLoad();
-    return saveModal;
+    const createModal = new DatasetCreateModal(this.page);
+    await createModal.waitForLoad();
+    return createModal;
   }
 
-  async clickAnalyzeButton(): Promise<void> {
-    const saveButton = Button.findByName(this.page, { containsText: 'Analyze' });
+  async clickExportButton(): Promise<void> {
+    const saveButton = Button.findByName(this.page, { containsText: 'Export' });
     await saveButton.waitUntilEnabled();
     await saveButton.click();
   }
