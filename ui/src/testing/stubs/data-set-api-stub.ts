@@ -46,7 +46,8 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  previewExportToNotebook(workspaceNamespace: string, workspaceId: string, dataSetExportRequest: DataSetExportRequest, options?: any): Promise<ReadOnlyNotebookResponse> {
+  previewExportToNotebook(workspaceNamespace: string, workspaceId: string, dataSetExportRequest: DataSetExportRequest,
+    options?: any): Promise<ReadOnlyNotebookResponse> {
     return new Promise<ReadOnlyNotebookResponse>(resolve => {
       resolve(this.codePreview);
     });

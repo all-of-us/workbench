@@ -1780,7 +1780,7 @@ paths:
       responses:
         200:
           schema:
-            "$ref": "#/definitions/KernelTypeEnum"
+            "$ref": "#/definitions/KernelTypeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -5074,6 +5074,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/DataSet"
+  KernelTypeResponse:
+    type: object
+    properties:
+      kernelType:
+        "$ref": "#/definitions/KernelTypeEnum"
   DataSetCodeResponse:
     type: object
     properties:

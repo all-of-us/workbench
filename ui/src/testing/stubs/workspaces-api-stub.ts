@@ -7,7 +7,7 @@ import {
   CloneWorkspaceResponse,
   CopyRequest,
   EmptyResponse,
-  FileDetail, KernelTypeEnum,
+  FileDetail, KernelTypeEnum, KernelTypeResponse,
   RecentWorkspaceResponse,
   ResearchPurposeReviewRequest,
   ResourceType,
@@ -72,9 +72,11 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getNotebookKernel(workspaceNamespace: string, workspaceId: string, notebookName: string, options?: any): Promise<KernelTypeEnum> {
-    return new Promise<KernelTypeEnum>(resolve => {
-      resolve(this.notebookKernel);
+  getNotebookKernel(workspaceNamespace: string, workspaceId: string, notebookName: string, options?: any): Promise<KernelTypeResponse> {
+    return new Promise<KernelTypeResponse>(resolve => {
+      resolve({
+        kernelType: this.notebookKernel
+      });
     });
   }
 

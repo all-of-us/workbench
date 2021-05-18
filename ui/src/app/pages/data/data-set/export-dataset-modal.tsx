@@ -127,7 +127,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         setCreatingNewNotebook(false);
         setIsLoadingNotebook(true);
         workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
-          .then(kernel => setKernelType(kernel))
+          .then(resp => setKernelType(resp.kernelType))
           .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
           .finally(() => setIsLoadingNotebook(false));
       }
