@@ -60,7 +60,7 @@ buildscript {
 // TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
 //apply plugin: 'org.springframework.boot:spring-boot-properties-migrator'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'com.diffplug.gradle.spotless'
+apply plugin: 'com.diffplug.spotless'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'eclipse'
 apply plugin: 'idea'
