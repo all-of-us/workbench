@@ -1,41 +1,75 @@
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
-plugins {
-  id 'idea'
-  id 'java'
-  id 'war'
-  id 'eclipse'
+// Runs before all tasks. Sets up properties and dependencies for the build
+// process itself.
+buildscript {
+  // External properties on the default project. Values declared in ext blocks
+  // outside of the buildscsript block aren't usable here.
+  ext {
+    ELASTICSEARCH_VERSION = '6.8.3'
+    GAE_VERSION = '1.9.64'
+    GSON_VERSION = '2.8.5'
+    JACKSON_DATABIND_VERSION = '2.11.3'
+    JACKSON_VERSION = '2.11.3'
+    JODA_VERSION = '2.10'
+    KOTLIN_VERSION = '1.3.50'
+    MAPSTRUCT_VERSION = '1.3.1.Final'
+    MOCKITO_KOTLIN_VERSION = '2.2.0'
+    OKHTTP_VERSION = '2.7.5'
+    OPENCENSUS_VERSION = '0.23.0'
+    SPRINGFOX_VERSION = '2.6.1'
+    SPRING_BOOT_VERSION = '2.3.9.RELEASE'
+    SPRING_DEPENDENCY_MANAGEMENT_VERSION = '1.0.11.RELEASE'
+    SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
+    SWAGGER_2_CODEGEN_VERSION = '2.2.3'
+    SWAGGER_3_CODEGEN_VERSION = '3.0.21'
+  }
 
-  id 'com.diffplug.spotless' version '5.12.5'
-  id 'com.google.cloud.tools.appengine' version '2.4.1'
-  id 'org.hidetake.swagger.generator' version '2.18.2'
-  id "org.jetbrains.kotlin.jvm" version "1.5.0"
-  id "org.jetbrains.kotlin.plugin.noarg" version '1.3.50'
-  id 'org.springframework.boot' version '2.3.9.RELEASE'
-  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-  id "org.owasp.dependencycheck" version "6.0.1"
+  project.ext['hibernate.version'] = '5.4.31.Final'
+
+  repositories {
+    // Bintray's repository - a fast Maven Central mirror & more
+    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  // Buildscript-specific dependencies (uses buildscript-scoped repositories). This
+  // closure ensures allows the buildscript dependencies (e.g. for plgins) to be managed
+  // independently from the main project's application code's dependencies
+  dependencies {
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.12.5'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:2.4.1'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2'
+    // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
+    // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
+    // to match the modules imported by the Swagger codegen templates, and (2) some template files
+    // are overridden with forked templates within this repo; they will likely need to be re-copied from
+    // the newer release version and have AoU-specific modifications re-applied.
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
+    classpath 'org.owasp:dependency-check-gradle:6.0.1'
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
+    classpath "io.spring.gradle:dependency-management-plugin:$project.ext.SPRING_DEPENDENCY_MANAGEMENT_VERSION"
+  }
 }
 
-project.ext {
-  ELASTICSEARCH_VERSION = '6.8.3'
-  GAE_VERSION = '1.9.64'
-  GSON_VERSION = '2.8.5'
-  JACKSON_DATABIND_VERSION = '2.11.3'
-  JACKSON_VERSION = '2.11.3'
-  JODA_VERSION = '2.10'
-  KOTLIN_VERSION = '1.3.50'
-  MAPSTRUCT_VERSION = '1.3.1.Final'
-  MOCKITO_KOTLIN_VERSION = '2.2.0'
-  OKHTTP_VERSION = '2.7.5'
-  OPENCENSUS_VERSION = '0.23.0'
-  SPRINGFOX_VERSION = '2.6.1'
-  SPRING_BOOT_VERSION = '2.3.9.RELEASE'
-  SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
-  SWAGGER_2_CODEGEN_VERSION = '2.2.3'
-  SWAGGER_3_CODEGEN_VERSION = '3.0.21'
-  HIBERNATE_VERSION = '5.4.31.Final'
-}
+// TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
+//apply plugin: 'org.springframework.boot:spring-boot-properties-migrator'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.diffplug.spotless'
+apply plugin: 'com.google.cloud.tools.appengine' // App Engine tasks
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'org.hidetake.swagger.generator'
+apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
 // Artifact configurations derived from base configs. Configuration names
 // are concatenated by the Java plugin.
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
@@ -391,7 +425,7 @@ dependencies {
   implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
   implementation "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
-  implementation "org.hibernate:hibernate-core:${project.ext.HIBERNATE_VERSION}"
+  implementation "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
   // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
   // Kotlin dep, resulting in massive logspam.
