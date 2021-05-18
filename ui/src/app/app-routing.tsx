@@ -14,7 +14,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
-import { AdminBanner } from './pages/admin/admin-banner';
+import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
+import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
@@ -127,6 +128,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
+      <AppRoute path='/access-renewal' component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}/>
       <AppRoute
           path='/admin/banner'
           component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}

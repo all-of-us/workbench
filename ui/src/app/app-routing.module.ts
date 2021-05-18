@@ -72,6 +72,11 @@ const routes: Routes = [
         component: AppRouting,
         data: {}
       },
+      {
+        path: 'access-renewal',
+        component: AppRouting,
+        data: {}
+      },
       // non-migrated routes go HERE
       {
         path: '',
