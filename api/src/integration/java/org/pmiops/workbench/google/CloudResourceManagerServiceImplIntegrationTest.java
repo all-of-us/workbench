@@ -17,7 +17,7 @@ public class CloudResourceManagerServiceImplIntegrationTest extends BaseIntegrat
 
   @TestConfiguration
   @ComponentScan(basePackageClasses = CloudResourceManagerServiceImpl.class)
-  @Import({CloudResourceManagerServiceImpl.class})
+  @Import({CloudResourceManagerServiceImpl.class, BaseIntegrationTest.Configuration.class})
   static class Configuration {}
 
   // This is a single hand created user in the fake-research-aou.org gsuite.

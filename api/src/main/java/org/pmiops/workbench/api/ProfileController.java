@@ -590,7 +590,7 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser user = userProvider.get();
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
     directoryService.deleteUser(user.getUsername());
-    userDao.delete(user.getUserId());
+    userDao.deleteById(user.getUserId());
     profileAuditor.fireDeleteAction(user.getUserId(), user.getUsername());
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -620,5 +620,17 @@ public class ProfileController implements ProfileApiDelegate {
     DbUser dbUser =
         rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
     return ResponseEntity.ok(profileService.getProfile(dbUser));
+  }
+
+  @Override
+  public ResponseEntity<Void> confirmProfile() {
+    userService.confirmProfile();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> confirmPublications() {
+    userService.confirmPublications();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

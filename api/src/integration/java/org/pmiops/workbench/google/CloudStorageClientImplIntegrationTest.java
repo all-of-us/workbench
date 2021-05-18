@@ -14,7 +14,7 @@ public class CloudStorageClientImplIntegrationTest extends BaseIntegrationTest {
 
   @TestConfiguration
   @ComponentScan(basePackageClasses = CloudStorageClientImpl.class)
-  @Import(CloudStorageClientImpl.class)
+  @Import({CloudStorageClientImpl.class, BaseIntegrationTest.Configuration.class})
   static class Configuration {}
 
   @Test

@@ -249,6 +249,26 @@ paths:
       responses:
         204:
           description: Request Received.
+  "/v1/confirmProfile":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that their profile is up to date, as part of the
+        annual renewal compliance process.
+      operationId: confirmProfile
+      responses:
+        204:
+          description: Profile Confirmed.
+  "/v1/confirmPublications":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that they have either reported any AoU-related
+        publications, or they have none.
+      operationId: confirmPublications
+      responses:
+        204:
+          description: Publications Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
@@ -1587,6 +1607,21 @@ paths:
       description: Find and alert users that have exceeded their free tier billing
         usage
       operationId: checkFreeTierBillingUsage
+      responses:
+        204:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/synchronizeUserAccess":
+    get:
+      security: []
+      tags:
+      - offlineUser
+      - cron
+      description: Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
+      operationId: synchronizeUserAccess
       responses:
         204:
           description: No Error
@@ -4437,7 +4472,6 @@ definitions:
     enum:
     - ACTIVE
     - DELETED
-    - PENDING_DELETION_POST_1PPW_MIGRATION
   ResearchPurpose:
     type: object
     required:
@@ -5573,6 +5607,8 @@ definitions:
         enum:
           - complianceTraining
           - dataUseAgreement
+          - profileConfirmation
+          - publicationConfirmation
       expirationEpochMillis:
         type: integer
         format: int64

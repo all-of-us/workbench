@@ -342,7 +342,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                   return rd;
                 })
             .collect(Collectors.toList());
-    rdrExportDao.save(exportList);
+    rdrExportDao.saveAll(exportList);
   }
 
   /**

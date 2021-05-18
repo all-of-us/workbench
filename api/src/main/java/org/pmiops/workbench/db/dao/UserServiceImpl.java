@@ -49,6 +49,8 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -149,13 +151,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateUserAccessTiers(dbUser, agent);
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          dbUser = userDao.findOne(dbUser.getUserId());
+          long userId = dbUser.getUserId();
+          dbUser =
+              userDao
+                  .findById(userId)
+                  .orElseThrow(
+                      () ->
+                          new BadRequestException(
+                              String.format("User with ID %s not found", userId)));
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(
@@ -170,7 +177,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            dbUser = userDao.findOne(dbUser.getUserId());
+            long userId = dbUser.getUserId();
+            dbUser =
+                userDao
+                    .findById(userId)
+                    .orElseThrow(
+                        () ->
+                            new BadRequestException(
+                                String.format("User with ID %s not found", userId)));
             statementClosedCount++;
           } else {
             throw new ConflictException(
@@ -211,30 +225,82 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  public boolean isCompleteAndNotExpired(Timestamp completionTime) {
-    Timestamp expirationTime =
-        new Timestamp(
-            clock.millis()
-                - TimeUnit.MILLISECONDS.convert(
-                    configProvider.get().accessRenewal.expiryDays, TimeUnit.DAYS));
-    if (configProvider.get().access.enableAccessRenewal) {
-      return completionTime != null && expirationTime.before(completionTime);
+  private class ModuleTimes {
+    public Optional<Timestamp> completion;
+    public Optional<Timestamp> bypass;
+
+    public ModuleTimes(Timestamp nullableCompletion, Timestamp nullableBypass) {
+      completion = Optional.ofNullable(nullableCompletion);
+      bypass = Optional.ofNullable(nullableBypass);
     }
-    return completionTime != null;
+
+    public boolean isBypassed() {
+      return bypass.isPresent();
+    }
+
+    public boolean isComplete() {
+      return completion.isPresent();
+    }
+
+    public Optional<Timestamp> getExpiration() {
+      if (isBypassed() || !configProvider.get().access.enableAccessRenewal) {
+        return Optional.empty();
+      }
+      Long expiryDays = configProvider.get().accessRenewal.expiryDays;
+      if (expiryDays == null) {
+        throw new RuntimeException("config value accessRenewal.expiryDays.expiryDays is null");
+      }
+      long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
+      return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
+    }
+
+    public boolean hasExpired() {
+      final Timestamp now = new Timestamp(clock.millis());
+      return getExpiration().map(x -> x.before(now)).orElse(false);
+    }
+  }
+
+  private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
+    return new RenewableAccessModuleStatus()
+        .moduleName(name)
+        .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
+        .hasExpired(times.hasExpired());
+  }
+
+  public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
+    return ImmutableList.of(
+        mkStatus(
+            ModuleNameEnum.COMPLIANCETRAINING,
+            new ModuleTimes(
+                user.getComplianceTrainingCompletionTime(),
+                user.getComplianceTrainingBypassTime())),
+        mkStatus(
+            ModuleNameEnum.DATAUSEAGREEMENT,
+            new ModuleTimes(
+                user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime())),
+        mkStatus(
+            ModuleNameEnum.PROFILECONFIRMATION,
+            new ModuleTimes(user.getProfileLastConfirmedTime(), null)),
+        mkStatus(
+            ModuleNameEnum.PUBLICATIONCONFIRMATION,
+            new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
-    if (user.getDataUseAgreementBypassTime() != null
-        || !configProvider.get().access.enableDataUseAgreement) {
-      // Data use agreement version may be ignored, since it's bypassed on the user or env level.
-      return true;
-    } else if (user.getDataUseAgreementSignedVersion() != null
-        && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()
-        && isCompleteAndNotExpired(user.getDataUseAgreementCompletionTime())) {
-      // User has signed the most-recent DUCC version.
+    final ModuleTimes duaTimes =
+        new ModuleTimes(
+            user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime());
+    if (!configProvider.get().access.enableDataUseAgreement) {
       return true;
     }
-    return false;
+    if (duaTimes.isBypassed()) {
+      return true;
+    }
+    final Integer signedVersion = user.getDataUseAgreementSignedVersion();
+    if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
+      return false;
+    }
+    return duaTimes.isComplete() && !duaTimes.hasExpired();
   }
 
   // Checking for annual completion time is not a part of this module
@@ -245,9 +311,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean isComplianceTrainingCompliant(DbUser user) {
-    return user.getComplianceTrainingBypassTime() != null
-        || isCompleteAndNotExpired(user.getComplianceTrainingCompletionTime())
-        || !configProvider.get().access.enableComplianceTraining;
+    if (!configProvider.get().access.enableComplianceTraining) {
+      return true;
+    }
+    final ModuleTimes ctTimes =
+        new ModuleTimes(
+            user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime());
+    return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
@@ -366,9 +436,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser.setDegreesEnum(degrees);
     }
     dbUser.setDemographicSurvey(dbDemographicSurvey);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbUser.setCreationTime(now);
-    dbUser.setLastModifiedTime(now);
 
     // For existing user that do not have address
     if (dbAddress != null) {
@@ -449,7 +516,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             dua.setUserNameOutOfDate(
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userDataUseAgreementDao.save(dataUseAgreements);
+    userDataUseAgreementDao.saveAll(dataUseAgreements);
   }
 
   @Override
@@ -964,11 +1031,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
-    return userDao.findAllUsersWithAuthoritiesAndPageVisits();
-  }
-
-  @Override
   public DbUser updateRasLinkLoginGovStatus(String loginGovUserName) {
     DbUser dbUser = userProvider.get();
 
@@ -977,6 +1039,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           user.setRasLinkLoginGovUsername(loginGovUserName);
           user.setRasLinkLoginGovCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
           // TODO(RW-6480): Determine if need to set link expiration time.
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
+  }
+
+  /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
+  @Override
+  public DbUser confirmProfile() {
+    final DbUser dbUser = userProvider.get();
+    return updateUserWithRetries(
+        user -> {
+          user.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
+  }
+
+  /** Confirm that a user has either reported any AoU-related publications, or has none. */
+  @Override
+  public DbUser confirmPublications() {
+    final DbUser dbUser = userProvider.get();
+    return updateUserWithRetries(
+        user -> {
+          user.setPublicationsLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
           return user;
         },
         dbUser,

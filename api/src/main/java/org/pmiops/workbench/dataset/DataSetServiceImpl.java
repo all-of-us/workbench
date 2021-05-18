@@ -203,7 +203,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private final BigQueryService bigQueryService;
-  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final CohortDao cohortDao;
   private final CohortService cohortService;
   private final ConceptBigQueryService conceptBigQueryService;
@@ -222,7 +221,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public DataSetServiceImpl(
       BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
       CohortService cohortService,
       ConceptBigQueryService conceptBigQueryService,
@@ -237,7 +235,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
     this.bigQueryService = bigQueryService;
-    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.cohortService = cohortService;
     this.conceptBigQueryService = conceptBigQueryService;
@@ -414,7 +411,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findOne(dataSetRequest.getDataSetId());
+      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
       // In case wrong dataSetId is passed to Api
       if (dbDataset == null) {
         throw new BadRequestException("Data Set Generate code Failed: Data set not found");
@@ -438,7 +435,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dataSetMapper.prePackagedConceptSetsFromStorage(dbDataset.getPrePackagedConceptSet()),
             dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,
@@ -877,13 +874,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
-        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("ConceptSets %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   @Transactional
   @Override
   public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
-    return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+    return cohortDao.findAllByCohortIdIn(
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Cohorts %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   public List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId) {
@@ -892,22 +902,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  // TODO(calbach): Remove direct testing of this - cover via public interface.
-  @VisibleForTesting
-  public List<DbDataset> getDbDataSets(
+  private List<DbDataset> getDbDataSets(
       long workspaceId, ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        DbCohort dbCohort = cohortDao.findOne(resourceId);
-        if (dbCohort.getWorkspaceId() != workspaceId) {
+        DbCohort dbCohort = cohortDao.findById(resourceId).orElse(null);
+        if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
         dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
         break;
       case CONCEPT_SET:
-        DbConceptSet dbConceptSet = conceptSetDao.findOne(resourceId);
-        if (dbConceptSet.getWorkspaceId() != workspaceId) {
+        DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
+        if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
         dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
@@ -923,7 +931,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       throw new NotFoundException(
           "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
-    dataSetDao.delete(dataSetId);
+    dataSetDao.deleteById(dataSetId);
   }
 
   @Override
@@ -943,7 +951,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<DbDataset> dbDataSetList = getDbDataSets(workspaceId, resourceType, resourceId);
     dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
-      dataSetDao.save(dbDataSetList);
+      dataSetDao.saveAll(dbDataSetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }

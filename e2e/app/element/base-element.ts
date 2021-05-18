@@ -370,4 +370,8 @@ export default class BaseElement {
   async asElementHandle(waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
     return this.waitForXPath(waitOptions);
   }
+
+  async exists(): Promise<boolean> {
+    return (await this.page.$x(this.xpath)).length !== 0;
+  }
 }

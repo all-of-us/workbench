@@ -276,7 +276,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           }]
         };
         encountersOptions.forEach(option => {
-          if (option.parentId === 0 && option.count > 0) {
+          if (option.count > 0) {
             encounters.options.push({
               label: option.name,
               value: option.conceptId.toString()

@@ -5,7 +5,7 @@ import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 
-const enum Selectors {
+export const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
   // not(contains(normalize-space(@style), "width: 0px;")) is used to determine visibility
   contentXpath = '//*[not(contains(normalize-space(@style), "width: 0px;"))]/*[@data-test-id="sidebar-content"]',

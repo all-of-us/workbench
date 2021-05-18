@@ -19,8 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.BaseTestConfiguration.CLOCK;
-import static org.pmiops.workbench.BaseTestConfiguration.NOW;
 import static org.pmiops.workbench.BaseTestConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
@@ -180,6 +178,7 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -259,6 +258,7 @@ public class WorkspacesControllerTest extends SpringTest {
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
+  @Autowired FakeClock fakeClock;
 
   @MockBean FreeTierBillingService mockFreeTierBillingService;
 
@@ -392,7 +392,6 @@ public class WorkspacesControllerTest extends SpringTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
-    workbenchConfig.firecloud.registeredDomainName = "allUsers";
     workbenchConfig.billing.accountId = "free-tier";
 
     testMockFactory = new TestMockFactory();
@@ -416,8 +415,6 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
-
-    CLOCK.setInstant(NOW.toInstant());
 
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
@@ -1006,7 +1003,7 @@ public class WorkspacesControllerTest extends SpringTest {
     request.setWorkspace(workspace);
     workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
 
-    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus())
+    assertThat(workspaceDao.findById(dbWorkspace.getWorkspaceId()).get().getBillingStatus())
         .isEqualTo(BillingStatus.ACTIVE);
   }
 
@@ -2304,7 +2301,7 @@ public class WorkspacesControllerTest extends SpringTest {
         shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
-    CLOCK.increment(1000);
+    fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     WorkspaceUserRolesResponse shareResp =
         workspacesController
@@ -2418,7 +2415,7 @@ public class WorkspacesControllerTest extends SpringTest {
     shareWorkspaceRequest.addItemsItem(writer);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
-    CLOCK.increment(1000);
+    fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     try {
       workspacesController.shareWorkspace(
@@ -2476,7 +2473,7 @@ public class WorkspacesControllerTest extends SpringTest {
                         .put("canShare", false)));
     when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
 
-    CLOCK.increment(1000);
+    fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
@@ -2519,14 +2516,14 @@ public class WorkspacesControllerTest extends SpringTest {
         shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
-    CLOCK.increment(1000);
+    fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     stubFcGetWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
-    CLOCK.increment(1000);
+    fakeClock.increment(1000);
     shareWorkspaceRequest = new ShareWorkspaceRequest();
     // Use the initial etag, not the updated value from shareWorkspace.
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());

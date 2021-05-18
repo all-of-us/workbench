@@ -392,9 +392,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         surveyNode,
         questionNode,
         answerNode);
-    personDao.delete(dbPerson1.getPersonId());
-    personDao.delete(dbPerson2.getPersonId());
-    personDao.delete(dbPerson3.getPersonId());
+    personDao.deleteById(dbPerson1.getPersonId());
+    personDao.deleteById(dbPerson2.getPersonId());
+    personDao.deleteById(dbPerson3.getPersonId());
   }
 
   private static SearchParameter icd9() {
@@ -2264,7 +2264,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private void delete(DbCriteria... criteriaList) {
-    Arrays.stream(criteriaList).forEach(c -> cbCriteriaDao.delete(c.getId()));
+    Arrays.stream(criteriaList).forEach(c -> cbCriteriaDao.deleteById(c.getId()));
   }
 
   private void assertDemographics(DemoChartInfoListResponse response) {

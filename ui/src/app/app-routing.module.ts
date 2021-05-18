@@ -6,8 +6,6 @@ import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -152,37 +150,26 @@ const routes: Routes = [
                       }
                     ]
                   },
-                  // non-migrated routes go HERE
                   {
                     path: 'data',
                     children: [
                       {
                         path: '',
-                        component: DataPageComponent,
-                        data: {
-                          title: 'Data Page',
-                          breadcrumb: BreadcrumbType.Workspace,
-                          pageKey: 'data'
-                        }
+                        component: AppRouting,
+                        data: {}
                       },
                       {
                         path: 'data-sets',
-                        component: DataSetPageComponent,
-                        data: {
-                          title: 'Dataset Page',
-                          breadcrumb: BreadcrumbType.Dataset,
-                          pageKey: 'datasetBuilder'
-                        }
+                        component: AppRouting,
+                        data: {}
                       },
                       {
                         path: 'data-sets/:dataSetId',
-                        component: DataSetPageComponent,
-                        data: {
-                          title: 'Edit Dataset',
-                          breadcrumb: BreadcrumbType.Dataset,
-                          pageKey: 'datasetBuilder'
-                        }
-                      }, {
+                        component: AppRouting,
+                        data: {}
+                      },
+                      // non-migrated routes go HERE
+                      {
                         path: 'cohorts',
                         children: [
                           {

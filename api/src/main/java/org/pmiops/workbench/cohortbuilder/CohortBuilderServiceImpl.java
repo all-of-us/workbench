@@ -209,7 +209,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   public List<Criteria> findCriteriaAutoComplete(
       String domain, String term, String type, Boolean standard, Integer limit) {
     PageRequest pageRequest =
-        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT));
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
             domain, type, standard, modifyTermMatch(term), pageRequest);
@@ -243,7 +243,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, String surveyName, Integer limit) {
     PageRequest pageRequest =
-        new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     if (term == null || term.trim().isEmpty()) {
       if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
         Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
@@ -419,8 +419,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domainId, String sortColumn, String sortName) {
     Sort sort =
         sortName.equalsIgnoreCase(Sort.Direction.ASC.toString())
-            ? new Sort(Sort.Direction.ASC, "name")
-            : new Sort(Sort.Direction.DESC, "name");
+            ? Sort.by(Sort.Direction.ASC, "name")
+            : Sort.by(Sort.Direction.DESC, "name");
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndType(Domain.PERSON.toString(), sortColumn, sort);
     return criteriaList.stream()
