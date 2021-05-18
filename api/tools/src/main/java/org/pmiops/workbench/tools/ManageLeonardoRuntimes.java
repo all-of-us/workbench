@@ -28,6 +28,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -248,6 +249,9 @@ public class ManageLeonardoRuntimes {
     // This tool doesn't currently need database access, so it doesn't extend the
     // CommandLineToolConfig. To add database access, extend from that config and update project.rb
     // to ensure a Cloud SQL proxy is available when this command is run.
-    new SpringApplicationBuilder(ManageLeonardoRuntimes.class).web(false).run(args);
+    new SpringApplicationBuilder(ManageLeonardoRuntimes.class)
+        .web(WebApplicationType.NONE)
+        .run(args)
+        .close();
   }
 }

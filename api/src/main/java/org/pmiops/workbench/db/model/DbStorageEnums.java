@@ -502,6 +502,8 @@ public final class DbStorageEnums {
           .put(TerraJobStatus.RUNNING, (short) 0)
           .put(TerraJobStatus.FAILED, (short) 1)
           .put(TerraJobStatus.SUCCEEDED, (short) 2)
+          .put(TerraJobStatus.ABORTED, (short) 3)
+          .put(TerraJobStatus.ABORTING, (short) 4)
           .build();
 
   public static TerraJobStatus terraJobStatusFromStorage(Short terraJobStatus) {
@@ -518,7 +520,6 @@ public final class DbStorageEnums {
           ImmutableBiMap.<WorkspaceActiveStatus, Short>builder()
               .put(WorkspaceActiveStatus.ACTIVE, (short) 0)
               .put(WorkspaceActiveStatus.DELETED, (short) 1)
-              .put(WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION, (short) 2)
               .build();
 
   public static WorkspaceActiveStatus workspaceActiveStatusFromStorage(Short s) {

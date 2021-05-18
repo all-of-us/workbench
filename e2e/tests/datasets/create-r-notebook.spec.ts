@@ -6,7 +6,7 @@ import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity } from 'app/page/cohort-search-page';
+import { Ethnicity } from 'app/page/cohort-participants-group';
 import { Language, LinkText, ResourceCard } from 'app/text-labels';
 
 describe('Create dataset and export to notebook at same time', () => {
@@ -31,17 +31,12 @@ describe('Create dataset and export to notebook at same time', () => {
 
     // Include Participants Group 1: Add Criteria: Ethnicity
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const searchPage = await group1.includeEthnicity();
-    await searchPage.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
-
-    // Open selection list and click Save Criteria button
-    await searchPage.reviewAndSaveCriteria();
+    await group1.includeEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();
-    const group1CountInt = Number(group1Count.replace(/,/g, ''));
-    expect(group1CountInt).toBeGreaterThan(1);
-    console.log(`Include Participants Group 1: ${group1CountInt}`);
+    expect(group1Count).toBeGreaterThan(1);
+    console.log(`Include Participants Group 1: ${group1Count}`);
 
     // Save new Cohort.
     const newCohortName = await cohortBuildPage.createCohort();

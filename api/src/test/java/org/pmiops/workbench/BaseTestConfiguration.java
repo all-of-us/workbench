@@ -16,7 +16,12 @@ public class BaseTestConfiguration {
   public static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
   @Bean
-  public Clock clock() {
-    return CLOCK;
+  FakeClock fakeClock() {
+    return new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+  }
+
+  @Bean
+  Clock clock(FakeClock c) {
+    return c;
   }
 }

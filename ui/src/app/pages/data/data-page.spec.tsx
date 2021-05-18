@@ -4,7 +4,7 @@ import * as React from 'react';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
 import {ResourceCardBase} from 'app/components/card';
-import {DataPage} from 'app/pages/data/data-page';
+import {DataComponent} from 'app/pages/data/data-component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
@@ -35,14 +35,14 @@ describe('DataPage', () => {
   });
 
   it('should render', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it('should show all datasets, cohorts, and concept sets', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     const resourceCardsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
@@ -54,7 +54,7 @@ describe('DataPage', () => {
   });
 
   it('should show only cohorts when selected', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     const resourceCardsExpected = exampleCohortStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -64,7 +64,7 @@ describe('DataPage', () => {
   });
 
   it('should show only cohort reviews when selected', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     const resourceCardsExpected = cohortReviewStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -74,7 +74,7 @@ describe('DataPage', () => {
   });
 
   it('should show only conceptSets when selected', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     const resourceCardsExpected = ConceptSetsApiStub.stubConceptSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -84,7 +84,7 @@ describe('DataPage', () => {
   });
 
   it('should show only dataSets when selected', async() => {
-    const wrapper = mount(<DataPage />);
+    const wrapper = mount(<DataComponent />);
     const resourceCardsExpected = DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);

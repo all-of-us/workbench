@@ -31,8 +31,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
 import {TextModalComponent} from 'app/components/text-modal';
-import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {FooterComponent} from './components/footer';
 
@@ -63,8 +61,6 @@ import {FooterComponent} from './components/footer';
     CohortPageComponent,
     ConceptSearchComponent,
     ConfirmDeleteModalComponent,
-    DataPageComponent,
-    DataSetPageComponent,
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,

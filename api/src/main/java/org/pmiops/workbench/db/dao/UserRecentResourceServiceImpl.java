@@ -62,7 +62,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateCohortEntry(long workspaceId, long userId, long cohortId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    DbCohort cohort = cohortDao.findOne(cohortId);
+    DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
     DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
@@ -78,7 +78,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    final DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    final DbConceptSet conceptSet = conceptSetDao.findById(conceptSetId).orElse(null);
     userRecentResourceDao.save(makeUserRecentResource(workspaceId, userId, now, conceptSet));
   }
 

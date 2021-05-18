@@ -23,6 +23,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -622,20 +624,24 @@ public class DbUser {
     this.demographicSurvey = demographicSurvey;
   }
 
+  @UpdateTimestamp
   @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
 
+  @VisibleForTesting
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
 
+  @CreationTimestamp
   @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
   }
 
+  @VisibleForTesting
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }

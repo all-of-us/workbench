@@ -105,6 +105,10 @@ public class GenomicExtractionService {
         .build();
   }
 
+  private boolean isTerminal(TerraJobStatus status) {
+    return !(status == TerraJobStatus.RUNNING || status == TerraJobStatus.ABORTING);
+  }
+
   public List<GenomicExtractionJob> getGenomicExtractionJobs(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace =
@@ -116,8 +120,8 @@ public class GenomicExtractionService {
             dbSubmission -> {
               try {
                 // Don't bother checking if we already know the job is in a terminal status.
-                if (dbSubmission.getTerraStatusEnum() == TerraJobStatus.RUNNING
-                    || dbSubmission.getTerraStatusEnum() == null) {
+                if (dbSubmission.getTerraStatusEnum() == null
+                    || !isTerminal(dbSubmission.getTerraStatusEnum())) {
                   WgsCohortExtractionConfig cohortExtractionConfig =
                       workbenchConfigProvider.get().wgsCohortExtraction;
                   FirecloudSubmission firecloudSubmission =
@@ -129,9 +133,11 @@ public class GenomicExtractionService {
                               dbSubmission.getSubmissionId());
 
                   TerraJobStatus status =
-                      genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
+                      genomicExtractionMapper.convertWorkflowStatus(
+                          // Extraction submissions should only have one workflow.
+                          firecloudSubmission.getWorkflows().get(0).getStatus());
                   dbSubmission.setTerraStatusEnum(status);
-                  if (status != TerraJobStatus.RUNNING) {
+                  if (isTerminal(status)) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
                             firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));

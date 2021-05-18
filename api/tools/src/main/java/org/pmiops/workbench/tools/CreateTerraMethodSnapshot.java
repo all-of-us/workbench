@@ -22,6 +22,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodIO;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodQuery;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodResponse;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -206,6 +207,9 @@ public class CreateTerraMethodSnapshot {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(CreateTerraMethodSnapshot.class).web(false).run(args);
+    new SpringApplicationBuilder(CreateTerraMethodSnapshot.class)
+        .web(WebApplicationType.NONE)
+        .run(args)
+        .close();
   }
 }

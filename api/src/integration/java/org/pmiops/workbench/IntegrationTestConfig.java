@@ -7,15 +7,18 @@ import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.GoogleConfig;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
-@Import({RetryConfig.class, CommonConfig.class, CloudStorageClientImpl.class})
+@Import({RetryConfig.class, CommonConfig.class, CloudStorageClientImpl.class, GoogleConfig.class})
 public class IntegrationTestConfig {
 
   @Bean(name = FireCloudConfig.END_USER_API_CLIENT)
+  @Primary
   ApiClient endUserApiClient() {
     // Integration tests can't make calls using user credentials.
     return null;

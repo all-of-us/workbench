@@ -46,6 +46,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.pmiops.workbench.elasticsearch.ElasticDocument;
 import org.pmiops.workbench.elasticsearch.ElasticUtils;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.threeten.bp.Duration;
@@ -372,6 +373,6 @@ public final class ElasticSearchIndexer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(ElasticSearchIndexer.class).web(false).run(args);
+    new SpringApplicationBuilder(ElasticSearchIndexer.class).web(WebApplicationType.NONE).run(args);
   }
 }

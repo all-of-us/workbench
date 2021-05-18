@@ -74,7 +74,7 @@ public class ConfigLoader {
         log.info(marshalledDiff.toString());
         System.exit(1);
       }
-      DbConfig existingConfig = configDao.findOne(configKey);
+      DbConfig existingConfig = configDao.findById(configKey).orElse(null);
       if (existingConfig == null) {
         log.info("No configuration exists, creating one.");
         DbConfig config = new DbConfig();

@@ -38,7 +38,6 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
@@ -90,7 +89,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, DataSetControllerBQTest.Configuration.class})
 public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
@@ -100,7 +99,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
@@ -146,7 +144,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
-    CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CohortService.class,
     ConceptSetService.class,
@@ -216,7 +213,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
-            cdrBigQuerySchemaConfigService,
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
@@ -368,12 +364,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
-    cohortDao.delete(dbCohort1.getCohortId());
-    cohortDao.delete(dbCohort2.getCohortId());
-    conceptSetDao.delete(dbConditionConceptSet.getConceptSetId());
-    conceptSetDao.delete(dbProcedureConceptSet.getConceptSetId());
-    workspaceDao.delete(dbWorkspace.getWorkspaceId());
-    cdrVersionDao.delete(dbCdrVersion.getCdrVersionId());
+    cohortDao.deleteById(dbCohort1.getCohortId());
+    cohortDao.deleteById(dbCohort2.getCohortId());
+    conceptSetDao.deleteById(dbConditionConceptSet.getConceptSetId());
+    conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
+    workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
+    cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
     dsLinkingDao.delete(conditionLinking1);
     dsLinkingDao.delete(conditionLinking2);
     dsLinkingDao.delete(personLinking1);

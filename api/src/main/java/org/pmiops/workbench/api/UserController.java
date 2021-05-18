@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
@@ -48,28 +49,31 @@ public class UserController implements UserApiDelegate {
         return modelUser;
       };
 
-  private Provider<DbUser> userProvider;
+  private final Provider<Cloudbilling> cloudBillingProvider;
+  private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> configProvider;
-  private final UserService userService;
+
+  private final AccessTierService accessTierService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
-
-  private final Provider<Cloudbilling> cloudBillingProvider;
+  private final UserService userService;
 
   @Autowired
   public UserController(
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
+      AccessTierService accessTierService,
       FireCloudService fireCloudService,
-      UserService userService,
-      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider,
-      FreeTierBillingService freeTierBillingService) {
+      FreeTierBillingService freeTierBillingService,
+      UserService userService) {
+    this.cloudBillingProvider = cloudBillingProvider;
     this.userProvider = userProvider;
     this.configProvider = configProvider;
-    this.userService = userService;
+    this.accessTierService = accessTierService;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
-    this.cloudBillingProvider = cloudBillingProvider;
+    this.userService = userService;
   }
 
   /**
@@ -102,15 +106,17 @@ public class UserController implements UserApiDelegate {
     // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
     // details will be published publicly, but it prevents arbitrary unregistered users from seeing
     // limited researcher profile details.
-    WorkbenchConfig config = configProvider.get();
-    if (!fireCloudService.isUserMemberOfGroup(
-        userProvider.get().getUsername(), config.firecloud.registeredDomainName)) {
+
+    // also TODO RW-6190: add access tier parameter to this call and check that tier's
+    // membership specifically
+
+    if (!isUserInRegisteredTier()) {
       throw new ForbiddenException("user search requires registered data access");
     }
 
     Sort.Direction direction =
-        Optional.ofNullable(Sort.Direction.fromStringOrNull(sortOrder)).orElse(Sort.Direction.ASC);
-    Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
+        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
+    Sort sort = Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
 
     // What we are really looking for here are users who have a FC account.
     // This should exist if they have signed in at least once
@@ -146,6 +152,16 @@ public class UserController implements UserApiDelegate {
       return ResponseEntity.badRequest().body(response);
     }
     return ResponseEntity.ok(response);
+  }
+
+  // check that a user has registered tier membership according to both our DB and Terra/Firecloud
+  private boolean isUserInRegisteredTier() {
+    return accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+        .anyMatch(
+            tier ->
+                tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+                    && fireCloudService.isUserMemberOfGroup(
+                        userProvider.get().getUsername(), tier.getAuthDomainName()));
   }
 
   @Override

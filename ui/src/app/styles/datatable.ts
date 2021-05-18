@@ -28,6 +28,9 @@ export const datatableStyles = `
     border: 1px solid #c8c8c8;
     border-radius: 3px;
   }
+  .p-datatable-scrollable-body {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
   .p-datatable .p-paginator.p-paginator-bottom {
     border: 0;
     margin-top: 20px;

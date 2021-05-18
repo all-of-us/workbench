@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +63,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class FreeTierBillingServiceTest {
 
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
+
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
@@ -81,16 +83,11 @@ public class FreeTierBillingServiceTest {
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
-  // An arbitrary timestamp to use as the anchor time for tests.
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
-
   @TestConfiguration
   @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, MailService.class})
   static class Configuration {
     @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public Clock clock() {
       return CLOCK;
     }
@@ -111,11 +108,6 @@ public class FreeTierBillingServiceTest {
 
     // by default we have 0 spend
     doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
-  }
-
-  @After
-  public void resetClock() {
-    CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
@@ -338,29 +330,16 @@ public class FreeTierBillingServiceTest {
   public void maybeSetDollarLimitOverride_true() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    assertThat(user.getLastModifiedTime()).isNull();
-
-    // we update the user and should see this last modified time
-    final Instant time2 = START_INSTANT.plusSeconds(1000);
-    CLOCK.setInstant(time2);
 
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
-    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
-        .isEqualTo(new Timestamp(time2.toEpochMilli()));
-
-    // we update the user again and should see this new last modified time
-    final Instant time3 = START_INSTANT.plusSeconds(2000);
-    CLOCK.setInstant(time3);
 
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), 200.0, 100.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
-    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
-        .isEqualTo(new Timestamp(time3.toEpochMilli()));
   }
 
   @Test
@@ -371,7 +350,6 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertThat(user.getLastModifiedTime()).isNull();
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
@@ -380,7 +358,6 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertThat(user.getLastModifiedTime()).isNull();
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
   }
 
@@ -469,7 +446,7 @@ public class FreeTierBillingServiceTest {
 
     for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
       // retrieve from DB again to reflect update after cron
-      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
+      DbWorkspace dbWorkspace = workspaceDao.findById(ws.getWorkspaceId()).get();
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
     }
@@ -508,7 +485,7 @@ public class FreeTierBillingServiceTest {
 
     // confirm DB updates after checkFreeTierBillingUsage()
 
-    final DbWorkspace dbWorkspace1 = workspaceDao.findOne(ws1.getWorkspaceId());
+    final DbWorkspace dbWorkspace1 = workspaceDao.findById(ws1.getWorkspaceId()).get();
     assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace1.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -516,7 +493,7 @@ public class FreeTierBillingServiceTest {
     assertThat(usage1.getUser()).isEqualTo(user1);
     assertWithinBillingTolerance(usage1.getCost(), cost1);
 
-    final DbWorkspace dbWorkspace2 = workspaceDao.findOne(ws2.getWorkspaceId());
+    final DbWorkspace dbWorkspace2 = workspaceDao.findById(ws2.getWorkspaceId()).get();
     assertThat(dbWorkspace2.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace2.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -576,7 +553,7 @@ public class FreeTierBillingServiceTest {
     verify(mailService, times(1)).alertUserFreeTierExpiration(eq(user));
 
     // retrieve from DB again to reflect update after cron
-    DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
+    DbWorkspace dbWorkspace = workspaceDao.findById(workspace.getWorkspaceId()).get();
     assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -719,7 +696,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, freeTierWorkspace, BillingStatus.INACTIVE, 100.01);
 
     final DbWorkspace retrievedWorkspace =
-        workspaceDao.findOne(userAccountWorkspace.getWorkspaceId());
+        workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
     assertThat(retrievedWorkspace.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
     // TODO RW-5107
     // assertThat(retrievedWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.USER_PROVIDED);
@@ -750,7 +727,8 @@ public class FreeTierBillingServiceTest {
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus, double cost) {
 
-    final DbWorkspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
+    final DbWorkspace workspace =
+        workspaceDao.findById(workspaceForQuerying.getWorkspaceId()).get();
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
     assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -283,6 +285,34 @@ public class UserServiceTest {
   }
 
   @Test
+  public void testSyncEraCommonsStatus_lastModified() {
+    // User starts without eRA commons.
+    Supplier<Timestamp> getLastModified =
+        () -> userDao.findUserByUsername(USERNAME).getLastModifiedTime();
+    Timestamp modifiedTime0 = getLastModified.get();
+
+    when(mockFireCloudService.getNihStatus())
+        .thenReturn(
+            new FirecloudNihStatus()
+                .linkedNihUsername("nih-user")
+                // FireCloud stores the NIH status in seconds, not msecs.
+                .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
+    userService.syncEraCommonsStatus();
+    Timestamp modifiedTime1 = getLastModified.get();
+    assertWithMessage(
+            "modified time should change when eRA commons status changes, want %s < %s",
+            modifiedTime0, modifiedTime1)
+        .that(modifiedTime0.before(modifiedTime1))
+        .isTrue();
+
+    userService.syncEraCommonsStatus();
+    assertWithMessage(
+            "modified time should not change on sync, if eRA commons status doesn't change")
+        .that(modifiedTime1)
+        .isEqualTo(getLastModified.get());
+  }
+
+  @Test
   public void testUpdateRasLink() throws ApiException {
     String loginGovName = "loginGov@email.com";
     userService.updateRasLinkLoginGovStatus(loginGovName);
@@ -448,16 +478,35 @@ public class UserServiceTest {
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
-    DbUser retrievedUser = userService.confirmProfile();
-    assertThat(retrievedUser.getProfileLastConfirmedTime())
+    userService.confirmProfile();
+    assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
     tick();
 
-    retrievedUser = userService.confirmProfile();
-    assertThat(retrievedUser.getProfileLastConfirmedTime())
+    userService.confirmProfile();
+    assertThat(providedDbUser.getProfileLastConfirmedTime())
+        .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void test_confirmPublications() {
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime()).isNull();
+
+    // user confirms profile, so confirmation time is set to START_INSTANT
+
+    userService.confirmPublications();
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime())
+        .isEqualTo(Timestamp.from(START_INSTANT));
+
+    // time passes, user confirms again, confirmation time is updated
+
+    tick();
+
+    userService.confirmPublications();
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 }

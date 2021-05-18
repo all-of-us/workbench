@@ -290,7 +290,7 @@ public class UpdateCdrConfig {
       if (!dryRun) {
         // Note: this will fail if the database still has references to the CDR version being
         // deleted.
-        cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+        cdrVersionDao.deleteById(cdrVersion.getCdrVersionId());
       }
     }
 
@@ -307,7 +307,7 @@ public class UpdateCdrConfig {
       if (!dryRun) {
         // Note: this will fail if the database still has references to the Access Tier being
         // deleted.
-        accessTierDao.delete(accessTier.getAccessTierId());
+        accessTierDao.deleteById(accessTier.getAccessTierId());
       }
     }
   }

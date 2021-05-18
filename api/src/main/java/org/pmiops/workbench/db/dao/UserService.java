@@ -15,10 +15,13 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
+
+  List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser dbUser);
 
   DbUser createServiceAccountUser(String email);
 
@@ -159,4 +162,7 @@ public interface UserService {
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   DbUser confirmProfile();
+
+  /** Confirm that a user has either reported any AoU-related publications, or has none. */
+  DbUser confirmPublications();
 }

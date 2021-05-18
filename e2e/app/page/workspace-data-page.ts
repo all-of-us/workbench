@@ -8,7 +8,6 @@ import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
-import CriteriaSearchPage, { Visits } from './criteria-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -16,6 +15,8 @@ import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
 import { SaveOption } from 'app/modal/conceptset-save-modal';
 import ConceptSetActionsPage from './conceptset-actions-page';
+import { Visits } from './cohort-participants-group';
+import CriteriaSearchPage from './criteria-search-page';
 
 const PageTitle = 'Data Page';
 
@@ -96,11 +97,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async createCohort(cohortName?: string): Promise<DataResourceCard> {
     const cohortBuildPage = await this.clickAddCohortsButton();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const searchPage = await group1.includeVisits();
-    await searchPage.addVisits([Visits.OutpatientVisit]);
-    // Open selection list and click Save Criteria button
-    await searchPage.reviewAndSaveCriteria();
-    await waitWhileLoading(this.page);
+    await group1.includeVisits([Visits.OutpatientVisit]);
     await cohortBuildPage.getTotalCount();
     const name = cohortName === undefined ? makeRandomName() : cohortName;
     await cohortBuildPage.createCohort(name);
