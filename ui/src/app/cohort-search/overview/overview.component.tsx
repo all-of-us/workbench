@@ -8,6 +8,7 @@ import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-searc
 import {Button, Clickable} from 'app/components/buttons';
 import {ComboChart} from 'app/components/combo-chart.component';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {CreateModal} from 'app/components/create-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
@@ -27,7 +28,6 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {CreateModal} from '../../components/create-modal';
 
 const COHORT_TYPE = 'AoU_Discover';
 

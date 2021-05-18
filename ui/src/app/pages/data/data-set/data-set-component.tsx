@@ -5,11 +5,13 @@ import * as React from 'react';
 
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {CreateModal} from 'app/components/create-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -51,8 +53,6 @@ import {
   Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
-import {CreateModal} from '../../../components/create-modal';
-import {withErrorModal, WithErrorModalProps} from '../../../components/with-error-modal';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {

@@ -11,17 +11,17 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
+import {FlexRow} from 'app/components/flex';
+import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {RadioButton, Select, TextInput} from 'app/components/inputs';
+import {ErrorMessage} from 'app/components/messages';
+import {Spinner} from 'app/components/spinners';
+import colors from 'app/styles/colors';
+import {AnalyticsTracker} from 'app/utils/analytics';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {validate} from 'validate.js';
-import {FlexRow} from '../../../components/flex';
-import {SmallHeader, styles as headerStyles} from '../../../components/headers';
-import {RadioButton, Select, TextInput} from '../../../components/inputs';
-import {ErrorMessage} from '../../../components/messages';
-import {Spinner} from '../../../components/spinners';
-import colors from '../../../styles/colors';
-import {AnalyticsTracker} from '../../../utils/analytics';
-import {ACTION_DISABLED_INVALID_BILLING} from '../../../utils/strings';
-import {WorkspaceData} from '../../../utils/workspace-data';
-import {WorkspacePermissionsUtil} from '../../../utils/workspace-permissions';
 
 interface Props {
   closeFunction: Function;
@@ -195,7 +195,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 </div>
               {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
                 .map((kernelTypeEnum, i) =>
-                  <label key={i} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+                  <label key={i} style={
+                    {display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
                     <RadioButton
                       style={{marginRight: '0.25rem'}}
                       data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
