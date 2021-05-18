@@ -169,10 +169,10 @@ end
 # By default, skip empty lines only.
 def bq_ingest(tier, source_project, dataset_name, table_match_filter="", table_skip_filter="^$")
   common = Common.new
-  source_dataset = "#{source_project}:#{dataset_name}"
-  ingest_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dataset_name}"
-  dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dataset_name}"
-  common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}'"
+  source_fq_dataset = "#{source_project}:#{dataset_name}"
+  ingest_fq_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dataset_name}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{dataset_name}"
+  common.status "Copying from '#{source_fq_dataset}' -> '#{ingest_fq_dataset}' -> '#{dest_fq_dataset}'"
 
   # If you receive an error from "bq" like "Invalid JWT Signature", you may
   # need to delete cached BigQuery creds on your local machine. Try running
@@ -181,28 +181,27 @@ def bq_ingest(tier, source_project, dataset_name, table_match_filter="", table_s
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
   # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
-  common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
+  common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_fq_dataset}}
   common.run_inline %W{./copy-bq-dataset.sh
-      #{source_dataset} #{ingest_dataset} #{source_project}
+      #{source_fq_dataset} #{ingest_fq_dataset} #{source_project}
       #{table_match_filter} #{table_skip_filter}}
 
-  common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
+  common.run_inline %W{bq mk -f --dataset #{dest_fq_dataset}}
   common.run_inline %W{./copy-bq-dataset.sh
-      #{ingest_dataset} #{dest_dataset} #{tier.fetch(:ingest_cdr_project)}
+      #{ingest_fq_dataset} #{dest_fq_dataset} #{tier.fetch(:ingest_cdr_project)}
       #{table_match_filter} #{table_skip_filter}}
 
   # Delete the intermediate dataset.
-  common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
+  common.run_inline %W{bq rm -r -f --dataset #{ingest_fq_dataset}}
 end
 
-def bq_update_acl(dataset)
+def bq_update_acl(fq_dataset)
   common = Common.new
-  common.status(dataset)
 
   config_file = Tempfile.new("bq-acls.json")
   begin
     json = JSON.parse(
-      common.capture_stdout %{bq show --format=prettyjson #{dataset}})
+      common.capture_stdout %{bq show --format=prettyjson #{fq_dataset}})
     existing_groups = Set[]
     existing_users = Set[]
     for entry in json["access"]
@@ -218,7 +217,7 @@ def bq_update_acl(dataset)
     File.open(config_file.path, "w") do |f|
       f.write(JSON.pretty_generate(json))
     end
-    common.run_inline %W{bq update --source #{config_file.path} #{dataset}}
+    common.run_inline %W{bq update --source #{config_file.path} #{fq_dataset}}
   ensure
     config_file.unlink
   end
@@ -277,12 +276,12 @@ def publish_cdr(cmd_name, args)
   env = ENVIRONMENTS[op.opts.project]
   tier = env.fetch(:accessTiers)[op.opts.tier]
   source_cdr_project = tier.fetch(:source_cdr_project)
-  dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
     bq_ingest(tier, source_cdr_project, op.opts.bq_dataset, table_match_filter, table_skip_filter)
 
-    bq_update_acl(dest_dataset) do |acl_json, existing_groups, existing_users|
+    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
       auth_domain_group_email = tier.fetch(:auth_domain_group_email)
       if existing_groups.include?(auth_domain_group_email)
         common.status "#{auth_domain_group_email} already in ACL, skipping..."
@@ -345,7 +344,7 @@ def publish_cdr_wgs(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   tier = env.fetch(:accessTiers)[op.opts.tier]
-  dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+  dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
   source_project = tier.fetch(:source_cdr_wgs_project)
   unless source_project
@@ -356,7 +355,7 @@ def publish_cdr_wgs(cmd_name, args)
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
     bq_ingest(tier, source_project, op.opts.bq_dataset, WGS_TABLE_FILTER)
 
-    bq_update_acl(dest_dataset) do |acl_json, existing_groups, _existing_users|
+    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
       if existing_groups.include?(extraction_proxy_group)
         common.status "#{extraction_proxy_group} already in ACL, skipping..."
       else
@@ -413,10 +412,10 @@ def create_wgs_extraction_dataset(cmd_name, args)
   proxy_group = must_get_wgs_proxy_group(op.opts.project)
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
-    common.run_inline %W{bq mk --default_table_expiration #{op.opts.ttl}  --dataset #{dest_dataset}}
+    dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+    common.run_inline %W{bq mk --default_table_expiration #{op.opts.ttl}  --dataset #{dest_fq_dataset}}
 
-    bq_update_acl(dest_dataset) do |acl_json, existing_groups, existing_users|
+    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
       if existing_groups.includes?(proxy_group)
         common.status "#{proxy_group} already in ACL, skipping..."
       else
