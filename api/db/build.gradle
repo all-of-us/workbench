@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.liquibase:liquibase-gradle-plugin:1.2.4'
+        classpath 'org.liquibase:liquibase-gradle-plugin:2.0.4'
         classpath 'mysql:mysql-connector-java:5.1.37'
     }
 }

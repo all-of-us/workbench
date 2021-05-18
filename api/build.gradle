@@ -411,8 +411,6 @@ dependencies {
   implementation "io.swagger:swagger-annotations:1.5.16"
   implementation "javax.inject:javax.inject:1"
   implementation "joda-time:joda-time:$project.ext.JODA_VERSION"
-  implementation "org.liquibase:liquibase-core:3.10.0"
-  implementation "mysql:mysql-connector-java:8.0.16"
   implementation "org.apache.commons:commons-collections4:4.4"
   implementation "org.apache.commons:commons-lang3:3.6"
   implementation "org.apache.commons:commons-text:1.8"
@@ -420,6 +418,12 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-validation'
   implementation "commons-codec:commons-codec:1.15"
   implementation 'com.auth0:java-jwt:3.14.0'
+
+  // liquibase
+  liquibaseRuntime "org.liquibase:liquibase-core:3.10.0"
+  liquibaseRuntime "mysql:mysql-connector-java:8.0.16"
+  liquibaseRuntime group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+  liquibaseRuntime "ch.qos.logback:logback-classic:1.2.3"
 
   // Elasticsearch client
   implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
