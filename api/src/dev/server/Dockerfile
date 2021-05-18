@@ -3,8 +3,41 @@ FROM ubuntu:18.04
 #
 # Development requirements
 #
+#RUN apt-get update && \
+#    apt-get install --no-install-recommends -y \
+#     curl \
+#     python \
+#     gcc \
+#     python-dev \
+#     python-setuptools \
+#     bash \
+#     libc6-i386 \
+#     openssh-client \
+#     git \
+#     gettext \
+#     mysql-server \
+#     mysql-client \
+#     ruby \
+#     ruby-dev \
+#     ruby-json \
+#     make \
+#     unzip \
+#     wait-for-it \
+#     apt-transport-https \
+#     software-properties-common \
+#     gnupg \
+#     wget \
+#     && \
+#     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - && \
+#     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ && \
+#     apt-get update \
+#     apt-get install --no-install-recommends -y adoptopenjdk-11-hotspot \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
+
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
+     openjdk-11-jdk \
      curl \
      python \
      gcc \
@@ -23,16 +56,11 @@ RUN apt-get update && \
      make \
      unzip \
      wait-for-it \
-     wget \
      && \
-     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add - && \
-     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ && \
-     apt-get update \
-     apt-get install --no-install-recommends -y adoptopenjdk-11-hotspot \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr/lib/jvm/adoptopenjdk-11-hotspot-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH

@@ -161,7 +161,8 @@ public class RasLinkServiceTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime().getTime()).isEqualTo(NOW.getTime());
+    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime().getTime())
+        .isEqualTo(NOW.getTime());
   }
 
   @Test
