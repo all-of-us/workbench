@@ -225,9 +225,11 @@ swaggerSources {
 //
 
 // Generate AppEngine Cron file
+// Use local env if WORKBENCH_ENV not set.
+def workbenchEnv = System.getenv('WORKBENCH_ENV') != null ? System.getenv('WORKBENCH_ENV') : 'local'
 task generate_appengine_cron_yaml(type: Exec) {
   executable "ruby"
-  args = ["libproject/generate_appengine_cron_yaml.rb", System.getenv("WORKBENCH_ENV")]
+  args = ["libproject/generate_appengine_cron_yaml.rb", workbenchEnv]
 }
 
 // Generate AppEngine Web Configration XML file
