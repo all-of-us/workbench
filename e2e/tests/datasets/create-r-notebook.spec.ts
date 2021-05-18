@@ -8,7 +8,7 @@ import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity } from 'app/page/cohort-participants-group';
 import { Language, LinkText, ResourceCard } from 'app/text-labels';
-import ExportToNotebookModal from '../../app/modal/export-to-notebook-modal';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 
 describe('Create dataset and export to notebook at same time', () => {
   beforeEach(async () => {

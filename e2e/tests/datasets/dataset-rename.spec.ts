@@ -29,8 +29,8 @@ describe('Dataset test', () => {
 
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.selectConceptSets([LinkText.Demographics, LinkText.AllSurveys]);
-    const saveModal = await datasetPage.clickCreateButton();
-    const datasetName = await saveModal.createDataset();
+    const createModal = await datasetPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
     page.goto(dataPageUrl);
     await dataPage.waitForLoad();
 

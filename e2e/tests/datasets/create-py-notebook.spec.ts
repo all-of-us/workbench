@@ -5,7 +5,7 @@ import {Language, LinkText, ResourceCard} from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
-import ExportToNotebookModal from '../../app/modal/export-to-notebook-modal';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 
 describe('Create dataset and export to notebook at same time', () => {
   beforeEach(async () => {

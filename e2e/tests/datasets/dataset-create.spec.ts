@@ -50,8 +50,8 @@ describe('Dataset test', () => {
 
     await datasetPage.selectCohorts([cohortName]);
     await datasetPage.selectConceptSets([LinkText.Demographics]);
-    const saveModal = await datasetPage.clickCreateButton();
-    let datasetName = await saveModal.createDataset();
+    const createModal = await datasetPage.clickCreateButton();
+    let datasetName = await createModal.createDataset();
 
     // Verify create successful.
     await dataPage.openDatasetsSubtab();

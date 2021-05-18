@@ -29,8 +29,8 @@ describe('Export to notebook from dataset', () => {
 
     await datasetBuildPage.selectCohorts(['All Participants']);
     await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
-    const saveModal = await datasetBuildPage.clickCreateButton();
-    const datasetName = await saveModal.createDataset();
+    const createModal = await datasetBuildPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
     page.goto(dataPageUrl);
     await waitWhileLoading(page);
 

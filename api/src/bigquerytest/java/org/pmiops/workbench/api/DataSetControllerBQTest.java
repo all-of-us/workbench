@@ -284,7 +284,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(
                 new Cohort().id(dbCohort1.getCohortId()),
                 new Cohort().id(dbCohort2.getCohortId())));
-    //    when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
 
     conditionLinking1 =
         DbDSLinking.builder()

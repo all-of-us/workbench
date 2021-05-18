@@ -31,37 +31,10 @@ export default class DatasetCreateModal extends Modal {
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
-    // // Export to Notebook checkbox is checked by default
-    // const exportCheckbox = this.waitForCheckbox('Export to notebook');
-    //
-    // if (exportToNotebook) {
-    //   // Export to notebook
-    //   const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
-    //   await notebookNameTextbox.type(notebookName);
-    //   const radioBtn = RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
-    //   await radioBtn.select();
-    // } else {
-    //   // Not export to notebook
-    //   await exportCheckbox.unCheck();
-    // }
-    // await waitWhileLoading(this.page);
-
-    // if (isUpdate) {
-    //   await this.clickButton(LinkText.Update, { waitForClose: true, waitForNav: true });
-    // } else {
-    //   await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
-    // }
     await this.clickButton(LinkText.Save, { waitForClose: true, waitForNav: true });
     await waitWhileLoading(this.page);
 
-    // if (isUpdate) {
-    //   logger.info(`Updated Dataset "${newDatasetName}"`);
-    // } else {
-      logger.info(`Created Dataset "${newDatasetName}"`);
-    // }
-    // if (exportToNotebook) {
-    //   logger.info(`Created Notebook "${notebookName}"`);
-    // }
+    logger.info(`Created Dataset "${newDatasetName}"`);
     return newDatasetName;
   }
 
