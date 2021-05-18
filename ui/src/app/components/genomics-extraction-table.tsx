@@ -33,7 +33,7 @@ const spinStyles = {
   animationDuration: '5000ms',
   animationIterationCount: 'infinite',
   animationTimingFunction: 'linear'
-}
+};
 
 
 const getIconConfigForStatus = (status: TerraJobStatus) => {
