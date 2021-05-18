@@ -999,7 +999,8 @@ public class BillingProjectBufferServiceTest {
 
     List<Timestamp> observedExpiredCreating =
         billingProjectBufferService
-            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.CREATING).stream()
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.CREATING)
+            .stream()
             .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
             .collect(Collectors.toList());
 
@@ -1013,7 +1014,8 @@ public class BillingProjectBufferServiceTest {
 
     List<Timestamp> observedExpiredAssigning =
         billingProjectBufferService
-            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.ASSIGNING).stream()
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.ASSIGNING)
+            .stream()
             .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
             .collect(Collectors.toList());
 
