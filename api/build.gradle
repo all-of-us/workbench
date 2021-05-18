@@ -349,7 +349,7 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
+project.tasks.bootJar.dependsOn(['compileGeneratedJava', 'generate_appengine_yaml',
         'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
@@ -599,13 +599,12 @@ task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_app
 }
 
 // AppEngine plugin tasks
-project.tasks.jettyRun.dependsOn project.tasks.startCronEmulator
-project.tasks.jettyStart.dependsOn project.tasks.startCronEmulator
-jettyStart {
-  // This task has the side-effect of running a local server, and therefore
-  // should not be cacheable.
-  outputs.upToDateWhen { false }
-}
+project.tasks.bootRun.dependsOn project.tasks.startCronEmulator
+//jettyStart {
+//  // This task has the side-effect of running a local server, and therefore
+//  // should not be cacheable.
+//  outputs.upToDateWhen { false }
+//}
 
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
