@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ExportDatasetModal} from 'app/components/export-dataset-modal';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {Select} from 'app/components/inputs';
 import {Tooltip} from 'app/components/popups';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
