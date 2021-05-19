@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +83,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-// TODO(calbach): Move this test to the correct package.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -114,7 +114,7 @@ public class DataSetServiceTest {
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private CohortQueryBuilder mockCohortQueryBuilder;
-
+  @Autowired private Provider<String> prefixProvider;
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
 
@@ -158,7 +158,8 @@ public class DataSetServiceTest {
             dsLinkingDao,
             dsDataDictionaryDao,
             dataSetMapper,
-            CLOCK);
+            CLOCK,
+            prefixProvider);
 
     cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);

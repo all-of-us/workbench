@@ -33,7 +33,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
@@ -71,7 +70,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -89,10 +87,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final CohortService cohortService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
-
   private final Provider<DbUser> userProvider;
-  private final Provider<String> prefixProvider;
-
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
@@ -109,7 +104,6 @@ public class DataSetController implements DataSetApiDelegate {
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
-      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -120,7 +114,6 @@ public class DataSetController implements DataSetApiDelegate {
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
-    this.prefixProvider = prefixProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -157,11 +150,6 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  @VisibleForTesting
-  public String generateRandomEightCharacterQualifier() {
-    return prefixProvider.get();
-  }
-
   public ResponseEntity<DataSetCodeResponse> generateCode(
       String workspaceNamespace,
       String workspaceId,
@@ -185,16 +173,13 @@ public class DataSetController implements DataSetApiDelegate {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
-    final String qualifier = generateRandomEightCharacterQualifier();
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
     final ImmutableList<String> codeCells =
-        ImmutableList.copyOf(
-            dataSetService.generateCodeCells(
-                kernelTypeEnum,
-                dataSetRequest.getName(),
-                dbWorkspace.getCdrVersion().getName(),
-                qualifier,
-                bigQueryJobConfigsByDomain));
+        dataSetService.generateCodeCells(
+            kernelTypeEnum,
+            dataSetRequest.getName(),
+            dbWorkspace.getCdrVersion().getName(),
+            bigQueryJobConfigsByDomain);
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -351,14 +336,11 @@ public class DataSetController implements DataSetApiDelegate {
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
-    String qualifier = generateRandomEightCharacterQualifier();
-
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
             dbWorkspace.getCdrVersion().getName(),
-            qualifier,
             queriesByDomain);
 
     if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {

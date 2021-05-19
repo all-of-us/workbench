@@ -1,6 +1,5 @@
 package org.pmiops.workbench.dataset;
 
-import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -24,12 +23,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -39,6 +37,7 @@ import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.dataset.builder.NotebookCode;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -72,20 +71,13 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
-  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
-  private static final String PYTHON_CDR_ENV_VARIABLE =
-      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
-  // This is implicitly handled by bigrquery, so we don't need this variable.
-  private static final String R_CDR_ENV_VARIABLE = "";
-  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
-      ImmutableMap.of(
-          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
@@ -198,6 +190,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
   private final Clock clock;
+  private final Provider<String> prefixProvider;
 
   @Autowired
   @VisibleForTesting
@@ -211,7 +204,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DSLinkingDao dsLinkingDao,
       DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
-      Clock clock) {
+      Clock clock,
+      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortDao = cohortDao;
     this.conceptBigQueryService = conceptBigQueryService;
@@ -222,6 +216,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
     this.clock = clock;
+    this.prefixProvider = prefixProvider;
   }
 
   @Override
@@ -741,37 +736,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> generateCodeCells(
+  public ImmutableList<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       String cdrVersionName,
-      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
-    String prerequisites;
-    switch (kernelTypeEnum) {
-      case R:
-        prerequisites = "library(bigrquery)";
-        break;
-      case PYTHON:
-        prerequisites = "import pandas\n" + "import os";
-        break;
-      default:
-        throw new BadRequestException(
-            "Kernel Type " + kernelTypeEnum.toString() + " not supported");
-    }
+    String qualifier = generateRandomEightCharacterQualifier();
     return queryJobConfigurationMap.entrySet().stream()
         .map(
             entry ->
-                prerequisites
-                    + "\n\n"
-                    + generateNotebookUserCode(
-                        entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
-                        dataSetName,
-                        cdrVersionName,
-                        qualifier,
-                        kernelTypeEnum))
-        .collect(Collectors.toList());
+                NotebookCode.Builder.getInstance()
+                    .setConfiguration(entry.getValue())
+                    .setDomain(entry.getKey())
+                    .setKernel(kernelTypeEnum)
+                    .setDataSetName(dataSetName)
+                    .setCdrName(cdrVersionName)
+                    .setQualifier(qualifier)
+                    .generateCode())
+        .collect(ImmutableList.toImmutableList());
   }
 
   @Override
@@ -1004,124 +986,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return StringUtils.capitalize(text.toLowerCase());
   }
 
-  private static String generateSqlWithEnvironmentVariables(
-      String query, KernelTypeEnum kernelTypeEnum) {
-    return new BasicFormatterImpl()
-        .format(query.replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum)));
-  }
-
-  // This takes the query, and string replaces in the values for each of the named
-  // parameters generated. For example:
-  //    SELECT * FROM cdr.dataset.person WHERE criteria IN unnest(@p1_1)
-  // becomes:
-  //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
-  private static String fillInQueryParams(
-      String query, Map<String, QueryParameterValue> queryParameterValueMap) {
-    return queryParameterValueMap.entrySet().stream()
-        .map(param -> (Function<String, String>) s -> replaceParameter(s, param))
-        .reduce(Function.identity(), Function::andThen)
-        .apply(query)
-        .replaceAll("unnest", "");
-  }
-
-  private static String replaceParameter(
-      String s, Map.Entry<String, QueryParameterValue> parameter) {
-    String value =
-        ARRAY.equals(parameter.getValue().getType())
-            ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
-                .map(DataSetServiceImpl::convertSqlTypeToString)
-                .collect(Collectors.joining(", "))
-            : convertSqlTypeToString(parameter.getValue());
-    String key = String.format("@%s", parameter.getKey());
-    return s.replaceAll(key, value);
-  }
-
-  private static String convertSqlTypeToString(QueryParameterValue parameter) {
-    switch (parameter.getType()) {
-      case BOOL:
-        return Boolean.valueOf(parameter.getValue()) ? "1" : "0";
-      case INT64:
-      case FLOAT64:
-      case NUMERIC:
-        return parameter.getValue();
-      case STRING:
-      case TIMESTAMP:
-      case DATE:
-        return String.format("'%s'", parameter.getValue());
-      default:
-        throw new RuntimeException();
-    }
-  }
-
-  private static String generateNotebookUserCode(
-      QueryJobConfiguration queryJobConfiguration,
-      Domain domain,
-      String dataSetName,
-      String cdrVersionName,
-      String qualifier,
-      KernelTypeEnum kernelTypeEnum) {
-
-    // Define [namespace]_sql, query parameters (as either [namespace]_query_config
-    // or [namespace]_query_parameters), and [namespace]_df variables
-    String domainAsString = domain.toString().toLowerCase();
-    String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
-    // Comments in R and Python have the same syntax
-    String descriptiveComment =
-        String.format(
-            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
-            dataSetName, domainAsString, cdrVersionName);
-    String sqlSection;
-    String dataFrameSection;
-    String displayHeadSection;
-
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        sqlSection =
-            namespace
-                + "sql = \"\"\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
-                + "\"\"\"";
-        dataFrameSection =
-            namespace
-                + "df = pandas.read_gbq("
-                + namespace
-                + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
-        displayHeadSection = namespace + "df.head(5)";
-        break;
-      case R:
-        sqlSection =
-            namespace
-                + "sql <- paste(\""
-                + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
-                + "\", sep=\"\")";
-        dataFrameSection =
-            namespace
-                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
-                + namespace
-                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")";
-        displayHeadSection = "head(" + namespace + "df, 5)";
-        break;
-      default:
-        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
-    }
-
-    return descriptiveComment
-        + "\n"
-        + sqlSection
-        + "\n\n"
-        + dataFrameSection
-        + "\n\n"
-        + displayHeadSection;
-  }
-
-  private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
-    return Optional.ofNullable(nullableList).orElse(new ArrayList<>());
+  @VisibleForTesting
+  public String generateRandomEightCharacterQualifier() {
+    return prefixProvider.get();
   }
 
   private static boolean getBuiltinBooleanFromNullable(Boolean boo) {

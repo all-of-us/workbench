@@ -49,8 +49,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -166,8 +164,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataSetControllerTest {
 
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
-  private static final String CONCEPT_SET_TWO_NAME = "concept set two";
-  private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
@@ -190,8 +186,6 @@ public class DataSetControllerTest {
   private Cohort cohort;
   private Cohort noAccessCohort;
   private ConceptSet conceptSet1;
-  private ConceptSet conceptSet2;
-  private ConceptSet surveyConceptSet;
   private ConceptSet noAccessConceptSet;
   private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
@@ -214,8 +208,6 @@ public class DataSetControllerTest {
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
-
-  @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
   @TestConfiguration
   @Import({
@@ -439,27 +431,6 @@ public class DataSetControllerTest {
             .countValue(123L)
             .prevalence(0.2F)
             .conceptSynonyms(new ArrayList<>()));
-
-    surveyConceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name(CONCEPT_SET_SURVEY_NAME).domain(Domain.OBSERVATION))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
-
-    conceptSet2 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getName(),
-                new CreateConceptSetRequest()
-                    .conceptSet(new ConceptSet().name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG))
-                    .addedConceptSetConceptIds(conceptSetConceptIds))
-            .getBody();
 
     noAccessDataSet =
         dataSetController
@@ -905,12 +876,11 @@ public class DataSetControllerTest {
 
   @Test
   public void getDataDictionaryEntry() {
-    when(mockCdrVersionService.findByCdrVersionId(2l))
-        .thenReturn(Optional.ofNullable(new DbCdrVersion()));
+    when(mockCdrVersionService.findByCdrVersionId(2L)).thenReturn(Optional.of(new DbCdrVersion()));
     when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
 
-    dataSetController.getDataDictionaryEntry(2l, "PERSON", "MockValue");
+    dataSetController.getDataDictionaryEntry(2L, "PERSON", "MockValue");
     verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 
@@ -929,19 +899,17 @@ public class DataSetControllerTest {
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
-        });
+        () ->
+            dataSetController.extractGenomicData(
+                workspace.getNamespace(), workspace.getName(), dataSet.getId()));
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
     assertThrows(
         ForbiddenException.class,
-        () -> {
-          dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
-        });
+        () ->
+            dataSetController.extractGenomicData(
+                workspace.getNamespace(), workspace.getName(), dataSet.getId()));
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
@@ -973,9 +941,9 @@ public class DataSetControllerTest {
   public void testGenomicDataExtraction_notFound() {
     assertThrows(
         BadRequestException.class,
-        () -> {
-          dataSetController.extractGenomicData(workspace.getNamespace(), workspace.getName(), 404L);
-        });
+        () ->
+            dataSetController.extractGenomicData(
+                workspace.getNamespace(), workspace.getName(), 404L));
   }
 
   @Test
@@ -990,10 +958,9 @@ public class DataSetControllerTest {
             .getBody();
     assertThrows(
         BadRequestException.class,
-        () -> {
-          dataSetController.extractGenomicData(
-              workspace.getNamespace(), workspace.getName(), dataSet.getId());
-        });
+        () ->
+            dataSetController.extractGenomicData(
+                workspace.getNamespace(), workspace.getName(), dataSet.getId()));
 
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);

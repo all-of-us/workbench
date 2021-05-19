@@ -120,9 +120,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private GenomicExtractionService genomicExtractionService;
 
-  @Autowired
-  @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
-  Provider<String> prefixProvider;
+  @MockBean Provider<String> prefixProvider;
 
   private DataSetController controller;
 
@@ -221,7 +219,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             dsLinkingDao,
             dsDataDictionaryDao,
             dataSetMapper,
-            CLOCK);
+            CLOCK,
+            prefixProvider);
     controller =
         spy(
             new DataSetController(
@@ -232,7 +231,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 fireCloudService,
                 notebooksService,
                 userProvider,
-                prefixProvider,
                 genomicExtractionService,
                 workspaceAuthService,
                 workbenchConfigProvider));
@@ -280,7 +278,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(
                 new Cohort().id(dbCohort1.getCohortId()),
                 new Cohort().id(dbCohort2.getCohortId())));
-    when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
+    when(dataSetServiceImpl.generateRandomEightCharacterQualifier()).thenReturn("00000000");
 
     conditionLinking1 =
         DbDSLinking.builder()

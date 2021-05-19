@@ -2,6 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,11 +31,10 @@ public interface DataSetService {
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
-  List<String> generateCodeCells(
+  ImmutableList<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       String cdrVersionName,
-      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
   DbDataset cloneDataSetToWorkspace(
