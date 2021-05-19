@@ -49,9 +49,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-prod",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
-    "extractionCohortsDataset": "",
-    "extractionDestinationDataset": "",
-    "extractionTempTablesDataset": ""
+    "extractionCohortsDataset": "fc-aou-cdr-prod-ct.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-prod-ct.wgs_extraction_destination",
+    "extractionTempTablesDataset": "fc-aou-cdr-prod-ct.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
