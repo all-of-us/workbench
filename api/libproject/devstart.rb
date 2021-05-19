@@ -296,6 +296,8 @@ def setup_local_environment()
   ENV["DB_HOST"] = "127.0.0.1"
   ENV["MYSQL_ROOT_PASSWORD"] = root_password
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
+  # Placeholder for running Spring Boot server locally.
+  ENV["GAE_INSTANCE"] = "loca-instance"
 end
 
 # TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
@@ -2945,7 +2947,7 @@ def start_api_and_incremental_build(cmd_name, args)
   begin
     common.status "API server startup..."
     bm = Benchmark.measure {
-      # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+      # bootRun must be run with the Gradle daemon or it will stop outputting logs as soon as
       # the application has finished starting.
       common.run_inline %W{gradle --daemon bootRun}
       common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
