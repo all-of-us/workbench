@@ -21,8 +21,10 @@ import java.util.Random;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.Application;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -41,14 +43,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = Application.class)
 @DataJpaTest
 public class RasLinkServiceTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
@@ -88,56 +98,56 @@ public class RasLinkServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
-  @Mock private static OpenIdConnectClient mockOidcClient;
-  @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
-  @Mock private static HttpTransport mockHttpTransport;
-  @Mock private OpenIdConnectClient mockRasOidcClient;
-
-  @TestConfiguration
-  @Import({
-    RasLinkService.class,
-    UserServiceTestConfiguration.class,
-  })
-  @MockBean({
-    FireCloudService.class,
-    ComplianceService.class,
-    DirectoryService.class,
-    UserServiceAuditor.class,
-    FreeTierBillingService.class,
-    HttpTransport.class,
-    AccessTierService.class,
-  })
-  static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-
-    @Bean
-    Random random() {
-      return new FakeLongRandom(123);
-    }
-
-    @Bean
-    @Qualifier(RAS_OIDC_CLIENT)
-    OpenIdConnectClient rasOidcClient() {
-      return mockOidcClient;
-    }
-
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public WorkbenchConfig getWorkbenchConfig() {
-      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-      config.accessRenewal.expiryDays = (long) 365;
-      return config;
-    }
-
-    @Bean
-    @Scope("prototype")
-    DbUser user() {
-      return currentUser;
-    }
-  }
+//  @Mock private static OpenIdConnectClient mockOidcClient;
+   @MockBean private static Provider<OpenIdConnectClient> mockOidcClientProvider;
+//  @Mock private static HttpTransport mockHttpTransport;
+   @Mock private OpenIdConnectClient mockOidcClient;
+//
+//  @TestConfiguration
+//  @Import({
+//    RasLinkService.class,
+//    UserServiceTestConfiguration.class,
+//  })
+//  @MockBean({
+//    FireCloudService.class,
+//    ComplianceService.class,
+//    DirectoryService.class,
+//    UserServiceAuditor.class,
+//    FreeTierBillingService.class,
+//    HttpTransport.class,
+//    AccessTierService.class,
+//  })
+//  static class Configuration {
+//    @Bean
+//    Clock clock() {
+//      return CLOCK;
+//    }
+//
+//    @Bean
+//    Random random() {
+//      return new FakeLongRandom(123);
+//    }
+//
+//    @Bean
+//    @Qualifier(RAS_OIDC_CLIENT)
+//    OpenIdConnectClient rasOidcClient() {
+//      return mockOidcClient;
+//    }
+//
+//    @Bean
+//    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//    public WorkbenchConfig getWorkbenchConfig() {
+//      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+//      config.accessRenewal.expiryDays = (long) 365;
+//      return config;
+//    }
+//
+//    @Bean
+//    @Scope("prototype")
+//    DbUser user() {
+//      return currentUser;
+//    }
+//  }
 
   @Before
   public void setUp() throws Exception {
