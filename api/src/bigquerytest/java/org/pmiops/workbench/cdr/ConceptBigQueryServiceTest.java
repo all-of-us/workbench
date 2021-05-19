@@ -15,12 +15,13 @@ import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({BigQueryTestService.class, ConceptBigQueryService.class})
+@Import({TestJpaConfig.class, BigQueryTestService.class, ConceptBigQueryService.class})
 public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
