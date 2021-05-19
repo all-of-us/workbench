@@ -4,8 +4,6 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -42,7 +40,6 @@ import org.springframework.stereotype.Service;
 public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
-  private final Clock clock;
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
@@ -59,7 +56,6 @@ public class FreeTierBillingService {
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
-      Clock clock,
       MailService mailService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
@@ -67,7 +63,6 @@ public class FreeTierBillingService {
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao) {
     this.bigQueryService = bigQueryService;
-    this.clock = clock;
     this.mailService = mailService;
     this.userDao = userDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -329,7 +324,6 @@ public class FreeTierBillingService {
 
       // TODO: prevent setting this limit directly except in this method?
       user.setFreeTierCreditsLimitDollarsOverride(newDollarLimit);
-      user.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
       user = userDao.save(user);
 
       if (userHasRemainingFreeTierCredits(user)) {

@@ -1,13 +1,9 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
-import { makeRandomName, makeWorkspaceName, numericalStringToNumber } from 'utils/str-utils';
-import { PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
-import CohortActionsPage from 'app/page/cohort-actions-page';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import CohortReviewModal from 'app/modal/cohort-review-modal';
-import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
-import CohortReviewPage from 'app/page/cohort-review-page';
+import CohortBuildPage from 'app/page/cohort-build-page';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
+import { MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 
@@ -20,7 +16,7 @@ describe('Editing Cohort tests', () => {
   const workspace = makeWorkspaceName();
   let workspaceUrl;
 
-  test('Discard changes in cohort', async () => {
+  test('Discard changes', async () => {
     await findAWorkspace();
 
     const dataPage = new WorkspaceDataPage(page);
@@ -32,7 +28,7 @@ describe('Editing Cohort tests', () => {
     await cohortBuildPage.waitForLoad();
 
     // Wait for Total Count that also indicates page load is ready.
-    numericalStringToNumber(await cohortBuildPage.getTotalCount());
+    await cohortBuildPage.getTotalCount();
 
     // Switch on Temporal in Group 1.
     const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex();
@@ -47,122 +43,6 @@ describe('Editing Cohort tests', () => {
     await dataPage.waitForLoad();
     const resourceCard = new DataResourceCard(page);
     expect(await resourceCard.findCard(cohortName)).toBeTruthy();
-  });
-
-  test('Rename group in cohort', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-
-    // Save Total Count for comparison later
-    const totalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
-
-    // Edit Group 1 name successfully
-    const newName = makeRandomName();
-    const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex();
-    await group1.editGroupName(newName);
-
-    // Check new named group
-    const groupName = cohortBuildPage.findIncludeParticipantsGroup(newName);
-    expect(await groupName.exists()).toBe(true);
-
-    // Check Total Count is unaffected by group name rename
-    const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
-    expect(newTotalCount).toBe(totalCount);
-
-    await cohortBuildPage.saveChanges();
-
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-    expect(await page.title()).toContain('Cohort Actions');
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.waitForLoad();
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-  });
-
-  test('Insert new group in cohort', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
-
-    // Insert new group in Include Participants
-    const newGroup = cohortBuildPage.findIncludeParticipantsEmptyGroup();
-    await newGroup.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, 200);
-
-    // Check Total Count and new Total Count is different
-    const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
-    expect(newTotalCount).toBeGreaterThan(1);
-
-    await cohortBuildPage.saveChanges();
-
-    // Should land on Cohort Actions page
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-
-    await waitForText(page, 'Cohort Saved Successfully', { css: 'body h3' });
-    const cohortLink = await page.waitForXPath(`//a[normalize-space()="${cohortName}"]`, { visible: true });
-    expect(cohortLink).toBeTruthy();
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openCohortsSubtab();
-    await waitWhileLoading(page);
-
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-  });
-
-  test('Create cohort Review Set', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-
-    const reviewSetsButton = await cohortBuildPage.getCopyButton();
-    await reviewSetsButton.click();
-
-    const modal = new CohortReviewModal(page);
-    await modal.waitForLoad();
-
-    const reviewSetNumberOfParticipants = 100;
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
-    await modal.clickButton(LinkText.CreateSet);
-
-    const cohortReviewPage = new CohortReviewPage(page);
-    await cohortReviewPage.waitForLoad();
-
-    await waitForText(page, `Review Sets for ${cohortName}`);
-
-    // Verify table pagination records count.
-    const participantsTable = cohortReviewPage.getDataTable();
-    const records = await participantsTable.getNumRecords();
-    // Table records page numbering is in "1 - 25 of 100 records" format.
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
-
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
-
-    // Click Back to Cohort link
-    const backToCohortButton = await cohortReviewPage.getBackToCohortButton();
-    await backToCohortButton.click();
-
-    await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
-
-    // Back out to Data page
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.waitForLoad();
-
-    // Verify Cohort Review card exists
-    const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard(cohortName, ResourceCard.CohortReview);
-    expect(reviewCohortCard).toBeTruthy();
-
-    await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
   test('Delete cohort', async () => {
@@ -203,7 +83,7 @@ describe('Editing Cohort tests', () => {
     await cohortLink.clickAndWait();
 
     // Total Count should be unchanged.
-    await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
+    expect(await cohortBuildPage.getTotalCount()).toEqual(totalCount);
 
     // Delete cohort while inside the Cohort Build page
     const modalContent = await cohortBuildPage.deleteCohort();
@@ -252,6 +132,7 @@ describe('Editing Cohort tests', () => {
     await dataPage.renameResource(duplicateCohortName, newCohortName, ResourceCard.Cohort);
     // Verify rename successful.
     expect(await DataResourceCard.findCard(page, newCohortName)).toBeTruthy();
+    expect(await DataResourceCard.findCard(page, cohortName)).toBeTruthy();
     return dataPage.findCohortCard(newCohortName);
   }
 

@@ -4,7 +4,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
@@ -12,7 +11,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
@@ -22,8 +20,9 @@ import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component'
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {CdrVersionsApi, StatusAlertApi} from 'generated/fetch';
+import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
 
 describe('SignedInComponent', () => {
@@ -44,7 +43,6 @@ describe('SignedInComponent', () => {
         FooterComponent
       ],
       providers: [
-        {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {
@@ -55,6 +53,7 @@ describe('SignedInComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(StatusAlertApi, new StatusAlertApiStub());
   });

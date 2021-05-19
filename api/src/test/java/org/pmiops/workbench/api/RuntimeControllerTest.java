@@ -244,7 +244,6 @@ public class RuntimeControllerTest {
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
-    config.firecloud.registeredDomainName = "";
     config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
     config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;

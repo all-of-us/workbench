@@ -1,3 +1,10 @@
 {
-  "featuredWorkspaces": []
+  "featuredWorkspaces": [
+    {
+      "name": "How to Work with All of Us Genomics Data",
+      "namespace": "aou-rw-preprod-edf20f2f",
+      "id": "alpha0genomicsvalidation",
+      "category": "TUTORIAL_WORKSPACES"
+    }
+  ]
 }

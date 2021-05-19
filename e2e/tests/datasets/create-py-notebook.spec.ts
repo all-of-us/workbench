@@ -52,17 +52,13 @@ describe('Create dataset and export to notebook at same time', () => {
 
     // Verify new notebook exists.
     const resourceCard = new DataResourceCard(page);
-    const notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+    let notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(notebookExists).toBe(true);
-
-    const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
 
     // Delete notebook
     await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
-
-    // Resource cards count decrease by 1.
-    const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
-    expect(newCardsCount).toBe(origCardsCount - 1);
+    notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+    expect(notebookExists).toBe(false);
 
     // Delete Dataset.
     await dataPage.openDatasetsSubtab();

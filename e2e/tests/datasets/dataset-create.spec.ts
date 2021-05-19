@@ -1,5 +1,4 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
@@ -35,22 +34,8 @@ describe('Dataset test', () => {
     const cohortBuildPage = new CohortBuildPage(page);
     // Include Participants Group 1: Add a Condition
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const searchPage = await group1.includeDrugs();
-
     // Search for drug hydroxychloroquine
-    const searchResultsTable = await searchPage.searchCriteria('hydroxychloroquine');
-    // Add a drug in Result table first row. Drug name ignored.
-    const nameValue = await searchResultsTable.getCellValue(1, 1);
-    const addIcon = ClrIconLink.findByName(
-      page,
-      { containsText: nameValue, iconShape: 'plus-circle' },
-      searchResultsTable
-    );
-    await addIcon.click();
-
-    // Open selection list and click Save Criteria button
-    await searchPage.reviewAndSaveCriteria();
-    await cohortBuildPage.getTotalCount();
+    await group1.includeDrugs('hydroxychloroquine');
 
     // Save new cohort.
     const cohortName = await cohortBuildPage.createCohort();

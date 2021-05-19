@@ -233,9 +233,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async selectWorkspaceAction(option: MenuOption, opts?: { waitForNav: false }): Promise<void> {
-    const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
-    await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
-    const snowmanMenu = new SnowmanMenu(this.page);
+    const snowmanMenu = await this.getWorkspaceActionMenu();
     await snowmanMenu.select(option, opts);
     logger.info(`Selected Workspace Action menu option: ${option}`);
   }
@@ -291,5 +289,12 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const modal = new ShareModal(this.page);
     await modal.waitForLoad();
     return modal;
+  }
+
+  async getWorkspaceActionMenu(): Promise<SnowmanMenu> {
+    const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
+    await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
+    const snowmanMenu = new SnowmanMenu(this.page);
+    return snowmanMenu;
   }
 }

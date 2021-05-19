@@ -45,3 +45,4 @@
     - This is different from the Step 6 command since we only need read permissions and we do NOT want a TTL.
     - `./project.rb publish-cdr --project all-of-us-workbench-test --bq-dataset 1kg_wgs --exclude-sa-acl --exclude-auth-domain-acl --additional-reader-group PROXY_118217329794842274136@dev.test.firecloud.org --source-cdr-project-override all-of-us-workbench-test`
     - This is what I did to publish the test WGS data but the process may be different once we get to real data.
+    - Notify Data Apps of any changes to the test dataset or schema

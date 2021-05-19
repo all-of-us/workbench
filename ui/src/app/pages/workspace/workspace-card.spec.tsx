@@ -7,8 +7,7 @@ import {Profile, ProfileApi, WorkspacesApi, WorkspaceAccessLevel} from 'generate
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, userRolesStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {serverConfigStore} from 'app/utils/stores';
-import {userProfileStore} from 'app/utils/navigation';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceCard} from './workspace-card';
 
@@ -20,6 +19,7 @@ jest.mock('app/utils/navigation', () => ({
 describe('WorkspaceCard', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -43,10 +43,10 @@ describe('WorkspaceCard', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     serverConfigStore.set({config: {gsuiteDomain: 'abc'}});
   });
 

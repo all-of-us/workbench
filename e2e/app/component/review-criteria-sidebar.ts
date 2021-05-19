@@ -1,12 +1,13 @@
 import { ElementHandle, Page } from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
-import { FilterSign } from 'app/page/criteria-search-page';
 import { LinkText } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
-import { waitForNumericalString } from 'utils/waits-utils';
-import BaseHelpSidebar from './base-help-sidebar';
+import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import BaseHelpSidebar, { Selectors } from './base-help-sidebar';
 import { logger } from 'libs/logger';
+import { FilterSign } from 'app/page/cohort-participants-group';
+import { getPropValue } from 'utils/element-utils';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -15,6 +16,8 @@ enum SectionSelectors {
 }
 
 export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
+  participantResultXpath = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
+
   constructor(page: Page) {
     super(page);
   }
@@ -28,7 +31,14 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async waitUntilVisible(): Promise<void> {
     await super.waitUntilVisible();
     const title = await this.getTitle();
+    await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
     logger.info(`"${title}" sidebar is opened`);
+  }
+
+  async getCriteriaCount(): Promise<number> {
+    const xpath = `${Selectors.rootXpath}//*[@data-test-id="criteria-count"]`;
+    const element = await this.page.waitForXPath(xpath, { visible: true });
+    return getPropValue<number>(element, 'textContent');
   }
 
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
@@ -41,7 +51,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await numberField.type(String(filterValue));
 
     await this.clickButton(LinkText.Calculate);
-    const participantResult = await this.waitForParticipantResult();
+    const participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
 
     // Find criteria in Selected Criteria Content Box.
     const removeSelectedCriteriaIconSelector = buildXPath({ type: ElementType.Icon, iconShape: 'times-circle' }, this);
@@ -77,11 +87,11 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     let participantResult: string;
     await this.clickButton(LinkText.Calculate);
     try {
-      participantResult = await this.waitForParticipantResult();
+      participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
     } catch (e) {
       // Retry one more time.
       await this.clickButton(LinkText.Calculate);
-      participantResult = await this.waitForParticipantResult();
+      participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
     }
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
@@ -90,14 +100,25 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
 
   async clickSaveCriteriaButton(): Promise<void> {
     await this.clickButton(LinkText.SaveCriteria, { waitForClose: true });
+    await waitWhileLoading(this.page);
   }
 
-  async waitForParticipantResult(): Promise<string> {
-    const selector = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
-    return waitForNumericalString(this.page, selector);
-  }
-
-  waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
+  async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, { visible: true });
+  }
+
+  async removeSelectedCriteria(criteriaName: string): Promise<void> {
+    const removeSelectedCriteriaIcon = buildXPath(
+      {
+        type: ElementType.Icon,
+        iconShape: 'times-circle',
+        containsText: criteriaName,
+        ancestorLevel: 2
+      },
+      this
+    );
+    const removeIcon = await this.page.waitForXPath(removeSelectedCriteriaIcon, { visible: true });
+    await removeIcon.click();
+    await this.page.waitForXPath(removeSelectedCriteriaIcon, { hidden: true });
   }
 }

@@ -168,9 +168,6 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    // confirm that this value is no longer how we choose perimeters
-    workbenchConfig.firecloud.vpcServicePerimeterName = "something else";
-
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
@@ -184,8 +181,8 @@ public class FireCloudServiceImplTest {
     // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.getEnableFlowLogs()).isTrue();
-    assertThat(request.getHighSecurityNetwork()).isTrue();
+    assertThat(request.isEnableFlowLogs()).isTrue();
+    assertThat(request.isHighSecurityNetwork()).isTrue();
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 }

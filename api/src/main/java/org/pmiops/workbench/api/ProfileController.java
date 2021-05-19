@@ -621,4 +621,16 @@ public class ProfileController implements ProfileApiDelegate {
         rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
     return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
+
+  @Override
+  public ResponseEntity<Void> confirmProfile() {
+    userService.confirmProfile();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> confirmPublications() {
+    userService.confirmPublications();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 }

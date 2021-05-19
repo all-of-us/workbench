@@ -5,10 +5,12 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import ReactSelect from 'app/element/react-select';
-import { MenuOption } from 'app/text-labels';
+import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { getPropValue } from 'utils/element-utils';
 import { waitForNumericalString } from 'utils/waits-utils';
+import * as fp from 'lodash/fp';
+import ShareModal from 'app/modal/share-modal';
 
 describe('Workspace UI tests', () => {
   const charLimitXpath = '//*[@data-test-id="characterLimit"]';
@@ -73,7 +75,7 @@ describe('Workspace UI tests', () => {
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
-  test('CANCEL in Edit page go back to Your Workspaces page', async () => {
+  test('CANCEL in Edit page goes back to Your Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
     await workspaces.load();
 
@@ -99,8 +101,8 @@ describe('Workspace UI tests', () => {
     expect(await workspaces.isLoaded()).toBe(true);
   });
 
-  test('Display workspaces by access levels', async () => {
-    const filterMenuOptions = ['Owner', 'Writer', 'Reader'];
+  test('Workspaces display by access level filter', async () => {
+    const filter = ['Owner', 'Writer', 'Reader'];
 
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -110,15 +112,15 @@ describe('Workspace UI tests', () => {
     const defaultSelectedValue = await selectMenu.getSelectedOption();
     expect(defaultSelectedValue).toEqual('All');
 
-    // Change Workspace Filter.
-    for (const menuOption of filterMenuOptions) {
-      const selectedValue = await workspacesPage.filterByAccessLevel(menuOption);
-      expect(selectedValue).toEqual(menuOption); // Verify selected option
+    // Change Filter by value.
+    for (const accessLevel of filter) {
+      const filterSelectedValue = await workspacesPage.filterByAccessLevel(accessLevel);
+      expect(filterSelectedValue).toEqual(accessLevel); // Verify selected option
       const cards = await WorkspaceCard.findAllCards(page);
       // If any card exists, get its Access Level and compare with filter level.
       for (const card of cards) {
-        const cardLevel = await card.getWorkspaceAccessLevel();
-        expect(cardLevel).toEqual(menuOption.toUpperCase());
+        const workspaceAccessLevel = await card.getWorkspaceAccessLevel();
+        expect(workspaceAccessLevel).toEqual(accessLevel.toUpperCase());
       }
     }
   });
@@ -165,6 +167,26 @@ describe('Workspace UI tests', () => {
     // Back to Home page.
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
+  });
+
+  test('Workspace Card Snowman menu options', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+
+    const cards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+    if (cards.length === 0) {
+      return; // End test now, no Workspace card.
+    }
+    const selectedCard = fp.shuffle(cards)[0];
+
+    // Verify: Share, Edit, Duplicate and Delete actions are available for click.
+    await selectedCard.verifyWorkspaceCardMenuOptions(WorkspaceAccessLevel.Owner);
+
+    // Verify Share Modal is accessible.
+    await selectedCard.selectSnowmanMenu(MenuOption.Share, { waitForNav: false });
+    const shareModal = new ShareModal(page);
+    await shareModal.waitUntilVisible();
+    await shareModal.clickButton(LinkText.Cancel, { waitForClose: true });
   });
 
   /*
