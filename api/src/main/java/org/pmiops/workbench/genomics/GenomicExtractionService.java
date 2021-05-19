@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -45,6 +46,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GenomicExtractionService {
+
+  private final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -189,59 +192,59 @@ public class GenomicExtractionService {
                     .inputs(
                         new ImmutableMap.Builder<String, String>()
                             .put(
-                                "WgsCohortExtract.participant_ids",
+                                EXTRACT_WORKFLOW_NAME + ".cohort_sample_names",
                                 "\"gs://" // Cromwell string inputs require double quotes
                                     + personIdsFile.getBucket()
                                     + "/"
                                     + personIdsFile.getName()
                                     + "\"")
                             .put(
-                                "WgsCohortExtract.query_project",
+                                EXTRACT_WORKFLOW_NAME + ".query_project",
                                 "\"" + workspace.getWorkspaceNamespace() + "\"")
-                            .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
+                            .put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
-                                "WgsCohortExtract.wgs_dataset",
+                                EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\""
                                     + workspace.getCdrVersion().getBigqueryProject()
                                     + "."
                                     + workspace.getCdrVersion().getWgsBigqueryDataset()
                                     + "\"")
                             .put(
-                                "WgsCohortExtract.wgs_extraction_cohorts_dataset",
+                                EXTRACT_WORKFLOW_NAME + ".gvs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
                             .put(
-                                "WgsCohortExtract.wgs_extraction_destination_dataset",
+                                EXTRACT_WORKFLOW_NAME + ".gvs_extraction_destination_dataset",
                                 "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
                             .put(
-                                "WgsCohortExtract.wgs_extraction_temp_tables_dataset",
+                                EXTRACT_WORKFLOW_NAME + ".gvs_extraction_temp_tables_dataset",
                                 "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
                             .put(
-                                "WgsCohortExtract.wgs_intervals",
+                                EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
                             // This value will need to be dynamically adjusted through testing
-                            .put("WgsCohortExtract.scatter_count", "1000")
+                            .put(EXTRACT_WORKFLOW_NAME + ".scatter_count", "1000")
                             .put(
-                                "WgsCohortExtract.reference",
+                                EXTRACT_WORKFLOW_NAME + ".reference",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")
                             .put(
-                                "WgsCohortExtract.reference_index",
+                                EXTRACT_WORKFLOW_NAME + ".reference_index",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"")
                             .put(
-                                "WgsCohortExtract.reference_dict",
+                                EXTRACT_WORKFLOW_NAME + ".reference_dict",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"")
                             // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
                             // etc
-                            .put("WgsCohortExtract.output_file_base_name", "\"interval\"")
+                            .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
                             .put(
-                                "WgsCohortExtract.output_gcs_dir",
+                                EXTRACT_WORKFLOW_NAME + ".output_gcs_dir",
                                 "\"gs://"
                                     + fcUserWorkspace.getBucketName()
                                     + "/"
                                     + extractionFolder
                                     + "/vcfs/\"")
                             .put(
-                                "WgsCohortExtract.gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-204-g6449d52-SNAPSHOT-local.jar\"")
+                                EXTRACT_WORKFLOW_NAME + ".gatk_override",
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
