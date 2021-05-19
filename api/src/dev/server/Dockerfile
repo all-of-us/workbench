@@ -40,7 +40,8 @@ RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cl
     ln -s /lib /lib64 && \
     gcloud config set core/disable_usage_reporting true && \
     gcloud config set component_manager/disable_update_check true && \
-    gcloud config set metrics/environment github_docker_image
+    gcloud config set metrics/environment github_docker_image &&
+    gcloud components install app-engine-java
 
 #
 # Other development tools
