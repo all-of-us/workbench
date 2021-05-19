@@ -19,6 +19,7 @@ import {
 import {profileStore, useStore} from 'app/utils/stores';
 
 const {useState} = React;
+const LOOKBACK_PERIOD = 330;
 
 const renewalStyle = {
   h1: {
@@ -86,7 +87,7 @@ const getExpirationTimeForModule = fp.curry((modules, moduleName) => {
   return fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 });
 
-const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > 330;
+const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
 
 export const AccessRenewalPage = fp.flow(
   withRouteData,
