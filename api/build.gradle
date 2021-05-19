@@ -225,9 +225,10 @@ swaggerSources {
 //
 
 // Generate AppEngine Cron file
+def workbenchEnv = System.getenv('WORKBENCH_ENV') != null ? System.getenv('WORKBENCH_ENV') : 'local'
 task generate_appengine_cron_yaml(type: Exec) {
   executable "ruby"
-  args = ["libproject/generate_appengine_cron_yaml.rb", System.getenv("WORKBENCH_ENV")]
+  args = ["libproject/generate_appengine_cron_yaml.rb", workbenchEnv]
 }
 
 // Generate AppEngine Web Configration XML file
@@ -637,7 +638,7 @@ task listProjectAPIs(type: GenerateAPIListingTask)
 // this task is executed.
 //
 // N.B. these properties should be kept roughly in sync with the App Engine configuration
-// XML file under src/main/webapp/WEB-INF/app.yaml
+// yaml file under src/main/webapp/WEB-INF/app.yaml
 def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
 
