@@ -143,8 +143,10 @@ public class RdrExportServiceImpl implements RdrExportService {
 
       updateDbRdrExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
-      log.severe("Error while sending researcher data to RDR");
+      log.severe(
+          String.format("Error while sending researcher data to RDR for user IDs: %s", userIds));
     }
+    log.info(String.format("successfully exported researcher data for user IDs: %s", userIds));
   }
 
   /**
@@ -172,8 +174,12 @@ public class RdrExportServiceImpl implements RdrExportService {
         }
       }
     } catch (ApiException ex) {
-      log.severe("Error while sending workspace data to RDR");
+      log.severe(
+          String.format(
+              "Error while sending workspace data to RDR for workspace IDs: %s", workspaceIds));
     }
+    log.info(
+        String.format("successfully exported workspace data for workspace IDs: %s", workspaceIds));
   }
 
   // Convert workbench DBUser to RDR Model
