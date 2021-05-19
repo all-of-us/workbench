@@ -576,7 +576,9 @@ appengine {
     // Give dev_appserver 2 minutes to start up when running appengineStart; by
     // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
     startSuccessTimeout = 120
-    projectId = "GCLOUD_CONFIG"
+
+    // Placeholder value for bring up local server.
+    projectId = 'all-of-us-loca'
 
     environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
   }
