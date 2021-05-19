@@ -47,7 +47,7 @@ export const Modal = ({width = 450, loading = false, ...props}) => {
   return <ReactModal
     parentSelector={() => document.getElementById('popup-root')}
     isOpen
-    style={{overlay: styles.overlay, content: props.contentStyle || {...styles.modal, width}}}
+    style={{overlay: styles.overlay, content: props.contentStyleOverride || {...styles.modal, width}}}
     ariaHideApp={false}
     {...props}
   >
@@ -58,12 +58,12 @@ export const Modal = ({width = 450, loading = false, ...props}) => {
 
 
 export const AnimatedModal = ({width = 450, ...props}) => {
-  const contentStyle = {...styles.modal, width};
-  const contentStyleSpring = useSpring({...contentStyle, from: {width: 450}});
+  const style = {...styles.modal, width};
+  const styleSpring = useSpring({...style, from: {width: 450}});
 
-  return <Modal contentStyle={{margin: 'auto'}} {...props}>
+  return <Modal contentStyleOverride={{margin: 'auto'}} {...props}>
     <div>
-      <animated.div style={contentStyleSpring}>
+      <animated.div style={styleSpring}>
         {props.children}
       </animated.div>
     </div>

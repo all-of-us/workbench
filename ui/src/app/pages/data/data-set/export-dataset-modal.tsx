@@ -37,7 +37,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
   ({workspace, dataset, closeFunction}: HocProps) => {
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
-    const [isExporting, setIsExporting] = useState(false); // replace w/ undefined notebooks list? // test case - no notebooks in workspace
+    const [isExporting, setIsExporting] = useState(false);
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
     const [codePreview, setCodePreview] = useState(null);
@@ -59,8 +59,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
             newNotebook: creatingNewNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
-          appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
+        const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/`
+          + appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
         navigateByUrl(notebookUrl);
       } catch (e) {
         console.error(e);
@@ -72,16 +72,16 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     function createDataSetRequest(): DataSetRequest {
       return {
         name: dataset ? dataset.name : 'dataset',
-        ...(dataset.id ? {
-          dataSetId: dataset.id
-        } : {
-          dataSetId: dataset.id,
-          includesAllParticipants: dataset.includesAllParticipants,
-          conceptSetIds: dataset.conceptSets.map(cs => cs.id),
-          cohortIds: dataset.cohorts.map(c => c.id),
-          domainValuePairs: dataset.domainValuePairs,
-          prePackagedConceptSet: dataset.prePackagedConceptSet
-        })
+        ...(dataset.id
+          ? { dataSetId: dataset.id }
+          : {
+            dataSetId: dataset.id,
+            includesAllParticipants: dataset.includesAllParticipants,
+            conceptSetIds: dataset.conceptSets.map(cs => cs.id),
+            cohortIds: dataset.cohorts.map(c => c.id),
+            domainValuePairs: dataset.domainValuePairs,
+            prePackagedConceptSet: dataset.prePackagedConceptSet
+          })
       };
     }
 
@@ -120,17 +120,17 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
-    function onNotebookSelect(v) {
-      setCreatingNewNotebook(v === '');
-      setNotebookName(v);
+    function onNotebookSelect(value) {
+      setCreatingNewNotebook(value === '');
+      setNotebookName(value);
       setErrorMsg(null);
 
-      if (v === '') {
+      if (value === '') {
         setCreatingNewNotebook(true);
       } else {
         setCreatingNewNotebook(false);
         setIsLoadingNotebook(true);
-        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, v)
+        workspacesApi().getNotebookKernel(workspace.namespace, workspace.id, value)
           .then(resp => setKernelType(resp.kernelType))
           .catch(() => setErrorMsg('Could not fetch notebook metadata. Please try again or create a new notebook.'))
           .finally(() => setIsLoadingNotebook(false));
@@ -139,7 +139,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
-        .then(notebooks => setExistingNotebooks(notebooks))
+        .then(notebooks => setExistingNotebooks(notebooks.map(fileDetail => fileDetail.name.slice(0, -6))))
         .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
     }, [workspace]);
 
@@ -154,17 +154,17 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         notebookName: {
           presence: {allowEmpty: false},
           exclusion: {
-            within: creatingNewNotebook && existingNotebooks ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
+            within: existingNotebooks,
             message: 'already exists'
           }
         }
       }),
-      ...(workspace.billingStatus === BillingStatus.INACTIVE ? {
-        billing: [ACTION_DISABLED_INVALID_BILLING]
-      } : {}),
-      ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ? {
-        permission: ['Exporting to a notebook requires write access to the workspace']
-      } : {})
+      ...(workspace.billingStatus === BillingStatus.INACTIVE
+        ? { billing: [ACTION_DISABLED_INVALID_BILLING]}
+        : {}),
+      ...(!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+        ? { permission: ['Exporting to a notebook requires write access to the workspace']}
+        : {})
     };
 
     const isNotebooksLoading = existingNotebooks === undefined;
@@ -172,8 +172,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     const selectOptions = [{label: '(Create a new notebook)', value: ''}];
     if (!isNotebooksLoading) {
       selectOptions.push(...existingNotebooks.map(notebook => ({
-        value: notebook.name.slice(0, -6),
-        label: notebook.name.slice(0, -6)
+        value: notebook,
+        label: notebook,
       })));
     }
 
