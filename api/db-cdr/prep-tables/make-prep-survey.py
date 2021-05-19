@@ -53,7 +53,6 @@ def main():
 
     for name in surveys:
         rows = read_csv(name + '_' + date + '.csv')
-        print(rows)
 
         # open your file writers for this survey and write headers
         controlledWriter, registeredWriter, allWriter = \
@@ -158,8 +157,10 @@ def main():
                 maxValue = ''
                 isNumericAnswer = False
 
-                if (text_validation == 'integer' or text_validation == 'number') and \
-                row['Text Validation Min'] and row['Text Validation Max'] != '':
+                if (
+                    text_validation == 'integer' or text_validation == 'number') and \
+                    row['Text Validation Min'] and row[
+                    'Text Validation Max'] != '':
                     minValue = row['Text Validation Min']
                     maxValue = row['Text Validation Max']
                     isNumericAnswer = True
@@ -171,12 +172,7 @@ def main():
                             itemFlags, fieldNames)
 
                 # answers for outputAll file
-#                 addAllAnswers(allFile,choices, questionIdAll, None, None, itemFlags,fieldNames)
-
-
-
-
-
+    #                 addAllAnswers(allFile,choices, questionIdAll, None, None, itemFlags,fieldNames)
 
     # This will query the concept table using concept_name
     results = query_topic_code(project, dataset, "Respiratory Conditions")
@@ -184,6 +180,8 @@ def main():
         print(result.concept_code)
 
     # when done remove directory and all files
+
+
 #     shutil.rmtree(home_dir)
 
 
@@ -240,7 +238,7 @@ def parse_row_columns(row):
     section_header = row['Section Header']
     min_value = row['Text Validation Min']
     max_value = row['Text Validation Max']
-    return field_annotation,field_annotation_array, question_label, question_code, \
+    return field_annotation, field_annotation_array, question_label, question_code, \
            text_validation, choices, section_header, min_value, max_value
 
 
