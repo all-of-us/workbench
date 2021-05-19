@@ -14,7 +14,7 @@ import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {switchCase, withCurrentWorkspace} from 'app/utils';
+import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -28,6 +28,14 @@ import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
 import {MenuItem} from './buttons';
 
+const spinStyles = {
+  animationName: 'spin',
+  animationDuration: '5000ms',
+  animationIterationCount: 'infinite',
+  animationTimingFunction: 'linear'
+};
+
+
 const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
     return {
@@ -35,10 +43,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'Processing extraction',
       style: {
         color: colors.success,
-        animationName: 'spin',
-        animationDuration: '5000ms',
-        animationIterationCount: 'infinite',
-        animationTimingFunction: 'linear'
+        ...spinStyles
       }
     };
   } else if (status === TerraJobStatus.SUCCEEDED) {
@@ -54,6 +59,23 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'This extraction has failed. Please try again from the dataset\'s page.',
       style: {
         color: colors.danger
+      }
+    };
+  } else if (status === TerraJobStatus.ABORTING) {
+    return {
+      icon: faSyncAlt,
+      iconTooltip: 'Aborting this extraction. This may take a few minutes.',
+      style: {
+        color: colors.warning,
+        ...spinStyles
+      }
+    };
+  } else if (status === TerraJobStatus.ABORTED) {
+    return {
+      icon: faBan,
+      iconTooltip: 'This extraction was aborted by the user.',
+      style: {
+        color: colors.warning
       }
     };
   }
@@ -149,9 +171,14 @@ const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) =
         {job.datasetName}
       </span>,
     statusOrdinal: // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
-      job.status === TerraJobStatus.RUNNING ? 0 :
-        job.status === TerraJobStatus.SUCCEEDED ? 1 :
-          job.status === TerraJobStatus.FAILED ? 2 : Number.MAX_SAFE_INTEGER,
+      switchCase(job.status,
+        [TerraJobStatus.RUNNING, () => 0],
+          [TerraJobStatus.SUCCEEDED, () => 1],
+          [TerraJobStatus.ABORTED, () => 2],
+          [TerraJobStatus.ABORTING, () => 3],
+          [TerraJobStatus.FAILED, () => 4],
+          [DEFAULT, () => Number.MAX_SAFE_INTEGER]
+      ),
     statusDisplay: <TooltipTrigger content={iconConfig.iconTooltip}>
       <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
         <FontAwesomeIcon

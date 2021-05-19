@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -155,7 +156,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          dbUser = userDao.findOne(dbUser.getUserId());
+          long userId = dbUser.getUserId();
+          dbUser =
+              userDao
+                  .findById(userId)
+                  .orElseThrow(
+                      () ->
+                          new BadRequestException(
+                              String.format("User with ID %s not found", userId)));
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(
@@ -170,7 +178,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            dbUser = userDao.findOne(dbUser.getUserId());
+            long userId = dbUser.getUserId();
+            dbUser =
+                userDao
+                    .findById(userId)
+                    .orElseThrow(
+                        () ->
+                            new BadRequestException(
+                                String.format("User with ID %s not found", userId)));
             statementClosedCount++;
           } else {
             throw new ConflictException(
@@ -233,9 +248,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return Optional.empty();
       }
       Long expiryDays = configProvider.get().accessRenewal.expiryDays;
-      if (expiryDays == null) {
-        throw new RuntimeException("config value accessRenewal.expiryDays.expiryDays is null");
-      }
+      Preconditions.checkNotNull(
+          expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
       return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
@@ -502,7 +516,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             dua.setUserNameOutOfDate(
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userDataUseAgreementDao.save(dataUseAgreements);
+    userDataUseAgreementDao.saveAll(dataUseAgreements);
   }
 
   @Override

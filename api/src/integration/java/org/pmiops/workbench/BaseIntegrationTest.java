@@ -26,7 +26,7 @@ public abstract class BaseIntegrationTest {
   protected static WorkbenchConfig config;
 
   @TestConfiguration
-  static class Configuration {
+  public static class Configuration {
     // This prototype-scoped bean override will cause all autowired services to call this method
     // for their Provider<WorkbenchConfig>. Further modifications may be made from within each test
     // case.

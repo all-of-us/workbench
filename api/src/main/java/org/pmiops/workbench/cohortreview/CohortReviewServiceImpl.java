@@ -186,7 +186,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public void deleteCohortReview(Long cohortReviewId) {
-    cohortReviewDao.delete(cohortReviewId);
+    cohortReviewDao.deleteById(cohortReviewId);
   }
 
   @Override
@@ -507,14 +507,14 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(
       Long cohortAnnotationDefinitionId) {
     DbCohortAnnotationDefinition cohortAnnotationDefinition =
-        cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
-
-    if (cohortAnnotationDefinition == null) {
-      throw new NotFoundException(
-          String.format(
-              "Not Found: No cohort annotation definition found for id: %s",
-              cohortAnnotationDefinitionId));
-    }
+        cohortAnnotationDefinitionDao
+            .findById(cohortAnnotationDefinitionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Not Found: No cohort annotation definition found for id: %s",
+                            cohortAnnotationDefinitionId)));
     return cohortAnnotationDefinition;
   }
 

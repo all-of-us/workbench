@@ -324,7 +324,7 @@ public class ManageLeonardoRuntimes {
     // This tool doesn't currently need database access, so it doesn't extend the
     // CommandLineToolConfig. To add database access, extend from that config and update project.rb
     // to ensure a Cloud SQL proxy is available when this command is run.
-    new SpringApplicationBuilder(ManageLeonardoRuntimes.class).web(false).run(args);
+    new SpringApplicationBuilder(ManageLeonardoRuntimes.class).web(WebApplicationType.NONE).run(args);
   }
 }
 ```

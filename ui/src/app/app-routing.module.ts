@@ -77,6 +77,11 @@ const routes: Routes = [
         component: AppRouting,
         data: {}
       },
+      {
+        path: 'profile',
+        component: AppRouting,
+        data: {}
+      },
       // non-migrated routes go HERE
       {
         path: '',
@@ -86,11 +91,6 @@ const routes: Routes = [
           // legacy / duplicated routes go HERE
           {
             path: 'library',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'profile',
             component: AppRouting,
             data: {}
           },

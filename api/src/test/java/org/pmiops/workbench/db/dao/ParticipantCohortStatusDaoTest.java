@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
@@ -32,7 +33,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, CommonConfig.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ParticipantCohortStatusDaoTest extends SpringTest {
   private static final Long COHORT_REVIEW_ID = 1L;

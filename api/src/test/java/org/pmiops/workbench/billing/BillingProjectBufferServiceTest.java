@@ -659,7 +659,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
     assertThat(invokedProjectName).isEqualTo("test-project-name");
 
-    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(assignedEntry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
@@ -689,7 +689,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
     assertThat(invokedProjectName).isEqualTo("test-project-name");
 
-    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(assignedEntry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
@@ -764,7 +764,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED);
     billingProjectBufferService.syncBillingProjectStatus();
     billingProjectBufferService.cleanBillingBuffer();
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ERROR);
   }
 
@@ -786,7 +786,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     // Time has elapsed but no status sync has occurred, should not transition.
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.CREATING);
   }
 
@@ -809,13 +809,13 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     // Time has elapsed but no status sync has occurred, should not transition.
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.CREATING);
 
     // Sync again, now after the timeout - should transition.
     billingProjectBufferService.syncBillingProjectStatus();
     billingProjectBufferService.cleanBillingBuffer();
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ERROR);
   }
 
@@ -830,7 +830,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(AFTER_ASSIGNING_TIMEOUT_ELAPSED);
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ERROR);
   }
 
@@ -845,7 +845,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(BEFORE_ASSIGNING_TIMEOUT_ELAPSES);
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(assigning.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.ASSIGNING);
 
     DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
@@ -857,7 +857,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(BEFORE_CREATING_TIMEOUT_ELAPSES);
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(creating.getId()).get().getStatusEnum())
         .isEqualTo(BufferEntryStatus.CREATING);
   }
 

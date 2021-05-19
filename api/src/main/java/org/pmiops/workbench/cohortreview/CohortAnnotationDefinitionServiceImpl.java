@@ -32,7 +32,7 @@ public class CohortAnnotationDefinitionServiceImpl implements CohortAnnotationDe
 
   @Override
   public void delete(Long annotationDefinitionId) {
-    cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
+    cohortAnnotationDefinitionDao.deleteById(annotationDefinitionId);
   }
 
   @Override

@@ -23,7 +23,11 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
 
   @TestConfiguration
   @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
-  @Import({FireCloudServiceImpl.class, StorageConfig.class})
+  @Import({
+    FireCloudServiceImpl.class,
+    StorageConfig.class,
+    BaseIntegrationTest.Configuration.class
+  })
   static class Configuration {}
 
   @Test

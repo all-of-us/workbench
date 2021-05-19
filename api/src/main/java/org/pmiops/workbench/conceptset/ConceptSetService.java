@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -148,7 +149,7 @@ public class ConceptSetService {
   }
 
   public void delete(Long conceptSetId) {
-    conceptSetDao.delete(conceptSetId);
+    conceptSetDao.deleteById(conceptSetId);
   }
 
   public ConceptSet getConceptSet(Long workspaceId, Long conceptSetId) {
@@ -158,8 +159,9 @@ public class ConceptSetService {
   }
 
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
-    return ((List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds))
-        .stream().map(conceptSetMapper::dbModelToClient).collect(Collectors.toList());
+    return StreamSupport.stream(conceptSetDao.findAllById(conceptSetIds).spliterator(), false)
+        .map(conceptSetMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   public List<ConceptSet> findByWorkspaceId(long workspaceId) {
@@ -216,7 +218,13 @@ public class ConceptSetService {
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
     Set<DbConceptSetConceptId> dbConceptSetConceptIds =
-        conceptSetDao.findOne(conceptSet.getId()).getConceptSetConceptIds();
+        conceptSetDao
+            .findById(conceptSet.getId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Concept set %s does not exist", conceptSet.getId())))
+            .getConceptSetConceptIds();
     List<Criteria> criteriaList =
         cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
             conceptSet.getDomain().toString(), dbConceptSetConceptIds);
