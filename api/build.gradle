@@ -70,7 +70,6 @@ apply plugin: 'net.ltgt.apt-idea'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'war'
 
 // Artifact configurations derived from base configs. Configuration names
 // are concatenated by the Java plugin.
