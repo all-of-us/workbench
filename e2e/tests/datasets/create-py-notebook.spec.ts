@@ -1,7 +1,7 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Language, LinkText, ResourceCard} from 'app/text-labels';
+import { Language, LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';

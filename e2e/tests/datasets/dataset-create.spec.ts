@@ -51,7 +51,7 @@ describe('Dataset test', () => {
     await datasetPage.selectCohorts([cohortName]);
     await datasetPage.selectConceptSets([LinkText.Demographics]);
     const createModal = await datasetPage.clickCreateButton();
-    let datasetName = await createModal.createDataset();
+    const datasetName = await createModal.createDataset();
 
     // Verify create successful.
     await dataPage.openDatasetsSubtab();
@@ -70,8 +70,8 @@ describe('Dataset test', () => {
     await datasetEditPage.selectCohorts(['All Participants']);
     await datasetEditPage.clickExportButton();
 
-    page.goto(dataPageUrl);
-    await dataPage.waitForLoad()
+    await page.goto(dataPageUrl);
+    await dataPage.waitForLoad();
     await dataPage.openDatasetsSubtab();
     await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });

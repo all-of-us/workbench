@@ -31,7 +31,7 @@ describe('Dataset test', () => {
     await datasetPage.selectConceptSets([LinkText.Demographics, LinkText.AllSurveys]);
     const createModal = await datasetPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
-    page.goto(dataPageUrl);
+    await page.goto(dataPageUrl);
     await dataPage.waitForLoad();
 
     // Verify create successful

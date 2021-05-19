@@ -1,7 +1,7 @@
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
-import {Page} from 'puppeteer';
-import {Language, LinkText} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 
 export default class ExportToNotebookModal extends Modal {
@@ -29,14 +29,14 @@ export default class ExportToNotebookModal extends Modal {
     return new RadioButton(this.page, selector);
   }
 
-  async enterNotebookName(notebookName: string) {
+  async enterNotebookName(notebookName: string): Promise<Textbox> {
     const notebookNameInput = this.getNotebookNameInput();
-    return await notebookNameInput.type(notebookName);
+    return notebookNameInput.type(notebookName);
   }
 
-  async pickLanguage(language: Language = Language.Python) {
+  async pickLanguage(language: Language = Language.Python): Promise<void> {
     const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
-    return await radio.select();
+    return radio.select();
   }
 
   async clickExportButton() {
@@ -52,7 +52,7 @@ export default class ExportToNotebookModal extends Modal {
    * @param {Language} language Notebook programming language. Default value is Python.
    */
   async fillInModal(notebookName: string, language: Language = Language.Python): Promise<void> {
-    await this.enterNotebookName(notebookName)
+    await this.enterNotebookName(notebookName);
     await this.pickLanguage(language);
     return await this.clickExportButton();
   }

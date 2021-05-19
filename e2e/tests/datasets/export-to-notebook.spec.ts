@@ -31,7 +31,7 @@ describe('Export to notebook from dataset', () => {
     await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
-    page.goto(dataPageUrl);
+    await page.goto(dataPageUrl);
     await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);
