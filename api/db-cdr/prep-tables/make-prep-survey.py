@@ -7,9 +7,9 @@ from google.cloud import storage
 from io import StringIO
 
 # we will increment this as the row number as we write each row in each output file
-idControlled = 1
-idRegistered = 1
-idAll = 1
+id_controlled = 1
+id_registered = 1
+id_all = 1
 
 home_dir = "../csv"
 
@@ -53,6 +53,7 @@ def main():
 
     for name in surveys:
         rows = read_csv(name + '_' + date + '.csv')
+        print(rows)
 
         # open your file writers for this survey and write headers
         controlledWriter, registeredWriter, allWriter = \
@@ -60,10 +61,12 @@ def main():
 
         # we will use this when the rowNumber = 1 to add in as the first row
         rowNumber = 0
-        idControlled = 1
-        idRegistered = 1
-        idAll = 1
-        #print(idAll)
+        global id_controlled
+        global id_registered
+        global id_all
+        id_controlled = 1
+        id_registered = 1
+        id_all = 1
 
         # initializing these variables in the case that the topic is null
         topicIdAll = 0
@@ -76,8 +79,8 @@ def main():
                 field_annotation, field_annotation_array, question_label, question_code, \
                 text_validation, choices, section_header, min_value, \
                 max_value = parse_row_columns(row)
-                 # zahra stuff here
-                rowNumber +=1
+                # zahra stuff here
+                rowNumber += 1
 
                 itemFlags = {}
                 for item in annotation_flags:
@@ -91,25 +94,29 @@ def main():
                     if item not in annotation_flags:
                         splitCodes = item.split('=')
                         if answerSuppressed not in splitCodes:
-                        # in the case that it doesn't have a code ex: Launched 5/30/2017 (PTSC) & 12/10/2019 (CE).
+                            # in the case that it doesn't have a code ex: Launched 5/30/2017 (PTSC) & 12/10/2019 (CE).
                             if len(splitCodes) > 1:
-                                fieldNames[splitCodes[0].strip().lower()] = splitCodes[1].strip().lower()
+                                fieldNames[splitCodes[0].strip().lower()] = \
+                                    splitCodes[1].strip().lower()
 
                 # for the first row of survey
                 if rowNumber == 1:
-                    surveryIdAll = idAll
-                    print(idAll)
-                    writeRowAll(allWriter, 0, question_code, question_label, 'SURVEY',None, None,itemFlags,fieldNames)
+                    surveryIdAll = id_all
+                    writeRowAll(allWriter, 0, question_code, question_label,
+                                'SURVEY', None, None, itemFlags, fieldNames)
 
+                    surveryIdControlled = id_controlled
+                    writeRow(controlledWriter, 0, question_code, question_label,
+                             'SURVEY', None, None, itemFlags, 'controlled',
+                             fieldNames)
 
-                    surveryIdControlled = idControlled
-                    writeRow(controlledWriter, 0, question_code, question_label, 'SURVEY', None, None, itemFlags,'controlled', fieldNames)
-
-                    surveryIdRegistered = idRegistered
-                    writeRow(registeredWriter, 0, question_code, question_label, 'SURVEY', None, None, itemFlags,'registered', fieldNames)
+                    surveryIdRegistered = id_registered
+                    writeRow(registeredWriter, 0, question_code, question_label,
+                             'SURVEY', None, None, itemFlags, 'registered',
+                             fieldNames)
                     continue
 
-                 ############ Topic ############
+                ############ Topic ############
                 if len(row['Section Header']) > 0:
                     header = row['Section Header']
 
@@ -124,11 +131,22 @@ def main():
 
                     # get the concept codes for the topics and write topics into file
                     #topicCode = getTopicCode(header.replace("'", "\\'"))
-                    topicCode = query_topic_code(project, dataset, header.replace("'", "\\'"))
-                    topicIdAll = idAll
-                    writeRowAll(allWriter,surveryIdAll, topicCode, header,'TOPIC', None, None, itemFlags,fieldNames)
+                    topicCodes = query_topic_code(project, dataset, header.replace("'", "\\'"))
+                    for topicCode in topicCodes:
+                        print(topicCode.concept_code)
+                        topicIdAll = id_all
+                        writeRowAll(allWriter,surveryIdAll, topicCode.concept_code, header,'TOPIC', None, None, itemFlags,fieldNames)
 
                     # in the case that we have topic_suppressed we want to skip that row
+                    # if itemFlags["CONTROLLED_TOPIC_SUPPRESSED"] != 1:
+                    #     topicIdControlled = idControlled
+                    #     writeRow(controlledWriter,surveryIdControlled, topicCode, header
+                    #                 ,'TOPIC', None, None, itemFlags,'controlled',fieldNames)
+                    #
+                    # if itemFlags["REGISTERED_TOPIC_SUPPRESSED"] != 1:
+                    #     topicIdRegister = idRegistered
+                    #     writeRow(registeredWriter,surveryIdRegistered, topicCode, header
+                    #              ,'TOPIC', None, None,itemFlags,'register',fieldNames)
 
                  ############ Question and Answer ############
                  # if there is a topic use it otherwise use the survey as parent_id
@@ -147,8 +165,10 @@ def main():
                     isNumericAnswer = True
 
                 # the first row is the survey so we want to look at all other rows
-                questionIdAll = idAll
-                writeRowAll(allWriter,parentIdAll,question_code, question_label, 'QUESTION', minValue, maxValue, itemFlags,fieldNames)
+                questionIdAll = id_all
+                writeRowAll(allWriter, parentIdAll, question_code,
+                            question_label, 'QUESTION', minValue, maxValue,
+                            itemFlags, fieldNames)
 
                 # answers for outputAll file
 #                 addAllAnswers(allFile,choices, questionIdAll, None, None, itemFlags,fieldNames)
@@ -261,8 +281,8 @@ def open_writers_with_headers(name):
 
 def writeRowAll(writer, parent_id, code, name, item_type, min_val, max_val,
     flags, field_names):
-    global idAll
-    new_row = {'id': idAll, 'parent_id': parent_id, 'code': code,
+    global id_all
+    new_row = {'id': id_all, 'parent_id': parent_id, 'code': code,
                'name': name, 'type': item_type, 'min': min_val, 'max': max_val,
                'registered_topic_suppressed': flags[
                    "REGISTERED_TOPIC_SUPPRESSED"],
@@ -281,31 +301,38 @@ def writeRowAll(writer, parent_id, code, name, item_type, min_val, max_val,
         new_row['code'] = get_short_code(code, field_names)
 
     writer.writerow(new_row)
-    print(idAll)
-    idAll += 1
+    id_all += 1
+
 
 # builds the OutputControlled/OutputRegistered row that will get passed through the addRow function
-def writeRow(writer, parent_id, code, name, item_type, minValue, maxValue, flags, fileType,field_names):
-    global idControlled
-    dictRowControl = {'id': idControlled,'parent_id': parent_id,'code': code, 'name': name, 'type': item_type, 'min': minValue
-            , 'max': maxValue,'answers_bucketed': flags["CONTROLLED_ANSWERS_BUCKETED"] }
+def writeRow(writer, parent_id, code, name, item_type, minValue, maxValue,
+    flags, fileType, field_names):
+    global id_controlled
+    dictRowControl = {'id': id_controlled, 'parent_id': parent_id, 'code': code,
+                      'name': name, 'type': item_type, 'min': minValue
+        , 'max': maxValue,
+                      'answers_bucketed': flags["CONTROLLED_ANSWERS_BUCKETED"]}
 
     if item_type == 'QUESTION':
         dictRowControl['code'] = get_short_code(code, field_names)
 
-    global idRegistered
-    dictRowRegister = {'id': idRegistered,'parent_id': parent_id,'code': code, 'name': name, 'type': item_type, 'min': minValue
-            , 'max': maxValue,'answers_bucketed':flags["REGISTERED_ANSWERS_BUCKETED"] }
+    global id_registered
+    dictRowRegister = {'id': id_registered, 'parent_id': parent_id,
+                       'code': code,
+                       'name': name, 'type': item_type, 'min': minValue
+        , 'max': maxValue,
+                       'answers_bucketed': flags["REGISTERED_ANSWERS_BUCKETED"]}
 
     if item_type == 'QUESTION':
         dictRowRegister['code'] = get_short_code(code, field_names)
 
     if fileType == 'controlled':
         writer.writerow(dictRowControl)
-        idControlled +=1
+        id_controlled += 1
     else:
         writer.writerow(dictRowRegister)
-        idRegistered +=1
+        id_registered += 1
+
 
 # def addAllAnswers(writer,choices,parent_id, minValue, maxValue,flags,fieldNames):
 #     if choices != '':
