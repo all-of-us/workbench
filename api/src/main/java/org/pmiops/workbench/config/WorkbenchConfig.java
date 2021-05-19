@@ -104,9 +104,6 @@ public class WorkbenchConfig {
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
-    // TODO(RW-6034): rm after related code removal is release.
-    @Deprecated public Integer garbageCollectionUserCapacity;
-    @Deprecated public ArrayList<String> garbageCollectionUsers;
   }
 
   public static class FireCloudConfig {
