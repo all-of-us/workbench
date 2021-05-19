@@ -156,7 +156,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param workspaceIds
    */
   @Override
-  public void exportWorkspaces(List<Long> workspaceIds, Boolean backfill) {
+  public void exportWorkspaces(List<Long> workspaceIds, boolean backfill) {
     List<RdrWorkspace> rdrWorkspacesList;
     try {
       rdrWorkspacesList =
@@ -169,9 +169,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
-        if (backfill != null && backfill != true) {
-          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
-        }
+        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
       }
     } catch (ApiException ex) {
       log.severe(
