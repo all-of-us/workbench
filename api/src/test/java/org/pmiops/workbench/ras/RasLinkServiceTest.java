@@ -2,6 +2,7 @@ package org.pmiops.workbench.ras;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
@@ -24,6 +25,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.Application;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -54,15 +56,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@AutoConfigureMockMvc
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = Application.class)
+@AutoConfigureMockMvc
 @DataJpaTest
 public class RasLinkServiceTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
-  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
   private static final String AUTH_CODE = "code";
   private static final String REDIRECT_URL = "url";
@@ -99,61 +97,15 @@ public class RasLinkServiceTest {
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
 //  @Mock private static OpenIdConnectClient mockOidcClient;
-   @MockBean private static Provider<OpenIdConnectClient> mockOidcClientProvider;
+  @MockBean private static Provider<OpenIdConnectClient> mockOidcClientProvider;
 //  @Mock private static HttpTransport mockHttpTransport;
    @Mock private OpenIdConnectClient mockOidcClient;
-//
-//  @TestConfiguration
-//  @Import({
-//    RasLinkService.class,
-//    UserServiceTestConfiguration.class,
-//  })
-//  @MockBean({
-//    FireCloudService.class,
-//    ComplianceService.class,
-//    DirectoryService.class,
-//    UserServiceAuditor.class,
-//    FreeTierBillingService.class,
-//    HttpTransport.class,
-//    AccessTierService.class,
-//  })
-//  static class Configuration {
-//    @Bean
-//    Clock clock() {
-//      return CLOCK;
-//    }
-//
-//    @Bean
-//    Random random() {
-//      return new FakeLongRandom(123);
-//    }
-//
-//    @Bean
-//    @Qualifier(RAS_OIDC_CLIENT)
-//    OpenIdConnectClient rasOidcClient() {
-//      return mockOidcClient;
-//    }
-//
-//    @Bean
-//    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-//    public WorkbenchConfig getWorkbenchConfig() {
-//      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-//      config.accessRenewal.expiryDays = (long) 365;
-//      return config;
-//    }
-//
-//    @Bean
-//    @Scope("prototype")
-//    DbUser user() {
-//      return currentUser;
-//    }
-//  }
 
   @Before
   public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
     rasLinkService = new RasLinkService(userService, mockOidcClientProvider);
-    when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
-
+    doReturn(mockOidcClient).when(mockOidcClientProvider).get();
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");
     currentUser.setDisabled(false);
