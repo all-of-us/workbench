@@ -67,7 +67,6 @@ ENVIRONMENTS = {
     :accessTiers => {
       "registered" => {
         :source_cdr_project => "all-of-us-ehr-dev",
-        :source_cdr_wgs_project => "aou-genomics-curation-stable",
         :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
         :dest_cdr_project => "fc-aou-cdr-synth-stable",
         :auth_domain_group_email => "GROUP_all-of-us-registered-stable@firecloud.org",
