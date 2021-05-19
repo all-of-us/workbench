@@ -353,6 +353,7 @@ project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
 project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
                              'generate_appengine_cron_yaml'])
+project.tasks.explodeWar.dependsOn(project.tasks.bootWar)
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
