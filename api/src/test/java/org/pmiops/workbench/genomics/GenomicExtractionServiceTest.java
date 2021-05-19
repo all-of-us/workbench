@@ -297,12 +297,12 @@ public class GenomicExtractionServiceTest {
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ABORTED, FirecloudWorkflowStatus.ABORTED)
             .getWgsExtractCromwellSubmissionId(),
-        TerraJobStatus.FAILED);
+        TerraJobStatus.ABORTED);
     expectedStatuses.put(
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ABORTING, FirecloudWorkflowStatus.ABORTING)
             .getWgsExtractCromwellSubmissionId(),
-        TerraJobStatus.FAILED);
+        TerraJobStatus.ABORTING);
     expectedStatuses.put(
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ACCEPTED, FirecloudWorkflowStatus.QUEUED)
@@ -411,7 +411,8 @@ public class GenomicExtractionServiceTest {
   @Test
   public void abortGenomicExtractionJob() throws ApiException {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        createDbWgsExtractCromwellSubmission();
+        createSubmissionAndMockMonitorCall(
+            FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING);
 
     doNothing()
         .when(submissionsApi)
