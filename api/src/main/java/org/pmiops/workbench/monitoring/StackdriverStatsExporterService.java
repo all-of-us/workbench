@@ -2,7 +2,6 @@ package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
 import com.google.appengine.api.modules.ModulesException;
-import com.google.appengine.api.modules.ModulesService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
@@ -15,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.appengine.AppEngineModuleService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +38,11 @@ public class StackdriverStatsExporterService {
       ImmutableSet.of(PROJECT_ID_LABEL, LOCATION_LABEL, NAMESPACE_LABEL, NODE_ID_LABEL);
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private ModulesService modulesService;
+  private AppEngineModuleService modulesService;
   private Optional<String> spoofedNodeId;
 
   public StackdriverStatsExporterService(
-      Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
+      Provider<WorkbenchConfig> workbenchConfigProvider, AppEngineModuleService modulesService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
     this.initialized = false;

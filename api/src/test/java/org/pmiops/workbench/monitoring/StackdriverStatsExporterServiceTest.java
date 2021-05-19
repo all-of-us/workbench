@@ -6,11 +6,11 @@ import static org.mockito.Mockito.doThrow;
 
 import com.google.api.MonitoredResource;
 import com.google.appengine.api.modules.ModulesException;
-import com.google.appengine.api.modules.ModulesService;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.appengine.AppEngineModuleService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,12 @@ public class StackdriverStatsExporterServiceTest {
 
   private static final String PROJECT_ID = "fake-project";
   private static final String FOUND_NODE_ID = "node-11001001";
-  @Autowired private ModulesService mockModulesService;
+  @Autowired private AppEngineModuleService mockModulesService;
   @Autowired private StackdriverStatsExporterService exporterService;
 
   @TestConfiguration
   @Import(StackdriverStatsExporterService.class)
-  @MockBean(ModulesService.class)
+  @MockBean(AppEngineModuleService.class)
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
