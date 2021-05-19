@@ -256,9 +256,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public KernelTypeEnum getNotebookKernel(
       String workspaceNamespace, String workspaceName, String notebookName) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
-
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)

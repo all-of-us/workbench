@@ -715,6 +715,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
       String workspace, String workspaceName, String notebookName) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspace, workspaceName, WorkspaceAccessLevel.READER);
+
     return ResponseEntity.ok(
         new KernelTypeResponse()
             .kernelType(
