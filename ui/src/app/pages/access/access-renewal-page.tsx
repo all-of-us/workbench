@@ -1,22 +1,22 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {withRouteData} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {RadioButton} from 'app/components/inputs';
 import {FlexColumn, } from 'app/components/flex';
+import {Arrow, ClrIcon, withCircleBackground} from 'app/components/icons';
+import {RadioButton} from 'app/components/inputs';
+import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  displayDateWithoutHours,
   daysFromNow,
+  displayDateWithoutHours,
   withStyle,
 } from 'app/utils';
-import {withRouteData} from 'app/components/app-router';
-import {Arrow, withCircleBackground, ClrIcon} from 'app/components/icons'
 import {profileStore, useStore} from 'app/utils/stores';
-import {AoU} from 'app/components/text-wrappers';
 
 const {useState} = React;
 
@@ -43,17 +43,17 @@ const renewalStyle = {
     fontWeight: 500,
     height: 345,
     lineHeight: '22px',
-    margin:0,
+    margin: 0,
     padding: '0.5rem',
     width: 560
   }
-}
+};
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, title, TitleComponent, lastCompletion, nextReview, children, style}) => {
-    const daysRemaining = daysFromNow(nextReview)
+    const daysRemaining = daysFromNow(nextReview);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><TitleComponent/></div>
@@ -64,9 +64,9 @@ const RenewalCard = withStyle(renewalStyle.card)(
         <div>{`${displayDateWithoutHours(nextReview)} (${daysRemaining > 0 ? daysRemaining + ' days' : 'expired'})`}</div>
       </div>
       {children}
-    </FlexColumn>
+    </FlexColumn>;
   }
-)
+);
 
 const CompletedButton = ({buttonText, wasBypassed, style}:
   {buttonText: string, wasBypassed: boolean, style?: React.CSSProperties}) => <Button disabled={true}
@@ -80,13 +80,13 @@ const CompletedButton = ({buttonText, wasBypassed, style}:
                         ...style
                       }}>
     <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
-  </Button>
+  </Button>;
 
 const getExpirationTimeForModule = fp.curry((modules, moduleName) => {
-  return fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules)
-})
+  return fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
+});
 
-const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > 330
+const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > 330;
 
 export const AccessRenewalPage = fp.flow(
   withRouteData,
@@ -101,8 +101,8 @@ export const AccessRenewalPage = fp.flow(
     complianceTrainingBypassTime,
     renewableAccessModules: {modules}},
   } = useStore(profileStore);
-  const [publications, setPublications] = useState<boolean>()
-  const getExpirationTimeFor = getExpirationTimeForModule(modules)
+  const [publications, setPublications] = useState<boolean>();
+  const getExpirationTimeFor = getExpirationTimeForModule(modules);
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
@@ -121,7 +121,7 @@ export const AccessRenewalPage = fp.flow(
                 lastCompletion={profileLastConfirmedTime}
                 nextReview={getExpirationTimeFor('profileConfirmation')}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
-        <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile 
+        <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
         {
@@ -179,4 +179,4 @@ export const AccessRenewalPage = fp.flow(
       </RenewalCard>
     </div>
   </FadeBox>;
-})
+});

@@ -358,7 +358,7 @@ export function displayDateWithoutHours(time: number): string {
   return date.toLocaleString('en-us', {month: 'short', day: 'numeric', year: 'numeric'});
 }
 
-export const daysFromNow = (timeInMillis: number): number => Math.floor((timeInMillis - Date.now()) / 1000 / 60 / 60 /  24)
+export const daysFromNow = (timeInMillis: number): number => Math.floor((timeInMillis - Date.now()) / 1000 / 60 / 60 /  24);
 
 // To convert datetime strings into human-readable dates
 export function displayDate(time: Number): string {
