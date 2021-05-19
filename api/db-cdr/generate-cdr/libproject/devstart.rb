@@ -301,7 +301,7 @@ def publish_cdr(cmd_name, args)
         acl_json["access"].push({ "userByEmail" => app_sa, "role" => "READER"})
       end
 
-      return acl_json
+      acl_json
     end
   end
 end
@@ -362,7 +362,7 @@ def publish_cdr_wgs(cmd_name, args)
         common.status "Adding #{extraction_proxy_group} as a READER..."
         acl_json["access"].push({"groupByEmail" => extraction_proxy_group, "role" => "READER"})
       end
-      return acl_json
+      acl_json
     end
   end
 end
@@ -373,16 +373,11 @@ Common.register_command({
   :fn => ->(*args) { publish_cdr_wgs("publish-cdr-wgs", args) }
 })
 
-def create_wgs_extraction_dataset(cmd_name, args)
+def create_wgs_extraction_datasets(cmd_name, args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
 
-  op.add_option(
-    "--bq-dataset [dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BigQuery dataset name to be created"
-  )
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -401,35 +396,48 @@ def create_wgs_extraction_dataset(cmd_name, args)
     "--ttl [ttl]",
     ->(opts, v) { opts.ttl = v},
     "Add default ttl to dataset tables. Given in seconds.")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier and opts.ttl }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.tier and opts.ttl }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
-  tier = env.fetch(:accessTiers)[op.opts.tier]
   proxy_group = must_get_wgs_proxy_group(op.opts.project)
+  cdr_project = env.fetch(:accessTiers)[op.opts.tier].fetch(:dest_cdr_project)
+
+  extract_config = get_config(op.opts.project).fetch("wgsCohortExtraction", {})
+  fq_datasets = [
+    "extractionCohortsDataset",
+    "extractionDestinationDataset",
+    "extractionTempTablesDataset"
+  ].map do |key|
+    fq_ds = extract_config.fetch(key)
+    raise ArgumentError.new("missing config value for #{key} in project #{op.opts.project}") unless fq_ds
+    raise ArgumentError.new("config value (#{fq_ds}) doesn't match expected CDR project for tier (#{cdr_project})") unless fq_ds.start_with? "#{cdr_project}."
+    fq_ds.sub("\.", ":")
+  end
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
-    common.run_inline %W{bq mk --default_table_expiration #{op.opts.ttl}  --dataset #{dest_fq_dataset}}
+    for fq_dataset in fq_datasets do
+      common.run_inline %W{bq mk -f --default_table_expiration #{op.opts.ttl}  --dataset #{fq_dataset}}
 
-    bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
-      if existing_groups.includes?(proxy_group)
-        common.status "#{proxy_group} already in ACL, skipping..."
-      else
-        common.status "Adding #{proxy_group} as a WRITER..."
-        acl_json["access"].push({"groupByEmail" => proxy_group, "role" => "WRITER"})
+      bq_update_acl(fq_dataset) do |acl_json, existing_groups, _existing_users|
+        if existing_groups.include?(proxy_group)
+          common.status "#{proxy_group} already in ACL, skipping..."
+        else
+          common.status "Adding #{proxy_group} as a WRITER..."
+          acl_json["access"].push({"groupByEmail" => proxy_group, "role" => "WRITER"})
+        end
+
+        acl_json
       end
-
-      return acl_json
     end
   end
 end
 
 Common.register_command({
-  :invocation => "create-wgs-extraction-dataset",
+  :invocation => "create-wgs-extraction-datasets",
   :description => "Create datasets with TTL tables for WGS cohort extraction",
-  :fn => ->(*args) { create_wgs_extraction_dataset("create-wgs-extraction-dataset", args) }
+  :fn => ->(*args) { create_wgs_extraction_datasets("create-wgs-extraction-datasets", args) }
 })
