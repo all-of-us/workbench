@@ -33,7 +33,7 @@ export const styles = {
   },
 
   circleBackground: {
-    background: `${addOpacity(colors.accent, 0.15)}`, 
+    background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
