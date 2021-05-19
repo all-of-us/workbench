@@ -488,9 +488,6 @@ dependencies {
   // There is no jdk11, jdk8 still works for java 11.
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
-  // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-
   __tools__Compile 'commons-cli:commons-cli:1.4'
   __tools__Compile 'com.opencsv:opencsv:4.6'
 
