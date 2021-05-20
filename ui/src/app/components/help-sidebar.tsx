@@ -66,9 +66,9 @@ import {
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {dataSetApi} from 'services/swagger-fetch-clients';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
-import {dataSetApi} from "../services/swagger-fetch-clients";
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -236,7 +236,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
-  extractionJobs: Array<GenomicExtractionJob>
+  extractionJobs: Array<GenomicExtractionJob>;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -603,25 +603,21 @@ export const HelpSidebar = fp.flow(
       let status;
       // If any jobs are currently running, show running icon.
       if (jobsByStatus[TerraJobStatus.RUNNING]) {
-        status = TerraJobStatus.RUNNING
-      }
-      // Otherwise, if any jobs have failed recently, show error icon.
-      else if (
+        status = TerraJobStatus.RUNNING;
+      } else if (
           jobsByStatus[TerraJobStatus.FAILED]
           && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
             jobsByStatus[TerraJobStatus.FAILED]
           )
       ) {
-        status = TerraJobStatus.FAILED
-      }
-      // Otherwise, if any jobs have completed succesfully recently, show success icon.
-      else if (
+        status = TerraJobStatus.FAILED;
+      } else if (
           jobsByStatus[TerraJobStatus.SUCCEEDED]
           && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
-          jobsByStatus[TerraJobStatus.SUCCEEDED]
+            jobsByStatus[TerraJobStatus.SUCCEEDED]
           )
       ) {
-        status = TerraJobStatus.SUCCEEDED
+        status = TerraJobStatus.SUCCEEDED;
       }
 
       // We always want to show the DNA icon.
@@ -632,23 +628,23 @@ export const HelpSidebar = fp.flow(
         <FlexRow data-test-id='extraction-status-icon-container' style={styles.statusIconContainer}>
           {
             switchCase(status,
-                [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
-                  ...styles.runtimeStatusIcon,
-                  ...styles.rotate,
-                  color: colors.runtimeStatus.starting,
-                }}/>],
-                [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
-                  ...styles.runtimeStatusIcon,
-                  color: colors.runtimeStatus.error,
-                }}/>],
-                [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
-                  ...styles.runtimeStatusIcon,
-                  color: colors.runtimeStatus.running,
-                }}/>]
+              [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
+                ...styles.runtimeStatusIcon,
+                ...styles.rotate,
+                color: colors.runtimeStatus.starting,
+              }}/>],
+              [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
+                ...styles.runtimeStatusIcon,
+                color: colors.runtimeStatus.error,
+              }}/>],
+              [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
+                ...styles.runtimeStatusIcon,
+                color: colors.runtimeStatus.running,
+              }}/>]
             )
           }
         </FlexRow>
-      </FlexRow>
+      </FlexRow>;
     }
 
     get sidebarStyle() {
@@ -781,17 +777,17 @@ export const HelpSidebar = fp.flow(
                        }}>
                     {
                       switchCase(icon.id,
-                          ['dataDictionary',
-                            () => <a href={supportUrls.dataDictionary} target='_blank'>
+                        ['dataDictionary',
+                          () => <a href={supportUrls.dataDictionary} target='_blank'>
                               <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                             </a>
-                          ],
+                        ],
                           ['runtime', () => this.displayRuntimeIcon(icon)],
                           ['genomicExtractions', () => this.displayExtractionIcon(icon)],
-                          [DEFAULT, () => icon.faIcon === null
+                        [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
                               : this.displayFontAwesomeIcon(icon)
-                          ]
+                        ]
                       )
                     }
                   </div>
