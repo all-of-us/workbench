@@ -184,7 +184,7 @@ def main():
                 print("writing in rows with a question")
 
                 # answers for outputAll file
-                add_all_answers(all_writer,question_code choices, question_id_all, None, None, item_flags, field_names)
+                add_all_answers(all_writer, question_code choices, question_id_all, None, None, item_flags, field_names)
                 print("writing in rows with an answer")
 
                 if item_flags["CONTROLLED_QUESTION_SUPPRESSED"] != 1:
