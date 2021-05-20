@@ -58,6 +58,7 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   CdrVersionTiersResponse,
@@ -66,7 +67,6 @@ import {
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
 
