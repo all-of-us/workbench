@@ -21,7 +21,7 @@ import {profileStore, useStore} from 'app/utils/stores';
 
 const {useState} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
-// In an effort to allow userts to sync all of their training, we are setting at 330 to start.
+// In an effort to allow users to sync all of their training, we are setting at 330 to start.
 const LOOKBACK_PERIOD = 330;
 
 const renewalStyle = {
