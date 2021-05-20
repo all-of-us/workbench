@@ -20,6 +20,8 @@ import {
 import {profileStore, useStore} from 'app/utils/stores';
 
 const {useState} = React;
+// Lookback period - at what point do we give users the option to update their compliance items?
+// In an effort to allow userts to sync all of their training, we are setting at 330 to start.
 const LOOKBACK_PERIOD = 330;
 
 const renewalStyle = {
@@ -63,7 +65,7 @@ const RenewalCard = withStyle(renewalStyle.card)(
         <div>Last Updated On:</div>
         <div>Next Review:</div>
         <div>{`${displayDateWithoutHours(lastCompletion)}`}</div>
-        <div>{`${displayDateWithoutHours(nextReview)} (${daysRemaining > 0 ? daysRemaining + ' days' : 'expired'})`}</div>
+        <div>{`${displayDateWithoutHours(nextReview)} (${daysRemaining >= 0 ? daysRemaining + ' days' : 'expired'})`}</div>
       </div>
       {children}
     </FlexColumn>;
@@ -84,10 +86,6 @@ const CompletedButton = ({buttonText, wasBypassed, style}:
     <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
   </Button>;
 
-const getExpirationTimeForModule = fp.curry((modules, moduleName) => {
-  return fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
-});
-
 const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
 
 export const AccessRenewalPage = fp.flow(
@@ -106,7 +104,7 @@ export const AccessRenewalPage = fp.flow(
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
-  const getExpirationTimeFor = getExpirationTimeForModule(modules);
+  const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
@@ -157,7 +155,7 @@ export const AccessRenewalPage = fp.flow(
           <label htmlFor={reportId}>Report submitted</label>
         </div>
       </RenewalCard>
-      {/* Code of Conduct */}
+      {/* Compliance Training */}
       <RenewalCard step={3}
                    TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
                    lastCompletion={complianceTrainingCompletionTime}
@@ -166,7 +164,7 @@ export const AccessRenewalPage = fp.flow(
           the compliance requirements for using the <AoU/> Dataset.
         </div>
         {
-          !!complianceTrainingBypassTime || isComplete(getExpirationTimeFor('complianceTraining'))
+          complianceTrainingBypassTime || isComplete(getExpirationTimeFor('complianceTraining'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={!!complianceTrainingBypassTime}/>
             : <Button style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>Complete Training</Button>
         }
@@ -178,7 +176,7 @@ export const AccessRenewalPage = fp.flow(
                    nextReview={getExpirationTimeFor('dataUseAgreement')}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         {
-          !!dataUseAgreementBypassTime || isComplete(getExpirationTimeFor('dataUseAgreement'))
+          dataUseAgreementBypassTime || isComplete(getExpirationTimeFor('dataUseAgreement'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={!!dataUseAgreementBypassTime} />
             : <Button style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>View & Sign</Button>
         }

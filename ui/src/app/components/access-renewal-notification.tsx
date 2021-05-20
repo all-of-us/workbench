@@ -103,5 +103,5 @@ const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => 
 export const AccessRenewalNotificationMaybe = (props: {profile: Profile}) => {
   const daysRemaining = maybeDaysRemaining(props.profile);
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
-  return Math.abs(daysRemaining) >= 0 ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
+  return daysRemaining !== undefined ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
 };
