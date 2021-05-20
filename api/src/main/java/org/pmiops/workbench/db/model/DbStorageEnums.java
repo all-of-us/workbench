@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
+import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -496,13 +497,29 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_SURVEY.get(survey);
   }
 
+  private static final BiMap<TerraJobStatus, Short> CLIENT_TO_STORAGE_TERRA_JOB_STATUS =
+      ImmutableBiMap.<TerraJobStatus, Short>builder()
+          .put(TerraJobStatus.RUNNING, (short) 0)
+          .put(TerraJobStatus.FAILED, (short) 1)
+          .put(TerraJobStatus.SUCCEEDED, (short) 2)
+          .put(TerraJobStatus.ABORTED, (short) 3)
+          .put(TerraJobStatus.ABORTING, (short) 4)
+          .build();
+
+  public static TerraJobStatus terraJobStatusFromStorage(Short terraJobStatus) {
+    return CLIENT_TO_STORAGE_TERRA_JOB_STATUS.inverse().get(terraJobStatus);
+  }
+
+  public static Short terraJobStatusToStorage(TerraJobStatus terraJobStatus) {
+    return CLIENT_TO_STORAGE_TERRA_JOB_STATUS.get(terraJobStatus);
+  }
+
   // WorkspaceActiveStatus
   private static final BiMap<WorkspaceActiveStatus, Short>
       CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS =
           ImmutableBiMap.<WorkspaceActiveStatus, Short>builder()
               .put(WorkspaceActiveStatus.ACTIVE, (short) 0)
               .put(WorkspaceActiveStatus.DELETED, (short) 1)
-              .put(WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION, (short) 2)
               .build();
 
   public static WorkspaceActiveStatus workspaceActiveStatusFromStorage(Short s) {

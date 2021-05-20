@@ -1,10 +1,11 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 
 describe('Create dataset and export to notebook at same time', () => {
   beforeEach(async () => {
@@ -32,10 +33,18 @@ describe('Create dataset and export to notebook at same time', () => {
     expect(await previewTable.exists()).toBe(true);
     expect(await previewTable.getRowCount()).toBeGreaterThan(1);
 
-    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
+    const createModal = await datasetBuildPage.clickCreateButton();
     const newNotebookName = makeRandomName();
-    const newDatasetName = await saveModal.saveDataset({ exportToNotebook: true, notebookName: newNotebookName });
+    const newDatasetName = await createModal.createDataset();
     await waitWhileLoading(page);
+
+    await datasetBuildPage.clickExportButton();
+    const exportModal = new ExportToNotebookModal(page);
+    await exportModal.waitForLoad();
+
+    await exportModal.enterNotebookName(newNotebookName);
+    await exportModal.pickLanguage(Language.Python);
+    await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
     const notebookPreviewPage = new NotebookPreviewPage(page);
@@ -52,17 +61,13 @@ describe('Create dataset and export to notebook at same time', () => {
 
     // Verify new notebook exists.
     const resourceCard = new DataResourceCard(page);
-    const notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+    let notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(notebookExists).toBe(true);
-
-    const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
 
     // Delete notebook
     await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
-
-    // Resource cards count decrease by 1.
-    const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
-    expect(newCardsCount).toBe(origCardsCount - 1);
+    notebookExists = await resourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+    expect(notebookExists).toBe(false);
 
     // Delete Dataset.
     await dataPage.openDatasetsSubtab();

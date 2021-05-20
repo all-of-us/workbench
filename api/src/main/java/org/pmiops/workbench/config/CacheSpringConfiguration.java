@@ -41,7 +41,7 @@ public class CacheSpringConfiguration {
                 if (configClass == null) {
                   throw new IllegalArgumentException("Invalid config key: " + key);
                 }
-                DbConfig config = configDao.findOne(key);
+                DbConfig config = configDao.findById(key).orElse(null);
                 if (config == null) {
                   return null;
                 }

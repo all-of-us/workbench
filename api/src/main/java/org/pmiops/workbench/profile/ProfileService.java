@@ -1,7 +1,6 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -126,17 +124,13 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
+    final List<RenewableAccessModuleStatus> modulesStatus =
+        userService.getRenewableAccessModuleStatus(userLite);
+
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
-            .modules(
-                ImmutableList.of(
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.COMPLIANCETRAINING)
-                        .hasExpired(false),
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.DATAUSEAGREEMENT)
-                        .hasExpired(false)))
-            .anyModuleHasExpired(false);
+            .modules(modulesStatus)
+            .anyModuleHasExpired(modulesStatus.stream().anyMatch(x -> x.getHasExpired()));
 
     return profileMapper.toModel(
         user,
@@ -241,9 +235,6 @@ public class ProfileService {
       dbDemographicSurvey.setUser(user);
     }
     user.setDemographicSurvey(dbDemographicSurvey);
-
-    user.setLastModifiedTime(now);
-
     userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?

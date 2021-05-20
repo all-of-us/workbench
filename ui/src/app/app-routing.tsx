@@ -33,6 +33,8 @@ import {ParticipantsTable} from './pages/data/cohort-review/table-page';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
+import {DataComponent} from './pages/data/data-component';
+import {DataSetComponent} from './pages/data/data-set/data-set-component';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -63,6 +65,8 @@ const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
+const DataComponentPage = withRouteData(DataComponent);
+const DataSetComponentPage = withRouteData(DataSetComponent);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const DetailPagePage = withRouteData(DetailPage);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -72,7 +76,6 @@ const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const ParticipantsTablePage = withRouteData(ParticipantsTable);
-const ProfilePagePage = withRouteData(ProfilePage); // again bad sorry
 const QueryReportPage = withRouteData(QueryReport);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
@@ -193,6 +196,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             minimizeChrome: true
           }} />}
       />
+      <AppRoute path='/profile' component={() => <ProfilePage routeData={{title: 'Profile'}}/>}/>
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
       <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
@@ -200,10 +204,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-        />
-        <AppRoute
-          path='/profile'
-          component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
         />
         <AppRoute
           path='/workspaces'
@@ -281,6 +281,30 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             contentFullHeightOverride: true,
             pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data'
+          component={() => <DataComponentPage routeData={{
+            title: 'Data Page',
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: 'data'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/data-sets'
+          component={() => <DataSetComponentPage routeData={{
+            title: 'Dataset Page',
+            breadcrumb: BreadcrumbType.Dataset,
+            pageKey: 'datasetBuilder'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
+          component={() => <DataSetComponentPage routeData={{
+            title: 'Edit Dataset',
+            breadcrumb: BreadcrumbType.Dataset,
+            pageKey: 'datasetBuilder'
           }}/>}
         />
         <AppRoute

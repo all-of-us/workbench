@@ -1,10 +1,7 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.dataset;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -49,19 +46,21 @@ import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
-import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
@@ -81,7 +80,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-// TODO(calbach): Move this test to the correct package.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -97,42 +95,33 @@ public class DataSetServiceTest {
                   .setValue(Long.toString(101L))
                   .build())
           .build();
-  private static final ImmutableList<Long> COHORT_IDS = ImmutableList.of(101L, 102L);
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
   private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
   private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
-  @Autowired private BigQueryService bigQueryService;
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
-  @Autowired private ConceptBigQueryService conceptBigQueryService;
-  @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
-  @Autowired private DataSetMapper dataSetMapper;
   @Autowired private CohortQueryBuilder mockCohortQueryBuilder;
+  @Autowired private BigQueryService mockBigQueryService;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private DataSetServiceImpl dataSetServiceImpl;
 
-  @MockBean private BigQueryService mockBigQueryService;
-  @MockBean private CohortDao mockCohortDao;
-
+  private DbWorkspace workspace;
   private DbCohort cohort;
-  private DataSetServiceImpl dataSetServiceImpl;
 
   @TestConfiguration
-  @Import({DataSetMapperImpl.class})
+  @Import({DataSetMapperImpl.class, DataSetServiceImpl.class})
   @MockBean({
-    CdrBigQuerySchemaConfigService.class,
+    BigQueryService.class,
     CommonMappers.class,
     CohortService.class,
     ConceptBigQueryService.class,
-    ConceptSetDao.class,
     ConceptSetService.class,
-    CohortQueryBuilder.class,
-    DataSetDao.class,
-    DSLinkingDao.class
+    CohortQueryBuilder.class
   })
   static class Configuration {
     @Bean
@@ -148,34 +137,19 @@ public class DataSetServiceTest {
 
   @Before
   public void setUp() {
-    dataSetServiceImpl =
-        new DataSetServiceImpl(
-            bigQueryService,
-            cdrBigQuerySchemaConfigService,
-            cohortDao,
-            conceptBigQueryService,
-            conceptSetDao,
-            mockCohortQueryBuilder,
-            dataSetDao,
-            dsLinkingDao,
-            dsDataDictionaryDao,
-            dataSetMapper,
-            CLOCK);
-
-    cohort = buildSimpleCohort();
-    when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
+    workspace = workspaceDao.save(new DbWorkspace());
+    cohort = cohortDao.save(buildSimpleCohort(workspace));
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
   }
 
-  private DbCohort buildSimpleCohort() {
+  private DbCohort buildSimpleCohort(DbWorkspace workspace) {
     final SearchRequest searchRequest = SearchRequests.males();
     final String cohortCriteria = new Gson().toJson(searchRequest);
 
     final DbCohort cohortDbModel = new DbCohort();
-    cohortDbModel.setCohortId(101L);
     cohortDbModel.setType("foo");
-    cohortDbModel.setWorkspaceId(1L);
+    cohortDbModel.setWorkspaceId(workspace.getWorkspaceId());
     cohortDbModel.setCriteria(cohortCriteria);
     return cohortDbModel;
   }
@@ -193,10 +167,11 @@ public class DataSetServiceTest {
   }
 
   private static DataSetRequest buildEmptyRequest() {
-    final DataSetRequest invalidRequest = new DataSetRequest();
-    invalidRequest.setDomainValuePairs(Collections.emptyList());
-    invalidRequest.setPrePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
-    return invalidRequest;
+    return new DataSetRequest()
+        .cohortIds(Collections.emptyList())
+        .conceptSetIds(Collections.emptyList())
+        .domainValuePairs(Collections.emptyList())
+        .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
   }
 
   @Test(expected = BadRequestException.class)
@@ -209,7 +184,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testGetsCohortQueryStringAndCollectsNamedParameters() {
-    final DbCohort cohortDbModel = buildSimpleCohort();
+    final DbCohort cohortDbModel = buildSimpleCohort(workspace);
     final QueryAndParameters queryAndParameters =
         dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
     assertThat(queryAndParameters.getQuery()).isNotEmpty();
@@ -427,74 +402,50 @@ public class DataSetServiceTest {
   @Test
   public void testDomainToBigQueryConfig() {
     mockLinkingTableQuery(ImmutableList.of("FROM `" + TEST_CDR_TABLE + ".person` person"));
+
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
+
     final DataSetRequest dataSetRequest =
         new DataSetRequest()
-            .conceptSetIds(Collections.emptyList())
-            .cohortIds(Collections.emptyList())
+            .conceptSetIds(ImmutableList.of(cohort.getCohortId()))
+            .cohortIds(ImmutableList.of(dbConceptSet.getConceptSetId()))
             .domainValuePairs(ImmutableList.of(new DomainValuePair()))
             .name("blah")
             .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-            .cohortIds(COHORT_IDS)
+            .cohortIds(ImmutableList.of(cohort.getCohortId()))
             .domainValuePairs(
                 ImmutableList.of(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID")));
-    final Gson gson = new Gson();
-    final String cohortCriteriaJson =
-        gson.toJson(
-            new SearchRequest()
-                .includes(Collections.emptyList())
-                .excludes(Collections.emptyList())
-                .dataFilters(Collections.emptyList()),
-            SearchRequest.class);
-
-    final DbCohort dbCohort = new DbCohort();
-    dbCohort.setCriteria(cohortCriteriaJson);
-    dbCohort.setCohortId(COHORT_IDS.get(0));
-
-    doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
 
     final Map<String, QueryJobConfiguration> result =
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
     assertThat(result).hasSize(1);
     assertThat(result.get("PERSON").getNamedParameters()).hasSize(1);
-    assertThat(result.get("PERSON").getNamedParameters().get("foo_101").getValue())
-        .isEqualTo("101");
+    assertThat(result.get("PERSON").getNamedParameters().get("foo_1").getValue()).isEqualTo("101");
   }
 
   @Test
-  public void testFITBITDomainToBigQueryConfig() {
+  public void testFitbitDomainToBigQueryConfig() {
     mockLinkingTableQuery(
         ImmutableList.of(
             "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level"));
-    mockDsLinkingTableForFitbit();
+    setupDsLinkingTableForFitbit();
     final DataSetRequest dataSetRequest =
         new DataSetRequest()
-            .conceptSetIds(Collections.emptyList())
-            .cohortIds(Collections.emptyList())
+            .conceptSetIds(ImmutableList.of())
+            .cohortIds(ImmutableList.of(cohort.getCohortId()))
             .domainValuePairs(ImmutableList.of(new DomainValuePair()))
             .name("blah")
             .prePackagedConceptSet(
                 ImmutableList.of(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))
-            .cohortIds(Collections.emptyList())
             .domainValuePairs(
                 ImmutableList.of(
                     new DomainValuePair().domain(Domain.FITBIT_HEART_RATE_LEVEL).value("PERSON_ID"),
                     new DomainValuePair()
                         .domain(Domain.FITBIT_HEART_RATE_LEVEL)
                         .value("DATETIME")));
-    final Gson gson = new Gson();
-    final String cohortCriteriaJson =
-        gson.toJson(
-            new SearchRequest()
-                .includes(Collections.emptyList())
-                .excludes(Collections.emptyList())
-                .dataFilters(Collections.emptyList()),
-            SearchRequest.class);
-
-    final DbCohort dbCohort = new DbCohort();
-    dbCohort.setCriteria(cohortCriteriaJson);
-    dbCohort.setCohortId(COHORT_IDS.get(0));
-
-    doReturn(ImmutableList.of(dbCohort)).when(mockCohortDao).findAllByCohortIdIn(anyList());
 
     final Map<String, QueryJobConfiguration> result =
         dataSetServiceImpl.domainToBigQueryConfig(dataSetRequest);
@@ -515,11 +466,10 @@ public class DataSetServiceTest {
   @Test
   public void testGetPersonIdsWithWholeGenome_cohorts() {
     mockPersonIdQuery();
-    when(cohortDao.findAllByCohortIdIn(anyList()))
-        .thenReturn(ImmutableList.of(buildSimpleCohort(), buildSimpleCohort()));
+    DbCohort cohort2 = cohortDao.save(buildSimpleCohort(workspace));
 
     DbDataset dataset = new DbDataset();
-    dataset.setCohortIds(ImmutableList.of(1L, 2L));
+    dataset.setCohortIds(ImmutableList.of(cohort.getCohortId(), cohort2.getCohortId()));
     dataSetServiceImpl.getPersonIdsWithWholeGenome(dataset);
 
     // Two participant criteria, one per cohort.
@@ -555,80 +505,61 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void testGetDbDataSets_cohort() {
-    when(cohortDao.findOne(cohort.getCohortId())).thenReturn(cohort);
-
+  public void testGetDataSets_cohort() {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
-    dataSetServiceImpl.saveDataSet(dbDataset);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
-    when(dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(
-            cohort.getCohortId(), cohort.getWorkspaceId()))
-        .thenReturn(ImmutableList.of(dbDataset));
-
-    List<DbDataset> dbDatasets =
-        dataSetServiceImpl.getDbDataSets(
+    List<DataSet> datasets =
+        dataSetServiceImpl.getDataSets(
             cohort.getWorkspaceId(), ResourceType.COHORT, cohort.getCohortId());
-    assertThat(dbDatasets.size()).isEqualTo(1);
-    assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
+    assertThat(datasets).containsExactly(dataset);
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetDbDataSets_cohortWrongWorkspace() {
-    when(cohortDao.findOne(cohort.getCohortId())).thenReturn(cohort);
-
+  public void testGetDataSets_cohortWrongWorkspace() {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    dataSetServiceImpl.getDbDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
+    dataSetServiceImpl.getDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
   }
 
   @Test
-  public void testGetDbDataSets_conceptSet() {
-    long WORKSPACE_ID = 1L;
-
+  public void testGetDataSets_conceptSet() {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(3L);
-    dbConceptSet.setWorkspaceId(WORKSPACE_ID);
-
-    when(conceptSetDao.findOne(dbConceptSet.getConceptSetId())).thenReturn(dbConceptSet);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
 
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-    dbDataset.setWorkspaceId(WORKSPACE_ID);
-    dataSetServiceImpl.saveDataSet(dbDataset);
+    dbDataset.setWorkspaceId(workspace.getWorkspaceId());
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
 
-    when(dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(
-            dbConceptSet.getConceptSetId(), WORKSPACE_ID))
-        .thenReturn(ImmutableList.of(dbDataset));
-
-    List<DbDataset> dbDatasets =
-        dataSetServiceImpl.getDbDataSets(
-            WORKSPACE_ID, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
-    assertThat(dbDatasets.size()).isEqualTo(1);
-    assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
+    List<DataSet> datasets =
+        dataSetServiceImpl.getDataSets(
+            workspace.getWorkspaceId(), ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    assertThat(datasets).containsExactly(dataset);
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetDbDataSets_conceptSetWrongWorkspace() {
+  public void testGetDataSets_conceptSetWrongWorkspace() {
     long WORKSPACE_ID = 1L;
 
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(3L);
     dbConceptSet.setWorkspaceId(WORKSPACE_ID);
-
-    when(conceptSetDao.findOne(dbConceptSet.getConceptSetId())).thenReturn(dbConceptSet);
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
 
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
     dbDataset.setWorkspaceId(WORKSPACE_ID);
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    dataSetServiceImpl.getDbDataSets(
-        101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    dataSetServiceImpl.getDataSets(101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
   }
 
   @Test(expected = NotFoundException.class)
@@ -636,10 +567,6 @@ public class DataSetServiceTest {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setDataSetId(1L);
     dbDataset.setWorkspaceId(2L);
-
-    when(dataSetDao.findByDataSetIdAndWorkspaceId(
-            dbDataset.getDataSetId(), dbDataset.getWorkspaceId()))
-        .thenReturn(Optional.empty());
 
     DataSetRequest request = buildEmptyRequest();
     dataSetServiceImpl.updateDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId(), request);
@@ -650,9 +577,6 @@ public class DataSetServiceTest {
     DbDataset dbDataset = new DbDataset();
     dbDataset.setDataSetId(1L);
     dbDataset.setWorkspaceId(2L);
-
-    when(dataSetDao.findByDataSetIdAndWorkspaceId(anyLong(), anyLong()))
-        .thenReturn(Optional.empty());
 
     dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
   }
@@ -672,25 +596,26 @@ public class DataSetServiceTest {
         .getTableFieldsFromDomain(Domain.MEASUREMENT);
   }
 
-  private void mockDsLinkingTableForFitbit() {
-    DbDSLinking dbDSLinkingFitbit_personId = new DbDSLinking();
-    dbDSLinkingFitbit_personId.setDenormalizedName("PERSON_ID");
-    dbDSLinkingFitbit_personId.setDomain(Domain.FITBIT_HEART_RATE_LEVEL.name());
-    dbDSLinkingFitbit_personId.setOmopSql("heart_rate_minute_level.PERSON_ID\n");
-    dbDSLinkingFitbit_personId.setJoinValue(
-        "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level");
+  private String normalizeDomainName(Domain d) {
+    return StringUtils.capitalize(d.name().toLowerCase());
+  }
 
-    DbDSLinking dbDSLinkingFitbit_date = new DbDSLinking();
-    dbDSLinkingFitbit_date.setDenormalizedName("DATETIME");
-    dbDSLinkingFitbit_date.setDomain(Domain.FITBIT_HEART_RATE_LEVEL.name());
-    dbDSLinkingFitbit_date.setOmopSql("CAST(heart_rate_minute_level.datetime as DATE) as date");
-    dbDSLinkingFitbit_date.setJoinValue(
+  private void setupDsLinkingTableForFitbit() {
+    DbDSLinking dbDSLinkingFitbitPersonId = new DbDSLinking();
+    dbDSLinkingFitbitPersonId.setDenormalizedName("PERSON_ID");
+    dbDSLinkingFitbitPersonId.setDomain(normalizeDomainName(Domain.FITBIT_HEART_RATE_LEVEL));
+    dbDSLinkingFitbitPersonId.setOmopSql("heart_rate_minute_level.PERSON_ID\n");
+    dbDSLinkingFitbitPersonId.setJoinValue(
         "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level");
-    doReturn(ImmutableList.of(dbDSLinkingFitbit_personId, dbDSLinkingFitbit_date))
-        .when(dsLinkingDao)
-        .findByDomainAndDenormalizedNameIn(
-            StringUtils.capitalize(Domain.FITBIT_HEART_RATE_LEVEL.name().toLowerCase()),
-            ImmutableList.of("CORE_TABLE_FOR_DOMAIN", "PERSON_ID", "DATETIME"));
+    dsLinkingDao.save(dbDSLinkingFitbitPersonId);
+
+    DbDSLinking dbDSLinkingFitbitDate = new DbDSLinking();
+    dbDSLinkingFitbitDate.setDenormalizedName("DATETIME");
+    dbDSLinkingFitbitDate.setDomain(normalizeDomainName(Domain.FITBIT_HEART_RATE_LEVEL));
+    dbDSLinkingFitbitDate.setOmopSql("CAST(heart_rate_minute_level.datetime as DATE) as date");
+    dbDSLinkingFitbitDate.setJoinValue(
+        "FROM `" + TEST_CDR_TABLE + ".heart_rate_minute_level` heart_rate_minute_level");
+    dsLinkingDao.save(dbDSLinkingFitbitDate);
   }
 
   private void mockLinkingTableQuery(Collection<String> domainBaseTables) {

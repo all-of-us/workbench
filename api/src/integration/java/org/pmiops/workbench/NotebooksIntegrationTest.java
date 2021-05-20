@@ -36,7 +36,11 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
   // where the class under test is defined. Adding that annotation
   @ComponentScan(basePackageClasses = LeonardoNotebooksClientImpl.class)
-  @Import({LeonardoNotebooksClientImpl.class, StorageConfig.class})
+  @Import({
+    LeonardoNotebooksClientImpl.class,
+    StorageConfig.class,
+    BaseIntegrationTest.Configuration.class
+  })
   static class Configuration {}
 
   @Test

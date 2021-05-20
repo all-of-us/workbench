@@ -64,7 +64,6 @@ public class UserControllerTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-  private static DbUser user = new DbUser();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
 
@@ -120,11 +119,14 @@ public class UserControllerTest {
   @Autowired UserAccessTierDao userAccessTierDao;
   @Autowired UserDao userDao;
 
-  DbAccessTier registeredTier;
+  private static DbAccessTier registeredTier;
+  private static DbUser user;
 
   @Before
   public void setUp() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    user = userDao.save(new DbUser());
+    addUserToTier(user, registeredTier);
     saveFamily();
   }
 

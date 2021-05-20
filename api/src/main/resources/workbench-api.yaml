@@ -249,6 +249,26 @@ paths:
       responses:
         204:
           description: Request Received.
+  "/v1/confirmProfile":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that their profile is up to date, as part of the
+        annual renewal compliance process.
+      operationId: confirmProfile
+      responses:
+        204:
+          description: Profile Confirmed.
+  "/v1/confirmPublications":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that they have either reported any AoU-related
+        publications, or they have none.
+      operationId: confirmPublications
+      responses:
+        204:
+          description: Publications Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
@@ -1594,6 +1614,21 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/synchronizeUserAccess":
+    get:
+      security: []
+      tags:
+      - offlineUser
+      - cron
+      description: Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
+      operationId: synchronizeUserAccess
+      responses:
+        204:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:
@@ -1728,6 +1763,25 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/FileDetail"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/kernel":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Get Kernel Type of notebook
+      operationId: getNotebookKernel
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Kernel Type
+          schema:
+            "$ref": "#/definitions/KernelTypeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2190,6 +2244,29 @@ paths:
           description: The updated concept set.
           schema:
             "$ref": "#/definitions/ConceptSet"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
+    post:
+      tags:
+        - dataSet
+      description: 'Given a Data Set, return the SQL query built from it.'
+      operationId: generateCode
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: path
+          name: kernelType
+          required: true
+          type: string
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: 'A SQL query for each domain in the Data Set'
+          schema:
+            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2214,29 +2291,6 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/ConceptSet"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
-    post:
-      tags:
-      - dataSet
-      description: 'Given a Data Set, return the SQL query built from it.'
-      operationId: generateCode
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: path
-        name: kernelType
-        required: true
-        type: string
-      - in: body
-        name: dataSet
-        required: true
-        schema:
-          "$ref": "#/definitions/DataSetRequest"
-      responses:
-        200:
-          description: 'A SQL query for each domain in the Data Set'
-          schema:
-            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2472,6 +2526,29 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         400:
           description: Invalid data set request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook/preview":
+    post:
+      tags:
+        - dataSet
+      description: 'Preview notebook code generation'
+      operationId: previewExportToNotebook
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: body
+          name: dataSetExportRequest
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetExportRequest"
+      responses:
+        200:
+          description: HTML Read Only version of the the notebook cells to be exported
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+        400:
+          description: Invalid data set export request
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview":
@@ -4419,7 +4496,6 @@ definitions:
     enum:
     - ACTIVE
     - DELETED
-    - PENDING_DELETION_POST_1PPW_MIGRATION
   ResearchPurpose:
     type: object
     required:
@@ -5022,6 +5098,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/DataSet"
+  KernelTypeResponse:
+    type: object
+    properties:
+      kernelType:
+        "$ref": "#/definitions/KernelTypeEnum"
   DataSetCodeResponse:
     type: object
     properties:
@@ -5555,6 +5636,8 @@ definitions:
         enum:
           - complianceTraining
           - dataUseAgreement
+          - profileConfirmation
+          - publicationConfirmation
       expirationEpochMillis:
         type: integer
         format: int64
@@ -8950,6 +9033,8 @@ definitions:
       - RUNNING
       - FAILED
       - SUCCEEDED
+      - ABORTED
+      - ABORTING
   TierAccessStatus:
     type: string
     description: 'Whether a user currently has access to a tier'

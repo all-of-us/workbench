@@ -47,7 +47,7 @@ public class OfflineWorkspaceController implements OfflineWorkspaceApiDelegate {
                     return filteredWorkspace;
                   })
               .collect(Collectors.toList());
-      workspaceDao.save(workspaceList);
+      workspaceDao.saveAll(workspaceList);
     }
     return ResponseEntity.noContent().build();
   }

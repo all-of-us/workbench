@@ -2353,6 +2353,10 @@ components:
         submissionId:
           type: string
           description: Submission Id
+        submissionDate:
+          type: string
+          description: SubmissionRequest date
+          format: date-time
     MethodConfiguration:
       required:
         - deleted

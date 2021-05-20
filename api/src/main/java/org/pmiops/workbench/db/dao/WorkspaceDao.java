@@ -87,7 +87,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = findOne(workspaceId);
+    DbWorkspace workspace = findById(workspaceId).orElse(null);
     if (workspace == null || !workspace.isActive()) {
       return Optional.empty();
     }
@@ -118,7 +118,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
-    DbWorkspace toUpdate = findOne(workspaceId);
+    DbWorkspace toUpdate =
+        findById(workspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("DbWorkspace %s does not exist", workspaceId)));
     toUpdate.setBillingStatus(status);
     save(toUpdate);
   }
@@ -127,7 +132,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
   @Query(
-      "SELECT COUNT(workspace.workspaceId) as workspaceCount, workspace.activeStatus, tier "
+      "SELECT COUNT(workspace.workspaceId) AS workspaceCount, workspace.activeStatus AS activeStatus, tier AS tier "
           + "FROM DbWorkspace workspace "
           + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
           + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "

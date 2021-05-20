@@ -59,6 +59,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeResponse;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
@@ -167,11 +168,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing cdrVersionId");
     }
     try {
-      DbCdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
-      if (cdrVersion == null) {
-        throw new BadRequestException(
-            String.format("CDR version with ID %s not found", cdrVersionId));
-      }
+      DbCdrVersion cdrVersion =
+          cdrVersionDao
+              .findById(Long.parseLong(cdrVersionId))
+              .orElseThrow(
+                  () ->
+                      new BadRequestException(
+                          String.format("CDR version with ID %s not found", cdrVersionId)));
+
       if (ArchivalStatus.LIVE != cdrVersion.getArchivalStatusEnum()) {
         throw new FailedPreconditionException(
             String.format(
@@ -721,6 +725,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
+  public ResponseEntity<KernelTypeResponse> getNotebookKernel(
+      String workspace, String workspaceName, String notebookName) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspace, workspaceName, WorkspaceAccessLevel.READER);
+
+    return ResponseEntity.ok(
+        new KernelTypeResponse()
+            .kernelType(
+                notebooksService.getNotebookKernel(workspace, workspaceName, notebookName)));
   }
 
   @Override

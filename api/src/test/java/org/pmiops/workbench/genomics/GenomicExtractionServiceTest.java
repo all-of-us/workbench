@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -53,6 +54,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudValidatedMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -189,6 +191,8 @@ public class GenomicExtractionServiceTest {
 
     FirecloudSubmissionResponse submissionResponse = new FirecloudSubmissionResponse();
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
+    submissionResponse.setSubmissionDate(
+        CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
@@ -221,7 +225,10 @@ public class GenomicExtractionServiceTest {
         new FirecloudSubmission()
             .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
             .status(FirecloudSubmissionStatus.DONE)
-            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(completionTimestamp))
+            .addWorkflowsItem(
+                new FirecloudWorkflow()
+                    .statusLastChangedDate(completionTimestamp)
+                    .status(FirecloudWorkflowStatus.SUCCEEDED))
             .submissionDate(submissionDate));
 
     GenomicExtractionJob wgsCohortExtractionJob =
@@ -235,8 +242,6 @@ public class GenomicExtractionServiceTest {
         .isEqualTo(completionTimestamp.toInstant().toEpochMilli());
     assertThat(wgsCohortExtractionJob.getDatasetName()).isEqualTo(dataset.getName());
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
-    assertThat(wgsCohortExtractionJob.getSubmissionDate())
-        .isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
   @Test
@@ -279,31 +284,43 @@ public class GenomicExtractionServiceTest {
     Map<Long, TerraJobStatus> expectedStatuses = new HashMap<>();
 
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.DONE)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.DONE, FirecloudWorkflowStatus.SUCCEEDED)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.SUCCEEDED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTED)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.DONE, FirecloudWorkflowStatus.FAILED)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.FAILED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTING)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.ABORTED, FirecloudWorkflowStatus.ABORTED)
             .getWgsExtractCromwellSubmissionId(),
-        TerraJobStatus.FAILED);
+        TerraJobStatus.ABORTED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ACCEPTED)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.ABORTING, FirecloudWorkflowStatus.ABORTING)
+            .getWgsExtractCromwellSubmissionId(),
+        TerraJobStatus.ABORTING);
+    expectedStatuses.put(
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.ACCEPTED, FirecloudWorkflowStatus.QUEUED)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.EVALUATING)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTED)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.SUBMITTED, FirecloudWorkflowStatus.SUBMITTED)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTING)
+        createSubmissionAndMockMonitorCall(
+                FirecloudSubmissionStatus.SUBMITTING, FirecloudWorkflowStatus.LAUNCHING)
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
 
@@ -330,14 +347,17 @@ public class GenomicExtractionServiceTest {
   }
 
   private DbWgsExtractCromwellSubmission createSubmissionAndMockMonitorCall(
-      FirecloudSubmissionStatus status) throws ApiException {
+      FirecloudSubmissionStatus submissionStatus, FirecloudWorkflowStatus workflowStatus)
+      throws ApiException {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
     doReturn(
             new FirecloudSubmission()
                 .addWorkflowsItem(
-                    new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
-                .status(status)
+                    new FirecloudWorkflow()
+                        .statusLastChangedDate(OffsetDateTime.now())
+                        .status(workflowStatus))
+                .status(submissionStatus)
                 .submissionDate(OffsetDateTime.now()))
         .when(submissionsApi)
         .getSubmission(
@@ -363,6 +383,8 @@ public class GenomicExtractionServiceTest {
     assertThat(dbSubmissions.size()).isEqualTo(1);
     assertThat(dbSubmissions.get(0).getSubmissionId()).isEqualTo(FC_SUBMISSION_ID);
     assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
+    assertThat(dbSubmissions.get(0).getTerraSubmissionDate())
+        .isEqualTo(new Timestamp(CLOCK.instant().toEpochMilli()));
   }
 
   @Test
@@ -389,7 +411,8 @@ public class GenomicExtractionServiceTest {
   @Test
   public void abortGenomicExtractionJob() throws ApiException {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        createDbWgsExtractCromwellSubmission();
+        createSubmissionAndMockMonitorCall(
+            FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING);
 
     doNothing()
         .when(submissionsApi)

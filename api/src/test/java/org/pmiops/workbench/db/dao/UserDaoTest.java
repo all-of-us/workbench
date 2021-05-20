@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -56,7 +57,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetUserCountGaugeData_singleValue() {
+  public void testGetUserCountGaugeData_singleValue() throws Exception {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
     user1 = userDao.save(user1);
@@ -69,6 +70,15 @@ public class UserDaoTest extends SpringTest {
     assertThat(split(row.getAccessTierShortNames())).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<UserCountByDisabledAndAccessTiers> projectionClass =
+        UserCountByDisabledAndAccessTiers.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(rows.get(0))).isNotNull();
+      }
+    }
   }
 
   @Test
@@ -77,7 +87,6 @@ public class UserDaoTest extends SpringTest {
     user1.setDisabled(false);
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
-
     List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountByDisabledAndAccessTiers row = rows.get(0);
@@ -143,6 +152,55 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
+  public void testGetAdminTableUsers() throws Exception {
+    // Make sure AdminTable projection works.
+    Timestamp nowTime = now();
+    String contactEmail = "1@foo.com";
+    DbUser user = new DbUser();
+    user.setUsername("name");
+    user.setDisabled(true);
+    user.setContactEmail(contactEmail);
+    user.setGivenName("givenName");
+    user.setFamilyName("familyName");
+    user.setFirstRegistrationCompletionTime(nowTime);
+    user.setDataUseAgreementCompletionTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setEraCommonsBypassTime(nowTime);
+    user.setEraCommonsCompletionTime(nowTime);
+    user.setRasLinkLoginGovCompletionTime(nowTime);
+    user.setRasLinkLoginGovBypassTime(nowTime);
+    user.setComplianceTrainingCompletionTime(nowTime);
+    user.setComplianceTrainingBypassTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setTwoFactorAuthBypassTime(nowTime);
+    user.setTwoFactorAuthCompletionTime(nowTime);
+    user.setBetaAccessBypassTime(nowTime);
+    user.setBetaAccessRequestTime(nowTime);
+    user.setEmailVerificationCompletionTime(nowTime);
+    user.setEmailVerificationBypassTime(nowTime);
+    user.setIdVerificationBypassTime(nowTime);
+    user.setIdVerificationCompletionTime(nowTime);
+    user.setCreationTime(nowTime);
+    user.setFirstSignInTime(nowTime);
+
+    final DbInstitution institution = createInstitution();
+    user = userDao.save(user);
+    createAffiliation(user, institution);
+    addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
+
+    List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
+    assertThat(rows).hasSize(1);
+    final DbAdminTableUser row = rows.get(0);
+    Class<DbAdminTableUser> dbAdminUserClass = DbAdminTableUser.class;
+    // Iterate all getter methods and make sure all return value is non-null.
+    for (Method method : dbAdminUserClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(row)).isNotNull();
+      }
+    }
+  }
+
+  @Test
   public void test_getAdminTableUsers_disabledTier() {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
@@ -158,7 +216,7 @@ public class UserDaoTest extends SpringTest {
 
   @Test
   public void test_findUsersBySearchStringAndTier_empty() {
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     assertThat(userDao.findUsersBySearchStringAndTier("any", ascendingByUsername, "any")).isEmpty();
   }
 
@@ -169,7 +227,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "A", ascendingByUsername, registeredTier.getShortName());
@@ -188,7 +246,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "Le", ascendingByUsername, registeredTier.getShortName());
@@ -207,7 +265,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "sci", ascendingByUsername, registeredTier.getShortName());
@@ -229,7 +287,7 @@ public class UserDaoTest extends SpringTest {
     // this also won't match
     TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier("A", ascendingByUsername, "wrong-tier");
     assertThat(result).isEmpty();
@@ -258,7 +316,7 @@ public class UserDaoTest extends SpringTest {
     taylor = userDao.save(taylor);
     addUserToTier(taylor, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
 
     // 'a' matches 'afunk123' and all of Taylor's fields
     List<DbUser> result =

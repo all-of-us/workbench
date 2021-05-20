@@ -8,10 +8,7 @@
     "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
-    "registeredDomainName": "all-of-us-registered-staging",
-    "registeredDomainGroup": "GROUP_all-of-us-registered-staging@firecloud.org",
     "xAppIdValue": "staging-AoU-RW",
-    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
@@ -36,10 +33,6 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ],
-    "garbageCollectionUserCapacity": 1000,
-    "garbageCollectionUsers": [
-      "aou-rw-gc-staging-1@all-of-us-rw-staging.iam.gserviceaccount.com"
     ]
   },
   "auth": {

@@ -72,17 +72,17 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = ({canDelete
     closeOnClick
     content={<React.Fragment>
       <TooltipTrigger>
+        <TooltipTrigger content={<div>Requires Write Permission</div>}
+                        disabled={canEdit}>
+          <MenuItem icon='pencil'
+                    onClick={onEdit}
+                    disabled={!canEdit}>
+            Rename
+          </MenuItem>
+        </TooltipTrigger>
         <MenuItem icon='copy'
                   onClick={onCopy}>
           Copy to another Workspace
-        </MenuItem>
-      </TooltipTrigger>
-      <TooltipTrigger content={<div>Requires Write Permission</div>}
-                      disabled={canEdit}>
-        <MenuItem icon='pencil'
-                  onClick={onEdit}
-                  disabled={!canEdit}>
-          Edit
         </MenuItem>
       </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Owner Permission</div>}

@@ -4,6 +4,7 @@ import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
+import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
 
 const styles = reactStyles({
@@ -46,13 +47,27 @@ export const Modal = ({width = 450, loading = false, ...props}) => {
   return <ReactModal
     parentSelector={() => document.getElementById('popup-root')}
     isOpen
-    style={{overlay: styles.overlay, content: {...styles.modal, width}}}
+    style={{overlay: styles.overlay, content: props.contentStyleOverride || {...styles.modal, width}}}
     ariaHideApp={false}
     {...props}
   >
     {props.children}
     {loading && <SpinnerOverlay/>}
   </ReactModal>;
+};
+
+
+export const AnimatedModal = ({width = 450, ...props}) => {
+  const style = {...styles.modal, width};
+  const styleSpring = useSpring({...style, from: {width: 450}});
+
+  return <Modal contentStyleOverride={{margin: 'auto'}} {...props}>
+    <div>
+      <animated.div style={styleSpring}>
+        {props.children}
+      </animated.div>
+    </div>
+  </Modal>;
 };
 
 export const ModalTitle = withStyle(styles.modalTitle)('div');

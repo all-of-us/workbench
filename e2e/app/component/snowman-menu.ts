@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import BaseMenu from './base-menu';
 
 export const snowmanIconXpath = '//clr-icon[@shape="ellipsis-vertical"]';
-const defaultXpath = '//*[@id="popup-root"]';
+const defaultXpath = '//*[@id="popup-root"]/div[not(@class="ReactModalPortal")]'; // Exclude modal popup.
 
 export default class SnowmanMenu extends BaseMenu {
   constructor(page: Page, xpath: string = defaultXpath) {

@@ -8,10 +8,7 @@
     "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
-    "registeredDomainName": "all-of-us-registered-prod",
-    "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
     "xAppIdValue": "AoU-RW",
-    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
@@ -35,10 +32,6 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ],
-    "garbageCollectionUserCapacity": 1000,
-    "garbageCollectionUsers": [
-      "aou-rw-gc-prod-1@all-of-us-rw-prod.iam.gserviceaccount.com"
     ]
   },
   "auth": {

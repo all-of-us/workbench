@@ -12,6 +12,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.util.Arrays
+import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,8 +21,6 @@ import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.Arrays
-import javax.inject.Provider
 
 @RunWith(SpringRunner::class)
 class ActionAuditServiceTest {

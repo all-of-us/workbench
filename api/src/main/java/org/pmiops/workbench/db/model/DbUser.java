@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +23,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -93,6 +94,8 @@ public class DbUser {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+  private Timestamp profileLastConfirmedTime;
+  private Timestamp publicationsLastConfirmedTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -241,10 +244,6 @@ public class DbUser {
   @Column(name = "first_registration_completion_time")
   public Timestamp getFirstRegistrationCompletionTime() {
     return firstRegistrationCompletionTime;
-  }
-
-  public void setFirstRegistrationCompletionTime() {
-    setFirstRegistrationCompletionTime(Timestamp.from(Instant.now()));
   }
 
   @VisibleForTesting
@@ -625,20 +624,24 @@ public class DbUser {
     this.demographicSurvey = demographicSurvey;
   }
 
+  @UpdateTimestamp
   @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
 
+  @VisibleForTesting
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
 
+  @CreationTimestamp
   @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
   }
 
+  @VisibleForTesting
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
@@ -663,6 +666,24 @@ public class DbUser {
 
   public void setAddress(DbAddress address) {
     this.address = address;
+  }
+
+  @Column(name = "profile_last_confirmed_time")
+  public Timestamp getProfileLastConfirmedTime() {
+    return profileLastConfirmedTime;
+  }
+
+  public void setProfileLastConfirmedTime(Timestamp profileLastConfirmedTime) {
+    this.profileLastConfirmedTime = profileLastConfirmedTime;
+  }
+
+  @Column(name = "publications_last_confirmed_time")
+  public Timestamp getPublicationsLastConfirmedTime() {
+    return publicationsLastConfirmedTime;
+  }
+
+  public void setPublicationsLastConfirmedTime(Timestamp publicationsLastConfirmedTime) {
+    this.publicationsLastConfirmedTime = publicationsLastConfirmedTime;
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation

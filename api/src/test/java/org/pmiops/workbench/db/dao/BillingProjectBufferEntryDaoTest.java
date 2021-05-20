@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -60,7 +61,7 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
   }
 
   @Test
-  public void testBillingBufferGaugeData() {
+  public void testBillingBufferGaugeData() throws Exception {
     DbAccessTier tier2 =
         accessTierDao.save(
             new DbAccessTier()
@@ -87,6 +88,14 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
       assertThat(count(counts, BufferEntryStatus.CREATING, tier)).isEqualTo(CREATING_COUNT);
       assertThat(count(counts, BufferEntryStatus.AVAILABLE, tier)).isEqualTo(AVAILABLE_COUNT);
       assertThat(count(counts, BufferEntryStatus.ERROR, tier)).isEqualTo(ERROR_COUNT);
+    }
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<ProjectCountByStatusAndTier> projectionClass = ProjectCountByStatusAndTier.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(counts.get(0))).isNotNull();
+      }
     }
   }
 

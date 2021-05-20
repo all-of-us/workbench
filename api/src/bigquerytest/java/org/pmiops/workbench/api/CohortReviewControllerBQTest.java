@@ -96,7 +96,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class, CohortReviewController.class})
+@Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
@@ -106,7 +106,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortMapperImpl.class,
     CohortQueryBuilder.class,
     CohortReviewMapperImpl.class,
-    CohortReviewMapperImpl.class,
+    CohortReviewController.class,
     CohortReviewServiceImpl.class,
     CommonMappers.class,
     CommonMappers.class,
@@ -245,8 +245,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
-    workspaceDao.delete(workspace.getWorkspaceId());
-    cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+    workspaceDao.deleteById(workspace.getWorkspaceId());
+    cdrVersionDao.deleteById(cdrVersion.getCdrVersionId());
   }
 
   private static ParticipantData expectedAllEvents1() {
