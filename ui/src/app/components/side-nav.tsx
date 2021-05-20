@@ -273,7 +273,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
           active={this.props.profileActive}
-          disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
         />
       }
       {

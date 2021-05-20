@@ -87,6 +87,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    // Turn off suffix-based content negotiation
+    configurer.favorPathExtension(false);
   }
 
   static ServletContext getRequestServletContext() {
