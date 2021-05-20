@@ -1,5 +1,8 @@
 package org.pmiops.workbench.actionaudit.auditors
 
+import java.time.Clock
+import java.util.logging.Logger
+import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -9,9 +12,6 @@ import org.pmiops.workbench.db.model.DbUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.time.Clock
-import java.util.logging.Logger
-import javax.inject.Provider
 
 @Service
 class BillingProjectAuditorImpl @Autowired

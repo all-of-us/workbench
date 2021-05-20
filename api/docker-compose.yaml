@@ -10,7 +10,7 @@ x-api-defaults: &api-defaults
   # it from the provided build context or use a cached local version.
   # When making changes to this image, you can modify this tag to force all devs
   # to rebuild.
-  image: allofustest/workbench-dev-api:local-3
+  image: allofustest/workbench-dev-api:local-6
   build:
     context: ./src/dev/server
   user: ${UID}
