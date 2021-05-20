@@ -49,7 +49,7 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
-    "extractionMethodConfigurationVersion": 54,
+    "extractionMethodConfigurationVersion": 72,
     "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
     "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
@@ -139,6 +139,6 @@
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }
