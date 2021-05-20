@@ -91,7 +91,7 @@ const AccessRenewalNotification = (props: {daysRemaining: number}) => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Time for access renewal. {props.daysRemaining} days remaining.</div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('profile')}>
+    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('access-renewal')}>
       <div style={styles.buttonText}>Get Started</div>
     </Button>
   </FlexRow>;

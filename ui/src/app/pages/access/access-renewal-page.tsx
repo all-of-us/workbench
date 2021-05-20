@@ -15,6 +15,7 @@ import {
   daysFromNow,
   displayDateWithoutHours,
   withStyle,
+  useId
 } from 'app/utils';
 import {profileStore, useStore} from 'app/utils/stores';
 
@@ -102,7 +103,9 @@ export const AccessRenewalPage = fp.flow(
     complianceTrainingBypassTime,
     renewableAccessModules: {modules}},
   } = useStore(profileStore);
-  const [publications, setPublications] = useState<boolean>();
+  const [publications, setPublications] = useState<boolean>(null);
+  const noReportId = useId();
+  const reportId = useId()
   const getExpirationTimeFor = getExpirationTimeForModule(modules);
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
@@ -126,7 +129,7 @@ export const AccessRenewalPage = fp.flow(
           information up-to-date at all times.
         </div>
         {
-          isComplete(getExpirationTimeFor('publicationConfirmation'))
+          isComplete(getExpirationTimeFor('profileConfirmation'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={false}/>
             : <Button style={{marginTop: 'auto', height: '1.6rem', width: '4.5rem'}}>Review</Button>
         }
@@ -138,18 +141,20 @@ export const AccessRenewalPage = fp.flow(
                    nextReview={getExpirationTimeFor('publicationConfirmation')}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
-             If you are lead on or part of a publication or presentation that hasn’t been reported to the program, please report it now.
+             If you are lead on or part of a publication or presentation that hasn’t been reported to the 
+             program, <a target='_blank'  href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           {
             isComplete(getExpirationTimeFor('publicationConfirmation'))
               ? <CompletedButton style={{gridRow: '1 / span 2'}} buttonText='Confirmed' wasBypassed={false}/>
-              : <Button style={{gridRow: '1 / span 2', height: '1.6rem', width: '4.5rem', marginRight: '0.25rem'}}>Confirm</Button>
+              : <Button disabled={publications === null} 
+                    style={{gridRow: '1 / span 2', height: '1.6rem', width: '4.5rem', marginRight: '0.25rem'}}>Confirm</Button>
           }
-          <RadioButton style={{justifySelf: 'end'}} checked={publications === true} onChange={() => setPublications(true)}/>
-          <label> At this time, I have nothing to report </label>
-          <RadioButton style={{justifySelf: 'end'}} checked={publications === false} onChange={() => setPublications(false)}/>
-          <label>Report submitted</label>
+          <RadioButton id={noReportId} style={{justifySelf: 'end'}} checked={publications === true} onChange={() => setPublications(true)}/>
+          <label htmlFor={noReportId}> At this time, I have nothing to report </label>
+          <RadioButton id={reportId} style={{justifySelf: 'end'}} checked={publications === false} onChange={() => setPublications(false)}/>
+          <label htmlFor={reportId}>Report submitted</label>
         </div>
       </RenewalCard>
       {/* Code of Conduct */}
