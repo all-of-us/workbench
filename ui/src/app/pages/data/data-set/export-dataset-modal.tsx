@@ -154,7 +154,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         notebookName: {
           presence: {allowEmpty: false},
           exclusion: {
-            within: existingNotebooks,
+            within: creatingNewNotebook ? existingNotebooks : [],
             message: 'already exists'
           }
         }

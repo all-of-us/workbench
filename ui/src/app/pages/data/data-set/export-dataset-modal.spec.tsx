@@ -11,6 +11,7 @@ import {
   DataSetRequest,
   KernelTypeEnum,
   WorkspacesApi} from 'generated/fetch';
+import {act} from 'react-dom/test-utils';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -128,11 +129,12 @@ describe('ExportDatasetModal', () => {
       dataSetId: dataset.id,
       name: expectedNotebookName
     };
-
-    const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
-    wrapper.find(Select).props().onChange(expectedNotebookName);
+    const wrapper = mount(component(testProps));
+    act(() => {
+      wrapper.find(Select).props().onChange(expectedNotebookName);
+    });
     await waitOneTickAndUpdate(wrapper);
 
     findExportButton(wrapper).simulate('click');
