@@ -16,7 +16,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench-image:
     type: string
-    default: "allofustest/workbench:buildimage-0.0.20"
+    default: "yonghao/workbench:buildimage-gradle6"
   db-image:
     type: string
     default: "circleci/mysql:5.7"
