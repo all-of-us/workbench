@@ -1,5 +1,6 @@
 package org.pmiops.workbench.dataset;
 
+import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -23,11 +24,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -37,7 +40,6 @@ import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.dataset.builder.NotebookCode;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -78,6 +80,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
+  private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
+  private static final String PYTHON_CDR_ENV_VARIABLE =
+      "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
+  // This is implicitly handled by bigrquery, so we don't need this variable.
+  private static final String R_CDR_ENV_VARIABLE = "";
+  private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
+      ImmutableMap.of(
+          KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
@@ -745,14 +755,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return queryJobConfigurationMap.entrySet().stream()
         .map(
             entry ->
-                NotebookCode.Builder.getInstance()
-                    .setConfiguration(entry.getValue())
-                    .setDomain(entry.getKey())
-                    .setKernel(kernelTypeEnum)
-                    .setDataSetName(dataSetName)
-                    .setCdrName(cdrVersionName)
-                    .setQualifier(qualifier)
-                    .generateCode())
+                generateNotebookUserCode(
+                    entry.getValue(),
+                    entry.getKey(),
+                    dataSetName,
+                    cdrVersionName,
+                    qualifier,
+                    kernelTypeEnum))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -984,6 +993,115 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public static String capitalizeFirstCharacterOnly(String text) {
     return StringUtils.capitalize(text.toLowerCase());
+  }
+
+  private static String fillInQueryParams(
+      String query, Map<String, QueryParameterValue> queryParameterValueMap) {
+    return queryParameterValueMap.entrySet().stream()
+        .map(param -> (Function<String, String>) s -> replaceParameter(s, param))
+        .reduce(Function.identity(), Function::andThen)
+        .apply(query)
+        .replaceAll("unnest", "");
+  }
+
+  private static String replaceParameter(
+      String s, Map.Entry<String, QueryParameterValue> parameter) {
+    String value =
+        ARRAY.equals(parameter.getValue().getType())
+            ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
+                .map(DataSetServiceImpl::convertSqlTypeToString)
+                .collect(Collectors.joining(", "))
+            : convertSqlTypeToString(parameter.getValue());
+    String key = String.format("@%s", parameter.getKey());
+    return s.replaceAll(key, value);
+  }
+
+  private static String convertSqlTypeToString(QueryParameterValue parameter) {
+    switch (parameter.getType()) {
+      case BOOL:
+        return Boolean.valueOf(parameter.getValue()) ? "1" : "0";
+      case INT64:
+      case FLOAT64:
+      case NUMERIC:
+        return parameter.getValue();
+      case STRING:
+      case TIMESTAMP:
+      case DATE:
+        return String.format("'%s'", parameter.getValue());
+      default:
+        throw new RuntimeException();
+    }
+  }
+
+  private String generateNotebookUserCode(
+      QueryJobConfiguration queryJobConfiguration,
+      String domain,
+      String dataSetName,
+      String cdrVersionName,
+      String qualifier,
+      KernelTypeEnum kernelTypeEnum) {
+    // Define [namespace]_sql, query parameters (as either [namespace]_query_config
+    // or [namespace]_query_parameters), and [namespace]_df variables
+    String domainLowercase = domain.toLowerCase();
+    String namespace = "dataset_" + qualifier + "_" + domainLowercase + "_";
+    // Comments in R and Python have the same syntax
+    String descriptiveComment =
+        String.format(
+            "# This query represents dataset \"%s\" for domain \"%s\" and was generated for %s",
+            dataSetName, domainLowercase, cdrVersionName);
+    String query =
+        queryJobConfiguration
+            .getQuery()
+            .replaceAll(CDR_STRING, KERNEL_TYPE_TO_ENV_VARIABLE_MAP.get(kernelTypeEnum));
+    String formattedQuery = new BasicFormatterImpl().format(query);
+    Map<String, QueryParameterValue> params = queryJobConfiguration.getNamedParameters();
+    String prerequisites;
+    String sqlSection;
+    String dataFrameSection;
+    String displayHeadSection;
+
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        prerequisites = "import pandas\n" + "import os";
+        sqlSection =
+            namespace + "sql = \"\"\"" + fillInQueryParams(formattedQuery, params) + "\"\"\"";
+        dataFrameSection =
+            namespace
+                + "df = pandas.read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
+        displayHeadSection = namespace + "df.head(5)";
+        break;
+      case R:
+        prerequisites = "library(bigrquery)";
+        sqlSection =
+            namespace
+                + "sql <- paste(\""
+                + fillInQueryParams(formattedQuery, params)
+                + "\", sep=\"\")";
+        dataFrameSection =
+            namespace
+                + "df <- bq_table_download(bq_dataset_query(Sys.getenv(\"WORKSPACE_CDR\"), "
+                + namespace
+                + "sql, billing=Sys.getenv(\"GOOGLE_PROJECT\")), bigint=\"integer64\")";
+        displayHeadSection = "head(" + namespace + "df, 5)";
+        break;
+      default:
+        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
+    }
+    return prerequisites
+        + "\n\n"
+        + descriptiveComment
+        + "\n"
+        + sqlSection
+        + "\n\n"
+        + dataFrameSection
+        + "\n\n"
+        + displayHeadSection;
+  }
+
+  private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
+    return Optional.ofNullable(nullableList).orElse(new ArrayList<>());
   }
 
   @VisibleForTesting
