@@ -169,7 +169,13 @@ public class RdrExportServiceImpl implements RdrExportService {
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
 
-        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        // Skip the RDR export table updates on backfills. A normal export may trigger manual review
+        // from the RDR, where-as a backfill does not. Therefore, even if the RDR has the latest
+        // data already from a backfill, we'd still want to resend any normal modifications, if any,
+        // in order to trigger this review process.
+        if (!backfill) {
+          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        }
       }
     } catch (ApiException ex) {
       log.severe(

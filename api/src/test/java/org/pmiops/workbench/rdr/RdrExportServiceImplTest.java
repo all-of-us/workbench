@@ -215,7 +215,7 @@ public class RdrExportServiceImplTest {
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).saveAll(anyList());
+    verify(rdrExportDao, never()).saveAll(anyList());
 
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), true);
   }
