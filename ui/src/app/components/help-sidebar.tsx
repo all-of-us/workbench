@@ -66,7 +66,7 @@ import {
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {dataSetApi} from 'services/swagger-fetch-clients';
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
 

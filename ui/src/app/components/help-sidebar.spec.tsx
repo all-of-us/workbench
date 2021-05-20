@@ -10,20 +10,35 @@ import {
   currentWorkspaceStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {CdrVersionsApi, CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
+import {
+  CdrVersionsApi,
+  CohortAnnotationDefinitionApi,
+  CohortReviewApi,
+  DataSetApi,
+  RuntimeApi,
+  RuntimeStatus,
+  TerraJobStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi
+} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
-import {cdrVersionStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
-import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  serverConfigStore
+} from 'app/utils/stores';
+import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
-import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from "generated/fetch";
-import {WorkspacesApi} from "generated/fetch";
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
-import {clearCompoundRuntimeOperations, registerCompoundRuntimeOperation} from 'app/utils/stores';
+import {DataSetApiStub} from "../../testing/stubs/data-set-api-stub";
+import moment = require("moment");
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -41,6 +56,7 @@ jest.mock('react-transition-group', () => {
 });
 
 describe('HelpSidebar', () => {
+  let dataSetStub: DataSetApiStub;
   let runtimeStub: RuntimeApiStub;
   let props: {};
 
@@ -50,11 +66,17 @@ describe('HelpSidebar', () => {
     return c;
   };
 
-  const statusIcon = (wrapper, exists = true) => {
+  const runtimeStatusIcon = (wrapper, exists = true) => {
     const icon = wrapper.find({'data-test-id': 'runtime-status-icon-container'}).find('svg');
     expect(icon.exists()).toEqual(exists);
     return icon;
   };
+
+  const extractionStatusIcon = (wrapper, exists = true) => {
+    const icon = wrapper.find({'data-test-id': 'extraction-status-icon-container'}).find('svg');
+    expect(icon.exists()).toEqual(exists);
+    return icon;
+  }
 
   const setRuntimeStatus = (status) => {
     const runtime = {...defaultRuntime(), status};
@@ -74,15 +96,17 @@ describe('HelpSidebar', () => {
 
   beforeEach(() => {
     props = {};
+    dataSetStub = new DataSetApiStub();
     runtimeStub = new RuntimeApiStub();
-    registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
+    registerApiClient(DataSetApi, dataSetStub);
+    registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
-    serverConfigStore.set({config: {...defaultServerConfig}});
+    serverConfigStore.set({config: {...defaultServerConfig, enableGenomicExtraction: true}});
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);
 
@@ -188,20 +212,20 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
 
     act(() => setRuntimeStatus(RuntimeStatus.Deleting));
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
 
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
-    statusIcon(wrapper, /* exists */ false);
+    runtimeStatusIcon(wrapper, /* exists */ false);
 
     act(() => setRuntimeStatus(RuntimeStatus.Creating));
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
 
   });
 
@@ -211,10 +235,76 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
 
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+  });
+
+  it('should display "running" icon when extract currently running', async() => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.RUNNING
+      },
+      {
+        status: TerraJobStatus.FAILED
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED
+      }
+    ];
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+  });
+
+  it('should display "FAILED" icon with recent failed jobs', async() => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now()
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED
+      }
+    ];
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.error);
+  });
+
+  it('should display "SUCCEEDED" icon with recent succeeded jobs', async() => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now()
+      }
+    ];
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
+  });
+
+  it('should display no extract icons with old failed/succeded jobs', async() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.FAILED,
+        completionTime: date.getTime()
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: date.getTime()
+      }
+    ];
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    extractionStatusIcon(wrapper, false);
   });
 });
