@@ -567,6 +567,7 @@ tasks.withType(Test) {
 appengine {
   tools {
     cloudSdkHome = "/google-cloud-sdk"
+    cloudSdkVersion = "321.0.0"
   }
   // App Engine tasks configuration
   run {      // local (dev_appserver) configuration (standard environments only)
