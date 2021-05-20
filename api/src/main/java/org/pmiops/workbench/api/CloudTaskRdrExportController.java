@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
@@ -49,7 +50,7 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    rdrExportService.exportWorkspaces(workspaceIds, backfill);
+    rdrExportService.exportWorkspaces(workspaceIds, Optional.ofNullable(backfill).orElse(false));
     return ResponseEntity.noContent().build();
   }
 }
