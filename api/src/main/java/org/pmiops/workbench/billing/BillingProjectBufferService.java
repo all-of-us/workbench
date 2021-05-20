@@ -131,7 +131,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   @NotNull
   private DbBillingProjectBufferEntry makeCreatingBufferEntry(DbAccessTier accessTier) {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
-    bufferEntry.setFireCloudProjectName(createBillingProjectName(workbenchConfigProvider));
+    bufferEntry.setFireCloudProjectName(createBillingProjectName(workbenchConfigProvider.get().billing.projectNamePrefix));
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
     // Note: we set the lastSyncRequestTime column to the current timestamp as an optimization.
     // If we leave this column as NULL, the sync process will prioritize this entry for immediate

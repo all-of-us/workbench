@@ -273,7 +273,7 @@ public class WorkbenchConfig {
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
-    // If true, use FireCloud V2 Billing endpoints.
+    // If true, use FireCloud V2 Billing instead of the Billing Buffer when creating projects.
     public boolean enableFireCloudV2Billing;
   }
 
