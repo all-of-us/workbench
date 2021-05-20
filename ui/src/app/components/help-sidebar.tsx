@@ -10,6 +10,7 @@ import {
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
@@ -27,8 +28,9 @@ import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  DEFAULT,
   reactStyles,
-  ReactWrapperBase, withCdrVersions,
+  ReactWrapperBase, switchCase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -59,13 +61,14 @@ import {HelpTips} from 'app/components/help-tips';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   CdrVersionTiersResponse,
-  Criteria,
+  Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
-  RuntimeStatus,
+  RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
+import {dataSetApi} from "../services/swagger-fetch-clients";
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -120,13 +123,14 @@ const styles = reactStyles({
   },
   runtimeStatusIcon: {
     width: '.5rem',
-    height: '.5rem'
+    height: '.5rem',
+    zIndex: 2,
   },
   runtimeStatusIconOutline: {
     border: `1px solid ${colors.white}`,
     borderRadius: '.25rem',
   },
-  runtimeStatusIconContainer: {
+  statusIconContainer: {
     alignSelf: 'flex-end',
     margin: '0 .1rem .1rem auto'
   },
@@ -232,6 +236,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  extractionJobs: Array<GenomicExtractionJob>
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -255,6 +260,7 @@ export const HelpSidebar = fp.flow(
       super(props);
       this.state = {
         activeIcon: null,
+        extractionJobs: [],
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -334,7 +340,7 @@ export const HelpSidebar = fp.flow(
           faIcon: faDna,
           label: 'Genomic Extraction',
           showIcon: () => true,
-          style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+          style: {height: '22px', width: '22px', marginTop: '0.25rem', position: 'absolute'},
           tooltip: 'Genomic Extraction History',
         }
       }[iconKey];
@@ -398,6 +404,9 @@ export const HelpSidebar = fp.flow(
           this.setActiveIcon(null);
         }
       }));
+
+      const genomicExtractionList = await dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id);
+      this.setState({extractionJobs: genomicExtractionList.jobs});
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -539,7 +548,7 @@ export const HelpSidebar = fp.flow(
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        <FlexRow data-test-id='runtime-status-icon-container' style={styles.runtimeStatusIconContainer}>
+        <FlexRow data-test-id='runtime-status-icon-container' style={styles.statusIconContainer}>
           {(status === RuntimeStatus.Creating
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)
@@ -580,6 +589,66 @@ export const HelpSidebar = fp.flow(
           }
         </FlexRow>
       </FlexRow>;
+    }
+
+    withinPastTwentyFourHours(epoch) {
+      const completionTimeMoment = moment(epoch);
+      const twentyFourHoursAgo = moment().subtract(1, 'days');
+      return completionTimeMoment.isAfter(twentyFourHoursAgo);
+    }
+
+    displayExtractionIcon(icon: IconConfig) {
+      const {extractionJobs} = this.state;
+      const jobsByStatus = fp.groupBy('status', extractionJobs);
+      let status;
+      // If any jobs are currently running, show running icon.
+      if (jobsByStatus[TerraJobStatus.RUNNING]) {
+        status = TerraJobStatus.RUNNING
+      }
+      // Otherwise, if any jobs have failed recently, show error icon.
+      else if (
+          jobsByStatus[TerraJobStatus.FAILED]
+          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
+            jobsByStatus[TerraJobStatus.FAILED]
+          )
+      ) {
+        status = TerraJobStatus.FAILED
+      }
+      // Otherwise, if any jobs have completed succesfully recently, show success icon.
+      else if (
+          jobsByStatus[TerraJobStatus.SUCCEEDED]
+          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
+          jobsByStatus[TerraJobStatus.SUCCEEDED]
+          )
+      ) {
+        status = TerraJobStatus.SUCCEEDED
+      }
+
+      // We always want to show the DNA icon.
+      // When there are running jobs, we will show a small overlay icon in the bottom right of the
+      // tab showing the job status.
+      return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
+        {this.displayFontAwesomeIcon(icon)}
+        <FlexRow data-test-id='extraction-status-icon-container' style={styles.statusIconContainer}>
+          {
+            switchCase(status,
+                [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
+                  ...styles.runtimeStatusIcon,
+                  ...styles.rotate,
+                  color: colors.runtimeStatus.starting,
+                }}/>],
+                [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
+                  ...styles.runtimeStatusIcon,
+                  color: colors.runtimeStatus.error,
+                }}/>],
+                [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
+                  ...styles.runtimeStatusIcon,
+                  color: colors.runtimeStatus.running,
+                }}/>]
+            )
+          }
+        </FlexRow>
+      </FlexRow>
     }
 
     get sidebarStyle() {
@@ -710,15 +779,20 @@ export const HelpSidebar = fp.flow(
                            this.onIconClick(icon);
                          }
                        }}>
-                    {icon.id === 'dataDictionary'
-                      ? <a href={supportUrls.dataDictionary} target='_blank'>
-                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                        </a>
-                      : icon.id === 'runtime'
-                        ? this.displayRuntimeIcon(icon)
-                        : icon.faIcon === null
-                          ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
-                          : this.displayFontAwesomeIcon(icon)
+                    {
+                      switchCase(icon.id,
+                          ['dataDictionary',
+                            () => <a href={supportUrls.dataDictionary} target='_blank'>
+                              <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                            </a>
+                          ],
+                          ['runtime', () => this.displayRuntimeIcon(icon)],
+                          ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+                          [DEFAULT, () => icon.faIcon === null
+                              ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
+                              : this.displayFontAwesomeIcon(icon)
+                          ]
+                      )
                     }
                   </div>
                 </TooltipTrigger>
