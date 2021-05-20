@@ -22,7 +22,6 @@ RUN apt-get update && \
      ruby \
      ruby-dev \
      ruby-json \
-     libgdbm-dev
      make \
      unzip \
      wait-for-it \
