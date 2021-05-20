@@ -14,8 +14,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   daysFromNow,
   displayDateWithoutHours,
-  withStyle,
-  useId
+  useId,
+  withStyle
 } from 'app/utils';
 import {profileStore, useStore} from 'app/utils/stores';
 
@@ -105,7 +105,7 @@ export const AccessRenewalPage = fp.flow(
   } = useStore(profileStore);
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
-  const reportId = useId()
+  const reportId = useId();
   const getExpirationTimeFor = getExpirationTimeForModule(modules);
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
@@ -141,14 +141,14 @@ export const AccessRenewalPage = fp.flow(
                    nextReview={getExpirationTimeFor('publicationConfirmation')}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
-             If you are lead on or part of a publication or presentation that hasn’t been reported to the 
+             If you are lead on or part of a publication or presentation that hasn’t been reported to the
              program, <a target='_blank'  href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           {
             isComplete(getExpirationTimeFor('publicationConfirmation'))
               ? <CompletedButton style={{gridRow: '1 / span 2'}} buttonText='Confirmed' wasBypassed={false}/>
-              : <Button disabled={publications === null} 
+              : <Button disabled={publications === null}
                     style={{gridRow: '1 / span 2', height: '1.6rem', width: '4.5rem', marginRight: '0.25rem'}}>Confirm</Button>
           }
           <RadioButton id={noReportId} style={{justifySelf: 'end'}} checked={publications === true} onChange={() => setPublications(true)}/>
