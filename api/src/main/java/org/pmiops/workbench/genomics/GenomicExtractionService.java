@@ -46,7 +46,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenomicExtractionService {
 
-  private final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
+  public static final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
