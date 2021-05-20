@@ -53,10 +53,18 @@ const renewalStyle = {
   }
 };
 
+export const withInvalidDateHandling = date => {
+  if (!date) {
+    return 'Unavailable'
+  } else {
+    return displayDateWithoutHours(date)
+  }
+} 
+
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
 const RenewalCard = withStyle(renewalStyle.card)(
-  ({step, title, TitleComponent, lastCompletion, nextReview, children, style}) => {
+  ({step, TitleComponent, lastCompletion, nextReview, children, style}) => {
     const daysRemaining = daysFromNow(nextReview);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
@@ -64,8 +72,8 @@ const RenewalCard = withStyle(renewalStyle.card)(
       <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', gridTemplateColumns: '6rem 1fr'}}>
         <div>Last Updated On:</div>
         <div>Next Review:</div>
-        <div>{`${displayDateWithoutHours(lastCompletion)}`}</div>
-        <div>{`${displayDateWithoutHours(nextReview)} (${daysRemaining >= 0 ? daysRemaining + ' days' : 'expired'})`}</div>
+        <div>{`${withInvalidDateHandling(lastCompletion)}`}</div>
+        <div>{`${withInvalidDateHandling(nextReview)} (${daysRemaining >= 0 ? daysRemaining + ' days' : 'expired'})`}</div>
       </div>
       {children}
     </FlexColumn>;
