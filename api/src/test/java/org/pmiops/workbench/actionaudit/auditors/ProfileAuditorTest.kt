@@ -5,6 +5,10 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.math.BigDecimal
+import java.time.Clock
+import java.time.Instant
+import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,10 +28,6 @@ import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Race
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation
 import org.springframework.test.context.junit4.SpringRunner
-import java.math.BigDecimal
-import java.time.Clock
-import java.time.Instant
-import javax.inject.Provider
 
 @RunWith(SpringRunner::class)
 class ProfileAuditorTest {

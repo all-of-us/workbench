@@ -1,8 +1,8 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
+import kotlin.reflect.KClass
 import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Workspace
-import kotlin.reflect.KClass
 
 class TargetPropertyExtractor {
     companion object {
