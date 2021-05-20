@@ -39,6 +39,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
@@ -218,6 +219,28 @@ public class DataSetController implements DataSetApiDelegate {
       previewValue.setQueryValue(queryValues);
     }
   }
+
+  @Override
+  public ResponseEntity<DataSetCodeResponse> generateCode(
+      String workspaceNamespace,
+      String workspaceId,
+      String kernelTypeEnumString,
+      DataSetRequest dataSetRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
+    final String generatedCode = String.join("\n\n",
+        dataSetService.generateCodeCells(new DataSetExportRequest()
+            .kernelType(kernelTypeEnum)
+            .dataSetRequest(dataSetRequest),
+            dbWorkspace));
+
+    return ResponseEntity.ok(
+        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
+  }
+
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
