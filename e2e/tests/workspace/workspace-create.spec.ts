@@ -21,11 +21,11 @@ describe('Creating new workspaces', () => {
     // create workspace with "No Review Requested" radiobutton selected
     const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
-    // Pick out few sentenses to verify
+    // Pick out few sentences to verify
     expect(modalTextContent).toContain('Create Workspace');
     expect(modalTextContent).toContain(
-      'Primary purpose of your project (Question 1)' +
-        'Summary of research purpose (Question 2)Population of interest (Question 5)'
+      'Will be displayed publicly to inform All of Us research participants. ' +
+        'Therefore, please verify that you have provided sufficiently detailed responses in plain language.'
     );
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
@@ -94,7 +94,7 @@ describe('Creating new workspaces', () => {
     const name = makeWorkspaceName();
     const createPage = await workspacesPage.fillOutRequiredCreationFields(name);
 
-    const cdrVersionSelect = await createPage.getCdrVersionSelect();
+    const cdrVersionSelect = createPage.getCdrVersionSelect();
     expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
 
     await createPage.selectAccessTier(AccessTierDisplayNames.Controlled);

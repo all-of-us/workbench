@@ -30,8 +30,10 @@ export default class ShareModal extends Modal {
       await waitWhileLoading(this.page);
       await this.page.waitForXPath(dropDownXpath, { hidden: true });
     };
+
     const searchBox = this.waitForSearchBox();
-    await searchBox.type(userName);
+    // Type in user email and append it with two whitespaces. Otherwise the select dropdown is not showing.
+    await searchBox.type(`${userName}  `, { delay: 20 });
 
     await waitForDropDown(); // Needed for the dropdown
     const addCollab = this.waitForAddCollaboratorIcon(userName);

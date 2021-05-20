@@ -4,6 +4,7 @@ import { makeRandomName } from 'utils/str-utils';
 import { waitForPropertyExists, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
+import Textbox from 'app/element/textbox';
 import { LinkText } from 'app/text-labels';
 import Modal from './modal';
 import { logger } from 'libs/logger';
@@ -21,13 +22,17 @@ export default class DatasetCreateModal extends Modal {
     return true;
   }
 
+  getNameTextbox(): Textbox {
+    return this.waitForTextbox('DATASET NAME');
+  }
+
   /**
    * Handle Create dialog
    */
   async createDataset(): Promise<string> {
     const newDatasetName = makeRandomName();
 
-    const nameTextbox = this.waitForTextbox('DATASET NAME');
+    const nameTextbox = this.getNameTextbox();
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 

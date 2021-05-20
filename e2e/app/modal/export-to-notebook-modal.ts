@@ -40,7 +40,7 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   async clickExportButton() {
-    return this.clickButton(LinkText.ExportAndOpen, { waitForClose: true });
+    return this.clickButton(LinkText.Export, { waitForClose: true });
   }
 
   /**
