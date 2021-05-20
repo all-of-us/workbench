@@ -8,6 +8,7 @@ import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { Ethnicity } from 'app/page/cohort-participants-group';
 import { Language, LinkText, ResourceCard } from 'app/text-labels';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 
 describe('Create dataset and export to notebook at same time', () => {
   beforeEach(async () => {
@@ -48,14 +49,18 @@ describe('Create dataset and export to notebook at same time', () => {
 
     await datasetBuildPage.selectCohorts([newCohortName]);
     await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
-    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
+    const createModal = await datasetBuildPage.clickCreateButton();
     const newNotebookName = makeRandomName();
-    const newDatasetName = await saveModal.saveDataset({
-      exportToNotebook: true,
-      notebookName: newNotebookName,
-      lang: Language.R
-    });
+    const newDatasetName = await createModal.createDataset();
     await waitWhileLoading(page);
+
+    await datasetBuildPage.clickExportButton();
+    const exportModal = new ExportToNotebookModal(page);
+    await exportModal.waitForLoad();
+
+    await exportModal.enterNotebookName(newNotebookName);
+    await exportModal.pickLanguage(Language.R);
+    await exportModal.clickExportButton();
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
     const notebookPreviewPage = new NotebookPreviewPage(page);

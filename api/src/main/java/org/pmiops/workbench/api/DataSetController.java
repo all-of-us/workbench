@@ -3,11 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,42 +16,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -66,12 +55,12 @@ import org.pmiops.workbench.model.GenomicExtractionJobListResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -86,12 +75,9 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  private final CohortService cohortService;
-  private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
 
   private final Provider<DbUser> userProvider;
-  private final Provider<String> prefixProvider;
 
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
@@ -103,24 +89,18 @@ public class DataSetController implements DataSetApiDelegate {
   @Autowired
   DataSetController(
       CdrVersionService cdrVersionService,
-      CohortService cohortService,
-      ConceptSetService conceptSetService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
-      @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cdrVersionService = cdrVersionService;
-    this.cohortService = cohortService;
-    this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
-    this.prefixProvider = prefixProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -157,57 +137,14 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  @VisibleForTesting
-  public String generateRandomEightCharacterQualifier() {
-    return prefixProvider.get();
-  }
-
-  public ResponseEntity<DataSetCodeResponse> generateCode(
-      String workspaceNamespace,
-      String workspaceId,
-      String kernelTypeEnumString,
-      DataSetRequest dataSetRequest) {
-    DbWorkspace dbWorkspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    validateDataSetRequestResources(dbWorkspace.getWorkspaceId(), dataSetRequest);
-
-    // Generate query per domain for the selected concept set, cohort and values
-    // TODO(calbach): I don't understand what this was trying to support - the inner workspaceId is
-    // not documented, and allowing this to be a different value than what is sent in the URL is
-    // a potential security issue.
-    dataSetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.domainToBigQueryConfig(dataSetRequest);
-
-    if (bigQueryJobConfigsByDomain.isEmpty()) {
-      log.warning("Empty query map generated for this DataSetRequest");
-    }
-
-    final String qualifier = generateRandomEightCharacterQualifier();
-    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
-    final ImmutableList<String> codeCells =
-        ImmutableList.copyOf(
-            dataSetService.generateCodeCells(
-                kernelTypeEnum,
-                dataSetRequest.getName(),
-                dbWorkspace.getCdrVersion().getName(),
-                qualifier,
-                bigQueryJobConfigsByDomain));
-    final String generatedCode = String.join("\n\n", codeCells);
-
-    return ResponseEntity.ok(
-        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
-  }
-
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateDataSetPreviewRequestResources(dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
+    dataSetService.validateDataSetPreviewRequestResources(
+        dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
 
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
     TableResult queryResponse = dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
@@ -284,6 +221,51 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
+  public ResponseEntity<DataSetCodeResponse> generateCode(
+      String workspaceNamespace,
+      String workspaceId,
+      String kernelTypeEnumString,
+      DataSetRequest dataSetRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
+    final String generatedCode =
+        String.join(
+            "\n\n",
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(kernelTypeEnum)
+                    .dataSetRequest(dataSetRequest),
+                dbWorkspace));
+
+    return ResponseEntity.ok(
+        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
+  }
+
+  @Override
+  public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
+      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    JSONObject notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
+
+    dataSetService
+        .generateCodeCells(dataSetExportRequest, dbWorkspace)
+        .forEach(
+            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
+
+    return ResponseEntity.ok(
+        new ReadOnlyNotebookResponse()
+            .html(
+                notebooksService.convertNotebookToHtml(
+                    notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
+  }
+
+  @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     DbWorkspace dbWorkspace =
@@ -291,159 +273,64 @@ public class DataSetController implements DataSetApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
 
-    validateDataSetRequestResources(
-        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+    String bucketName =
+        fireCloudService
+            .getWorkspace(workspaceNamespace, workspaceId)
+            .getWorkspace()
+            .getBucketName();
 
-    // This suppresses 'may not be initialized errors. We will always init to something else before
-    // used.
-    JSONObject notebookFile = new JSONObject();
-    FirecloudWorkspaceResponse workspace =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-    JSONObject metaData = new JSONObject();
+    JSONObject notebookFile;
 
     if (!dataSetExportRequest.getNewNotebook()) {
       notebookFile =
-          notebooksService.getNotebookContents(
-              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
-      try {
-        String language =
-            Optional.of(notebookFile.getJSONObject("metadata"))
-                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
-                .map(kernelSpec -> kernelSpec.getString("language"))
-                .orElse("Python");
-        if ("R".equals(language)) {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
-        } else {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-        }
-      } catch (JSONException e) {
-        // If we can't find metadata to parse, default to python.
-        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-      }
+          notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
+      dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));
     } else {
-      switch (dataSetExportRequest.getKernelType()) {
-        case PYTHON:
-          break;
-        case R:
-          metaData
-              .put(
-                  "kernelspec",
-                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
-              .put(
-                  "language_info",
-                  new JSONObject()
-                      .put("codemirror_mode", "r")
-                      .put("file_extension", ".r")
-                      .put("mimetype", "text/x-r-source")
-                      .put("name", "r")
-                      .put("pygments_lexer", "r")
-                      .put("version", "3.4.4"));
-          break;
-        default:
-          throw new BadRequestException(
-              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
-      }
+      notebookFile = createNotebookObject(dataSetExportRequest.getKernelType());
     }
 
-    // TODO(calbach): Verify whether the request payload is ever expected to include a different
-    // workspace ID.
-    dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
-    Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+    dataSetService
+        .generateCodeCells(dataSetExportRequest, dbWorkspace)
+        .forEach(
+            cell -> notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(cell)));
 
-    String qualifier = generateRandomEightCharacterQualifier();
-
-    List<String> queriesAsStrings =
-        dataSetService.generateCodeCells(
-            dataSetExportRequest.getKernelType(),
-            dataSetExportRequest.getDataSetRequest().getName(),
-            dbWorkspace.getCdrVersion().getName(),
-            qualifier,
-            queriesByDomain);
-
-    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
-      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-      }
-
-      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
-        throw new FailedPreconditionException(
-            "The workspace CDR version does not have whole genome data");
-      }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
-        throw new BadRequestException("Genomics code generation is only supported in Python");
-      }
-
-      // TODO(RW-6633): Add WGS codegen support.
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
-
-    if (dataSetExportRequest.getNewNotebook()) {
-      notebookFile =
-          new JSONObject()
-              .put("cells", new JSONArray())
-              .put("metadata", metaData)
-              // nbformat and nbformat_minor are the notebook major and minor version we are
-              // creating.
-              // Specifically, here we create notebook version 4.2 (I believe)
-              // See https://nbformat.readthedocs.io/en/latest/api.html
-              .put("nbformat", 4)
-              .put("nbformat_minor", 2);
-    }
-    for (String query : queriesAsStrings) {
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
-    }
-
-    notebooksService.saveNotebook(
-        workspace.getWorkspace().getBucketName(),
-        dataSetExportRequest.getNotebookName(),
-        notebookFile);
+    notebooksService.saveNotebook(bucketName, dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  /** Validate that the requested resources are contained by the given workspace. */
-  private void validateDataSetRequestResources(long workspaceId, DataSetRequest request) {
-    if (request.getDataSetId() != null) {
-      mustGetDbDataset(workspaceId, request.getDataSetId());
-    } else {
-      validateCohortsInWorkspace(workspaceId, request.getCohortIds());
-      validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+  private JSONObject createNotebookObject(KernelTypeEnum kernelTypeEnum) {
+    JSONObject metaData = new JSONObject();
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        break;
+      case R:
+        metaData
+            .put(
+                "kernelspec",
+                new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+            .put(
+                "language_info",
+                new JSONObject()
+                    .put("codemirror_mode", "r")
+                    .put("file_extension", ".r")
+                    .put("mimetype", "text/x-r-source")
+                    .put("name", "r")
+                    .put("pygments_lexer", "r")
+                    .put("version", "3.4.4"));
+        break;
+      default:
+        throw new BadRequestException("Kernel Type " + kernelTypeEnum + " is not supported");
     }
-  }
 
-  private void validateDataSetPreviewRequestResources(
-      long workspaceId, DataSetPreviewRequest request) {
-    validateCohortsInWorkspace(workspaceId, request.getCohortIds());
-    validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
-  }
-
-  private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
-    if (CollectionUtils.isEmpty(cohortIds)) {
-      return;
-    }
-    List<Long> workspaceCohortIds =
-        cohortService.findByWorkspaceId(workspaceId).stream()
-            .map(Cohort::getId)
-            .collect(Collectors.toList());
-
-    if (!workspaceCohortIds.containsAll(cohortIds)) {
-      throw new NotFoundException("one or more of the requested cohorts were not found");
-    }
-  }
-
-  private void validateConceptSetsInWorkspace(
-      long workspaceId, @Nullable List<Long> conceptSetIds) {
-    if (CollectionUtils.isEmpty(conceptSetIds)) {
-      return;
-    }
-    List<Long> workspaceConceptSetIds =
-        conceptSetService.findByWorkspaceId(workspaceId).stream()
-            .map(ConceptSet::getId)
-            .collect(Collectors.toList());
-    if (!workspaceConceptSetIds.containsAll(conceptSetIds)) {
-      throw new NotFoundException("one or more of the requested concept sets were not found");
-    }
+    return new JSONObject()
+        .put("cells", new JSONArray())
+        .put("metadata", metaData)
+        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+        // Specifically, here we create notebook version 4.2 (I believe)
+        // See https://nbformat.readthedocs.io/en/latest/api.html
+        .put("nbformat", 4)
+        .put("nbformat_minor", 2);
   }
 
   @Override
@@ -565,7 +452,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Workspace CDR does not have access to WGS data");
     }
 
-    DbDataset dataSet = mustGetDbDataset(workspace.getWorkspaceId(), dataSetId);
+    DbDataset dataSet = dataSetService.mustGetDbDataset(workspace.getWorkspaceId(), dataSetId);
     try {
       return ResponseEntity.ok(
           genomicExtractionService.submitGenomicExtractionJob(workspace, dataSet));
@@ -614,17 +501,5 @@ public class DataSetController implements DataSetApiDelegate {
         throw new ServerErrorException(e);
       }
     }
-  }
-
-  private DbDataset mustGetDbDataset(long workspaceId, long dataSetId) {
-    return dataSetService
-        .getDbDataSet(workspaceId, dataSetId)
-        .<NotFoundException>orElseThrow(
-            () -> {
-              throw new NotFoundException(
-                  String.format(
-                      "No DataSet found for workspaceId: %s, dataSetId: %s",
-                      workspaceId, dataSetId));
-            });
   }
 }

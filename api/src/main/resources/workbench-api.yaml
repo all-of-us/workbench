@@ -1763,6 +1763,25 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/FileDetail"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/kernel":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - workspaces
+      description: Get Kernel Type of notebook
+      operationId: getNotebookKernel
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Kernel Type
+          schema:
+            "$ref": "#/definitions/KernelTypeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2225,6 +2244,29 @@ paths:
           description: The updated concept set.
           schema:
             "$ref": "#/definitions/ConceptSet"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
+    post:
+      tags:
+        - dataSet
+      description: 'Given a Data Set, return the SQL query built from it.'
+      operationId: generateCode
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: path
+          name: kernelType
+          required: true
+          type: string
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: 'A SQL query for each domain in the Data Set'
+          schema:
+            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2249,29 +2291,6 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/ConceptSet"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
-    post:
-      tags:
-      - dataSet
-      description: 'Given a Data Set, return the SQL query built from it.'
-      operationId: generateCode
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: path
-        name: kernelType
-        required: true
-        type: string
-      - in: body
-        name: dataSet
-        required: true
-        schema:
-          "$ref": "#/definitions/DataSetRequest"
-      responses:
-        200:
-          description: 'A SQL query for each domain in the Data Set'
-          schema:
-            "$ref": "#/definitions/DataSetCodeResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2507,6 +2526,29 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         400:
           description: Invalid data set request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook/preview":
+    post:
+      tags:
+        - dataSet
+      description: 'Preview notebook code generation'
+      operationId: previewExportToNotebook
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: body
+          name: dataSetExportRequest
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetExportRequest"
+      responses:
+        200:
+          description: HTML Read Only version of the the notebook cells to be exported
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+        400:
+          description: Invalid data set export request
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview":
@@ -5056,6 +5098,11 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/DataSet"
+  KernelTypeResponse:
+    type: object
+    properties:
+      kernelType:
+        "$ref": "#/definitions/KernelTypeEnum"
   DataSetCodeResponse:
     type: object
     properties:

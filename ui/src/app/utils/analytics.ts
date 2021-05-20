@@ -64,11 +64,10 @@ export const AnalyticsTracker = {
   },
   DatasetBuilder: {
     OpenCreatePage: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Create Page'),
+    Create: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Create'),
     Save: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save'),
-    SaveAndAnalyze: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Save and Analyze', suffix),
     OpenEditPage: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Edit Page', suffix),
     Update: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Update'),
-    UpdateAndAnalyze: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Update and Analyze', suffix),
     SeeCodePreview: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'See Code Preview'),
     OpenRenameModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Rename Modal'),
     Rename: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Rename'),

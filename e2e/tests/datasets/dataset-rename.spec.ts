@@ -21,6 +21,7 @@ describe('Dataset test', () => {
    */
   test('Can create and rename Dataset', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
+    const dataPageUrl = page.url();
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);
@@ -28,8 +29,10 @@ describe('Dataset test', () => {
 
     await datasetPage.selectCohorts(['All Participants']);
     await datasetPage.selectConceptSets([LinkText.Demographics, LinkText.AllSurveys]);
-    const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
-    const datasetName = await saveModal.saveDataset();
+    const createModal = await datasetPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
+    await page.goto(dataPageUrl);
+    await dataPage.waitForLoad();
 
     // Verify create successful
     const resourceCard = new DataResourceCard(page);

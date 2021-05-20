@@ -143,8 +143,8 @@ describe('Create Concept Sets from Domains', () => {
     await conceptActionPage.clickCreateDatasetButton();
     await datasetBuildPage.selectCohorts(['All Participants']);
     await datasetBuildPage.selectConceptSets([conceptSet1, conceptSet2]);
-    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
-    const datasetName = await saveModal.saveDataset();
+    const createModal = await datasetBuildPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
 
     // Verify Dataset created successful.
     await dataPage.openDatasetsSubtab();

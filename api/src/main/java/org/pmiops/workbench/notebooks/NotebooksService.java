@@ -4,6 +4,7 @@ import com.google.cloud.storage.Blob;
 import java.util.List;
 import org.json.JSONObject;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.KernelTypeEnum;
 
 public interface NotebooksService {
 
@@ -44,7 +45,14 @@ public interface NotebooksService {
 
   JSONObject getNotebookContents(String bucketName, String notebookName);
 
+  KernelTypeEnum getNotebookKernel(JSONObject notebookFile);
+
+  KernelTypeEnum getNotebookKernel(
+      String workspaceNamespace, String workspaceName, String notebookName);
+
   void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
+
+  public String convertNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 
