@@ -231,16 +231,18 @@ public class DataSetController implements DataSetApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
-    final String generatedCode = String.join("\n\n",
-        dataSetService.generateCodeCells(new DataSetExportRequest()
-            .kernelType(kernelTypeEnum)
-            .dataSetRequest(dataSetRequest),
-            dbWorkspace));
+    final String generatedCode =
+        String.join(
+            "\n\n",
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(kernelTypeEnum)
+                    .dataSetRequest(dataSetRequest),
+                dbWorkspace));
 
     return ResponseEntity.ok(
         new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
-
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
