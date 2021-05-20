@@ -20,7 +20,6 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -201,7 +200,9 @@ public class GenomicExtractionService {
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".query_project",
                                 "\"" + workspace.getWorkspaceNamespace() + "\"")
-                            .put(EXTRACT_WORKFLOW_NAME + ".extraction_uuid", "\"" + extractionUuid + "\"")
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
+                                "\"" + extractionUuid + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\""
