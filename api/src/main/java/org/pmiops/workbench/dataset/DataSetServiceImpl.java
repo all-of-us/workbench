@@ -995,6 +995,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return StringUtils.capitalize(text.toLowerCase());
   }
 
+  // This takes the query, and string replaces in the values for each of the named
+  // parameters generated. For example:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN unnest(@p1_1)
+  // becomes:
+  //    SELECT * FROM cdr.dataset.person WHERE criteria IN (1, 2, 3)
   private static String fillInQueryParams(
       String query, Map<String, QueryParameterValue> queryParameterValueMap) {
     return queryParameterValueMap.entrySet().stream()
