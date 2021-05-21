@@ -24,6 +24,7 @@ describe('Dataset test', () => {
    */
   test('Create Dataset from user-defined Cohorts', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
+    const dataPageUrl = page.url();
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);
@@ -49,8 +50,8 @@ describe('Dataset test', () => {
 
     await datasetPage.selectCohorts([cohortName]);
     await datasetPage.selectConceptSets([LinkText.Demographics]);
-    const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
-    let datasetName = await saveModal.saveDataset({ exportToNotebook: false });
+    const createModal = await datasetPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
 
     // Verify create successful.
     await dataPage.openDatasetsSubtab();
@@ -67,13 +68,10 @@ describe('Dataset test', () => {
     const datasetEditPage = new DatasetEditPage(page);
     await datasetEditPage.waitForLoad();
     await datasetEditPage.selectCohorts(['All Participants']);
-    await datasetEditPage.clickAnalyzeButton();
+    await datasetEditPage.clickExportButton();
 
-    // Save Dataset in a new name.
-    await saveModal.waitForLoad();
-    datasetName = await saveModal.saveDataset({ exportToNotebook: false }, true);
+    await page.goto(dataPageUrl);
     await dataPage.waitForLoad();
-
     await dataPage.openDatasetsSubtab();
     await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
   });

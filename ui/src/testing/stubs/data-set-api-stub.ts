@@ -10,7 +10,7 @@ import {
   DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum,
-  MarkDataSetRequest
+  MarkDataSetRequest, ReadOnlyNotebookResponse
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -27,6 +27,8 @@ export const stubDataSet = (): DataSet => ({
 });
 
 export class DataSetApiStub extends DataSetApi {
+  public codePreview;
+
   static stubDataSets(): DataSet[] {
     return [stubDataSet()];
   }
@@ -41,6 +43,13 @@ export class DataSetApiStub extends DataSetApi {
     dataSet: DataSetRequest): Promise<DataSetCodeResponse> {
     return new Promise<DataSetCodeResponse>(resolve => {
       resolve({kernelType: KernelTypeEnum[kernelType], code: ''});
+    });
+  }
+
+  previewExportToNotebook(workspaceNamespace: string, workspaceId: string, dataSetExportRequest: DataSetExportRequest,
+    options?: any): Promise<ReadOnlyNotebookResponse> {
+    return new Promise<ReadOnlyNotebookResponse>(resolve => {
+      resolve(this.codePreview);
     });
   }
 

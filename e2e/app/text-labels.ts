@@ -94,7 +94,7 @@ export enum LinkText {
   DiscardChanges = 'Discard Changes',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
-  ExportAndOpen = 'Export and Open',
+  ExportAndOpen = 'Export',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',

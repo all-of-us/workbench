@@ -21,6 +21,7 @@ describe('Export to notebook from dataset', () => {
    */
   test('Create Jupyter notebook for Python programming language from existing dataset', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
+    const dataPageUrl = page.url();
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -28,8 +29,9 @@ describe('Export to notebook from dataset', () => {
 
     await datasetBuildPage.selectCohorts(['All Participants']);
     await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
-    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
-    const datasetName = await saveModal.saveDataset({ exportToNotebook: false });
+    const createModal = await datasetBuildPage.clickCreateButton();
+    const datasetName = await createModal.createDataset();
+    await page.goto(dataPageUrl);
     await waitWhileLoading(page);
 
     const resourceCard = new DataResourceCard(page);

@@ -91,7 +91,6 @@ public class RdrExportServiceImplTest {
   public void setUp() {
     rdrExportService = spy(rdrExportService);
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);
-    when(mockApiClient.setDebugging(true)).thenReturn(null);
 
     dbUserWithEmail = new DbUser();
     dbUserWithEmail.setUserId(1L);
@@ -204,6 +203,21 @@ public class RdrExportServiceImplTest {
     verify(rdrExportDao, times(1)).saveAll(anyList());
 
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
+  }
+
+  @Test
+  public void exportWorkspace_backfill() throws ApiException {
+    List<Long> workspaceID = new ArrayList<>();
+    workspaceID.add(1l);
+    RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
+    when(rdrMapper.toRdrModel(mockWorkspace)).thenReturn(rdrWorkspace);
+    rdrExportService.exportWorkspaces(workspaceID, true);
+    verify(mockWorkspaceService)
+        .getFirecloudUserRoles(
+            mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
+    verify(rdrExportDao, never()).saveAll(anyList());
+
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), true);
   }
 
   /**

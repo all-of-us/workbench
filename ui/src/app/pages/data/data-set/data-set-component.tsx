@@ -5,14 +5,16 @@ import * as React from 'react';
 
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {CreateModal} from 'app/components/create-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {CircleWithText} from 'app/icons/circleWithText';
-import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
+import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -26,27 +28,29 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  navigateAndPreventDefaultIfNoKeysPressed
+} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
-  BillingStatus,
   CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
-  DataSetPreviewValueList,
+  DataSetPreviewValueList, DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile,
+  Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
 
@@ -419,7 +423,7 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props {
+interface Props extends WithErrorModalProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
@@ -443,7 +447,8 @@ interface State {
 
   includesAllParticipants: boolean;
   loadingResources: boolean;
-  openSaveModal: boolean;
+  openExportModal: boolean;
+  openCreateModal: boolean;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -451,9 +456,10 @@ interface State {
   selectedDomainValuePairs: DomainValuePair[];
   selectedPrepackagedConceptSets: Set<PrepackagedConceptSet>;
   selectedPreviewDomain: Domain;
+  savingDataset: boolean;
 }
 
-export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -468,7 +474,8 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         domainValueSetLookup: new Map(),
         includesAllParticipants: false,
         loadingResources: true,
-        openSaveModal: false,
+        openExportModal: false,
+        openCreateModal: false,
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -476,11 +483,12 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         selectedPreviewDomain: Domain.CONDITION,
         selectedPrepackagedConceptSets: new Set(),
         selectedDomainValuePairs: [],
+        savingDataset: false
       };
     }
 
-    get editing() {
-      return this.props.urlParams.dataSetId !== undefined;
+    get isCreatingNewDataset() {
+      return !this.state.dataSet;
     }
 
     async componentDidMount() {
@@ -501,26 +509,34 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
         };
-
-      }
-      if (!this.editing) {
-        return;
       }
 
-      const [, dataSet] = await Promise.all([
-        resourcesPromise,
-        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
-      ]);
+      if (this.props.urlParams.dataSetId !== undefined) {
+        const [, dataset] = await Promise.all([
+          resourcesPromise,
+          dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
+        ]);
 
-      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataSet.prePackagedConceptSet);
-      this.setState({
-        dataSet,
-        includesAllParticipants: dataSet.includesAllParticipants,
-        selectedConceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-        selectedCohortIds: dataSet.cohorts.map(c => c.id),
-        selectedDomainValuePairs: dataSet.domainValuePairs,
-        selectedDomains: this.getDomainsFromDataSet(dataSet),
-        selectedPrepackagedConceptSets,
+        this.loadDataset(dataset);
+      }
+    }
+
+    loadDataset(dataset) {
+      // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
+      // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
+      if (window.location.href.endsWith('data-sets')) {
+        history.pushState({}, '', `${window.location.href}/${dataset.id}`);
+      }
+
+      return this.setState({
+        dataSet: dataset,
+        dataSetTouched: false,
+        includesAllParticipants: dataset.includesAllParticipants,
+        selectedConceptSetIds: dataset.conceptSets.map(cs => cs.id),
+        selectedCohortIds: dataset.cohorts.map(c => c.id),
+        selectedDomainValuePairs: dataset.domainValuePairs,
+        selectedDomains: this.getDomainsFromDataSet(dataset),
+        selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
       });
     }
 
@@ -596,7 +612,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         // existing dataset which already covers the domain. This avoids having
         // us overwrite the selected pairs on initial load.
         let morePairs = [];
-        if (!this.editing || !this.getDomainsFromDataSet(dataSet).has(domain)) {
+        if (this.isCreatingNewDataset || !this.getDomainsFromDataSet(dataSet).has(domain)) {
           morePairs = values.items.map(v => ({domain, value: v.value}));
         }
 
@@ -930,6 +946,53 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
       this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
+    async createDataset(name, desc) {
+      AnalyticsTracker.DatasetBuilder.Create();
+      const {namespace, id} = this.props.workspace;
+
+      return dataSetApi()
+        .createDataSet(namespace, id, this.createDatasetRequest(name, desc))
+        .then(dataset => this.loadDataset(dataset));
+    }
+
+    async saveDataset() {
+      AnalyticsTracker.DatasetBuilder.Save();
+      const {namespace, id} = this.props.workspace;
+
+      this.setState({savingDataset: true});
+      dataSetApi().updateDataSet(namespace, id, this.state.dataSet.id, this.updateDatasetRequest())
+        .then(dataset => this.loadDataset(dataset))
+        .catch(e => {
+          console.error(e);
+          this.props.showErrorModal('Save Dataset Error', 'Please refresh and try again');
+        })
+        .finally(() => this.setState({savingDataset: false}));
+    }
+
+    createDatasetRequest(name, desc): DataSetRequest {
+      return {
+        name,
+        description: desc,
+        ...{
+          includesAllParticipants: this.state.includesAllParticipants,
+          conceptSetIds: this.state.selectedConceptSetIds,
+          cohortIds: this.state.selectedCohortIds,
+          domainValuePairs: this.state.selectedDomainValuePairs,
+          prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum()
+        }
+      };
+    }
+
+    updateDatasetRequest(): DataSetRequest {
+      return {
+        ...this.createDatasetRequest(
+          this.state.dataSet.name,
+          this.state.dataSet.description
+        ),
+        etag: this.state.dataSet.etag
+      };
+    }
+
     openZendeskWidget() {
       const {profile} = this.props.profileState;
       openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
@@ -1053,7 +1116,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         domainValueSetLookup,
         includesAllParticipants,
         loadingResources,
-        openSaveModal,
+        openExportModal,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -1062,9 +1125,14 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         selectedDomainValuePairs,
         selectedPrepackagedConceptSets
       } = this.state;
+      const exportError = !this.canWrite ? 'Requires Owner or Writer permission' :
+        dataSetTouched ? 'Pending changes must be saved' : '';
+
       return <React.Fragment>
+        {this.state.savingDataset && <SpinnerOverlay opacity={0.3}/>}
+
         <FadeBox style={{paddingTop: '1rem'}}>
-          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
+          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{!this.isCreatingNewDataset &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
           <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
@@ -1253,29 +1321,42 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
           </div>
         </FadeBox>
         <div style={styles.stickyFooter}>
-          <TooltipTrigger data-test-id='save-tooltip'
-            content='Requires Owner or Writer permission' disabled={this.canWrite}>
-          <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-            onClick ={() => this.setState({openSaveModal: true})}
-            disabled={this.disableSave() || !this.canWrite}>
-              {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
-                'Update and Analyze' : 'Save and Analyze'}
-          </Button>
+            <TooltipTrigger data-test-id='save-tooltip'
+                            content='Requires Owner or Writer permission' disabled={this.canWrite}>
+              {this.isCreatingNewDataset ?
+                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                        onClick ={() => this.setState({openCreateModal: true})}
+                        disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
+                  Create Dataset
+                </Button> :
+                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                        onClick ={() => this.saveDataset()}
+                        disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
+                  Save
+                </Button>}
+            </TooltipTrigger>
+
+          <TooltipTrigger data-test-id='export-tooltip'
+                          content={exportError}
+                          disabled={!exportError}>
+            <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
+                    onClick ={() => this.setState({openExportModal: true})}
+                    disabled={this.disableSave() || !!exportError}>
+              Export
+            </Button>
           </TooltipTrigger>
         </div>
-        {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
-                                           selectedConceptSetIds={selectedConceptSetIds}
-                                           selectedCohortIds={selectedCohortIds}
-                                           selectedDomainValuePairs={selectedDomainValuePairs}
-                                           workspaceNamespace={namespace}
-                                           workspaceId={id}
-                                           billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                           prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
-                                           dataSet={dataSet ? dataSet : undefined}
-                                           closeFunction={() => {
-                                             this.setState({openSaveModal: false});
-                                           }}
-        />}
+        {this.state.openCreateModal && <CreateModal entityName='Dataset'
+                                                    getExistingNames={async() => {
+                                                      const resources = await workspacesApi().getWorkspaceResources(namespace, id,
+                                                        {typesToFetch: [ResourceType.DATASET]});
+                                                      return resources.map(resource => resource.dataSet.name);
+                                                    }}
+                                                    save={(name, desc) => this.createDataset(name, desc)}
+                                                    close={() => this.setState({openCreateModal: false})}/>}
+
+        {openExportModal && <ExportDatasetModal dataset={dataSet}
+                                                closeFunction={() => this.setState({openExportModal: false})}/>}
       </React.Fragment>;
     }
   });

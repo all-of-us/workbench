@@ -33,10 +33,6 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ],
-    "garbageCollectionUserCapacity": 1000,
-    "garbageCollectionUsers": [
-      "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
     ]
   },
   "auth": {
