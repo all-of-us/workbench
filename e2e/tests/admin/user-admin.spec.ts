@@ -40,21 +40,19 @@ describe('Admin', () => {
         ]
         let adminTable = new AdminTable(page);
         const columnNames = await adminTable.getColumnNames();
-        console.log(columnNames);
         expect(columnNames).toHaveLength(columns.length);
         expect(columnNames.sort()).toEqual(columns.sort());
        
-      // const usernameIndex = await adminTable.getUsernameIndex(username);
-      //   const columnIndex = await adminTable.bypassLinkColindex()
-      //   console.log(columnIndex);
+      // get the index of the user name column
+      const usernameColIndex = await adminTable.getColumnIndex("User name");
 
-      // //   //click on the bypass link
-      //   let bypassLinkModal  = await userAdminPage.clickBypassLink(1, columnIndex);
-      //  let toggleText = await bypassLinkModal.getAllToggleTexts();
-      //  console.log(toggleText);
+      //click on the bypass link
+      let bypassLinkModal  = await userAdminPage.clickBypassLink(1, usernameColIndex);
+       let toggleText = await bypassLinkModal.getAllToggleTexts();
+       console.log(toggleText);
     
 
-      // // change toggle to green for all the modules
+      // change toggle to green for all the modules
       //  await bypassLinkModal.bypassAllModules();
 
       //get the index of the user lockout column
