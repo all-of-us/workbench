@@ -6,7 +6,7 @@ import {withRouteData} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ControlledTierBadge} from 'app/components/icons';
+import {ControlledTierBadge, ExclamationTriangle} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
@@ -20,9 +20,8 @@ import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {styles} from 'app/pages/profile/profile-styles';
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import {institutionApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
@@ -86,6 +85,13 @@ interface ProfilePageState {
 interface CompletionTime {
   completionTime: number;
   bypassTime: number;
+}
+
+const isRenewalReferred = () => {
+  return fp.flow(
+    fp.get(['state', 'state', 'from', 'pathname']),
+    fp.contains('access-renewal')
+  )(history)
 }
 
 const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
@@ -243,6 +249,18 @@ export const ProfilePage = fp.flow(
       }
     }
 
+    async confirmProfile() {
+      this.setState({updating: true});
+      try {
+        await profileApi().confirmProfile();
+      } catch (error) {
+        const errorResponse = await convertAPIError(error);
+        this.props.showProfileErrorModal(errorResponse.message);
+      } finally {
+        this.setState({updating: false});
+      }
+    }
+
     private getEraCommonsCardText(profile) {
       switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
         case RegistrationStepStatus.COMPLETED:
@@ -330,6 +348,9 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
+      
+      const isExpired = fp.flow(fp.find({moduleName: 'profileConfirmation'}), fp.get('hasExpired'))(profile.renewableAccessModules.modules)
+      console.log(isExpired, profile.renewableAccessModules.modules, isRenewalReferred())
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
@@ -400,6 +421,13 @@ export const ProfilePage = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
+            {(isExpired || isRenewalReferred()) && 
+              <div style={styles.renewalBox}>
+                <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
+                <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
+                <a onClick={() => this.confirmProfile()} style={{margin: '0 0.5rem 0 auto', textDecoration: 'underline'}}>Looks Good</a> 
+              </div>
+            }
             <div style={styles.title}>Public displayed Information</div>
             <hr style={{...styles.verticalLine, width: '64%'}}/>
             <FlexRow style={{marginTop: '1rem'}}>

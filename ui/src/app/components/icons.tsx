@@ -1,4 +1,4 @@
-import {faCheck, faCheckCircle, faTimes} from '@fortawesome/free-solid-svg-icons';
+import {faCheck, faCheckCircle, faTimes, faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import colors, {addOpacity} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
@@ -120,3 +120,4 @@ export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircl
   </div>;
 };
 export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
+export const ExclamationTriangle = props => <Icon shape={faExclamationTriangle} color={colors.danger} {...props}/>;

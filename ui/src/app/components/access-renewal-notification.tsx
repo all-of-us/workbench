@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigateByUrl} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
@@ -94,7 +94,7 @@ const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => 
     }
     </div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('access-renewal')}>
+    <Button type='primary' style={styles.button} onClick={() => navigate(['access-renewal'])}>
       <div style={styles.buttonText}>Get Started</div>
     </Button>
   </FlexRow>;

@@ -1,16 +1,19 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {withRouteData} from 'app/components/app-router';
-import {Button} from 'app/components/buttons';
+import {withRouteData, Navigate} from 'app/components/app-router';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, } from 'app/components/flex';
-import {Arrow, ClrIcon, withCircleBackground} from 'app/components/icons';
+import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
 import {RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
+import {navigate} from 'app/utils/navigation';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {maybeDaysRemaining} from 'app/components/access-renewal-notification'
+
 import {
   daysFromNow,
   displayDateWithoutHours,
@@ -108,16 +111,31 @@ export const AccessRenewalPage = fp.flow(
     dataUseAgreementBypassTime,
     complianceTrainingBypassTime,
     renewableAccessModules: {modules}},
+    profile
   } = useStore(profileStore);
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
+  const [navigatex, setNavigatex] = useState(null)
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
+
+  if (navigatex) {
+    return <Navigate to={navigatex}/>;
+  }
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-      <BackArrow style={{height: '1.5rem', width: '1.5rem'}}/>
-      <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
+      
+      {maybeDaysRemaining(profile) >= 0 
+        ? <React.Fragment>
+            <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
+            <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
+          </React.Fragment>
+        : <React.Fragment>
+            <ExclamationTriangle style={{height: '1.5rem', width: '1.5rem'}}/>
+            <div style={styles.h1}>Access to the Researcher Workbench revoked.</div>
+          </React.Fragment> 
+      }
       <div style={{gridColumnStart: 2}}>Researchers are required to complete a number of steps as part of the annual renewal
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
@@ -137,7 +155,10 @@ export const AccessRenewalPage = fp.flow(
         {
           isComplete(getExpirationTimeFor('profileConfirmation'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={false}/>
-            : <Button style={{marginTop: 'auto', height: '1.6rem', width: '4.5rem'}}>Review</Button>
+            : <Button onClick={() => {
+              history.pushState('access-renewal', '');
+              navigate(['profile'])
+            }} style={{marginTop: 'auto', height: '1.6rem', width: '4.5rem'}}>Review</Button>
         }
       </RenewalCard>
       {/* Publications */}
@@ -148,7 +169,8 @@ export const AccessRenewalPage = fp.flow(
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
-             program, <a target='_blank'  href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
+             program, <a target='_blank' style={{textDecoration: 'underline'}} 
+              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           {
@@ -186,7 +208,8 @@ export const AccessRenewalPage = fp.flow(
         {
           dataUseAgreementBypassTime || isComplete(getExpirationTimeFor('dataUseAgreement'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={!!dataUseAgreementBypassTime} />
-            : <Button style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>View & Sign</Button>
+            : <Button onClick={() => navigate(['data-code-of-conduct'])} 
+                      style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>View & Sign</Button>
         }
       </RenewalCard>
     </div>
