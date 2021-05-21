@@ -60,7 +60,7 @@ ENV GRADLE_USER_HOME /.gradle
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-RUN curl https://services.gradle.org/distributions/gradle-5.6.3-bin.zip -L > /tmp/gradle.zip
+RUN curl https://services.gradle.org/distributions/gradle-6.7.1-bin.zip -L > /tmp/gradle.zip
 WORKDIR /tmp
 RUN unzip gradle.zip && rm gradle.zip \
   && mv gradle-* /gradle

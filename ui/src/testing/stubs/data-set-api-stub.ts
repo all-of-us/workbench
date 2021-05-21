@@ -8,9 +8,9 @@ import {
   DataSetPreviewResponse,
   DataSetRequest,
   DomainValuesResponse,
-  EmptyResponse,
+  EmptyResponse, GenomicExtractionJobListResponse,
   KernelTypeEnum,
-  MarkDataSetRequest
+  MarkDataSetRequest, ReadOnlyNotebookResponse
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -27,12 +27,17 @@ export const stubDataSet = (): DataSet => ({
 });
 
 export class DataSetApiStub extends DataSetApi {
+  public codePreview;
+
+  public extractionJobs;
+
   static stubDataSets(): DataSet[] {
     return [stubDataSet()];
   }
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    this.extractionJobs = [];
   }
 
   generateCode(workspaceNamespace: string,
@@ -41,6 +46,13 @@ export class DataSetApiStub extends DataSetApi {
     dataSet: DataSetRequest): Promise<DataSetCodeResponse> {
     return new Promise<DataSetCodeResponse>(resolve => {
       resolve({kernelType: KernelTypeEnum[kernelType], code: ''});
+    });
+  }
+
+  previewExportToNotebook(workspaceNamespace: string, workspaceId: string, dataSetExportRequest: DataSetExportRequest,
+    options?: any): Promise<ReadOnlyNotebookResponse> {
+    return new Promise<ReadOnlyNotebookResponse>(resolve => {
+      resolve(this.codePreview);
     });
   }
 
@@ -101,5 +113,9 @@ export class DataSetApiStub extends DataSetApi {
 
   async markDirty(workspaceNamespace: string, workspaceId: string, markDataSetRequest?: MarkDataSetRequest, options?: any) {
     return true;
+  }
+
+  async getGenomicExtractionJobs(workspaceNamespace: string, workspaceId: string) {
+    return Promise.resolve({jobs: this.extractionJobs});
   }
 }

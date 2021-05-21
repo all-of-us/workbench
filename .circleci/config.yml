@@ -16,7 +16,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench-image:
     type: string
-    default: "allofustest/workbench:buildimage-0.0.20"
+    default: "allofustest/workbench:buildimage-0.0.22"
   db-image:
     type: string
     default: "circleci/mysql:5.7"
@@ -259,18 +259,18 @@ commands:
       - halt-test-check:
           dir_names: "api"
       - restore_cache:
-          key: v5-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
-          key: v5-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+          key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - steps: << parameters.additional_steps >>
       - save_cache:
           paths:
             - ~/.gradle/wrapper
-          key: v5-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v5-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+          key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - store_test_results:
           path: ~/workbench/api/build/test-results/test
       - store_artifacts:

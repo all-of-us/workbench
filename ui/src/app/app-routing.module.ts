@@ -73,6 +73,11 @@ const routes: Routes = [
         data: {}
       },
       {
+        path: 'access-renewal',
+        component: AppRouting,
+        data: {}
+      },
+      {
         path: 'profile',
         component: AppRouting,
         data: {}

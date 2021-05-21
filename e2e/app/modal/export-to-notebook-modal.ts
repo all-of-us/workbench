@@ -3,6 +3,9 @@ import Textbox from 'app/element/textbox';
 import { Page } from 'puppeteer';
 import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
+import { waitForText } from 'utils/waits-utils';
+
+const title = 'Export Dataset';
 
 export default class ExportToNotebookModal extends Modal {
   constructor(page: Page, xpath?: string) {
@@ -10,6 +13,7 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, title, { xpath: this.getXpath() });
     await this.getNotebookNameInput().asElementHandle();
     return true;
   }
@@ -29,6 +33,20 @@ export default class ExportToNotebookModal extends Modal {
     return new RadioButton(this.page, selector);
   }
 
+  async enterNotebookName(notebookName: string): Promise<Textbox> {
+    const notebookNameInput = this.getNotebookNameInput();
+    return notebookNameInput.type(notebookName);
+  }
+
+  async pickLanguage(language: Language = Language.Python): Promise<void> {
+    const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
+    return radio.select();
+  }
+
+  async clickExportButton() {
+    return this.clickButton(LinkText.Export, { waitForClose: true });
+  }
+
   /**
    * Fill out Export Notebook modal to create a new notebook:
    * - Type notebook name.
@@ -38,10 +56,8 @@ export default class ExportToNotebookModal extends Modal {
    * @param {Language} language Notebook programming language. Default value is Python.
    */
   async fillInModal(notebookName: string, language: Language = Language.Python): Promise<void> {
-    const notebookNameInput = this.getNotebookNameInput();
-    await notebookNameInput.type(notebookName);
-    const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
-    await radio.select();
-    return this.clickButton(LinkText.ExportAndOpen, { waitForClose: true });
+    await this.enterNotebookName(notebookName);
+    await this.pickLanguage(language);
+    return await this.clickExportButton();
   }
 }

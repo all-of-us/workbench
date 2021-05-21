@@ -6,14 +6,13 @@ require('jest-circus');
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   screenshotDir = 'logs/screenshot';
   htmlDir = 'logs/html';
+  failedTestSuites = {};
 
   async setup() {
     await super.setup();
   }
 
   async teardown() {
-    // time for screenshots
-    await this.global.page.waitForTimeout(1000);
     await super.teardown();
   }
 
@@ -29,13 +28,28 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
     switch (event.name) {
+      case 'test_start':
+        // https://stackoverflow.com/questions/51250006/jest-stop-test-suite-after-first-fail
+        // When one test fails, next tests in the same describe block will be skipped.
+        // If there are more describe blocks in the same test file, they will not be skipped.
+        if (this.failedTestSuites[event.test.parent.name]) {
+          event.test.mode = 'skip';
+        }
+        break;
       case 'test_fn_failure':
       case 'hook_failure':
         {
-          const runningTest = state.currentlyRunningTest.name;
+          let describeName;
+          try {
+            describeName = state.currentlyRunningTest.parent.name;
+          } catch (err) {
+            describeName = event.test.parent.name;
+          }
+          this.failedTestSuites[describeName] = true;
+          const runningTest = state.currentlyRunningTest;
           let testName;
           if (runningTest != null) {
-            testName = runningTest.replace(/\W/g, '-');
+            testName = runningTest.name.replace(/\W/g, '-');
           } else {
             testName = event.test.name.replace(/\W/g, '-');
           }
@@ -50,15 +64,20 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
       default:
         break;
     }
+    if (super.handleTestEvent) {
+      super.handleTestEvent(event, state);
+    }
   }
 
   async takeScreenshot(filePath) {
-    await this.global.page.screenshot({ path: filePath, fullPage: true });
+    const [activePage] = (await this.global.browser.pages()).slice(-1);
+    await activePage.screenshot({ path: filePath, fullPage: true });
     console.info(`Saved screenshot: ${filePath}`);
   }
 
   async savePageToFile(htmlFile) {
-    const htmlContent = await this.global.page.content();
+    const [activePage] = (await this.global.browser.pages()).slice(-1);
+    const htmlContent = await activePage.content();
     return new Promise((resolve, reject) => {
       fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
         if (error) {

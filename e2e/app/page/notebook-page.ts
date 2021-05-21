@@ -9,6 +9,8 @@ import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import NotebookPreviewPage from './notebook-preview-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
+import WorkspaceDataPage from './workspace-data-page';
+import Link from 'app/element/link';
 
 // CSS selectors
 enum CssSelector {
@@ -72,6 +74,24 @@ export default class NotebookPage extends AuthenticatedPage {
   }
 
   /**
+   * Click workspace name, goto Workspace Data page.
+   * This function does not handle Unsaved Changes confirmation.
+   */
+  async goDataPage(): Promise<WorkspaceDataPage> {
+    const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
+    await this.getWorkspaceLink().click();
+    await navPromise;
+    const dataPage = new WorkspaceDataPage(this.page);
+    await dataPage.waitForLoad();
+    return dataPage;
+  }
+
+  getWorkspaceLink(): Link {
+    const selector = '//a[contains(@href, "/data")]';
+    return new Link(this.page, selector);
+  }
+
+  /**
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
   async run(): Promise<void> {
@@ -116,13 +136,37 @@ export default class NotebookPage extends AuthenticatedPage {
    * Wait for notebook kernel becomes ready (idle).
    */
   async waitForKernelIdle(timeOut?: number): Promise<void> {
-    const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
-    const notifSelector = '#notification_kernel';
     const frame = await this.getIFrame();
+    const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
+    const notificationSelector = '#notification_kernel';
+    const isIdle = async (timeout): Promise<boolean> => {
+      return Promise.all([
+        frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
+        frame.waitForSelector(notificationSelector, { hidden: true, timeout })
+      ])
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+    };
+    // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
+    let ready = false;
+    const startTime = Date.now();
+    while (Date.now() - startTime <= timeOut) {
+      const idle = await isIdle(30000);
+      if (ready && idle) {
+        break;
+      }
+      ready = idle;
+      await this.page.waitForTimeout(5000);
+    }
+    // Throws exception if not ready.
     try {
       await Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout: timeOut }),
-        frame.waitForSelector(notifSelector, { hidden: true, timeout: timeOut })
+        frame.waitForSelector(idleIconSelector, { visible: true, timeout: 1000 }),
+        frame.waitForSelector(notificationSelector, { hidden: true, timeout: 1000 })
       ]);
     } catch (e) {
       throw new Error(`Notebook kernel is ${await this.getKernelStatus()}. waitForKernelIdle() encountered ${e}`);
@@ -206,7 +250,9 @@ export default class NotebookPage extends AuthenticatedPage {
       await markdownCellInput.type(codeToRun);
       await this.changeToCodeCell();
     } else {
-      await inputCell.type(codeToRun);
+      if (codeToRun) {
+        await inputCell.type(codeToRun);
+      }
     }
 
     await inputCell.dispose();
@@ -261,7 +307,7 @@ export default class NotebookPage extends AuthenticatedPage {
     await runtimePanel.close();
   }
 
-  private async getIFrame(): Promise<Frame> {
+  async getIFrame(): Promise<Frame> {
     const frame = await this.page.waitForSelector('iframe[src*="notebooks"]');
     return frame.contentFrame();
   }

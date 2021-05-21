@@ -1,10 +1,10 @@
 import {faCheck, faCheckCircle, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import colors, {addOpacity} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {faAlarmExclamation} from '@fortawesome/pro-solid-svg-icons';
-import colors from 'app/styles/colors';
 
 export const styles = {
   infoIcon: {
@@ -30,6 +30,19 @@ export const styles = {
     marginLeft: -9,
     width: '21px',
     height: '21px'
+  },
+
+  circleBackground: {
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+
+  defaultCircle: {
+    height: '1.5rem',
+    width: '1.5rem',
   }
 };
 
@@ -94,9 +107,16 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
 };
 
+const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
+
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
-export const ControlledTierBadge = ({size = 25, ...props}) =>
-  <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>;
+export const ControlledTierBadge = svgIcon('/assets/icons/controlled-tier-badge.svg');
+export const Arrow = svgIcon('/assets/icons/arrow-left-regular.svg');
+export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
+  return <div style={{...style, ...styles.circleBackground}}>
+    <WrappedIcon/>
+  </div>;
+};
 export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;

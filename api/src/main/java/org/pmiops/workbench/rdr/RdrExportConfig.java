@@ -24,7 +24,6 @@ public class RdrExportConfig {
   public RdrApi rdrApi(WorkbenchConfig workbenchConfig) {
     RdrApi api = new RdrApi();
     org.pmiops.workbench.rdr.ApiClient apiClient = new org.pmiops.workbench.rdr.ApiClient();
-    apiClient.setDebugging(true);
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(SCOPES));
       apiClient.setBasePath("https://" + workbenchConfig.rdrExport.host);

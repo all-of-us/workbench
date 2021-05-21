@@ -101,13 +101,13 @@ public class DataSetServiceTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
+  @Autowired private CohortDao cohortDao;
+  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private CohortQueryBuilder mockCohortQueryBuilder;
   @Autowired private BigQueryService mockBigQueryService;
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private CohortDao cohortDao;
-  @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DataSetServiceImpl dataSetServiceImpl;
 
   private DbWorkspace workspace;

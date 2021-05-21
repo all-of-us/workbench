@@ -1,12 +1,12 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
 import com.google.common.truth.Truth.assertThat
+import kotlin.reflect.KClass
 import org.junit.Before
 import org.junit.Test
 import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.Workspace
-import kotlin.reflect.KClass
 
 class TargetPropertyExtractorTest {
     private var workspace: Workspace? = null

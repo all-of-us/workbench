@@ -94,9 +94,13 @@ export enum LinkText {
   DiscardChanges = 'Discard Changes',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
-  ExportAndOpen = 'Export and Open',
+  Export = 'Export',
   Finish = 'Finish',
   FinishAndReview = 'Finish & Review',
+  FitbitActivitySummary = 'Fitbit Activity Summary',
+  FitbitHeartRateLevel = 'Fitbit Heart Rate Level',
+  FitbitHeartRateSummary = 'Fitbit Heart Rate Summary',
+  FitbitIntraDaySteps = 'Fitbit Intra Day Steps',
   GoToCopiedConceptSet = 'Go to Copied Concept Set',
   GoToCopiedNotebook = 'Go to Copied Notebook',
   KeepEditing = 'Keep Editing',
@@ -118,7 +122,8 @@ export enum LinkText {
   StayHere = 'Stay Here',
   Submit = 'Submit',
   Update = 'Update',
-  Yes = 'Yes'
+  Yes = 'Yes',
+  YesDelete = 'YES, DELETE'
 }
 
 // Notebook programming language.

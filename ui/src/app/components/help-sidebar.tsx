@@ -10,6 +10,7 @@ import {
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
@@ -27,8 +28,9 @@ import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
+  DEFAULT,
   reactStyles,
-  ReactWrapperBase, withCdrVersions,
+  ReactWrapperBase, switchCase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -56,12 +58,13 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   CdrVersionTiersResponse,
-  Criteria,
+  Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
-  RuntimeStatus,
+  RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
@@ -120,13 +123,14 @@ const styles = reactStyles({
   },
   runtimeStatusIcon: {
     width: '.5rem',
-    height: '.5rem'
+    height: '.5rem',
+    zIndex: 2,
   },
   runtimeStatusIconOutline: {
     border: `1px solid ${colors.white}`,
     borderRadius: '.25rem',
   },
-  runtimeStatusIconContainer: {
+  statusIconContainer: {
     alignSelf: 'flex-end',
     margin: '0 .1rem .1rem auto'
   },
@@ -232,6 +236,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  extractionJobs: Array<GenomicExtractionJob>;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -255,6 +260,7 @@ export const HelpSidebar = fp.flow(
       super(props);
       this.state = {
         activeIcon: null,
+        extractionJobs: [],
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -334,7 +340,8 @@ export const HelpSidebar = fp.flow(
           faIcon: faDna,
           label: 'Genomic Extraction',
           showIcon: () => true,
-          style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+          // position: absolute is so the status icon won't push the DNA icon to the left.
+          style: {height: '22px', width: '22px', marginTop: '0.25rem', position: 'absolute'},
           tooltip: 'Genomic Extraction History',
         }
       }[iconKey];
@@ -398,6 +405,12 @@ export const HelpSidebar = fp.flow(
           this.setActiveIcon(null);
         }
       }));
+
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        const genomicExtractionList = await dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id);
+        this.setState({extractionJobs: genomicExtractionList.jobs});
+      }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -539,28 +552,28 @@ export const HelpSidebar = fp.flow(
       // overlay icon in the bottom right of the tab showing the runtime status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={{...icon.style, position: 'absolute'}} />
-        <FlexRow data-test-id='runtime-status-icon-container' style={styles.runtimeStatusIconContainer}>
+        <FlexRow data-test-id='runtime-status-icon-container' style={styles.statusIconContainer}>
           {(status === RuntimeStatus.Creating
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)
             && <FontAwesomeIcon icon={faSyncAlt} style={{
               ...styles.runtimeStatusIcon,
               ...styles.rotate,
-              color: colors.runtimeStatus.starting,
+              color: colors.asyncOperationStatus.starting,
             }}/>
           }
           {status === RuntimeStatus.Stopped
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.stopped,
+              color: colors.asyncOperationStatus.stopped,
             }}/>
           }
           {status === RuntimeStatus.Running
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.running,
+              color: colors.asyncOperationStatus.running,
             }}/>
           }
           {(status === RuntimeStatus.Stopping
@@ -568,15 +581,77 @@ export const HelpSidebar = fp.flow(
             && <FontAwesomeIcon icon={faSyncAlt} style={{
               ...styles.runtimeStatusIcon,
               ...styles.rotate,
-              color: colors.runtimeStatus.stopping,
+              color: colors.asyncOperationStatus.stopping,
             }}/>
           }
           {status === RuntimeStatus.Error
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.error,
+              color: colors.asyncOperationStatus.error,
             }}/>
+          }
+        </FlexRow>
+      </FlexRow>;
+    }
+
+    withinPastTwentyFourHours(epoch) {
+      const completionTimeMoment = moment(epoch);
+      const twentyFourHoursAgo = moment().subtract(1, 'days');
+      return completionTimeMoment.isAfter(twentyFourHoursAgo);
+    }
+
+    displayExtractionIcon(icon: IconConfig) {
+      const {extractionJobs} = this.state;
+      const jobsByStatus = fp.groupBy('status', extractionJobs);
+      let status;
+      // If any jobs are currently active, show the 'sync' icon corresponding to their status.
+      if (jobsByStatus[TerraJobStatus.RUNNING]) {
+        status = TerraJobStatus.RUNNING;
+      } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
+        status = TerraJobStatus.ABORTING;
+      } else if (jobsByStatus[TerraJobStatus.SUCCEEDED] || jobsByStatus[TerraJobStatus.FAILED]) {
+        // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
+        const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
+        const mostRecentCompletedJob = fp.flow(
+          fp.filter((job: GenomicExtractionJob) => this.withinPastTwentyFourHours(job.completionTime)),
+          // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
+          fp.sortBy(job => job.completionTime),
+          fp.reverse,
+          fp.head
+        )(completedJobs);
+        if (mostRecentCompletedJob) {
+          status = mostRecentCompletedJob.status;
+        }
+      }
+
+      // We always want to show the DNA icon.
+      // When there are running or recently completed  jobs, we will show a small overlay icon in
+      // the bottom right of the tab showing the job status.
+      return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
+        {this.displayFontAwesomeIcon(icon)}
+        <FlexRow data-test-id='extraction-status-icon-container' style={styles.statusIconContainer}>
+          {
+            switchCase(status,
+              [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
+                ...styles.runtimeStatusIcon,
+                ...styles.rotate,
+                color: colors.asyncOperationStatus.starting,
+              }}/>],
+              [TerraJobStatus.ABORTING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
+                ...styles.runtimeStatusIcon,
+                ...styles.rotate,
+                color: colors.asyncOperationStatus.stopping,
+              }}/>],
+              [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
+                ...styles.runtimeStatusIcon,
+                color: colors.asyncOperationStatus.error,
+              }}/>],
+              [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
+                ...styles.runtimeStatusIcon,
+                color: colors.asyncOperationStatus.succeeded,
+              }}/>]
+            )
           }
         </FlexRow>
       </FlexRow>;
@@ -710,15 +785,20 @@ export const HelpSidebar = fp.flow(
                            this.onIconClick(icon);
                          }
                        }}>
-                    {icon.id === 'dataDictionary'
-                      ? <a href={supportUrls.dataDictionary} target='_blank'>
-                          <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
-                        </a>
-                      : icon.id === 'runtime'
-                        ? this.displayRuntimeIcon(icon)
-                        : icon.faIcon === null
-                          ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
-                          : this.displayFontAwesomeIcon(icon)
+                    {
+                      switchCase(icon.id,
+                        ['dataDictionary',
+                          () => <a href={supportUrls.dataDictionary} target='_blank'>
+                              <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
+                            </a>
+                        ],
+                        ['runtime', () => this.displayRuntimeIcon(icon)],
+                        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+                        [DEFAULT, () => icon.faIcon === null
+                              ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
+                              : this.displayFontAwesomeIcon(icon)
+                        ]
+                      )
                     }
                   </div>
                 </TooltipTrigger>
