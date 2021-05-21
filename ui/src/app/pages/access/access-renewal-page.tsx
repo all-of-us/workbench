@@ -13,7 +13,7 @@ import {styles} from 'app/pages/profile/profile-styles';
 import {navigate} from 'app/utils/navigation';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {maybeDaysRemaining} from 'app/components/access-renewal-notification'
-
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {
   daysFromNow,
   displayDateWithoutHours,
@@ -56,13 +56,21 @@ const renewalStyle = {
   }
 };
 
-export const withInvalidDateHandling = date => {
+const withInvalidDateHandling = date => {
   if (!date) {
     return 'Unavailable';
   } else {
     return displayDateWithoutHours(date);
   }
 };
+
+const confirmPublications = async () => {
+  try {
+    await profileApi().confirmPublications();
+  } catch {
+    console.log('Error')
+  }
+}
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
@@ -177,6 +185,7 @@ export const AccessRenewalPage = fp.flow(
             isComplete(getExpirationTimeFor('publicationConfirmation'))
               ? <CompletedButton style={{gridRow: '1 / span 2'}} buttonText='Confirmed' wasBypassed={false}/>
               : <Button disabled={publications === null}
+                    onClick={() => confirmPublications()}
                     style={{gridRow: '1 / span 2', height: '1.6rem', width: '4.5rem', marginRight: '0.25rem'}}>Confirm</Button>
           }
           <RadioButton id={noReportId} style={{justifySelf: 'end'}} checked={publications === true} onChange={() => setPublications(true)}/>
