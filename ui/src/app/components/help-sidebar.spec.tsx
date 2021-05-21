@@ -286,9 +286,6 @@ describe('HelpSidebar', () => {
         status: TerraJobStatus.FAILED,
         completionTime: Date.now()
       },
-      {
-        status: TerraJobStatus.SUCCEEDED
-      }
     ];
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -296,10 +293,14 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.error);
   });
 
-  it('should display "SUCCEEDED" icon with recent succeeded jobs', async() => {
+  it('should display "SUCCEEDED" icon with recent succeeded and failed jobs', async() => {
     dataSetStub.extractionJobs = [
       {
         status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now()
+      },
+      {
+        status: TerraJobStatus.FAILED,
         completionTime: Date.now()
       }
     ];
@@ -309,7 +310,7 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.succeeded);
   });
 
-  it('should display no extract icons with old failed/succeded jobs', async() => {
+  it('should display no extract icons with old failed/succeeded jobs', async() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
     dataSetStub.extractionJobs = [
