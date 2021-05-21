@@ -651,10 +651,7 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
-    // V1's namespace is pre-created by billing buffer, while v2 is created randomly on fly.
-    // We expect all field match except this one. But this line will be replaced by all assert above
-    // once we are fully on v2.
-    assertThat(v2Workspace.namespace(workspace.getNamespace())).isEqualTo(workspace);
+    assertThat(v2Workspace).isEqualTo(workspace);
   }
 
   @Test
@@ -1318,11 +1315,7 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .createAllOfUsBillingProject(
             v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
-    // V1's namespace is pre-created by billing buffer, while v2 is created randomly on fly.
-    // We expect all field match except this one. But this line will be replaced by all assert above
-    // once we are fully on v2.
-    assertThat(v2ClonedWorkspace.namespace(clonedWorkspace.getNamespace()))
-        .isEqualTo(clonedWorkspace);
+    assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
   }
 
   @Test
