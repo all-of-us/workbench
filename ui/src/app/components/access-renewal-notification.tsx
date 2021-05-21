@@ -86,12 +86,15 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
   }
 };
 
-const AccessRenewalNotification = (props: {daysRemaining: number}) => {
+const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => {
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
-    <div style={styles.text}>Time for access renewal. {props.daysRemaining} days remaining.</div>
+    <div style={styles.text}>Time for access renewal. {
+      `${daysRemaining >= 0 ? daysRemaining + ' days remaining.' : 'Your access has expired.'}`
+    }
+    </div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('profile')}>
+    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('access-renewal')}>
       <div style={styles.buttonText}>Get Started</div>
     </Button>
   </FlexRow>;
@@ -100,5 +103,5 @@ const AccessRenewalNotification = (props: {daysRemaining: number}) => {
 export const AccessRenewalNotificationMaybe = (props: {profile: Profile}) => {
   const daysRemaining = maybeDaysRemaining(props.profile);
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
-  return !!daysRemaining ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
+  return daysRemaining !== undefined ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
 };

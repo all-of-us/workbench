@@ -1,5 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -14,7 +15,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
-import { AdminBanner } from './pages/admin/admin-banner';
+import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
@@ -126,6 +127,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
+      <AppRoute path='/access-renewal' component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}/>
       <AppRoute
           path='/admin/banner'
           component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}

@@ -5613,8 +5613,15 @@ definitions:
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
-        description: Timestamp when the user was bypassed for completing login.gov linking
-          linking.
+        description: Timestamp when the user was bypassed for completing login.gov linking.
+      publicationsLastConfirmedTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user last confirmed their publications.
+      profileLastConfirmedTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user last confirmed their profile.
       renewableAccessModules:
         type: object
         properties:
