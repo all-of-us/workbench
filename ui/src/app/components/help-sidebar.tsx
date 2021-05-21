@@ -340,6 +340,7 @@ export const HelpSidebar = fp.flow(
           faIcon: faDna,
           label: 'Genomic Extraction',
           showIcon: () => true,
+          // position: absolute is so the status icon won't push the DNA icon to the left.
           style: {height: '22px', width: '22px', marginTop: '0.25rem', position: 'absolute'},
           tooltip: 'Genomic Extraction History',
         }
@@ -405,8 +406,11 @@ export const HelpSidebar = fp.flow(
         }
       }));
 
-      const genomicExtractionList = await dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id);
-      this.setState({extractionJobs: genomicExtractionList.jobs});
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        const genomicExtractionList = await dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id);
+        this.setState({extractionJobs: genomicExtractionList.jobs});
+      }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -555,21 +559,21 @@ export const HelpSidebar = fp.flow(
             && <FontAwesomeIcon icon={faSyncAlt} style={{
               ...styles.runtimeStatusIcon,
               ...styles.rotate,
-              color: colors.runtimeStatus.starting,
+              color: colors.asyncOperationStatus.starting,
             }}/>
           }
           {status === RuntimeStatus.Stopped
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.stopped,
+              color: colors.asyncOperationStatus.stopped,
             }}/>
           }
           {status === RuntimeStatus.Running
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.running,
+              color: colors.asyncOperationStatus.running,
             }}/>
           }
           {(status === RuntimeStatus.Stopping
@@ -577,14 +581,14 @@ export const HelpSidebar = fp.flow(
             && <FontAwesomeIcon icon={faSyncAlt} style={{
               ...styles.runtimeStatusIcon,
               ...styles.rotate,
-              color: colors.runtimeStatus.stopping,
+              color: colors.asyncOperationStatus.stopping,
             }}/>
           }
           {status === RuntimeStatus.Error
             && <FontAwesomeIcon icon={faCircle} style={{
               ...styles.runtimeStatusIcon,
               ...styles.runtimeStatusIconOutline,
-              color: colors.runtimeStatus.error,
+              color: colors.asyncOperationStatus.error,
             }}/>
           }
         </FlexRow>
@@ -631,15 +635,15 @@ export const HelpSidebar = fp.flow(
               [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
                 ...styles.runtimeStatusIcon,
                 ...styles.rotate,
-                color: colors.runtimeStatus.starting,
+                color: colors.asyncOperationStatus.starting,
               }}/>],
               [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
                 ...styles.runtimeStatusIcon,
-                color: colors.runtimeStatus.error,
+                color: colors.asyncOperationStatus.error,
               }}/>],
               [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
                 ...styles.runtimeStatusIcon,
-                color: colors.runtimeStatus.running,
+                color: colors.asyncOperationStatus.succeeded,
               }}/>]
             )
           }

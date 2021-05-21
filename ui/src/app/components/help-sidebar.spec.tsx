@@ -212,12 +212,12 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.running);
 
     act(() => setRuntimeStatus(RuntimeStatus.Deleting));
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopping);
 
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
@@ -225,7 +225,7 @@ describe('HelpSidebar', () => {
 
     act(() => setRuntimeStatus(RuntimeStatus.Creating));
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
 
   });
 
@@ -235,11 +235,11 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopping);
 
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+    expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
   });
 
   it('should display "running" icon when extract currently running', async() => {
@@ -257,7 +257,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
   });
 
   it('should display "FAILED" icon with recent failed jobs', async() => {
@@ -273,7 +273,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.error);
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.error);
   });
 
   it('should display "SUCCEEDED" icon with recent succeeded jobs', async() => {
@@ -286,7 +286,7 @@ describe('HelpSidebar', () => {
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.succeeded);
   });
 
   it('should display no extract icons with old failed/succeded jobs', async() => {
