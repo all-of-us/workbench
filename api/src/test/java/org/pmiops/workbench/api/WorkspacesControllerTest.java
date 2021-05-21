@@ -589,6 +589,7 @@ public class WorkspacesControllerTest extends SpringTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
+    mockBillingProjectBuffer(workspace.getNamespace());
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
         .createWorkspace(
