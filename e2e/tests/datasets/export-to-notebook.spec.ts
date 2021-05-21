@@ -17,7 +17,7 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Export to notebook tests', () => {
-  const KernelLanguage = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -79,7 +79,7 @@ describe('Export to notebook tests', () => {
    * Test:
    * - Create dataset and export to notebook. Start the notebook and run the dataset code.
    */
-  test.each(KernelLanguage)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
+  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button

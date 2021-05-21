@@ -11,7 +11,7 @@ import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 
 describe('Datasets card snowman menu actions', () => {
-  const KernelLanguage = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -116,7 +116,7 @@ describe('Datasets card snowman menu actions', () => {
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu (the notebook is not created).
    */
-  test.each(KernelLanguage)('Export to %s kernel Jupyter notebook', async (kernelLanguage) => {
+  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
