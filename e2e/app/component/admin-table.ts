@@ -3,7 +3,7 @@ import Container from 'app/container';
 //import { getPropValue } from 'utils/element-utils';
 import Table from './table';
 
-const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-datatable ")]/div[1]';
+const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-datatable ")]';
 
 export default class adminTable extends Table {
   constructor(page: Page, xpath: string = defaultXpath, container?: Container) {
@@ -11,23 +11,23 @@ export default class adminTable extends Table {
   }
 
   getFrozenHeader(): Table {
-    return new Table(this.page, `${this.getXpath()}/div[1]//table[@class="p-datatable-scrollable-header-table"]`);
+    return new Table(this.page, `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-header-table"]`);
   }
 
   getFrozenBody(): Table {
-    return new Table(this.page, `${this.getXpath()}/div[1]//table[@class="p-datatable-scrollable-body-table"]`);
+    return new Table(this.page, `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-body-table"]`);
   }
 
   getHeaderTable(): Table {
-    return new Table(this.page, `${this.getXpath()}/div[2]//table[@class="p-datatable-scrollable-header-table"]`);
+    return new Table(this.page, `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-header-table"]`);
   }
 
   getBodyTable(): Table {
-    return new Table(this.page, `${this.getXpath()}/div[2]//table[@class="p-datatable-scrollable-body-table"]`);
+    return new Table(this.page, `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-body-table"]`);
   }
 
   getFooterTable(): Table {
-    return new Table(this.page, `${this.getXpath()}/div[2]//table[@class="p-datatable-scrollable-footer-table"]`);
+    return new Table(this.page, `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-footer-table"]`);
   }
 
   // gets the column index
