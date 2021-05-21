@@ -1,7 +1,5 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.billing.BillingProjectUtil.createBillingProjectName;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -48,6 +46,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
+  @VisibleForTesting static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final ImmutableMap<BufferEntryStatus, Duration> STATUS_TO_GRACE_PERIOD =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -104,6 +103,25 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   /**
+   * Creates a random Billing Project name. This actually should be in separate service. But
+   * consider billing buffer will be gone soon, it is easier to put the method in this class, and
+   * just rename the class to BillingProjectService once start deprecation.
+   */
+  public String createBillingProjectName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+
+    String projectNamePrefix = workbenchConfigProvider.get().billing.projectNamePrefix;
+    if (!projectNamePrefix.endsWith("-")) {
+      projectNamePrefix = projectNamePrefix + "-";
+    }
+    return projectNamePrefix + randomString;
+  }
+
+  /**
    * Creates a new billing project in the buffer, and kicks off the FireCloud project creation.
    *
    * <p>No action is taken if the buffer is full.
@@ -131,7 +149,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   @NotNull
   private DbBillingProjectBufferEntry makeCreatingBufferEntry(DbAccessTier accessTier) {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
-    bufferEntry.setFireCloudProjectName(createBillingProjectName(workbenchConfigProvider.get().billing.projectNamePrefix));
+    bufferEntry.setFireCloudProjectName(createBillingProjectName());
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
     // Note: we set the lastSyncRequestTime column to the current timestamp as an optimization.
     // If we leave this column as NULL, the sync process will prioritize this entry for immediate
@@ -298,6 +316,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       billingProjectBufferEntryDao.releaseAssigningLock();
     }
   }
+
   private int getUnfilledBufferSpace(DbAccessTier accessTier) {
     return getBufferMaxCapacity(accessTier.getShortName()) - (int) getCurrentBufferSize(accessTier);
   }

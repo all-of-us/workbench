@@ -132,7 +132,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
 
       log.info("Creating billing project");
-      if(workbenchConfig.featureFlags.enableFireCloudV2Billing) {
+      if (workbenchConfig.featureFlags.enableFireCloudV2Billing) {
         BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
         billingV2Api.createBillingProjectFullV2(billingProjectRequest);
       } else {
@@ -140,8 +140,8 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
         billingApi.createBillingProjectFull(billingProjectRequest);
 
         while (billingApi
-            .billingProjectStatus(billingProjectRequest.getProjectName())
-            .getCreationStatus()
+                .billingProjectStatus(billingProjectRequest.getProjectName())
+                .getCreationStatus()
             != FirecloudBillingProjectStatus.CreationStatusEnum.READY) {
           log.info("Billing project is not ready yet");
           Thread.sleep(5000);

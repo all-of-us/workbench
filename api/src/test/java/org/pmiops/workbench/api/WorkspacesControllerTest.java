@@ -51,7 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -393,6 +392,7 @@ public class WorkspacesControllerTest extends SpringTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
@@ -450,17 +450,11 @@ public class WorkspacesControllerTest extends SpringTest {
         .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
   }
 
-  private JSONObject createDemoCriteria() {
-    JSONObject criteria = new JSONObject();
-    criteria.append("includes", new JSONArray());
-    criteria.append("excludes", new JSONArray());
-    return criteria;
-  }
-
   private void mockBillingProjectBuffer(String projectName) {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
+    doReturn(projectName).when(billingProjectBufferService).createBillingProjectName();
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -599,51 +593,67 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .createWorkspace(
             workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
-
     stubGetWorkspace(
         workspace.getNamespace(),
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    Workspace workspace2 =
+    Workspace retrievedWorkspace =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody()
             .getWorkspace();
-    assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
-    assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
-    assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
-    assertThat(workspace2.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
-    assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(workspace2.getId()).isEqualTo("name");
-    assertThat(workspace2.getName()).isEqualTo("name");
-    assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
-    assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getControlSet()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getAncestry()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getCommercialPurpose()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getSocialBehavioral()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulationHealth()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getEducational()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
-    assertThat(workspace2.getResearchPurpose().getReasonForAllOfUs()).isEqualTo("reason for aou");
-    assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
-    assertThat(workspace2.getResearchPurpose().getAnticipatedFindings())
+    assertThat(retrievedWorkspace.getCreationTime()).isEqualTo(NOW_TIME);
+    assertThat(retrievedWorkspace.getLastModifiedTime()).isEqualTo(NOW_TIME);
+    assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
+    assertThat(retrievedWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+    assertThat(retrievedWorkspace.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
+    assertThat(retrievedWorkspace.getId()).isEqualTo("name");
+    assertThat(retrievedWorkspace.getName()).isEqualTo("name");
+    assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
+    assertThat(retrievedWorkspace.getResearchPurpose().getMethodsDevelopment()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getControlSet()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getAncestry()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getCommercialPurpose()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getSocialBehavioral()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getPopulationHealth()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getEducational()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getDrugDevelopment()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getAdditionalNotes())
+        .isEqualTo("additional notes");
+    assertThat(retrievedWorkspace.getResearchPurpose().getReasonForAllOfUs())
+        .isEqualTo("reason for aou");
+    assertThat(retrievedWorkspace.getResearchPurpose().getIntendedStudy())
+        .isEqualTo("intended study");
+    assertThat(retrievedWorkspace.getResearchPurpose().getAnticipatedFindings())
         .isEqualTo("anticipated findings");
-    assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
-    assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
-    assertThat(workspace2.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
+    assertThat(retrievedWorkspace.getNamespace()).isEqualTo(workspace.getNamespace());
+    assertThat(retrievedWorkspace.getResearchPurpose().getReviewRequested()).isTrue();
+    assertThat(retrievedWorkspace.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
+    assertThat(retrievedWorkspace.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
             "projects/" + workspace.getGoogleProject(),
             new ProjectBillingInfo()
                 .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
-    assertThat(workspace2.getBillingAccountName())
+    verify(fireCloudService, never())
+        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
+    assertThat(retrievedWorkspace.getBillingAccountName())
         .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
+
+    // Now switch to v2 Billing and fire the same request. It is generally not recommaned to use
+    // one test method testing multiple-funtions, but consider we will migrate to v2 soon, this
+    // might be a fast easy way to write test.
+    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
+    Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(fireCloudService)
+        .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
+    // V1's namespace is pre-created by billing buffer, while v2 is created randomly on fly.
+    // We expect all field match except this one. But this line will be replaced by all assert above
+    // once we are fully on v2.
+    assertThat(v2Workspace.namespace(workspace.getNamespace())).isEqualTo(workspace);
   }
 
   @Test
@@ -1296,6 +1306,22 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
+
+    // When V2 Billing enabled
+    workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
+    Workspace v2ClonedWorkspace =
+        workspacesController
+            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+            .getBody()
+            .getWorkspace();
+    verify(fireCloudService)
+        .createAllOfUsBillingProject(
+            v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+    // V1's namespace is pre-created by billing buffer, while v2 is created randomly on fly.
+    // We expect all field match except this one. But this line will be replaced by all assert above
+    // once we are fully on v2.
+    assertThat(v2ClonedWorkspace.namespace(clonedWorkspace.getNamespace()))
+        .isEqualTo(clonedWorkspace);
   }
 
   @Test

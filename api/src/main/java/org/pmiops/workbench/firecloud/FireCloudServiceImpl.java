@@ -251,7 +251,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .privateIpGoogleAccess(true)
             .servicePerimeter(servicePerimeter);
 
-    if(isFireCloudBillingV2ApiEnabled()) {
+    if (isFireCloudBillingV2ApiEnabled()) {
       BillingV2Api billingV2Api = billingV2ApiProvider.get();
       retryHandler.run(
           (context) -> {
@@ -270,7 +270,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void deleteBillingProject(String billingProject) {
-    if(isFireCloudBillingV2ApiEnabled()) {
+    if (isFireCloudBillingV2ApiEnabled()) {
       BillingV2Api billingV2Api = billingV2ApiProvider.get();
       retryHandler.run(
           (context) -> {
