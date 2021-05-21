@@ -608,6 +608,15 @@ export const HelpSidebar = fp.flow(
       // If any jobs are currently running, show running icon.
       if (jobsByStatus[TerraJobStatus.RUNNING]) {
         status = TerraJobStatus.RUNNING;
+      } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
+        status = TerraJobStatus.ABORTING;
+      } else if (
+          jobsByStatus[TerraJobStatus.SUCCEEDED]
+          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
+          jobsByStatus[TerraJobStatus.SUCCEEDED]
+          )
+      ) {
+        status = TerraJobStatus.SUCCEEDED;
       } else if (
           jobsByStatus[TerraJobStatus.FAILED]
           && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
@@ -615,13 +624,6 @@ export const HelpSidebar = fp.flow(
           )
       ) {
         status = TerraJobStatus.FAILED;
-      } else if (
-          jobsByStatus[TerraJobStatus.SUCCEEDED]
-          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
-            jobsByStatus[TerraJobStatus.SUCCEEDED]
-          )
-      ) {
-        status = TerraJobStatus.SUCCEEDED;
       }
 
       // We always want to show the DNA icon.
@@ -636,6 +638,11 @@ export const HelpSidebar = fp.flow(
                 ...styles.runtimeStatusIcon,
                 ...styles.rotate,
                 color: colors.asyncOperationStatus.starting,
+              }}/>],
+              [TerraJobStatus.ABORTING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
+                ...styles.runtimeStatusIcon,
+                ...styles.rotate,
+                color: colors.asyncOperationStatus.stopping,
               }}/>],
               [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
                 ...styles.runtimeStatusIcon,
@@ -786,8 +793,8 @@ export const HelpSidebar = fp.flow(
                               <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
                             </a>
                         ],
-                          ['runtime', () => this.displayRuntimeIcon(icon)],
-                          ['genomicExtractions', () => this.displayExtractionIcon(icon)],
+                        ['runtime', () => this.displayRuntimeIcon(icon)],
+                        ['genomicExtractions', () => this.displayExtractionIcon(icon)],
                         [DEFAULT, () => icon.faIcon === null
                               ? <img data-test-id={'help-sidebar-icon-' + icon.id} src={proIcons[icon.id]} style={icon.style} />
                               : this.displayFontAwesomeIcon(icon)

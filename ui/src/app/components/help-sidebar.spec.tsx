@@ -37,8 +37,7 @@ import {
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
-import {DataSetApiStub} from "../../testing/stubs/data-set-api-stub";
-import moment = require("moment");
+import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -248,6 +247,9 @@ describe('HelpSidebar', () => {
         status: TerraJobStatus.RUNNING
       },
       {
+        status: TerraJobStatus.ABORTING
+      },
+      {
         status: TerraJobStatus.FAILED
       },
       {
@@ -258,6 +260,24 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
+  });
+
+  it('should display "aborting" icon when extract currently aborting and nothing running', async() => {
+    dataSetStub.extractionJobs = [
+      {
+        status: TerraJobStatus.ABORTING
+      },
+      {
+        status: TerraJobStatus.FAILED
+      },
+      {
+        status: TerraJobStatus.SUCCEEDED
+      }
+    ];
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopping);
   });
 
   it('should display "FAILED" icon with recent failed jobs', async() => {
