@@ -40,18 +40,18 @@ describe('Admin', () => {
         ]
         let adminTable = new AdminTable(page);
         const columnNames = await adminTable.getColumnNames();
+        console.log(columnNames);
         expect(columnNames).toHaveLength(columns.length);
         expect(columnNames.sort()).toEqual(columns.sort());
        
-      // get the index of the user name column
-      const usernameColIndex = await adminTable.getColumnIndex("User name");
+      // get the index of the Bypass column
+      const bypassColIndex = await adminTable.getColumnIndex("Bypass");
 
       //click on the bypass link
-      let bypassLinkModal  = await userAdminPage.clickBypassLink(1, usernameColIndex);
-       let toggleText = await bypassLinkModal.getAllToggleTexts();
+      let bypassLinkModal  = await userAdminPage.clickBypassLink(1, bypassColIndex);
+      let toggleText = await bypassLinkModal.getAllToggleTexts();
        console.log(toggleText);
     
-
       // change toggle to green for all the modules
       //  await bypassLinkModal.bypassAllModules();
 
@@ -70,7 +70,8 @@ describe('Admin', () => {
       const auditColIndex = await adminTable.getColumnIndex("Audit");
       console.log(`auditColIndex: ${auditColIndex}`);
        //verify that the status col has status as active and user lockout displays ENABLE
-     await userAdminPage.clickAuditLink(1, auditColIndex);
+      await userAdminPage.clickAuditLink(1, auditColIndex);
+
 
       const nameColIndex = await adminTable.getNameColindex();
 

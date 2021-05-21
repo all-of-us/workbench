@@ -3,6 +3,7 @@ import Container from 'app/container';
 //import { getPropValue } from 'utils/element-utils';
 import Table from './table';
 
+
 const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-datatable ")]';
 
 export default class adminTable extends Table {
