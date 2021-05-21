@@ -416,7 +416,7 @@ export const ProfilePage = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(isExpired && isRenewalReferred()) && 
+            {(isExpired || isRenewalReferred()) && 
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>

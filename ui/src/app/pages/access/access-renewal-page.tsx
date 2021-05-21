@@ -14,6 +14,7 @@ import {navigateByUrl, navigate} from 'app/utils/navigation';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {maybeDaysRemaining} from 'app/components/access-renewal-notification'
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {redirectToTraining} from 'app/utils/access-utils'
 import {
   daysFromNow,
   displayDateWithoutHours,
@@ -64,7 +65,7 @@ const withInvalidDateHandling = date => {
   }
 };
 
-const confirmPublications = withProfileReload(async () => {
+const confirmPublications = withProfileStoreReload(async () => {
   try {
     await profileApi().confirmPublications();
   } catch {
@@ -135,14 +136,14 @@ export const AccessRenewalPage = fp.flow(
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
       
-      {maybeDaysRemaining(profile) == undefined 
+      {maybeDaysRemaining(profile) < 0
         ? <React.Fragment>
-            <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
-            <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
-          </React.Fragment>
-        : <React.Fragment>
             <ExclamationTriangle style={{height: '1.5rem', width: '1.5rem'}}/>
             <div style={styles.h1}>Access to the Researcher Workbench revoked.</div>
+          </React.Fragment>  
+        : <React.Fragment>
+            <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
+            <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
           </React.Fragment> 
       }
       <div style={{gridColumnStart: 2}}>Researchers are required to complete a number of steps as part of the annual renewal
@@ -213,7 +214,8 @@ export const AccessRenewalPage = fp.flow(
         {
           complianceTrainingBypassTime || isComplete(getExpirationTimeFor('complianceTraining'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={!!complianceTrainingBypassTime}/>
-            : <Button style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>Complete Training</Button>
+            : <Button onClick={redirectToTraining} 
+                style={{marginTop: 'auto', height: '1.6rem', width: 'max-content'}}>Complete Training</Button>
         }
       </RenewalCard>
       {/* DUCC */}

@@ -19,6 +19,7 @@ import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
+import {redirectToTraining} from 'app/utils/access-utils'
 
 const styles = reactStyles({
   mainHeader: {
@@ -106,12 +107,6 @@ function redirectToRas(): void {
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
   window.open(url, '_blank');
-}
-
-async function redirectToTraining() {
-  AnalyticsTracker.Registration.EthicsTraining();
-  await profileApi().updatePageVisits({page: 'moodle'});
-  window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
 interface RegistrationTask {
