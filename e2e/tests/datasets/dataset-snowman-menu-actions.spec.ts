@@ -3,22 +3,69 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
-import { makeRandomName } from 'utils/str-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import DatasetBuildPage from "app/page/dataset-build-page";
+import DatasetBuildPage from 'app/page/dataset-build-page';
+import DatasetEditPage from 'app/page/dataset-edit-page';
 
 describe('Datasets card snowman menu actions', () => {
-  const ProgrammingLanguage = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+  const KernelLanguage = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'aoutest-766371621540813'; //makeWorkspaceName();
+  const workspace = makeWorkspaceName();
 
-  xtest('Rename dataset', async () => {
+  test('Edit dataset', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
+
+    const datasetName = await createDataSet();
+
+    // Find Dataset card.
+    const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
+    await dataBuildPage.openDatasetsSubtab();
+    await waitWhileLoading(page);
+
+    const resourceCard = new DataResourceCard(page);
+    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
+    expect(datasetCard).toBeTruthy();
+
+    // Edit dataset.
+    await datasetCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
+
+    const datasetEditPage = new DatasetEditPage(page);
+    await datasetEditPage.waitForLoad();
+
+    // Verify displayed dataset name.
+    const strArray = (await datasetEditPage.getDatasetName()).split(' - ');
+    expect(strArray[1]).toEqual(datasetName);
+
+    // Verify Cohort checkbox is checked.
+    const cohortCheckBox = datasetEditPage.getCohortCheckBox('All Participants');
+    expect(await cohortCheckBox.isChecked()).toBe(true);
+
+    // Verify Cohort checkbox is checked.
+    const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(LinkText.Demographics);
+    expect(await conceptSetCheckBox.isChecked()).toBe(true);
+
+    // Export button is enabled.
+    const exportButton = datasetEditPage.getExportButton();
+    expect(await exportButton.isCursorNotAllowed()).toBe(false);
+
+    // Save button is disabled.
+    const saveButton = datasetEditPage.getSaveButton();
+    expect(await saveButton.isCursorNotAllowed()).toBe(true);
+
+    // Delete Datasets cards.
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.openDatasetsSubtab();
+    await dataPage.deleteResource(datasetName, ResourceCard.Dataset);
+  });
+
+  test('Rename dataset', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
@@ -69,7 +116,7 @@ describe('Datasets card snowman menu actions', () => {
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu (the notebook is not created).
    */
-  test.each(ProgrammingLanguage)('Export to %s kernel Jupyter notebook', async (each) => {
+  test.each(KernelLanguage)('Export to %s kernel Jupyter notebook', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const datasetName = await createDataSet();
@@ -86,13 +133,11 @@ describe('Datasets card snowman menu actions', () => {
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();
 
-    // Check modal title and state of EXPORT AND OPEN button.
-    const modalText = await exportModal.getTextContent();
-    expect(modalText.some((text) => text.includes(`Export ${datasetName} to Notebook`))).toBe(true);
+    // Check modal Export button is disabled.
     expect(await exportModal.waitForButton(LinkText.Export).isCursorNotAllowed()).toBe(true);
 
     const notebookName = makeRandomName('pyNotebook');
-    await exportModal.fillInModal(notebookName, each.LANGUAGE);
+    await exportModal.fillInModal(notebookName, kernelLanguage.LANGUAGE);
 
     // Verify notebook created successfully. Not going to start the Jupyter notebook.
     const notebookPreviewPage = new NotebookPreviewPage(page);

@@ -1,7 +1,7 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signInAs, signInWithAccessToken, signOut } from 'utils/test-utils';
+import { findOrCreateWorkspace, findWorkspaceCard, signInAs, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -47,7 +47,7 @@ describe('Create Dataset', () => {
     // Step 2 Select Concept Sets (Rows): select Demographics.
     await datasetPage.selectConceptSets([LinkText.Demographics]);
 
-    // Save and Analyze button is enabled.
+    // Export button is disabled.
     expect(await exportButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is enabled.
@@ -66,7 +66,7 @@ describe('Create Dataset', () => {
     await datasetPage.selectConceptSets([LinkText.FitbitHeartRateLevel]);
     await datasetPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
 
-    // Export button is enabled.
+    // Export button is disabled.
     expect(await exportButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is enabled.
@@ -117,24 +117,16 @@ describe('Create Dataset', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     datasetName = await createModal.createDataset();
 
+    // Verify dataset card in Data page.
     dataPage = await datasetBuildPage.clickDataTab();
     await dataPage.openDatasetsSubtab();
     await waitWhileLoading(page);
 
-    // Verify dataset card.
     const resourceCard = new DataResourceCard(page);
     const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     expect(dataSetCard).toBeTruthy();
 
-    // Don't delete dataset because it's needed in next test.
-  });
-
-  test('Workspace READER cannot edit dataset', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-
+    // Share workspace with a READER.
     await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
@@ -143,8 +135,10 @@ describe('Create Dataset', () => {
     await shareWorkspaceModal.shareWithUser(config.readerUserName, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
 
-    await signOut(page);
+    // Don't delete dataset because it's needed in next test.
+  });
 
+  test('Workspace READER cannot edit dataset', async () => {
     // READER log in in new Incognito page.
     const newPage = await signInAs(config.readerUserName, config.userPassword);
 

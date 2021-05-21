@@ -1,14 +1,13 @@
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
-import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import {Ethnicity, Sex} from 'app/page/cohort-participants-group';
+import {Language, LinkText, MenuOption, ResourceCard} from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
-import DatasetEditPage from 'app/page/dataset-edit-page';
-import { getPropValue } from 'utils/element-utils';
+import {getPropValue} from 'utils/element-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
@@ -30,7 +29,7 @@ describe('Export to notebook tests', () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button.
-    let dataPage = new WorkspaceDataPage(page);
+    const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     // Create a new cohort to use in new dataset.
@@ -49,37 +48,10 @@ describe('Export to notebook tests', () => {
 
     // Export to Python language notebook.
     const notebookName = makeRandomName();
-    let createModal = await datasetBuildPage.clickCreateButton();
+    const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    await datasetBuildPage.clickExportButton();
-    const exportModal = new ExportToNotebookModal(page);
-    await exportModal.waitForLoad();
-
-    await exportModal.enterNotebookName(notebookName);
-    await exportModal.pickLanguage(Language.Python);
-    await exportModal.clickExportButton();
-
-    // Navigate to Workspace Data page.
-    dataPage = await cohortActionsPage.clickDataTab();
-
-    // Verify dataset exists.
-    await dataPage.openDatasetsSubtab();
-    const resourceCard = new DataResourceCard(page);
-    const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
-    expect(dataSetExists).toBe(true);
-
-    // Find Dataset card. Open Edit Dataset page.
-    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
-
-    const datasetEditPage = new DatasetEditPage(page);
-    await datasetEditPage.waitForLoad();
-
-    createModal = await datasetEditPage.clickExportButton();
-
-    // Leave Dataset name unchanged.
-    expect(await createModal.getNameTextbox().getValue()).toEqual(datasetName);
+    const exportModal = await datasetBuildPage.clickExportButton();
 
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(Language.Python);
@@ -88,42 +60,19 @@ describe('Export to notebook tests', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
-    // Open notebook in Edit mode.
-    const notebookPage = await notebookPreviewPage.openEditMode(notebookName);
+    const analysisPage = await notebookPreviewPage.goAnalysisPage()
 
-    // Run dataset in notebook cell #1.
-    await notebookPage.runCodeCell(1);
-
-    // Checkout code cell output.
-    const cell1 = notebookPage.findCell(1);
-    const cell1Output = await cell1.findOutputElementHandle();
-
-    // Cell output format should be html table.
-    const outputClassName = await getPropValue<string>(cell1Output, 'className');
-    expect(outputClassName).toContain('rendered_html');
-
-    // Verify workspace name in notebook page.
-    const workspaceLink = await notebookPage.getWorkspaceLink().asElementHandle();
-    expect(await getPropValue<string>(workspaceLink, 'textContent')).toEqual(workspace);
+    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
     // Navigate to Workspace Data page.
-    await notebookPage.goDataPage();
+    await analysisPage.openDataPage({ waitPageChange: true });
 
     // Delete the cohort.
     await deleteCohort(cohortName, datasetName);
 
-    // Dataset is no longer exists.
+    // Dataset automatically is no longer exists after delete cohort.
     await dataPage.openDatasetsSubtab();
-    expect(await resourceCard.cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
-
-    // Delete the notebook.
-    await dataPage.openAnalysisPage();
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
-    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-
-    // Finally, delete the workspace.
-    await dataPage.deleteWorkspace();
+    expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
   });
 
   /**
@@ -160,7 +109,7 @@ describe('Export to notebook tests', () => {
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();
 
-    const notebookName = makeRandomName();
+    const notebookName = makeRandomName('notebook', { includeHyphen: false });
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(kernelLanguage.LANGUAGE);
     await exportModal.clickExportButton();

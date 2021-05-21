@@ -11,9 +11,12 @@ import CohortBuildPage from './cohort-build-page';
 import ConceptSetSearchPage from './conceptset-search-page';
 import Link from 'app/element/link';
 import DatasetCreateModal from 'app/modal/dataset-create-modal';
-import WorkspaceDataPage from "./workspace-data-page";
-import WorkspaceAnalysisPage from "./workspace-analysis-page";
-import WorkspaceAboutPage from "./workspace-about-page";
+import WorkspaceDataPage from './workspace-data-page';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
+import WorkspaceAboutPage from './workspace-about-page';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
+import { getPropValue } from 'utils/element-utils';
+import { LinkText } from 'app/text-labels';
 
 const pageTitle = 'Dataset Page';
 
@@ -46,8 +49,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   async selectCohorts(cohortNames: string[]): Promise<void> {
     for (const cohortName of cohortNames) {
-      const xpath = this.getCheckboxXpath(StepLabels.SelectCohorts, cohortName);
-      const checkbox = new Checkbox(this.page, xpath);
+      const checkbox = this.getCohortCheckBox(cohortName);
       await checkbox.check();
       await waitWhileLoading(this.page);
     }
@@ -61,8 +63,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   async selectConceptSets(conceptSetNames: string[]): Promise<void> {
     for (const conceptSetName of conceptSetNames) {
-      const xpath = this.getCheckboxXpath(StepLabels.SelectConceptSets, conceptSetName);
-      const checkbox = new Checkbox(this.page, xpath);
+      const checkbox = this.getConceptSetCheckBox(conceptSetName);
       await checkbox.check();
       await waitWhileLoading(this.page);
     }
@@ -122,18 +123,22 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     return createModal;
   }
 
-  async clickExportButton(): Promise<DatasetCreateModal> {
+  async clickExportButton(): Promise<ExportToNotebookModal> {
     const saveButton = this.getExportButton();
     await saveButton.waitUntilEnabled();
     await saveButton.click();
     await waitWhileLoading(this.page);
-    const createModal = new DatasetCreateModal(this.page);
-    await createModal.waitForLoad();
-    return createModal;
+    const exportModal = new ExportToNotebookModal(this.page);
+    await exportModal.waitForLoad();
+    return exportModal;
   }
 
   getCreateDatasetButton(): Button {
     return Button.findByName(this.page, { name: 'Create Dataset' });
+  }
+
+  getSaveButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.Save });
   }
 
   getExportButton(): Button {
@@ -162,6 +167,16 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     return new Link(this.page, '//a[text()="Workspaces" and @href="/workspaces"]');
   }
 
+  getCohortCheckBox(cohortName: string): Checkbox {
+    const xpath = this.getCheckboxXpath(StepLabels.SelectCohorts, cohortName);
+    return new Checkbox(this.page, xpath);
+  }
+
+  getConceptSetCheckBox(conceptSetName: string): Checkbox {
+    const xpath = this.getCheckboxXpath(StepLabels.SelectConceptSets, conceptSetName);
+    return new Checkbox(this.page, xpath);
+  }
+
   async clickDataTab(): Promise<WorkspaceDataPage> {
     const dataPage = new WorkspaceDataPage(this.page);
     await dataPage.openDataPage({ waitPageChange: true });
@@ -181,6 +196,11 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     await aboutPage.openAboutPage({ waitPageChange: true });
     await aboutPage.waitForLoad();
     return aboutPage;
+  }
+
+  async getDatasetName(): Promise<string> {
+    const h2 = await this.page.waitForXPath('//h2', { visible: true });
+    return getPropValue<string>(h2, 'textContent');
   }
 
   private getCheckboxXpath(labelName: string, valueName: string): string {

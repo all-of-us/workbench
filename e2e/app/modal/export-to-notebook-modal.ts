@@ -3,6 +3,9 @@ import Textbox from 'app/element/textbox';
 import { Page } from 'puppeteer';
 import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
+import { waitForText } from 'utils/waits-utils';
+
+const title = 'Export Dataset';
 
 export default class ExportToNotebookModal extends Modal {
   constructor(page: Page, xpath?: string) {
@@ -10,6 +13,7 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, title, { xpath: this.getXpath() });
     await this.getNotebookNameInput().asElementHandle();
     return true;
   }
