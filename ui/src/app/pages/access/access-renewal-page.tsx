@@ -55,11 +55,11 @@ const renewalStyle = {
 
 export const withInvalidDateHandling = date => {
   if (!date) {
-    return 'Unavailable'
+    return 'Unavailable';
   } else {
-    return displayDateWithoutHours(date)
+    return displayDateWithoutHours(date);
   }
-} 
+};
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
