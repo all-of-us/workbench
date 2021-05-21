@@ -16,6 +16,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -365,6 +366,17 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
+      throw new ServerErrorException(e);
+    }
+    return getProfileResponse(userProvider.get());
+  }
+
+  @Override
+  public ResponseEntity<Profile> syncAccessModuleStatus() {
+    DbUser user = userProvider.get();
+    try {
+      userService.updateUserWithRetries(Function.identity(), user, Agent.asUser(user));
+    } catch (Exception e) {
       throw new ServerErrorException(e);
     }
     return getProfileResponse(userProvider.get());

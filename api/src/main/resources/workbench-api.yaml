@@ -461,6 +461,24 @@ paths:
           description: The user's profile.
           schema:
             "$ref": "#/definitions/Profile"
+  "/v1/account/sync-access-module-status":
+    post:
+      tags:
+      - profile
+      summary: Sync access module training status
+      description: Sync the status of the user's access modules
+      operationId: syncAccessModuleStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            "$ref": "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/account/sync-training-status":
     post:
       tags:
