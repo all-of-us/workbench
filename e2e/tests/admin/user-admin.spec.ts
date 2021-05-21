@@ -40,6 +40,7 @@ describe('Admin', () => {
         ]
         let adminTable = new AdminTable(page);
         const columnNames = await adminTable.getColumnNames();
+
         console.log(columnNames);
         expect(columnNames).toHaveLength(columns.length);
         expect(columnNames.sort()).toEqual(columns.sort());
@@ -70,7 +71,9 @@ describe('Admin', () => {
       const auditColIndex = await adminTable.getColumnIndex("Audit");
       console.log(`auditColIndex: ${auditColIndex}`);
        //verify that the status col has status as active and user lockout displays ENABLE
+
       await userAdminPage.clickAuditLink(1, auditColIndex);
+
 
 
       const nameColIndex = await adminTable.getNameColindex();
