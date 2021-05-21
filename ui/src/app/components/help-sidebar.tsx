@@ -613,13 +613,15 @@ export const HelpSidebar = fp.flow(
       } else if (jobsByStatus[TerraJobStatus.SUCCEEDED] || jobsByStatus[TerraJobStatus.FAILED]) {
         // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
         const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
-        const recentCompletedJobs = fp.flow(
+        const mostRecentCompletedJob = fp.flow(
+          fp.filter((job: GenomicExtractionJob) => this.withinPastTwentyFourHours(job.completionTime)),
           // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
-          fp.sortBy((job: GenomicExtractionJob) => job.completionTime),
-          fp.reverse
+          fp.sortBy(job => job.completionTime),
+          fp.reverse,
+          fp.head
         )(completedJobs);
-        if (!fp.isEmpty(recentCompletedJobs) && this.withinPastTwentyFourHours(recentCompletedJobs[0].completionTime)) {
-          status = recentCompletedJobs[0].status;
+        if (mostRecentCompletedJob) {
+          status = mostRecentCompletedJob.status;
         }
       }
 
