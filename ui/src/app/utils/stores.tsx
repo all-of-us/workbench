@@ -53,6 +53,11 @@ export const profileStore = atom<ProfileStore>({
   })
 });
 
+export const withProfileStoreReload = wrappedFn => async () =>  {
+  await wrappedFn();
+  profileStore.get().reload();
+}
+
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;
   aborter: AbortController;

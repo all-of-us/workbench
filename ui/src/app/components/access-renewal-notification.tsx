@@ -8,6 +8,7 @@ import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
+import {profileStore, useStore} from 'app/utils/stores';
 
 const styles = reactStyles({
   box: {
@@ -100,8 +101,9 @@ const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => 
   </FlexRow>;
 };
 
-export const AccessRenewalNotificationMaybe = (props: {profile: Profile}) => {
-  const daysRemaining = maybeDaysRemaining(props.profile);
+export const AccessRenewalNotificationMaybe = () => {
+  const {profile} = useStore(profileStore);
+  const daysRemaining = maybeDaysRemaining(profile);
   // returning null is a way to tell React not to render this component.  `undefined` won't work here.
   return daysRemaining !== undefined ? <AccessRenewalNotification daysRemaining={daysRemaining}/> : null;
 };

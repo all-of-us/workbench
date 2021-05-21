@@ -4,13 +4,13 @@ import * as React from 'react';
 import {withRouteData, Navigate} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {FlexColumn, } from 'app/components/flex';
+import {FlexColumn } from 'app/components/flex';
 import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
 import {RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
-import {navigate} from 'app/utils/navigation';
+import {navigateByUrl, navigate} from 'app/utils/navigation';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {maybeDaysRemaining} from 'app/components/access-renewal-notification'
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -20,7 +20,7 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {profileStore, useStore} from 'app/utils/stores';
+import {profileStore, useStore, withProfileStoreReload} from 'app/utils/stores';
 
 const {useState} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
@@ -64,13 +64,13 @@ const withInvalidDateHandling = date => {
   }
 };
 
-const confirmPublications = async () => {
+const confirmPublications = withProfileReload(async () => {
   try {
     await profileApi().confirmPublications();
   } catch {
     console.log('Error')
   }
-}
+})
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
@@ -131,10 +131,11 @@ export const AccessRenewalPage = fp.flow(
     return <Navigate to={navigatex}/>;
   }
 
+  console.log(maybeDaysRemaining(profile) )
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
       
-      {maybeDaysRemaining(profile) >= 0 
+      {maybeDaysRemaining(profile) == undefined 
         ? <React.Fragment>
             <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
             <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
@@ -164,8 +165,8 @@ export const AccessRenewalPage = fp.flow(
           isComplete(getExpirationTimeFor('profileConfirmation'))
             ? <CompletedButton buttonText='Confirmed' wasBypassed={false}/>
             : <Button onClick={() => {
-              history.pushState('access-renewal', '');
-              navigate(['profile'])
+              // history.pushState('access-renewal', '');
+              navigateByUrl('profile?renewal=1')
             }} style={{marginTop: 'auto', height: '1.6rem', width: '4.5rem'}}>Review</Button>
         }
       </RenewalCard>
@@ -188,9 +189,16 @@ export const AccessRenewalPage = fp.flow(
                     onClick={() => confirmPublications()}
                     style={{gridRow: '1 / span 2', height: '1.6rem', width: '4.5rem', marginRight: '0.25rem'}}>Confirm</Button>
           }
-          <RadioButton id={noReportId} style={{justifySelf: 'end'}} checked={publications === true} onChange={() => setPublications(true)}/>
+          <RadioButton id={noReportId} 
+            disabled={isComplete(getExpirationTimeFor('publicationConfirmation'))} 
+            style={{justifySelf: 'end'}} checked={publications === true} 
+            onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
-          <RadioButton id={reportId} style={{justifySelf: 'end'}} checked={publications === false} onChange={() => setPublications(false)}/>
+          <RadioButton id={reportId} 
+            disabled={isComplete(getExpirationTimeFor('publicationConfirmation'))}
+            style={{justifySelf: 'end'}} 
+            checked={publications === false} 
+            onChange={() => setPublications(false)}/>
           <label htmlFor={reportId}>Report submitted</label>
         </div>
       </RenewalCard>

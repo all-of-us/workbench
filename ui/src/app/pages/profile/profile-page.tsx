@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {withRouteData} from 'app/components/app-router';
+import {queryParamsStore} from 'app/utils/navigation';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -29,7 +30,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {serverConfigStore} from 'app/utils/stores';
+import {serverConfigStore, withProfileStoreReload} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
@@ -87,12 +88,7 @@ interface CompletionTime {
   bypassTime: number;
 }
 
-const isRenewalReferred = () => {
-  return fp.flow(
-    fp.get(['state', 'state', 'from', 'pathname']),
-    fp.contains('access-renewal')
-  )(history)
-}
+const isRenewalReferred = (): boolean => !!queryParamsStore.getValue().renewal
 
 const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
   return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
@@ -249,7 +245,7 @@ export const ProfilePage = fp.flow(
       }
     }
 
-    async confirmProfile() {
+    confirmProfile = withProfileStoreReload(async () => {
       this.setState({updating: true});
       try {
         await profileApi().confirmProfile();
@@ -259,7 +255,7 @@ export const ProfilePage = fp.flow(
       } finally {
         this.setState({updating: false});
       }
-    }
+    })
 
     private getEraCommonsCardText(profile) {
       switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
@@ -350,7 +346,6 @@ export const ProfilePage = fp.flow(
 
       
       const isExpired = fp.flow(fp.find({moduleName: 'profileConfirmation'}), fp.get('hasExpired'))(profile.renewableAccessModules.modules)
-      console.log(isExpired, profile.renewableAccessModules.modules, isRenewalReferred())
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
@@ -421,7 +416,7 @@ export const ProfilePage = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(isExpired || isRenewalReferred()) && 
+            {(isExpired && isRenewalReferred()) && 
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>

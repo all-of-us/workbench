@@ -221,7 +221,7 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
-        <AccessRenewalNotificationMaybe profile={this.props.profile}/>
+        <AccessRenewalNotificationMaybe/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}
