@@ -614,7 +614,7 @@ export const HelpSidebar = fp.flow(
         // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
         const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
         const recentCompletedJobs = fp.flow(
-            // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
+          // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
           fp.sortBy((job: GenomicExtractionJob) => job.completionTime),
           fp.reverse
         )(completedJobs);
