@@ -605,30 +605,27 @@ export const HelpSidebar = fp.flow(
       const {extractionJobs} = this.state;
       const jobsByStatus = fp.groupBy('status', extractionJobs);
       let status;
-      // If any jobs are currently running, show running icon.
+      // If any jobs are currently active, show the 'sync' icon corresponding to their status.
       if (jobsByStatus[TerraJobStatus.RUNNING]) {
         status = TerraJobStatus.RUNNING;
       } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
         status = TerraJobStatus.ABORTING;
-      } else if (
-          jobsByStatus[TerraJobStatus.SUCCEEDED]
-          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
-          jobsByStatus[TerraJobStatus.SUCCEEDED]
-          )
-      ) {
-        status = TerraJobStatus.SUCCEEDED;
-      } else if (
-          jobsByStatus[TerraJobStatus.FAILED]
-          && fp.some(job => this.withinPastTwentyFourHours(job.completionTime),
-            jobsByStatus[TerraJobStatus.FAILED]
-          )
-      ) {
-        status = TerraJobStatus.FAILED;
+      } else if (jobsByStatus[TerraJobStatus.SUCCEEDED] || jobsByStatus[TerraJobStatus.FAILED]) {
+        // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
+        const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
+        const recentCompletedJobs = fp.flow(
+            // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
+            fp.sortBy((job: GenomicExtractionJob) => job.completionTime),
+            fp.reverse
+        )(completedJobs);
+        if (!fp.isEmpty(recentCompletedJobs) && this.withinPastTwentyFourHours(recentCompletedJobs[0].completionTime)) {
+          status = recentCompletedJobs[0].status;
+        }
       }
 
       // We always want to show the DNA icon.
-      // When there are running jobs, we will show a small overlay icon in the bottom right of the
-      // tab showing the job status.
+      // When there are running or recently completed  jobs, we will show a small overlay icon in
+      // the bottom right of the tab showing the job status.
       return <FlexRow style={{height: '100%', alignItems: 'center', justifyContent: 'space-around'}}>
         {this.displayFontAwesomeIcon(icon)}
         <FlexRow data-test-id='extraction-status-icon-container' style={styles.statusIconContainer}>

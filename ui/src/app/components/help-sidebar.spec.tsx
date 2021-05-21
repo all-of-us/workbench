@@ -250,10 +250,12 @@ describe('HelpSidebar', () => {
         status: TerraJobStatus.ABORTING
       },
       {
-        status: TerraJobStatus.FAILED
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now()
       },
       {
-        status: TerraJobStatus.SUCCEEDED
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now()
       }
     ];
     const wrapper = await component();
@@ -268,10 +270,12 @@ describe('HelpSidebar', () => {
         status: TerraJobStatus.ABORTING
       },
       {
-        status: TerraJobStatus.FAILED
+        status: TerraJobStatus.FAILED,
+        completionTime: Date.now()
       },
       {
-        status: TerraJobStatus.SUCCEEDED
+        status: TerraJobStatus.SUCCEEDED,
+        completionTime: Date.now()
       }
     ];
     const wrapper = await component();
@@ -293,15 +297,19 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.error);
   });
 
-  it('should display "SUCCEEDED" icon with recent succeeded and failed jobs', async() => {
+  it('should display icon corresponding to most recent completed job within 24h', async() => {
+    const oneHourAgo = new Date();
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+    const twoHoursAgo = new Date();
+    twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
     dataSetStub.extractionJobs = [
       {
         status: TerraJobStatus.SUCCEEDED,
-        completionTime: Date.now()
+        completionTime: oneHourAgo
       },
       {
         status: TerraJobStatus.FAILED,
-        completionTime: Date.now()
+        completionTime: twoHoursAgo
       }
     ];
     const wrapper = await component();
