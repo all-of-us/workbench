@@ -226,7 +226,6 @@ export default class CohortParticipantsGroup {
     const menu = new TieredMenu(this.page);
     await menu.waitUntilVisible();
     await menu.select(menuItems);
-    await waitWhileLoading(this.page);
     return this;
   }
 

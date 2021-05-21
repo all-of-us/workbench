@@ -1,9 +1,15 @@
-import { FilterSign, PhysicalMeasurementsCriteria, Race, Sex, Visits } from 'app/page/cohort-participants-group';
+import {
+  Ethnicity,
+  FilterSign,
+  PhysicalMeasurementsCriteria,
+  Race,
+  Sex,
+  Visits
+} from 'app/page/cohort-participants-group';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity } from 'app/page/cohort-participants-group';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';

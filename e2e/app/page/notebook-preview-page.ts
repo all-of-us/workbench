@@ -33,7 +33,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const link = new Link(this.page, Selector.editButton);
     await link.click();
     // Restarting notebook server may take a while.
-    await waitWhileLoading(this.page, 60 * 15 * 1000);
+    await waitWhileLoading(this.page, 60 * 20 * 1000);
 
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();

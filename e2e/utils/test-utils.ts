@@ -55,7 +55,9 @@ export async function signInAs(userId: string, passwd: string, opts: { reset?: b
 }
 
 export async function signOut(page: Page): Promise<void> {
-  await page.evaluate('window.setTestAccessTokenOverride(null)');
+  await page.evaluate(async () => {
+    return 'window.setTestAccessTokenOverride(null)';
+  });
 
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);

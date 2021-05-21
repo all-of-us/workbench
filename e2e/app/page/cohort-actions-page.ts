@@ -8,6 +8,8 @@ import Link from 'app/element/link';
 import CohortBuildPage from './cohort-build-page';
 import WorkspaceDataPage from './workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
+import WorkspaceAnalysisPage from './workspace-analysis-page';
+import WorkspaceAboutPage from './workspace-about-page';
 
 const PageTitle = 'Cohort Actions';
 
@@ -56,7 +58,7 @@ export default class CohortActionsPage extends AuthenticatedPage {
   }
 
   async getCohortName(): Promise<string> {
-    const link = await this.getCohortLink();
+    const link = this.getCohortLink();
     return getPropValue<string>(await link.asElementHandle(), 'textContent');
   }
 
@@ -67,6 +69,24 @@ export default class CohortActionsPage extends AuthenticatedPage {
     await cohortBuildPage.getTotalCount();
     await waitWhileLoading(this.page);
     return cohortBuildPage;
+  }
+
+  async clickDataTab(): Promise<WorkspaceDataPage> {
+    const dataPage = new WorkspaceDataPage(this.page);
+    await dataPage.openDataPage({ waitPageChange: true });
+    return dataPage;
+  }
+
+  async clickAnalysisTab(): Promise<WorkspaceAnalysisPage> {
+    const analysisPage = new WorkspaceAnalysisPage(this.page);
+    await analysisPage.openAnalysisPage({ waitPageChange: true });
+    return analysisPage;
+  }
+
+  async clickAboutTab(): Promise<WorkspaceAboutPage> {
+    const aboutPage = new WorkspaceAboutPage(this.page);
+    await aboutPage.openAboutPage({ waitPageChange: true });
+    return aboutPage;
   }
 
   // A helper function to avoid clutter tests.
