@@ -1,5 +1,4 @@
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
-import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
@@ -511,6 +510,9 @@ dependencies {
 
   // Use Mockito for testing only.
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+
+  // Hotswapping
+  developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 tasks.compileJava {
@@ -612,12 +614,6 @@ version = '0.1.0'          // Version in generated output
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
-  inputDir = sourceSets.main.java.outputDir
-  // This is actually not used but required.
-  outputDir = sourceSets.main.java.outputDir
-}
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 

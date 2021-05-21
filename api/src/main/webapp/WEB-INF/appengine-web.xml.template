@@ -16,6 +16,7 @@
     <property name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
     <property name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
     <property name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
+    <property name="spring.devtools.restart.enabled=false " value="${WORKBENCH_DB_PASSWORD}"/>
 
     <property name="cdr.datasource.url" value="${CDR_DB_CONNECTION_STRING}"/>
     <property name="cdr.datasource.username" value="${CDR_DB_USER}"/>
