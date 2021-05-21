@@ -615,8 +615,8 @@ export const HelpSidebar = fp.flow(
         const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
         const recentCompletedJobs = fp.flow(
             // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
-            fp.sortBy((job: GenomicExtractionJob) => job.completionTime),
-            fp.reverse
+          fp.sortBy((job: GenomicExtractionJob) => job.completionTime),
+          fp.reverse
         )(completedJobs);
         if (!fp.isEmpty(recentCompletedJobs) && this.withinPastTwentyFourHours(recentCompletedJobs[0].completionTime)) {
           status = recentCompletedJobs[0].status;
