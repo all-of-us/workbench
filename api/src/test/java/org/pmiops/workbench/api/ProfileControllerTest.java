@@ -557,9 +557,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
-    // One year passes
+    // // One year passes
     long yearInMillis = TimeUnit.DAYS.toMillis(config.accessRenewal.expiryDays + 1);
     fakeClock.increment(yearInMillis);
+   
 
     // A sync is requested - it should remove access
     assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -581,6 +582,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setProfileLastConfirmedTime(update);
     assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
+
+    // testMe_success is very unhappy with the clock increment... reset it
+    fakeClock.increment(yearInMillis * -1);
   }
 
   @Test
