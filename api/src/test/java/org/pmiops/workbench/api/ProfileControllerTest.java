@@ -1,17 +1,32 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
 import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,6 +38,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -39,7 +55,13 @@ import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
@@ -47,15 +69,30 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.Race;
+import org.pmiops.workbench.model.RasLinkRequestBody;
+import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SexAtBirth;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
 import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
@@ -79,6 +116,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
@@ -390,8 +428,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    final List<DbUserTermsOfService> tosRows =
-  Lists.newArrayList(userTermsOfServiceDao.findAll());
+    final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
@@ -421,8 +458,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = Exception.class)
   public void testCreateAccount_dbUserFailure() {
-    // Exercises a scenario where the userService throws an unexpected exception (e.g. a SQL
-  error),
+    // Exercises a scenario where the userService throws an unexpected exception (e.g. a SQL error),
     // ensuring we attempt to clean up the orphaned G Suite user after catching the exception.
     createAccountRequest.getProfile().getAddress().setZipCode("12345678901234567890");
 
@@ -436,8 +472,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testSubmitDataUseAgreement_success() {
     createAccountAndDbUserWithAffiliation();
     String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUA_VERSION,
-  duaInitials).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
@@ -500,7 +535,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final long userId = createAccountAndDbUserWithAffiliation().getUserId();
 
-    // set bypasses times
+    // Set bypass times
     final DbUser dbUser = userDao.findUserByUserId(userId);
     dbUser.setBetaAccessBypassTime(TIMESTAMP);
     dbUser.setEraCommonsBypassTime(TIMESTAMP);
@@ -518,7 +553,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     userDao.save(dbUser);
     dbUser.getComplianceTrainingCompletionTime();
 
-    // ...we request a sync, the user is now compliant
+    // We request a sync, the user is now compliant
     assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
@@ -529,6 +564,23 @@ public class ProfileControllerTest extends BaseControllerTest {
     // A sync is requested - it should remove access
     assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).isEmpty();
+
+    // User updates everything but their profile
+    Timestamp update = new Timestamp(fakeClock.millis() + TimeUnit.DAYS.toMillis(1));
+    dbUser.setDataUseAgreementCompletionTime(update);
+    dbUser.setComplianceTrainingCompletionTime(update);
+    dbUser.setPublicationsLastConfirmedTime(update);
+    userDao.save(dbUser);
+    dbUser.getComplianceTrainingCompletionTime();
+
+    // They should still not be registered after a sync request
+    assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).isEmpty();
+
+    // User updates their profile, they should now be registered
+    dbUser.setProfileLastConfirmedTime(update);
+    assertThat(profileController.syncAccessModuleStatus().getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
   }
 
   @Test
@@ -626,8 +678,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = NotFoundException.class)
   public void updateVerifiedInstitutionalAffiliation_noSuchInstitution() {
-    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on
-  ACCESS_CONTROL_ADMIN
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
     // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -645,8 +696,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void updateVerifiedInstitutionalAffiliation_update() {
-    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on
-  ACCESS_CONTROL_ADMIN
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
     // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -676,8 +726,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void updateVerifiedInstitutionalAffiliation_removeForbidden() {
-    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on
-  ACCESS_CONTROL_ADMIN
+    // ProfileController.updateVerifiedInstitutionalAffiliation() is gated on ACCESS_CONTROL_ADMIN
     // Authority which is also checked in ProfileService.validateProfile()
     boolean grantAdminAuthority = true;
 
@@ -757,8 +806,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     String newName =
-        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
-  "lifegoesonrahlalalalifegoeson";
+        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setGivenName(newName);
     profileController.updateProfile(profile);
   }
@@ -824,8 +872,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
     String newName =
-        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
-  "lifegoesonrahlalalalifegoeson";
+        "obladidobladalifegoesonyalalalalalifegoesonobladioblada" + "lifegoesonrahlalalalifegoeson";
     profile.setFamilyName(newName);
     profileController.updateProfile(profile);
   }
@@ -882,8 +929,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         new InstitutionUserInstructions()
             .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
             .instructions(
-                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\"
-  />");
+                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
@@ -950,10 +996,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.syncEraCommonsStatus();
     assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
         .isEqualTo(linkedUsername);
-  
-  assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
-  
-  assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
   @Test
@@ -1301,10 +1345,8 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
-            new
-  AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
-            new
-  AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             // would un-bypass if a bypass had existed
             new AccessBypassRequest().moduleName(AccessModule.BETA_ACCESS).isBypassed(false));
 
@@ -1324,8 +1366,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
             // un-bypass the previously bypassed
-            new
-  AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
+            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
             new AccessBypassRequest()
                 .moduleName(AccessModule.COMPLIANCE_TRAINING)
                 .isBypassed(false),
@@ -1469,8 +1510,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername())
         .isEqualTo(loginGovUsername);
-  
-  assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime())
+    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime())
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
