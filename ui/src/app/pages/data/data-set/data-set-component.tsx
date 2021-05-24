@@ -14,6 +14,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
+import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -53,7 +54,6 @@ import {
   Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
-import {GenomicExtractionModal} from './genomic-extraction-modal';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
