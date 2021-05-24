@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {daysFromNow, reactStyles} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {Button} from './buttons';
@@ -63,7 +63,6 @@ const styles = reactStyles({
   },
 });
 
-export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 
 // return the number of full days remaining to expiration in the soonest-to-expire module,
@@ -78,10 +77,10 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
     fp.min)(profile);
 
   if (earliestExpiration) {
-    const daysRemaining = (earliestExpiration - Date.now()) / MILLIS_PER_DAY;
+    const daysRemaining = daysFromNow(earliestExpiration);
     if (daysRemaining < NOTIFICATION_THRESHOLD_DAYS) {
       // note that we will show 0 days remaining if the expiration is later today
-      return Math.trunc(daysRemaining);
+      return daysRemaining;
     }
   }
 };

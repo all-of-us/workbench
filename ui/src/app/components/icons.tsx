@@ -107,16 +107,18 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
 };
 
-const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
-
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
+export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
+
+const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
+
 export const ControlledTierBadge = svgIcon('/assets/icons/controlled-tier-badge.svg');
 export const Arrow = svgIcon('/assets/icons/arrow-left-regular.svg');
+
 export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
   return <div style={{...style, ...styles.circleBackground}}>
     <WrappedIcon/>
   </div>;
 };
-export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
