@@ -204,12 +204,11 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
                                 "\"" + extractionUuid + "\"")
                             .put(
+                                EXTRACT_WORKFLOW_NAME + ".gvs_project",
+                                "\"" + workspace.getCdrVersion().getBigqueryProject() + "\"")
+                            .put(
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
-                                "\""
-                                    + workspace.getCdrVersion().getBigqueryProject()
-                                    + "."
-                                    + workspace.getCdrVersion().getWgsBigqueryDataset()
-                                    + "\"")
+                                "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gvs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
@@ -219,6 +218,9 @@ public class GenomicExtractionService {
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gvs_extraction_temp_tables_dataset",
                                 "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
+                            .put(
+                                EXTRACT_WORKFLOW_NAME + ".do_not_filter_override",
+                                "true")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".wgs_intervals",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
@@ -258,16 +260,16 @@ public class GenomicExtractionService {
             .getMethodConfiguration();
 
     FirecloudSubmissionResponse submissionResponse =
-        submissionApiProvider
-            .get()
-            .createSubmission(
-                new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(false)
-                    .methodConfigurationNamespace(methodConfig.getNamespace())
-                    .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false),
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName);
+          submissionApiProvider
+              .get()
+              .createSubmission(
+                  new FirecloudSubmissionRequest()
+                      .deleteIntermediateOutputFiles(false)
+                      .methodConfigurationNamespace(methodConfig.getNamespace())
+                      .methodConfigurationName(methodConfig.getName())
+                      .useCallCache(false),
+                  cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                  cohortExtractionConfig.operationalTerraWorkspaceName);
 
     // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
     // check for such jobs.
