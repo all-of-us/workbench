@@ -4,10 +4,10 @@ import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {
     maybeDaysRemaining,
-    MILLIS_PER_DAY,
     NOTIFICATION_THRESHOLD_DAYS
 } from "./access-renewal-notification";
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
+import {MILLIS_PER_DAY} from 'app/utils';
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;
