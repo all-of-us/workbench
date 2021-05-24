@@ -217,9 +217,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setCdrVersion(cdrVersion);
 
     workspaceDao.save(dbWorkspace);
-    when(workspaceAuthService.enforceWorkspaceAccessLevel(
-            WORKSPACE_NAMESPACE, WORKSPACE_ID, WorkspaceAccessLevel.READER))
-        .thenReturn(WorkspaceAccessLevel.READER);
 
     when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_ID, WorkspaceAccessLevel.READER))
