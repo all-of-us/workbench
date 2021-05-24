@@ -276,6 +276,7 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
+    useJUnitPlatform()
     // Allow unit tests to directly load config files.
     resources {
       srcDir "config/"
@@ -506,7 +507,6 @@ dependencies {
   testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
 
   testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
-  testRuntime 'org.junit.vintage:junit-vintage-engine:5.4.0'
 
   // Use Mockito for testing only.
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
