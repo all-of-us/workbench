@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -17,7 +16,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.access.AccessTierService;
@@ -125,7 +126,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
-  @Mock private WorkspaceAuthService workspaceAuthService;
+  @Autowired private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
@@ -913,58 +914,39 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .isTrue();
   }
 
+  @Rule public ExpectedException badRequestThrown = ExpectedException.none();
+
   @Test
   public void validateAttribute() {
     SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
     demo.attributes(ImmutableList.of(attribute));
+    badRequestThrown.expect(BadRequestException.class);
+    badRequestThrown.expectMessage("Bad Request: attribute operator null is not valid.");
+
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(demo), new ArrayList<>());
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operator null is not valid.");
-    }
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operands are empty.");
-    }
+    badRequestThrown.expectMessage("Bad Request: attribute operator null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: attribute NUM operands must be numeric.");
-    }
+    badRequestThrown.expectMessage("Bad Request: attribute NUM operands must be numeric.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("10", "20"));
     attribute.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
@@ -973,60 +955,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operator null is not valid.");
-    }
+    badRequestThrown.expect(BadRequestException.class);
+    badRequestThrown.expectMessage("Bad Request: modifier operator null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operands are empty.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier operands are empty.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("10", "20"));
     modifier.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.name(ModifierType.EVENT_DATE);
     modifier.operands(ImmutableList.of("10"));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier EVENT_DATE must be a valid date.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier EVENT_DATE must be a valid date.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
@@ -1080,29 +1035,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void temporalGroupExceptions() {
+    badRequestThrown.expect(BadRequestException.class);
     SearchGroupItem icd9SGI =
         new SearchGroupItem().type(Domain.CONDITION.toString()).addSearchParametersItem(icd9());
 
     SearchGroup temporalGroup = new SearchGroup().items(ImmutableList.of(icd9SGI)).temporal(true);
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: search group item temporal group null is not valid.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: search group item temporal group null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     icd9SGI.temporalGroup(0);
-    try {
-      controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
