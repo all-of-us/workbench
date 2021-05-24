@@ -256,6 +256,9 @@ spotless {
   }
 }
 
+test {
+  useJUnitPlatform()
+}
 
 // The plugin generates configuration names by concatenating SourceSet names
 // with builtin identifiers according to the rules at
@@ -276,7 +279,6 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
-    useJUnitPlatform()
     // Allow unit tests to directly load config files.
     resources {
       srcDir "config/"
