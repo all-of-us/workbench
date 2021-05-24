@@ -118,7 +118,7 @@ export default class ShareModal extends Modal {
     await this.waitForSearchBox().type(email, { delay: 20 });
     await waitWhileLoading(this.page);
     return await this.page
-      .waitForXPath(notFoundXpath, { visible: true })
+      .waitForXPath(notFoundXpath, { visible: true, timeout: 5000 })
       .then(() => {
         return true;
       })
