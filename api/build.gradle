@@ -500,7 +500,6 @@ dependencies {
   testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
   testCompile 'com.google.truth:truth:0.42'
   testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
-  testCompile "org.springframework.boot:spring-boot-starter-test"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.10.0'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
@@ -511,6 +510,11 @@ dependencies {
 
   // Use Mockito for testing only.
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+
+  // Test deps
+  testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+  }
 }
 
 tasks.compileJava {
