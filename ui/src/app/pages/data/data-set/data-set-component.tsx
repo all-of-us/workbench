@@ -1343,7 +1343,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
                 <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
                         onClick ={() => this.saveDataset()}
                         disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
-                  Save
+                  Save Dataset
                 </Button>}
             </TooltipTrigger>
 
@@ -1353,7 +1353,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
                     onClick ={() => this.onClickExport()}
                     disabled={this.disableSave() || !!exportError}>
-              Export
+              Analyze
             </Button>
           </TooltipTrigger>
         </div>
