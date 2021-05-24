@@ -9,7 +9,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -105,17 +104,32 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Optional<DbWorkspace> findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
       String googleProject, short activeStatus);
 
-  List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
+  interface WorkspaceCostView {
+    Long getWorkspaceId();
+
+    String getGoogleProject();
+
+    Long getCreatorId();
+
+    Double getFreeTierCost();
+  }
+
+  @Query(
+      "SELECT w.workspaceId AS workspaceId, "
+          + "w.googleProject AS googleProject, "
+          + "w.creator.id AS creatorId, "
+          + "f.cost AS freeTierCost "
+          + "FROM DbWorkspace w "
+          + "LEFT JOIN DbWorkspaceFreeTierUsage f ON w.workspaceId = f.workspace.id "
+          // Billing migration status 1 = NEW
+          + "WHERE w.billingMigrationStatus = 1 AND w.creator IS NOT NULL")
+  List<WorkspaceCostView> getWorkspaceCostViews();
 
   DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
   List<DbWorkspace> findAllByNeedsResearchPurposeReviewPrompt(short researchPurposeReviewed);
-
-  default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
-    return findAllByBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
-  }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
     DbWorkspace toUpdate =

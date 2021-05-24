@@ -422,21 +422,21 @@ public class FreeTierBillingServiceTest {
 
   @Test
   public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() throws MessagingException {
-    final String ns1 = "namespace-1";
-    final String ns2 = "namespace-2";
+    final String proj1 = "proj-1";
+    final String proj2 = "proj-2";
     final double cost1 = 123.45;
     final double cost2 = 234.56;
     final double sum = cost1 + cost2;
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = sum - 0.01;
 
-    doReturn(mockBQTableResult(ImmutableMap.of(ns1, cost1, ns2, cost2)))
+    doReturn(mockBQTableResult(ImmutableMap.of(proj1, cost1, proj2, cost2)))
         .when(bigQueryService)
         .executeQuery(any());
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final DbWorkspace ws1 = createWorkspace(user, ns1);
-    final DbWorkspace ws2 = createWorkspace(user, ns2);
+    final DbWorkspace ws1 = createWorkspace(user, proj1);
+    final DbWorkspace ws2 = createWorkspace(user, proj2);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(mailService).alertUserFreeTierExpiration(eq(user));
@@ -462,21 +462,21 @@ public class FreeTierBillingServiceTest {
 
   @Test
   public void checkFreeTierBillingUsage_twoUsers() throws MessagingException {
-    final String ns1 = "namespace-1";
-    final String ns2 = "namespace-2";
+    final String proj1 = "proj-1";
+    final String proj2 = "proj-2";
     final double cost1 = 123.45;
     final double cost2 = 234.56;
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
 
-    doReturn(mockBQTableResult(ImmutableMap.of(ns1, cost1, ns2, cost2)))
+    doReturn(mockBQTableResult(ImmutableMap.of(proj1, cost1, proj2, cost2)))
         .when(bigQueryService)
         .executeQuery(any());
 
     DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
-    DbWorkspace ws1 = createWorkspace(user1, ns1);
+    DbWorkspace ws1 = createWorkspace(user1, proj1);
     DbUser user2 = createUser("more@test.com");
-    DbWorkspace ws2 = createWorkspace(user2, ns2);
+    DbWorkspace ws2 = createWorkspace(user2, proj2);
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(mailService).alertUserFreeTierExpiration(eq(user1));
     verify(mailService).alertUserFreeTierExpiration(eq(user2));
@@ -685,6 +685,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspace userAccountWorkspace = new DbWorkspace();
     userAccountWorkspace.setCreator(user);
     userAccountWorkspace.setWorkspaceNamespace("some other namespace");
+    userAccountWorkspace.setGoogleProject("other project");
     userAccountWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     userAccountWorkspace.setBillingAccountName("some other account");
     userAccountWorkspace.setBillingStatus(BillingStatus.ACTIVE);
@@ -747,15 +748,16 @@ public class FreeTierBillingServiceTest {
   }
 
   // we only alert/record for BillingMigrationStatus.NEW workspaces
-  private DbWorkspace createWorkspace(DbUser creator, String namespace) {
-    return createWorkspace(creator, namespace, BillingMigrationStatus.NEW);
+  private DbWorkspace createWorkspace(DbUser creator, String project) {
+    return createWorkspace(creator, project, BillingMigrationStatus.NEW);
   }
 
   private DbWorkspace createWorkspace(
-      DbUser creator, String namespace, BillingMigrationStatus billingMigrationStatus) {
+      DbUser creator, String project, BillingMigrationStatus billingMigrationStatus) {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCreator(creator);
-    workspace.setWorkspaceNamespace(namespace);
+    workspace.setWorkspaceNamespace(project + "-ns");
+    workspace.setGoogleProject(project);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     workspace.setBillingAccountType(BillingAccountType.FREE_TIER);
