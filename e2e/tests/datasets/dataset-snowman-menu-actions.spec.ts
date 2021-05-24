@@ -10,6 +10,9 @@ import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 
+// 10 minutes.
+jest.setTimeout(10 * 60 * 1000);
+
 describe('Datasets card snowman menu actions', () => {
   const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
 

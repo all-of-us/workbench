@@ -9,8 +9,8 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import { makeWorkspaceName } from 'utils/str-utils';
 
-// 30 minutes. Test involves notebook that could take a long time to create.
-jest.setTimeout(30 * 60 * 1000);
+// 10 minutes.
+jest.setTimeout(10 * 60 * 1000);
 
 describe('Create Dataset', () => {
   beforeEach(async () => {
