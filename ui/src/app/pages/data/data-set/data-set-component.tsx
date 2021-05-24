@@ -53,6 +53,7 @@ import {
   Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import {GenomicExtractionModal} from './genomic-extraction-modal';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -289,8 +290,6 @@ interface ValueListItemState {
   showDataDictionaryEntry: boolean;
 }
 
-
-
 export class ValueListItem extends React.Component<
   ValueListItemProps, ValueListItemState> {
 
@@ -433,6 +432,13 @@ interface Props extends WithErrorModalProps {
   };
 }
 
+enum ModalState {
+  None,
+  Create,
+  Export,
+  Extract
+}
+
 interface State {
   cohortList: Cohort[];
   conceptSetList: ConceptSet[];
@@ -447,8 +453,7 @@ interface State {
 
   includesAllParticipants: boolean;
   loadingResources: boolean;
-  openExportModal: boolean;
-  openCreateModal: boolean;
+  modalState: ModalState;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -474,8 +479,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         domainValueSetLookup: new Map(),
         includesAllParticipants: false,
         loadingResources: true,
-        openExportModal: false,
-        openCreateModal: false,
+        modalState: ModalState.None,
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -1104,6 +1108,14 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
       </div>;
     }
 
+    onClickExport() {
+      if (this.state.selectedDomains.has(Domain.WHOLEGENOMEVARIANT)) {
+        this.setState({modalState: ModalState.Extract});
+      } else {
+        this.setState({modalState: ModalState.Export});
+      }
+    }
+
     render() {
       const {namespace, id} = this.props.workspace;
       const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
@@ -1116,7 +1128,6 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
         domainValueSetLookup,
         includesAllParticipants,
         loadingResources,
-        openExportModal,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -1325,7 +1336,7 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
                             content='Requires Owner or Writer permission' disabled={this.canWrite}>
               {this.isCreatingNewDataset ?
                 <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
-                        onClick ={() => this.setState({openCreateModal: true})}
+                        onClick ={() => this.setState({modalState: ModalState.Create})}
                         disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
                   Create Dataset
                 </Button> :
@@ -1340,23 +1351,32 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
                           content={exportError}
                           disabled={!exportError}>
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-                    onClick ={() => this.setState({openExportModal: true})}
+                    onClick ={() => this.onClickExport()}
                     disabled={this.disableSave() || !!exportError}>
               Export
             </Button>
           </TooltipTrigger>
         </div>
-        {this.state.openCreateModal && <CreateModal entityName='Dataset'
+        {this.state.modalState === ModalState.Create && <CreateModal entityName='Dataset'
                                                     getExistingNames={async() => {
                                                       const resources = await workspacesApi().getWorkspaceResources(namespace, id,
                                                         {typesToFetch: [ResourceType.DATASET]});
                                                       return resources.map(resource => resource.dataSet.name);
                                                     }}
                                                     save={(name, desc) => this.createDataset(name, desc)}
-                                                    close={() => this.setState({openCreateModal: false})}/>}
+                                                    close={() => this.setState({modalState: ModalState.None})}/>}
 
-        {openExportModal && <ExportDatasetModal dataset={dataSet}
-                                                closeFunction={() => this.setState({openExportModal: false})}/>}
+        {this.state.modalState === ModalState.Export && <ExportDatasetModal dataset={dataSet}
+                                                closeFunction={() => this.setState({modalState: ModalState.None})}/>}
+
+        {this.state.modalState === ModalState.Extract && <GenomicExtractionModal dataSet={dataSet}
+                                                                                 workspaceNamespace={namespace}
+                                                                                 workspaceFirecloudName={id}
+                                                                                 title={'Would you like to extract genomic variant data as VCF files?'}
+                                                                                 cancelText={'Skip'}
+                                                                                 confirmText={'Extract & Continue'}
+                                                                                 closeFunction={() =>
+                                                                                   this.setState({modalState: ModalState.Export})}/>}
       </React.Fragment>;
     }
   });
