@@ -52,8 +52,8 @@ describe('Datasets card snowman menu actions', () => {
     expect(await conceptSetCheckBox.isChecked()).toBe(true);
 
     // Export button is enabled.
-    const exportButton = datasetEditPage.getExportButton();
-    expect(await exportButton.isCursorNotAllowed()).toBe(false);
+    const analyzeButton datasetEditPage.getAnalyzeButton();
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(false);
 
     // Save button is disabled.
     const saveButton = datasetEditPage.getSaveButton();

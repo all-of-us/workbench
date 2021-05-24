@@ -51,7 +51,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    const exportModal = await datasetBuildPage.clickExportButton();
+    const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(Language.Python);
@@ -105,7 +105,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    await datasetBuildPage.clickExportButton();
+    await datasetBuildPage.clickAnalyzeButton();
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();
 

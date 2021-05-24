@@ -34,8 +34,8 @@ describe('Create Dataset', () => {
     await datasetPage.selectCohorts(['All Participants']);
 
     // Export button is disabled.
-    const exportButton = datasetPage.getExportButton();
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    const analyzeButton = datasetPage.getAnalyzeButton();
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is disabled.
     const createDatasetButton = datasetPage.getCreateDatasetButton();
@@ -48,7 +48,7 @@ describe('Create Dataset', () => {
     await datasetPage.selectConceptSets([LinkText.Demographics]);
 
     // Export button is disabled.
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is enabled.
     expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
@@ -67,7 +67,7 @@ describe('Create Dataset', () => {
     await datasetPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
 
     // Export button is disabled.
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is enabled.
     expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
@@ -76,7 +76,7 @@ describe('Create Dataset', () => {
     await datasetPage.unselectCohort('All Participants');
 
     // Export button is disabled.
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // Create Dataset button is disabled.
     expect(await createDatasetButton.isCursorNotAllowed()).toBe(true);
@@ -172,13 +172,13 @@ describe('Create Dataset', () => {
     const dataSetEditPage = new DatasetEditPage(newPage);
     await dataSetEditPage.waitForLoad();
 
-    const exportButton = dataSetEditPage.getExportButton();
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    const analyzeButton = dataSetEditPage.getAnalyzeButton();
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
 
     // No matter of what has changed, the Analyze button remains disabled.
     await dataSetEditPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
     await dataSetEditPage.getPreviewTableButton().click();
     await waitWhileLoading(newPage);
-    expect(await exportButton.isCursorNotAllowed()).toBe(true);
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
   });
 });

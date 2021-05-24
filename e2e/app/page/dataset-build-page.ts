@@ -123,10 +123,10 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     return createModal;
   }
 
-  async clickExportButton(): Promise<ExportToNotebookModal> {
-    const saveButton = this.getExportButton();
-    await saveButton.waitUntilEnabled();
-    await saveButton.click();
+  async clickAnalyzeButton(): Promise<ExportToNotebookModal> {
+    const analyzeButton = this.getAnalyzeButton();
+    await analyzeButton.waitUntilEnabled();
+    await analyzeButton.click();
     await waitWhileLoading(this.page);
     const exportModal = new ExportToNotebookModal(this.page);
     await exportModal.waitForLoad();
@@ -141,8 +141,8 @@ export default class DatasetBuildPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.Save });
   }
 
-  getExportButton(): Button {
-    return Button.findByName(this.page, { containsText: 'Export' });
+  getAnalyzeButton(): Button {
+    return Button.findByName(this.page, { containsText: 'Analyze' });
   }
 
   async getPreviewTable(): Promise<Table> {
@@ -153,9 +153,6 @@ export default class DatasetBuildPage extends AuthenticatedPage {
 
   getPreviewTableButton(): Button {
     return Button.findByName(this.page, { name: 'View Preview Table' });
-  }
-  getSaveAndAnalyzeButton(): Button {
-    return Button.findByName(this.page, { name: 'Save and Analyze' });
   }
 
   getSelectAllCheckbox(): Checkbox {
