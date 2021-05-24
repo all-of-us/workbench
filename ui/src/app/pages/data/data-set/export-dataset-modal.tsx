@@ -227,6 +227,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
+                    data-test-id='export-dataset-modal-cancel-button'
                     onClick={closeFunction}
                     style={{marginRight: '2rem'}}>
               Cancel

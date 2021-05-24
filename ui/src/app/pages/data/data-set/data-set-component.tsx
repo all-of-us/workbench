@@ -20,7 +20,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  reactStyles,
+  reactStyles, switchCase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
@@ -795,11 +795,10 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     disableSave() {
-      return !this.state.selectedConceptSetIds || (this.state.selectedConceptSetIds.length === 0
-          && this.state.selectedPrepackagedConceptSets.size === 0) ||
-          ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0) &&
-              !this.state.includesAllParticipants) || !this.state.selectedDomainValuePairs ||
-          this.state.selectedDomainValuePairs.length === 0;
+      return !this.state.selectedConceptSetIds ||
+        (this.state.selectedConceptSetIds.length === 0 && this.state.selectedPrepackagedConceptSets.size === 0) ||
+        ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
+        !this.state.selectedDomainValuePairs || this.state.selectedDomainValuePairs.length === 0;
     }
 
     getDataTableValue(data) {
@@ -1109,11 +1108,12 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     onClickExport() {
-      if (this.state.selectedDomains.has(Domain.WHOLEGENOMEVARIANT)) {
-        this.setState({modalState: ModalState.Extract});
-      } else {
-        this.setState({modalState: ModalState.Export});
-      }
+      this.setState(state => {
+        return {
+          ...state,
+          modalState: state.selectedDomains.has(Domain.WHOLEGENOMEVARIANT) ? ModalState.Extract : ModalState.Export
+        };
+      });
     }
 
     render() {
@@ -1350,33 +1350,40 @@ export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(
           <TooltipTrigger data-test-id='export-tooltip'
                           content={exportError}
                           disabled={!exportError}>
-            <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
+            <Button style={{marginBottom: '2rem'}} data-test-id='analyze-button'
                     onClick ={() => this.onClickExport()}
                     disabled={this.disableSave() || !!exportError}>
               Analyze
             </Button>
           </TooltipTrigger>
         </div>
-        {this.state.modalState === ModalState.Create && <CreateModal entityName='Dataset'
-                                                    getExistingNames={async() => {
-                                                      const resources = await workspacesApi().getWorkspaceResources(namespace, id,
-                                                        {typesToFetch: [ResourceType.DATASET]});
-                                                      return resources.map(resource => resource.dataSet.name);
-                                                    }}
-                                                    save={(name, desc) => this.createDataset(name, desc)}
-                                                    close={() => this.setState({modalState: ModalState.None})}/>}
 
-        {this.state.modalState === ModalState.Export && <ExportDatasetModal dataset={dataSet}
-                                                closeFunction={() => this.setState({modalState: ModalState.None})}/>}
+        {
+          switchCase(this.state.modalState,
+            [ModalState.Create, () =>
+              <CreateModal entityName='Dataset'
+                           getExistingNames={async() => {
+                             const resources = await workspacesApi()
+                               .getWorkspaceResources(namespace, id, {typesToFetch: [ResourceType.DATASET]});
+                             return resources.map(resource => resource.dataSet.name);
+                           }}
+                           save={(name, desc) => this.createDataset(name, desc)}
+                           close={() => this.setState({modalState: ModalState.None})}/>],
+            [ModalState.Export, () =>
+              <ExportDatasetModal dataset={dataSet}
+                                  closeFunction={() => this.setState({modalState: ModalState.None})}/>],
+            [ModalState.Extract, () =>
+              <GenomicExtractionModal dataSet={dataSet}
+                                      workspaceNamespace={namespace}
+                                      workspaceFirecloudName={id}
+                                      title={'Would you like to extract genomic variant data as VCF files?'}
+                                      cancelText={'Skip'}
+                                      confirmText={'Extract & Continue'}
+                                      closeFunction={() => this.setState({modalState: ModalState.Export})}/>
+            ]
+          )
+        }
 
-        {this.state.modalState === ModalState.Extract && <GenomicExtractionModal dataSet={dataSet}
-                                                                                 workspaceNamespace={namespace}
-                                                                                 workspaceFirecloudName={id}
-                                                                                 title={'Would you like to extract genomic variant data as VCF files?'}
-                                                                                 cancelText={'Skip'}
-                                                                                 confirmText={'Extract & Continue'}
-                                                                                 closeFunction={() =>
-                                                                                   this.setState({modalState: ModalState.Export})}/>}
       </React.Fragment>;
     }
   });
