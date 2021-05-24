@@ -212,17 +212,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    final String billingProject = claimBillingProject(user, accessTier);
-    FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(billingProject, workspace.getName());
+    FirecloudWorkspaceId workspaceId = getFcBillingProject(accessTier, workspace);
     FirecloudWorkspace fcWorkspace =
         fireCloudService.createWorkspace(
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
             accessTier.getAuthDomainName());
-
-    DbWorkspace dbWorkspace =
-        createDbWorkspace(workspace, cdrVersion, user, workspaceId, fcWorkspace);
+    DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {
@@ -248,11 +244,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private DbWorkspace createDbWorkspace(
-      Workspace workspace,
-      DbCdrVersion cdrVersion,
-      DbUser user,
-      FirecloudWorkspaceId workspaceId,
-      FirecloudWorkspace fcWorkspace) {
+      Workspace workspace, DbCdrVersion cdrVersion, DbUser user, FirecloudWorkspace fcWorkspace) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     // The final step in the process is to clone the AoU representation of the
@@ -264,8 +256,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudName(fcWorkspace.getName());
+    dbWorkspace.setWorkspaceNamespace(fcWorkspace.getNamespace());
     dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
@@ -481,11 +473,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     DbUser user = userProvider.get();
-
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    final String billingProject = claimBillingProject(user, accessTier);
-    FirecloudWorkspaceId toFcWorkspaceId =
-        generateFirecloudWorkspaceId(billingProject, toWorkspace.getName());
+    FirecloudWorkspaceId toFcWorkspaceId = getFcBillingProject(accessTier, toWorkspace);
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
@@ -493,10 +482,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             toFcWorkspaceId.getWorkspaceNamespace(),
             toFcWorkspaceId.getWorkspaceName(),
             accessTier.getAuthDomainName());
-
-    DbWorkspace dbWorkspace =
-        createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspaceId, toFcWorkspace);
-
+    DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
@@ -533,6 +519,31 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
+  }
+
+  /**
+   * Gets a FireCloud Billing project.
+   *
+   * <p>If {@code enableFireCloudV2Billing} is enabled, create one directly using FireCloud
+   * v2Billing endpoints. Otherwise, claim one from billing buffer.
+   */
+  private FirecloudWorkspaceId getFcBillingProject(DbAccessTier accessTier, Workspace workspace) {
+    DbUser user = userProvider.get();
+    String billingProject;
+    if (workbenchConfigProvider.get().featureFlags.enableFireCloudV2Billing) {
+      // If v2 Billing is enabled, we will call FireCloud directly to create one.
+      billingProject = billingProjectBufferService.createBillingProjectName();
+      fireCloudService.createAllOfUsBillingProject(
+          billingProject, accessTier.getServicePerimeter());
+
+      // We use AoU Service Account to create the billing account then assign owner role to user.
+      // In this way, we can make sure AoU Service Account is still the owner of this billing
+      // account.
+      fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
+    } else {
+      billingProject = claimBillingProject(user, accessTier);
+    }
+    return generateFirecloudWorkspaceId(billingProject, workspace.getName());
   }
 
   @Override
