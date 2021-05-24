@@ -3,7 +3,6 @@ import { LinkText, WorkspaceAccessLevel } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
-import { logger } from 'libs/logger';
 import Button from 'app/element/button';
 import { ElementType } from 'app/xpath-options';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -22,16 +21,20 @@ export default class ShareModal extends Modal {
 
   async shareWithUser(userName: string, level: WorkspaceAccessLevel): Promise<void> {
     const dropDownXpath = this.getXpath() + '//*[@data-test-id="drop-down"][.//clr-icon[@shape="plus-circle"]]';
-    const waitForDropDown = async () => {
-      await waitWhileLoading(this.page);
-      await this.page.waitForXPath(dropDownXpath, { visible: true });
+    const existsDropDown = async (): Promise<boolean> => {
+      return this.page
+        .waitForXPath(dropDownXpath, { visible: true, timeout: 2000 })
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
     };
-
     const waitForClose = async () => {
       await waitWhileLoading(this.page);
       await this.page.waitForXPath(dropDownXpath, { hidden: true });
     };
-
     const findCollaboratorAddIcon = () => {
       return ClrIconLink.findByName(
         this.page,
@@ -39,41 +42,32 @@ export default class ShareModal extends Modal {
         this
       );
     };
-
     const pickUserRole = async () => {
       const roleInput = await this.waitForRoleSelectorForUser(userName);
       await roleInput.click();
-
       const ownerOpt = await this.waitForRoleOption(level);
       await ownerOpt.click();
     };
-
-    let maxAttempts = 2;
-    // Try 2 times: enter email and find add icon.
-    const typeAndAddUser = async () => {
-      await this.waitForSearchBox().type(userName, { delay: 50 });
-      await waitForDropDown();
-      try {
-        const addIcon = findCollaboratorAddIcon();
-        await addIcon.click();
-        await waitForClose();
-        return;
-      } catch (err) {
-        // Click failed.
+    const typeAndAddUser = async (): Promise<boolean> => {
+      const addIcon = findCollaboratorAddIcon();
+      for (const char of userName) {
+        const input = await this.waitForSearchBox().asElementHandle();
+        await input.type(char, { delay: 50 });
+        if ((await existsDropDown()) && (await addIcon.exists())) {
+          await addIcon.click();
+          await waitForClose();
+          return true;
+        }
       }
-      if (maxAttempts <= 0) {
-        return;
-      }
-      maxAttempts--;
-      await this.page.waitForTimeout(1000).then(() => {
-        return typeAndAddUser();
-      });
+      return false;
     };
 
-    await typeAndAddUser();
+    const isSuccess = await typeAndAddUser();
+    if (!isSuccess) {
+      throw new Error(`Failed to share with user ${userName}.`);
+    }
     await pickUserRole();
     await this.clickButton(LinkText.Save, { waitForClose: true });
-    logger.info(`Shared workspace to ${userName} with role ${level}`);
   }
 
   getSaveButton(): Button {
@@ -118,7 +112,7 @@ export default class ShareModal extends Modal {
     return this.page.waitForXPath(`//*[starts-with(@id,"react-select") and text()="${levelText}"]`, { visible: true });
   }
 
-  async notFindUser(email: string): Promise<boolean> {
+  async existsUser(email: string): Promise<boolean> {
     const notFoundXpath =
       this.getXpath() + '//*[@data-test-id="drop-down"][not(.//*[text()="No results based on your search"])]';
     await this.waitForSearchBox().type(email, { delay: 20 });

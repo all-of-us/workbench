@@ -372,6 +372,13 @@ export default class BaseElement {
   }
 
   async exists(): Promise<boolean> {
-    return (await this.page.$x(this.xpath)).length !== 0;
+    return this.page
+      .waitForXPath(this.xpath, { visible: true, timeout: 2000 })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 }

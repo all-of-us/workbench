@@ -4,7 +4,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-//import { makeWorkspaceName } from 'utils/str-utils';
+import { makeWorkspaceName } from 'utils/str-utils';
 
 describe('Workspace Share Modal', () => {
   const assignAccess = [
@@ -13,7 +13,7 @@ describe('Workspace Share Modal', () => {
   ];
 
   // Create new workspace with default CDR version
-  const workspace = 'aoutest-407581621629013'; //makeWorkspaceName();
+  const workspace = makeWorkspaceName();
 
   test.each(assignAccess)('Share workspace %s', async (assign) => {
     await signInWithAccessToken(page);
