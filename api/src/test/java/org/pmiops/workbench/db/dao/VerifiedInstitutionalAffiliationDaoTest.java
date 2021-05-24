@@ -3,8 +3,8 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -29,7 +29,7 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
   private DbInstitution testInst =
       new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testUser = userDao.save(testUser);
     testInst = institutionDao.save(testInst);

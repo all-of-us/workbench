@@ -17,8 +17,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.collections4.ListUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -122,7 +122,7 @@ public class UserControllerTest {
   private static DbAccessTier registeredTier;
   private static DbUser user;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     user = userDao.save(new DbUser());

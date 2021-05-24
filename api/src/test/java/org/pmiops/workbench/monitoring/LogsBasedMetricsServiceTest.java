@@ -23,8 +23,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -63,7 +63,7 @@ public class LogsBasedMetricsServiceTest {
   @Import({LogsBasedMetricServiceImpl.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setup() {
     doReturn(MONITORED_RESOURCE)
         .when(mockStackdriverStatsExporterService)

@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -39,7 +39,7 @@ public class CohortDaoTest extends SpringTest {
   @Import({ReportingTestConfig.class})
   public static class conifg {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     dbWorkspace = new DbWorkspace();

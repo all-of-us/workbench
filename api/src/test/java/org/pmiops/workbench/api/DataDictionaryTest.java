@@ -5,9 +5,9 @@ import static com.google.common.truth.Truth.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierService;
@@ -95,7 +95,7 @@ public class DataDictionaryTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 

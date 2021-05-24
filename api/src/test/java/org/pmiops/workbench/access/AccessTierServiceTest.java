@@ -8,8 +8,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -72,7 +72,7 @@ public class AccessTierServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     user = new DbUser();
     user.setUsername("user");

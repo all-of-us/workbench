@@ -12,8 +12,8 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.storage.Blob;
 import java.time.Clock;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -88,7 +88,7 @@ public class NotebooksServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     dbUser = new DbUser();
     dbUser.setUserId(101L);

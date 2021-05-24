@@ -7,8 +7,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -61,7 +61,7 @@ public class UserRecentResourceServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     user = userDao.save(new DbUser());
 

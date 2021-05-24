@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 
 public class WorkbenchConfigTest {

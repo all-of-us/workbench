@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
@@ -97,7 +97,7 @@ public class DataSetMapperTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbDataset = new DbDataset();
     dbDataset.setVersion(1);

@@ -6,8 +6,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
@@ -35,7 +35,7 @@ public class UserAccessTierDaoTest extends SpringTest {
   private DbAccessTier registeredTier;
   private DbAccessTier controlledTier;
 
-  @Before
+  @BeforeEach
   public void setup() {
     user = new DbUser();
     user.setUserId(100);

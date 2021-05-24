@@ -5,8 +5,8 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
@@ -24,7 +24,7 @@ public class CBDataFilterDaoTest extends SpringTest {
 
   @Autowired private CBDataFilterDao cbDataFilterDao;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dataFilter =
         cbDataFilterDao.save(

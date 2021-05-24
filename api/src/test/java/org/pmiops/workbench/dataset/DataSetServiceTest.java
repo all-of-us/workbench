@@ -34,8 +34,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -135,7 +135,7 @@ public class DataSetServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workspace = workspaceDao.save(new DbWorkspace());
     cohort = cohortDao.save(buildSimpleCohort(workspace));

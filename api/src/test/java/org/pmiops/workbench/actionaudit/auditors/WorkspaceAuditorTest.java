@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -82,7 +82,7 @@ public class WorkspaceAuditorTest {
   @MockBean({UserDao.class, ConceptSetService.class, CohortService.class})
   static class Config {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final ResearchPurpose researchPurpose1 =
         new ResearchPurpose()

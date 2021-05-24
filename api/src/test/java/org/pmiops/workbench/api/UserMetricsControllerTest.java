@@ -16,8 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMapper;
@@ -88,7 +88,7 @@ public class UserMetricsControllerTest {
   @MockBean({Clock.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final DbCdrVersion dbCdrVersion =
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);

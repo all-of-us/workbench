@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
@@ -73,7 +73,7 @@ public class AuthDomainControllerTest extends SpringTest {
   private final FirecloudManagedGroupWithMembers testGroup =
       new FirecloudManagedGroupWithMembers().groupEmail(testGroupEmail);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);

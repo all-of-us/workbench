@@ -6,8 +6,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -33,7 +33,7 @@ public class CdrConfigVOMapperTest {
   private AccessTierVO testTierJson;
   private CdrVersionVO testVersionJson;
 
-  @Before
+  @BeforeEach
   public void setup() {
     testTierJson = new AccessTierVO();
     testTierJson.accessTierId = 5;

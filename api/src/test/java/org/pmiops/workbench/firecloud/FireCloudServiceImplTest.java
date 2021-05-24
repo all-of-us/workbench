@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.util.Arrays;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnit;
@@ -67,7 +67,7 @@ public class FireCloudServiceImplTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";

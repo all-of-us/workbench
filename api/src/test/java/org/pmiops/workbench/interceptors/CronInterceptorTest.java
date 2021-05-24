@@ -6,9 +6,9 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpMethods;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -25,7 +25,7 @@ public class CronInterceptorTest {
 
   private CronInterceptor interceptor;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     interceptor = new CronInterceptor();
   }

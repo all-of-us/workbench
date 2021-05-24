@@ -53,8 +53,8 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
@@ -388,7 +388,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
   private TestMockFactory testMockFactory;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;

@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -76,7 +76,7 @@ public class EgressEventAuditorTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbUser = new DbUser();
     dbUser.setUserId(USER_ID);

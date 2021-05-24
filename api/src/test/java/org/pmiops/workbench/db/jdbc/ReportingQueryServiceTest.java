@@ -18,8 +18,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -95,7 +95,7 @@ public class ReportingQueryServiceTest extends SpringTest {
 
   private DbInstitution dbInstitution;
 
-  @Before
+  @BeforeEach
   public void setup() {
     dbInstitution = createDbInstitution();
   }

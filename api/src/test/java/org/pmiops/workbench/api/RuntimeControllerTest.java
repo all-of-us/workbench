@@ -28,8 +28,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -240,7 +240,7 @@ public class RuntimeControllerTest {
   private GceConfig gceConfig;
   private LinkedTreeMap<String, Object> gceConfigObj;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;

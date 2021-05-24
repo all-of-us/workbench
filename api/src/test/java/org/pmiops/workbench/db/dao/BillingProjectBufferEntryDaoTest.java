@@ -10,8 +10,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
@@ -54,7 +54,7 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private AccessTierDao accessTierDao;
 
-  @Before
+  @BeforeEach
   public void setup() {
     testAccessTier = accessTierDao.save(testAccessTier);
     insertBufferEntriesWithCounts(STATUS_TO_COUNT_INPUT);

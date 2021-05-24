@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
@@ -23,7 +23,7 @@ public class DSLinkingDaoTest extends SpringTest {
   private DbDSLinking dbDSLinking1;
   private DbDSLinking dbDSLinking2;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbDSLinking1 =
         dsLinkingDao.save(

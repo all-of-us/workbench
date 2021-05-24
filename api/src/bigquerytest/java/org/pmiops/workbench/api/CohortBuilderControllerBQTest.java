@@ -15,9 +15,9 @@ import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.access.AccessTierService;
@@ -174,7 +174,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return CB_DATA;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
@@ -373,7 +373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .build());
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     delete(
         drugNode1,

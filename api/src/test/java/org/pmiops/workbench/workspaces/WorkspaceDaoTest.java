@@ -6,7 +6,7 @@ import static org.springframework.test.util.AssertionErrors.fail;
 import java.lang.reflect.Method;
 import java.time.Clock;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessTierDao;

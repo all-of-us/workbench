@@ -14,7 +14,7 @@ import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;

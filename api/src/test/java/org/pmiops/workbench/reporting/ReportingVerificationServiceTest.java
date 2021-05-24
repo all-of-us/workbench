@@ -26,8 +26,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -89,7 +89,7 @@ public class ReportingVerificationServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(ACTUAL_COUNT_QUERY_RESULT).when(mockTableResult).getValues();

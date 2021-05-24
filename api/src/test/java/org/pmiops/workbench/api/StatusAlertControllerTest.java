@@ -5,8 +5,8 @@ import static com.google.common.truth.Truth.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.test.FakeClock;
@@ -36,7 +36,7 @@ public class StatusAlertControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     StatusAlert initialStatusAlert =
         new StatusAlert()

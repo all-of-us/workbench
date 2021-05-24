@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashSet;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -38,7 +38,7 @@ public class CriteriaLookupUtilTest extends SpringTest {
 
   private CriteriaLookupUtil lookupUtil;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     lookupUtil = new CriteriaLookupUtil(cbCriteriaDao);
   }

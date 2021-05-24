@@ -14,8 +14,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Arrays
 import javax.inject.Provider
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
@@ -30,7 +30,7 @@ class ActionAuditServiceTest {
 
     private var actionAuditService: ActionAuditService? = null
 
-    @Before
+    @BeforeEach
     fun setUp() {
         val actionAuditConfig = ActionAuditConfig()
                 .apply { logName = "log_path_1" }

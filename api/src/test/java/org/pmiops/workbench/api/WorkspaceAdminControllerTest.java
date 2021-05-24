@@ -10,8 +10,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -117,7 +117,7 @@ public class WorkspaceAdminControllerTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final TestMockFactory testMockFactory = new TestMockFactory();
 

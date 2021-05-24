@@ -22,9 +22,9 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public class QueryParameterValuesTest {
@@ -36,13 +36,13 @@ public class QueryParameterValuesTest {
   private static final QueryParameterValue TIMESTAMP_QPV =
       QueryParameterValue.timestamp(INSTANT.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
 
-  @Before
+  @BeforeEach
   public void setup() {
     PARAM_MAP.put("foo", QueryParameterValue.int64(99));
     PARAM_MAP.put("bar", QueryParameterValue.string("hooray"));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     PARAM_MAP.clear();
   }

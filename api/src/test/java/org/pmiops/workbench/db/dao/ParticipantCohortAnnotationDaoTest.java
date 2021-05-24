@@ -3,8 +3,8 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
@@ -32,7 +32,7 @@ public class ParticipantCohortAnnotationDaoTest extends SpringTest {
   private long cohortReviewId = 3L;
   private long participantId = 4L;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCohortAnnotationDefinition enumAnnotationDefinition =
         new DbCohortAnnotationDefinition()

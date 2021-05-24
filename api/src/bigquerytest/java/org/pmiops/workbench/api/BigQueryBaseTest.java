@@ -44,7 +44,7 @@ public abstract class BigQueryBaseTest extends SpringTest {
 
   public static final String BASE_PATH = "src/bigquerytest/resources/bigquery/";
 
-  @BeforeAllMethods
+  @BeforeEachAllMethods
   public void beforeAllMethodsSetUp() throws Exception {
     createDataSet(workbenchConfig.bigquery.dataSetId);
     for (String tableName : getTableNames()) {
@@ -53,7 +53,7 @@ public abstract class BigQueryBaseTest extends SpringTest {
     }
   }
 
-  @AfterAllMethods
+  @AfterEachAllMethods
   public void beforeAllMethodsTearDown() throws Exception {
     for (String tableName : getTableNames()) {
       deleteTable(workbenchConfig.bigquery.dataSetId, tableName);

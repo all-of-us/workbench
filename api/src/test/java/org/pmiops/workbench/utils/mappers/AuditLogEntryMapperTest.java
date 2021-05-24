@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AuditAction;

@@ -14,8 +14,8 @@ import java.time.Clock;
 import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -59,7 +59,7 @@ public class RequestTimeMetricInterceptorTest {
   @Import({RequestTimeMetricInterceptor.class})
   public static class Config {}
 
-  @Before
+  @BeforeEach
   public void setup() {
     doReturn(START_INSTANT).when(mockClock).instant();
     doReturn(HttpMethods.GET).when(mockHttpServletRequest).getMethod();

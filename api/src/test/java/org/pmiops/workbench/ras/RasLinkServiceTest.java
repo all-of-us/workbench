@@ -19,8 +19,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Random;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.access.AccessTierService;
@@ -139,7 +139,7 @@ public class RasLinkServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rasLinkService = new RasLinkService(userService, mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);

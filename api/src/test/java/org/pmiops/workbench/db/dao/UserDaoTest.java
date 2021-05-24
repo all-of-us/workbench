@@ -9,8 +9,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
@@ -51,7 +51,7 @@ public class UserDaoTest extends SpringTest {
 
   @Autowired private UserDao userDao;
 
-  @Before
+  @BeforeEach
   public void setup() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
   }

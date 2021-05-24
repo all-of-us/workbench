@@ -3,8 +3,8 @@ package org.pmiops.workbench.captcha;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
@@ -44,7 +44,7 @@ public class CaptchaVerificationServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, ApiException {
     config = WorkbenchConfig.createEmptyConfig();
     config.admin.loginUrl = "hostname";

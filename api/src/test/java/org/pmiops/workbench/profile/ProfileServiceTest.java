@@ -15,8 +15,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.access.AccessTierService;
@@ -140,7 +140,7 @@ public class ProfileServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     loggedInUser = new DbUser();
     loggedInUser.setUserId(1000);

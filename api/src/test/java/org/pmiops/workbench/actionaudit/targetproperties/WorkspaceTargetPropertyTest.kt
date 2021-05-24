@@ -1,8 +1,8 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.model.ResearchPurpose
@@ -16,7 +16,7 @@ class WorkspaceTargetPropertyTest {
     private var workspace1: Workspace? = null
     private var workspace2: Workspace? = null
 
-    @Before
+    @BeforeEach
     fun setUp() {
         val researchPurposeAllFieldsPopulated = ResearchPurpose()
                 .apply { approved = true }

@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -274,7 +274,7 @@ public class CohortsControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testMockFactory = new TestMockFactory();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);

@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -36,7 +36,7 @@ public class CohortMapperTest {
   @MockBean({UserDao.class, Clock.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     sourceClientCohort =
         new Cohort()

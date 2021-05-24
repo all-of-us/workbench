@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -105,7 +105,7 @@ public class UserServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USERNAME);

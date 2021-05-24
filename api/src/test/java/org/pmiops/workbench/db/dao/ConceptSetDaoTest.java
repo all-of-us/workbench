@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -32,7 +32,7 @@ public class ConceptSetDaoTest extends SpringTest {
   @Autowired private WorkspaceDao workspaceDao;
   private DbConceptSet dbConceptSet;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbWorkspace ws = new DbWorkspace();
     ws.setVersion(1);

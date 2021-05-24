@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.time.Instant;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ActionAuditEventTest {
 

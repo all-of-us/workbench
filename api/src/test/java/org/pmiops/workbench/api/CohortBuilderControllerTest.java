@@ -7,8 +7,8 @@ import static org.mockito.Mockito.doReturn;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
@@ -83,7 +83,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Import({CohortBuilderMapperImpl.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);

@@ -2,8 +2,8 @@ package org.pmiops.workbench.cdr.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
@@ -24,7 +24,7 @@ public class DSDataDictionaryDaoTest extends SpringTest {
   private DbDSDataDictionary dbDSDataDictionaryCondition;
   private DbDSDataDictionary dbDSDataDictionaryPerson;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbDSDataDictionaryCondition_ds =
         dsDataDictionaryDao.save(

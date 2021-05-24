@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -68,7 +68,7 @@ public class OfflineAuditControllerTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);

@@ -7,8 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -59,12 +59,12 @@ public abstract class BaseControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     config = loadTestConfig();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     config = null;
   }

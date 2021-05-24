@@ -9,7 +9,7 @@ import com.google.cloud.bigquery.Schema;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 

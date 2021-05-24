@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
@@ -139,7 +139,7 @@ public class WorkspaceAdminServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final TestMockFactory testMockFactory = new TestMockFactory();
 

@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -44,7 +44,7 @@ public class ParticipantCohortStatusDaoTest extends SpringTest {
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
-  @Before
+  @BeforeEach
   public void onSetup() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrDbName("");

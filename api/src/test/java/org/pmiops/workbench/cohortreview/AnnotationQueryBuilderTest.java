@@ -13,8 +13,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -96,7 +96,7 @@ public class AnnotationQueryBuilderTest extends SpringTest {
   private ImmutableMap<String, Object> expectedResult2;
   private List<String> allColumns;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);

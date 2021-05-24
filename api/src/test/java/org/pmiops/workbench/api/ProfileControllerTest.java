@@ -26,9 +26,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.pmiops.workbench.access.AccessTierService;
@@ -227,7 +227,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   @Override
   public void setUp() throws IOException {
     super.setUp();

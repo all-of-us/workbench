@@ -3,7 +3,7 @@ package org.pmiops.workbench.shibboleth;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.shibboleth.api.ShibbolethApi;

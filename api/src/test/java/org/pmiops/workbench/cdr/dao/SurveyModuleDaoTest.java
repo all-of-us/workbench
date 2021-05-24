@@ -3,8 +3,8 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
@@ -21,7 +21,7 @@ public class SurveyModuleDaoTest extends SpringTest {
   @Autowired private SurveyModuleDao surveyModuleDao;
   private DbSurveyModule expectedDbSurveyModule;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     expectedDbSurveyModule =
         surveyModuleDao.save(

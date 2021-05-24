@@ -11,9 +11,9 @@ import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import javax.mail.MessagingException;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -42,7 +42,7 @@ public class MailServiceImplTest {
   @Mock private MandrillMessageStatus msgStatus;
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Before
+  @BeforeEach
   public void setUp() throws ApiException {
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
     msgStatuses.add(msgStatus);

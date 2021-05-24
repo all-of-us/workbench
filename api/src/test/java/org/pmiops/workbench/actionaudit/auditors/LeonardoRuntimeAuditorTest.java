@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -49,7 +49,7 @@ public class LeonardoRuntimeAuditorTest {
   @MockBean(value = {ActionAuditService.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     user1 = new DbUser();
     user1.setUserId(101L);

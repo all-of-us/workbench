@@ -10,9 +10,9 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -80,7 +80,7 @@ public class ElasticFiltersTest extends SpringTest {
 
   private SearchParameter leafParam2;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     // Generate a simple test criteria tree
     // 1
@@ -208,7 +208,7 @@ public class ElasticFiltersTest extends SpringTest {
             .group(false);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     // jdbcTemplate is used to create/insert data into the criteria ancestor table. The codebase
     // currently doesn't have a need to implement a DAO for this table. The @DirtiesContext

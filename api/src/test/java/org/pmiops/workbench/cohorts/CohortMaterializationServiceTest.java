@@ -12,8 +12,8 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
@@ -117,7 +117,7 @@ public class CohortMaterializationServiceTest extends SpringTest {
 
   private DbCohortReview cohortReview;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(DATA_SET_ID);

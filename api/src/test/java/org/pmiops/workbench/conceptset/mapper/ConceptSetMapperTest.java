@@ -5,8 +5,8 @@ import static com.google.common.truth.Truth.assertThat;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -38,7 +38,7 @@ public class ConceptSetMapperTest {
   @MockBean({ConceptBigQueryService.class, Clock.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Timestamp now = new Timestamp(System.currentTimeMillis());
     DbUser creator = new DbUser();

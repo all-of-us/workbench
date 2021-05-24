@@ -17,8 +17,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -120,7 +120,7 @@ public class WorkspaceServiceTest {
 
   private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     doReturn(NOW).when(mockClock).instant();
 

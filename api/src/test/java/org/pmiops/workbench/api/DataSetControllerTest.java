@@ -44,9 +44,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -304,7 +304,7 @@ public class DataSetControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     doAnswer(
             (invocation) -> {

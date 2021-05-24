@@ -7,8 +7,8 @@ import static org.mockito.Mockito.mock;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
@@ -19,7 +19,7 @@ public class CohortFactoryTest {
 
   private CohortFactory cohortFactory;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     cohortFactory = new CohortFactoryImpl(Clock.systemUTC());
   }

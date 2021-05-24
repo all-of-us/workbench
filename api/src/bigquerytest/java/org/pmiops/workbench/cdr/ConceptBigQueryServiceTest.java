@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
@@ -26,7 +26,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

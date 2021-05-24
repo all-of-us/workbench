@@ -8,8 +8,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -88,7 +88,7 @@ public class WorkspaceMapperTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     sourceFirecloudWorkspace =
         new FirecloudWorkspace()

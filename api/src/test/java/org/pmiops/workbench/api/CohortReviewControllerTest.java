@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -228,7 +228,7 @@ public class CohortReviewControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     user = new DbUser();
     user.setUsername("bob@gmail.com");

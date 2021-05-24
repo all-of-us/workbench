@@ -2,8 +2,8 @@ package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -40,7 +40,7 @@ public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
 
   private Institution testInstitution;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testInstitution =
         institutionService.createInstitution(

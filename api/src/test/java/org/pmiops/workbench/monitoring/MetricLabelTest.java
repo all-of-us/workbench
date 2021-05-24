@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.monitoring.labels.MetricLabelBase;
 
 public class MetricLabelTest {

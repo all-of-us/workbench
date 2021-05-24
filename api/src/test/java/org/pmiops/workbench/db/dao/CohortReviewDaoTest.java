@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -30,7 +30,7 @@ public class CohortReviewDaoTest extends SpringTest {
   private DbCohortReview cohortReview;
   private long cohortId;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCohort cohort = new DbCohort();
     DbWorkspace workspace = new DbWorkspace();

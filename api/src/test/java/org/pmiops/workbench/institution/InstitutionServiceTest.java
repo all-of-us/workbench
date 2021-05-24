@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -65,7 +65,7 @@ public class InstitutionServiceTest extends SpringTest {
           .emailAddresses(Collections.emptyList())
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
 
-  @Before
+  @BeforeEach
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);

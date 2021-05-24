@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
@@ -121,7 +121,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     return result;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

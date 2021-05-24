@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -98,7 +98,7 @@ public class GaugeRecorderServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     doReturn(Collections.singleton(WORKSPACE_MEASUREMENT_BUNDLE))
         .when(mockWorkspaceServiceImpl)

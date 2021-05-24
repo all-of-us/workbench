@@ -3,8 +3,8 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
@@ -23,7 +23,7 @@ public class CriteriaMenuDaoTest extends SpringTest {
   private DbCriteriaMenu dbCriteriaMenuParent1;
   private DbCriteriaMenu dbCriteriaMenuChild;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbCriteriaMenuParent =
         criteriaMenuDao.save(

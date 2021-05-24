@@ -1,7 +1,7 @@
 package org.pmiops.workbench.exceptions;
 
 import java.net.SocketTimeoutException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.notebooks.ApiException;
 
 public class ExceptionUtilsTest {

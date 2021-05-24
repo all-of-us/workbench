@@ -2,8 +2,8 @@ package org.pmiops.workbench.actionaudit.targetproperties
 
 import com.google.common.truth.Truth.assertThat
 import kotlin.reflect.KClass
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test
 import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.Workspace
@@ -12,7 +12,7 @@ class TargetPropertyExtractorTest {
     private var workspace: Workspace? = null
     private var researchPurpose1: ResearchPurpose? = null
 
-    @Before
+    @BeforeEach
     fun setUp() {
         researchPurpose1 = ResearchPurpose()
             .apply { intendedStudy = "stubbed toes" }

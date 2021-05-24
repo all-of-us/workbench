@@ -4,8 +4,8 @@ import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -37,12 +37,12 @@ public abstract class BaseIntegrationTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     config = loadTestConfig();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     config = null;
   }

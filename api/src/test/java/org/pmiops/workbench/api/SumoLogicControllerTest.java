@@ -12,8 +12,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -59,7 +59,7 @@ public class SumoLogicControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws JsonProcessingException {
     config = WorkbenchConfig.createEmptyConfig();
 

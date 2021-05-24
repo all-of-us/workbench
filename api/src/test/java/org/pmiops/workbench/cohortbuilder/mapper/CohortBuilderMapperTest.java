@@ -2,7 +2,7 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;

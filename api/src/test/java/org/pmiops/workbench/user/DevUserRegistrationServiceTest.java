@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.db.dao.UserService;
@@ -42,7 +42,7 @@ public class DevUserRegistrationServiceTest {
   @Import({DevUserRegistrationServiceImpl.class, VerifiedInstitutionalAffiliationMapperImpl.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     userInfo = new Userinfoplus().setEmail("gjordan@fake-research-aou.org");
   }

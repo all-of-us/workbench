@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
@@ -73,7 +73,7 @@ public class OfflineUserControllerTest extends SpringTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockUserService.getAllUsersExcludingDisabled()).thenReturn(getUsers());
     when(mockUserService.getAllUsers()).thenReturn(getUsers());

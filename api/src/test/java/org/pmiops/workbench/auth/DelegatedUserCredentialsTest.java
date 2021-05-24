@@ -28,8 +28,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -68,7 +68,7 @@ public class DelegatedUserCredentialsTest {
   private DelegatedUserCredentials delegatedCredentials;
   private FakeClock fakeClock;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     mockTokenServerTransport = new MockTokenServerTransport();
     fakeClock = new FakeClock(Instant.ofEpochSecond(12345));

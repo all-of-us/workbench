@@ -19,8 +19,8 @@ import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.Tagger;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -57,7 +57,7 @@ public class MonitoringServiceTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setup() {
     initMockMeasureMap();
 

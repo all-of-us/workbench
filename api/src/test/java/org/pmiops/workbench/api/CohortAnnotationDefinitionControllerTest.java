@@ -9,8 +9,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -91,7 +91,7 @@ public class CohortAnnotationDefinitionControllerTest {
   @MockBean({Clock.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     CohortReviewService cohortReviewService =
         new CohortReviewServiceImpl(
