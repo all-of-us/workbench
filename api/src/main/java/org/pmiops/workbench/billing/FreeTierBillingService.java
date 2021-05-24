@@ -84,25 +84,16 @@ public class FreeTierBillingService {
    * passing thresholds or exceeding limits
    */
   public void checkFreeTierBillingUsage() {
-    // Get existing DB cost information.
-    final List<WorkspaceCostView> dbCost = workspaceDao.getWorkspaceCostViews();
-
-    // Grab BigQuery cost data.
-    final Map<String, Long> workspaceByProject =
-        dbCost.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
-    final Map<Long, Double> liveCostByWorkspace =
-        getFreeTierWorkspaceCostsFromBQ(workspaceByProject);
-
     // Generate before/after workspace costs, find delta, apply updates
+    final List<WorkspaceCostView> dbCost = workspaceDao.getWorkspaceCostViews();
     final Map<Long, Double> dbCostByWorkspace =
         dbCost.stream()
             .collect(
                 Collectors.toMap(
                     WorkspaceCostView::getWorkspaceId,
                     v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
+    final Map<Long, Double> liveCostByWorkspace = getFreeTierWorkspaceCostsFromBQ(dbCost);
+
     liveCostByWorkspace.keySet().stream()
         .filter(id -> compareCosts(dbCostByWorkspace.get(id), liveCostByWorkspace.get(id)) != 0)
         .map(id -> workspaceDao.findById(id).get())
@@ -111,13 +102,7 @@ public class FreeTierBillingService {
                 workspaceFreeTierUsageDao.updateCost(
                     w, liveCostByWorkspace.get(w.getWorkspaceId())));
 
-    // Generate before/after user sums
-    final Map<Long, Long> creatorByWorkspace =
-        dbCost.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceCostView::getWorkspaceId, WorkspaceCostView::getCreatorId));
-
+    // Generate before/after free tier costs by user
     final Map<Long, Double> dbCostByCreator =
         dbCost.stream()
             .collect(
@@ -126,6 +111,11 @@ public class FreeTierBillingService {
                     Collectors.summingDouble(
                         v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0))));
 
+    final Map<Long, Long> creatorByWorkspace =
+        dbCost.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceCostView::getWorkspaceId, WorkspaceCostView::getCreatorId));
     final Map<Long, Double> liveCostByCreator =
         liveCostByWorkspace.entrySet().stream()
             .collect(
@@ -136,7 +126,6 @@ public class FreeTierBillingService {
     // collect previously-expired and currently-expired users
     // for users who are expired: alert only if they were not expired previously
     // for users who are not yet expired: check for intermediate thresholds and alert
-
     final Set<Long> usersWithChangedCosts =
         liveCostByCreator.keySet().stream()
             .filter(u -> compareCosts(dbCostByCreator.get(u), liveCostByCreator.get(u)) != 0)
@@ -279,7 +268,12 @@ public class FreeTierBillingService {
     return workspaceDao.findAllCreatorsByBillingStatus(BillingStatus.INACTIVE);
   }
 
-  private Map<Long, Double> getFreeTierWorkspaceCostsFromBQ(Map<String, Long> workspaceByProject) {
+  private Map<Long, Double> getFreeTierWorkspaceCostsFromBQ(List<WorkspaceCostView> dbCost) {
+    final Map<String, Long> workspaceByProject =
+        dbCost.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceCostView::getGoogleProject, WorkspaceCostView::getWorkspaceId));
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT project.id, SUM(cost) cost FROM `"
