@@ -94,13 +94,19 @@ public class FreeTierBillingService {
                     v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
     final Map<Long, Double> liveCostByWorkspace = getFreeTierWorkspaceCostsFromBQ(dbCost);
 
-    liveCostByWorkspace.keySet().stream()
-        .filter(id -> compareCosts(dbCostByWorkspace.get(id), liveCostByWorkspace.get(id)) != 0)
-        .map(id -> workspaceDao.findById(id).get())
-        .forEach(
-            w ->
-                workspaceFreeTierUsageDao.updateCost(
-                    w, liveCostByWorkspace.get(w.getWorkspaceId())));
+    int workspaceDiffCount = 0;
+    for (long id : liveCostByWorkspace.keySet()) {
+      if (compareCosts(dbCostByWorkspace.get(id), liveCostByWorkspace.get(id)) == 0) {
+        continue;
+      }
+      workspaceFreeTierUsageDao.updateCost(
+          workspaceDao.findById(id).get(), liveCostByWorkspace.get(id));
+      workspaceDiffCount++;
+    }
+    logger.info(
+        String.format(
+            "found changed cost information for %d/%d workspaces",
+            workspaceDiffCount, dbCostByWorkspace.size()));
 
     // Generate before/after free tier costs by user
     final Map<Long, Double> dbCostByCreator =
@@ -148,6 +154,10 @@ public class FreeTierBillingService {
       }
       updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
     }
+    logger.info(
+        String.format(
+            "%d newly expired users of %d with updated costs of %d workspace creators",
+            newlyExpiredUsers.size(), usersWithChangedCosts.size(), dbCostByCreator.size()));
 
     final Set<DbUser> usersToThresholdCheck =
         Sets.difference(
