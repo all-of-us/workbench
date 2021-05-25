@@ -84,29 +84,10 @@ public class FreeTierBillingService {
    * passing thresholds or exceeding limits
    */
   public void checkFreeTierBillingUsage() {
-    // Generate before/after workspace costs, find delta, apply updates
+    // Generate before/after workspace costs, apply updates if any
     final List<WorkspaceCostView> dbCost = workspaceDao.getWorkspaceCostViews();
-    final Map<Long, Double> dbCostByWorkspace =
-        dbCost.stream()
-            .collect(
-                Collectors.toMap(
-                    WorkspaceCostView::getWorkspaceId,
-                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
     final Map<Long, Double> liveCostByWorkspace = getFreeTierWorkspaceCostsFromBQ(dbCost);
-
-    int workspaceDiffCount = 0;
-    for (long id : liveCostByWorkspace.keySet()) {
-      if (compareCosts(dbCostByWorkspace.get(id), liveCostByWorkspace.get(id)) == 0) {
-        continue;
-      }
-      workspaceFreeTierUsageDao.updateCost(
-          workspaceDao.findById(id).get(), liveCostByWorkspace.get(id));
-      workspaceDiffCount++;
-    }
-    logger.info(
-        String.format(
-            "found changed cost information for %d/%d workspaces",
-            workspaceDiffCount, dbCostByWorkspace.size()));
+    updateWorkspaceFreeTierUsage(dbCost, liveCostByWorkspace);
 
     // Generate before/after free tier costs by user
     final Map<Long, Double> dbCostByCreator =
@@ -191,6 +172,29 @@ public class FreeTierBillingService {
     return workspace
         .getBillingAccountName()
         .equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+  }
+
+  private void updateWorkspaceFreeTierUsage(
+      List<WorkspaceCostView> dbCost, Map<Long, Double> liveCostByWorkspace) {
+    final Map<Long, Double> dbCostByWorkspace =
+        dbCost.stream()
+            .collect(
+                Collectors.toMap(
+                    WorkspaceCostView::getWorkspaceId,
+                    v -> Optional.ofNullable(v.getFreeTierCost()).orElse(0.0)));
+    int workspaceDiffCount = 0;
+    for (long id : liveCostByWorkspace.keySet()) {
+      if (compareCosts(dbCostByWorkspace.get(id), liveCostByWorkspace.get(id)) == 0) {
+        continue;
+      }
+      workspaceFreeTierUsageDao.updateCost(
+          workspaceDao.findById(id).get(), liveCostByWorkspace.get(id));
+      workspaceDiffCount++;
+    }
+    logger.info(
+        String.format(
+            "found changed cost information for %d/%d workspaces",
+            workspaceDiffCount, dbCostByWorkspace.size()));
   }
 
   private void updateFreeTierWorkspacesStatus(final DbUser user, final BillingStatus status) {
