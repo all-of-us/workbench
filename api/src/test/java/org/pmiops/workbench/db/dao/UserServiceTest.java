@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -69,6 +71,7 @@ public class UserServiceTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private MailService mailService;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
@@ -508,5 +511,11 @@ public class UserServiceTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail() {
+    userService.maybeSendAccessExpirationEmail(providedDbUser);
+    verifyZeroInteractions(mailService);
   }
 }

@@ -172,6 +172,17 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining)
+      throws MessagingException {
+    // TODO
+  }
+
+  @Override
+  public void alertUserRegisteredTierExpiration(final DbUser user) throws MessagingException {
+    // TODO
+  }
+
+  @Override
   public void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
       throws MessagingException {
 
