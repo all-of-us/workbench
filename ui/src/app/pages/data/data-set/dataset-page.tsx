@@ -1110,7 +1110,6 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     onClickExport() {
       this.setState(state => {
         return {
-          ...state,
           modalState: state.selectedDomains.has(Domain.WHOLEGENOMEVARIANT) ? ModalState.Extract : ModalState.Export
         };
       });
