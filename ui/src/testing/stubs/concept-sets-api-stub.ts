@@ -69,7 +69,7 @@ export class ConceptStubVariables {
       isStandard: true,
       childCount: 1,
       parentCount: 0
-    },
+    }
   ];
 }
 
@@ -129,6 +129,12 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         description: 'Mocked for tests',
         domain: Domain.OBSERVATION,
         survey: Surveys.LIFESTYLE,
+        lastModifiedTime: new Date().getTime() - 2000
+      }, {
+        id: 351,
+        name: 'Mock WGS',
+        description: 'Mocked for tests',
+        domain: Domain.WHOLEGENOMEVARIANT,
         lastModifiedTime: new Date().getTime() - 2000
       }
     ];

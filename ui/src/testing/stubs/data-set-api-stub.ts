@@ -28,7 +28,7 @@ export const stubDataSet = (): DataSet => ({
 
 export class DataSetApiStub extends DataSetApi {
   public codePreview;
-
+  public getDatasetMock = stubDataSet();
   public extractionJobs;
 
   static stubDataSets(): DataSet[] {
@@ -38,6 +38,10 @@ export class DataSetApiStub extends DataSetApi {
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
     this.extractionJobs = [];
+  }
+
+  getDataSet(workspaceNamespace: string, workspaceId: string, dataSetId: number, options?: any): Promise<DataSet> {
+    return new Promise<DataSet>(resolve => resolve(this.getDatasetMock));
   }
 
   generateCode(workspaceNamespace: string,
