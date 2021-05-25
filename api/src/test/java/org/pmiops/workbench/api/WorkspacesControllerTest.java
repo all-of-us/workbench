@@ -1315,6 +1315,9 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .createAllOfUsBillingProject(
             v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+
+    // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
+    sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
     assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
   }
 
@@ -1425,10 +1428,13 @@ public class WorkspacesControllerTest extends SpringTest {
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
   }
 
+  // DbWorkspace stores several fields as Sets, but Workspace sees them as Lists of arbitrary order.
+  // Population Details is the only field in this test where we store multiple entries.  Because we
+  // want to use the basic equality test, we need to enforce a consistent ordering.
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
-    final List<SpecificPopulationEnum> populateionDetailsSorted =
+    final List<SpecificPopulationEnum> populationDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
-    researchPurpose.setPopulationDetails(populateionDetailsSorted);
+    researchPurpose.setPopulationDetails(populationDetailsSorted);
   }
 
   private UserRole buildUserRole(String email, WorkspaceAccessLevel workspaceAccessLevel) {
