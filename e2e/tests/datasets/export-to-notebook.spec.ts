@@ -1,13 +1,13 @@
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity, Sex} from 'app/page/cohort-participants-group';
-import {Language, LinkText, MenuOption, ResourceCard} from 'app/text-labels';
+import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
+import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
@@ -60,7 +60,7 @@ describe('Export to notebook tests', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
-    const analysisPage = await notebookPreviewPage.goAnalysisPage()
+    const analysisPage = await notebookPreviewPage.goAnalysisPage();
 
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
