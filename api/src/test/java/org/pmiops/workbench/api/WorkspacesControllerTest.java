@@ -1315,6 +1315,9 @@ public class WorkspacesControllerTest extends SpringTest {
     verify(fireCloudService)
         .createAllOfUsBillingProject(
             v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+
+    // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
+    sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
     assertThat(v2ClonedWorkspace).isEqualTo(clonedWorkspace);
   }
 
