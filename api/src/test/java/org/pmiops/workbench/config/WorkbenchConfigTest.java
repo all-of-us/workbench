@@ -5,13 +5,13 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 
-public class WorkbenchConfigTest {
+class WorkbenchConfigTest {
 
   @Test
-  public void testUnsafeEndpointsDisabledInProd() throws FileNotFoundException {
+void testUnsafeEndpointsDisabledInProd() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_prod.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
     assertThat(workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData).isFalse();
@@ -19,7 +19,7 @@ public class WorkbenchConfigTest {
   }
 
   @Test
-  public void testUnsafeEndpointsDisabledInStable() throws FileNotFoundException {
+void testUnsafeEndpointsDisabledInStable() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_stable.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
     assertThat(workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData).isFalse();
@@ -27,7 +27,7 @@ public class WorkbenchConfigTest {
   }
 
   @Test
-  public void testUnsafeEndpointsDisabledInStaging() throws FileNotFoundException {
+void testUnsafeEndpointsDisabledInStaging() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_staging.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
     assertThat(workbenchConfig.access.unsafeAllowUserCreationFromGSuiteData).isFalse();

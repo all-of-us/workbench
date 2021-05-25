@@ -14,17 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.Domain;
 
-public class StorageEnumsTest {
+class StorageEnumsTest {
   private final Object INDICATES_STATIC_METHOD = null;
 
   final List<Field> allFields = Arrays.asList(DbStorageEnums.class.getDeclaredFields());
   final List<Method> allMethods = Arrays.asList(DbStorageEnums.class.getDeclaredMethods());
 
   @Test
-  public void test_duplicateFieldNames() {
+void test_duplicateFieldNames() {
     Set<String> seenFieldNames = Sets.newHashSet();
     for (Field field : allFields) {
       String fieldName = field.getName();
@@ -34,7 +34,7 @@ public class StorageEnumsTest {
   }
 
   @Test
-  public void test_duplicateMethodNames() {
+void test_duplicateMethodNames() {
     Set<String> seenMethodNames = Sets.newHashSet();
     for (Method method : allMethods) {
       String methodName = method.getName();
@@ -51,7 +51,7 @@ public class StorageEnumsTest {
   // special-case test for domain ID round trip
 
   @Test
-  public void test_domainId() {
+void test_domainId() {
     for (Domain domainValue : Domain.values()) {
       String storageValue = DbStorageEnums.domainToDomainId(domainValue);
       assertWithMessage("unmapped enum value: " + domainValue).that(storageValue).isNotNull();
@@ -60,7 +60,7 @@ public class StorageEnumsTest {
   }
 
   @Test
-  public void test_noMissingMapEntries() throws InvocationTargetException, IllegalAccessException {
+void test_noMissingMapEntries() throws InvocationTargetException, IllegalAccessException {
     // e.g. public static Short reviewStatusToStorage(ReviewStatus s)
     final Map<Class, Method> enumClassToStorageMethod =
         allMethods.stream()

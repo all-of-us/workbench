@@ -1,23 +1,23 @@
 package org.pmiops.workbench.db;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class LiquibaseTest {
+class LiquibaseTest {
 
   List<String> whitelist = Arrays.asList("db.changelog-master.xml");
 
   @Test
-  public void allChangeLogFilesAreIndexed() throws Exception {
+void allChangeLogFilesAreIndexed() throws Exception {
     List<String> indexedChangeLogs = getIndexedChangeLogs();
     for (File f : new File("db/changelog").listFiles()) {
       if (!whitelist.contains(f.getName()) && !indexedChangeLogs.contains(f.getName())) {

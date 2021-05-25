@@ -10,9 +10,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RandomizeVcfTest {
+class RandomizeVcfTest {
   private static final VCFFileReader reader =
       new VCFFileReader(new File("src/test/resources/NA12878_204126160130_R01C01.toy.vcf.gz"));
   private static final Random random = new Random(0);
@@ -22,7 +22,7 @@ public class RandomizeVcfTest {
   private static final RandomizeVcf randomizeVcf = new RandomizeVcf(sampleNames, random);
 
   @Test
-  public void testRandomizeVariant() {
+void testRandomizeVariant() {
     VariantContext randomizedVariant = randomizeVcf.randomizeVariant(variantContext);
     // For each sample/GT in the variant...
     // For each allele in the genotype...
@@ -43,7 +43,7 @@ public class RandomizeVcfTest {
   }
 
   @Test
-  public void testRandomizeAlleles() {
+void testRandomizeAlleles() {
     List<Allele> alleles = randomizeVcf.randomizeAlleles(variantContext);
     assertThat(alleles.size()).isEqualTo(2); // humans ought to be diploid.
     alleles.forEach(allele -> assertThat(variantContext.getAlleles()).contains(allele));

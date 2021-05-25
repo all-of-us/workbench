@@ -7,25 +7,25 @@ import static org.mockito.Mockito.mock;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReviewStatus;
 
-public class CohortFactoryTest {
+class CohortFactoryTest {
 
   private CohortFactory cohortFactory;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+void setUp() {
     cohortFactory = new CohortFactoryImpl(Clock.systemUTC());
   }
 
   @Test
-  public void createCohort() {
+void createCohort() {
     org.pmiops.workbench.model.Cohort apiCohort = new org.pmiops.workbench.model.Cohort();
     apiCohort.setDescription("desc");
     apiCohort.setName("name");
@@ -47,7 +47,7 @@ public class CohortFactoryTest {
   }
 
   @Test
-  public void duplicateCohort() {
+void duplicateCohort() {
     DbCohort originalCohort = new DbCohort();
     originalCohort.setDescription("desc");
     originalCohort.setName("name");
@@ -71,7 +71,7 @@ public class CohortFactoryTest {
   }
 
   @Test
-  public void duplicateCohortReview() {
+void duplicateCohortReview() {
     Timestamp now = new Timestamp(Clock.systemUTC().millis());
 
     DbCohortReview originalCohortReview = new DbCohortReview();

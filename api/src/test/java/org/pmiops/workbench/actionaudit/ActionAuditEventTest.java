@@ -3,9 +3,10 @@ package org.pmiops.workbench.actionaudit;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.time.Instant;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ActionAuditEventTest {
+class ActionAuditEventTest {
 
   private static final String ACTION_ID = "foo";
   private static final long USER_ID = 333L;
@@ -14,13 +15,15 @@ public class ActionAuditEventTest {
   private static final String NEW_VALUE = "Fred";
   private static final long TIMESTAMP = Instant.parse("2007-01-03T00:00:00.00Z").toEpochMilli();
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testActionAuditEventBuilder_throwsOnMissingValues() {
+  @Test
+void testActionAuditEventBuilder_throwsOnMissingValues() {
+    assertThrows(IllegalArgumentException.class,()->{
     ActionAuditEvent.builder().build();
+  });
   }
 
   @Test
-  public void testActionAuditEventBuilder_constructsEvent() {
+void testActionAuditEventBuilder_constructsEvent() {
     ActionAuditEvent event =
         ActionAuditEvent.builder()
             .timestamp(TIMESTAMP)
