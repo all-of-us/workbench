@@ -14,8 +14,8 @@ import CohortSaveAsModal from 'app/modal/cohort-save-as-modal';
 import { getPropValue } from 'utils/element-utils';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import WorkspaceDataPage from './workspace-data-page';
+import faker from 'faker';
 
-const faker = require('faker/locale/en_US');
 const PageTitle = 'Build Cohort Criteria';
 
 export enum FieldSelector {
