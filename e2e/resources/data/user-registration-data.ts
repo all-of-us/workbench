@@ -1,4 +1,4 @@
-const faker = require('faker/locale/en_US');
+import faker from 'faker';
 
 const newUserName = `aoutestuser${Math.floor(Math.random() * 1000)}${Math.floor(Date.now() / 1000)}`;
 

@@ -1,4 +1,4 @@
-const faker = require('faker/locale/en_US');
+import faker from 'faker';
 
 /**
  * Get a fake user information.
