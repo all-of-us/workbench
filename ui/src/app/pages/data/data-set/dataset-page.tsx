@@ -464,7 +464,7 @@ interface State {
   savingDataset: boolean;
 }
 
-export const DataSetComponent = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
+export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {

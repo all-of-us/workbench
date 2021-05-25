@@ -35,7 +35,7 @@ import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {DataComponent} from './pages/data/data-component';
-import {DataSetComponent} from './pages/data/data-set/data-set-component';
+import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -67,7 +67,7 @@ const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataComponentPage = withRouteData(DataComponent);
-const DataSetComponentPage = withRouteData(DataSetComponent);
+const DataSetComponentPage = withRouteData(DatasetPage);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const DetailPagePage = withRouteData(DetailPage);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
