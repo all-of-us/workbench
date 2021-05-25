@@ -1428,9 +1428,9 @@ public class WorkspacesControllerTest extends SpringTest {
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
   }
 
-  // DbWorkspace stores several fields as Sets and Workspaces sees them as Lists.
-  // In this test, we only have multiple entries for Population Details, so we need to enforce
-  // a consistent ordering.
+  // DbWorkspace stores several fields as Sets, but Workspace sees them as Lists of arbitrary order.
+  // Population Details is the only field in this test where we store multiple entries.  Because we
+  // want to use the basic equality test, we need to enforce a consistent ordering.
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
     final List<SpecificPopulationEnum> populationDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
