@@ -39,25 +39,25 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     return notebookPage;
   }
 
+  async getFormattedCode(): Promise<string[]> {
+    const css = '#notebook-container pre';
+    await this.waitForCssSelector(css);
+    const textContents = await this.findNotebookIframe().then((frame) => {
+      return frame.$$(css);
+    });
+    const arr: string[] = [];
+    for (const textContent of textContents) {
+      arr.push(await getPropValue<string>(textContent, 'textContent'));
+    }
+    return arr;
+  }
+
   getEditLink(): Link {
     return new Link(this.page, Selector.editLink);
   }
 
   getRunPlaygroundModeLink(): Link {
     return new Link(this.page, Selector.runPlaygroundModeLink);
-  }
-
-  async getFormattedCode(): Promise<string[]> {
-    const css = '#notebook-container pre';
-    await this.waitForCssSelector(css);
-    const contents = await this.findNotebookIframe().then((frame) => {
-      return frame.$$(css);
-    });
-    const arr: string[] = [];
-    for (const content of contents) {
-      arr.push(await getPropValue<string>(content, 'textContent'));
-    }
-    return arr;
   }
 
   /**

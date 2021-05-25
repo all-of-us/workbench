@@ -25,7 +25,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
   const pyCode = 'print(1+1)';
   const pyAnswer = 2;
 
-  test('Share to workspace READER', async () => {
+  test('Share notebook to workspace READER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
@@ -143,7 +143,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
   });
 
-  test('Workspace READER clone workspace to edit copy of notebook', async () => {
+  test('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
     await signIn(page, config.readerUserName, config.userPassword);
 
