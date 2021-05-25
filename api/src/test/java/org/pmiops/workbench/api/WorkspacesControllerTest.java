@@ -1428,10 +1428,13 @@ public class WorkspacesControllerTest extends SpringTest {
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
   }
 
+  // DbWorkspace stores several fields as Sets and Workspaces sees them as Lists.
+  // In this test, we only have multiple entries for Population Details, so we need to enforce
+  // a consistent ordering.
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
-    final List<SpecificPopulationEnum> populateionDetailsSorted =
+    final List<SpecificPopulationEnum> populationDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
-    researchPurpose.setPopulationDetails(populateionDetailsSorted);
+    researchPurpose.setPopulationDetails(populationDetailsSorted);
   }
 
   private UserRole buildUserRole(String email, WorkspaceAccessLevel workspaceAccessLevel) {
