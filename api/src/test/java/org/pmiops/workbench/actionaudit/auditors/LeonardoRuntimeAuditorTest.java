@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
   private static final long Y2K_EPOCH_MILLIS =

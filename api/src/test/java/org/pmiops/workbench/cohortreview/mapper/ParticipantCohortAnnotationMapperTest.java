@@ -15,7 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class ParticipantCohortAnnotationMapperTest {
 
   @Autowired private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;

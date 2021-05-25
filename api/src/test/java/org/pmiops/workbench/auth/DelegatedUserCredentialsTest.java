@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class DelegatedUserCredentialsTest {
 
   static final String USER_EMAIL = "john.doe@researchallofus.org";

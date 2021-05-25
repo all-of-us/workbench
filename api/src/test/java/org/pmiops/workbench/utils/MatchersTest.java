@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class MatchersTest {
 
   private static final Pattern SINGLE_GROUP_PATTERN = Pattern.compile("abcd(?<next>[efg])");

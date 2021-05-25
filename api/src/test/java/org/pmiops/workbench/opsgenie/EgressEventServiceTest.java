@@ -53,7 +53,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class EgressEventServiceTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");

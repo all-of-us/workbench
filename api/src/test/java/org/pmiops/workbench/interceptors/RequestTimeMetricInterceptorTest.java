@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class RequestTimeMetricInterceptorTest {
 
   private static final Instant START_INSTANT = Instant.parse("2007-01-03T00:00:00.00Z");

@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class GaugeRecorderServiceTest {
 
   private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =

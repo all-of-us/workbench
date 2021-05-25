@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class OfflineRuntimeControllerTest {
   private static final Instant NOW = Instant.parse("1988-12-26T00:00:00Z");
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());

@@ -56,7 +56,7 @@ class FakeController {
   public void handle() {}
 }
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class AuthInterceptorTest {
 
   private static final long USER_ID = 123L;

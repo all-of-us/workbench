@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @Import({
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
