@@ -138,7 +138,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   getSaveButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Save });
+    return Button.findByName(this.page, { name: LinkText.SaveDataset });
   }
 
   getAnalyzeButton(): Button {
