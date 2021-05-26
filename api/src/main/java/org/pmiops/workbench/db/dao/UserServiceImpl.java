@@ -254,6 +254,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
 
+    // IMPORTANT: do not use this method as the sole method of determining access compliance!
+    // We must ALSO confirm module completion.
+    // Modules which are not complete are also "not expired"
     public boolean hasExpired() {
       final Timestamp now = new Timestamp(clock.millis());
       return getExpiration().map(x -> x.before(now)).orElse(false);
@@ -320,6 +323,27 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
   }
 
+  // these 2 modules will not be checked at all until we flip the feature flag
+
+  private boolean isProfileConfirmationCompliant(DbUser user) {
+    if (!configProvider.get().access.enableAccessRenewal) {
+      return true;
+    }
+
+    final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
+    return profileTimes.isComplete() && !profileTimes.hasExpired();
+  }
+
+  private boolean isPublicationConfirmationCompliant(DbUser user) {
+    if (!configProvider.get().access.enableAccessRenewal) {
+      return true;
+    }
+
+    final ModuleTimes publicationTimes =
+        new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
+    return publicationTimes.isComplete() && !publicationTimes.hasExpired();
+  }
+
   private boolean shouldUserBeRegistered(DbUser user) {
     // beta access bypass and 2FA do not need to be checked for annual renewal
     boolean betaAccessGranted =
@@ -333,6 +357,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
+        && isPublicationConfirmationCompliant(user)
+        && isProfileConfirmationCompliant(user)
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
