@@ -47,14 +47,6 @@ export const updateGenomicExtractionStore = (workspaceNamespace: string, extract
   });
 };
 
-export const registerGenomicExtraction = (workspaceNamespace: string, extraction: GenomicExtractionJob) => {
-  if (genomicExtractionStore.get()[workspaceNamespace]) {
-    updateGenomicExtractionStore(workspaceNamespace, fp.concat(genomicExtractionStore.get()[workspaceNamespace], extraction));
-  } else {
-    updateGenomicExtractionStore(workspaceNamespace, [extraction]);
-  }
-};
-
 export interface ProfileStore {
   profile?: Profile;
   load: Function;
