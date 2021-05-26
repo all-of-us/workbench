@@ -1,7 +1,14 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  ConfigResponse,
+  GenomicExtractionJob,
+  Profile,
+  Runtime,
+} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
@@ -26,6 +33,27 @@ interface AuthStore {
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
 export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
+
+export interface GenomicExtractionStore {
+  [workspaceNamespace: string]: GenomicExtractionJob[]
+}
+
+export const genomicExtractionStore = atom<GenomicExtractionStore>({});
+
+export const updateGenomicExtractionStore = (workspaceNamespace: string, extractions: GenomicExtractionJob[]) => {
+  genomicExtractionStore.set({
+    ...genomicExtractionStore.get(),
+    [workspaceNamespace]: extractions
+  });
+}
+
+export const registerGenomicExtraction = (workspaceNamespace: string, extraction: GenomicExtractionJob) => {
+  if (genomicExtractionStore.get()[workspaceNamespace]) {
+    updateGenomicExtractionStore(workspaceNamespace, fp.concat(genomicExtractionStore.get()[workspaceNamespace], extraction));
+  } else {
+    updateGenomicExtractionStore(workspaceNamespace, [extraction]);
+  }
+}
 
 export interface ProfileStore {
   profile?: Profile;

@@ -275,6 +275,7 @@ public class GenomicExtractionService {
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     dbSubmission.setTerraSubmissionDate(
         CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
+    dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
@@ -286,7 +287,7 @@ public class GenomicExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
+    return genomicExtractionMapper.toApi(dbSubmission);
   }
 
   public void abortGenomicExtractionJob(DbWorkspace dbWorkspace, String jobId) throws ApiException {
