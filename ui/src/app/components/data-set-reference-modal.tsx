@@ -48,7 +48,7 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
   render() {
     const {referencedResource, dataSets, onCancel} = this.props;
 
-    const resourceName = fp.startCase(getDisplayName(referencedResource));
+    const resourceName = getDisplayName(referencedResource);
     const resourceElem = <span style={styles.resource}>{resourceName}</span>;
     const resourceWithTypeElem = <span>{getTypeString(referencedResource)} {resourceElem}</span>;
     const dataSetsElem = <span style={styles.dataSets}>{dataSets}</span>;
