@@ -1,7 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {withRouteData, Navigate} from 'app/components/app-router';
+import {maybeDaysRemaining} from 'app/components/access-renewal-notification';
+import {withRouteData} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn } from 'app/components/flex';
@@ -10,11 +11,7 @@ import {RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
-import {navigateByUrl, navigate} from 'app/utils/navigation';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {maybeDaysRemaining} from 'app/components/access-renewal-notification'
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import {redirectToTraining} from 'app/utils/access-utils'
 import {
   cond,
   daysFromNow,
@@ -22,7 +19,8 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {profileStore, useStore, withProfileStoreReload} from 'app/utils/stores';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {profileStore, useStore} from 'app/utils/stores';
 
 const {useState} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
@@ -57,7 +55,7 @@ const renewalStyle = {
     width: 560
   }
 };
-const isComplete = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
+const isInGoodStanding = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
 
 const withInvalidDateHandling = date => {
   if (!date) {
@@ -75,25 +73,34 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   const bypassDate = withInvalidDateHandling(bypassTime);
 
   return cond(
+    // User has bypassed module
     [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
-    [!userCompletedModule && !userBypassedModule, () => 
+    // User never completed training
+    [!userCompletedModule && !userBypassedModule, () =>
       ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
-    [userCompletedModule && !isComplete(nextReviewTime), () => {
+    // User completed training, but is in the lookback window
+    [userCompletedModule && !isInGoodStanding(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
-      const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)'
-      return { 
+      const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
+      return {
         lastConfirmedDate,
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
-      }
+      };
     }],
-    [userCompletedModule && isComplete(nextReviewTime), () => {
+    // User completed training and is up to date
+    [userCompletedModule && isInGoodStanding(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
       return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
     }]
   );
+};
+
+interface CompletedButtonInterface {
+  buttonText: string;
+  wasBypassed: boolean;
+  style?: React.CSSProperties;
 }
 
-interface CompletedButtonInterface { buttonText: string, wasBypassed: boolean, style?: React.CSSProperties}
 const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
     data-test-id='completed-button'
     style={{
@@ -108,31 +115,23 @@ const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterf
   </Button>;
 
 interface ActionButtonInterface {
-  isComplete: boolean, 
-  wasBypassed: boolean, 
-  actionButtonText: string, 
-  completedButtonText: string, 
-  onClick: Function,
-  disabled?: boolean,
-  style?: React.CSSProperties
+  isComplete: boolean;
+  wasBypassed: boolean;
+  actionButtonText: string;
+  completedButtonText: string;
+  onClick: Function;
+  disabled?: boolean;
+  style?: React.CSSProperties;
 }
 const ActionButton = (
   {isComplete, disabled, wasBypassed, actionButtonText, completedButtonText, onClick, style}: ActionButtonInterface) => {
   return wasBypassed || isComplete
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
-    : <Button 
-        onClick={onClick} 
-        disabled={disabled} 
-        style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>
-}
-
-const confirmPublications = withProfileStoreReload(async () => {
-  try {
-    await profileApi().confirmPublications();
-  } catch {
-    console.log('Error')
-  }
-})
+    : <Button
+        onClick={onClick}
+        disabled={disabled}
+        style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
+};
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
@@ -142,7 +141,7 @@ const RenewalCard = withStyle(renewalStyle.card)(
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><TitleComponent/></div>
-      <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', gridTemplateColumns: '6rem 1fr'}}>
+      <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', columnGap: '1rem', gridTemplateColumns: 'auto 1fr'}}>
         <div>Last Updated On:</div>
         <div>Next Review:</div>
         <div>{lastConfirmedDate}</div>
@@ -170,26 +169,20 @@ export const AccessRenewalPage = fp.flow(
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
-  const [navigatex, setNavigatex] = useState(null)
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
-  if (navigatex) {
-    return <Navigate to={navigatex}/>;
-  }
-
-  console.log(profile)
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-      
+
       {maybeDaysRemaining(profile) < 0
         ? <React.Fragment>
             <ExclamationTriangle style={{height: '1.5rem', width: '1.5rem'}}/>
             <div style={styles.h1}>Access to the Researcher Workbench revoked.</div>
-          </React.Fragment>  
+          </React.Fragment>
         : <React.Fragment>
             <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
             <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
-          </React.Fragment> 
+          </React.Fragment>
       }
       <div style={{gridColumnStart: 2}}>Researchers are required to complete a number of steps as part of the annual renewal
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
@@ -207,10 +200,10 @@ export const AccessRenewalPage = fp.flow(
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
-        <ActionButton isComplete={isComplete(getExpirationTimeFor('profileConfirmation'))} 
-          actionButtonText='Review' 
-          completedButtonText='Confirmed' 
-          onClick={() => navigateByUrl('profile?renewal=1')} 
+        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('profileConfirmation'))}
+          actionButtonText='Review'
+          completedButtonText='Confirmed'
+          onClick={() => navigateByUrl('profile?renewal=1')}
           wasBypassed={false} />
       </RenewalCard>
       {/* Publications */}
@@ -221,26 +214,26 @@ export const AccessRenewalPage = fp.flow(
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
-             program, <a target='_blank' style={{textDecoration: 'underline'}} 
+             program, <a target='_blank' style={{textDecoration: 'underline'}}
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
-          <ActionButton isComplete={isComplete(getExpirationTimeFor('publicationConfirmation'))} 
-            actionButtonText='Confirm' 
-            completedButtonText='Confirmed' 
-            onClick={async () => await confirmPublications()} 
+          <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+            actionButtonText='Confirm'
+            completedButtonText='Confirmed'
+            onClick={fp.noop}
             wasBypassed={false}
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
-          <RadioButton id={noReportId} 
-            disabled={isComplete(getExpirationTimeFor('publicationConfirmation'))} 
-            style={{justifySelf: 'end'}} checked={publications === true} 
+          <RadioButton id={noReportId}
+            disabled={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+            style={{justifySelf: 'end'}} checked={publications === true}
             onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
-          <RadioButton id={reportId} 
-            disabled={isComplete(getExpirationTimeFor('publicationConfirmation'))}
-            style={{justifySelf: 'end'}} 
-            checked={publications === false} 
+          <RadioButton id={reportId}
+            disabled={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+            style={{justifySelf: 'end'}}
+            checked={publications === false}
             onChange={() => setPublications(false)}/>
           <label htmlFor={reportId}>Report submitted</label>
         </div>
@@ -254,10 +247,10 @@ export const AccessRenewalPage = fp.flow(
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        <ActionButton isComplete={isComplete(getExpirationTimeFor('complianceTraining'))} 
-          actionButtonText='Complete Training' 
-          completedButtonText='Confirmed' 
-          onClick={redirectToTraining} 
+        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('complianceTraining'))}
+          actionButtonText='Complete Training'
+          completedButtonText='Confirmed'
+          onClick={fp.noop}
           wasBypassed={!!complianceTrainingBypassTime}/>
       </RenewalCard>
       {/* DUCC */}
@@ -267,10 +260,10 @@ export const AccessRenewalPage = fp.flow(
         nextReviewTime={getExpirationTimeFor('dataUseAgreement')}
         bypassTime={dataUseAgreementBypassTime}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
-        <ActionButton isComplete={isComplete(getExpirationTimeFor('dataUseAgreement'))} 
-          actionButtonText='View & Sign' 
+        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('dataUseAgreement'))}
+          actionButtonText='View & Sign'
           completedButtonText='Confirmed'
-          onClick={() => navigate(['data-code-of-conduct'])} 
+          onClick={() => navigate(['data-code-of-conduct'])}
           wasBypassed={!!dataUseAgreementBypassTime}/>
       </RenewalCard>
     </div>
