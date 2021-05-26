@@ -128,7 +128,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
-      <AppRoute path='/access-renewal' component={() => !serverConfigStore.get().config.enableAccessRenewal 
+      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal 
         ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
         : <Navigate to={'/profile'}/>
         }/>
