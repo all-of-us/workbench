@@ -12,6 +12,7 @@ import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {redirectToTraining} from 'app/utils/access-utils'
 import {
   cond,
   daysFromNow,
@@ -19,8 +20,8 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
-import {profileStore, useStore} from 'app/utils/stores';
+import {navigateByUrl} from 'app/utils/navigation';
+import {profileStore, useStore, withProfileStoreReload} from 'app/utils/stores';
 
 const {useState} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
@@ -55,6 +56,9 @@ const renewalStyle = {
     width: 560
   }
 };
+
+
+// Helper Functions
 const isInGoodStanding = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
 
 const withInvalidDateHandling = date => {
@@ -64,6 +68,14 @@ const withInvalidDateHandling = date => {
     return displayDateWithoutHours(date);
   }
 };
+
+const confirmPublications = withProfileStoreReload(async () => {
+  try {
+    await profileApi().confirmPublications();
+  } catch {
+    console.log('Error')
+  }
+})
 
 const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   const userCompletedModule = !!lastConfirmedTime;
@@ -95,6 +107,8 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   );
 };
 
+
+// Helper / Stateless Components
 interface CompletedButtonInterface {
   buttonText: string;
   wasBypassed: boolean;
@@ -152,6 +166,8 @@ const RenewalCard = withStyle(renewalStyle.card)(
   }
 );
 
+
+// Page to render
 export const AccessRenewalPage = fp.flow(
   withRouteData,
   withProfileErrorModal
@@ -221,7 +237,7 @@ export const AccessRenewalPage = fp.flow(
           <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
-            onClick={fp.noop}
+            onClick={async () => await confirmPublications()}
             wasBypassed={false}
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
@@ -250,7 +266,7 @@ export const AccessRenewalPage = fp.flow(
         <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('complianceTraining'))}
           actionButtonText='Complete Training'
           completedButtonText='Confirmed'
-          onClick={fp.noop}
+          onClick={redirectToTraining}
           wasBypassed={!!complianceTrainingBypassTime}/>
       </RenewalCard>
       {/* DUCC */}
@@ -263,7 +279,7 @@ export const AccessRenewalPage = fp.flow(
         <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('dataUseAgreement'))}
           actionButtonText='View & Sign'
           completedButtonText='Confirmed'
-          onClick={() => navigate(['data-code-of-conduct'])}
+          onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
           wasBypassed={!!dataUseAgreementBypassTime}/>
       </RenewalCard>
     </div>
