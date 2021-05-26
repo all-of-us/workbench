@@ -114,7 +114,8 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
 
     const getCdrVersionName = (r: WorkspaceResource) => {
       const {cdrVersionTiersResponse} = props;
-      return getCdrVersion(getWorkspace(r), cdrVersionTiersResponse).name;
+      const cdrVersion = getCdrVersion(getWorkspace(r), cdrVersionTiersResponse)
+      return cdrVersion && cdrVersion.name;
     };
 
     if (resources && wsMap) {
