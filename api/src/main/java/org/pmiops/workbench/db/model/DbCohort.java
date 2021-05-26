@@ -17,7 +17,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "cohort")
-public class DbCohort {
+public class DbCohort implements GetWorkspaceId {
 
   private long cohortId;
   private int version;

@@ -62,6 +62,7 @@ import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.GetWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -447,11 +448,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId());
-      // In case wrong dataSetId is passed to Api
-      if (dbDataset == null) {
-        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
-      }
+      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId())
+          // if the wrong dataSetId is passed to the API
+          .orElseThrow(() -> new BadRequestException("Data Set Generate code Failed: Data set not found"));
     } else {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }
@@ -1096,6 +1095,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return getDbDataSets(workspaceId, resourceType, resourceId).stream()
         .map(dataSetMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private <T extends GetWorkspaceId> T verifyResourceInWorkspace(Optional<T> resource, long workspaceId) {
+    return resource.filter(cohort -> cohort.getWorkspaceId() == workspaceId)
+        .orElseThrow(() -> new NotFoundException("Resource does not belong to specified workspace"));
   }
 
   private List<DbDataset> getDbDataSets(
