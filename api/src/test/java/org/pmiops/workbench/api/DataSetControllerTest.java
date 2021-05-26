@@ -107,6 +107,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
@@ -204,15 +205,15 @@ public class DataSetControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
-  @MockBean private CdrVersionService mockCdrVersionService;
-  @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
-  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private BigQueryService mockBigQueryService;
+  @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
+  @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
+  @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
-  @MockBean private FireCloudService fireCloudService;
-  @MockBean private NotebooksService mockNotebooksService;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
+  @MockBean private FireCloudService fireCloudService;
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
+  @MockBean private NotebooksService mockNotebooksService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -255,6 +256,7 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,
+    MailService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,

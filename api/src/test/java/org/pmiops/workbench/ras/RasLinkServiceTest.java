@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -99,13 +100,14 @@ public class RasLinkServiceTest {
     UserServiceTestConfiguration.class,
   })
   @MockBean({
-    FireCloudService.class,
+    AccessTierService.class,
     ComplianceService.class,
     DirectoryService.class,
-    UserServiceAuditor.class,
+    FireCloudService.class,
     FreeTierBillingService.class,
     HttpTransport.class,
-    AccessTierService.class,
+    MailService.class,
+    UserServiceAuditor.class,
   })
   static class Configuration {
     @Bean

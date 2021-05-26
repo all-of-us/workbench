@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -91,6 +92,7 @@ public class UserServiceAccessTest {
     ComplianceService.class,
     DirectoryService.class,
     FireCloudService.class,
+    MailService.class,
     UserServiceAuditor.class,
   })
   @TestConfiguration

@@ -74,6 +74,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
@@ -167,7 +168,11 @@ public class RuntimeControllerTest {
     NoBackOffPolicy.class,
     AccessTierServiceImpl.class,
   })
-  @MockBean({ConceptSetService.class, CohortService.class})
+  @MockBean({
+    ConceptSetService.class,
+    CohortService.class,
+    MailService.class,
+  })
   static class Configuration {
 
     @Bean
