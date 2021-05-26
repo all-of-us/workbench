@@ -34,14 +34,14 @@ public class CommonMappers {
     return Optional.ofNullable(timestamp)
         .map(Timestamp::toInstant)
         .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC))
-        .orElse(null);
+        ;
   }
 
   public static Timestamp timestamp(OffsetDateTime offsetDateTime) {
     return Optional.ofNullable(offsetDateTime)
         .map(OffsetDateTime::toInstant)
         .map(Timestamp::from)
-        .orElse(null);
+        ;
   }
 
   @Named("toTimestampCurrentIfNull")
@@ -92,14 +92,14 @@ public class CommonMappers {
   }
 
   public String dbUserToCreatorEmail(DbUser creator) {
-    return Optional.ofNullable(creator).map(DbUser::getUsername).orElse(null);
+    return Optional.ofNullable(creator).map(DbUser::getUsername);
   }
 
   public String cdrVersionToId(DbCdrVersion cdrVersion) {
     return Optional.ofNullable(cdrVersion)
         .map(DbCdrVersion::getCdrVersionId)
         .map(id -> Long.toString(id))
-        .orElse(null);
+        ;
   }
 
   @Named("versionToEtag")

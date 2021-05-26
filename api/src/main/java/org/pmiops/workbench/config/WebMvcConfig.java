@@ -63,13 +63,13 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Userinfoplus userInfo(Optional<UserAuthentication> userAuthentication) {
-    return userAuthentication.map(UserAuthentication::getPrincipal).orElse(null);
+    return userAuthentication.map(UserAuthentication::getPrincipal);
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DbUser user(Optional<UserAuthentication> userAuthentication) {
-    return userAuthentication.map(UserAuthentication::getUser).orElse(null);
+    return userAuthentication.map(UserAuthentication::getUser);
   }
 
   @Override

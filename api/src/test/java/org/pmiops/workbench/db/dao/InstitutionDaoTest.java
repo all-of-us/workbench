@@ -4,6 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -56,8 +60,8 @@ public class InstitutionDaoTest {
   @Test
   public void test_delete() {
     institutionDao.deleteById(testInst.getInstitutionId());
-    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).orElse(null);
-    assertThat(dbInstitution).isNull();
+    Optional<DbInstitution> dbInstitution = institutionDao.findById(testInst.getInstitutionId());
+    assertThat(dbInstitution).isEmpty();
     assertThat(institutionDao.findAll()).isEmpty();
   }
 

@@ -89,7 +89,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
                 getCloudResourceManagerServiceWithImpersonation(user)
                     .projects()
                     .list()
-                    .setPageToken(pageToken.orElse(null))
+                    .setPageToken(pageToken)
                     .execute();
             if (resp.getProjects() != null) {
               projects.addAll(resp.getProjects());

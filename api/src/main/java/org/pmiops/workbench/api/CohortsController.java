@@ -444,7 +444,7 @@ public class CohortsController implements CohortsApiDelegate {
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
-    DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
+    DbCohort cohort = cohortDao.findById(cohortId);
     if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
       throw new NotFoundException(
           String.format(

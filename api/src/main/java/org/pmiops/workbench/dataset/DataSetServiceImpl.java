@@ -447,7 +447,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
+      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId());
       // In case wrong dataSetId is passed to Api
       if (dbDataset == null) {
         throw new BadRequestException("Data Set Generate code Failed: Data set not found");
@@ -1103,7 +1103,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        DbCohort dbCohort = cohortDao.findById(resourceId).orElse(null);
+        DbCohort dbCohort = cohortDao.findById(resourceId);
         if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
@@ -1112,7 +1112,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 resourceId, workspaceId, false);
         break;
       case CONCEPT_SET:
-        DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
+        DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId);
         if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }

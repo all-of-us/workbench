@@ -52,7 +52,7 @@ public final class QueryParameterValues {
         Optional.ofNullable(instant)
             .map(Instant::toEpochMilli)
             .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
-            .orElse(null);
+            ;
     return QueryParameterValue.timestamp(epochMicros);
   }
 
@@ -122,7 +122,7 @@ public final class QueryParameterValues {
   @Nullable
   public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
     final String arg =
-        Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format).orElse(null);
+        Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format);
     return QueryParameterValue.timestamp(arg);
   }
 
@@ -132,7 +132,7 @@ public final class QueryParameterValues {
   public static String toInsertRowString(@Nullable OffsetDateTime offsetDateTime) {
     return Optional.ofNullable(offsetDateTime)
         .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format)
-        .orElse(null);
+        ;
   }
 
   // BigQuery TIMESTAMP types don't include a zone or offset, but are always UTC.
@@ -153,7 +153,7 @@ public final class QueryParameterValues {
   // RowToInsert enum string or null (to be omitted)
   @Nullable
   public static <T extends Enum<T>> String enumToString(@Nullable T enumValue) {
-    return Optional.ofNullable(enumValue).map(T::toString).orElse(null);
+    return Optional.ofNullable(enumValue).map(T::toString);
   }
 
   @NotNull

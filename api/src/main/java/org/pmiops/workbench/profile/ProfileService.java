@@ -124,10 +124,10 @@ public class ProfileService {
         verifiedInstitutionalAffiliationDao
             .findFirstByUser(user)
             .map(verifiedInstitutionalAffiliationMapper::dbToModel)
-            .orElse(null);
+            ;
 
     final @Nullable DbUserTermsOfService latestTermsOfService =
-        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
 
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
