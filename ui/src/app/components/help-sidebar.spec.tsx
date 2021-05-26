@@ -29,7 +29,7 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {
   cdrVersionStore,
-  clearCompoundRuntimeOperations,
+  clearCompoundRuntimeOperations, genomicExtractionStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore
@@ -242,22 +242,24 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "running" icon when extract currently running', async() => {
-    dataSetStub.extractionJobs = [
-      {
-        status: TerraJobStatus.RUNNING
-      },
-      {
-        status: TerraJobStatus.ABORTING
-      },
-      {
-        status: TerraJobStatus.FAILED,
-        completionTime: Date.now()
-      },
-      {
-        status: TerraJobStatus.SUCCEEDED,
-        completionTime: Date.now()
-      }
-    ];
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.RUNNING
+        },
+        {
+          status: TerraJobStatus.ABORTING
+        },
+        {
+          status: TerraJobStatus.FAILED,
+          completionTime: Date.now()
+        },
+        {
+          status: TerraJobStatus.SUCCEEDED,
+          completionTime: Date.now()
+        }
+      ]
+    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -265,19 +267,21 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "aborting" icon when extract currently aborting and nothing running', async() => {
-    dataSetStub.extractionJobs = [
-      {
-        status: TerraJobStatus.ABORTING
-      },
-      {
-        status: TerraJobStatus.FAILED,
-        completionTime: Date.now()
-      },
-      {
-        status: TerraJobStatus.SUCCEEDED,
-        completionTime: Date.now()
-      }
-    ];
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.ABORTING
+        },
+        {
+          status: TerraJobStatus.FAILED,
+          completionTime: Date.now()
+        },
+        {
+          status: TerraJobStatus.SUCCEEDED,
+          completionTime: Date.now()
+        }
+      ]
+    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -285,12 +289,14 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "FAILED" icon with recent failed jobs', async() => {
-    dataSetStub.extractionJobs = [
-      {
-        status: TerraJobStatus.FAILED,
-        completionTime: Date.now()
-      },
-    ];
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.FAILED,
+          completionTime: Date.now()
+        },
+      ]
+    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -302,16 +308,18 @@ describe('HelpSidebar', () => {
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
     const twoHoursAgo = new Date();
     twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
-    dataSetStub.extractionJobs = [
-      {
-        status: TerraJobStatus.SUCCEEDED,
-        completionTime: oneHourAgo
-      },
-      {
-        status: TerraJobStatus.FAILED,
-        completionTime: twoHoursAgo
-      }
-    ];
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.SUCCEEDED,
+          completionTime: oneHourAgo.getTime()
+        },
+        {
+          status: TerraJobStatus.FAILED,
+          completionTime: twoHoursAgo.getTime()
+        }
+      ]
+    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -321,16 +329,18 @@ describe('HelpSidebar', () => {
   it('should display no extract icons with old failed/succeeded jobs', async() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
-    dataSetStub.extractionJobs = [
-      {
-        status: TerraJobStatus.FAILED,
-        completionTime: date.getTime()
-      },
-      {
-        status: TerraJobStatus.SUCCEEDED,
-        completionTime: date.getTime()
-      }
-    ];
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.FAILED,
+          completionTime: date.getTime()
+        },
+        {
+          status: TerraJobStatus.SUCCEEDED,
+          completionTime: date.getTime()
+        }
+      ]
+    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
