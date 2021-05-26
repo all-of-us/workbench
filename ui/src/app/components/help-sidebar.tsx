@@ -620,9 +620,9 @@ export const HelpSidebar = fp.flow(
       ) {
         // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
         const completedJobs = fp.flatten([
-            jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
-            jobsByStatus[TerraJobStatus.FAILED] || [],
-            jobsByStatus[TerraJobStatus.ABORTED] || []
+          jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
+          jobsByStatus[TerraJobStatus.FAILED] || [],
+          jobsByStatus[TerraJobStatus.ABORTED] || []
         ]);
         const mostRecentCompletedJob = fp.flow(
           fp.filter((job: GenomicExtractionJob) => this.withinPastTwentyFourHours(job.completionTime)),

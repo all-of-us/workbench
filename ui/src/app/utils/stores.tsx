@@ -35,7 +35,7 @@ export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false})
 export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
 export interface GenomicExtractionStore {
-  [workspaceNamespace: string]: GenomicExtractionJob[]
+  [workspaceNamespace: string]: GenomicExtractionJob[];
 }
 
 export const genomicExtractionStore = atom<GenomicExtractionStore>({});
@@ -45,7 +45,7 @@ export const updateGenomicExtractionStore = (workspaceNamespace: string, extract
     ...genomicExtractionStore.get(),
     [workspaceNamespace]: extractions
   });
-}
+};
 
 export const registerGenomicExtraction = (workspaceNamespace: string, extraction: GenomicExtractionJob) => {
   if (genomicExtractionStore.get()[workspaceNamespace]) {
@@ -53,7 +53,7 @@ export const registerGenomicExtraction = (workspaceNamespace: string, extraction
   } else {
     updateGenomicExtractionStore(workspaceNamespace, [extraction]);
   }
-}
+};
 
 export interface ProfileStore {
   profile?: Profile;

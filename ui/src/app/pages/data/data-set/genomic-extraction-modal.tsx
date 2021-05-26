@@ -8,7 +8,7 @@ import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
 import {DataSet} from 'generated/fetch';
-import {genomicExtractionStore, updateGenomicExtractionStore} from "../../../utils/stores";
+import {genomicExtractionStore, updateGenomicExtractionStore} from 'app/utils/stores';
 
 const {useState} = React;
 
@@ -58,12 +58,12 @@ export const GenomicExtractionModal = ({
                   const job = await dataSetApi().extractGenomicData(
                     workspaceNamespace, workspaceFirecloudName, dataSet.id);
                   updateGenomicExtractionStore(
-                      workspaceNamespace,
-                      fp.concat(
-                          genomicExtractionStore.get()[workspaceNamespace] || [],
-                          job
-                      )
-                  )
+                    workspaceNamespace,
+                    fp.concat(
+                      genomicExtractionStore.get()[workspaceNamespace] || [],
+                      job
+                    )
+                  );
                   closeFunction();
                 } catch (e) {
                   setError(true);
