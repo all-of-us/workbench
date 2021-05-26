@@ -18,6 +18,7 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
+import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
@@ -28,7 +29,6 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {MenuItem} from './buttons';
 
 const spinStyles = {

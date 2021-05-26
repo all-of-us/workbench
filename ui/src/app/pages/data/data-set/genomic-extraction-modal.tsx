@@ -7,8 +7,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
-import {DataSet} from 'generated/fetch';
 import {genomicExtractionStore, updateGenomicExtractionStore} from 'app/utils/stores';
+import {DataSet} from 'generated/fetch';
 
 const {useState} = React;
 
