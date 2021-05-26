@@ -442,12 +442,14 @@ public class CohortsController implements CohortsApiDelegate {
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
-    DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
-    if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
-      throw new NotFoundException(
-          String.format(
-              "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
-    }
-    return cohort;
+    return cohortDao
+        .findById(cohortId)
+        .filter(cohort -> cohort.getWorkspaceId() == workspace.getWorkspaceId())
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format(
+                        "No cohort with name %s in workspace %s.",
+                        cohortId, workspace.getFirecloudName())));
   }
 }

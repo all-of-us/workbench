@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +48,8 @@ public class InstitutionDaoTest extends SpringTest {
   @Test
   public void test_delete() {
     institutionDao.deleteById(testInst.getInstitutionId());
-    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).orElse(null);
-    assertThat(dbInstitution).isNull();
+    Optional<DbInstitution> dbInstitution = institutionDao.findById(testInst.getInstitutionId());
+    assertThat(dbInstitution).isEmpty();
     assertThat(institutionDao.findAll()).isEmpty();
   }
 

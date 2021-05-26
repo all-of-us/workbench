@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.RdrEntity;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -223,33 +224,31 @@ public class RdrExportServiceImpl implements RdrExportService {
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
       researcher.setEducation(
           RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-      researcher.setEthnicity(
-          Optional.ofNullable(dbDemographicSurvey.getEthnicityEnum())
-              .map(RdrExportEnums::ethnicityToRdrEthnicity)
-              .orElse(null));
+
+      Ethnicity ethnicity = dbDemographicSurvey.getEthnicityEnum();
+      if (ethnicity != null) {
+        researcher.setEthnicity(RdrExportEnums.ethnicityToRdrEthnicity(ethnicity));
+      }
 
       researcher.setSexAtBirth(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getSexAtBirthEnum().stream()
-                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
+          Optional.ofNullable(dbDemographicSurvey.getSexAtBirthEnums())
+              .orElse(Collections.emptyList()).stream()
+              .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+              .collect(Collectors.toList()));
       researcher.setGender(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
-                      .map(RdrExportEnums::genderToRdrGender)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
+          Optional.ofNullable(dbDemographicSurvey.getGenderIdentityEnums())
+              .orElse(Collections.emptyList()).stream()
+              .map(RdrExportEnums::genderToRdrGender)
+              .collect(Collectors.toList()));
+
+      researcher.setRace(
+          Optional.ofNullable(dbDemographicSurvey.getRaceEnums()).orElse(Collections.emptyList())
+              .stream()
+              .map(RdrExportEnums::raceToRdrRace)
+              .collect(Collectors.toList()));
 
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-
-      researcher.setRace(
-          Optional.ofNullable(
-                  dbDemographicSurvey.getRaceEnum().stream()
-                      .map(RdrExportEnums::raceToRdrRace)
-                      .collect(Collectors.toList()))
-              .orElse(new ArrayList<>()));
 
       researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
       researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());

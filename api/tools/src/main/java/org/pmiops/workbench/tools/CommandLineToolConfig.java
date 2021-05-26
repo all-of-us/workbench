@@ -48,10 +48,10 @@ public class CommandLineToolConfig {
   @Bean
   @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    DbConfig config = configDao.findById(DbConfig.MAIN_CONFIG_ID).orElse(null);
-
-    Gson gson = new Gson();
-    return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
+    return configDao
+        .findById(DbConfig.MAIN_CONFIG_ID)
+        .map(config -> new Gson().fromJson(config.getConfiguration(), WorkbenchConfig.class))
+        .orElse(null);
   }
 
   /**

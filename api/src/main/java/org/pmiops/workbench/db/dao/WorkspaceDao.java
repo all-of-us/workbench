@@ -87,11 +87,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = findById(workspaceId).orElse(null);
-    if (workspace == null || !workspace.isActive()) {
-      return Optional.empty();
-    }
-    return Optional.of(workspace);
+    return findById(workspaceId).filter(DbWorkspace::isActive);
   }
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);

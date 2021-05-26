@@ -171,7 +171,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     Users response = null;
     do {
       final String pageToken =
-          Optional.ofNullable(response).map(r -> r.getNextPageToken()).orElse(null);
+          Optional.ofNullable(response).map(Users::getNextPageToken).orElse(null);
       try {
         response =
             retryHandler.runAndThrowChecked(

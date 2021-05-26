@@ -41,12 +41,11 @@ public class CacheSpringConfiguration {
                 if (configClass == null) {
                   throw new IllegalArgumentException("Invalid config key: " + key);
                 }
-                DbConfig config = configDao.findById(key).orElse(null);
-                if (config == null) {
-                  return null;
-                }
-                Gson gson = new Gson();
-                return gson.fromJson(config.getConfiguration(), configClass);
+
+                return configDao
+                    .findById(key)
+                    .map(config -> new Gson().fromJson(config.getConfiguration(), configClass))
+                    .orElse(null);
               }
             });
   }

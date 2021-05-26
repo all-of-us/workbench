@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -169,12 +170,13 @@ public class DbDemographicSurvey {
   }
 
   @Transient
-  public List<Race> getRaceEnum() {
+  @Nullable
+  public List<Race> getRaceEnums() {
     if (race == null) return null;
     return this.race.stream().map(DbStorageEnums::raceFromStorage).collect(Collectors.toList());
   }
 
-  public void setRaceEnum(List<Race> raceList) {
+  public void setRaceEnums(List<Race> raceList) {
     this.race = raceList.stream().map(DbStorageEnums::raceToStorage).collect(Collectors.toList());
   }
 
@@ -192,14 +194,15 @@ public class DbDemographicSurvey {
   }
 
   @Transient
-  public List<GenderIdentity> getGenderIdentityEnumList() {
-    if (genderIdentityList == null) return new ArrayList<GenderIdentity>();
+  @Nullable
+  public List<GenderIdentity> getGenderIdentityEnums() {
+    if (genderIdentityList == null) return new ArrayList<>();
     return this.genderIdentityList.stream()
         .map(DbStorageEnums::genderIdentityFromStorage)
         .collect(Collectors.toList());
   }
 
-  public void setGenderIdentityEnumList(List<GenderIdentity> genderList) {
+  public void setGenderIdentityEnums(List<GenderIdentity> genderList) {
     this.genderIdentityList =
         genderList.stream()
             .map(DbStorageEnums::genderIdentityToStorage)
@@ -220,14 +223,15 @@ public class DbDemographicSurvey {
   }
 
   @Transient
-  public List<SexAtBirth> getSexAtBirthEnum() {
+  @Nullable
+  public List<SexAtBirth> getSexAtBirthEnums() {
     if (sexAtBirth == null) return null;
     return this.sexAtBirth.stream()
         .map(DbStorageEnums::sexAtBirthFromStorage)
         .collect(Collectors.toList());
   }
 
-  public void setSexAtBirthEnum(List<SexAtBirth> sexAtBirthList) {
+  public void setSexAtBirthEnums(List<SexAtBirth> sexAtBirthList) {
     this.sexAtBirth =
         sexAtBirthList.stream()
             .map(DbStorageEnums::sexAtBirthToStorage)

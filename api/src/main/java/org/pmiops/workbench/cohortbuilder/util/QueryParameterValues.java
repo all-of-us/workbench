@@ -48,12 +48,12 @@ public final class QueryParameterValues {
   // QueryParameterValue can have a null value, so no need to return an Optional.
   @NotNull
   public static QueryParameterValue instantToQPValue(@Nullable Instant instant) {
-    final Long epochMicros =
-        Optional.ofNullable(instant)
-            .map(Instant::toEpochMilli)
-            .map(milli -> milli * MICROSECONDS_IN_MILLISECOND)
-            .orElse(null);
-    return QueryParameterValue.timestamp(epochMicros);
+    if (instant == null) {
+      return QueryParameterValue.timestamp((Long) null);
+    } else {
+      final long epochMicros = instant.toEpochMilli() * MICROSECONDS_IN_MILLISECOND;
+      return QueryParameterValue.timestamp(epochMicros);
+    }
   }
 
   // Will return an empty Optional for null input, but parse errors will still throw
@@ -121,18 +121,22 @@ public final class QueryParameterValues {
 
   @Nullable
   public static QueryParameterValue toTimestampQpv(@Nullable OffsetDateTime offsetDateTime) {
-    final String arg =
-        Optional.ofNullable(offsetDateTime).map(QPV_TIMESTAMP_FORMATTER::format).orElse(null);
-    return QueryParameterValue.timestamp(arg);
+    if (offsetDateTime == null) {
+      return QueryParameterValue.timestamp((String) null);
+    } else {
+      return QueryParameterValue.timestamp(QPV_TIMESTAMP_FORMATTER.format(offsetDateTime));
+    }
   }
 
   // Return null instead of Optional.empty() so the return value can go directly into
   // the content map of an InsertAllRequest.RowToInsert.
   @Nullable
   public static String toInsertRowString(@Nullable OffsetDateTime offsetDateTime) {
-    return Optional.ofNullable(offsetDateTime)
-        .map(ROW_TO_INSERT_TIMESTAMP_FORMATTER::format)
-        .orElse(null);
+    if (offsetDateTime == null) {
+      return null;
+    } else {
+      return ROW_TO_INSERT_TIMESTAMP_FORMATTER.format(offsetDateTime);
+    }
   }
 
   // BigQuery TIMESTAMP types don't include a zone or offset, but are always UTC.
@@ -153,7 +157,11 @@ public final class QueryParameterValues {
   // RowToInsert enum string or null (to be omitted)
   @Nullable
   public static <T extends Enum<T>> String enumToString(@Nullable T enumValue) {
-    return Optional.ofNullable(enumValue).map(T::toString).orElse(null);
+    if (enumValue == null) {
+      return null;
+    } else {
+      return enumValue.toString();
+    }
   }
 
   @NotNull

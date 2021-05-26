@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
@@ -74,25 +75,28 @@ public class ConfigLoader {
         log.info(marshalledDiff.toString());
         System.exit(1);
       }
-      DbConfig existingConfig = configDao.findById(configKey).orElse(null);
-      if (existingConfig == null) {
-        log.info("No configuration exists, creating one.");
-        DbConfig config = new DbConfig();
-        config.setConfigId(configKey);
-        config.setConfiguration(newJson.toString());
-        configDao.save(config);
-      } else {
-        JsonNode existingJson = jackson.readTree(existingConfig.getConfiguration());
+
+      Optional<DbConfig> existingConfig = configDao.findById(configKey);
+      if (existingConfig.isPresent()) {
+        DbConfig config = existingConfig.get();
+        JsonNode existingJson = jackson.readTree(config.getConfiguration());
         JsonNode diff = JsonDiff.asJson(existingJson, newJson);
         if (diff.size() == 0) {
           log.info("No change in configuration; exiting.");
         } else {
           log.info("Updating configuration:");
           log.info(diff.toString());
-          existingConfig.setConfiguration(newJson.toString());
-          configDao.save(existingConfig);
+          config.setConfiguration(newJson.toString());
+          configDao.save(config);
         }
+      } else {
+        log.info("No configuration exists, creating one.");
+        DbConfig config = new DbConfig();
+        config.setConfigId(configKey);
+        config.setConfiguration(newJson.toString());
+        configDao.save(config);
       }
+
       log.info("Done.");
     };
   }
