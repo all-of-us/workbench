@@ -82,7 +82,6 @@ describe('ExportDatasetModal', () => {
     });
   });
 
-
   it('should disable export if no name is provided', async() => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -178,4 +177,14 @@ describe('ExportDatasetModal', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('iframe').exists()).toBeFalsy();
   });
+
+  // Remove analysis tool section if R is selected
+
+  // Only show analysis tool is WGS is selected AND programming langauge is Python
+
+  // Preview/Export - send tool=None if wgs is not allowed
+
+  // See Code Preview - has analysis tool fields
+
+  // Export - has analysis tool fields
 });

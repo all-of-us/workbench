@@ -27,12 +27,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -796,24 +798,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    if (DataSetExportRequest.GenomicsDataTypeEnum.WHOLE_GENOME.equals(
-        dataSetExportRequest.getGenomicsDataType())) {
-      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        throw new NotImplementedException();
-      }
-
-      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
-        throw new FailedPreconditionException(
-            "The workspace CDR version does not have whole genome data");
-      }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
-        throw new BadRequestException("Genomics code generation is only supported in Python");
-      }
-
-      // TODO(RW-6633): Add WGS codegen support.
-      throw new NotImplementedException();
-    }
-
     String prerequisites;
     switch (dataSetExportRequest.getKernelType()) {
       case R:
@@ -827,8 +811,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "Kernel Type " + dataSetExportRequest.getKernelType().toString() + " not supported");
     }
 
-    return queriesByDomain.entrySet().stream()
-        .map(
+    return Stream.concat(
+        queriesByDomain.entrySet().stream().map(
             entry ->
                 prerequisites
                     + "\n\n"
@@ -838,8 +822,42 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         dataSetExportRequest.getDataSetRequest().getName(),
                         dbWorkspace.getCdrVersion().getName(),
                         qualifier,
-                        dataSetExportRequest.getKernelType()))
+                        dataSetExportRequest.getKernelType())),
+        generateWgsCode(dataSetExportRequest, dbWorkspace).stream())
         .collect(Collectors.toList());
+  }
+
+  private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
+    List<String> wgsCodegen = new ArrayList<>();
+    if (!dataSetExportRequest.getGenomicsAnalysisTool().equals(DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)) {
+      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        throw new NotImplementedException();
+      }
+
+      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have whole genome data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
+        case HAIL:
+          return generateHailCode();
+        case PLINK:
+          return generatePlinkCode();
+      }
+    }
+    return wgsCodegen;
+  }
+
+  private List<String> generateHailCode() {
+    return null;
+  }
+
+  private List<String> generatePlinkCode() {
+    return null;
   }
 
   @Override
