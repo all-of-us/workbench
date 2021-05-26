@@ -4,6 +4,8 @@ import {atom, Atom} from 'app/utils/subscribable';
 import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import {navigate} from 'app/utils/navigation';
+import * as fp from 'lodash/fp';
 
 const {useEffect, useState} = React;
 
@@ -53,9 +55,13 @@ export const profileStore = atom<ProfileStore>({
   })
 });
 
+// This should be with AccessRenewalModal -> onDismiss -> redirect
 export const withProfileStoreReload = wrappedFn => async () =>  {
   await wrappedFn();
-  profileStore.get().reload();
+  const profile = await profileStore.get().reload();
+  // if (fp.isEmpty(profile.accessTierShortNames)) {
+  navigate(['access-renewal']);
+  // } 
 }
 
 export interface CompoundRuntimeOperation {
