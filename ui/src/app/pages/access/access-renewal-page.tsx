@@ -73,9 +73,12 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   const bypassDate = withInvalidDateHandling(bypassTime);
 
   return cond(
+    // User has bypassed module
     [userBypassedModule, () => ({lastConfirmedDate: `${bypassDate}`, nextReviewDate: 'Unavailable (bypassed)'})],
+    // User never completed training
     [!userCompletedModule && !userBypassedModule, () =>
       ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
+    // User completed training, but is in the lookback window
     [userCompletedModule && !isInGoodStanding(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
       const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
@@ -84,6 +87,7 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay}`
       };
     }],
+    // User completed training and is up to date
     [userCompletedModule && isInGoodStanding(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
       return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
