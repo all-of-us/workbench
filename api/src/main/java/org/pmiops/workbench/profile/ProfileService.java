@@ -132,6 +132,10 @@ public class ProfileService {
             .modules(modulesStatus)
             .anyModuleHasExpired(modulesStatus.stream().anyMatch(x -> x.getHasExpired()));
 
+    final Timestamp profileLastConfirmedTime = user.getProfileLastConfirmedTime();
+
+    final Timestamp publicationsLastConfirmedTime = user.getPublicationsLastConfirmedTime();
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
@@ -258,6 +262,8 @@ public class ProfileService {
     this.verifiedInstitutionalAffiliationDao.save(newAffiliation);
 
     final Profile appliedUpdatedProfile = getProfile(user);
+
+    userService.confirmProfile();
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
   }
 
