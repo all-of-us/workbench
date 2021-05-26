@@ -8,7 +8,6 @@ import {
   Profile,
   Runtime,
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 

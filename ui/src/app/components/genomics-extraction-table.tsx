@@ -272,7 +272,12 @@ export const GenomicsExtractionTable = fp.flow(
                 ? <FailedRequestMessage/>
                 : <DataTable autoLayout
                          emptyMessage={<EmptyTableMessage/>}
-                         sortField={!genomicExtraction[workspace.namespace] || genomicExtraction[workspace.namespace].length !== 0 ? 'dateStarted' : ''}
+                         sortField={
+                           !genomicExtraction[workspace.namespace]
+                           || genomicExtraction[workspace.namespace].length !== 0
+                               ? 'dateStarted'
+                               : ''
+                         }
                          sortOrder={-1}
                          value={genomicExtraction[workspace.namespace].map(job => mapJobToTableRow(job, workspace))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
