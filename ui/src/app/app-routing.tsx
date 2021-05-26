@@ -1,5 +1,5 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData, Navigate} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
@@ -11,6 +11,7 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
+import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
@@ -46,7 +47,6 @@ import {WorkspaceList} from './pages/workspace/workspace-list';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 
 
 const signInGuard: Guard = {
@@ -128,7 +128,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
-      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal 
+      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
         ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
         : <Navigate to={'/profile'}/>
         }/>
