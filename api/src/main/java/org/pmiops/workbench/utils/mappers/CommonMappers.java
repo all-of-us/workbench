@@ -30,17 +30,17 @@ public class CommonMappers {
   }
 
   public static OffsetDateTime offsetDateTimeUtc(Timestamp timestamp) {
-    return Optional.ofNullable(timestamp)
-        .map(Timestamp::toInstant)
-        .map(instant -> OffsetDateTime.ofInstant(instant, ZoneOffset.UTC))
-        .orElse(null);
+    if (timestamp != null) {
+      return OffsetDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC);
+    }
+    return null;
   }
 
   public static Timestamp timestamp(OffsetDateTime offsetDateTime) {
-    return Optional.ofNullable(offsetDateTime)
-        .map(OffsetDateTime::toInstant)
-        .map(Timestamp::from)
-        .orElse(null);
+    if (offsetDateTime != null) {
+      return Timestamp.from(offsetDateTime.toInstant());
+    }
+    return null;
   }
 
   @Named("toTimestampCurrentIfNull")
@@ -91,14 +91,17 @@ public class CommonMappers {
   }
 
   public String dbUserToCreatorEmail(DbUser creator) {
-    return Optional.ofNullable(creator).map(DbUser::getUsername).orElse(null);
+    if (creator != null) {
+      return creator.getUsername();
+    }
+    return null;
   }
 
   public String cdrVersionToId(DbCdrVersion cdrVersion) {
-    return Optional.ofNullable(cdrVersion)
-        .map(DbCdrVersion::getCdrVersionId)
-        .map(id -> Long.toString(id))
-        .orElse(null);
+    if (cdrVersion != null) {
+      return Long.toString(cdrVersion.getCdrVersionId());
+    }
+    return null;
   }
 
   @Named("versionToEtag")

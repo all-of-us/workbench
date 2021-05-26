@@ -8,6 +8,7 @@ import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -48,7 +49,10 @@ public class CommandLineToolConfig {
   @Bean
   @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    DbConfig config = configDao.findById(DbConfig.MAIN_CONFIG_ID).orElse(null);
+    DbConfig config =
+        configDao
+            .findById(DbConfig.MAIN_CONFIG_ID)
+            .orElseThrow(() -> new FailedPreconditionException("Could not load configuration"));
 
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);

@@ -446,11 +446,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
-      // In case wrong dataSetId is passed to Api
-      if (dbDataset == null) {
-        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
-      }
+      dbDataset =
+          dataSetDao
+              .findById(dataSetRequest.getDataSetId())
+              // if the wrong dataSetId is passed to the API
+              .orElseThrow(
+                  () ->
+                      new BadRequestException("Data Set Generate code Failed: Data set not found"));
     } else {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }
@@ -1102,22 +1104,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        DbCohort dbCohort = cohortDao.findById(resourceId).orElse(null);
-        if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
-          throw new NotFoundException("Resource does not belong to specified workspace");
-        }
-        dbDataSets =
-            dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
-                resourceId, workspaceId, false);
+        cohortDao
+            .findById(resourceId)
+            .filter(conceptSet -> conceptSet.getWorkspaceId() == workspaceId)
+            .orElseThrow(
+                () -> new NotFoundException("Resource does not belong to specified workspace"));
+        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
         break;
       case CONCEPT_SET:
-        DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
-        if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
-          throw new NotFoundException("Resource does not belong to specified workspace");
-        }
-        dbDataSets =
-            dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(
-                resourceId, workspaceId, false);
+        conceptSetDao
+            .findById(resourceId)
+            .filter(conceptSet -> conceptSet.getWorkspaceId() == workspaceId)
+            .orElseThrow(
+                () -> new NotFoundException("Resource does not belong to specified workspace"));
+        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
         break;
     }
     return dbDataSets;

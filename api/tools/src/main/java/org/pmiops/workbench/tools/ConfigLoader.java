@@ -78,10 +78,17 @@ public class ConfigLoader {
         } else {
           log.info("Updating configuration:");
           log.info(diff.toString());
-          existingConfig.setConfiguration(newJson.toString());
-          configDao.save(existingConfig);
+          config.setConfiguration(newJson.toString());
+          configDao.save(config);
         }
+      } else {
+        log.info("No configuration exists, creating one.");
+        DbConfig config = new DbConfig();
+        config.setConfigId(configKey);
+        config.setConfiguration(newJson.toString());
+        configDao.save(config);
       }
+
       log.info("Done.");
     };
   }

@@ -45,8 +45,8 @@ public class InstitutionDaoTest {
   @Test
   public void test_delete() {
     institutionDao.deleteById(testInst.getInstitutionId());
-    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).orElse(null);
-    assertThat(dbInstitution).isNull();
+    Optional<DbInstitution> dbInstitution = institutionDao.findById(testInst.getInstitutionId());
+    assertThat(dbInstitution).isEmpty();
     assertThat(institutionDao.findAll()).isEmpty();
   }
 
