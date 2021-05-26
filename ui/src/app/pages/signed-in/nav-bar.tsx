@@ -10,6 +10,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {Profile} from 'generated/fetch';
+import {ProfileStore} from 'app/utils/stores'
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -65,6 +66,7 @@ const styles = reactStyles({
 
 export interface Props {
   profile: Profile;
+  profileState: ProfileStore;
   bannerAdminActive: boolean;
   workspaceAdminActive: boolean;
   headerImg: string;
@@ -239,7 +241,7 @@ export const NavBar = withUserProfile()(
         {
           this.state.sideNavVisible
           && <SideNav
-            profile={this.props.profile}
+            profile={this.props.profileState.profile}
             bannerAdminActive={this.props.bannerAdminActive}
             homeActive={this.props.homeActive}
             libraryActive={this.props.libraryActive}
