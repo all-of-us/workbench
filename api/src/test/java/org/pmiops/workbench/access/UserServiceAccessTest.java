@@ -206,9 +206,15 @@ public class UserServiceAccessTest {
     assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(START_INSTANT.plus(2, ChronoUnit.DAYS)));
-    dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
+    dbUser =
+        userService.updateUserWithRetries(
+            user -> {
+              user.setDataUseAgreementCompletionTime(
+                  Timestamp.from(START_INSTANT.plus(2, ChronoUnit.DAYS)));
+              return user;
+            },
+            dbUser,
+            Agent.asUser(dbUser));
     assertRegisteredTierEnabled(dbUser);
   }
 
