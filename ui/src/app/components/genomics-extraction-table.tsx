@@ -249,7 +249,8 @@ export const GenomicsExtractionTable = fp.flow(
       .finally(() => setIsLoading(false));
   }, [workspace]);
 
-  const requestFailed = !isLoading && genomicExtractionStore.get() === null;
+  const workspaceExtractionJobs = genomicExtraction[workspace.namespace];
+  const requestFailed = !isLoading && workspaceExtractionJobs === undefined;
 
   return <div id='extraction-data-table-container' className='extraction-data-table-container'>
     <div className='slim-scroll-bar'>
@@ -273,13 +274,13 @@ export const GenomicsExtractionTable = fp.flow(
                 : <DataTable autoLayout
                          emptyMessage={<EmptyTableMessage/>}
                          sortField={
-                           !genomicExtraction[workspace.namespace]
-                           || genomicExtraction[workspace.namespace].length !== 0
+                           !workspaceExtractionJobs
+                           || workspaceExtractionJobs.length !== 0
                                ? 'dateStarted'
                                : ''
                          }
                          sortOrder={-1}
-                         value={genomicExtraction[workspace.namespace].map(job => mapJobToTableRow(job, workspace))}
+                         value={workspaceExtractionJobs.map(job => mapJobToTableRow(job, workspace))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
                     <Column header='Dataset Name'
                             field='datasetNameDisplay'
