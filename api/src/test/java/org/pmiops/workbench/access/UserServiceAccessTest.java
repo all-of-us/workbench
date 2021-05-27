@@ -359,13 +359,15 @@ public class UserServiceAccessTest {
 
     final long expirationWindow = 365L;
     providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-    final Timestamp expired =
-        Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
-          user.setComplianceTrainingCompletionTime(expired);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setComplianceTrainingCompletionTime(willExpire);
+
+          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+
           return userDao.save(user);
         });
   }
@@ -455,14 +457,16 @@ public class UserServiceAccessTest {
 
     final long expirationWindow = 365L;
     providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-    final Timestamp expired =
-        Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(expired);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setDataUseAgreementCompletionTime(willExpire);
           user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+
           return userDao.save(user);
         });
   }
@@ -486,12 +490,14 @@ public class UserServiceAccessTest {
 
     final long expirationWindow = 365L;
     providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-    final Timestamp expired =
-        Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
     testUnregistration(
         user -> {
-          user.setPublicationsLastConfirmedTime(expired);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setPublicationsLastConfirmedTime(willExpire);
+
+          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+
           return userDao.save(user);
         });
   }
@@ -515,12 +521,14 @@ public class UserServiceAccessTest {
 
     final long expirationWindow = 365L;
     providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-    final Timestamp expired =
-        Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
     testUnregistration(
         user -> {
-          user.setProfileLastConfirmedTime(expired);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setProfileLastConfirmedTime(willExpire);
+
+          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+
           return userDao.save(user);
         });
   }
