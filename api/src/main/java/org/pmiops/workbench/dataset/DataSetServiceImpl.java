@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -62,6 +63,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CriteriaType;
@@ -214,6 +216,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DSLinkingDao dsLinkingDao;
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
+  private final GenomicExtractionService genomicExtractionService;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
@@ -232,6 +235,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DSLinkingDao dsLinkingDao,
       DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
+      GenomicExtractionService genomicExtractionService,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
@@ -246,6 +250,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dsLinkingDao = dsLinkingDao;
     this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
+    this.genomicExtractionService = genomicExtractionService;
     this.prefixProvider = prefixProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
@@ -812,22 +817,24 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     return Stream.concat(
-        queriesByDomain.entrySet().stream().map(
-            entry ->
-                prerequisites
-                    + "\n\n"
-                    + generateNotebookUserCode(
-                        entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
-                        dataSetExportRequest.getDataSetRequest().getName(),
-                        dbWorkspace.getCdrVersion().getName(),
-                        qualifier,
-                        dataSetExportRequest.getKernelType())),
-        generateWgsCode(dataSetExportRequest, dbWorkspace).stream())
+        queriesByDomain.entrySet().stream()
+            .filter(query -> !Domain.WHOLE_GENOME_VARIANT.toString().equals(query.getKey())) // This filter can be removed once valid SQL is generated for WGS
+            .map(
+                entry ->
+                    prerequisites
+                        + "\n\n"
+                        + generateNotebookUserCode(
+                            entry.getValue(),
+                            Domain.fromValue(entry.getKey()),
+                            dataSetExportRequest.getDataSetRequest().getName(),
+                            dbWorkspace.getCdrVersion().getName(),
+                            qualifier,
+                            dataSetExportRequest.getKernelType())),
+        generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .collect(Collectors.toList());
   }
 
-  private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace) {
+  private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
     List<String> wgsCodegen = new ArrayList<>();
     if (!dataSetExportRequest.getGenomicsAnalysisTool().equals(DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)) {
       if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
@@ -844,20 +851,74 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
       switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
         case HAIL:
-          return generateHailCode();
+          return generateHailCode(qualifier, dataSetExportRequest);
         case PLINK:
-          return generatePlinkCode();
+          return generatePlinkCode(qualifier);
       }
     }
     return wgsCodegen;
   }
 
-  private List<String> generateHailCode() {
-    return null;
+  // TODO eric: what happens on datasetDao.findById(null) ?
+
+  // TODO eric test cases
+  // - dataset doesn't exist
+  // - extraction doesn't exist
+  // - extraction exists but only failed extractions
+  // - extraction exists (happy case)
+
+  private String generateExtractionDirCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    String extractionDir = genomicExtractionService
+        .getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
+        .orElse("");
+
+    String noExtractionDirComment = extractionDir.isEmpty()
+        ? "# Run a Genomic Extraction from a Dataset to generate a GCS directory with VCF files\n"
+        : "";
+
+    return noExtractionDirComment + "%env DATASET_" + qualifier + "_VCF_DIR='" + extractionDir + "'";
   }
 
-  private List<String> generatePlinkCode() {
-    return null;
+  private List<String> generateHailCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    return ImmutableList.of(
+        "# Note: Hail demos must be run from a \"Hail Genomics Analysis\" cloud analysis environment",
+
+        generateExtractionDirCode(qualifier, dataSetExportRequest),
+
+        "# Initialize Hail\n" +
+            "\n" +
+            "import hail as hl\n" +
+            "import os\n" +
+            "from hail.plot import show\n" +
+            "\n" +
+            "hl.init(default_reference='GRCh38')\n" +
+            "hl.plot.output_notebook()",
+
+        "# Create Hail Matrix table\n" +
+        "# This can take a few hours for larger (several hundred participant) cohorts\n" +
+        "hail_matrix_table_gcs = f'{os.environ['WORKSPACE_BUCKET']}/dataset_" + qualifier + ".mt'\n" +
+        "hl.import_vcf(f'{os.environ['DATASET_" + qualifier + "_VCF_DIR']}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n" +
+        "mt = hl.read_matrix_table(hail_matrix_table_gcs)"
+    );
+  }
+
+  private List<String> generatePlinkCode(String qualifier) {
+    return ImmutableList.of(
+        "%env DATASET_123_VCF_DIR=f'gs://fc-aou-preprod-datasets-controlled/5/wgs/vcf/merged'",
+        "%%bash\n" +
+            "# Download VCFs\n" +
+            "\n" +
+            "mkdir vcfs\n" +
+            "gsutil -m cp DATASET_123_VCF_DIR/* dataset_123_vcfs/",
+        "%%bash\n" +
+            "\n" +
+            "# Create a single merged VCF file\n" +
+            "# This can take a few hours for larger (several hundred participant) cohorts\n" +
+            "\n" +
+            "bcftools concat dataset_123_vcfs/*.vcf.gz -o dataset_123_vcfs/dataset_123_merged.vcf.gz",
+        "!plink --vcf dataset_123_vcfs/dataset_123_merged.vcf.gz --make-bed --out dataset_123_plink",
+        "!rm -r dataset_123_vcfs"
+    );
   }
 
   @Override

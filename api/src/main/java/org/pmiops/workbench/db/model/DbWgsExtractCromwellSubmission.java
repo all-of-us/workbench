@@ -24,6 +24,7 @@ public class DbWgsExtractCromwellSubmission {
   private DbUser creator;
   private DbDataset dataset;
   private Long sampleCount;
+  private String outputDir;
   private BigDecimal userCost;
   private Timestamp creationTime;
   private Timestamp completionTime;
@@ -87,6 +88,15 @@ public class DbWgsExtractCromwellSubmission {
 
   public void setSampleCount(Long sampleCount) {
     this.sampleCount = sampleCount;
+  }
+
+  @Column(name = "output_dir")
+  public String getOutputDir () {
+    return outputDir;
+  }
+
+  public void setOutputDir(String outputDir) {
+    this.outputDir = outputDir;
   }
 
   @Column(name = "user_cost")
