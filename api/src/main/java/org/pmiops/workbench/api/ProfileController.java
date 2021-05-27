@@ -479,6 +479,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    confirmProfile();
+
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead
