@@ -298,6 +298,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       currentCohortCriteriaStore.next(updateList);
     }
 
+    closeModifiers(modifiers) {
+      if (modifiers) {
+        this.setState({modifiers}, () => this.checkCriteriaChanges());
+      }
+      this.setState({showModifiersSlide: false});
+    }
+
     closeSidebar() {
       attributesSelectionStore.next(undefined);
       setSidebarActiveIconStore.next(null);
@@ -396,10 +403,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             </FlexRowWrap>
           </React.Fragment>}
           {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
-                                               closeModifiers={() => {
-                                                 this.setState({showModifiersSlide: false});
-                                                 this.checkCriteriaChanges();
-                                               }}/>}
+                                                                       closeModifiers={(modifiers) => this.closeModifiers(modifiers)}/>}
           {!!attributesSelection && <AttributesPage back={() => this.closeSidebar()}
                                                     close={() => attributesSelectionStore.next(undefined)}
                                                     node={attributesSelection}/>}
