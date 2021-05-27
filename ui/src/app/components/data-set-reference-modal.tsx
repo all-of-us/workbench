@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
