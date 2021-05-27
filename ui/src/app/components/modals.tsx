@@ -6,6 +6,9 @@ import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
+import {Button} from 'app/components/buttons';
+import * as fp from 'lodash/fp';
+
 
 const styles = reactStyles({
   modal: {
@@ -73,3 +76,34 @@ export const AnimatedModal = ({width = 450, ...props}) => {
 export const ModalTitle = withStyle(styles.modalTitle)('div');
 export const ModalBody = withStyle(styles.modalBody)('div');
 export const ModalFooter = withStyle(styles.modalFooter)('div');
+
+export const ResponseModal = ({onDismiss, title, message}) => {
+  return <Modal>
+    <ModalTitle>{title}</ModalTitle>
+    <ModalBody>{message}</ModalBody>
+    <ModalFooter>
+      <Button onClick={onDismiss}>OK</Button>
+    </ModalFooter>
+  </Modal> 
+}
+
+export interface Result {
+  title: string, 
+  message: string,
+  errorTitle?: string,
+  errorMessage?: string,
+  error?: boolean,
+  onDismiss?: () => any
+};
+
+export const withResponseHandling = fp.curry(
+  (setConfirm, {title, message, errorTitle, errorMessage, onDismiss = fp.noop}: Result, wrappedFn) => async (...args) => {
+  try {
+    const result = await wrappedFn(...args);
+    setConfirm({error: false, title, message, onDismiss})
+    return result
+  } catch (e) {
+    setConfirm({error: true, title: errorTitle, message: errorMessage});
+  }
+})
+
