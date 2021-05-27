@@ -249,7 +249,7 @@ export const GenomicsExtractionTable = fp.flow(
       .finally(() => setIsLoading(false));
   }, [workspace]);
 
-  const requestFailed = !isLoading && genomicExtractionStore === null;
+  const requestFailed = !isLoading && genomicExtractionStore.get() === null;
 
   return <div id='extraction-data-table-container' className='extraction-data-table-container'>
     <div className='slim-scroll-bar'>
