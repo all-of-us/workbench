@@ -201,7 +201,7 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
 
     // Simulate time passing, user is no longer compliant
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(2, ChronoUnit.DAYS));
+    advanceClockDays(2);
     dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
     assertRegisteredTierDisabled(dbUser);
 
@@ -209,8 +209,7 @@ public class UserServiceAccessTest {
     dbUser =
         userService.updateUserWithRetries(
             user -> {
-              user.setDataUseAgreementCompletionTime(
-                  Timestamp.from(START_INSTANT.plus(2, ChronoUnit.DAYS)));
+              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
               return user;
             },
             dbUser,
@@ -243,7 +242,7 @@ public class UserServiceAccessTest {
 
     // Simulate time passing, user is no longer compliant, but the flag is not set so they should
     // still be enabled
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(1, ChronoUnit.DAYS));
+    advanceClockDays(1);
 
     dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
     assertRegisteredTierEnabled(dbUser);
@@ -366,7 +365,7 @@ public class UserServiceAccessTest {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setComplianceTrainingCompletionTime(willExpire);
 
-          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+          advanceClockDays(expirationWindow + 1);
 
           return userDao.save(user);
         });
@@ -465,7 +464,7 @@ public class UserServiceAccessTest {
           user.setDataUseAgreementCompletionTime(willExpire);
           user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+          advanceClockDays(expirationWindow + 1);
 
           return userDao.save(user);
         });
@@ -496,7 +495,7 @@ public class UserServiceAccessTest {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setPublicationsLastConfirmedTime(willExpire);
 
-          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+          advanceClockDays(expirationWindow + 1);
 
           return userDao.save(user);
         });
@@ -527,10 +526,14 @@ public class UserServiceAccessTest {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setProfileLastConfirmedTime(willExpire);
 
-          PROVIDED_CLOCK.setInstant(START_INSTANT.plus(expirationWindow + 1, ChronoUnit.DAYS));
+          advanceClockDays(expirationWindow + 1);
 
           return userDao.save(user);
         });
+  }
+
+  private void advanceClockDays(long days) {
+    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(days, ChronoUnit.DAYS));
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
