@@ -52,6 +52,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -216,7 +217,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DSLinkingDao dsLinkingDao;
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
-  private final GenomicExtractionService genomicExtractionService;
+  private final WgsExtractCromwellSubmissionDao submissionDao;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
@@ -235,7 +236,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DSLinkingDao dsLinkingDao,
       DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
-      GenomicExtractionService genomicExtractionService,
+      WgsExtractCromwellSubmissionDao submissionDao,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
@@ -250,7 +251,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dsLinkingDao = dsLinkingDao;
     this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
-    this.genomicExtractionService = genomicExtractionService;
+    this.submissionDao = submissionDao;
     this.prefixProvider = prefixProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
@@ -853,7 +854,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         case HAIL:
           return generateHailCode(qualifier, dataSetExportRequest);
         case PLINK:
-          return generatePlinkCode(qualifier);
+          return generatePlinkCode(qualifier, dataSetExportRequest);
       }
     }
     return wgsCodegen;
@@ -867,19 +868,40 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // - extraction exists but only failed extractions
   // - extraction exists (happy case)
 
-  private String generateExtractionDirCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
-    String extractionDir = genomicExtractionService
-        .getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
-        .orElse("");
+  // File refactoring ticket
+  private Optional<String> getExtractionDirectory(Long datasetId) {
+    try {
+      return Optional.of(submissionDao
+          .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
+          .get()
+          .getOutputDir()
+          .replaceFirst("/$", "")); // Drop trailing slash if exists
+    } catch (NoSuchElementException e) {
+      return Optional.empty();
+    }
+  }
 
-    String noExtractionDirComment = extractionDir.isEmpty()
+  // This is the default value filled into all extractions that were created before the output_dir column was added
+  private static final String MISSING_OUTPUT_DIR_SUBMISSION = "PRERELEASE";
+
+  private String generateVcfDirEnvName(String qualifier) {
+    return "DATASET_" + qualifier + "_VCF_DIR";
+  }
+
+  private String generateExtractionDirCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    String extractionDir = getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
+        .orElse(MISSING_OUTPUT_DIR_SUBMISSION);
+
+    String noExtractionDirComment = MISSING_OUTPUT_DIR_SUBMISSION.equals(extractionDir)
         ? "# Run a Genomic Extraction from a Dataset to generate a GCS directory with VCF files\n"
         : "";
 
-    return noExtractionDirComment + "%env DATASET_" + qualifier + "_VCF_DIR='" + extractionDir + "'";
+    return noExtractionDirComment + "%env " + generateVcfDirEnvName(qualifier) + "=" + extractionDir;
   }
 
   private List<String> generateHailCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String matrixName = "mt_" + qualifier;
+
     return ImmutableList.of(
         "# Note: Hail demos must be run from a \"Hail Genomics Analysis\" cloud analysis environment",
 
@@ -895,29 +917,46 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "hl.plot.output_notebook()",
 
         "# Create Hail Matrix table\n" +
-        "# This can take a few hours for larger (several hundred participant) cohorts\n" +
-        "hail_matrix_table_gcs = f'{os.environ['WORKSPACE_BUCKET']}/dataset_" + qualifier + ".mt'\n" +
-        "hl.import_vcf(f'{os.environ['DATASET_" + qualifier + "_VCF_DIR']}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n" +
-        "mt = hl.read_matrix_table(hail_matrix_table_gcs)"
+            "# This can take a few hours for larger (several hundred participant) cohorts\n" +
+            "workspace_bucket = os.environ['WORKSPACE_BUCKET']\n" +
+            "vcf_dir = os.environ['" + generateVcfDirEnvName(qualifier) + "']\n" +
+            "hail_matrix_table_gcs = f'{workspace_bucket}/dataset_" + qualifier + ".mt'\n" +
+            "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n" +
+            matrixName + " = hl.read_matrix_table(hail_matrix_table_gcs)",
+
+        "# Select variants\n" +
+            matrixName + ".rows().select().show(5)",
+
+        "# Select sample names\n" +
+            matrixName + ".s.show(5)"
     );
   }
 
-  private List<String> generatePlinkCode(String qualifier) {
+  private List<String> generatePlinkCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String localVcfDir = "dataset_" + qualifier + "_vcfs";
+    final String mergedVcfFilename = "dataset_" + qualifier + "_merged.vcf.gz";
+    final String mergedVcfFilepath = localVcfDir + "/" + mergedVcfFilename;
+    final String plinkBinaryPrefix = "dataset_" + qualifier + "_plink";
+
     return ImmutableList.of(
-        "%env DATASET_123_VCF_DIR=f'gs://fc-aou-preprod-datasets-controlled/5/wgs/vcf/merged'",
+        generateExtractionDirCode(qualifier, dataSetExportRequest),
+
         "%%bash\n" +
             "# Download VCFs\n" +
             "\n" +
-            "mkdir vcfs\n" +
-            "gsutil -m cp DATASET_123_VCF_DIR/* dataset_123_vcfs/",
-        "%%bash\n" +
-            "\n" +
-            "# Create a single merged VCF file\n" +
+            "mkdir " + localVcfDir + "\n" +
+            "gsutil -m cp ${" + generateVcfDirEnvName(qualifier) + "}/* " + localVcfDir + "/",
+
+        "# Create a single merged VCF file\n" +
             "# This can take a few hours for larger (several hundred participant) cohorts\n" +
             "\n" +
-            "bcftools concat dataset_123_vcfs/*.vcf.gz -o dataset_123_vcfs/dataset_123_merged.vcf.gz",
-        "!plink --vcf dataset_123_vcfs/dataset_123_merged.vcf.gz --make-bed --out dataset_123_plink",
-        "!rm -r dataset_123_vcfs"
+            "!bcftools concat -a" + localVcfDir + "/*.vcf.gz -o " + mergedVcfFilepath,
+
+        "!plink --vcf " + mergedVcfFilepath + " --make-bed --out " + plinkBinaryPrefix,
+
+        "# Plink binary input files. Optionally - delete " + localVcfDir + "/ if you plan to only use Plink\n" +
+            "# and no longer need the VCF files\n" +
+            "!ls dataset_43789957_plink.*"
     );
   }
 

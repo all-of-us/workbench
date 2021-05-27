@@ -19,11 +19,11 @@ public interface WgsExtractCromwellSubmissionDao
       findByWorkspaceWorkspaceIdAndWgsExtractCromwellSubmissionId(
           Long workspaceWorkspaceId, Long gsExtractCromwellSubmissionId);
 
-  Optional<DbWgsExtractCromwellSubmission> findByDatasetAndTerraStatusInOrderByCreationTimeDesc(
+  Optional<DbWgsExtractCromwellSubmission> findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(
       DbDataset dataset, List<Short> terraStatuses);
 
   default Optional<DbWgsExtractCromwellSubmission> findMostRecentValidExtractionByDataset(DbDataset dataset) {
-    return findByDatasetAndTerraStatusInOrderByCreationTimeDesc(dataset,
+    return findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(dataset,
         ImmutableList.of(
             DbStorageEnums.terraJobStatusToStorage(TerraJobStatus.RUNNING),
             DbStorageEnums.terraJobStatusToStorage(TerraJobStatus.SUCCEEDED)

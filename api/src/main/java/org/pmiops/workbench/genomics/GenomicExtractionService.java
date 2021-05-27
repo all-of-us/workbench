@@ -115,17 +115,6 @@ public class GenomicExtractionService {
     return !(status == TerraJobStatus.RUNNING || status == TerraJobStatus.ABORTING);
   }
 
-  public Optional<String> getExtractionDirectory(Long datasetId) {
-    try {
-      return Optional.of(wgsExtractCromwellSubmissionDao
-          .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
-          .get()
-          .getOutputDir());
-    } catch (NoSuchElementException e) {
-      return Optional.empty();
-    }
-  }
-
   public List<GenomicExtractionJob> getGenomicExtractionJobs(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace =
@@ -292,6 +281,7 @@ public class GenomicExtractionService {
         CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
     dbSubmission.setSampleCount((long) personIds.size());
     dbSubmission.setOutputDir(outputDir);
+    dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider

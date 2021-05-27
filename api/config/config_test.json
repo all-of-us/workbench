@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "test-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -140,6 +140,6 @@
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }
