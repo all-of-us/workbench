@@ -50,9 +50,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-staging",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
-    "extractionCohortsDataset": "",
-    "extractionDestinationDataset": "",
-    "extractionTempTablesDataset": ""
+    "extractionCohortsDataset": "fc-aou-cdr-staging-ct.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-staging-ct.wgs_extraction_destination",
+    "extractionTempTablesDataset": "fc-aou-cdr-staging-ct.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": true
@@ -114,7 +114,8 @@
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": false
+    "enableGenomicExtraction": false,
+    "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

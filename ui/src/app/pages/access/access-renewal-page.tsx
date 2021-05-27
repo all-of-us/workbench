@@ -13,6 +13,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {redirectToTraining} from 'app/utils/access-utils'
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {
   cond,
   daysFromNow,
@@ -20,7 +21,7 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {navigateByUrl} from 'app/utils/navigation';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {profileStore, useStore, withProfileStoreReload} from 'app/utils/stores';
 
 const {useState} = React;
@@ -56,10 +57,7 @@ const renewalStyle = {
     width: 560
   }
 };
-
-
-// Helper Functions
-const isInGoodStanding = (nextReview: number): boolean => daysFromNow(nextReview) > LOOKBACK_PERIOD;
+const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= LOOKBACK_PERIOD;
 
 const withInvalidDateHandling = date => {
   if (!date) {
@@ -91,7 +89,7 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
     [!userCompletedModule && !userBypassedModule, () =>
       ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
     // User completed training, but is in the lookback window
-    [userCompletedModule && !isInGoodStanding(nextReviewTime), () => {
+    [userCompletedModule && isExpiring(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
       const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
       return {
@@ -100,7 +98,7 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
       };
     }],
     // User completed training and is up to date
-    [userCompletedModule && isInGoodStanding(nextReviewTime), () => {
+    [userCompletedModule && !isExpiring(nextReviewTime), () => {
       const daysRemaining = daysFromNow(nextReviewTime);
       return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
     }]
@@ -216,7 +214,7 @@ export const AccessRenewalPage = fp.flow(
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
-        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('profileConfirmation'))}
+        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('profileConfirmation'))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
           onClick={() => navigateByUrl('profile?renewal=1')}
@@ -234,20 +232,20 @@ export const AccessRenewalPage = fp.flow(
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
-          <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+          <ActionButton isComplete={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
-            onClick={async () => await confirmPublications()}
+            onClick={confirmPublications}
             wasBypassed={false}
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
           <RadioButton id={noReportId}
-            disabled={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+            disabled={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             style={{justifySelf: 'end'}} checked={publications === true}
             onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
           <RadioButton id={reportId}
-            disabled={isInGoodStanding(getExpirationTimeFor('publicationConfirmation'))}
+            disabled={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             style={{justifySelf: 'end'}}
             checked={publications === false}
             onChange={() => setPublications(false)}/>
@@ -263,7 +261,7 @@ export const AccessRenewalPage = fp.flow(
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('complianceTraining'))}
+        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('complianceTraining'))}
           actionButtonText='Complete Training'
           completedButtonText='Confirmed'
           onClick={redirectToTraining}
@@ -276,10 +274,10 @@ export const AccessRenewalPage = fp.flow(
         nextReviewTime={getExpirationTimeFor('dataUseAgreement')}
         bypassTime={dataUseAgreementBypassTime}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
-        <ActionButton isComplete={isInGoodStanding(getExpirationTimeFor('dataUseAgreement'))}
+        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('dataUseAgreement'))}
           actionButtonText='View & Sign'
-          completedButtonText='Confirmed'
-          onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
+          completedButtonText='Completed'
+          onClick={() => navigate(['data-code-of-conduct'])}
           wasBypassed={!!dataUseAgreementBypassTime}/>
       </RenewalCard>
     </div>

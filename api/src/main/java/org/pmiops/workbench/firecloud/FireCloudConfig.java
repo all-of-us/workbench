@@ -14,6 +14,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -181,6 +182,16 @@ public class FireCloudConfig {
     // Billing calls are made by the AllOfUs service account, rather than using the end user's
     // credentials.
     BillingApi api = new BillingApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public BillingV2Api billingV2Api(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    // Billing calls are made by the AllOfUs service account, rather than using the end user's
+    // credentials.
+    BillingV2Api api = new BillingV2Api();
     api.setApiClient(apiClient);
     return api;
   }

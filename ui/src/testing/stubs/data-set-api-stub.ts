@@ -8,7 +8,7 @@ import {
   DataSetPreviewResponse,
   DataSetRequest,
   DomainValuesResponse,
-  EmptyResponse,
+  EmptyResponse, GenomicExtractionJobListResponse,
   KernelTypeEnum,
   MarkDataSetRequest, ReadOnlyNotebookResponse
 } from 'generated/fetch';
@@ -28,6 +28,8 @@ export const stubDataSet = (): DataSet => ({
 
 export class DataSetApiStub extends DataSetApi {
   public codePreview;
+  public getDatasetMock = stubDataSet();
+  public extractionJobs;
 
   static stubDataSets(): DataSet[] {
     return [stubDataSet()];
@@ -35,6 +37,11 @@ export class DataSetApiStub extends DataSetApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+    this.extractionJobs = [];
+  }
+
+  getDataSet(workspaceNamespace: string, workspaceId: string, dataSetId: number, options?: any): Promise<DataSet> {
+    return new Promise<DataSet>(resolve => resolve(this.getDatasetMock));
   }
 
   generateCode(workspaceNamespace: string,
@@ -110,5 +117,9 @@ export class DataSetApiStub extends DataSetApi {
 
   async markDirty(workspaceNamespace: string, workspaceId: string, markDataSetRequest?: MarkDataSetRequest, options?: any) {
     return true;
+  }
+
+  async getGenomicExtractionJobs(workspaceNamespace: string, workspaceId: string) {
+    return Promise.resolve({jobs: this.extractionJobs});
   }
 }

@@ -44,10 +44,9 @@ import org.springframework.stereotype.Service;
 public class BillingProjectBufferService implements GaugeDataCollector {
 
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
-
-  private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
+  @VisibleForTesting static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final ImmutableMap<BufferEntryStatus, Duration> STATUS_TO_GRACE_PERIOD =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -101,6 +100,25 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                         MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Creates a random Billing Project name. This actually should be in separate service. But
+   * consider billing buffer will be gone soon, it is easier to put the method in this class, and
+   * just rename the class to BillingProjectService once start deprecation.
+   */
+  public String createBillingProjectName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+
+    String projectNamePrefix = workbenchConfigProvider.get().billing.projectNamePrefix;
+    if (!projectNamePrefix.endsWith("-")) {
+      projectNamePrefix = projectNamePrefix + "-";
+    }
+    return projectNamePrefix + randomString;
   }
 
   /**
@@ -297,21 +315,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();
     }
-  }
-
-  private String createBillingProjectName() {
-    String randomString =
-        Hashing.sha256()
-            .hashUnencodedChars(UUID.randomUUID().toString())
-            .toString()
-            .substring(0, PROJECT_BILLING_ID_SIZE);
-
-    String prefix = workbenchConfigProvider.get().billing.projectNamePrefix;
-    if (!prefix.endsWith("-")) {
-      prefix = prefix + "-";
-    }
-
-    return prefix + randomString;
   }
 
   private int getUnfilledBufferSpace(DbAccessTier accessTier) {

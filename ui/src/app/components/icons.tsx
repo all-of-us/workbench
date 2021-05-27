@@ -1,4 +1,4 @@
-import {faCheck, faCheckCircle, faTimes, faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
+import {faCheck, faCheckCircle, faExclamationTriangle, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import colors, {addOpacity} from 'app/styles/colors';
 import * as fp from 'lodash/fp';

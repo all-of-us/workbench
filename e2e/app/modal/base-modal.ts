@@ -33,14 +33,18 @@ export default abstract class BaseModal extends Container {
 
   async getTextContent(): Promise<string[]> {
     // xpath that excludes button labels and spans
-    const selector = `${this.getXpath()}//*[normalize-space(text()) and not(@role="button")]`;
+    const selector = `${this.getXpath()}//div[normalize-space(text()) and not(@role="button")]`;
     await this.waitUntilVisible();
     await this.page.waitForXPath(selector, { visible: true });
     const elements: ElementHandle[] = await this.page.$x(selector);
     return fp.flow(
-      fp.map(async (elem: ElementHandle) => (await getPropValue<string>(elem, 'textContent')).trim()),
+      fp.map(async (elem: ElementHandle) => (await getPropValue<string>(elem, 'innerText')).trim()),
       (contents) => Promise.all(contents)
     )(elements);
+  }
+
+  async getTitle(): Promise<string> {
+    return (await this.getTextContent())[0];
   }
 
   waitForButton(buttonLabel: LinkText): Button {

@@ -47,12 +47,12 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionpreprod",
     "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
     "extractionPetServiceAccount": "pet-110393474898566940625@aouwgscohortextraction-preprod.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-preprod",
-    "extractionMethodConfigurationName": "",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-preprod-manual",
+    "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
     "extractionMethodConfigurationVersion": 1,
-    "extractionCohortsDataset": "",
-    "extractionDestinationDataset": "",
-    "extractionTempTablesDataset": ""
+    "extractionCohortsDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_destination",
+    "extractionTempTablesDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
@@ -114,7 +114,8 @@
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": false
+    "enableGenomicExtraction": true,
+    "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
@@ -134,6 +135,6 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }

@@ -45,7 +45,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     const share = Button.findByName(this.page, { containsText: 'Share' });
     await share.click();
     const modal = new ShareModal(this.page);
-    await modal.waitUntilVisible();
+    await modal.waitForLoad();
     return modal;
   }
 
