@@ -257,7 +257,7 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_disable_noncompliant() {
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDisabled(true);
           return userDao.save(user);
@@ -270,7 +270,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableBetaAccess = true;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setBetaAccessBypassTime(null);
           return userDao.save(user);
@@ -282,7 +282,7 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_email_pending_noncompliant() {
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setEmailVerificationStatusEnum(EmailVerificationStatus.PENDING);
           return userDao.save(user);
@@ -291,7 +291,7 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_email_unverified_noncompliant() {
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
           return userDao.save(user);
@@ -303,7 +303,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableEraCommons = true;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setEraCommonsBypassTime(null);
           return userDao.save(user);
@@ -314,7 +314,7 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_updateUserWithRetries_2fa_unbypassed_noncompliant() {
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setTwoFactorAuthBypassTime(null);
           return userDao.save(user);
@@ -327,7 +327,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setComplianceTrainingBypassTime(null);
           return userDao.save(user);
@@ -339,7 +339,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setComplianceTrainingBypassTime(null);
           return userDao.save(user);
@@ -356,7 +356,7 @@ public class UserServiceAccessTest {
     final Timestamp expired =
         Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setComplianceTrainingBypassTime(null);
           user.setComplianceTrainingCompletionTime(expired);
@@ -371,7 +371,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           return userDao.save(user);
@@ -382,7 +382,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
@@ -394,7 +394,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
@@ -408,7 +408,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           return userDao.save(user);
@@ -420,7 +420,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
@@ -433,7 +433,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
@@ -452,7 +452,7 @@ public class UserServiceAccessTest {
     final Timestamp expired =
         Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setDataUseAgreementBypassTime(null);
           user.setDataUseAgreementCompletionTime(expired);
@@ -467,7 +467,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_publications_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setPublicationsLastConfirmedTime(null);
           return userDao.save(user);
@@ -483,7 +483,7 @@ public class UserServiceAccessTest {
     final Timestamp expired =
         Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setPublicationsLastConfirmedTime(expired);
           return userDao.save(user);
@@ -496,7 +496,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_profile_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setProfileLastConfirmedTime(null);
           return userDao.save(user);
@@ -512,19 +512,23 @@ public class UserServiceAccessTest {
     final Timestamp expired =
         Timestamp.from(START_INSTANT.minus(expirationWindow + 1, ChronoUnit.DAYS));
 
-    register_then_unregister(
+    assertUnregisters(
         user -> {
           user.setProfileLastConfirmedTime(expired);
           return userDao.save(user);
         });
   }
 
-  private void register_then_unregister(Function<DbUser, DbUser> unregisteringFunction) {
+  // checks which power most of these tests - confirm that the unregisteringFunction does that
+  private void assertUnregisters(Function<DbUser, DbUser> unregisteringFunction) {
+    // initial state: user is unregistered (has no tier memberships)
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
+    // we register the user
     dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
     assertRegisteredTierEnabled(dbUser);
 
+    // we unregister the user by applying the function under test
     dbUser = userService.updateUserWithRetries(unregisteringFunction, dbUser, Agent.asUser(dbUser));
 
     // The user received a DbUserAccessTier when they were registered.
