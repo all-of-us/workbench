@@ -908,19 +908,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        cohortDao
-            .findById(resourceId)
-            .filter(conceptSet -> conceptSet.getWorkspaceId() == workspaceId)
-            .orElseThrow(
-                () -> new NotFoundException("Resource does not belong to specified workspace"));
+        cohortDao.getRequiredByWorkspaceIdAndCohortId(workspaceId, resourceId);
         dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
         break;
       case CONCEPT_SET:
-        conceptSetDao
-            .findById(resourceId)
-            .filter(conceptSet -> conceptSet.getWorkspaceId() == workspaceId)
-            .orElseThrow(
-                () -> new NotFoundException("Resource does not belong to specified workspace"));
+        conceptSetDao.getRequiredByWorkspaceIdAndConceptId(workspaceId, resourceId);
         dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
         break;
     }
