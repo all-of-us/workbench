@@ -4,11 +4,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
 
   Optional<DbConceptSet> findByWorkspaceIdAndConceptSetId(long workspaceId, long conceptId);
+
+  default DbConceptSet getRequiredByWorkspaceIdAndConceptId(long workspaceId, long resourceId) {
+    return findByWorkspaceIdAndConceptSetId(workspaceId, resourceId)
+        .orElseThrow(
+            () -> new NotFoundException("Resource does not belong to specified workspace"));
+  }
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 
