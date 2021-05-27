@@ -127,7 +127,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_never_registered() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(Function.identity());
 
     // the user has never been registered so they have no DbUserAccessTier entry
 
@@ -141,7 +141,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_register() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -162,7 +162,7 @@ public class UserServiceAccessTest {
 
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
 
     List<DbAccessTier> expectedTiers =
         ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
@@ -185,7 +185,7 @@ public class UserServiceAccessTest {
 
     // initialize user as registered with generic values including bypassed DUA
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
     // add a proper DUA completion which will expire soon, but remove DUA bypass
@@ -195,25 +195,23 @@ public class UserServiceAccessTest {
         Timestamp.from(
             START_INSTANT.minus(
                 (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
-    dbUser = userService.updateUserWithRetries(this::removeDuaBypass, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
     assertRegisteredTierEnabled(dbUser);
 
     // Simulate time passing, user is no longer compliant
     advanceClockDays(2);
-    dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(Function.identity());
     assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
     dbUser =
-        userService.updateUserWithRetries(
+        updateUserWithRetries(
             user -> {
               user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
               return user;
-            },
-            dbUser,
-            Agent.asUser(dbUser));
+            });
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -225,7 +223,7 @@ public class UserServiceAccessTest {
 
     // initialize user as registered with generic values including bypassed DUA
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
     // add a proper DUA completion which will expire soon, but remove DUA bypass
@@ -235,7 +233,7 @@ public class UserServiceAccessTest {
         Timestamp.from(
             START_INSTANT.minus(
                 (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
-    dbUser = userService.updateUserWithRetries(this::removeDuaBypass, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
     assertRegisteredTierEnabled(dbUser);
@@ -244,7 +242,7 @@ public class UserServiceAccessTest {
     // still be enabled
     advanceClockDays(1);
 
-    dbUser = userService.updateUserWithRetries(Function.identity(), dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(Function.identity());
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -542,15 +540,20 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     // we register the user
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
     // we unregister the user by applying the function under test
-    dbUser = userService.updateUserWithRetries(unregisteringFunction, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(unregisteringFunction);
 
     // The user received a DbUserAccessTier when they were registered.
     // They still have it after unregistering but now it is DISABLED.
     assertRegisteredTierDisabled(dbUser);
+  }
+
+  // we can trim the signature since we always call this in the same way
+  private DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier) {
+    return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
   }
 
   private void assertRegisteredTierEnabled(DbUser dbUser) {
