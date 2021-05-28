@@ -36,7 +36,7 @@ def merge_cron_yaml(base_yaml_file, env_yaml_file, output_yaml_file)
   end
 
   out_yaml = {}
-  out_yaml['cron'] = base_yaml['cron'].filter_map do |base_cron|
+  out_yaml['cron'] = base_yaml['cron'].map do |base_cron|
     url = base_cron['url']
     env_cron = env_cron_by_url[url]
     if env_cron.nil?
@@ -48,7 +48,7 @@ def merge_cron_yaml(base_yaml_file, env_yaml_file, output_yaml_file)
       end
       base_cron.merge(env_cron)
     end
-  end
+  end.compact
 
   File.open(output_yaml_file, 'w') { |f| YAML.dump(out_yaml, f) }
 end
