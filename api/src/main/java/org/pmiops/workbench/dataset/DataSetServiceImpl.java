@@ -94,6 +94,9 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
+  private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
+      "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
+
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
   private static final String PYTHON_CDR_ENV_VARIABLE =
       "\"\"\" + os.environ[\"WORKSPACE_CDR\"] + \"\"\".";
@@ -559,7 +562,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String cohortQueries) {
 
     return uniqueDomains.stream()
-        .filter(domain -> !domain.equals(Domain.WHOLE_GENOME_VARIANT)) // This filter can be removed once valid SQL is generated for WGS
+        .filter(
+            domain ->
+                !domain.equals(
+                    Domain.WHOLE_GENOME_VARIANT)) // This filter can be removed once valid SQL is
+        // generated for WGS
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -852,6 +859,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return generateGenomicsAnalysisCommentForR();
     }
 
+    // TODO RW-6806: Add some code to print a user friendly message if the extracted VCF files are
+    // not ready yet
     switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
       case HAIL:
         return generateHailCode(qualifier, dataSetExportRequest);
@@ -864,8 +873,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
-  // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the refactoring
-  // in RW-6808 is complete. Then this function should be part of the public interface for GenomicsExtractionService
+  // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
+  // refactoring
+  // in RW-6808 is complete. Then this function should be part of the public interface for
+  // GenomicsExtractionService
   // instead of just a private implementation detail of DataSetService's generateCodeCells
   @VisibleForTesting
   public Optional<String> getExtractionDirectory(Long datasetId) {
@@ -885,9 +896,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private String generateVcfDirEnvName(String qualifier) {
     return "DATASET_" + qualifier + "_VCF_DIR";
   }
-
-  private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
-      "\"GCS_VCF_DIRECTORY_GOES_HERE\"";
 
   private String generateExtractionDirCode(
       String qualifier, DataSetExportRequest dataSetExportRequest) {
@@ -913,9 +921,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final String matrixName = "mt_" + qualifier;
 
     return ImmutableList.of(
-        "# Note: Hail demos must be run from a \"Hail Genomics Analysis\" cloud analysis environment",
         generateExtractionDirCode(qualifier, dataSetExportRequest),
         "# Initialize Hail\n"
+            + "# Note: Hail must be run from a \"Hail Genomics Analysis\" cloud analysis environment"
             + "\n"
             + "import hail as hl\n"
             + "import os\n"
@@ -924,7 +932,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "hl.init(default_reference='GRCh38')\n"
             + "hl.plot.output_notebook()",
         "# Create Hail Matrix table\n"
-            + "# This can take a few hours for larger (several hundred participant) cohorts\n"
+            + "# This can take a few hours for a dataset with hundreds of participants\n"
             + "workspace_bucket = os.environ['WORKSPACE_BUCKET']\n"
             + "vcf_dir = os.environ['"
             + generateVcfDirEnvName(qualifier)
@@ -932,7 +940,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "hail_matrix_table_gcs = f'{workspace_bucket}/dataset_"
             + qualifier
             + ".mt'\n"
-            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n"
+            // TODO: handle the case where matrix table has already been imported. Currently - it
+            // throws a write error
+            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n",
+        "# Read Hail Matrix table\n"
             + matrixName
             + " = hl.read_matrix_table(hail_matrix_table_gcs)",
         "# Select variants\n" + matrixName + ".rows().select().show(5)",
@@ -949,7 +960,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<String> plinkCode =
         ImmutableList.of(
             "# Create a single merged VCF file\n"
-                + "# This can take a few hours for larger (several hundred participant) cohorts\n"
+                + "# This can take a few hours for a dataset with hundreds of participants\n"
                 + "\n"
                 + "!bcftools concat -a"
                 + localVcfDir
@@ -971,6 +982,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String qualifier, DataSetExportRequest dataSetExportRequest) {
     final String localVcfDir = "dataset_" + qualifier + "_vcfs";
 
+    // TODO: Add a check to see if sufficient disk space is available in the Runtime
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
         "%%bash\n"

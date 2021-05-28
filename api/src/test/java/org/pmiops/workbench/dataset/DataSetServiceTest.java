@@ -22,7 +22,6 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -589,9 +588,9 @@ public class DataSetServiceTest {
     dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
   }
 
-
-//  valid extraction exists but has an empty string directory (extractions that were created before
-//      merged)
+  //  valid extraction exists but has an empty string directory (extractions that were created
+  // before
+  //      merged)
 
   @Test
   public void test_getExtractionDirectory() {
@@ -605,7 +604,8 @@ public class DataSetServiceTest {
     dbSubmission.setDataset(dbDataset);
     submissionDao.save(dbSubmission);
 
-    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).get()).isEqualTo(outputDir);
+    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).get())
+        .isEqualTo(outputDir);
   }
 
   @Test
@@ -629,7 +629,8 @@ public class DataSetServiceTest {
     moreRecentSubmission.setDataset(dbDataset);
     submissionDao.save(moreRecentSubmission);
 
-    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).get()).isEqualTo(outputDir);
+    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).get())
+        .isEqualTo(outputDir);
   }
 
   @Test
@@ -642,7 +643,8 @@ public class DataSetServiceTest {
     DbDataset dbDataset = new DbDataset();
     dbDataset = dataSetDao.save(dbDataset);
 
-    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent()).isFalse();
+    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent())
+        .isFalse();
   }
 
   @Test
@@ -657,7 +659,8 @@ public class DataSetServiceTest {
     dbSubmission.setDataset(dbDataset);
     submissionDao.save(dbSubmission);
 
-    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent()).isFalse();
+    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent())
+        .isFalse();
   }
 
   @Test
@@ -671,7 +674,8 @@ public class DataSetServiceTest {
     dbSubmission.setDataset(dbDataset);
     submissionDao.save(dbSubmission);
 
-    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent()).isFalse();
+    assertThat(dataSetServiceImpl.getExtractionDirectory(dbDataset.getDataSetId()).isPresent())
+        .isFalse();
   }
 
   private void mockDomainTableFields() {
