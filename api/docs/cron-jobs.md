@@ -33,13 +33,14 @@ It's straightforward to copy existing patterns when creating a new cron job. Key
 
 - [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/master/api/src/main/resources/workbench-api.yaml) (API definition; search for "cron")
 - [OfflineClusterController.java](https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/api/OfflineClusterController.java) (controller)
-- [cron_default.yaml](https://github.com/all-of-us/workbench/blob/master/api/src/main/webapp/WEB-INF/cron_default.yaml) (App Engine cron config)
+- [cron_base.yaml](https://github.com/all-of-us/workbench/blob/master/api/src/main/webapp/WEB-INF/cron_base.yaml) (App Engine cron config)
 
 ## Alternative behavior by environment
 
 Modify the corresponding cron_{env}.yaml file to override the cron settings for
-a given environment. Note that this currently replaces, rather than extends the
-default cron file.
+a given environment. This extends the settings found in cron_base.yaml, keyed by URL.
+
+Include the special key "aou_skip_reason" to skip a cron in a given environment
 
 ## Local testing
 

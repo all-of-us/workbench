@@ -1,0 +1,2 @@
+- url: /v1/cron/checkFreeTierBillingUsage
+  aou_skip_reason: "RW-6280"
