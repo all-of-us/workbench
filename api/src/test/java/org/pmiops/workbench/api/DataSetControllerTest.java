@@ -115,7 +115,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -124,6 +123,7 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -878,8 +878,7 @@ public class DataSetControllerTest {
     cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
+    DataSetExportRequest request = setUpValidDataSetExportRequest().generateGenomicsAnalysisCode(true);
 
     FailedPreconditionException e =
         assertThrows(
@@ -901,16 +900,15 @@ public class DataSetControllerTest {
 
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
-            .kernelType(KernelTypeEnum.R)
-            .genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
+            .generateGenomicsAnalysisCode(true)
+            .kernelType(KernelTypeEnum.R);
 
-    BadRequestException e =
-        assertThrows(
-            BadRequestException.class,
-            () ->
-                dataSetController.exportToNotebook(
-                    workspace.getNamespace(), workspace.getName(), request));
-    assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
+    dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
+    verify(mockNotebooksService).saveNotebook(anyString(), anyString(), notebookContentsCaptor.capture());
+
+    JSONObject notebookContents = notebookContentsCaptor.getValue();
+
+    assertThat(notebookContents.toString()).contains("# Code generation for genomic analysis tools is not supported in R");
   }
 
   @Test

@@ -866,14 +866,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
-  // TODO eric test cases
-  // - dataset doesn't exist
-  // - extraction doesn't exist
-  // - extraction exists but only failed extractions
-  // - extraction exists and has a valid directory (happy case)
-  // - extraction exists but has an empty directory (happy case) (PRERLEASE CONDITION)
-
-  // File refactoring ticket
   private Optional<String> getExtractionDirectory(Long datasetId) {
     try {
       return Optional.of(submissionDao
@@ -978,7 +970,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private List<String> generateGenomicsAnalysisComment_R() {
     return ImmutableList.of(
-        "# Code generation for genomics analysis tools is not supported in R\n" +
+        "# Code generation for genomic analysis tools is not supported in R\n" +
             "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel"
     );
   }

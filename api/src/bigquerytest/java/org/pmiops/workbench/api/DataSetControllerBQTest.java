@@ -48,6 +48,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -119,6 +120,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private GenomicExtractionService genomicExtractionService;
@@ -226,6 +228,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             dsLinkingDao,
             dsDataDictionaryDao,
             dataSetMapper,
+            submissionDao,
             prefixProvider,
             workbenchConfigProvider,
             CLOCK);
