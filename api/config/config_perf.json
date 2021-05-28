@@ -50,9 +50,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
-    "extractionCohortsDataset": "",
-    "extractionDestinationDataset": "",
-    "extractionTempTablesDataset": ""
+    "extractionCohortsDataset": "fc-aou-cdr-perf-ct.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
+    "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": true

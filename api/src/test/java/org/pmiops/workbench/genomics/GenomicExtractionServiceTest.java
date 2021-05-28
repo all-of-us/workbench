@@ -396,7 +396,11 @@ public class GenomicExtractionServiceTest {
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
     verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
-    String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
+    String actualOutputDir =
+        argument
+            .getValue()
+            .getInputs()
+            .get(GenomicExtractionService.EXTRACT_WORKFLOW_NAME + ".output_gcs_dir");
 
     assertThat(actualOutputDir)
         .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");

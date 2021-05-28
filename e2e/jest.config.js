@@ -16,8 +16,9 @@ module.exports = {
       {
         resultDir: 'logs',
         resultJson: 'test-results.json',
+        resultHtml: 'puppeteer-test-results.html',
         reportTitle: 'AoU integration tests',
-        report: false
+        report: true
       }
     ],
     [
