@@ -559,6 +559,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String cohortQueries) {
 
     return uniqueDomains.stream()
+        .filter(domain -> !domain.equals(Domain.WHOLE_GENOME_VARIANT)) // This filter can be removed once valid SQL is generated for WGS
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -817,12 +818,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     return Stream.concat(
             queriesByDomain.entrySet().stream()
-                .filter(
-                    query ->
-                        !Domain.WHOLE_GENOME_VARIANT
-                            .toString()
-                            .equals(query.getKey())) // This filter can be removed once valid SQL is
-                // generated for WGS
                 .map(
                     entry ->
                         prerequisites
@@ -854,7 +849,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
-      return generateGenomicsAnalysisComment_R();
+      return generateGenomicsAnalysisCommentForR();
     }
 
     switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
@@ -869,7 +864,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
-  private Optional<String> getExtractionDirectory(Long datasetId) {
+  // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the refactoring
+  // in RW-6808 is complete. Then this function should be part of the public interface for GenomicsExtractionService
+  // instead of just a private implementation detail of DataSetService's generateCodeCells
+  @VisibleForTesting
+  public Optional<String> getExtractionDirectory(Long datasetId) {
     try {
       return Optional.of(
               submissionDao
@@ -988,7 +987,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             + "/");
   }
 
-  private List<String> generateGenomicsAnalysisComment_R() {
+  private List<String> generateGenomicsAnalysisCommentForR() {
     return ImmutableList.of(
         "# Code generation for genomic analysis tools is not supported in R\n"
             + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
