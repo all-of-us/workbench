@@ -5,16 +5,14 @@
       "shortName": "registered",
       "displayName": "Registered Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
-      "authDomainName": "all-of-us-registered-test",
-      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+      "authDomainName": "all-of-us-registered-test"
     },
     {
       "accessTierId": 2,
       "shortName": "test",
       "displayName": "Test Tier",
       "servicePerimeter": "nonsense string for testing",
-      "authDomainName": "a test domain",
-      "authDomainGroupEmail": "a test domain group email"
+      "authDomainName": "a test domain"
     }
   ],
   "cdrVersions": [

@@ -15,7 +15,6 @@ public class DbAccessTier {
   private String displayName;
   private String servicePerimeter;
   private String authDomainName;
-  private String authDomainGroupEmail;
 
   public DbAccessTier() {}
 
@@ -67,16 +66,6 @@ public class DbAccessTier {
 
   public DbAccessTier setAuthDomainName(String authDomainName) {
     this.authDomainName = authDomainName;
-    return this;
-  }
-
-  @Column(name = "auth_domain_group_email", nullable = false)
-  public String getAuthDomainGroupEmail() {
-    return authDomainGroupEmail;
-  }
-
-  public DbAccessTier setAuthDomainGroupEmail(String authDomainGroupEmail) {
-    this.authDomainGroupEmail = authDomainGroupEmail;
     return this;
   }
 

@@ -11,5 +11,4 @@ public class AccessTierVO {
   public String displayName;
   public String servicePerimeter;
   public String authDomainName;
-  public String authDomainGroupEmail;
 }
