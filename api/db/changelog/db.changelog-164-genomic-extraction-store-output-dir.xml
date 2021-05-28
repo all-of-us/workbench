@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="ericsong" id="changelog-165-genomic-extraction-store-output-dir">
+  <changeSet author="ericsong" id="changelog-164-genomic-extraction-store-output-dir">
     <addColumn tableName="wgs_extract_cromwell_submission">
       <column name="output_dir" type="varchar(255)" defaultValue="">
         <constraints nullable="false"/>
