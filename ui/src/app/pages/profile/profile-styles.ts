@@ -80,13 +80,13 @@ export const styles = reactStyles({
     height: 'auto'
   },
   renewalBox: {
-    borderRadius: 5, 
-    display: 'flex', 
-    alignItems: 'center', 
-    backgroundColor: colorWithWhiteness(colors.warning, 0.7), 
-    marginBottom: '1.5rem', 
-    height: '2.1rem', 
-    marginRight: '0.75rem', 
+    borderRadius: 5,
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: colorWithWhiteness(colors.warning, 0.7),
+    marginBottom: '1.5rem',
+    height: '2.1rem',
+    marginRight: '0.75rem',
     border: `1px solid ${colors.warning}`
   }
 });

@@ -22,8 +22,9 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
-import {profileStore, useStore, withProfileStoreReload} from 'app/utils/stores';
+import {navigateByUrl} from 'app/utils/navigation';
+import {profileStore, useStore} from 'app/utils/stores';
+
 
 const {useState} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
@@ -71,8 +72,8 @@ const withInvalidDateHandling = date => {
 const confirmPublications = fp.flow(
   withSuccessModal({ title: 'Confirmed Publications', message: 'You have successfully reported your publications'}),
   withErrorModal({
-    title: 'Failed To Confirm Publications', 
-    message: 'An error occurred trying to confirm your publications. Please try again.'
+    title: 'Failed To Confirm Publications',
+    message: 'An error occurred trying to confirm your publications. Please try again.',
   })
 )(async () => await profileApi().confirmPublications());
 
@@ -267,7 +268,7 @@ export const AccessRenewalPage = fp.flow(
         </div>
         <ActionButton isComplete={!isExpiring(getExpirationTimeFor('complianceTraining'))}
           actionButtonText='Complete Training'
-          completedButtonText='Confirmed'
+          completedButtonText='Completed'
           onClick={redirectToTraining}
           wasBypassed={!!complianceTrainingBypassTime}/>
       </RenewalCard>

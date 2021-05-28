@@ -20,8 +20,9 @@ import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {wasRefferredFromRenewal, reloadProfile} from 'app/utils/access-utils'
-import {withSuccessModal} from 'app/components/modals';
+import {wasRefferredFromRenewal} from 'app/utils/access-utils'
+import {withSuccessModal, withErrorModal} from 'app/components/modals';
+import * as fp from 'lodash/fp';
 
 
 const styles = reactStyles({
@@ -104,24 +105,24 @@ export const DataUserCodeOfConduct = withUserProfile()(
       });
     }
 
-    submitCodeOfConductWithRenewal = withSuccessModal({ 
-      title: 'Your profile has been updated', 
-      message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismissEffect: async () => {
-        await reloadProfile();
-        navigate(['access-renewal'])
-      }
-    }, async (initials) => {
+    submitCodeOfConductWithRenewal = fp.flow(
+      withSuccessModal({
+        title: 'Your agreement has been updated',
+        message: 'You will be redirected to the access renewal page upon closing this dialog.',
+        onDismiss: () => navigate(['access-renewal'])
+      }),
+      withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
+    )(async (initials) => {
       this.setState({submitting: true});
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
-      profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
+      const profile = await profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
+      this.props.profileState.updateCache(profile);
     })
 
     render() {
       const {profileState: {profile}} = this.props;
       const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic,
         page, submitting} = this.state;
-      console.log(wasRefferredFromRenewal); 
       const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
         initialNameV2: {
           presence: {allowEmpty: false},
@@ -262,7 +263,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
                         wasRefferredFromRenewal()
-                          ? this.submitCodeOfConductWithRenewal(initialMonitoring) 
+                          ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                           : this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >

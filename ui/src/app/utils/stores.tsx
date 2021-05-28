@@ -55,13 +55,13 @@ export const profileStore = atom<ProfileStore>({
 });
 
 
-export interface FetchResponseStore {
-  title: string, 
+export interface NotificationStore {
+  title: string,
   message: string,
-  onDismissEffect?: () => void
-} 
+  onDismiss?: () => void
+}
 
-export const fetchResponseStore = atom<FetchResponseStore | null>(null);
+export const notificationStore = atom<NotificationStore | null>(null);
 
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;

@@ -10,7 +10,7 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
-import {authStore, profileStore, fetchResponseStore, useStore} from 'app/utils/stores';
+import {authStore, profileStore, notificationStore, useStore} from 'app/utils/stores';
 import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -102,9 +102,11 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  const fetchResponse = useStore(fetchResponseStore)
+  
+  const notification = useStore(notificationStore)
   return authLoaded && <AppRouter>
-    {fetchResponse && <NotificationModal/>}
+    {/* Once we move off of Angular there will be a better place to put this at the app level */}
+    {notification && <NotificationModal title={notification.title} message={notification.message} onDismiss={notification.onDismiss}/>}
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}

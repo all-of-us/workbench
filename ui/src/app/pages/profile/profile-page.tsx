@@ -245,20 +245,20 @@ export const ProfilePage = fp.flow(
       }
     }
 
-    saveProfileWithRenewal = withSuccessModal({ 
-      title: 'Your profile has been updated', 
+    saveProfileWithRenewal = withSuccessModal({
+      title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismissEffect: async () => {
+      onDismiss: async () => {
         await reloadProfile();
         navigate(['access-renewal'])
       }
     }, this.saveProfile.bind(this))
 
     confirmProfile = fp.flow(
-      withSuccessModal({ 
-        title: 'You have confirmed your profile is accurate', 
+      withSuccessModal({
+        title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismissEffect: async () => {
+        onDismiss: async () => {
           await reloadProfile();
           navigate(['access-renewal'])
         }
@@ -357,7 +357,7 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
-      
+
       const hasExpired = fp.flow(fp.find({moduleName: 'profileConfirmation'}), fp.get('hasExpired'))(profile.renewableAccessModules.modules)
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
@@ -429,11 +429,11 @@ export const ProfilePage = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(hasExpired || wasRefferredFromRenewal()) && 
+            {(hasExpired || wasRefferredFromRenewal()) &&
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
-                <a onClick={() => this.confirmProfile()} style={{margin: '0 0.5rem 0 auto', textDecoration: 'underline'}}>Looks Good</a> 
+                <a onClick={() => this.confirmProfile()} style={{margin: '0 0.5rem 0 auto', textDecoration: 'underline'}}>Looks Good</a>
               </div>
             }
             <div style={styles.title}>Public displayed Information</div>
@@ -675,8 +675,8 @@ export const ProfilePage = fp.flow(
                 data-test-id='save_profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => wasRefferredFromRenewal() 
-                  ? this.saveProfileWithRenewal(currentProfile) 
+                onClick={() => wasRefferredFromRenewal()
+                  ? this.saveProfileWithRenewal(currentProfile)
                   : this.saveProfile(currentProfile)
                 }
                 disabled={!!errors || fp.isEqual(profile, currentProfile)}

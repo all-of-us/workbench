@@ -15,8 +15,8 @@ export async function redirectToTraining() {
 export const wasRefferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === "1"
 
 export const reloadProfile = withErrorModal({
-    title: 'Could Not Load Profile', 
+    title: 'Could Not Load Profile',
     message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
-  }, 
+  },
   profileStore.get().reload
 )
