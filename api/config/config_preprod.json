@@ -114,7 +114,7 @@
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": true,
+    "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
