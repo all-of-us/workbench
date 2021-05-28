@@ -19,4 +19,4 @@ export const reloadProfile = withErrorModal({
     message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
   },
   profileStore.get().reload
-)
+);

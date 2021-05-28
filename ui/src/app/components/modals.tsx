@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
-import {notificationStore, NotificationStore, useStore} from 'app/utils/stores';
+import {notificationStore, NotificationStore} from 'app/utils/stores';
 import {reactStyles, withStyle} from 'app/utils/index';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
@@ -81,29 +81,28 @@ export const ModalFooter = withStyle(styles.modalFooter)('div');
 
 // This modal is rendered when there is data present in the notificationStore - rendered at the router level until Angular is gone
 // We could have the modal choose to render itself, but I am preferring to keep this stateless for simplicity
-export const NotificationModal = ({title = '', message = '', onDismiss = fp.noop} ) => {
+export const NotificationModal = ({title = '', message = '', onDismiss} ) => {
   return <Modal>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>{message}</ModalBody>
     <ModalFooter>
       <Button onClick={async () => {
-        notificationStore.set(null);
-        await onDismiss();
+        onDismiss ? await onDismiss() : notificationStore.set(null);
       }}>OK</Button>
     </ModalFooter>
   </Modal>
 }
 
-export const withErrorModal = fp.curry((fetchResponseState: NotificationStore, wrappedFn) => async (...args) => {
+export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
   try {
     return await wrappedFn(...args);
   } catch (e) {
-    notificationStore.set(fetchResponseState);
+    notificationStore.set(notificationState);
   }
 });
 
-export const withSuccessModal = fp.curry((fetchResponseState: NotificationStore, wrappedFn) => async (...args) => {
+export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
     const response = await wrappedFn(...args);
-    notificationStore.set(fetchResponseState)
+    notificationStore.set(notificationState)
     return response;
 });

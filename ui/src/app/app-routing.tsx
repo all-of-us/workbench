@@ -102,8 +102,8 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  
   const notification = useStore(notificationStore)
+  
   return authLoaded && <AppRouter>
     {/* Once we move off of Angular there will be a better place to put this at the app level */}
     {notification && <NotificationModal title={notification.title} message={notification.message} onDismiss={notification.onDismiss}/>}

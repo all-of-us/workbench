@@ -13,7 +13,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {withSuccessModal, withErrorModal} from 'app/components/modals';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {redirectToTraining} from 'app/utils/access-utils'
+import {redirectToTraining, reloadProfile} from 'app/utils/access-utils'
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {
   cond,
@@ -70,7 +70,11 @@ const withInvalidDateHandling = date => {
 };
 
 const confirmPublications = fp.flow(
-  withSuccessModal({ title: 'Confirmed Publications', message: 'You have successfully reported your publications'}),
+  withSuccessModal({ 
+    title: 'Confirmed Publications', 
+    message: 'You have successfully reported your publications',
+    onDismiss: reloadProfile
+  }),
   withErrorModal({
     title: 'Failed To Confirm Publications',
     message: 'An error occurred trying to confirm your publications. Please try again.',
@@ -219,7 +223,7 @@ export const AccessRenewalPage = fp.flow(
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
-        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('profileConfirmation'))}
+        <ActionButton isComplete={isExpiring(getExpirationTimeFor('profileConfirmation'))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
           onClick={() => navigateByUrl('profile?renewal=1')}
@@ -237,12 +241,12 @@ export const AccessRenewalPage = fp.flow(
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
-          <ActionButton isComplete={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
+          <ActionButton isComplete={isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
             onClick={confirmPublications}
             wasBypassed={false}
-            disabled={publications === null}
+            // disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
           <RadioButton id={noReportId}
             disabled={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}

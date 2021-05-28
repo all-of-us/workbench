@@ -23,7 +23,7 @@ import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registrat
 import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {withSuccessModal, withErrorModal} from 'app/components/modals';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
@@ -249,8 +249,8 @@ export const ProfilePage = fp.flow(
       title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
       onDismiss: async () => {
+        navigate(['access-renewal']);
         await reloadProfile();
-        navigate(['access-renewal'])
       }
     }, this.saveProfile.bind(this))
 
@@ -259,8 +259,8 @@ export const ProfilePage = fp.flow(
         title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
         onDismiss: async () => {
+          navigate(['access-renewal']);
           await reloadProfile();
-          navigate(['access-renewal'])
         }
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
