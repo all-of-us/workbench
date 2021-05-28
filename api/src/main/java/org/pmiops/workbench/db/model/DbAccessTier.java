@@ -81,13 +81,11 @@ public class DbAccessTier {
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(servicePerimeter, that.servicePerimeter)
-        && Objects.equal(authDomainName, that.authDomainName)
-        && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail);
+        && Objects.equal(authDomainName, that.authDomainName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(
-        shortName, displayName, servicePerimeter, authDomainName, authDomainGroupEmail);
+    return Objects.hashCode(shortName, displayName, servicePerimeter, authDomainName);
   }
 }
