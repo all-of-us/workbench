@@ -11,7 +11,7 @@ import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
@@ -40,6 +40,16 @@ interface Props {
 interface HocProps extends Props {
   workspace: WorkspaceData;
 }
+
+const styles = reactStyles({
+  radioButtonLabel: {
+    display: 'inline-flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: '1rem',
+    color: colors.primary
+  }
+});
 
 export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCurrentWorkspace())(
   ({workspace, dataset, closeFunction}: HocProps) => {
@@ -147,7 +157,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     }
 
     function genomicsToolInput(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
-      return <label key={'genomics-tool-' + genomicsTool} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+      return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
         <RadioButton
           style={{marginRight: '0.25rem'}}
           disabled={loadingNotebook}
@@ -226,8 +236,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
             </div>
             {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
               .map((kernelTypeEnum, i) =>
-                <label key={i} style={
-                  {display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+                <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
                     style={{marginRight: '0.25rem'}}
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
