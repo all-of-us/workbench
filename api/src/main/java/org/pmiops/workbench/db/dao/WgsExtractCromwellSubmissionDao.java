@@ -1,9 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
-
-import com.google.common.collect.ImmutableList;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
@@ -19,14 +18,16 @@ public interface WgsExtractCromwellSubmissionDao
       findByWorkspaceWorkspaceIdAndWgsExtractCromwellSubmissionId(
           Long workspaceWorkspaceId, Long gsExtractCromwellSubmissionId);
 
-  Optional<DbWgsExtractCromwellSubmission> findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(
-      DbDataset dataset, List<Short> terraStatuses);
+  Optional<DbWgsExtractCromwellSubmission>
+      findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(
+          DbDataset dataset, List<Short> terraStatuses);
 
-  default Optional<DbWgsExtractCromwellSubmission> findMostRecentValidExtractionByDataset(DbDataset dataset) {
-    return findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(dataset,
+  default Optional<DbWgsExtractCromwellSubmission> findMostRecentValidExtractionByDataset(
+      DbDataset dataset) {
+    return findFirstByDatasetAndTerraStatusInOrderByCreationTimeDesc(
+        dataset,
         ImmutableList.of(
             DbStorageEnums.terraJobStatusToStorage(TerraJobStatus.RUNNING),
-            DbStorageEnums.terraJobStatusToStorage(TerraJobStatus.SUCCEEDED)
-        ));
+            DbStorageEnums.terraJobStatusToStorage(TerraJobStatus.SUCCEEDED)));
   }
 }

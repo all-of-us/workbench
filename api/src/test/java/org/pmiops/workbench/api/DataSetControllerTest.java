@@ -123,7 +123,6 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -878,7 +877,8 @@ public class DataSetControllerTest {
     cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
-    DataSetExportRequest request = setUpValidDataSetExportRequest().generateGenomicsAnalysisCode(true);
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest().generateGenomicsAnalysisCode(true);
 
     FailedPreconditionException e =
         assertThrows(
@@ -904,11 +904,13 @@ public class DataSetControllerTest {
             .kernelType(KernelTypeEnum.R);
 
     dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
-    verify(mockNotebooksService).saveNotebook(anyString(), anyString(), notebookContentsCaptor.capture());
+    verify(mockNotebooksService)
+        .saveNotebook(anyString(), anyString(), notebookContentsCaptor.capture());
 
     JSONObject notebookContents = notebookContentsCaptor.getValue();
 
-    assertThat(notebookContents.toString()).contains("# Code generation for genomic analysis tools is not supported in R");
+    assertThat(notebookContents.toString())
+        .contains("# Code generation for genomic analysis tools is not supported in R");
   }
 
   @Test

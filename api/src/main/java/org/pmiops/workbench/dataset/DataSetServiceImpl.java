@@ -35,7 +35,6 @@ import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -64,8 +63,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CriteriaType;
@@ -819,24 +816,30 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     return Stream.concat(
-        queriesByDomain.entrySet().stream()
-            .filter(query -> !Domain.WHOLE_GENOME_VARIANT.toString().equals(query.getKey())) // This filter can be removed once valid SQL is generated for WGS
-            .map(
-                entry ->
-                    prerequisites
-                        + "\n\n"
-                        + generateNotebookUserCode(
-                            entry.getValue(),
-                            Domain.fromValue(entry.getKey()),
-                            dataSetExportRequest.getDataSetRequest().getName(),
-                            dbWorkspace.getCdrVersion().getName(),
-                            qualifier,
-                            dataSetExportRequest.getKernelType())),
-        generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
+            queriesByDomain.entrySet().stream()
+                .filter(
+                    query ->
+                        !Domain.WHOLE_GENOME_VARIANT
+                            .toString()
+                            .equals(query.getKey())) // This filter can be removed once valid SQL is
+                // generated for WGS
+                .map(
+                    entry ->
+                        prerequisites
+                            + "\n\n"
+                            + generateNotebookUserCode(
+                                entry.getValue(),
+                                Domain.fromValue(entry.getKey()),
+                                dataSetExportRequest.getDataSetRequest().getName(),
+                                dbWorkspace.getCdrVersion().getName(),
+                                qualifier,
+                                dataSetExportRequest.getKernelType())),
+            generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .collect(Collectors.toList());
   }
 
-  private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
+  private List<String> generateWgsCode(
+      DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
     if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
       return new ArrayList<>();
     }
@@ -854,7 +857,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return generateGenomicsAnalysisComment_R();
     }
 
-    switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
+    switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
       case HAIL:
         return generateHailCode(qualifier, dataSetExportRequest);
       case PLINK:
@@ -868,11 +871,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private Optional<String> getExtractionDirectory(Long datasetId) {
     try {
-      return Optional.of(submissionDao
-          .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
-          .get()
-          .getOutputDir()
-          .replaceFirst("/$", "")) // Drop trailing slash if exists
+      return Optional.of(
+              submissionDao
+                  .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
+                  .get()
+                  .getOutputDir()
+                  .replaceFirst("/$", "")) // Drop trailing slash if exists
           .filter(dir -> !dir.isEmpty());
     } catch (NoSuchElementException e) {
       return Optional.empty();
@@ -883,96 +887,111 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return "DATASET_" + qualifier + "_VCF_DIR";
   }
 
-  private final static String MISSING_EXTRACTION_DIR_PLACEHOLDER = "\"GCS_VCF_DIRECTORY_GOES_HERE\"";
+  private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
+      "\"GCS_VCF_DIRECTORY_GOES_HERE\"";
 
-  private String generateExtractionDirCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
-    String extractionDir = getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
-        .orElse(MISSING_EXTRACTION_DIR_PLACEHOLDER);
+  private String generateExtractionDirCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
+    String extractionDir =
+        getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
+            .orElse(MISSING_EXTRACTION_DIR_PLACEHOLDER);
 
-    String noExtractionDirComment = MISSING_EXTRACTION_DIR_PLACEHOLDER.equals(extractionDir)
-        ? "# VCF files for this dataset do not exist\n" +
-          "# Run a Genomic Extraction from a Dataset to generate VCF files\n"
-        : "";
+    String noExtractionDirComment =
+        MISSING_EXTRACTION_DIR_PLACEHOLDER.equals(extractionDir)
+            ? "# VCF files for this dataset do not exist\n"
+                + "# Run a Genomic Extraction from a Dataset to generate VCF files\n"
+            : "";
 
-    return noExtractionDirComment + "%env " + generateVcfDirEnvName(qualifier) + "=" + extractionDir;
+    return noExtractionDirComment
+        + "%env "
+        + generateVcfDirEnvName(qualifier)
+        + "="
+        + extractionDir;
   }
 
-  private List<String> generateHailCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+  private List<String> generateHailCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
     final String matrixName = "mt_" + qualifier;
 
     return ImmutableList.of(
         "# Note: Hail demos must be run from a \"Hail Genomics Analysis\" cloud analysis environment",
-
         generateExtractionDirCode(qualifier, dataSetExportRequest),
-
-        "# Initialize Hail\n" +
-            "\n" +
-            "import hail as hl\n" +
-            "import os\n" +
-            "from hail.plot import show\n" +
-            "\n" +
-            "hl.init(default_reference='GRCh38')\n" +
-            "hl.plot.output_notebook()",
-
-        "# Create Hail Matrix table\n" +
-            "# This can take a few hours for larger (several hundred participant) cohorts\n" +
-            "workspace_bucket = os.environ['WORKSPACE_BUCKET']\n" +
-            "vcf_dir = os.environ['" + generateVcfDirEnvName(qualifier) + "']\n" +
-            "hail_matrix_table_gcs = f'{workspace_bucket}/dataset_" + qualifier + ".mt'\n" +
-            "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n" +
-            matrixName + " = hl.read_matrix_table(hail_matrix_table_gcs)",
-
-        "# Select variants\n" +
-            matrixName + ".rows().select().show(5)",
-
-        "# Select sample names\n" +
-            matrixName + ".s.show(5)"
-    );
+        "# Initialize Hail\n"
+            + "\n"
+            + "import hail as hl\n"
+            + "import os\n"
+            + "from hail.plot import show\n"
+            + "\n"
+            + "hl.init(default_reference='GRCh38')\n"
+            + "hl.plot.output_notebook()",
+        "# Create Hail Matrix table\n"
+            + "# This can take a few hours for larger (several hundred participant) cohorts\n"
+            + "workspace_bucket = os.environ['WORKSPACE_BUCKET']\n"
+            + "vcf_dir = os.environ['"
+            + generateVcfDirEnvName(qualifier)
+            + "']\n"
+            + "hail_matrix_table_gcs = f'{workspace_bucket}/dataset_"
+            + qualifier
+            + ".mt'\n"
+            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n"
+            + matrixName
+            + " = hl.read_matrix_table(hail_matrix_table_gcs)",
+        "# Select variants\n" + matrixName + ".rows().select().show(5)",
+        "# Select sample names\n" + matrixName + ".s.show(5)");
   }
 
-  private List<String> generatePlinkCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+  private List<String> generatePlinkCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
     final String localVcfDir = "dataset_" + qualifier + "_vcfs";
     final String mergedVcfFilename = "dataset_" + qualifier + "_merged.vcf.gz";
     final String mergedVcfFilepath = localVcfDir + "/" + mergedVcfFilename;
     final String plinkBinaryPrefix = "dataset_" + qualifier + "_plink";
 
-    List<String> plinkCode = ImmutableList.of(
-        "# Create a single merged VCF file\n" +
-            "# This can take a few hours for larger (several hundred participant) cohorts\n" +
-            "\n" +
-            "!bcftools concat -a" + localVcfDir + "/*.vcf.gz -o " + mergedVcfFilepath,
+    List<String> plinkCode =
+        ImmutableList.of(
+            "# Create a single merged VCF file\n"
+                + "# This can take a few hours for larger (several hundred participant) cohorts\n"
+                + "\n"
+                + "!bcftools concat -a"
+                + localVcfDir
+                + "/*.vcf.gz -o "
+                + mergedVcfFilepath,
+            "!plink --vcf " + mergedVcfFilepath + " --make-bed --out " + plinkBinaryPrefix,
+            "# Plink binary input files. Optionally - delete "
+                + localVcfDir
+                + "/ if you plan to only use Plink\n"
+                + "# and no longer need the VCF files\n"
+                + "!ls dataset_43789957_plink.*");
 
-        "!plink --vcf " + mergedVcfFilepath + " --make-bed --out " + plinkBinaryPrefix,
-
-        "# Plink binary input files. Optionally - delete " + localVcfDir + "/ if you plan to only use Plink\n" +
-            "# and no longer need the VCF files\n" +
-            "!ls dataset_43789957_plink.*"
-    );
-
-    return Stream.concat(generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
+    return Stream.concat(
+            generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
         .collect(Collectors.toList());
   }
 
-  private List<String> generateDownloadVcfCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+  private List<String> generateDownloadVcfCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
     final String localVcfDir = "dataset_" + qualifier + "_vcfs";
 
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
-
-        "%%bash\n" +
-            "\n" +
-            "# Download VCFs\n" +
-            "\n" +
-            "mkdir " + localVcfDir + "\n" +
-            "gsutil -m cp ${" + generateVcfDirEnvName(qualifier) + "}/* " + localVcfDir + "/"
-    );
+        "%%bash\n"
+            + "\n"
+            + "# Download VCFs\n"
+            + "\n"
+            + "mkdir "
+            + localVcfDir
+            + "\n"
+            + "gsutil -m cp ${"
+            + generateVcfDirEnvName(qualifier)
+            + "}/* "
+            + localVcfDir
+            + "/");
   }
 
   private List<String> generateGenomicsAnalysisComment_R() {
     return ImmutableList.of(
-        "# Code generation for genomic analysis tools is not supported in R\n" +
-            "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel"
-    );
+        "# Code generation for genomic analysis tools is not supported in R\n"
+            + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
   }
 
   @Override

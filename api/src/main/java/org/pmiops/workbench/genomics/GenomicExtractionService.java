@@ -8,7 +8,6 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,7 +15,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.dataset.DataSetService;
-import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
@@ -25,7 +23,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -184,7 +181,8 @@ public class GenomicExtractionService {
                 extractionFolder + "/person_ids.txt",
                 String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
 
-    final String outputDir = "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
+    final String outputDir =
+        "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -237,9 +235,7 @@ public class GenomicExtractionService {
                             // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
                             // etc
                             .put("WgsCohortExtract.output_file_base_name", "\"interval\"")
-                            .put(
-                                "WgsCohortExtract.output_gcs_dir",
-                                "\"" + outputDir + "\"")
+                            .put("WgsCohortExtract.output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 "WgsCohortExtract.gatk_override",
                                 "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-204-g6449d52-SNAPSHOT-local.jar\"")

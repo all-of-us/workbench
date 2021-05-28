@@ -91,7 +91,7 @@ public class DbWgsExtractCromwellSubmission {
   }
 
   @Column(name = "output_dir")
-  public String getOutputDir () {
+  public String getOutputDir() {
     return outputDir;
   }
 
