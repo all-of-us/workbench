@@ -75,7 +75,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       return {
         dataSetRequest: createDataSetRequest(),
         kernelType: kernelType,
-        genomicsAnalysisTool: allowWgsExport() ? genomicsAnalysisTool : GenomicsAnalysisToolEnum.NONE,
+        genomicsAnalysisTool: genomicsAnalysisTool,
+        generateGenomicsAnalysisCode: hasWgs(),
         notebookName: notebookName,
         newNotebook: creatingNewNotebook
       };
@@ -110,7 +111,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       return <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
     }
 
-    function loadCodePreview(kernel: KernelTypeEnum) {
+    function loadCodePreview() {
       setIsLoadingNotebook(true);
       setErrorMsg(null);
       dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest())
@@ -124,7 +125,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         setCodePreview(null);
       } else {
         AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-        loadCodePreview(kernelType);
+        loadCodePreview();
       }
     }
 
@@ -161,10 +162,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       return fp.includes(PrePackagedConceptSetEnum.WHOLEGENOME, dataset.prePackagedConceptSet);
     }
 
-    function allowWgsExport() {
-      return kernelType === KernelTypeEnum.Python && hasWgs();
-    }
-
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
         .then(notebooks => setExistingNotebooks(notebooks.map(fileDetail => fileDetail.name.slice(0, -6))))
@@ -173,9 +170,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
     useEffect(() => {
       if (codePreview) {
-        loadCodePreview(kernelType);
+        loadCodePreview();
       }
-    }, [kernelType]);
+    }, [kernelType, genomicsAnalysisTool]);
 
     const errors = {
       ...validate({notebookName}, {
@@ -241,7 +238,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                   {kernelTypeEnum}
                 </label>)}
 
-            {allowWgsExport() && <React.Fragment>
+            {kernelType === KernelTypeEnum.Python && <React.Fragment>
                 <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
                 </div>
