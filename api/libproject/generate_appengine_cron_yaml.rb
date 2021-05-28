@@ -20,25 +20,33 @@ end
 def merge_cron_yaml(base_yaml_file, env_yaml_file, output_yaml_file)
   common = Common.new
 
-  out_yaml = YAML.load_file(base_yaml_file)
-  base_crons = out_yaml['cron'].map { |c| [c['url'], c] }.to_h
+  base_yaml = YAML.load_file(base_yaml_file)
 
+  env_cron_by_url = {}
   if File.file?(env_yaml_file)
     env_yaml = YAML.load_file(env_yaml_file)
-    env_yaml['cron'].each do |env_cron|
+    env_cron_by_url = env_yaml['cron'].map do |cron|
+      url = cron['url']
+      raise ArgumentError.new("missing required 'url' key for #{cron}") if url.nil?
+      unless base_yaml['cron'].find { |base_cron| base_cron['url'] == url }
+        raise ArgumentError.new("cron URL '#{url}' does not exist in base yaml")
+      end
+      [url, cron]
+    end.to_h
+  end
 
-      raise ArgumentError.new("missing required 'url' key for #{env_cron}") unless env_cron.key?('url')
-      url = env_cron['url']
-      raise ArgumentError.new("cron URL '#{url}' does not exist in base yaml") unless base_crons.key?(url)
-
+  out_yaml = {}
+  out_yaml['cron'] = base_yaml['cron'].filter_map do |base_cron|
+    url = base_cron['url']
+    env_cron = env_cron_by_url[url]
+    if env_cron.nil?
+      base_cron
+    else
       if env_cron.key?('aou_skip_reason')
         common.status "Excluding cron '#{url}', reason: '#{env_cron['aou_skip_reason']}'"
-        out_yaml['cron'].reject! {|o| o['url'] == url}
         next
       end
-
-      # This indirectly mutates out_yaml
-      base_crons[url].merge!(env_cron)
+      base_cron.merge(env_cron)
     end
   end
 
