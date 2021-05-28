@@ -837,7 +837,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
     List<String> wgsCodegen = new ArrayList<>();
-    if (!dataSetExportRequest.getGenomicsAnalysisTool().equals(DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)) {
+    if (dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
       if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
         throw new NotImplementedException();
       }
@@ -846,8 +846,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         throw new FailedPreconditionException(
             "The workspace CDR version does not have whole genome data");
       }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
-        throw new BadRequestException("Genomics code generation is only supported in Python");
+
+      if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
+        return generateGenomicsAnalysisComment_R();
       }
 
       switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
@@ -855,18 +856,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           return generateHailCode(qualifier, dataSetExportRequest);
         case PLINK:
           return generatePlinkCode(qualifier, dataSetExportRequest);
+        case NONE:
+          return generateDownloadVcfCode(qualifier, dataSetExportRequest);
       }
     }
     return wgsCodegen;
   }
 
-  // TODO eric: what happens on datasetDao.findById(null) ?
-
   // TODO eric test cases
   // - dataset doesn't exist
   // - extraction doesn't exist
   // - extraction exists but only failed extractions
-  // - extraction exists (happy case)
+  // - extraction exists and has a valid directory (happy case)
+  // - extraction exists but has an empty directory (happy case) (PRERLEASE CONDITION)
 
   // File refactoring ticket
   private Optional<String> getExtractionDirectory(Long datasetId) {
@@ -875,25 +877,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
           .get()
           .getOutputDir()
-          .replaceFirst("/$", "")); // Drop trailing slash if exists
+          .replaceFirst("/$", "")) // Drop trailing slash if exists
+          .filter(dir -> !dir.isEmpty());
     } catch (NoSuchElementException e) {
       return Optional.empty();
     }
   }
 
-  // This is the default value filled into all extractions that were created before the output_dir column was added
-  private static final String MISSING_OUTPUT_DIR_SUBMISSION = "PRERELEASE";
-
   private String generateVcfDirEnvName(String qualifier) {
     return "DATASET_" + qualifier + "_VCF_DIR";
   }
 
+  private final static String MISSING_EXTRACTION_DIR_PLACEHOLDER = "\"GCS_VCF_DIRECTORY_GOES_HERE\"";
+
   private String generateExtractionDirCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
     String extractionDir = getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
-        .orElse(MISSING_OUTPUT_DIR_SUBMISSION);
+        .orElse(MISSING_EXTRACTION_DIR_PLACEHOLDER);
 
-    String noExtractionDirComment = MISSING_OUTPUT_DIR_SUBMISSION.equals(extractionDir)
-        ? "# Run a Genomic Extraction from a Dataset to generate a GCS directory with VCF files\n"
+    String noExtractionDirComment = MISSING_EXTRACTION_DIR_PLACEHOLDER.equals(extractionDir)
+        ? "# VCF files for this dataset do not exist\n" +
+          "# Run a Genomic Extraction from a Dataset to generate VCF files\n"
         : "";
 
     return noExtractionDirComment + "%env " + generateVcfDirEnvName(qualifier) + "=" + extractionDir;
@@ -938,15 +941,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final String mergedVcfFilepath = localVcfDir + "/" + mergedVcfFilename;
     final String plinkBinaryPrefix = "dataset_" + qualifier + "_plink";
 
-    return ImmutableList.of(
-        generateExtractionDirCode(qualifier, dataSetExportRequest),
-
-        "%%bash\n" +
-            "# Download VCFs\n" +
-            "\n" +
-            "mkdir " + localVcfDir + "\n" +
-            "gsutil -m cp ${" + generateVcfDirEnvName(qualifier) + "}/* " + localVcfDir + "/",
-
+    List<String> plinkCode = ImmutableList.of(
         "# Create a single merged VCF file\n" +
             "# This can take a few hours for larger (several hundred participant) cohorts\n" +
             "\n" +
@@ -957,6 +952,31 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         "# Plink binary input files. Optionally - delete " + localVcfDir + "/ if you plan to only use Plink\n" +
             "# and no longer need the VCF files\n" +
             "!ls dataset_43789957_plink.*"
+    );
+
+    return Stream.concat(generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
+        .collect(Collectors.toList());
+  }
+
+  private List<String> generateDownloadVcfCode(String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String localVcfDir = "dataset_" + qualifier + "_vcfs";
+
+    return ImmutableList.of(
+        generateExtractionDirCode(qualifier, dataSetExportRequest),
+
+        "%%bash\n" +
+            "\n" +
+            "# Download VCFs\n" +
+            "\n" +
+            "mkdir " + localVcfDir + "\n" +
+            "gsutil -m cp ${" + generateVcfDirEnvName(qualifier) + "}/* " + localVcfDir + "/"
+    );
+  }
+
+  private List<String> generateGenomicsAnalysisComment_R() {
+    return ImmutableList.of(
+        "# Code generation for genomics analysis tools is not supported in R\n" +
+            "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel"
     );
   }
 

@@ -5006,6 +5006,9 @@ definitions:
         enum:
           - NONE
           - WHOLE_GENOME
+      generateGenomicsAnalysisCode:
+        type: boolean
+        default: false
       genomicsAnalysisTool:
         type: string
         default: NONE
