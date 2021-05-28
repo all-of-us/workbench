@@ -38,7 +38,6 @@ public class CdrConfigVOMapperTest {
     testTierJson.displayName = "Tier Five";
     testTierJson.servicePerimeter = "tier/5/perim";
     testTierJson.authDomainName = "tier-5-users";
-    testTierJson.authDomainGroupEmail = "tier-5-users@firecloud.org";
 
     testVersionJson = new CdrVersionVO();
     testVersionJson.cdrVersionId = 20;
@@ -66,8 +65,7 @@ public class CdrConfigVOMapperTest {
             .setShortName(testTierJson.shortName)
             .setDisplayName(testTierJson.displayName)
             .setServicePerimeter(testTierJson.servicePerimeter)
-            .setAuthDomainName(testTierJson.authDomainName)
-            .setAuthDomainGroupEmail(testTierJson.authDomainGroupEmail);
+            .setAuthDomainName(testTierJson.authDomainName);
 
     assertThat(mapper.toDbTier(testTierJson)).isEqualTo(expected);
   }
@@ -88,8 +86,7 @@ public class CdrConfigVOMapperTest {
                 .setShortName("badTier")
                 .setDisplayName("Don't want this")
                 .setServicePerimeter("random/text")
-                .setAuthDomainName("bad-dudes")
-                .setAuthDomainGroupEmail("bad-dudes@arcade.net"));
+                .setAuthDomainName("bad-dudes"));
 
     DbAccessTier expected =
         new DbAccessTier()
@@ -97,8 +94,7 @@ public class CdrConfigVOMapperTest {
             .setShortName(testTierJson.shortName)
             .setDisplayName(testTierJson.displayName)
             .setServicePerimeter(testTierJson.servicePerimeter)
-            .setAuthDomainName(testTierJson.authDomainName)
-            .setAuthDomainGroupEmail(testTierJson.authDomainGroupEmail);
+            .setAuthDomainName(testTierJson.authDomainName);
 
     assertThat(mapper.toDbTiers(Collections.singletonList(testTierJson))).containsExactly(expected);
   }
