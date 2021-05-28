@@ -215,34 +215,61 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
+  // Ensure that we don't enforce access renewal in environments where the flag is not set:
+  // make the user expire in all of the ways possible by access renewal, and test that none
+  // of these cause noncompliance.
+
   @Test
   public void testRenewalFlag() {
     providedWorkbenchConfig.access.enableAccessRenewal = false;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
 
-    // initialize user as registered with generic values including bypassed DUA
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+    final Timestamp willExpire = Timestamp.from(START_INSTANT);
+
+    // initialize user as registered, including:
+    // bypassed DUA
+    // bypassed Compliance training
+    // recent confirmedPublications
+    // recent confirmedProfile
 
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
-    // add a proper DUA completion which will expire soon, but remove DUA bypass
+    // add proper DUA completion and compliance training and remove bypasses
 
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(
-            START_INSTANT.minus(
-                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
-    dbUser = updateUserWithRetries(this::removeDuaBypass);
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+              user.setDataUseAgreementCompletionTime(willExpire);
+              user.setDataUseAgreementBypassTime(null);
 
-    // User is compliant
+              user.setComplianceTrainingCompletionTime(willExpire);
+              user.setComplianceTrainingBypassTime(null);
+              return user;
+            });
+
+    // This is just a switch from bypassed -> user-performed action so we remain compliant
+    // (and still would be so, with enableAccessRenewal = true)
     assertRegisteredTierEnabled(dbUser);
 
-    // Simulate time passing, user is no longer compliant, but the flag is not set so they should
-    // still be enabled
-    advanceClockDays(1);
+    // Time passing beyond the expirationWindow would cause the user to become
+    // noncompliant when enableAccessRenewal = true
+    advanceClockDays(expirationWindow + 1);
 
-    dbUser = updateUserWithRetries(Function.identity());
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              // removing publicationsConfirmed and profileConfirmed would also cause
+              // noncompliance when enableAccessRenewal = true
+              user.setPublicationsLastConfirmedTime(null);
+              user.setProfileLastConfirmedTime(null);
+              return user;
+            });
+
+    // the user is still compliant because we are not checking for expiration
     assertRegisteredTierEnabled(dbUser);
   }
 
