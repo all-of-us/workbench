@@ -20,6 +20,9 @@ import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
+import {wasRefferredFromRenewal, reloadProfile} from 'app/utils/access-utils'
+import {withSuccessModal} from 'app/components/modals';
+
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -101,10 +104,24 @@ export const DataUserCodeOfConduct = withUserProfile()(
       });
     }
 
+    submitCodeOfConductWithRenewal = withSuccessModal({ 
+      title: 'Your profile has been updated', 
+      message: 'You will be redirected to the access renewal page upon closing this dialog.',
+      onDismissEffect: async () => {
+        await reloadProfile();
+        navigate(['access-renewal'])
+      }
+    }, async (initials) => {
+      this.setState({submitting: true});
+      const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
+      profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
+    })
+
     render() {
       const {profileState: {profile}} = this.props;
       const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic,
         page, submitting} = this.state;
+      console.log(wasRefferredFromRenewal); 
       const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
         initialNameV2: {
           presence: {allowEmpty: false},
@@ -244,7 +261,9 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
-                        this.submitDataUserCodeOfConduct(initialMonitoring);
+                        wasRefferredFromRenewal()
+                          ? this.submitCodeOfConductWithRenewal(initialMonitoring) 
+                          : this.submitDataUserCodeOfConduct(initialMonitoring);
                       }}
                   >
                     Accept

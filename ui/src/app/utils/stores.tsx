@@ -5,7 +5,6 @@ import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generat
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import {navigate} from 'app/utils/navigation';
-import * as fp from 'lodash/fp';
 
 const {useEffect, useState} = React;
 
@@ -55,14 +54,14 @@ export const profileStore = atom<ProfileStore>({
   })
 });
 
-// This should be with AccessRenewalModal -> onDismiss -> redirect
-export const withProfileStoreReload = wrappedFn => async () =>  {
-  await wrappedFn();
-  const profile = await profileStore.get().reload();
-  // if (fp.isEmpty(profile.accessTierShortNames)) {
-  navigate(['access-renewal']);
-  // } 
-}
+
+export interface FetchResponseStore {
+  title: string, 
+  message: string,
+  onDismissEffect?: () => void
+} 
+
+export const fetchResponseStore = atom<FetchResponseStore | null>(null);
 
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;

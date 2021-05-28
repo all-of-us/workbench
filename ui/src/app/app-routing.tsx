@@ -10,12 +10,13 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
-import {authStore, profileStore, useStore} from 'app/utils/stores';
+import {authStore, profileStore, fetchResponseStore, useStore} from 'app/utils/stores';
 import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
+import {NotificationModal} from './components/modals';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -101,7 +102,9 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
+  const fetchResponse = useStore(fetchResponseStore)
   return authLoaded && <AppRouter>
+    {fetchResponse && <NotificationModal/>}
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}

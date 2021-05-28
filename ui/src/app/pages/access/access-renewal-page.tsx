@@ -10,7 +10,7 @@ import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/com
 import {RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
-import {withResponseHandling, ResponseModal, Result} from 'app/components/modals';
+import {withSuccessModal, withErrorModal} from 'app/components/modals';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {redirectToTraining} from 'app/utils/access-utils'
@@ -68,13 +68,13 @@ const withInvalidDateHandling = date => {
   }
 };
 
-// const confirmPublications = withProfileStoreReload(async () => {
-//   try {
-//     await profileApi().confirmPublications();
-//   } catch {
-//     console.log('Error')
-//   }
-// })
+const confirmPublications = fp.flow(
+  withSuccessModal({ title: 'Confirmed Publications', message: 'You have successfully reported your publications'}),
+  withErrorModal({
+    title: 'Failed To Confirm Publications', 
+    message: 'An error occurred trying to confirm your publications. Please try again.'
+  })
+)(async () => await profileApi().confirmPublications());
 
 const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   const userCompletedModule = !!lastConfirmedTime;
@@ -185,30 +185,13 @@ export const AccessRenewalPage = fp.flow(
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
-  const [confirm, setConfirm] = useState<Result | null>(null);
 
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
-  const confirmPublications = withResponseHandling(setConfirm, {
-      title: 'Confirmed Publications',
-      message: 'You have successfully reported your publications',
-      errorTitle: 'Failed to confirm publications', 
-      errorMessage: 'An error occured trying to confirm your publications. Please try again.',
-      onDismiss: () => console.log('DISMISS')
-    }, async () => {
-    await profileApi().confirmPublications()
-  })
+
 
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-      {confirm && <ResponseModal 
-        title={confirm.title} 
-        message={confirm.message} 
-        onDismiss={() => {
-          !confirm.error && confirm.onDismiss && confirm.onDismiss();
-          setConfirm(null);
-        }
-      }/>}
       {maybeDaysRemaining(profile) < 0
         ? <React.Fragment>
             <ExclamationTriangle style={{height: '1.5rem', width: '1.5rem'}}/>

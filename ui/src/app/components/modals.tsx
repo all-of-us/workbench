@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
+import {fetchResponseStore, FetchResponseStore, useStore} from 'app/utils/stores';
 import {reactStyles, withStyle} from 'app/utils/index';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
@@ -77,15 +78,35 @@ export const ModalTitle = withStyle(styles.modalTitle)('div');
 export const ModalBody = withStyle(styles.modalBody)('div');
 export const ModalFooter = withStyle(styles.modalFooter)('div');
 
-export const ResponseModal = ({onDismiss, title, message}) => {
+export const NotificationModal = () => {
+  const {title, message, onDismissEffect = fp.noop} = useStore(fetchResponseStore);
   return <Modal>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>{message}</ModalBody>
     <ModalFooter>
-      <Button onClick={onDismiss}>OK</Button>
+      <Button onClick={async () => {
+        await onDismissEffect();
+        fetchResponseStore.set(null)
+      }}>OK</Button>
     </ModalFooter>
   </Modal> 
 }
+
+export const withErrorModal = fp.curry((fetchResponseState: FetchResponseStore, wrappedFn) => async (...args) => {
+  try {
+    return await wrappedFn(...args);
+  } catch (e) {
+    fetchResponseStore.set(fetchResponseState);
+  }
+});
+
+export const withSuccessModal = fp.curry((fetchResponseState: FetchResponseStore, wrappedFn) => async (...args) => {
+    const response = await wrappedFn(...args);
+    fetchResponseStore.set(fetchResponseState)
+    return response;
+});
+
+export const withErrorSuccessModal = fp.flow()
 
 export interface Result {
   title: string, 
@@ -93,17 +114,26 @@ export interface Result {
   errorTitle?: string,
   errorMessage?: string,
   error?: boolean,
-  onDismiss?: () => any
 };
 
 export const withResponseHandling = fp.curry(
-  (setConfirm, {title, message, errorTitle, errorMessage, onDismiss = fp.noop}: Result, wrappedFn) => async (...args) => {
+  (setConfirm, {title, message, errorTitle, errorMessage}: Result, wrappedFn) => async (...args) => {
   try {
     const result = await wrappedFn(...args);
-    setConfirm({error: false, title, message, onDismiss})
+    setConfirm({error: false, title, message})
     return result
   } catch (e) {
     setConfirm({error: true, title: errorTitle, message: errorMessage});
   }
-})
+});
+
+// export const withErrorHandling = (setError, {title,  message}, wrappedFn) = async () => {
+//   try {
+//     const result = await wrappedFn(...args);
+//     setError({error: false, title, message})
+//     return result
+//   } catch (e) {
+//     setError({error: true, title, message});
+//   }
+// }
 
