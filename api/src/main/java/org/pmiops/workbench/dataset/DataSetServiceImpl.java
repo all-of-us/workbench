@@ -64,6 +64,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
@@ -836,31 +837,33 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private List<String> generateWgsCode(DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
-    List<String> wgsCodegen = new ArrayList<>();
-    if (dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
-      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        throw new NotImplementedException();
-      }
-
-      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
-        throw new FailedPreconditionException(
-            "The workspace CDR version does not have whole genome data");
-      }
-
-      if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
-        return generateGenomicsAnalysisComment_R();
-      }
-
-      switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
-        case HAIL:
-          return generateHailCode(qualifier, dataSetExportRequest);
-        case PLINK:
-          return generatePlinkCode(qualifier, dataSetExportRequest);
-        case NONE:
-          return generateDownloadVcfCode(qualifier, dataSetExportRequest);
-      }
+    if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
+      return new ArrayList<>();
     }
-    return wgsCodegen;
+
+    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+      throw new NotImplementedException();
+    }
+
+    if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+      throw new FailedPreconditionException(
+          "The workspace CDR version does not have whole genome data");
+    }
+
+    if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
+      return generateGenomicsAnalysisComment_R();
+    }
+
+    switch(dataSetExportRequest.getGenomicsAnalysisTool()) {
+      case HAIL:
+        return generateHailCode(qualifier, dataSetExportRequest);
+      case PLINK:
+        return generatePlinkCode(qualifier, dataSetExportRequest);
+      case NONE:
+        return generateDownloadVcfCode(qualifier, dataSetExportRequest);
+      default:
+        throw new BadRequestException("Invalid Genomics Analysis Tool");
+    }
   }
 
   // TODO eric test cases

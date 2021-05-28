@@ -156,7 +156,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
-    function genomicsToolInput(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
+    function genomicsToolRadioButton(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
       return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
         <RadioButton
           style={{marginRight: '0.25rem'}}
@@ -251,9 +251,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
                 </div>
-              {genomicsToolInput('Hail', GenomicsAnalysisToolEnum.HAIL)}
-              {genomicsToolInput('PLINK', GenomicsAnalysisToolEnum.PLINK)}
-              {genomicsToolInput('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
+              {genomicsToolRadioButton('Hail', GenomicsAnalysisToolEnum.HAIL)}
+              {genomicsToolRadioButton('PLINK', GenomicsAnalysisToolEnum.PLINK)}
+              {genomicsToolRadioButton('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
             </React.Fragment>}
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>

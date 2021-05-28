@@ -50,7 +50,6 @@ import org.springframework.stereotype.Service;
 public class GenomicExtractionService {
 
   private final DataSetService dataSetService;
-  private final DataSetDao dataSetDao;
   private final FireCloudService fireCloudService;
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
@@ -65,7 +64,6 @@ public class GenomicExtractionService {
   @Autowired
   public GenomicExtractionService(
       DataSetService dataSetService,
-      DataSetDao dataSetDao,
       FireCloudService fireCloudService,
       @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
@@ -78,7 +76,6 @@ public class GenomicExtractionService {
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.dataSetService = dataSetService;
-    this.dataSetDao = dataSetDao;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
