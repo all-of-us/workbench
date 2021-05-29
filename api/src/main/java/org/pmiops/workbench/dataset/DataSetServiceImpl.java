@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -562,11 +561,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String cohortQueries) {
 
     return uniqueDomains.stream()
-        .filter(
-            domain ->
-                !domain.equals(
-                    Domain.WHOLE_GENOME_VARIANT)) // This filter can be removed once valid SQL is
-        // generated for WGS
+        .filter( // This filter can be removed once valid SQL is generated for WGS
+            domain -> !domain.equals(Domain.WHOLE_GENOME_VARIANT))
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -874,23 +870,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
-  // refactoring
-  // in RW-6808 is complete. Then this function should be part of the public interface for
-  // GenomicsExtractionService
-  // instead of just a private implementation detail of DataSetService's generateCodeCells
+  // refactoring in RW-6808 is complete. Then this function should be part of the public
+  // interface for GenomicsExtractionService instead of just a private implementation detail
+  // of DataSetService's generateCodeCells
   @VisibleForTesting
   public Optional<String> getExtractionDirectory(Long datasetId) {
-    try {
-      return Optional.of(
-              submissionDao
-                  .findMostRecentValidExtractionByDataset(dataSetDao.findById(datasetId).get())
-                  .get()
-                  .getOutputDir()
-                  .replaceFirst("/$", "")) // Drop trailing slash if exists
-          .filter(dir -> !dir.isEmpty());
-    } catch (NoSuchElementException e) {
-      return Optional.empty();
-    }
+    return dataSetDao
+        .findById(datasetId)
+        .flatMap(submissionDao::findMostRecentValidExtractionByDataset)
+        .map(submission -> submission.getOutputDir())
+        .map(dir -> dir.replaceFirst("/$", ""))
+        .filter(dir -> !dir.isEmpty());
   }
 
   private String generateVcfDirEnvName(String qualifier) {

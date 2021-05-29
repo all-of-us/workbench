@@ -84,10 +84,10 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     function createExportDatasetRequest(): DataSetExportRequest {
       return {
         dataSetRequest: createDataSetRequest(),
-        kernelType: kernelType,
-        genomicsAnalysisTool: genomicsAnalysisTool,
+        kernelType,
+        genomicsAnalysisTool,
         generateGenomicsAnalysisCode: hasWgs(),
-        notebookName: notebookName,
+        notebookName,
         newNotebook: creatingNewNotebook
       };
     }
