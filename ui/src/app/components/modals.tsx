@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import colors from 'app/styles/colors';
-import {notificationStore, NotificationStore} from 'app/utils/stores';
+import {notificationStore, NotificationStore, useStore} from 'app/utils/stores';
 import {reactStyles, withStyle} from 'app/utils/index';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
@@ -80,15 +80,17 @@ export const ModalBody = withStyle(styles.modalBody)('div');
 export const ModalFooter = withStyle(styles.modalFooter)('div');
 
 // This modal is rendered when there is data present in the notificationStore - rendered at the router level until Angular is gone
-// We could have the modal choose to render itself, but I am preferring to keep this stateless for simplicity
-export const NotificationModal = ({title = '', message = '', onDismiss} ) => {
-  return <Modal>
+export const NotificationModal = () => {
+  const notification = useStore(notificationStore);
+  const {title = '', message = '', onDismiss = fp.noop} = notification || {}; 
+
+  useEffect(() => onDismiss)
+
+  return notification && <Modal>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>{message}</ModalBody>
     <ModalFooter>
-      <Button onClick={async () => {
-        onDismiss ? await onDismiss() : notificationStore.set(null);
-      }}>OK</Button>
+      <Button onClick={() => notificationStore.set(null)}>OK</Button>
     </ModalFooter>
   </Modal>
 }

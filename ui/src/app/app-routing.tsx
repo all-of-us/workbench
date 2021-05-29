@@ -10,7 +10,7 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
-import {authStore, profileStore, notificationStore, useStore} from 'app/utils/stores';
+import {authStore, profileStore, useStore} from 'app/utils/stores';
 import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -102,281 +102,281 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  const notification = useStore(notificationStore)
   
-  return authLoaded && <AppRouter>
-    {/* Once we move off of Angular there will be a better place to put this at the app level */}
-    {notification && <NotificationModal title={notification.title} message={notification.message} onDismiss={notification.onDismiss}/>}
-    <AppRoute
-        path='/cookie-policy'
-        component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-    />
-    <AppRoute
-        path='/login'
-        component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/session-expired'
-        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/sign-in-again'
-        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/user-disabled'
-        component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-    />
+  return authLoaded && <React.Fragment>
+    <NotificationModal/>
+    <AppRouter>
+      <AppRoute
+          path='/cookie-policy'
+          component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
+      />
+      <AppRoute
+          path='/login'
+          component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/session-expired'
+          component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/sign-in-again'
+          component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/user-disabled'
+          component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+      />
 
-    <ProtectedRoutes guards={[signInGuard]}>
-      <AppRoute
-        path='/'
-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
-      />
-      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
-        ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
-        : <Navigate to={'/profile'}/>
-        }/>
-      <AppRoute
-          path='/admin/banner'
-          component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
-      />
-      <AppRoute
-          path='/admin/institution'
-          component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/institution/add'
-          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/institution/edit/:institutionId'
-          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/user' // included for backwards compatibility
-          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
-      />
-      <AppRoute
-          path='/admin/review-workspace'
-          component={() => <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>}
-      />
-      <AppRoute
-          path='/admin/users'
-          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
-      />
-      <AppRoute
-          path='/admin/users/:usernameWithoutGsuiteDomain'
-          component={() => <UserAdminPage routeData={{title: 'User Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/user-audit'
-          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
-      />
-      <AppRoute
-          path='/admin/user-audit/:username'
-          component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
-      />
-      <AppRoute
-          path='/admin/workspaces'
-          component={() => <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/workspaces/:workspaceNamespace'
-          component={() => <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>}
-      />
-      <AppRoute
-          path='/admin/workspace-audit'
-          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
-      />
-      <AppRoute
-          path='/admin/workspace-audit/:workspaceNamespace'
-          component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
-      />
-      <AppRoute
-          path='/admin/workspaces/:workspaceNamespace/:nbName'
-          component={() => <AdminNotebookViewPage routeData={{
-            pathElementForTitle: 'nbName',
-            minimizeChrome: true
-          }}/>}
-      />
-      <AppRoute
-          path='/data-code-of-conduct'
-          component={() => <DataUserCodeOfConductPage routeData={{
-            title: 'Data User Code of Conduct',
-            minimizeChrome: true
-          }} />}
-      />
-      <AppRoute path='/profile' component={() => <ProfilePage routeData={{title: 'Profile'}}/>}/>
-      <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-      <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
+      <ProtectedRoutes guards={[signInGuard]}>
+        <AppRoute
+          path='/'
+            component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+        />
+        <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
+          ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
+          : <Navigate to={'/profile'}/>
+          }/>
+        <AppRoute
+            path='/admin/banner'
+            component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
+        />
+        <AppRoute
+            path='/admin/institution'
+            component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/institution/add'
+            component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/institution/edit/:institutionId'
+            component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/user' // included for backwards compatibility
+            component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+        />
+        <AppRoute
+            path='/admin/review-workspace'
+            component={() => <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>}
+        />
+        <AppRoute
+            path='/admin/users'
+            component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+        />
+        <AppRoute
+            path='/admin/users/:usernameWithoutGsuiteDomain'
+            component={() => <UserAdminPage routeData={{title: 'User Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/user-audit'
+            component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+        />
+        <AppRoute
+            path='/admin/user-audit/:username'
+            component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+        />
+        <AppRoute
+            path='/admin/workspaces'
+            component={() => <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/workspaces/:workspaceNamespace'
+            component={() => <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>}
+        />
+        <AppRoute
+            path='/admin/workspace-audit'
+            component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+        />
+        <AppRoute
+            path='/admin/workspace-audit/:workspaceNamespace'
+            component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
+        />
+        <AppRoute
+            path='/admin/workspaces/:workspaceNamespace/:nbName'
+            component={() => <AdminNotebookViewPage routeData={{
+              pathElementForTitle: 'nbName',
+              minimizeChrome: true
+            }}/>}
+        />
+        <AppRoute
+            path='/data-code-of-conduct'
+            component={() => <DataUserCodeOfConductPage routeData={{
+              title: 'Data User Code of Conduct',
+              minimizeChrome: true
+            }} />}
+        />
+        <AppRoute path='/profile' component={() => <ProfilePage routeData={{title: 'Profile'}}/>}/>
+        <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
+        <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
-      <ProtectedRoutes guards={[registrationGuard]}>
-        <AppRoute
-          path='/library'
-          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-        />
-        <AppRoute
-          path='/workspaces'
-          component={() => <WorkspaceListPage
-              routeData={{
-                title: 'View Workspaces',
-                breadcrumb: BreadcrumbType.Workspaces
-              }}
-          />}
-        />
-        <AppRoute
-            path='/workspaces/build'
-            component={() => <WorkspaceEditPage
-                routeData={{title: 'Create Workspace'}}
-                workspaceEditMode={WorkspaceEditMode.Create}
-            />}
-        />
-        <AppRoute
-            path='/workspaces/:ns/:wsid/about'
-            component={() => <WorkspaceAboutPage
+        <ProtectedRoutes guards={[registrationGuard]}>
+          <AppRoute
+            path='/library'
+            component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+          />
+          <AppRoute
+            path='/workspaces'
+            component={() => <WorkspaceListPage
                 routeData={{
-                  title: 'View Workspace Details',
-                  breadcrumb: BreadcrumbType.Workspace,
-                  pageKey: 'about'
+                  title: 'View Workspaces',
+                  breadcrumb: BreadcrumbType.Workspaces
                 }}
             />}
-        />
-        <AppRoute
-            path='/workspaces/:ns/:wsid/duplicate'
-            component={() => <WorkspaceEditPage
-                routeData={{
-                  title: 'Duplicate Workspace',
-                  breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  pageKey: 'duplicate'
-                }}
-                workspaceEditMode={WorkspaceEditMode.Duplicate}
-            />}
-        />
-        <AppRoute
-            path='/workspaces/:ns/:wsid/edit'
-            component={() => <WorkspaceEditPage
-                routeData={{
-                  title: 'Edit Workspace',
-                  breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  pageKey: 'edit'
-                }}
-                workspaceEditMode={WorkspaceEditMode.Edit}
-            />}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/notebooks'
-          component={() => <NotebookListPage routeData={{
-            title: 'View Notebooks',
-            pageKey: 'notebooks',
-            breadcrumb: BreadcrumbType.Workspace
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
-          component={() => <InteractiveNotebookPage routeData={{
-            pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
-            pageKey: NOTEBOOK_PAGE_KEY,
-            minimizeChrome: true
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/notebooks/:nbName'
-          component={() => <NotebookRedirectPage routeData={{
-            pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
-            breadcrumb: BreadcrumbType.Notebook,
-            // The iframe we use to display the Jupyter notebook does something strange
-            // to the height calculation of the container, which is normally set to auto.
-            // Setting this flag sets the container to 100% so that no content is clipped.
-            contentFullHeightOverride: true,
-            pageKey: NOTEBOOK_PAGE_KEY,
-            minimizeChrome: true
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data'
-          component={() => <DataComponentPage routeData={{
-            title: 'Data Page',
-            breadcrumb: BreadcrumbType.Workspace,
-            pageKey: 'data'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/data-sets'
-          component={() => <DataSetComponentPage routeData={{
-            title: 'Dataset Page',
-            breadcrumb: BreadcrumbType.Dataset,
-            pageKey: 'datasetBuilder'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
-          component={() => <DataSetComponentPage routeData={{
-            title: 'Edit Dataset',
-            breadcrumb: BreadcrumbType.Dataset,
-            pageKey: 'datasetBuilder'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
-          component={() => <CohortActionsPage routeData={{
-            title: 'Cohort Actions',
-            breadcrumb: BreadcrumbType.Cohort,
-            pageKey: 'cohortBuilder'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
-          component={() => <ParticipantsTablePage routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
-            pageKey: 'reviewParticipants'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
-          component={() => <DetailPagePage routeData={{
-            title: 'Participant Detail',
-            breadcrumb: BreadcrumbType.Participant,
-            pageKey: 'reviewParticipantDetail'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
-          component={() => <QueryReportPage routeData={{
-            title: 'Review Cohort Description',
-            breadcrumb: BreadcrumbType.Cohort,
-            pageKey: 'cohortDescription'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
-          component={() => <CohortReviewPage routeData={{
-            title: 'Review Cohort Participants',
-            breadcrumb: BreadcrumbType.Cohort,
-            pageKey: 'reviewParticipants'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/concepts'
-          component={() => <ConceptHomepagePage routeData={{
-            title: 'Search Concepts',
-            breadcrumb: BreadcrumbType.SearchConcepts,
-            pageKey: 'searchConceptSets'
-          }}/>}
-        />
-        <AppRoute
-          path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
-          component={() => <ConceptSetActionsPage routeData={{
-            title: 'Concept Set Actions',
-            breadcrumb: BreadcrumbType.ConceptSet,
-            pageKey: 'conceptSetActions'
-          }}/>}
-        />
+          />
+          <AppRoute
+              path='/workspaces/build'
+              component={() => <WorkspaceEditPage
+                  routeData={{title: 'Create Workspace'}}
+                  workspaceEditMode={WorkspaceEditMode.Create}
+              />}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/about'
+              component={() => <WorkspaceAboutPage
+                  routeData={{
+                    title: 'View Workspace Details',
+                    breadcrumb: BreadcrumbType.Workspace,
+                    pageKey: 'about'
+                  }}
+              />}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/duplicate'
+              component={() => <WorkspaceEditPage
+                  routeData={{
+                    title: 'Duplicate Workspace',
+                    breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+                    pageKey: 'duplicate'
+                  }}
+                  workspaceEditMode={WorkspaceEditMode.Duplicate}
+              />}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/edit'
+              component={() => <WorkspaceEditPage
+                  routeData={{
+                    title: 'Edit Workspace',
+                    breadcrumb: BreadcrumbType.WorkspaceEdit,
+                    pageKey: 'edit'
+                  }}
+                  workspaceEditMode={WorkspaceEditMode.Edit}
+              />}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/notebooks'
+            component={() => <NotebookListPage routeData={{
+              title: 'View Notebooks',
+              pageKey: 'notebooks',
+              breadcrumb: BreadcrumbType.Workspace
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
+            component={() => <InteractiveNotebookPage routeData={{
+              pathElementForTitle: 'nbName',
+              breadcrumb: BreadcrumbType.Notebook,
+              pageKey: NOTEBOOK_PAGE_KEY,
+              minimizeChrome: true
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/notebooks/:nbName'
+            component={() => <NotebookRedirectPage routeData={{
+              pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
+              breadcrumb: BreadcrumbType.Notebook,
+              // The iframe we use to display the Jupyter notebook does something strange
+              // to the height calculation of the container, which is normally set to auto.
+              // Setting this flag sets the container to 100% so that no content is clipped.
+              contentFullHeightOverride: true,
+              pageKey: NOTEBOOK_PAGE_KEY,
+              minimizeChrome: true
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data'
+            component={() => <DataComponentPage routeData={{
+              title: 'Data Page',
+              breadcrumb: BreadcrumbType.Workspace,
+              pageKey: 'data'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/data-sets'
+            component={() => <DataSetComponentPage routeData={{
+              title: 'Dataset Page',
+              breadcrumb: BreadcrumbType.Dataset,
+              pageKey: 'datasetBuilder'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
+            component={() => <DataSetComponentPage routeData={{
+              title: 'Edit Dataset',
+              breadcrumb: BreadcrumbType.Dataset,
+              pageKey: 'datasetBuilder'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
+            component={() => <CohortActionsPage routeData={{
+              title: 'Cohort Actions',
+              breadcrumb: BreadcrumbType.Cohort,
+              pageKey: 'cohortBuilder'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
+            component={() => <ParticipantsTablePage routeData={{
+              title: 'Review Cohort Participants',
+              breadcrumb: BreadcrumbType.Cohort,
+              pageKey: 'reviewParticipants'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
+            component={() => <DetailPagePage routeData={{
+              title: 'Participant Detail',
+              breadcrumb: BreadcrumbType.Participant,
+              pageKey: 'reviewParticipantDetail'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
+            component={() => <QueryReportPage routeData={{
+              title: 'Review Cohort Description',
+              breadcrumb: BreadcrumbType.Cohort,
+              pageKey: 'cohortDescription'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
+            component={() => <CohortReviewPage routeData={{
+              title: 'Review Cohort Participants',
+              breadcrumb: BreadcrumbType.Cohort,
+              pageKey: 'reviewParticipants'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/concepts'
+            component={() => <ConceptHomepagePage routeData={{
+              title: 'Search Concepts',
+              breadcrumb: BreadcrumbType.SearchConcepts,
+              pageKey: 'searchConceptSets'
+            }}/>}
+          />
+          <AppRoute
+            path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
+            component={() => <ConceptSetActionsPage routeData={{
+              title: 'Concept Set Actions',
+              breadcrumb: BreadcrumbType.ConceptSet,
+              pageKey: 'conceptSetActions'
+            }}/>}
+          />
+        </ProtectedRoutes>
       </ProtectedRoutes>
-    </ProtectedRoutes>
-  </AppRouter>;
+    </AppRouter>
+  </React.Fragment>
 };
 
 @AComponent({

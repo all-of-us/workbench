@@ -97,7 +97,6 @@ export const DataUserCodeOfConduct = withUserProfile()(
     }
 
     submitDataUserCodeOfConduct(initials) {
-      this.setState({submitting: true});
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
@@ -113,7 +112,6 @@ export const DataUserCodeOfConduct = withUserProfile()(
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async (initials) => {
-      this.setState({submitting: true});
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
       const profile = await profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
       this.props.profileState.updateCache(profile);
@@ -259,12 +257,14 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
+                        this.setState({submitting: true});
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
                         wasRefferredFromRenewal()
                           ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                           : this.submitDataUserCodeOfConduct(initialMonitoring);
+                        this.setState({submitting: false});
                       }}
                   >
                     Accept

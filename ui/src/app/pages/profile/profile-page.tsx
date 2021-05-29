@@ -36,7 +36,7 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {wasRefferredFromRenewal, reloadProfile} from 'app/utils/access-utils'
+import {wasRefferredFromRenewal} from 'app/utils/access-utils'
 
 
 // validators for validate.js
@@ -248,20 +248,14 @@ export const ProfilePage = fp.flow(
     saveProfileWithRenewal = withSuccessModal({
       title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismiss: async () => {
-        navigate(['access-renewal']);
-        await reloadProfile();
-      }
+      onDismiss: () => navigate(['access-renewal'])
     }, this.saveProfile.bind(this))
 
     confirmProfile = fp.flow(
       withSuccessModal({
         title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: async () => {
-          navigate(['access-renewal']);
-          await reloadProfile();
-        }
+        onDismiss: () => navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
     )(async () => {
