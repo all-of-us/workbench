@@ -3,7 +3,6 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {withRouteData} from 'app/components/app-router';
-import {navigate} from 'app/utils/navigation';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -11,6 +10,7 @@ import {ControlledTierBadge, ExclamationTriangle} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
+import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
@@ -22,7 +22,6 @@ import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
-import {withSuccessModal, withErrorModal} from 'app/components/modals';
 import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
@@ -30,13 +29,14 @@ import {
   lensOnProps,
   withUserProfile
 } from 'app/utils';
+import {wasRefferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
+import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {wasRefferredFromRenewal} from 'app/utils/access-utils'
 
 
 // validators for validate.js
@@ -136,7 +136,6 @@ export const ProfilePage = fp.flow(
     ProfilePageProps,
     ProfilePageState
 > {
-    static displayName = 'ProfilePage';
 
     constructor(props) {
       super(props);
@@ -148,6 +147,26 @@ export const ProfilePage = fp.flow(
         updating: false
       };
     }
+    static displayName = 'ProfilePage';
+
+    saveProfileWithRenewal = withSuccessModal({
+      title: 'Your profile has been updated',
+      message: 'You will be redirected to the access renewal page upon closing this dialog.',
+      onDismiss: () => navigate(['access-renewal'])
+    }, this.saveProfile.bind(this));
+
+    confirmProfile = fp.flow(
+      withSuccessModal({
+        title: 'You have confirmed your profile is accurate',
+        message: 'You will be redirected to the access renewal page upon closing this dialog.',
+        onDismiss: () => navigate(['access-renewal'])
+      }),
+      withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
+    )(async() => {
+      this.setState({updating: true});
+      await profileApi().confirmProfile();
+      this.setState({updating: false});
+    });
 
     async componentDidMount() {
       try {
@@ -245,25 +264,6 @@ export const ProfilePage = fp.flow(
       }
     }
 
-    saveProfileWithRenewal = withSuccessModal({
-      title: 'Your profile has been updated',
-      message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismiss: () => navigate(['access-renewal'])
-    }, this.saveProfile.bind(this))
-
-    confirmProfile = fp.flow(
-      withSuccessModal({
-        title: 'You have confirmed your profile is accurate',
-        message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => navigate(['access-renewal'])
-      }),
-      withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
-    )(async () => {
-        this.setState({updating: true});
-        await profileApi().confirmProfile();
-        this.setState({updating: false});
-      })
-
     private getEraCommonsCardText(profile) {
       switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
         case RegistrationStepStatus.COMPLETED:
@@ -352,7 +352,10 @@ export const ProfilePage = fp.flow(
     } = currentProfile;
 
 
-      const hasExpired = fp.flow(fp.find({moduleName: 'profileConfirmation'}), fp.get('hasExpired'))(profile.renewableAccessModules.modules)
+      const hasExpired = fp.flow(
+        fp.find({moduleName: 'profileConfirmation'}),
+        fp.get('hasExpired')
+      )(profile.renewableAccessModules.modules);
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;

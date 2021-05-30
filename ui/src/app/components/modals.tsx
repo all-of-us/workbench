@@ -2,15 +2,15 @@ import * as Color from 'color';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
+import {Button} from 'app/components/buttons';
 import colors from 'app/styles/colors';
-import {notificationStore, NotificationStore, useStore} from 'app/utils/stores';
 import {reactStyles, withStyle} from 'app/utils/index';
+import {notificationStore, NotificationStore, useStore} from 'app/utils/stores';
+import * as fp from 'lodash/fp';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
-import {Button} from 'app/components/buttons';
-import * as fp from 'lodash/fp';
 
-const {useState, useEffect} = React;
+const { useEffect} = React;
 
 const styles = reactStyles({
   modal: {
@@ -82,9 +82,9 @@ export const ModalFooter = withStyle(styles.modalFooter)('div');
 // This modal is rendered when there is data present in the notificationStore - rendered at the router level until Angular is gone
 export const NotificationModal = () => {
   const notification = useStore(notificationStore);
-  const {title = '', message = '', onDismiss = fp.noop} = notification || {}; 
+  const {title = '', message = '', onDismiss = fp.noop} = notification || {};
 
-  useEffect(() => onDismiss)
+  useEffect(() => onDismiss);
 
   return notification && <Modal>
     <ModalTitle>{title}</ModalTitle>
@@ -92,10 +92,10 @@ export const NotificationModal = () => {
     <ModalFooter>
       <Button onClick={() => notificationStore.set(null)}>OK</Button>
     </ModalFooter>
-  </Modal>
-}
+  </Modal>;
+};
 
-export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
+export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
   try {
     return await wrappedFn(...args);
   } catch (e) {
@@ -103,8 +103,8 @@ export const withErrorModal = fp.curry((notificationState: NotificationStore, wr
   }
 });
 
-export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
-    const response = await wrappedFn(...args);
-    notificationStore.set(notificationState)
-    return response;
+export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
+  const response = await wrappedFn(...args);
+  notificationStore.set(notificationState);
+  return response;
 });

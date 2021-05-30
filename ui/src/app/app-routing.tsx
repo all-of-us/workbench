@@ -102,7 +102,7 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  
+
   return authLoaded && <React.Fragment>
     <NotificationModal/>
     <AppRouter>
@@ -376,7 +376,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         </ProtectedRoutes>
       </ProtectedRoutes>
     </AppRouter>
-  </React.Fragment>
+  </React.Fragment>;
 };
 
 @AComponent({

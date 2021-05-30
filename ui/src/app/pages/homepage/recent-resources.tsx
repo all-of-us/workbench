@@ -114,7 +114,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
 
     const getCdrVersionName = (r: WorkspaceResource) => {
       const {cdrVersionTiersResponse} = props;
-      const cdrVersion = getCdrVersion(getWorkspace(r), cdrVersionTiersResponse)
+      const cdrVersion = getCdrVersion(getWorkspace(r), cdrVersionTiersResponse);
       return cdrVersion && cdrVersion.name;
     };
 

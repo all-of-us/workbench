@@ -8,14 +8,13 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
 import {RadioButton} from 'app/components/inputs';
+import {withErrorModal, withSuccessModal} from 'app/components/modals';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
-import {withSuccessModal, withErrorModal} from 'app/components/modals';
 import {styles} from 'app/pages/profile/profile-styles';
-import colors, {colorWithWhiteness, addOpacity} from 'app/styles/colors';
-import {redirectToTraining} from 'app/utils/access-utils'
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {SpinnerOverlay} from 'app/components/spinners';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   cond,
   daysFromNow,
@@ -23,6 +22,7 @@ import {
   useId,
   withStyle
 } from 'app/utils';
+import {redirectToTraining} from 'app/utils/access-utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 
@@ -48,8 +48,8 @@ const renewalStyle = {
   },
   completionBox: {
     height: '3.5rem',
-    background: `${addOpacity(colors.accent, 0.15)}`, 
-    borderRadius: 5 , 
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: 5 ,
     marginTop: '0.5rem',
     padding: '0.75rem'
   },
@@ -71,15 +71,15 @@ const renewalStyle = {
 
 // Async Calls with error handling
 const reloadProfile = withErrorModal({
-    title: 'Could Not Load Profile',
-    message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
-  },
+  title: 'Could Not Load Profile',
+  message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
+},
   profileStore.get().reload
 );
 
 const confirmPublications = fp.flow(
-  withSuccessModal({ 
-    title: 'Confirmed Publications', 
+  withSuccessModal({
+    title: 'Confirmed Publications',
     message: 'You have successfully reported your publications',
     onDismiss: reloadProfile
   }),
@@ -87,12 +87,12 @@ const confirmPublications = fp.flow(
     title: 'Failed To Confirm Publications',
     message: 'An error occurred trying to confirm your publications. Please try again.',
   })
-)(async () => await profileApi().confirmPublications());
+)(async() => await profileApi().confirmPublications());
 
 
 const syncAndReload = fp.flow(
-  withSuccessModal({ 
-    title: 'Compliance Status Refreshed', 
+  withSuccessModal({
+    title: 'Compliance Status Refreshed',
     message: 'Your compliance training has been refreshed. If you are not seeing the correct status try again in a few minutes.',
     onDismiss: reloadProfile
   }),
@@ -100,8 +100,8 @@ const syncAndReload = fp.flow(
     title: 'Failed To Refresh',
     message: 'An error occurred trying to refresh your compliance training status. Please try again.',
   })
-)(async () => {
-    await profileApi().syncComplianceTrainingStatus();
+)(async() => {
+  await profileApi().syncComplianceTrainingStatus();
 });
 
 
@@ -219,7 +219,7 @@ export const AccessRenewalPage = fp.flow(
     profileLastConfirmedTime,
     dataUseAgreementBypassTime,
     complianceTrainingBypassTime,
-    renewableAccessModules: {anyModuleHasExpired, modules}},
+    renewableAccessModules: {modules}},
     profile
   } = useStore(profileStore);
   const [publications, setPublications] = useState<boolean>(null);
@@ -228,7 +228,7 @@ export const AccessRenewalPage = fp.flow(
   const [reloadDisabled, setReloadDisabled] = useState(true);
   const [busy, setBusy] = useState(false);
 
- 
+
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
     reloadProfile();
@@ -237,7 +237,7 @@ export const AccessRenewalPage = fp.flow(
 
   // Helpers
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
-  const anyModuleIsExpiring = fp.flow(fp.map('expirationEpochMillis'), fp.some(isExpiring))(modules)
+  const anyModuleIsExpiring = fp.flow(fp.map('expirationEpochMillis'), fp.some(isExpiring))(modules);
 
 
   // Render
@@ -296,7 +296,7 @@ export const AccessRenewalPage = fp.flow(
           <ActionButton isComplete={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
-            onClick={async () => {
+            onClick={async() => {
               setBusy(true);
               await confirmPublications();
               setBusy(false);
@@ -326,7 +326,7 @@ export const AccessRenewalPage = fp.flow(
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isExpiring(getExpirationTimeFor('complianceTraining')) && 
+        {isExpiring(getExpirationTimeFor('complianceTraining')) &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
@@ -339,15 +339,15 @@ export const AccessRenewalPage = fp.flow(
               redirectToTraining();
             }}
             wasBypassed={!!complianceTrainingBypassTime}/>
-          <Button 
+          {isExpiring(getExpirationTimeFor('complianceTraining')) && <Button
             disabled={reloadDisabled}
-            onClick={async () => {
+            onClick={async() => {
               setBusy(true);
-              await syncAndReload()
+              await syncAndReload();
               setBusy(false);
             }}
-            style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>
-        </FlexRow>  
+            style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>}
+        </FlexRow>
       </RenewalCard>
       {/* DUCC */}
       <RenewalCard step={4}

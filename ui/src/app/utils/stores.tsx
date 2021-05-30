@@ -4,7 +4,6 @@ import {atom, Atom} from 'app/utils/subscribable';
 import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
-import {navigate} from 'app/utils/navigation';
 
 const {useEffect, useState} = React;
 
@@ -56,9 +55,9 @@ export const profileStore = atom<ProfileStore>({
 
 
 export interface NotificationStore {
-  title: string,
-  message: string,
-  onDismiss?: () => void
+  title: string;
+  message: string;
+  onDismiss?: () => void;
 }
 
 export const notificationStore = atom<NotificationStore | null>(null);

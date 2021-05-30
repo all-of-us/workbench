@@ -4,11 +4,11 @@ import * as React from 'react';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
+import {profileStore, useStore} from 'app/utils/stores';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
-import {profileStore, useStore} from 'app/utils/stores';
 
 const styles = reactStyles({
   box: {

@@ -12,14 +12,13 @@ import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
-import {redirectToTraining} from 'app/utils/access-utils'
 
 const styles = reactStyles({
   mainHeader: {

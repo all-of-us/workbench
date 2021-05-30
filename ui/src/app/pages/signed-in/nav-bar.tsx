@@ -9,8 +9,8 @@ import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
+import {ProfileStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
-import {ProfileStore} from 'app/utils/stores'
 import * as React from 'react';
 
 const styles = reactStyles({

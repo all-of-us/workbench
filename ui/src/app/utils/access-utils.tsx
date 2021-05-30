@@ -1,7 +1,7 @@
-import {AnalyticsTracker} from 'app/utils/analytics';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {environment} from 'environments/environment';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {queryParamsStore} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 
 
 export async function redirectToTraining() {
@@ -10,4 +10,4 @@ export async function redirectToTraining() {
   window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
-export const wasRefferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === "1"
+export const wasRefferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
