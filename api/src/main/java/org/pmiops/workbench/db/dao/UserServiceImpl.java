@@ -320,17 +320,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
   }
 
-  private boolean isProfileCompliant(DbUser user) {
-    final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
-    return !profileTimes.hasExpired();
-  }
-
-  private boolean isPublicationsCompliant(DbUser user) {
-    final ModuleTimes publicationTimes =
-        new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
-    return !publicationTimes.hasExpired();
-  }
-
   private boolean shouldUserBeRegistered(DbUser user) {
     // beta access bypass and 2FA do not need to be checked for annual renewal
     boolean betaAccessGranted =
@@ -344,8 +333,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
-        && isPublicationsCompliant(user)
-        && isProfileCompliant(user)
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
