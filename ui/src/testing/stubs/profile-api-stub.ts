@@ -56,10 +56,10 @@ export class ProfileStubVariables {
       }, {
         moduleName: ModuleNameEnum.ComplianceTraining,
         expirationEpochMillis: undefined
-      },{
+      }, {
         moduleName: ModuleNameEnum.ProfileConfirmation,
         expirationEpochMillis: undefined
-      },{
+      }, {
         moduleName: ModuleNameEnum.PublicationConfirmation,
         expirationEpochMillis: undefined
       }],

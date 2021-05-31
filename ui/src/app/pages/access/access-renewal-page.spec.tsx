@@ -17,7 +17,7 @@ const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
 
 describe('ProfilePageComponent', () => {
-  
+
   function expireAllModules() {
     const expiredTime = Date.now() - 1000 * 60 * 60;
     const {profile} = profileStore.get();
@@ -33,7 +33,7 @@ describe('ProfilePageComponent', () => {
   function udpateOneModule(updateModuleName, time) {
     const oldProfile = profileStore.get().profile;
     const newModules = fp.map(({moduleName, expirationEpochMillis}) => ({
-      moduleName, 
+      moduleName,
       expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
     }), oldProfile.renewableAccessModules.modules);
     const newProfile = fp.set(['renewableAccessModules', 'modules'], newModules, oldProfile)
@@ -143,7 +143,7 @@ describe('ProfilePageComponent', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
   });
 
