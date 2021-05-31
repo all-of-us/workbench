@@ -5,13 +5,12 @@ import * as fp from 'lodash/fp';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
-import {findNodesByExactText, findNodesContainingText} from 'testing/react-test-helpers';
+import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
