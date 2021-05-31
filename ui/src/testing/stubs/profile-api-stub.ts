@@ -56,6 +56,12 @@ export class ProfileStubVariables {
       }, {
         moduleName: ModuleNameEnum.ComplianceTraining,
         expirationEpochMillis: undefined
+      },{
+        moduleName: ModuleNameEnum.ProfileConfirmation,
+        expirationEpochMillis: undefined
+      },{
+        moduleName: ModuleNameEnum.PublicationConfirmation,
+        expirationEpochMillis: undefined
       }],
       anyModuleHasExpired: false
     }
@@ -88,6 +94,14 @@ export class ProfileApiStub extends ProfileApi {
 
   public getMe(options?: any) {
     return Promise.resolve(this.profile);
+  }
+
+  public confirmProfile(options?: any) {
+    return Promise.resolve(new Response('', {status: 200}));
+  }
+
+  public confirmPublications(options?: any) {
+    return Promise.resolve(new Response('', {status: 200}));
   }
 
   public requestBetaAccess(options?: any) {
