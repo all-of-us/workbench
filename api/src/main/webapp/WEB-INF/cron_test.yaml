@@ -1,5 +1,3 @@
 cron:
-- url: /v1/cron/bulkAuditProjectAccess
-  aou_skip_reason: "RW-6430"
 - url: /v1/cron/checkFreeTierBillingUsage
   aou_skip_reason: "RW-6280"

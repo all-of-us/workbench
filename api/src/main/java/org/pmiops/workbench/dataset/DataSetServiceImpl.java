@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
@@ -49,6 +50,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -90,6 +92,9 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
+
+  private static final String MISSING_EXTRACTION_DIR_PLACEHOLDER =
+      "\"WORKSPACE_STORAGE_VCF_DIRECTORY_GOES_HERE\"";
 
   private static final String CDR_STRING = "\\$\\{projectId}.\\$\\{dataSetId}.";
   private static final String PYTHON_CDR_ENV_VARIABLE =
@@ -212,6 +217,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DSLinkingDao dsLinkingDao;
   private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
+  private final WgsExtractCromwellSubmissionDao submissionDao;
   private final Provider<String> prefixProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
@@ -230,6 +236,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DSLinkingDao dsLinkingDao,
       DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
+      WgsExtractCromwellSubmissionDao submissionDao,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
@@ -244,6 +251,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dsLinkingDao = dsLinkingDao;
     this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
+    this.submissionDao = submissionDao;
     this.prefixProvider = prefixProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
@@ -553,6 +561,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String cohortQueries) {
 
     return uniqueDomains.stream()
+        .filter( // This filter can be removed once valid SQL is generated for WGS
+            domain -> !domain.equals(Domain.WHOLE_GENOME_VARIANT))
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -796,24 +806,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     String qualifier = generateRandomEightCharacterQualifier();
 
-    if (DataSetExportRequest.GenomicsDataTypeEnum.WHOLE_GENOME.equals(
-        dataSetExportRequest.getGenomicsDataType())) {
-      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        throw new NotImplementedException();
-      }
-
-      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
-        throw new FailedPreconditionException(
-            "The workspace CDR version does not have whole genome data");
-      }
-      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
-        throw new BadRequestException("Genomics code generation is only supported in Python");
-      }
-
-      // TODO(RW-6633): Add WGS codegen support.
-      throw new NotImplementedException();
-    }
-
     String prerequisites;
     switch (dataSetExportRequest.getKernelType()) {
       case R:
@@ -827,19 +819,180 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "Kernel Type " + dataSetExportRequest.getKernelType().toString() + " not supported");
     }
 
-    return queriesByDomain.entrySet().stream()
-        .map(
-            entry ->
-                prerequisites
-                    + "\n\n"
-                    + generateNotebookUserCode(
-                        entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
-                        dataSetExportRequest.getDataSetRequest().getName(),
-                        dbWorkspace.getCdrVersion().getName(),
-                        qualifier,
-                        dataSetExportRequest.getKernelType()))
+    return Stream.concat(
+            queriesByDomain.entrySet().stream()
+                .map(
+                    entry ->
+                        prerequisites
+                            + "\n\n"
+                            + generateNotebookUserCode(
+                                entry.getValue(),
+                                Domain.fromValue(entry.getKey()),
+                                dataSetExportRequest.getDataSetRequest().getName(),
+                                dbWorkspace.getCdrVersion().getName(),
+                                qualifier,
+                                dataSetExportRequest.getKernelType())),
+            generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .collect(Collectors.toList());
+  }
+
+  private List<String> generateWgsCode(
+      DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
+    if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
+      return new ArrayList<>();
+    }
+
+    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+      throw new NotImplementedException();
+    }
+
+    if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+      throw new FailedPreconditionException(
+          "The workspace CDR version does not have whole genome data");
+    }
+
+    if (dataSetExportRequest.getKernelType().equals(KernelTypeEnum.R)) {
+      return generateGenomicsAnalysisCommentForR();
+    }
+
+    // TODO RW-6806: Add some code to print a user friendly message if the extracted VCF files are
+    // not ready yet
+    switch (dataSetExportRequest.getGenomicsAnalysisTool()) {
+      case HAIL:
+        return generateHailCode(qualifier, dataSetExportRequest);
+      case PLINK:
+        return generatePlinkCode(qualifier, dataSetExportRequest);
+      case NONE:
+        return generateDownloadVcfCode(qualifier, dataSetExportRequest);
+      default:
+        throw new BadRequestException("Invalid Genomics Analysis Tool");
+    }
+  }
+
+  // ericsong: I really dislike using @VisibleForTesting but I couldn't help it until the
+  // refactoring in RW-6808 is complete. Then this function should be part of the public
+  // interface for GenomicsExtractionService instead of just a private implementation detail
+  // of DataSetService's generateCodeCells
+  @VisibleForTesting
+  public Optional<String> getExtractionDirectory(Long datasetId) {
+    return dataSetDao
+        .findById(datasetId)
+        .flatMap(submissionDao::findMostRecentValidExtractionByDataset)
+        .map(submission -> submission.getOutputDir())
+        .map(dir -> dir.replaceFirst("/$", ""))
+        .filter(dir -> !dir.isEmpty());
+  }
+
+  private String generateVcfDirEnvName(String qualifier) {
+    return "DATASET_" + qualifier + "_VCF_DIR";
+  }
+
+  private String generateExtractionDirCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
+    String extractionDir =
+        getExtractionDirectory(dataSetExportRequest.getDataSetRequest().getDataSetId())
+            .orElse(MISSING_EXTRACTION_DIR_PLACEHOLDER);
+
+    String noExtractionDirComment =
+        MISSING_EXTRACTION_DIR_PLACEHOLDER.equals(extractionDir)
+            ? "# VCF files for this dataset do not exist\n"
+                + "# Run a Genomic Extraction from a Dataset to generate VCF files\n"
+            : "";
+
+    return noExtractionDirComment
+        + "%env "
+        + generateVcfDirEnvName(qualifier)
+        + "="
+        + extractionDir;
+  }
+
+  private List<String> generateHailCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String matrixName = "mt_" + qualifier;
+
+    return ImmutableList.of(
+        generateExtractionDirCode(qualifier, dataSetExportRequest),
+        "# Initialize Hail\n"
+            + "# Note: Hail must be run from a \"Hail Genomics Analysis\" cloud analysis environment"
+            + "\n"
+            + "import hail as hl\n"
+            + "import os\n"
+            + "from hail.plot import show\n"
+            + "\n"
+            + "hl.init(default_reference='GRCh38')\n"
+            + "hl.plot.output_notebook()",
+        "# Create Hail Matrix table\n"
+            + "# This can take a few hours for a dataset with hundreds of participants\n"
+            + "workspace_bucket = os.environ['WORKSPACE_BUCKET']\n"
+            + "vcf_dir = os.environ['"
+            + generateVcfDirEnvName(qualifier)
+            + "']\n"
+            + "hail_matrix_table_gcs = f'{workspace_bucket}/dataset_"
+            + qualifier
+            + ".mt'\n"
+            // TODO: handle the case where matrix table has already been imported. Currently - it
+            // throws a write error
+            + "hl.import_vcf(f'{vcf_dir}/*.vcf.gz', force_bgz=True).write(hail_matrix_table_gcs)\n",
+        "# Read Hail Matrix table\n"
+            + matrixName
+            + " = hl.read_matrix_table(hail_matrix_table_gcs)",
+        "# Select variants\n" + matrixName + ".rows().select().show(5)",
+        "# Select sample names\n" + matrixName + ".s.show(5)");
+  }
+
+  private List<String> generatePlinkCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String localVcfDir = "dataset_" + qualifier + "_vcfs";
+    final String mergedVcfFilename = "dataset_" + qualifier + "_merged.vcf.gz";
+    final String mergedVcfFilepath = localVcfDir + "/" + mergedVcfFilename;
+    final String plinkBinaryPrefix = "dataset_" + qualifier + "_plink";
+
+    List<String> plinkCode =
+        ImmutableList.of(
+            "# Create a single merged VCF file\n"
+                + "# This can take a few hours for a dataset with hundreds of participants\n"
+                + "\n"
+                + "!bcftools concat -a"
+                + localVcfDir
+                + "/*.vcf.gz -o "
+                + mergedVcfFilepath,
+            "!plink --vcf " + mergedVcfFilepath + " --make-bed --out " + plinkBinaryPrefix,
+            "# Plink binary input files. Optionally - delete "
+                + localVcfDir
+                + "/ if you plan to only use Plink\n"
+                + "# and no longer need the VCF files\n"
+                + "!ls dataset_43789957_plink.*");
+
+    return Stream.concat(
+            generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
+        .collect(Collectors.toList());
+  }
+
+  private List<String> generateDownloadVcfCode(
+      String qualifier, DataSetExportRequest dataSetExportRequest) {
+    final String localVcfDir = "dataset_" + qualifier + "_vcfs";
+
+    // TODO: Add a check to see if sufficient disk space is available in the Runtime
+    return ImmutableList.of(
+        generateExtractionDirCode(qualifier, dataSetExportRequest),
+        "%%bash\n"
+            + "\n"
+            + "# Download VCFs\n"
+            + "\n"
+            + "mkdir "
+            + localVcfDir
+            + "\n"
+            + "gsutil -m cp ${"
+            + generateVcfDirEnvName(qualifier)
+            + "}/* "
+            + localVcfDir
+            + "/");
+  }
+
+  private List<String> generateGenomicsAnalysisCommentForR() {
+    return ImmutableList.of(
+        "# Code generation for genomic analysis tools is not supported in R\n"
+            + "# The Google Cloud Storage location of extracted VCF files can be found in the Genomics Extraction History side panel");
   }
 
   @Override

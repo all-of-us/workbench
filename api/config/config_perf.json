@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -140,6 +140,6 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }
