@@ -479,8 +479,6 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
-    confirmProfile();
-
     DbUser user = userProvider.get();
 
     // Save current profile for audit trail. Continue to use the userProvider (instead
@@ -497,6 +495,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     profileService.updateProfile(user, updatedProfile, previousProfile);
+    confirmProfile();
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
