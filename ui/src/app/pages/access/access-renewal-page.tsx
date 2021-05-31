@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {maybeDaysRemaining} from 'app/components/access-renewal-notification';
 import {withRouteData} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -22,7 +21,7 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {redirectToTraining} from 'app/utils/access-utils';
+import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 
@@ -231,7 +230,13 @@ export const AccessRenewalPage = fp.flow(
 
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
-    reloadProfile();
+    const getProfile = async () => {
+      setBusy(true);
+      await reloadProfile();
+      setBusy(false);
+    }
+
+    getProfile();
   }, []);
 
 
