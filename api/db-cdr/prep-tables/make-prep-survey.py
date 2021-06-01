@@ -74,6 +74,11 @@ def main():
         id_registered = 1
         id_all = 1
 
+        # initialize survey_ids
+        survey_id_all = 0
+        survey_id_controlled = 0
+        survey_id_registered = 0
+
         # initializing these variables in the case that the topic is null
         topic_id_all = 0
         topic_id_controlled = 0
@@ -81,7 +86,7 @@ def main():
 
         for row in rows:
 
-            if not_row_to_skip(row):
+            if skip_row(row):
                 field_annotation, field_annotation_array, question_label, question_code, \
                 text_validation, choices, section_header, min_value, \
                 max_value = parse_row_columns(row)
@@ -93,28 +98,6 @@ def main():
                         item_flags[item] = 1
                     else:
                         item_flags[item] = 0
-
-                long_code_to_short_code = {}
-                for item in field_annotation_array:
-                    if item not in annotation_flags:
-                        split_codes = item.split('=')
-                        if "CONTROLLED_ANSWER_SUPPRESSED" not in split_codes and \
-                                "REGISTERED_ANSWER_SUPPRESSED" not in split_codes:
-                            # in the case that it doesn't have a code ex: Launched 5/30/2017 (PTSC) & 12/10/2019 (CE).
-                            if len(split_codes) > 1:
-                                long_code_to_short_code[split_codes[0].strip().lower()] = \
-                                    split_codes[1].strip().lower()
-
-                answer_suppression = {}
-                for item in field_annotation_array:
-                    split = item.split('=')
-                    if "CONTROLLED_ANSWER_SUPPRESSED" in split:
-                        answer_suppression.setdefault("CONTROLLED_ANSWER_SUPPRESSED", [])
-                        answer_suppression["CONTROLLED_ANSWER_SUPPRESSED"].append(split[1].lower())
-
-                    elif "REGISTERED_ANSWER_SUPPRESSED" in split:
-                        answer_suppression.setdefault("REGISTERED_ANSWER_SUPPRESSED", [])
-                        answer_suppression["REGISTERED_ANSWER_SUPPRESSED"].append(split[1].lower())
 
                 # for the first row of survey
                 if row_number == 1:
@@ -131,12 +114,41 @@ def main():
                               'SURVEY', None, None, item_flags, 'registered', None)
                     continue
 
+                # contains the long code as key and short code as key
+                # EX: CompletelyQuitAgePreferNotToAnswer=AttemptQuitSmoking_CompletelyQuitAgePreferNo
+                long_code_to_short_code = {}
+                for item in field_annotation_array:
+                    if item not in annotation_flags:
+                        split_codes = item.split('=')
+                        # we only want the long_code = short_code so we filter out the answer_suppression flags
+                        # EX:"CONTROLLED_ANSWER_SUPPRESSED"=WhatRaceEthnicity_AIAN looks similar to long_code=short_code
+
+                        if "CONTROLLED_ANSWER_SUPPRESSED" not in split_codes and \
+                                "REGISTERED_ANSWER_SUPPRESSED" not in split_codes:
+                            # in the case that it doesn't have a code ex: Launched 5/30/2017 (PTSC) & 12/10/2019 (CE).
+                            if len(split_codes) > 1:
+                                long_code_to_short_code[split_codes[0].strip().lower()] = \
+                                    split_codes[1].strip().lower()
+
+                # items that are marked as suppressed will be stored with the key as flag
+                # and the values as a list
+                answer_suppression = {}
+                for item in field_annotation_array:
+                    split = item.split('=')
+                    if "CONTROLLED_ANSWER_SUPPRESSED" in split:
+                        answer_suppression.setdefault("CONTROLLED_ANSWER_SUPPRESSED", [])
+                        answer_suppression["CONTROLLED_ANSWER_SUPPRESSED"].append(split[1].lower())
+
+                    if "REGISTERED_ANSWER_SUPPRESSED" in split:
+                        answer_suppression.setdefault("REGISTERED_ANSWER_SUPPRESSED", [])
+                        answer_suppression["REGISTERED_ANSWER_SUPPRESSED"].append(split[1].lower())
+
                 ############ Topic ############
                 if len(row['Section Header']) > 0:
                     header = row['Section Header']
 
                     # find the new lines and index to get the header up to the new line
-                    # to do: need to figure out what to do with first topic in pers_med_his
+                    # to do: need to figure out what to do with first topic in per_med_his
                     position = header.find("\n")
                     if position == -1:
                         header = row['Section Header'].replace("Thanks for your answers.", "")
@@ -181,6 +193,7 @@ def main():
 
                 # store the id of the question to use as parent_id for answers
                 question_id_all = id_all
+                # write out question
                 write_row_all(all_writer, parent_id_all, question_code,
                               question_label, 'QUESTION', min_value, max_value,
                               item_flags, long_code_to_short_code)
@@ -191,6 +204,7 @@ def main():
 
                 # in the case that the question is not suppressed
                 if item_flags["CONTROLLED_QUESTION_SUPPRESSED"] != 1:
+                    # write out question
                     question_id_controlled = id_controlled
                     write_row(controlled_writer, parent_id_controlled, question_code, question_label
                               , 'QUESTION', None, None, item_flags, 'controlled', long_code_to_short_code)
@@ -199,9 +213,10 @@ def main():
                     if is_numeric_answer:
                         add_numeric_answer(controlled_writer, question_id_controlled,
                                            min_value, max_value, item_flags, 'controlled')
-
-                    add_answers(controlled_writer, choices, question_code, question_id_controlled
-                                , None, None, item_flags, 'controlled', long_code_to_short_code, answer_suppression)
+                    # write out answer
+                    else:
+                        add_answers(controlled_writer, choices, question_code, question_id_controlled
+                                    , None, None, item_flags, 'controlled', long_code_to_short_code, answer_suppression)
 
                 if item_flags["REGISTERED_QUESTION_SUPPRESSED"] != 1:
                     question_id_registered = id_registered
@@ -211,9 +226,9 @@ def main():
                     if is_numeric_answer:
                         add_numeric_answer(registered_writer, question_id_registered,
                                            min_value, max_value, item_flags, 'registered')
-
-                    add_answers(registered_writer, choices, question_code, question_id_registered
-                                , None, None, item_flags, 'registered', long_code_to_short_code, answer_suppression)
+                    else:
+                        add_answers(registered_writer, choices, question_code, question_id_registered
+                                    , None, None, item_flags, 'registered', long_code_to_short_code, answer_suppression)
 
     # copy local output files and upload it to the bucket
     storage_client = storage.Client.from_service_account_json('../../sa-key.json')
@@ -260,7 +275,7 @@ def files_exist(date):
                             " does not exist!")
 
 
-def not_row_to_skip(row):
+def skip_row(row):
     return row['Variable / Field Name'].lower() != 'record_id' \
            and row['Field Type'].lower() != 'descriptive' \
            and 'please specify' not in row['Field Label'].lower()
@@ -347,7 +362,7 @@ def write_row_all(writer, parent_id, code, name, item_type, min_val, max_val,
     id_all += 1
 
 
-# builds the OutputControlled/OutputRegistered row that will get passed through the addRow function
+# builds the OutputControlled/OutputRegistered row 
 def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
               flags, file_type, long_code_to_short_code):
     global id_controlled
