@@ -211,11 +211,12 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       if (criteriaLookup) {
         this.updateCriteriaSelectionStore(criteriaLookup.items);
       }
-      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString() || domainId === Domain.VISIT.toString()) {
         let children = [];
+        const rootParentId = domainId === Domain.VISIT.toString() ? -1 : 0;
         rootNodes.items.forEach(child => {
           child['children'] = [];
-          if (child.parentId === 0) {
+          if (child.parentId === rootParentId) {
             children.push(child);
           } else {
             children = this.addChildToParent(child, children);
@@ -346,15 +347,13 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding
         more.
       </div>}
-      {node.domainId !== Domain.VISIT.toString() &&
-        <div style={styles.searchBarContainer}>
-          <SearchBar node={node}
-                     searchTerms={searchTerms}
-                     selectOption={selectOption}
-                     setIngredients={(i) => this.setState({ingredients: i})}
-                     setInput={(v) => setSearchTerms(v)}/>
-        </div>
-      }
+      <div style={styles.searchBarContainer}>
+        <SearchBar node={node}
+                   searchTerms={searchTerms}
+                   selectOption={selectOption}
+                   setIngredients={(i) => this.setState({ingredients: i})}
+                   setInput={(v) => setSearchTerms(v)}/>
+      </div>
       {!loading && <div style={{paddingTop: this.showHeader ? '1.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>

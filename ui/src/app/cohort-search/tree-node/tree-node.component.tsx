@@ -153,12 +153,17 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
     const {autocompleteSelection, node: {domainId, group}, searchTerms} = this.props;
-    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && group && searchTerms !== prevProps.searchTerms) {
+    if (this.inMemorySearch && group && searchTerms !== prevProps.searchTerms) {
       this.searchChildren();
     }
     if (!!autocompleteSelection && autocompleteSelection !== prevProps.autocompleteSelection) {
       this.checkAutocomplete();
     }
+  }
+
+  get inMemorySearch() {
+    const {node: {domainId}} = this.props;
+    return domainId === Domain.PHYSICALMEASUREMENT.toString() || domainId === Domain.VISIT.toString();
   }
 
   loadChildren() {
@@ -226,7 +231,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           const message = source === 'concept' ? 'Concept Search' : 'Cohort Builder Search';
           triggerEvent(message, 'Click', `${domainToTitle(domainId)} - ${labelName} - Expand`);
         }
-        if (domainId !== Domain.PHYSICALMEASUREMENT.toString() && !children) {
+        if (!this.inMemorySearch && !children) {
           this.loadChildren();
         }
       }
@@ -329,8 +334,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     const {autocompleteSelection, groupSelections, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable},
       source, scrollToMatch, searchTerms, select, selectedIds, setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
-    const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
+    const nodeChildren = this.inMemorySearch ? node.children : children;
+    const displayName = this.inMemorySearch && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
     const selectIconStyle = this.selectIconDisabled() ? {...styles.selectIcon, ...styles.disableIcon} : styles.selectIcon;
