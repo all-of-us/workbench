@@ -329,16 +329,16 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
-        const {searchContext: {domain, source, selectedSurvey}, workspace: {cdrVersionId}} = this.props;
+        const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
         const surveyName = selectedSurvey || 'All';
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), surveyName);
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value.trim(), surveyName);
         const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
           if (sourceMatch) {
-            const stdResp = await cohortBuilderApi().findStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
+            const stdResp = await cohortBuilderApi().findStandardCriteriaByDomainAndConceptId(namespace, id, domain, sourceMatch.conceptId);
             this.setState({standardData: stdResp.items});
           }
         }
@@ -395,9 +395,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         try {
           ingredients[row.id] = {open: false, loading: true, error: false, items: []};
           this.setState({ingredients});
-          const {workspace: {cdrVersionId}} = this.props;
+          const {workspace: {id, namespace}} = this.props;
           cohortBuilderApi()
-            .findDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
+            .findDrugIngredientByConceptId(namespace, id, row.conceptId)
             .then(resp => {
               ingredients[row.id] = {open: true, loading: false, error: false, items: resp.items};
               this.setState({ingredients});

@@ -61,10 +61,11 @@ public class UserServiceAccessTest {
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
 
-  private static DbUser providedDbUser;
+  private static DbUser dbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
   private static DbAccessTier registeredTier;
+
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
   private Function<DbUser, DbUser> registerUserNow =
@@ -106,7 +107,7 @@ public class UserServiceAccessTest {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser getDbUser() {
-      return providedDbUser;
+      return dbUser;
     }
   }
 
@@ -119,21 +120,29 @@ public class UserServiceAccessTest {
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
     user = userDao.save(user);
-    providedDbUser = user;
+    dbUser = user;
+  }
+
+  @Test
+  public void test_updateUserWithRetries_never_registered() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(Function.identity());
+
+    // the user has never been registered so they have no DbUserAccessTier entry
+
+    assertThat(userAccessTierDao.findAll()).hasSize(0);
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+    assertThat(userAccessMaybe).isEmpty();
   }
 
   @Test
   public void test_updateUserWithRetries_register() {
-    DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
-
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isPresent();
-    assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
   }
 
   @Test
@@ -151,10 +160,9 @@ public class UserServiceAccessTest {
                 .setAuthDomainGroupEmail("t3-users@fake-research-aou.org")
                 .setServicePerimeter("tier/3/perimeter"));
 
-    DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(registerUserNow);
 
     List<DbAccessTier> expectedTiers =
         ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
@@ -170,129 +178,425 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_unregister() {
-    DbUser dbUser = new DbUser();
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    // the user has never been registered so they have no DbUserAccessTier entry
-
-    assertThat(userAccessTierDao.findAll()).hasSize(0);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isEmpty();
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register_then_unregister() {
-    DbUser dbUser = new DbUser();
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
-    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    // The user received a DbUserAccessTier when they were registered.
-    // They still have it after unregistering but now it is DISABLED.
-
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isPresent();
-    assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.DISABLED);
-  }
-
-  @Test
   public void testSimulateUserFlowThroughRenewal() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
-    DbUser dbUser = new DbUser();
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // The user is still compliant and has bypass set
+    // initialize user as registered with generic values including bypassed DUA
+
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // add a proper DUA completion which will expire soon, but remove DUA bypass
+
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
     dbUser.setDataUseAgreementCompletionTime(
         Timestamp.from(
             START_INSTANT.minus(
                 (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    dbUser = updateUserWithRetries(this::removeDuaBypass);
 
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
-
-    // User is compliant and we remove dua bypass
-    dbUser =
-        userService.updateUserWithRetries(
-            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
-
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
+    // User is compliant
+    assertRegisteredTierEnabled(dbUser);
 
     // Simulate time passing, user is no longer compliant
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(2, ChronoUnit.DAYS));
-    dbUser =
-        userService.updateUserWithRetries(
-            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
-    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.DISABLED);
+    advanceClockDays(2);
+    dbUser = updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(START_INSTANT.plus(2, ChronoUnit.DAYS)));
     dbUser =
-        userService.updateUserWithRetries(
-            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
-    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
+        updateUserWithRetries(
+            user -> {
+              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
+              return user;
+            });
+    assertRegisteredTierEnabled(dbUser);
   }
+
+  // Ensure that we don't enforce access renewal in environments where the flag is not set:
+  // make the user expire in all of the ways possible by access renewal, and test that none
+  // of these cause noncompliance.
 
   @Test
   public void testRenewalFlag() {
     providedWorkbenchConfig.access.enableAccessRenewal = false;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
-    DbUser dbUser = new DbUser();
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // The user is still compliant and has bypass set
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(
-            START_INSTANT.minus(
-                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
-    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+    final Timestamp willExpire = Timestamp.from(START_INSTANT);
 
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
+    // initialize user as registered, including:
+    // bypassed DUA
+    // bypassed Compliance training
+    // recent confirmedPublications
+    // recent confirmedProfile
 
-    // User is compliant and we remove dua bypass
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // add proper DUA completion and compliance training and remove bypasses
+
     dbUser =
-        userService.updateUserWithRetries(
-            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+        updateUserWithRetries(
+            user -> {
+              user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+              user.setDataUseAgreementCompletionTime(willExpire);
+              user.setDataUseAgreementBypassTime(null);
 
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
+              user.setComplianceTrainingCompletionTime(willExpire);
+              user.setComplianceTrainingBypassTime(null);
+              return user;
+            });
 
-    // Simulate time passing, user is no longer compliant, but the flag is not set so they should be
-    // enabled
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(1, ChronoUnit.DAYS));
+    // This is just a switch from bypassed -> user-performed action so we remain compliant
+    // (and still would be so, with enableAccessRenewal = true)
+    assertRegisteredTierEnabled(dbUser);
+
+    // Time passing beyond the expirationWindow would cause the user to become
+    // noncompliant when enableAccessRenewal = true
+    advanceClockDays(expirationWindow + 1);
+
     dbUser =
-        userService.updateUserWithRetries(
-            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
-    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
-    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.ENABLED);
+        updateUserWithRetries(
+            user -> {
+              // removing publicationsConfirmed and profileConfirmed would also cause
+              // noncompliance when enableAccessRenewal = true
+              user.setPublicationsLastConfirmedTime(null);
+              user.setProfileLastConfirmedTime(null);
+              return user;
+            });
+
+    // the user is still compliant because we are not checking for expiration
+    assertRegisteredTierEnabled(dbUser);
   }
 
-  private DbUser registerUserWithoutDuaBypass(DbUser user) {
+  private DbUser removeDuaBypass(DbUser user) {
     user.setDataUseAgreementBypassTime(null);
     return userDao.save(user);
+  }
+
+  // test that every way for a user to be non-compliant or ineligible for Registered Tier access
+  // does in fact remove their access
+
+  // TODO: test all the ways to retain/restore access
+
+  // enabled/disabled is more of a master switch than a module but let's verify it anyway
+
+  @Test
+  public void test_updateUserWithRetries_disable_noncompliant() {
+    testUnregistration(
+        user -> {
+          user.setDisabled(true);
+          return userDao.save(user);
+        });
+  }
+
+  // Beta Access is entirely controlled by bypass, if enabled.
+  // It is not subject to annual renewal.
+
+  @Test
+  public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
+    providedWorkbenchConfig.access.enableBetaAccess = true;
+    testUnregistration(
+        user -> {
+          user.setBetaAccessBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  // email verification is not subject to bypass or annual renewal.
+  // It must be SUBSCRIBED for access.
+
+  @Test
+  public void test_updateUserWithRetries_email_pending_noncompliant() {
+    testUnregistration(
+        user -> {
+          user.setEmailVerificationStatusEnum(EmailVerificationStatus.PENDING);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_email_unverified_noncompliant() {
+    testUnregistration(
+        user -> {
+          user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+          return userDao.save(user);
+        });
+  }
+
+  // ERA Commons can be bypassed and is not subject to annual renewal.
+
+  @Test
+  public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    testUnregistration(
+        user -> {
+          user.setEraCommonsBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  // Two Factor Auth (2FA) can be bypassed and is not subject to annual renewal.
+
+  @Test
+  public void test_updateUserWithRetries_2fa_unbypassed_noncompliant() {
+    testUnregistration(
+        user -> {
+          user.setTwoFactorAuthBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  // Compliance training can be bypassed, and is subject to annual renewal.
+
+  @Test
+  public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
+    providedWorkbenchConfig.access.enableComplianceTraining = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+    testUnregistration(
+        user -> {
+          user.setComplianceTrainingBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
+    providedWorkbenchConfig.access.enableComplianceTraining = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setComplianceTrainingBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_training_unbypassed_aar_expired_noncompliant() {
+    providedWorkbenchConfig.access.enableComplianceTraining = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+
+    testUnregistration(
+        user -> {
+          user.setComplianceTrainingBypassTime(null);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setComplianceTrainingCompletionTime(willExpire);
+
+          advanceClockDays(expirationWindow + 1);
+
+          return userDao.save(user);
+        });
+  }
+
+  // DUA can be bypassed, and is subject to annual renewal.
+  // A missing DUA version or a version other than the latest is also noncompliant.
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
+          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_aar_missing_version_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_aar_wrong_version_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
+          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_dua_unbypassed_aar_expired_noncompliant() {
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+
+    testUnregistration(
+        user -> {
+          user.setDataUseAgreementBypassTime(null);
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setDataUseAgreementCompletionTime(willExpire);
+          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+          advanceClockDays(expirationWindow + 1);
+
+          return userDao.save(user);
+        });
+  }
+
+  // Publications confirmation is subject to annual renewal and cannot be bypassed.
+
+  @Test
+  public void test_updateUserWithRetries_publications_not_confirmed() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setPublicationsLastConfirmedTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_publications_expired() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+
+    testUnregistration(
+        user -> {
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setPublicationsLastConfirmedTime(willExpire);
+
+          advanceClockDays(expirationWindow + 1);
+
+          return userDao.save(user);
+        });
+  }
+
+  // Profile confirmation is subject to annual renewal and cannot be bypassed.
+
+  @Test
+  public void test_updateUserWithRetries_profile_not_confirmed() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+    testUnregistration(
+        user -> {
+          user.setProfileLastConfirmedTime(null);
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void test_updateUserWithRetries_profile_expired() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final long expirationWindow = 365L;
+    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
+
+    testUnregistration(
+        user -> {
+          final Timestamp willExpire = Timestamp.from(START_INSTANT);
+          user.setProfileLastConfirmedTime(willExpire);
+
+          advanceClockDays(expirationWindow + 1);
+
+          return userDao.save(user);
+        });
+  }
+
+  private void advanceClockDays(long days) {
+    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(days, ChronoUnit.DAYS));
+  }
+
+  // checks which power most of these tests - confirm that the unregisteringFunction does that
+  private void testUnregistration(Function<DbUser, DbUser> unregisteringFunction) {
+    // initial state: user is unregistered (has no tier memberships)
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    // we register the user
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // we unregister the user by applying the function under test
+    dbUser = updateUserWithRetries(unregisteringFunction);
+
+    // The user received a DbUserAccessTier when they were registered.
+    // They still have it after unregistering but now it is DISABLED.
+    assertRegisteredTierDisabled(dbUser);
+  }
+
+  // we can trim the signature since we always call this in the same way
+  private DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier) {
+    return userService.updateUserWithRetries(userModifier, dbUser, Agent.asUser(dbUser));
+  }
+
+  private void assertRegisteredTierEnabled(DbUser dbUser) {
+    assertRegisteredTierMembershipWithStatus(dbUser, TierAccessStatus.ENABLED);
+  }
+
+  private void assertRegisteredTierDisabled(DbUser dbUser) {
+    assertRegisteredTierMembershipWithStatus(dbUser, TierAccessStatus.DISABLED);
+  }
+
+  private void assertRegisteredTierMembershipWithStatus(DbUser dbUser, TierAccessStatus status) {
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+    assertThat(userAccessMaybe).isPresent();
+    assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(status);
   }
 
   private DbUser registerUser(Timestamp timestamp, DbUser user) {
@@ -303,6 +607,8 @@ public class UserServiceAccessTest {
     //        && betaAccessGranted
     //        && twoFactorAuthComplete
     //        && dataUseAgreementCompliant
+    //        && isPublicationsCompliant
+    //        && isProfileCompliant
     //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
 
     user.setDisabled(false);
@@ -312,12 +618,9 @@ public class UserServiceAccessTest {
     user.setBetaAccessBypassTime(timestamp);
     user.setTwoFactorAuthBypassTime(timestamp);
     user.setDataUseAgreementBypassTime(timestamp);
+    user.setPublicationsLastConfirmedTime(timestamp);
+    user.setProfileLastConfirmedTime(timestamp);
 
-    return userDao.save(user);
-  }
-
-  private DbUser unregisterUser(DbUser user) {
-    user.setDisabled(true);
     return userDao.save(user);
   }
 }

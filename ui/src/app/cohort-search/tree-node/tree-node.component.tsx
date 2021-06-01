@@ -164,13 +164,13 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   loadChildren() {
     const {node: {conceptId, count, domainId, id, isStandard, name, type}} = this.props;
     this.setState({loading: true});
-    const {cdrVersionId} = (currentWorkspaceStore.getValue());
+    const workspace = (currentWorkspaceStore.getValue());
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)
+    cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType, isStandard, id)
       .then(resp => {
         if (resp.items.length === 0 && domainId === Domain.DRUG.toString()) {
           cohortBuilderApi()
-            .findCriteriaBy(+cdrVersionId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+            .findCriteriaBy(workspace.namespace, workspace.id, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
             .then(rxResp => {
               this.setState({children: rxResp.items, loading: false});
             }, () => this.setState({error: true}));
