@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
@@ -17,7 +16,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.access.AccessTierService;
@@ -37,8 +38,10 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -66,8 +69,10 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -100,6 +105,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     AccessTierService.class,
     CdrVersionService.class,
+    WorkspaceAuthService.class
   })
   static class Configuration {
     @Bean
@@ -120,11 +126,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
+  @Autowired private WorkspaceAuthService workspaceAuthService;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired private CBCriteriaDao cbCriteriaDao;
+  @Autowired private WorkspaceDao workspaceDao;
 
-  @Autowired private CdrVersionService cdrVersionService;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private FireCloudService firecloudService;
 
@@ -158,6 +166,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private DbPerson dbPerson2;
   private DbPerson dbPerson3;
 
+  private static final String WORKSPACE_ID = "workspaceId";
+  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
+
   @Override
   public List<String> getTableNames() {
     return ImmutableList.of(
@@ -188,7 +199,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     controller =
         new CohortBuilderController(
-            cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
+            elasticSearchService, configProvider, cohortBuilderService, workspaceAuthService);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
@@ -199,6 +210,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    dbWorkspace.setName("Saved workspace");
+    dbWorkspace.setFirecloudName(WORKSPACE_ID);
+    dbWorkspace.setCdrVersion(cdrVersion);
+
+    workspaceDao.save(dbWorkspace);
+
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE, WORKSPACE_ID, WorkspaceAccessLevel.READER))
+        .thenReturn(dbWorkspace);
     drugNode1 = saveCriteriaWithPath("0", drugCriteriaParent());
     drugNode2 = saveCriteriaWithPath(drugNode1.getPath(), drugCriteriaChild(drugNode1.getId()));
 
@@ -878,7 +900,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void findDataFilters() {
     List<DataFilter> filters =
-        controller.findDataFilters(cdrVersion.getCdrVersionId()).getBody().getItems();
+        controller.findDataFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems();
     assertThat(
             filters.contains(
                 new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
@@ -889,58 +911,39 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .isTrue();
   }
 
+  @Rule public ExpectedException badRequestThrown = ExpectedException.none();
+
   @Test
   public void validateAttribute() {
     SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
     demo.attributes(ImmutableList.of(attribute));
+    badRequestThrown.expect(BadRequestException.class);
+    badRequestThrown.expectMessage("Bad Request: attribute operator null is not valid.");
+
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(demo), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operator null is not valid.");
-    }
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operands are empty.");
-    }
+    badRequestThrown.expectMessage("Bad Request: attribute operator null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: attribute NUM operands must be numeric.");
-    }
+    badRequestThrown.expectMessage("Bad Request: attribute NUM operands must be numeric.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     attribute.operands(ImmutableList.of("10", "20"));
     attribute.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
@@ -949,60 +952,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operator null is not valid.");
-    }
+    badRequestThrown.expect(BadRequestException.class);
+    badRequestThrown.expectMessage("Bad Request: modifier operator null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operands are empty.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier operands are empty.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.operands(ImmutableList.of("10", "20"));
     modifier.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     modifier.name(ModifierType.EVENT_DATE);
     modifier.operands(ImmutableList.of("10"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier EVENT_DATE must be a valid date.");
-    }
+    badRequestThrown.expectMessage("Bad Request: modifier EVENT_DATE must be a valid date.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
@@ -1011,7 +987,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1021,7 +997,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     searchRequest.addDataFiltersItem("HAS_EHR_DATA");
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1031,7 +1007,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     searchRequest.addDataFiltersItem("HAS_PHYSICAL_MEASUREMENT_DATA");
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1041,7 +1017,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     searchRequest.addDataFiltersItem("HAS_PPI_SURVEY_DATA");
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1051,34 +1027,26 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     searchRequest.addDataFiltersItem("HAS_EHR_DATA").addDataFiltersItem("HAS_PPI_SURVEY_DATA");
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
   public void temporalGroupExceptions() {
+    badRequestThrown.expect(BadRequestException.class);
     SearchGroupItem icd9SGI =
         new SearchGroupItem().type(Domain.CONDITION.toString()).addSearchParametersItem(icd9());
 
     SearchGroup temporalGroup = new SearchGroup().items(ImmutableList.of(icd9SGI)).temporal(true);
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: search group item temporal group null is not valid.");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: search group item temporal group null is not valid.");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
 
     icd9SGI.temporalGroup(0);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
-    }
+    badRequestThrown.expectMessage(
+        "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
+    controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
   }
 
   @Test
@@ -1113,7 +1081,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1125,7 +1093,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(ageModifier()));
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1153,7 +1121,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1183,7 +1151,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1211,7 +1179,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1237,7 +1205,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1264,7 +1232,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1296,7 +1264,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1329,7 +1297,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1339,7 +1307,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(ageModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1350,7 +1318,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9()),
             ImmutableList.of(visitModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1363,7 +1331,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1374,7 +1342,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9()),
             ImmutableList.of(ageModifier(), occurrencesModifier().operands(ImmutableList.of("2"))));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1385,7 +1353,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9(), icd9().conceptId(2L)),
             ImmutableList.of(ageModifier(), occurrencesModifier(), eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1396,7 +1364,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9()),
             ImmutableList.of(eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1407,7 +1375,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9()),
             ImmutableList.of(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1416,7 +1384,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1427,7 +1395,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9().group(true).conceptId(44823922L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1436,7 +1404,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1444,7 +1412,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1453,7 +1421,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.PERSON.toString(), ImmutableList.of(ethnicity()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1462,7 +1430,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1471,7 +1439,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1482,7 +1450,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(wholeGenomeVariant()),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1499,7 +1467,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequests =
         createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
   }
 
   @Test
@@ -1514,7 +1482,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequests =
         createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 3);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 3);
   }
 
   @Test
@@ -1529,7 +1497,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequests =
         createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
   }
 
   @Test
@@ -1564,7 +1532,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 2);
   }
 
   @Test
@@ -1580,7 +1548,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequests), 0);
   }
 
   @Test
@@ -1591,7 +1559,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 2);
   }
 
@@ -1603,7 +1571,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(procedure().conceptId(4L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1614,7 +1582,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(snomed().standard(true).conceptId(6L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1624,7 +1592,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.PROCEDURE.toString(), ImmutableList.of(snomed), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1634,7 +1602,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.VISIT.toString(), ImmutableList.of(visit().conceptId(10L)), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1645,7 +1613,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(visit().conceptId(10L)),
             ImmutableList.of(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1653,7 +1621,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(Domain.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1665,7 +1633,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(drug().group(true).conceptId(21600932L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1677,7 +1645,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(drug().group(true).conceptId(21600932L), drug()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1687,7 +1655,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(visitModifier()));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1697,7 +1665,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(ageModifier()));
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1709,7 +1677,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(measurement()),
             ImmutableList.of(visitModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1725,7 +1693,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.MEASUREMENT.toString(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1740,7 +1708,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1760,7 +1728,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1771,7 +1739,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(measurement()),
             ImmutableList.of(ageModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1786,7 +1754,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             lab1.getDomain(), ImmutableList.of(lab1, lab2, lab3), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1796,7 +1764,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(icd9.getDomain(), ImmutableList.of(icd9, snomed), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1805,7 +1773,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(pm.getDomain(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1819,7 +1787,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1841,7 +1809,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1882,7 +1850,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 3);
   }
 
   @Test
@@ -1893,7 +1861,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(hrDetail().conceptId(1586218L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1910,7 +1878,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(hrDetail().conceptId(1586218L).attributes(attributes)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -1927,7 +1895,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1944,7 +1912,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1961,7 +1929,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1979,7 +1947,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm, pm1), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -1996,7 +1964,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -2007,7 +1975,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 2);
   }
 
   @Test
@@ -2018,7 +1986,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest), 1);
   }
 
   @Test
@@ -2030,7 +1998,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(survey().conceptId(1585899L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2041,7 +2009,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2053,7 +2021,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(copeSurveyQuestionVersionAndAnyValue()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2065,7 +2033,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(copeSurveyQuestionAnyValue()),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2076,7 +2044,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyAnswer()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2087,7 +2055,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyCatAndNum()), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2100,7 +2068,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             ppiQuestion.getDomain(), ImmutableList.of(ppiQuestion), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2120,7 +2088,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(ppiValueAsConceptId),
             new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2138,7 +2106,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
     ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -2152,7 +2120,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DemoChartInfoListResponse response =
         controller
             .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE.toString(),
                 searchRequest)
@@ -2171,7 +2140,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DemoChartInfoListResponse response =
         controller
             .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
                 GenderOrSexType.GENDER.toString(),
                 AgeType.AGE_AT_CONSENT.toString(),
                 searchRequest)
@@ -2189,7 +2159,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DemoChartInfoListResponse response =
         controller
             .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
                 GenderOrSexType.SEX_AT_BIRTH.toString(),
                 AgeType.AGE_AT_CDR.toString(),
                 searchRequest)
@@ -2208,7 +2179,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Criteria> criteriaList =
         controller
             .findCriteriaForCohortEdit(
-                cdrVersion.getCdrVersionId(), Domain.CONDITION.toString(), request)
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), request)
             .getBody()
             .getItems();
     assertThat(criteriaList).hasSize(2);
