@@ -230,11 +230,11 @@ export const AccessRenewalPage = fp.flow(
 
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
-    const getProfile = async () => {
+    const getProfile = async() => {
       setBusy(true);
       await reloadProfile();
       setBusy(false);
-    }
+    };
 
     getProfile();
   }, []);
