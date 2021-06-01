@@ -15,7 +15,7 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
 
-describe('ProfilePageComponent', () => {
+describe('Access Renewal Page', () => {
 
   function expireAllModules() {
     const expiredTime = Date.now() - 1000 * 60 * 60;
@@ -29,7 +29,7 @@ describe('ProfilePageComponent', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
-  function udpateOneModule(updateModuleName, time) {
+  function updateOneModule(updateModuleName, time) {
     const oldProfile = profileStore.get().profile;
     const newModules = fp.map(({moduleName, expirationEpochMillis}) => ({
       moduleName,
@@ -108,11 +108,14 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    udpateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('profileConfirmation', oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
-
+    
+    // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+
+    // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
@@ -122,11 +125,13 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    udpateOneModule('profileConfirmation', oneYearFromNow());
-    udpateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('publicationConfirmation', oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
+    // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
@@ -136,14 +141,16 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    udpateOneModule('profileConfirmation', oneYearFromNow());
-    udpateOneModule('publicationConfirmation', oneYearFromNow());
-    udpateOneModule('complianceTraining', oneYearFromNow());
+    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule('complianceTraining', oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
+    // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
   });
 
   it('should show the correct state when all items are complete', async () => {
@@ -151,19 +158,20 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    udpateOneModule('profileConfirmation', oneYearFromNow());
-    udpateOneModule('publicationConfirmation', oneYearFromNow());
-    udpateOneModule('complianceTraining', oneYearFromNow());
-    udpateOneModule('dataUseAgreement', oneYearFromNow());
+    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule('complianceTraining', oneYearFromNow());
+    updateOneModule('dataUseAgreement', oneYearFromNow());
 
     setCompletionTimes(() => Date.now());
 
     await waitOneTickAndUpdate(wrapper);
 
+    // All Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(4);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the neccessary steps').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
   });
 
 });

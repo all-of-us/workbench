@@ -11,7 +11,7 @@ export async function redirectToTraining() {
   window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
-export const wasRefferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
+export const wasReferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 

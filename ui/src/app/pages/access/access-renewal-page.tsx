@@ -92,7 +92,7 @@ const confirmPublications = fp.flow(
 const syncAndReload = fp.flow(
   withSuccessModal({
     title: 'Compliance Status Refreshed',
-    message: 'Your compliance training has been refreshed. If you are not seeing the correct status try again in a few minutes.',
+    message: 'Your compliance training has been refreshed. If you are not seeing the correct status, try again in a few minutes.',
     onDismiss: reloadProfile
   }),
   withErrorModal({
@@ -225,15 +225,15 @@ export const AccessRenewalPage = fp.flow(
   const noReportId = useId();
   const reportId = useId();
   const [reloadDisabled, setReloadDisabled] = useState(true);
-  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
     const getProfile = async() => {
-      setBusy(true);
+      setLoading(true);
       await reloadProfile();
-      setBusy(false);
+      setLoading(false);
     };
 
     getProfile();
@@ -263,7 +263,7 @@ export const AccessRenewalPage = fp.flow(
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
       {!anyModuleIsExpiring && <div style={{...renewalStyle.completionBox, gridColumnStart: 2}}>
-        <div style={renewalStyle.h2}>Thank you for completing all the neccessary steps</div>
+        <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
         <div>
           Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.
         </div>
@@ -302,9 +302,9 @@ export const AccessRenewalPage = fp.flow(
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
             onClick={async() => {
-              setBusy(true);
+              setLoading(true);
               await confirmPublications();
-              setBusy(false);
+              setLoading(false);
             }}
             wasBypassed={false}
             disabled={publications === null}
@@ -347,9 +347,9 @@ export const AccessRenewalPage = fp.flow(
           {isExpiring(getExpirationTimeFor('complianceTraining')) && <Button
             disabled={reloadDisabled}
             onClick={async() => {
-              setBusy(true);
+              setLoading(true);
               await syncAndReload();
-              setBusy(false);
+              setLoading(false);
             }}
             style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>}
         </FlexRow>
@@ -368,6 +368,6 @@ export const AccessRenewalPage = fp.flow(
           wasBypassed={!!dataUseAgreementBypassTime}/>
       </RenewalCard>
     </div>
-    {busy && <SpinnerOverlay dark={true} opacity={0.6}/>}
+    {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}
   </FadeBox>;
 });

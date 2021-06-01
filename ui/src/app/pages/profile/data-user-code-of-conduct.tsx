@@ -14,7 +14,7 @@ import {
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
-import {wasRefferredFromRenewal} from 'app/utils/access-utils';
+import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
@@ -261,7 +261,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
-                        wasRefferredFromRenewal()
+                        wasReferredFromRenewal()
                           ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                           : this.submitDataUserCodeOfConduct(initialMonitoring);
                         this.setState({submitting: false});
