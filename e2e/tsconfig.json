@@ -25,5 +25,5 @@
     "baseUrl": ".",
     "lib": ["es2018", "dom"]
   },
-  "exclude": [ "tsc-out", "node_modules" ]
+  "exclude": [ "tsc-out", "node_modules", "logs" ]
 }
