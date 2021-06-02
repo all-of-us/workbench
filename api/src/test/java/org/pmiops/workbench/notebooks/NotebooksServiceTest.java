@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -41,11 +42,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
-public class NotebooksServiceTest {
+public class NotebooksServiceTest extends SpringTest  {
   private static final JSONObject NOTEBOOK_CONTENTS =
       new JSONObject().put("who", "I'm a notebook!");
   private static final String BUCKET_NAME = "notebook.bucket";

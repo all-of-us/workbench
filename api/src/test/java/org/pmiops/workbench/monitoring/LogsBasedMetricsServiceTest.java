@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
@@ -43,8 +44,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
-public class LogsBasedMetricsServiceTest {
+public class LogsBasedMetricsServiceTest extends SpringTest {
 
   private static final Duration OPERATION_DURATION = Duration.ofMillis(15);
   private static MonitoredResource MONITORED_RESOURCE =

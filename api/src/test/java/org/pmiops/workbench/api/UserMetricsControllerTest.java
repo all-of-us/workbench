@@ -54,7 +54,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class UserMetricsControllerTest {
 

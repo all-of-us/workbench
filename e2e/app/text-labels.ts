@@ -115,6 +115,7 @@ export enum LinkText {
   ReviewLater = 'REVIEW LATER',
   ReviewNow = 'REVIEW NOW',
   Save = 'Save',
+  SaveDataset = 'Save Dataset',
   SaveCohort = 'Save Cohort',
   SaveConceptSet = 'Save Concept Set',
   SaveCriteria = 'Save Criteria',

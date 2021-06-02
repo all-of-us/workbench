@@ -80,7 +80,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 public class WorkspaceAdminServiceTest {
 
   private static final long DB_WORKSPACE_ID = 2222L;

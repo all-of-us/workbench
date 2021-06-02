@@ -39,7 +39,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 public class InsertAllRequestBuilderTest {
 
   private static final InsertAllRequestPayloadTransformer<ReportingUser>

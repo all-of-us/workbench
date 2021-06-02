@@ -51,7 +51,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    const exportModal = await datasetBuildPage.clickExportButton();
+    const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(Language.Python);
@@ -105,7 +105,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    await datasetBuildPage.clickExportButton();
+    await datasetBuildPage.clickAnalyzeButton();
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();
 
@@ -123,11 +123,11 @@ describe('Export to notebook tests', () => {
     const code = await notebookPreviewPage.getFormattedCode();
     switch (kernelLanguage.LANGUAGE) {
       case Language.Python:
-        expect(code).toContain('import pandas');
-        expect(code).toContain('import os');
+        expect(code.some((item) => item.includes('import pandas'))).toBe(true);
+        expect(code.some((item) => item.includes('import os'))).toBe(true);
         break;
       case Language.R:
-        expect(code).toContain('library(bigrquery)');
+        expect(code.some((item) => item.includes('library(bigrquery)'))).toBe(true);
         break;
     }
 

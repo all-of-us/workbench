@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class StatusAlertControllerTest {
   private static final Instant NOW = Instant.now();

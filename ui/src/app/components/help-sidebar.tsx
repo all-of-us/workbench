@@ -46,10 +46,10 @@ import {
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
-  compoundRuntimeOpStore,
+  compoundRuntimeOpStore, GenomicExtractionStore, genomicExtractionStore,
   routeDataStore,
   RuntimeStore,
-  serverConfigStore,
+  serverConfigStore, updateGenomicExtractionStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -121,7 +121,7 @@ const styles = reactStyles({
     textAlign: 'center',
     verticalAlign: 'middle'
   },
-  runtimeStatusIcon: {
+  asyncOperationStatusIcon: {
     width: '.5rem',
     height: '.5rem',
     zIndex: 2,
@@ -232,11 +232,11 @@ interface Props {
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
+  genomicExtraction: GenomicExtractionStore;
 }
 
 interface State {
   activeIcon: string;
-  extractionJobs: Array<GenomicExtractionJob>;
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
@@ -250,6 +250,7 @@ export const HelpSidebar = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
+  withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
   withCdrVersions()
 )(
@@ -260,7 +261,6 @@ export const HelpSidebar = fp.flow(
       super(props);
       this.state = {
         activeIcon: null,
-        extractionJobs: [],
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -407,9 +407,11 @@ export const HelpSidebar = fp.flow(
       }));
 
       if (serverConfigStore.get().config.enableGenomicExtraction &&
-          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData &&
+          !genomicExtractionStore.get()[this.props.workspace.namespace]
+      ) {
         const genomicExtractionList = await dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id);
-        this.setState({extractionJobs: genomicExtractionList.jobs});
+        updateGenomicExtractionStore(this.props.workspace.namespace, genomicExtractionList.jobs);
       }
     }
 
@@ -557,21 +559,21 @@ export const HelpSidebar = fp.flow(
           || status === RuntimeStatus.Starting
           || status === RuntimeStatus.Updating)
             && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.runtimeStatusIcon,
+              ...styles.asyncOperationStatusIcon,
               ...styles.rotate,
               color: colors.asyncOperationStatus.starting,
             }}/>
           }
           {status === RuntimeStatus.Stopped
             && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
+              ...styles.asyncOperationStatusIcon,
               ...styles.runtimeStatusIconOutline,
               color: colors.asyncOperationStatus.stopped,
             }}/>
           }
           {status === RuntimeStatus.Running
             && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
+              ...styles.asyncOperationStatusIcon,
               ...styles.runtimeStatusIconOutline,
               color: colors.asyncOperationStatus.running,
             }}/>
@@ -579,14 +581,14 @@ export const HelpSidebar = fp.flow(
           {(status === RuntimeStatus.Stopping
           || status === RuntimeStatus.Deleting)
             && <FontAwesomeIcon icon={faSyncAlt} style={{
-              ...styles.runtimeStatusIcon,
+              ...styles.asyncOperationStatusIcon,
               ...styles.rotate,
               color: colors.asyncOperationStatus.stopping,
             }}/>
           }
           {status === RuntimeStatus.Error
             && <FontAwesomeIcon icon={faCircle} style={{
-              ...styles.runtimeStatusIcon,
+              ...styles.asyncOperationStatusIcon,
               ...styles.runtimeStatusIconOutline,
               color: colors.asyncOperationStatus.error,
             }}/>
@@ -602,7 +604,8 @@ export const HelpSidebar = fp.flow(
     }
 
     displayExtractionIcon(icon: IconConfig) {
-      const {extractionJobs} = this.state;
+      const extractionsByWorkspace = this.props.genomicExtraction;
+      const extractionJobs = extractionsByWorkspace[this.props.workspace.namespace];
       const jobsByStatus = fp.groupBy('status', extractionJobs);
       let status;
       // If any jobs are currently active, show the 'sync' icon corresponding to their status.
@@ -610,9 +613,17 @@ export const HelpSidebar = fp.flow(
         status = TerraJobStatus.RUNNING;
       } else if (jobsByStatus[TerraJobStatus.ABORTING]) {
         status = TerraJobStatus.ABORTING;
-      } else if (jobsByStatus[TerraJobStatus.SUCCEEDED] || jobsByStatus[TerraJobStatus.FAILED]) {
+      } else if (
+          jobsByStatus[TerraJobStatus.SUCCEEDED]
+          || jobsByStatus[TerraJobStatus.FAILED]
+          || jobsByStatus[TerraJobStatus.ABORTED]
+      ) {
         // Otherwise, show the status of the most recent completed job, if it was completed within the past 24h.
-        const completedJobs = fp.concat(jobsByStatus[TerraJobStatus.SUCCEEDED] || [], jobsByStatus[TerraJobStatus.FAILED] || []);
+        const completedJobs = fp.flatten([
+          jobsByStatus[TerraJobStatus.SUCCEEDED] || [],
+          jobsByStatus[TerraJobStatus.FAILED] || [],
+          jobsByStatus[TerraJobStatus.ABORTED] || []
+        ]);
         const mostRecentCompletedJob = fp.flow(
           fp.filter((job: GenomicExtractionJob) => this.withinPastTwentyFourHours(job.completionTime)),
           // This could be phrased as fp.sortBy('completionTime') but it confuses the compile time type checker
@@ -634,22 +645,26 @@ export const HelpSidebar = fp.flow(
           {
             switchCase(status,
               [TerraJobStatus.RUNNING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
-                ...styles.runtimeStatusIcon,
+                ...styles.asyncOperationStatusIcon,
                 ...styles.rotate,
                 color: colors.asyncOperationStatus.starting,
               }}/>],
               [TerraJobStatus.ABORTING, () => <FontAwesomeIcon icon={faSyncAlt} style={{
-                ...styles.runtimeStatusIcon,
+                ...styles.asyncOperationStatusIcon,
                 ...styles.rotate,
                 color: colors.asyncOperationStatus.stopping,
               }}/>],
               [TerraJobStatus.FAILED, () => <FontAwesomeIcon icon={faCircle} style={{
-                ...styles.runtimeStatusIcon,
+                ...styles.asyncOperationStatusIcon,
                 color: colors.asyncOperationStatus.error,
               }}/>],
               [TerraJobStatus.SUCCEEDED, () => <FontAwesomeIcon icon={faCircle} style={{
-                ...styles.runtimeStatusIcon,
+                ...styles.asyncOperationStatusIcon,
                 color: colors.asyncOperationStatus.succeeded,
+              }}/>],
+              [TerraJobStatus.ABORTED, () => <FontAwesomeIcon icon={faCircle} style={{
+                ...styles.asyncOperationStatusIcon,
+                color: colors.asyncOperationStatus.stopped,
               }}/>]
             )
           }

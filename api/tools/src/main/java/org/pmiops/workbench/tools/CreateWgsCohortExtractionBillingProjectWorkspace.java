@@ -22,6 +22,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -131,17 +132,21 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
 
       log.info("Creating billing project");
-      BillingApi billingApi = apiClientFactory.billingApi();
-      billingApi.createBillingProjectFull(billingProjectRequest);
+      if (workbenchConfig.featureFlags.enableFireCloudV2Billing) {
+        BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
+        billingV2Api.createBillingProjectFullV2(billingProjectRequest);
+      } else {
+        BillingApi billingApi = apiClientFactory.billingApi();
+        billingApi.createBillingProjectFull(billingProjectRequest);
 
-      while (billingApi
-              .billingProjectStatus(billingProjectRequest.getProjectName())
-              .getCreationStatus()
-          != FirecloudBillingProjectStatus.CreationStatusEnum.READY) {
-        log.info("Billing project is not ready yet");
-        Thread.sleep(5000);
+        while (billingApi
+                .billingProjectStatus(billingProjectRequest.getProjectName())
+                .getCreationStatus()
+            != FirecloudBillingProjectStatus.CreationStatusEnum.READY) {
+          log.info("Billing project is not ready yet");
+          Thread.sleep(5000);
+        }
       }
-
       String strippedName = workspaceName.toLowerCase().replaceAll("[^0-9a-z]", "");
       DbWorkspace.FirecloudWorkspaceId workspaceId =
           new DbWorkspace.FirecloudWorkspaceId(billingProjectName, strippedName);

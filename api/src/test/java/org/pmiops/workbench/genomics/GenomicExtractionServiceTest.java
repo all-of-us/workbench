@@ -44,6 +44,7 @@ import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -75,7 +76,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GenomicExtractionServiceTest {
@@ -396,16 +397,23 @@ public class GenomicExtractionServiceTest {
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
     verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
-    String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
+    String actualOutputDir =
+        argument
+            .getValue()
+            .getInputs()
+            .get(GenomicExtractionService.EXTRACT_WORKFLOW_NAME + ".output_gcs_dir");
 
     assertThat(actualOutputDir)
         .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    assertThrows(
+            FailedPreconditionException.class, () ->
+                    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset));
   }
 
   @Test

@@ -12,11 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.OfflineAuditApi;
 import org.pmiops.workbench.api.WorkspacesApi;
 import org.springframework.web.method.HandlerMethod;
 
-public class CronInterceptorTest {
+public class CronInterceptorTest extends SpringTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Mock private HandlerMethod handler;

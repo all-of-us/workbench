@@ -1,6 +1,7 @@
 package org.pmiops.workbench.interceptors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -22,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
@@ -29,6 +31,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -56,8 +59,7 @@ class FakeController {
   public void handle() {}
 }
 
-@ExtendWith(SpringExtension.class)
-public class AuthInterceptorTest {
+public class AuthInterceptorTest extends SpringTest {
 
   private static final long USER_ID = 123L;
 
@@ -143,15 +145,16 @@ public class AuthInterceptorTest {
     verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void preHandleGet_userInfoError() throws Exception {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
+    assertThrows(NotFoundException.class, () ->interceptor.preHandle(mockRequest, mockResponse, mockHandler));
+
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void preHandleGet_firecloudLookupFails() throws Exception {
     mockGetCallWithBearerToken();
 
@@ -160,7 +163,7 @@ public class AuthInterceptorTest {
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(fireCloudService.getMe()).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
+    assertThrows(NotFoundException.class, () ->interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
   @Test

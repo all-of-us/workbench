@@ -69,7 +69,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
-@ExtendWith(SpringExtension.class)
+
 public class ReportingUploadServiceTest {
 
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");

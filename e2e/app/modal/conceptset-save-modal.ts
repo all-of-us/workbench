@@ -8,8 +8,7 @@ import { LinkText } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
-
-const faker = require('faker/locale/en_US');
+import faker from 'faker';
 
 export enum SaveOption {
   CreateNewSet = 'Create new set',

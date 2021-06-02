@@ -62,7 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Test the unique ReportingNativeQueryService, which bypasses Spring in favor of low-level JDBC
  * queries. This means we need real DAOs.
  */
-@ExtendWith(SpringExtension.class)
+
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingQueryServiceTest extends SpringTest {

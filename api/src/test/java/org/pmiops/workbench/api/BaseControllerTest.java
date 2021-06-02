@@ -35,7 +35,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  *
  * <p>TODO(RW-4443): update all controller tests to extend this class.
  */
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class BaseControllerTest {
 

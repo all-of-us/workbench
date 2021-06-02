@@ -7,15 +7,17 @@ import {Tooltip} from 'app/components/popups';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {
-  DataSetApi,
+  DataSetApi, DataSetExportRequest,
   DataSetRequest,
-  KernelTypeEnum,
-  WorkspacesApi} from 'generated/fetch';
+  KernelTypeEnum, PrePackagedConceptSetEnum,
+  WorkspacesApi
+} from 'generated/fetch';
 import {act} from 'react-dom/test-utils';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 describe('ExportDatasetModal', () => {
   let dataset;
@@ -74,14 +76,14 @@ describe('ExportDatasetModal', () => {
     wrapper.find('[data-test-id="notebook-name-input"]')
       .first().simulate('change', {target: {value: expectedNotebookName}});
     findExportButton(wrapper).simulate('click');
-    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
       dataSetRequest: expectedDatasetRequest,
       newNotebook: true,
       notebookName: expectedNotebookName,
-      kernelType: KernelTypeEnum.Python
-    });
+      kernelType: KernelTypeEnum.Python,
+      generateGenomicsAnalysisCode: false
+    }));
   });
-
 
   it('should disable export if no name is provided', async() => {
     const wrapper = mount(component(testProps));
@@ -139,12 +141,12 @@ describe('ExportDatasetModal', () => {
 
     findExportButton(wrapper).simulate('click');
 
-    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
       dataSetRequest: expectedDatasetRequest,
       newNotebook: false,
       notebookName: expectedNotebookName,
       kernelType: KernelTypeEnum.R
-    });
+    }));
   });
 
   it('should show code preview, auto reload on kernel switch, and hide code preview', async() => {
@@ -178,4 +180,86 @@ describe('ExportDatasetModal', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('iframe').exists()).toBeFalsy();
   });
+
+  it('Show genomics analysis tools if WGS is in the dataset', async() => {
+    testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
+    const wrapper = mount(component(testProps));
+
+    Object.keys(GenomicsAnalysisToolEnum).forEach(tool => {
+      expect(wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()).toBeTruthy();
+    });
+  });
+
+  it('Remove genomics analysis tools if R is selected', async() => {
+    testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
+    const wrapper = mount(component(testProps));
+
+    wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    Object.keys(GenomicsAnalysisToolEnum).forEach(tool => {
+      expect(wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()).toBeFalsy();
+    });
+  });
+
+  it('Should export code with genomics analysis tool', async() => {
+    testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
+    const wrapper = mount(component(testProps));
+    const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
+    const expectedNotebookName = 'Notebook Name';
+    const expectedDatasetRequest: DataSetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name
+    };
+
+    wrapper.find('[data-test-id="notebook-name-input"]')
+      .first().simulate('change', {target: {value: expectedNotebookName}});
+    findExportButton(wrapper).simulate('click');
+    expect(exportSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, {
+      dataSetRequest: expectedDatasetRequest,
+      newNotebook: true,
+      notebookName: expectedNotebookName,
+      kernelType: KernelTypeEnum.Python,
+      generateGenomicsAnalysisCode: true,
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.HAIL
+    });
+  });
+
+  it('Auto reload code preview if genomics analysis tool is changed', async() => {
+    const expectedDatasetRequest = {
+      dataSetId: dataset.id,
+      name: dataset.name
+    };
+    datasetApiStub.codePreview = {
+      html: '<div id="notebook">print("hello world!")</div>'
+    };
+    testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
+    const wrapper = mount(component(testProps));
+    const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
+
+    wrapper.find('[data-test-id="code-preview-button"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
+      dataSetRequest: expectedDatasetRequest,
+      kernelType: KernelTypeEnum.Python,
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.HAIL
+    }));
+
+    wrapper.find('[data-test-id="genomics-tool-PLINK"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
+      dataSetRequest: expectedDatasetRequest,
+      kernelType: KernelTypeEnum.Python,
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.PLINK
+    }));
+
+    wrapper.find('[data-test-id="genomics-tool-NONE"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
+      dataSetRequest: expectedDatasetRequest,
+      kernelType: KernelTypeEnum.Python,
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE
+    }));
+  });
+
 });

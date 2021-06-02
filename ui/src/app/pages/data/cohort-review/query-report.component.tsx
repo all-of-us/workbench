@@ -211,14 +211,14 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     componentDidMount() {
-      const {cdrVersionTiersResponse, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionTiersResponse} = this.props;
       const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
       const cdrName = findCdrVersion(review.cdrVersionId.toString(), cdrVersionTiersResponse).name;
       this.setState({cdrName});
       const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
-      cohortBuilderApi().findDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
+      cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
         .then(response => {
           this.groupChartData(response.items);
           this.setState({data: response.items, loading: false});

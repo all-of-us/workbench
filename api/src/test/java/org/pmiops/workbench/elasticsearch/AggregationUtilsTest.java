@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 public class AggregationUtilsTest {
 
   @Test

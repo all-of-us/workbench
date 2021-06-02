@@ -41,7 +41,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 public class WorkspaceMapperTest {
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
   private static final String CREATOR_EMAIL = "ojc@verily.biz";

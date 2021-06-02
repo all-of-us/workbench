@@ -1,5 +1,5 @@
 import {Component as AComponent} from '@angular/core';
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
@@ -11,6 +11,7 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
+import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
@@ -35,7 +36,7 @@ import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {DataComponent} from './pages/data/data-component';
-import {DataSetComponent} from './pages/data/data-set/data-set-component';
+import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -67,7 +68,7 @@ const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataComponentPage = withRouteData(DataComponent);
-const DataSetComponentPage = withRouteData(DataSetComponent);
+const DataSetComponentPage = withRouteData(DatasetPage);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const DetailPagePage = withRouteData(DetailPage);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -127,7 +128,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
-      <AppRoute path='/access-renewal' component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}/>
+      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
+        ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
+        : <Navigate to={'/profile'}/>
+        }/>
       <AppRoute
           path='/admin/banner'
           component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}

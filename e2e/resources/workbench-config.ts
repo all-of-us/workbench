@@ -38,7 +38,7 @@ const test = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
-  readerUserName: process.env.TEST_READER || 'puppetcitester2@fake-research-aou.org',
+  readerUserName: process.env.TEST_READER || 'puppetcitestreader1@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };

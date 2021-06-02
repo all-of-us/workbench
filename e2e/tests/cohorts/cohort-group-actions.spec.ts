@@ -7,8 +7,7 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue, waitUntilChanged } from 'utils/element-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
-import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
-import { Ethnicity } from 'app/page/cohort-participants-group';
+import { Ethnicity, PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 
 describe('Build cohort page actions', () => {
   beforeEach(async () => {

@@ -985,6 +985,20 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertProfile(updatedProfile);
   }
 
+  @Test
+  public void testUpdateProfile_confirmsProfile() {
+    createAccountAndDbUserWithAffiliation();
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getProfileLastConfirmedTime()).isNull();
+
+    // make an arbitrary change
+    profile.setAboutYou("I'm a changed person.");
+    profileController.updateProfile(profile);
+
+    Profile updatedProfile = profileController.getMe().getBody();
+    assertThat(updatedProfile.getProfileLastConfirmedTime()).isEqualTo(fakeClock.millis());
+  }
+
   @Test(expected = NotFoundException.class)
   public void test_updateAccountProperties_null_user() {
     profileService.updateAccountProperties(new AccountPropertyUpdate());

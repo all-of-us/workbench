@@ -3241,9 +3241,10 @@ paths:
           description: CohortAnnotationDefinition deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu/{parentId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/menu/{parentId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+    - "$ref": "#/parameters/workspaceNamespace"
+    - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3261,23 +3262,25 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
       description: 'Returns information on the domains of data in the workspace''s
         CDR version along with participant and concept counts'
       operationId: findDomainInfos
-      parameters:
-      - "$ref": "#/parameters/cdrVersionId"
       responses:
         200:
           description: information on the domains
           schema:
             "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo/{domain}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo/{domain}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3299,23 +3302,25 @@ paths:
           description: A count of matching concepts in this domain
           schema:
             "$ref": "#/definitions/DomainCount"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
       description: 'Returns survey information in the workspace''s CDR version along
         with participant and question count'
       operationId: findSurveyModules
-      parameters:
-      - "$ref": "#/parameters/cdrVersionId"
       responses:
         200:
           description: information about the surveys
           schema:
             "$ref": "#/definitions/SurveysResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/surveymodule/{name}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule/{name}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3337,9 +3342,10 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search/term":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3371,9 +3377,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListWithCountResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/{conceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{conceptId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3396,9 +3403,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3457,9 +3465,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3497,9 +3506,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/drug":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/drug":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3521,9 +3531,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/drug/ingredient/{conceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/drug/ingredient/{conceptId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3541,9 +3552,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/attribute/{conceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/attribute/{conceptId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3561,9 +3573,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaAttributeListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3587,9 +3600,10 @@ paths:
           description: A collection of SurveyVersion
           schema:
             "$ref": "#/definitions/SurveyVersionListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/survey/attribute/{surveyConceptId}/{questionConceptId}/{answerConceptId}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3619,9 +3633,10 @@ paths:
           description: A collection of SurveyVersion
           schema:
             "$ref": "#/definitions/SurveyVersionListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/age/counts":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/age/counts":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3632,9 +3647,10 @@ paths:
           description: A collection age type counts
           schema:
             "$ref": "#/definitions/AgeTypeCountListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/search":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/search":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     post:
       tags:
       - cohortBuilder
@@ -3656,9 +3672,10 @@ paths:
           schema:
             type: integer
             format: int64
-  "/v1/cohortbuilder/{cdrVersionId}/chartinfo/{genderOrSex}/{age}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderOrSex}/{age}":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     post:
       tags:
       - cohortBuilder
@@ -3688,9 +3705,10 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/DemoChartInfoListResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/demographics":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/demographics":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -3702,9 +3720,10 @@ paths:
             and ethnicity.
           schema:
             "$ref": "#/definitions/ParticipantDemographics"
-  "/v1/cohortbuilder/{cdrVersionId}/dataFilters":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/dataFilters":
     parameters:
-    - "$ref": "#/parameters/cdrVersionId"
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
     get:
       tags:
       - cohortBuilder
@@ -5000,12 +5019,9 @@ definitions:
         default: false
       kernelType:
         "$ref": "#/definitions/KernelTypeEnum"
-      genomicsDataType:
-        type: string
-        default: NONE
-        enum:
-          - NONE
-          - WHOLE_GENOME
+      generateGenomicsAnalysisCode:
+        type: boolean
+        default: false
       genomicsAnalysisTool:
         type: string
         default: NONE

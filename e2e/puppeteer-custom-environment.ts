@@ -59,6 +59,8 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           await this.takeScreenshot(screenshotFile);
           const htmlFile = `${this.htmlDir}/${testName}.html`;
           await this.savePageToFile(htmlFile);
+          const pdfFile = `${this.htmlDir}/${testName}.pdf`;
+          await this.savePdf(pdfFile);
         }
         break;
       default:
@@ -89,6 +91,11 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
         }
       });
     });
+  }
+
+  async savePdf(pdfFile) {
+    const [activePage] = (await this.global.browser.pages()).slice(-1);
+    await activePage.pdf({ format: 'A4', path: pdfFile });
   }
 }
 

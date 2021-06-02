@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 public class CaptchaVerificationServiceTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";

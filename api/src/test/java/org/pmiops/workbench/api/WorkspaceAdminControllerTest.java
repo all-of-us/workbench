@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -50,7 +51,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
 
@@ -168,13 +168,14 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(fcWorkspaceResponse);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void getWorkspaceAdminView_404sWhenNotFound() {
     doThrow(
             new NotFoundException(
                 String.format("No workspace found for namespace %s", NONSENSE_NAMESPACE)))
         .when(mockWorkspaceAdminService)
         .getWorkspaceAdminView(NONSENSE_NAMESPACE);
-    workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE);
+    assertThrows(
+            NotFoundException.class, () -> workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE));
   }
 }

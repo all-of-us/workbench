@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+
 public class FieldValuesTest {
 
   private static final Schema WORKSPACE_QUERY_SCHEMA =

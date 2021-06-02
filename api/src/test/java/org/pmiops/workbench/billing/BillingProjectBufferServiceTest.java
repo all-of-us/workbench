@@ -12,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.billing.BillingProjectBufferService.PROJECT_BILLING_ID_SIZE;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -82,7 +83,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class BillingProjectBufferServiceTest {
   private static final Logger log =
@@ -1018,6 +1018,26 @@ public class BillingProjectBufferServiceTest {
             .collect(Collectors.toList());
 
     assertThat(observedExpiredAssigning).containsExactlyElementsIn(expectedExpiredAssigning);
+  }
+
+  @Test
+  public void createBillingProjectName_withUnderScore() {
+    String prefix = "prefix-";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = billingProjectBufferService.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix)).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + PROJECT_BILLING_ID_SIZE);
+  }
+
+  @Test
+  public void createBillingProjectName_withoutUnderScore() {
+    String prefix = "prefix";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = billingProjectBufferService.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix + "-")).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + 1 + PROJECT_BILLING_ID_SIZE);
   }
 
   private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {

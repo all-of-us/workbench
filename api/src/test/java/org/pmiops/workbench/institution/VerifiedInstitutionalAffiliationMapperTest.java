@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
 @Import({
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
@@ -61,7 +60,7 @@ public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
     assertThat(target.getInstitution().getShortName()).isEqualTo(testInstitution.getShortName());
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void test_setDbInstitution_missing() {
     final VerifiedInstitutionalAffiliation source =
         new VerifiedInstitutionalAffiliation().institutionShortName("not in DB");

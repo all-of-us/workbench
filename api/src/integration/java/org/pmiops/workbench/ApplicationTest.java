@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * This test that all application injection is done properly. It loads all JPA repositories,
  * Services, Controllers, Components and Configurations.
  */
-@ExtendWith(SpringExtension.class)
+
 @SpringBootTest
 public class ApplicationTest {
 

@@ -495,6 +495,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     profileService.updateProfile(user, updatedProfile, previousProfile);
+    confirmProfile();
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
