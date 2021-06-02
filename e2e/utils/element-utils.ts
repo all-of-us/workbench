@@ -1,5 +1,5 @@
 import { ElementHandle, JSHandle, Page } from 'puppeteer';
-import { logger } from '../libs/logger';
+import { logger } from 'libs/logger';
 
 /**
  * Gets the attribute value.

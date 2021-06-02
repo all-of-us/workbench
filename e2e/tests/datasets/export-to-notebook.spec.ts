@@ -123,23 +123,11 @@ describe('Export to notebook tests', () => {
     const code = await notebookPreviewPage.getFormattedCode();
     switch (kernelLanguage.LANGUAGE) {
       case Language.Python:
-        expect(
-          code.some((item) => {
-            return item.includes('import pandas');
-          })
-        ).toBe(true);
-        expect(
-          code.some((item) => {
-            return item.includes('import os');
-          })
-        ).toBe(true);
+        expect(code.some((item) => item.includes('import pandas'))).toBe(true);
+        expect(code.some((item) => item.includes('import os'))).toBe(true);
         break;
       case Language.R:
-        expect(
-          code.some((item) => {
-            return item.includes('library(bigrquery)');
-          })
-        ).toBe(true);
+        expect(code.some((item) => item.includes('library(bigrquery)'))).toBe(true);
         break;
     }
 
