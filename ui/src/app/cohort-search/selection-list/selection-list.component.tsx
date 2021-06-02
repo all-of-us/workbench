@@ -273,7 +273,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     checkCriteriaChanges() {
       const {cohortContext: {groupId, item, role}, criteria} = this.props;
       if (criteria.length === 0) {
-        this.setState({disableSave: true});
+        this.setState({disableSave: true, modifiers: []});
       } else {
         const requestItem = getItemFromSearchRequest(groupId, item.id, role);
         if (requestItem) {
