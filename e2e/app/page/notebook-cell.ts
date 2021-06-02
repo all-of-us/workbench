@@ -110,7 +110,7 @@ export default class NotebookCell {
    * @param {number} timeOut The timeout in milliseconds.
    */
   async findOutputElementHandle(timeOut?: number): Promise<ElementHandle> {
-    const selector = `${this.outputSelector(this.getCellIndex())}:not(.output_error)`;
+    const selector = `${this.outputSelector(this.getCellIndex())}:not(.output_error):not(.output_stderr)`;
     const iframe = await this.getIFrame();
     await iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
     const elements = await iframe.$$(selector);

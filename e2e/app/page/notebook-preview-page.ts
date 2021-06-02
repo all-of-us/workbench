@@ -45,7 +45,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     const textContents = await this.findNotebookIframe().then((frame) => {
       return frame.$$(css);
     });
-    return Promise.all(textContents.map(async (textContent) => await getPropValue<string>(textContent, 'textContent')));
+    return Promise.all(textContents.map(async (content) => await getPropValue<string>(content, 'textContent')));
   }
 
   getEditLink(): Link {
