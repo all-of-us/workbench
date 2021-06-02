@@ -14,11 +14,12 @@ import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} fro
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
+const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('Access Renewal Page', () => {
 
   function expireAllModules() {
-    const expiredTime = Date.now() - 1000 * 60 * 60;
+    const expiredTime = oneHourAgo();
     const {profile} = profileStore.get();
     const newProfile = fp.set('renewableAccessModules', {modules: [
       {moduleName: 'dataUseAgreement', expirationEpochMillis: expiredTime},
@@ -50,6 +51,15 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile,  load, reload, updateCache});
   }
 
+  function setBypassTimes(completionFn) {
+    const {profile} = profileStore.get();
+    const newProfile = fp.flow(
+      fp.set('dataUseAgreementBypassTime', completionFn()),
+      fp.set('complianceTrainingBypassTime', completionFn())
+    )(profile)
+    profileStore.set({profile: newProfile,  load, reload, updateCache});
+  }
+
   const profile = ProfileStubVariables.PROFILE_STUB;
 
   let mockUpdateProfile: SpyInstance;
@@ -68,7 +78,6 @@ describe('Access Renewal Page', () => {
     registerApiClient(ProfileApi, profileApi);
     mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
 
-    // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       profileStore.set({profile: profileStore.get().profile, load, reload, updateCache});
     });
@@ -113,9 +122,9 @@ describe('Access Renewal Page', () => {
     
     // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
 
     // Incomplete
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
@@ -131,6 +140,7 @@ describe('Access Renewal Page', () => {
 
     // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+
     // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
@@ -174,4 +184,28 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
   });
 
+  it('should show the correct state when items are bypassed', async () => {
+    expireAllModules()
+
+    const wrapper = component();
+
+    setCompletionTimes(() => Date.now());
+    setBypassTimes(() => Date.now());
+
+    updateOneModule('profileConfirmation', oneHourAgo());
+    updateOneModule('publicationConfirmation', oneHourAgo());
+
+    await waitOneTickAndUpdate(wrapper);  
+
+    // Incomplete
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+
+    // Complete
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
+
+    // State check
+    expect(findNodesContainingText(wrapper, 'click the refresh button').length).toBe(0);
+  });
 });

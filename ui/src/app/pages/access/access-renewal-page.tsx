@@ -331,7 +331,7 @@ export const AccessRenewalPage = fp.flow(
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isExpiring(getExpirationTimeFor('complianceTraining')) &&
+        {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime && 
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
@@ -344,7 +344,7 @@ export const AccessRenewalPage = fp.flow(
               redirectToTraining();
             }}
             wasBypassed={!!complianceTrainingBypassTime}/>
-          {isExpiring(getExpirationTimeFor('complianceTraining')) && <Button
+          {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime && <Button
             disabled={reloadDisabled}
             onClick={async() => {
               setLoading(true);
