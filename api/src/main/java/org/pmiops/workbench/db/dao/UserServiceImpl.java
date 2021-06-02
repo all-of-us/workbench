@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -1124,24 +1123,33 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    *
    * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
    * If no, either the feature flag is not set or the user does not have access for reasons other
-   * than access renewal compliance. In either case, we should not send an email.
+   * than access renewal compliance. In either negative case, we should not send an email.
    *
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
    */
   private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
+    // Collection<Optional<T>> is usually a code smell.
+    // Here we do need to know if any are EMPTY, for the next step.
     final Set<Optional<Timestamp>> expirations =
         getRenewableAccessModules(user).values().stream()
             .filter(times -> !times.isBypassed())
             .map(ModuleTimes::getExpiration)
             .collect(Collectors.toSet());
 
-    if (expirations.stream().allMatch(Optional::isPresent)) {
-      return expirations.stream().map(Optional::get).min(Timestamp::compareTo);
-    } else {
-      // if any un-bypassed modules are incomplete, this user has never had access
-      // and therefore it would be inappropriate to send an email
+    // if any un-bypassed modules are incomplete, we know:
+    // * this user does not currently have access
+    // * this user has never previously had access
+    // therefore: the user is neither "expired" nor "expiring" and we should not send an email
+
+    if (!expirations.stream().allMatch(Optional::isPresent)) {
       return Optional.empty();
+    } else {
+      return expirations.stream()
+          .map(Optional::get)
+          // note: min() returns EMPTY if the stream is empty at this point,
+          // which is also an indicator that we should not send an email
+          .min(Timestamp::compareTo);
     }
   }
 
@@ -1160,20 +1168,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private void sendRegisteredTierExpirationEmail(DbUser user) {
-    try {
-      mailService.alertUserRegisteredTierExpiration(user);
-    } catch (MessagingException e) {
-      // TODO
-      e.printStackTrace();
-    }
+    //   try {
+    mailService.alertUserRegisteredTierExpiration(user);
+    //    } catch (MessagingException e) {
+    //      // TODO
+    //      e.printStackTrace();
+    //    }
   }
 
   private void sendRegisteredTierWarningEmail(DbUser user, long daysRemaining) {
-    try {
-      mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
-    } catch (MessagingException e) {
-      // TODO
-      e.printStackTrace();
-    }
+    //    try {
+    mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
+    //    } catch (MessagingException e) {
+    //      // TODO
+    //      e.printStackTrace();
+    //    }
   }
 }

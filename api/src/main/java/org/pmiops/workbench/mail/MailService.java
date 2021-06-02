@@ -23,8 +23,7 @@ public interface MailService {
 
   void alertUserFreeTierExpiration(final DbUser user) throws MessagingException;
 
-  void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining)
-      throws MessagingException;
+  void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining);
 
-  void alertUserRegisteredTierExpiration(final DbUser user) throws MessagingException;
+  void alertUserRegisteredTierExpiration(final DbUser user);
 }
