@@ -119,7 +119,7 @@ describe('Access Renewal Page', () => {
 
     updateOneModule('profileConfirmation', oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
-    
+
     // Complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
 
@@ -195,7 +195,7 @@ describe('Access Renewal Page', () => {
     updateOneModule('profileConfirmation', oneHourAgo());
     updateOneModule('publicationConfirmation', oneHourAgo());
 
-    await waitOneTickAndUpdate(wrapper);  
+    await waitOneTickAndUpdate(wrapper);
 
     // Incomplete
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
