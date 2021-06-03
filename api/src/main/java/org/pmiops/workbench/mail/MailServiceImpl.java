@@ -191,7 +191,7 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-                "Registered Tier access expiration has expired for user %s", user.getUsername())
+                "Registered Tier access expiration has expired for user %s. ", user.getUsername())
             + (emailSent ? "Email sent." : "Email NOT sent.");
     log.info(logMsg);
   }
