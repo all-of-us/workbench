@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -34,7 +35,7 @@ import org.springframework.context.annotation.Scope;
  * <p>TODO(RW-4443): update all controller tests to extend this class.
  */
 @DataJpaTest
-public abstract class BaseControllerTest {
+public abstract class BaseControllerTest extends SpringTest {
 
   protected static WorkbenchConfig config;
   public static final String BASE_PATH = "config/";

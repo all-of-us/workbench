@@ -634,7 +634,6 @@ public class CohortReviewControllerTest extends SpringTest {
     when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.READER))
         .thenReturn(workspace2);
-    ;
     assertThrows(
         NotFoundException.class,
         () ->

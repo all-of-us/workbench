@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -33,7 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 
-public class OfflineRuntimeControllerTest {
+public class OfflineRuntimeControllerTest extends SpringTest {
   private static final Instant NOW = Instant.parse("1988-12-26T00:00:00Z");
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final Duration MAX_AGE = Duration.ofDays(14);

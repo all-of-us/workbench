@@ -87,7 +87,7 @@ public class ReportingUploadServiceTest extends SpringTest {
   @TestConfiguration
   @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
   @MockBean({ReportingVerificationService.class})
-  public static class config {}
+  public static class Config {}
 
   @BeforeEach
   public void setup() {
