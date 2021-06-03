@@ -1,6 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -204,14 +205,14 @@ public class LogsBasedMetricsServiceTest extends SpringTest {
         .isEqualTo(OPERATION_DURATION.toMillis());
   }
 
-  @Test(expected = IllegalAccessError.class)
+  @Test
   public void testRecordElapsedTime_throws() {
-    logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder(),
-        DistributionMetric.COHORT_OPERATION_TIME,
-        () -> {
-          throw new IllegalAccessError("Boo!");
-        });
+      assertThrows(IllegalAccessError.class, ()-> logsBasedMetricService.recordElapsedTime(
+              MeasurementBundle.builder(),
+              DistributionMetric.COHORT_OPERATION_TIME,
+              () -> {
+                  throw new IllegalAccessError("Boo!");
+              }));
   }
 
   @Test

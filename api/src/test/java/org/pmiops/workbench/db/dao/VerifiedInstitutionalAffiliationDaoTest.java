@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -205,7 +206,7 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
         .hasValue(testInst);
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_twoAffiliationsForUser() {
     verifiedInstitutionalAffiliationDao.save(
         new DbVerifiedInstitutionalAffiliation()
@@ -216,12 +217,12 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
-    verifiedInstitutionalAffiliationDao.save(
+    assertThrows(DataIntegrityViolationException.class, () -> verifiedInstitutionalAffiliationDao.save(
         new DbVerifiedInstitutionalAffiliation()
             .setUser(testUser)
             .setInstitution(newInst)
             .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
             .setInstitutionalRoleOtherText(
-                "Arbitrary and does not actually require enum to be OTHER"));
+                "Arbitrary and does not actually require enum to be OTHER")));
   }
 }

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +69,7 @@ public class DevUserRegistrationServiceTest {
     assertThat(dbAffiliationCaptor.getValue().getInstitution().getShortName()).isEqualTo("Google");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCreateUserFromUserInfo_NoMatchingInstitution() {
     // If no matching institution could be found, an exception is thrown.
     when(directoryService.getContactEmail(eq("gjordan@fake-research-aou.org")))
@@ -76,6 +77,6 @@ public class DevUserRegistrationServiceTest {
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.empty());
 
-    service.createUser(userInfo);
+    assertThrows(BadRequestException.class, () -> service.createUser(userInfo));
   }
 }

@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -224,14 +225,14 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testSyncComplianceTrainingStatusBadgeNotFoundV2() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
-    userService.syncComplianceTrainingStatusV2();
+    assertThrows(NotFoundException.class, () -> userService.syncComplianceTrainingStatusV2());
   }
 
   @Test

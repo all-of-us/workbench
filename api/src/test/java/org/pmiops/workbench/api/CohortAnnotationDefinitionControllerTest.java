@@ -393,13 +393,12 @@ public class CohortAnnotationDefinitionControllerTest {
             .etag(Etags.fromVersion(0))
             .cohortId(cohort.getCohortId());
 
-    assertThrows(NotFoundException.class, () ->   cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+    assertThrows(NotFoundException.class, () -> cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
             NAMESPACE2,
             NAME2,
             cohort.getCohortId(),
             dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
             request));
-    );
   }
 
   @Test

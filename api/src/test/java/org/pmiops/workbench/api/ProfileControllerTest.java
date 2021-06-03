@@ -592,9 +592,6 @@ public class ProfileControllerTest extends BaseControllerTest {
           // CONTACT_EMAIL has the domain @example.com
           createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
       });
-
-    // CONTACT_EMAIL has the domain @example.com
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
   }
 
   @Test

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,9 @@ public class ActionAuditEventTest {
   private static final String NEW_VALUE = "Fred";
   private static final long TIMESTAMP = Instant.parse("2007-01-03T00:00:00.00Z").toEpochMilli();
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testActionAuditEventBuilder_throwsOnMissingValues() {
-    ActionAuditEvent.builder().build();
+    assertThrows(IllegalArgumentException.class, () -> ActionAuditEvent.builder().build());
   }
 
   @Test

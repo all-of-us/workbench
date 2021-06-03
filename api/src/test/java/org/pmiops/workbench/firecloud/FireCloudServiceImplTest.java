@@ -1,12 +1,15 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+
 import java.util.Arrays;
+
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,20 +44,30 @@ public class FireCloudServiceImplTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
-  @Autowired private FireCloudService service;
+  @Autowired
+  private FireCloudService service;
 
   private static WorkbenchConfig workbenchConfig;
 
-  @MockBean private BillingApi billingApi;
-  @MockBean private BillingV2Api billingV2Api;
-  @MockBean private GroupsApi groupsApi;
-  @MockBean private HttpTransport httpTransport;
-  @MockBean private IamCredentialsClient iamCredentialsClient;
-  @MockBean private NihApi nihApi;
-  @MockBean private ProfileApi profileApi;
-  @MockBean private StatusApi statusApi;
+  @MockBean
+  private BillingApi billingApi;
+  @MockBean
+  private BillingV2Api billingV2Api;
+  @MockBean
+  private GroupsApi groupsApi;
+  @MockBean
+  private HttpTransport httpTransport;
+  @MockBean
+  private IamCredentialsClient iamCredentialsClient;
+  @MockBean
+  private NihApi nihApi;
+  @MockBean
+  private ProfileApi profileApi;
+  @MockBean
+  private StatusApi statusApi;
 
-  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @TestConfiguration
   @Import({FireCloudServiceImpl.class, RetryConfig.class})
@@ -93,22 +106,28 @@ public class FireCloudServiceImplTest {
     assertThat(service.getFirecloudStatus()).isFalse();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testGetMe_throwsNotFound() throws ApiException {
-    when(profileApi.me()).thenThrow(new ApiException(404, "blah"));
-    service.getMe();
+      assertThrows(NotFoundException.class, () -> {
+          when(profileApi.me()).thenThrow(new ApiException(404, "blah"));
+          service.getMe();
+      });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetMe_throwsForbidden() throws ApiException {
-    when(profileApi.me()).thenThrow(new ApiException(403, "blah"));
-    service.getMe();
+      assertThrows(ForbiddenException.class, () -> {
+          when(profileApi.me()).thenThrow(new ApiException(403, "blah"));
+          service.getMe();
+      });
   }
 
-  @Test(expected = UnauthorizedException.class)
+  @Test
   public void testGetMe_throwsUnauthorized() throws ApiException {
-    when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
-    service.getMe();
+      assertThrows(UnauthorizedException.class, () -> {
+          when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
+          service.getMe();
+      });
   }
 
   @Test
@@ -146,7 +165,7 @@ public class FireCloudServiceImplTest {
   @Test
   public void testNihStatus() throws Exception {
     FirecloudNihStatus status =
-        new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L);
+            new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L);
     when(nihApi.nihStatus()).thenReturn(status);
     assertThat(service.getNihStatus()).isNotNull();
     assertThat(service.getNihStatus()).isEqualTo(status);
@@ -158,10 +177,12 @@ public class FireCloudServiceImplTest {
     assertThat(service.getNihStatus()).isNull();
   }
 
-  @Test(expected = ServerErrorException.class)
+  @Test
   public void testNihStatusException() throws Exception {
-    when(nihApi.nihStatus()).thenThrow(new ApiException(500, "Internal Server Error"));
-    service.getNihStatus();
+      assertThrows(ServerErrorException.class, () -> {
+          when(nihApi.nihStatus()).thenThrow(new ApiException(500, "Internal Server Error"));
+          service.getNihStatus();
+      });
   }
 
   @Test
@@ -170,7 +191,7 @@ public class FireCloudServiceImplTest {
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
+            ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
     verify(billingApi).createBillingProjectFull(captor.capture());
     FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
 
@@ -194,7 +215,7 @@ public class FireCloudServiceImplTest {
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
+            ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
     verify(billingV2Api).createBillingProjectFullV2(captor.capture());
     FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
 
