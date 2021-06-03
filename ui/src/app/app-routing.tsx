@@ -60,6 +60,11 @@ const registrationGuard: Guard = {
   redirectPath: '/'
 };
 
+const expiredGuard: Guard = {
+  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
+  redirectPath: '/access-renewal'
+};
+
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
@@ -104,6 +109,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   const {authLoaded = false} = useStore(authStore);
 
   return authLoaded && <React.Fragment>
+    {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     <AppRouter>
       <AppRoute
@@ -126,16 +132,17 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           path='/user-disabled'
           component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
       />
-
       <ProtectedRoutes guards={[signInGuard]}>
-        <AppRoute
-          path='/'
-            component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
-        />
         <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
-          ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
-          : <Navigate to={'/profile'}/>
-          }/>
+            ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
+            : <Navigate to={'/profile'}/>
+        }/>
+        <ProtectedRoutes guards={[expiredGuard]}>
+          <AppRoute
+            path='/'
+              component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+          />
+        </ProtectedRoutes>
         <AppRoute
             path='/admin/banner'
             component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
@@ -210,7 +217,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
         <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
-        <ProtectedRoutes guards={[registrationGuard]}>
+        <ProtectedRoutes guards={[expiredGuard, registrationGuard]}>
           <AppRoute
             path='/library'
             component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
