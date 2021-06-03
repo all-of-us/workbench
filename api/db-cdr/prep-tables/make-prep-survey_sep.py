@@ -220,15 +220,11 @@ def topic():
 
 def suppressedQuestion():
                     if item_flags["CONTROLLED_QUESTION_SUPPRESSED"] != 1:
-                        # write out question
-                        question_id_controlled = id_controlled
-
                         # for questions with numeric response, we create an answer row named 'Select a value'
-                        upname('controlled')
+                        upname('controlled', id_controlled)
 
                     if item_flags["REGISTERED_QUESTION_SUPPRESSED"] != 1:
-                        question_id_registered = id_registered
-                        upname('registered')
+                        upname('registered', id_registered)
 def secondForLoop():
     long_code_to_short_code = {}
     answer_suppression = {}
@@ -259,15 +255,15 @@ def copy_upload():
         blob.upload_from_filename(home_dir + "/" + f)
     return
 
-def upname(controller):
+def upname(controller, controlled_or_reg):
     write_row(controlled_writer, parent_id_controlled, question_code, question_label
                                   , 'QUESTION', None, None, item_flags, controller, long_code_to_short_code)
     if is_numeric_answer:
-       add_numeric_answer(controlled_writer, question_id_controlled,
+       add_numeric_answer(controlled_writer, controlled_or_reg,
                                              min_value, max_value, item_flags, controller)
                       # write out answer
     else:
-       add_answers(controlled_writer, choices, question_code, question_id_controlled
+       add_answers(controlled_writer, choices, question_code, controlled_or_reg
                                       , None, None, item_flags, controller, long_code_to_short_code, answer_suppression)
 
 def read_csv(file):
