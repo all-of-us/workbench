@@ -59,6 +59,11 @@ const registrationGuard: Guard = {
   redirectPath: '/'
 };
 
+const expiredGuard: Guard = {
+  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
+  redirectPath: '/access-renewal'
+};
+
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
@@ -122,16 +127,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/user-disabled'
         component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
     />
-
-    <ProtectedRoutes guards={[signInGuard]}>
-      <AppRoute
-        path='/'
-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
-      />
-      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
-        ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
-        : <Navigate to={'/profile'}/>
-        }/>
+     <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
+          ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
+          : <Navigate to={'/profile'}/>
+      }/>
+      <ProtectedRoutes guards={[expiredGuard]}>
+        <AppRoute
+          path='/'
+            component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+        />
+      </ProtectedRoutes>
       <AppRoute
           path='/admin/banner'
           component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
