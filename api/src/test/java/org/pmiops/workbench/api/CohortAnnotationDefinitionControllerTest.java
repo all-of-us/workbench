@@ -68,6 +68,7 @@ public class CohortAnnotationDefinitionControllerTest extends SpringTest {
   @Autowired private CohortDao cohortDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
+  @Autowired private FakeClock fakeClock;
   @Mock private BigQueryService bigQueryService;
   @Mock private CohortBuilderService cohortBuilderService;
   @Mock private CohortReviewDao cohortReviewDao;
@@ -79,15 +80,12 @@ public class CohortAnnotationDefinitionControllerTest extends SpringTest {
   @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
   @Mock private ReviewQueryBuilder reviewQueryBuilder;
   @Mock private WorkspaceAuthService workspaceAuthService;
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   private DbWorkspace workspace;
   private DbWorkspace workspace2;
 
   @TestConfiguration
   @Import({CohortAnnotationDefinitionMapperImpl.class, CommonMappers.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
   @BeforeEach
@@ -106,7 +104,7 @@ public class CohortAnnotationDefinitionControllerTest extends SpringTest {
             participantCohortStatusDao,
             participantCohortStatusMapper,
             reviewQueryBuilder,
-            CLOCK);
+                fakeClock);
     CohortAnnotationDefinitionService cohortAnnotationDefinitionService =
         new CohortAnnotationDefinitionServiceImpl(
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);

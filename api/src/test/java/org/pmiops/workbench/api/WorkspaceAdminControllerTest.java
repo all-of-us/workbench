@@ -112,7 +112,6 @@ public class WorkspaceAdminControllerTest extends SpringTest {
     NotebooksService.class,
     ConceptSetService.class,
     CohortService.class,
-    Clock.class
   })
   static class Configuration {}
 

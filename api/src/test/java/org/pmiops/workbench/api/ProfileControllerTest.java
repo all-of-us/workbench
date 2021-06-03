@@ -121,8 +121,27 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProfileControllerTest extends BaseControllerTest {
+  @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
+  @MockBean private CloudStorageClient mockCloudStorageClient;
+  @MockBean private DirectoryService mockDirectoryService;
+  @MockBean private FireCloudService mockFireCloudService;
+  @MockBean private MailService mockMailService;
+  @MockBean private ProfileAuditor mockProfileAuditor;
+  @MockBean private ShibbolethService mockShibbolethService;
+  @MockBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockBean private RasLinkService mockRasLinkService;
 
-  private static final FakeClock fakeClock = new FakeClock(Instant.parse("1995-06-05T00:00:00Z"));
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
+  @Autowired private InstitutionService institutionService;
+  @Autowired private ProfileController profileController;
+  @Autowired private ProfileService profileService;
+  @Autowired private UserDao userDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Autowired private UserService userService;
+  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
+  @Autowired private FakeClock fakeClock;
+
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
   private static final String CITY = "Exampletown";
@@ -143,27 +162,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ZIP_CODE = "12345";
   private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
-
-  @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
-  @MockBean private CloudStorageClient mockCloudStorageClient;
-  @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private MailService mockMailService;
-  @MockBean private ProfileAuditor mockProfileAuditor;
-  @MockBean private ShibbolethService mockShibbolethService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditor;
-  @MockBean private RasLinkService mockRasLinkService;
-
-  @Autowired private AccessTierDao accessTierDao;
-  @Autowired private AccessTierService accessTierService;
-  @Autowired private InstitutionService institutionService;
-  @Autowired private ProfileController profileController;
-  @Autowired private ProfileService profileService;
-  @Autowired private UserDao userDao;
-  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Autowired private UserService userService;
-  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
-
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;

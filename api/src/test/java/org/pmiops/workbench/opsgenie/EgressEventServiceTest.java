@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -54,7 +55,7 @@ import org.springframework.context.annotation.Scope;
 
 public class EgressEventServiceTest extends SpringTest {
 
-  private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
+  private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final String INSTITUTION_2_NAME = "Auburn University";
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";
   private static WorkbenchConfig workbenchConfig;
@@ -66,7 +67,6 @@ public class EgressEventServiceTest extends SpringTest {
           .egressMibThreshold(100.0)
           .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
           .timeWindowDuration(600L);
-  private static final Clock CLOCK = new FakeClock(NOW);
 
   @MockBean private AlertApi mockAlertApi;
   @MockBean private EgressEventAuditor egressEventAuditor;
@@ -120,11 +120,6 @@ public class EgressEventServiceTest extends SpringTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
       return workbenchConfig;
-    }
-
-    @Bean
-    public Clock clock() {
-      return CLOCK;
     }
   }
 

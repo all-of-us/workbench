@@ -70,8 +70,7 @@ public class UserMetricsControllerTest extends SpringTest {
   @Autowired private FirecloudMapper firecloudMapper;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-
-  private final FakeClock fakeClock = new FakeClock(NOW);
+  @Autowired private FakeClock fakeClock;
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;

@@ -61,7 +61,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserControllerTest extends SpringTest {
 
-  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  @Autowired private FakeClock fakeClock;
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -86,11 +86,6 @@ public class UserControllerTest extends SpringTest {
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
       return config;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -487,7 +482,7 @@ public class UserControllerTest extends SpringTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
+    user.setFirstSignInTime(new Timestamp(fakeClock.instant().toEpochMilli()));
     incrementedUserId++;
     user = userDao.save(user);
 
