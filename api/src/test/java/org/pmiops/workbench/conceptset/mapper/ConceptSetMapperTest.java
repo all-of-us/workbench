@@ -3,7 +3,6 @@ package org.pmiops.workbench.conceptset.mapper;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,7 @@ public class ConceptSetMapperTest extends SpringTest {
 
   @TestConfiguration
   @Import({ConceptSetMapperImpl.class, CommonMappers.class})
-  @MockBean({ConceptBigQueryService.class, Clock.class})
+  @MockBean({ConceptBigQueryService.class})
   static class Configuration {}
 
   @BeforeEach

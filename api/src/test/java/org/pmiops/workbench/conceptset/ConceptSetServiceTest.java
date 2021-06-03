@@ -2,7 +2,6 @@ package org.pmiops.workbench.conceptset;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.time.Clock;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ public class ConceptSetServiceTest extends SpringTest {
     CommonMappers.class,
     CohortBuilderMapper.class,
     ConceptBigQueryService.class,
-    Clock.class,
     CohortBuilderService.class
   })
   static class Configuration {}

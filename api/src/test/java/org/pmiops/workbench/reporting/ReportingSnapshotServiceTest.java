@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
@@ -34,7 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 public class ReportingSnapshotServiceTest extends SpringTest {
-  private static final long NOW_EPOCH_MILLI = 1594404482000L;
+  private static final long NOW_EPOCH_MILLI = FakeClockConfiguration.NOW_TIME;
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
   @MockBean private ReportingQueryService mockReportingQueryService;
