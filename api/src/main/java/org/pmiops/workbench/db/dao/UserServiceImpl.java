@@ -1169,20 +1169,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private void sendRegisteredTierExpirationEmail(DbUser user) {
-    //   try {
     mailService.alertUserRegisteredTierExpiration(user);
-    //    } catch (MessagingException e) {
-    //      // TODO
-    //      e.printStackTrace();
-    //    }
   }
 
   private void sendRegisteredTierWarningEmail(DbUser user, long daysRemaining) {
-    //    try {
     mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
-    //    } catch (MessagingException e) {
-    //      // TODO
-    //      e.printStackTrace();
-    //    }
   }
 }

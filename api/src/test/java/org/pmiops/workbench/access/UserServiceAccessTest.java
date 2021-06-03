@@ -603,10 +603,10 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // expiring in 1.5 days will trigger the 1-day warning
+    // expiring in 1 day (plus some) will trigger the 1-day warning
 
-    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -623,10 +623,10 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // expiring in 1.5 days would trigger the 1-day warning...
+    // expiring in 1 day (plus some) would trigger the 1-day warning...
 
-    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     // but the feature flag is off
     providedWorkbenchConfig.access.enableAccessRenewal = false;
@@ -646,10 +646,10 @@ public class UserServiceAccessTest {
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
 
-    // expiring in 1.5 days would trigger the 1-day warning...
+    // expiring in 1 day (plus some) would trigger the 1-day warning...
 
-    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     // but this module is incomplete (and also not bypassed)
     dbUser.setDataUseAgreementCompletionTime(null);
@@ -675,10 +675,10 @@ public class UserServiceAccessTest {
     // this is bypassed
     dbUser.setDataUseAgreementBypassTime(now);
 
-    // expiring in 1.5 days will trigger the 1-day warning
+    // expiring in 1 day (plus some) will trigger the 1-day warning
 
-    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -696,14 +696,13 @@ public class UserServiceAccessTest {
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
 
-    // expiring in 1.5 days will trigger the 1-day warning
+    // expiring in 1 day (plus some) will trigger the 1-day warning
 
-    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
-    // a bypass which would "expire" in 30.5 does NOT trigger a 30-day warning
-    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
-    dbUser.setDataUseAgreementBypassTime(willExpireAfter(thirtyAndAHalf));
+    // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
+    dbUser.setDataUseAgreementBypassTime(willExpireAfter(daysPlusSome(30)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -747,10 +746,9 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // expiring in 30.5 days will trigger the 30-day warning
+    // expiring in 30 days (plus) will trigger the 30-day warning
 
-    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyAndAHalf));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -769,10 +767,8 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // expiring in 31.5 days will not trigger a warning
-
-    final Duration thirtyOneAndAHalf = Duration.ofDays(31).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyOneAndAHalf));
+    // expiring in 31 days (plus) will not trigger a warning
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(31)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -790,17 +786,14 @@ public class UserServiceAccessTest {
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
 
-    // expiring in 30.5 days would trigger the 30-day warning...
-
-    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyAndAHalf));
-
-    // but 15.5 days is sooner, so trigger 15 instead
-
-    final Duration fifteenAndAHalf = Duration.ofDays(15).plus(Duration.ofHours(12));
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fifteenAndAHalf));
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 30 days (plus) would trigger the 30-day warning...
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
+
+    // but 15 days (plus) is sooner, so trigger 15 instead
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(15)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -820,17 +813,14 @@ public class UserServiceAccessTest {
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
 
-    // expiring in 15.5 days would trigger the 15-day warning...
-
-    final Duration fifteenAndAHalf = Duration.ofDays(15).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(fifteenAndAHalf));
-
-    // but 14.5 days is sooner, so no email is sent
-
-    final Duration fourteenAndAHalf = Duration.ofDays(14).plus(Duration.ofHours(12));
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fourteenAndAHalf));
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 15 days (plus) would trigger the 15-day warning...
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(15)));
+
+    // but 14 days (plus) is sooner, so no email is sent
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(14)));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -878,6 +868,11 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verifyZeroInteractions(mailService);
+  }
+
+  // one day plus most of a day (to demonstrate we are truncating, not rounding)
+  private Duration daysPlusSome(long days) {
+    return Duration.ofDays(days).plus(Duration.ofHours(18));
   }
 
   private Instant expirationBoundary() {
