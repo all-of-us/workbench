@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import java.sql.Timestamp;
 import java.time.Clock;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.model.CohortReview;
@@ -15,7 +16,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class CohortReviewMapperTest {
+public class CohortReviewMapperTest extends SpringTest {
 
   @Autowired private CohortReviewMapper cohortReviewMapper;
 

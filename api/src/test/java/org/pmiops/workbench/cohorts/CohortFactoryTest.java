@@ -9,13 +9,14 @@ import java.time.Clock;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReviewStatus;
 
-public class CohortFactoryTest {
+public class CohortFactoryTest extends SpringTest {
 
   private CohortFactory cohortFactory;
 

@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import java.sql.Date;
 import java.time.Clock;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -13,7 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class ParticipantCohortAnnotationMapperTest {
+public class ParticipantCohortAnnotationMapperTest extends SpringTest {
 
   @Autowired private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
 

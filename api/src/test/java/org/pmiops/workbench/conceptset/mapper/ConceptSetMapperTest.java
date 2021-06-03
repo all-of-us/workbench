@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -23,7 +24,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class ConceptSetMapperTest {
+public class ConceptSetMapperTest extends SpringTest {
 
   @Autowired private ConceptSetMapper conceptSetMapper;
   @Autowired private ConceptBigQueryService conceptBigQueryService;

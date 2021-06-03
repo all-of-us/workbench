@@ -26,9 +26,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
-public class QueryParameterValuesTest {
+public class QueryParameterValuesTest extends SpringTest {
 
   private static final Map<String, QueryParameterValue> PARAM_MAP = new HashMap<>();
   private static final Instant INSTANT = Instant.parse("2012-12-13T00:00:00.00Z");

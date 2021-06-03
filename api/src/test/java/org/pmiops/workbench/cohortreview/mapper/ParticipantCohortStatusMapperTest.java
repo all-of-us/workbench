@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Date;
 import java.time.Clock;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -17,7 +18,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class ParticipantCohortStatusMapperTest {
+public class ParticipantCohortStatusMapperTest extends SpringTest {
 
   @Autowired private ParticipantCohortStatusMapper participantCohortStatusMapper;
 
