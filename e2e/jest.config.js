@@ -7,7 +7,7 @@ module.exports = {
   testTimeout: 1200000,
   testRunner: 'jest-circus/runner',
   testEnvironment: '<rootDir>/puppeteer-custom-environment.ts',
-  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup2.ts'],
   setupFiles: ['dotenv/config'],
   reporters: [
     'default',

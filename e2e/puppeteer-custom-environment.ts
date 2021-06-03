@@ -59,8 +59,6 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           await this.takeScreenshot(screenshotFile);
           const htmlFile = `${this.htmlDir}/${testName}.html`;
           await this.savePageToFile(htmlFile);
-          const pdfFile = `${this.htmlDir}/${testName}.pdf`;
-          await this.savePdf(pdfFile);
         }
         break;
       default:
