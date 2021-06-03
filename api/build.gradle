@@ -78,12 +78,11 @@ apply plugin: 'war'
 configurations {
   __bigQueryTest__Compile.extendsFrom testCompile
   __bigQueryTest__Runtime.extendsFrom testRuntime
-  __bigQueryTest__Runtime.extendsFrom testImplementation
   __bigQueryTest__Compile.extendsFrom testImplementation
 
   __integration__Compile.extendsFrom testCompile
   __integration__Runtime.extendsFrom testRuntime
-  __integration__Runtime.extendsFrom testImplementation
+  __integration__Compile.extendsFrom testImplementation
 
   __tools__Implementation.extendsFrom implementation
   __tools__RuntimeOnly.extendsFrom runtimeOnly
