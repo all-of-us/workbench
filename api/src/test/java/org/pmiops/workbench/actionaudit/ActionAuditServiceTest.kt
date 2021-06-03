@@ -14,7 +14,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.Arrays
 import javax.inject.Provider
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.config.WorkbenchConfig

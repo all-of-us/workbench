@@ -39,7 +39,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -62,14 +61,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Test all implementations of ReportingUploadService to save on setup code. If this becomes too
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
-
 public class ReportingUploadServiceTest {
 
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");

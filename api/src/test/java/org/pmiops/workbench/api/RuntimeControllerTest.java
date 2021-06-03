@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -111,7 +110,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -732,9 +730,9 @@ public class RuntimeControllerTest {
         .isEqualTo(RuntimeStatus.UNKNOWN);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testGetRuntime_NullBillingProject() {
-    runtimeController.getRuntime(null);
+    assertThrows(NotFoundException.class, ()-> runtimeController.getRuntime(null));
   }
 
   @Test

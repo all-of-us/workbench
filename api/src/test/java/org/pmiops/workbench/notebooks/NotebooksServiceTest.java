@@ -14,7 +14,6 @@ import java.time.Clock;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -44,7 +43,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @DataJpaTest
-public class NotebooksServiceTest extends SpringTest  {
+public class NotebooksServiceTest extends SpringTest {
   private static final JSONObject NOTEBOOK_CONTENTS =
       new JSONObject().put("who", "I'm a notebook!");
   private static final String BUCKET_NAME = "notebook.bucket";

@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AuditAction;
 import org.pmiops.workbench.model.AuditAgent;
@@ -20,8 +19,6 @@ import org.pmiops.workbench.model.AuditTargetPropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
-
 
 public class AuditLogEntryMapperTest {
 

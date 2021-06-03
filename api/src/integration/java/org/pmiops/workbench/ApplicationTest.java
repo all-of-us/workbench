@@ -6,19 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Component;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * This test that all application injection is done properly. It loads all JPA repositories,
  * Services, Controllers, Components and Configurations.
  */
-
 @SpringBootTest
 public class ApplicationTest {
 

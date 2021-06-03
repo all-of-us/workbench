@@ -30,12 +30,10 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.test.FakeClock;
-import org.springframework.test.context.junit4.SpringRunner;
 
 public class DelegatedUserCredentialsTest extends SpringTest {
 

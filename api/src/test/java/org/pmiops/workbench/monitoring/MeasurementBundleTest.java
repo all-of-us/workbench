@@ -11,7 +11,7 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 
-public class MeasurementBundleTest  extends SpringTest {
+public class MeasurementBundleTest extends SpringTest {
 
   private static final long USER_COUNT = 1000L;
 

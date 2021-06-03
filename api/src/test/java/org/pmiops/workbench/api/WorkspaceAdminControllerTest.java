@@ -13,7 +13,6 @@ import java.util.Optional;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -49,7 +48,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @DataJpaTest
 public class WorkspaceAdminControllerTest {
@@ -176,6 +174,7 @@ public class WorkspaceAdminControllerTest {
         .when(mockWorkspaceAdminService)
         .getWorkspaceAdminView(NONSENSE_NAMESPACE);
     assertThrows(
-            NotFoundException.class, () -> workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE));
+        NotFoundException.class,
+        () -> workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE));
   }
 }

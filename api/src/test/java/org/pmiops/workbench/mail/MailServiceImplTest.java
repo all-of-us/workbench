@@ -12,8 +12,8 @@ import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import javax.mail.MessagingException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -64,8 +64,8 @@ public class MailServiceImplTest extends SpringTest {
       throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     User user = createUser();
-    assertThrows(MessagingException.class, () ->
-            service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+    assertThrows(
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(1)).send(any());
   }
 
@@ -73,16 +73,17 @@ public class MailServiceImplTest extends SpringTest {
   public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
     doThrow(ApiException.class).when(mandrillApi).send(any());
     User user = createUser();
-    assertThrows(MessagingException.class, () ->
-            service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+    assertThrows(
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(3)).send(any());
   }
 
   @Test
   public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
     User user = createUser();
-    assertThrows(MessagingException.class, () ->
-            service.sendWelcomeEmail("Nota valid email", PASSWORD, user));
+    assertThrows(
+        MessagingException.class,
+        () -> service.sendWelcomeEmail("Nota valid email", PASSWORD, user));
   }
 
   @Test

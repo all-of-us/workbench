@@ -16,10 +16,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -31,7 +30,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -45,7 +43,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.method.HandlerMethod;
 
 /** mimicing a Swagger-generated wrapper */
@@ -150,8 +147,9 @@ public class AuthInterceptorTest extends SpringTest {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
 
-    assertThrows(NotFoundException.class, () ->interceptor.preHandle(mockRequest, mockResponse, mockHandler));
-
+    assertThrows(
+        NotFoundException.class,
+        () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
   @Test
@@ -163,7 +161,9 @@ public class AuthInterceptorTest extends SpringTest {
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(fireCloudService.getMe()).thenThrow(new NotFoundException());
 
-    assertThrows(NotFoundException.class, () ->interceptor.preHandle(mockRequest, mockResponse, mockHandler));
+    assertThrows(
+        NotFoundException.class,
+        () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
   @Test

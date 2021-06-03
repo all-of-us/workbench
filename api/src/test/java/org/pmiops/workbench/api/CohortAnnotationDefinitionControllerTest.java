@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +12,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -50,7 +50,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -357,29 +356,32 @@ public class CohortAnnotationDefinitionControllerTest {
     }
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void deleteCohortAnnotationDefinitionWrongWorkspace() {
     setupWorkspace2ServiceMock(WorkspaceAccessLevel.WRITER);
 
-    cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-        NAMESPACE2,
-        NAME2,
-        cohort.getCohortId(),
-        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+    assertThrows(NotFoundException.class, () -> cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+            NAMESPACE2,
+            NAME2,
+            cohort.getCohortId(),
+            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+    );
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void getCohortAnnotationDefinitionWrongWorkspace() {
     setupWorkspace2ServiceMock(WorkspaceAccessLevel.READER);
 
-    cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-        NAMESPACE2,
-        NAME2,
-        cohort.getCohortId(),
-        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+
+    assertThrows(NotFoundException.class, () ->   cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+            NAMESPACE2,
+            NAME2,
+            cohort.getCohortId(),
+            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+    );
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void updateCohortAnnotationDefinitionWrongWorkspace() {
     setupWorkspace2ServiceMock(WorkspaceAccessLevel.WRITER);
 
@@ -391,12 +393,13 @@ public class CohortAnnotationDefinitionControllerTest {
             .etag(Etags.fromVersion(0))
             .cohortId(cohort.getCohortId());
 
-    cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-        NAMESPACE2,
-        NAME2,
-        cohort.getCohortId(),
-        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
-        request);
+    assertThrows(NotFoundException.class, () ->   cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+            NAMESPACE2,
+            NAME2,
+            cohort.getCohortId(),
+            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
+            request));
+    );
   }
 
   @Test

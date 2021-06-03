@@ -18,7 +18,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -52,7 +51,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -92,7 +90,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -322,7 +319,8 @@ public class ConceptSetsControllerTest {
   @Test
   public void testGetConceptSetNotExists() {
     assertThrows(
-            NotFoundException.class, () -> conceptSetsController.getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L));
+        NotFoundException.class,
+        () -> conceptSetsController.getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L));
   }
 
   @Test
@@ -335,8 +333,10 @@ public class ConceptSetsControllerTest {
     conceptSet.setEtag(Etags.fromVersion(1));
 
     assertThrows(
-            NotFoundException.class, () -> conceptSetsController.updateConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, 1L, conceptSet));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.updateConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, 1L, conceptSet));
   }
 
   @Test
@@ -374,8 +374,10 @@ public class ConceptSetsControllerTest {
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
 
     assertThrows(
-            NotFoundException.class, () -> conceptSetsController.getConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId()));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.getConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId()));
   }
 
   @Test
@@ -384,8 +386,10 @@ public class ConceptSetsControllerTest {
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
     assertThrows(
-            NotFoundException.class, () -> conceptSetsController.updateConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1()));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.updateConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1()));
   }
 
   @Test
@@ -395,11 +399,13 @@ public class ConceptSetsControllerTest {
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
 
     assertThrows(
-            NotFoundException.class, () -> conceptSetsController.updateConceptSetConcepts(
-                    workspace.getNamespace(),
-                    WORKSPACE_NAME,
-                    conceptSet.getId(),
-                    addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId())));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.updateConceptSetConcepts(
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                conceptSet.getId(),
+                addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId())));
   }
 
   @Test
@@ -435,16 +441,18 @@ public class ConceptSetsControllerTest {
     makeSurveyConceptSet1();
     conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
     assertThrows(
-            NotFoundException.class, () ->
-                    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L));
   }
 
   @Test
   public void testGetConceptSetWrongConceptSetId() {
     makeConceptSet1();
     assertThrows(
-            NotFoundException.class, () ->
-                    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L));
+        NotFoundException.class,
+        () ->
+            conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L));
   }
 
   @Test
@@ -477,8 +485,10 @@ public class ConceptSetsControllerTest {
     conceptSet.setName("new name");
     conceptSet.setDomain(Domain.DEATH);
     assertThrows(
-            ConflictException.class, () -> conceptSetsController.updateConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
+        ConflictException.class,
+        () ->
+            conceptSetsController.updateConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
   }
 
   @Test
@@ -489,8 +499,10 @@ public class ConceptSetsControllerTest {
     conceptSet.setEtag(Etags.fromVersion(2));
 
     assertThrows(
-            ConflictException.class, () -> conceptSetsController.updateConceptSet(
-                    workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
+        ConflictException.class,
+        () ->
+            conceptSetsController.updateConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet));
   }
 
   @Test
@@ -650,17 +662,19 @@ public class ConceptSetsControllerTest {
     ConceptSetService.MAX_CONCEPTS_PER_SET = 2;
 
     assertThrows(
-            ConflictException.class, () -> conceptSetsController
-                    .updateConceptSetConcepts(
-                            workspace.getNamespace(),
-                            WORKSPACE_NAME,
-                            conceptSet.getId(),
-                            addConceptsRequest(
-                                    conceptSet.getEtag(),
-                                    CLIENT_CRITERIA_1.getConceptId(),
-                                    CLIENT_CRITERIA_3.getConceptId(),
-                                    CLIENT_CRITERIA_4.getConceptId()))
-                    .getBody());
+        ConflictException.class,
+        () ->
+            conceptSetsController
+                .updateConceptSetConcepts(
+                    workspace.getNamespace(),
+                    WORKSPACE_NAME,
+                    conceptSet.getId(),
+                    addConceptsRequest(
+                        conceptSet.getEtag(),
+                        CLIENT_CRITERIA_1.getConceptId(),
+                        CLIENT_CRITERIA_3.getConceptId(),
+                        CLIENT_CRITERIA_4.getConceptId()))
+                .getBody());
   }
 
   @Test
@@ -669,11 +683,13 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet = makeConceptSet1();
 
     assertThrows(
-            ConflictException.class, () -> conceptSetsController.updateConceptSetConcepts(
-                    workspace.getNamespace(),
-                    WORKSPACE_NAME,
-                    conceptSet.getId(),
-                    addConceptsRequest(Etags.fromVersion(2), CLIENT_CRITERIA_1.getConceptId())));
+        ConflictException.class,
+        () ->
+            conceptSetsController.updateConceptSetConcepts(
+                workspace.getNamespace(),
+                WORKSPACE_NAME,
+                conceptSet.getId(),
+                addConceptsRequest(Etags.fromVersion(2), CLIENT_CRITERIA_1.getConceptId())));
   }
 
   @Test

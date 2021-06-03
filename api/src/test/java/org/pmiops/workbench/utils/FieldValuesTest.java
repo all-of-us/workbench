@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValueList;
@@ -10,9 +11,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
-
 
 public class FieldValuesTest {
 
@@ -50,13 +48,21 @@ public class FieldValuesTest {
         .of(DOUBLE_VALUE);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testGetLong_invalidFieldName() {
-    FieldValues.getLong(ROW_1, "wrong_name");
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          FieldValues.getLong(ROW_1, "wrong_name");
+        });
   }
 
-  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  @Test
   public void testGetLong_invalidIndex() {
-    FieldValues.getLong(ROW_1, 999);
+    assertThrows(
+        ArrayIndexOutOfBoundsException.class,
+        () -> {
+          FieldValues.getLong(ROW_1, 999);
+        });
   }
 }

@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -51,10 +52,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
@@ -199,7 +200,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -212,53 +212,59 @@ public class WorkspacesControllerTest extends SpringTest {
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
   private static final Concept CLIENT_CONCEPT_1 =
-      new Concept()
-          .conceptId(123L)
-          .conceptName("a concept")
-          .standardConcept(true)
-          .conceptCode("conceptA")
-          .conceptClassId("classId")
-          .vocabularyId("V1")
-          .domainId("Condition")
-          .countValue(123L)
-          .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<>());
+          new Concept()
+                  .conceptId(123L)
+                  .conceptName("a concept")
+                  .standardConcept(true)
+                  .conceptCode("conceptA")
+                  .conceptClassId("classId")
+                  .vocabularyId("V1")
+                  .domainId("Condition")
+                  .countValue(123L)
+                  .prevalence(0.2F)
+                  .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
-      new Concept()
-          .conceptId(456L)
-          .standardConcept(false)
-          .conceptName("b concept")
-          .conceptCode("conceptB")
-          .conceptClassId("classId2")
-          .vocabularyId("V2")
-          .domainId("Condition")
-          .countValue(456L)
-          .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<>());
+          new Concept()
+                  .conceptId(456L)
+                  .standardConcept(false)
+                  .conceptName("b concept")
+                  .conceptCode("conceptB")
+                  .conceptClassId("classId2")
+                  .vocabularyId("V2")
+                  .domainId("Condition")
+                  .countValue(456L)
+                  .prevalence(0.3F)
+                  .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
-      new Concept()
-          .conceptId(256L)
-          .standardConcept(true)
-          .conceptName("c concept")
-          .conceptCode("conceptC")
-          .conceptClassId("classId2")
-          .vocabularyId("V3")
-          .domainId("Measurement")
-          .countValue(256L)
-          .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<>());
+          new Concept()
+                  .conceptId(256L)
+                  .standardConcept(true)
+                  .conceptName("c concept")
+                  .conceptCode("conceptC")
+                  .conceptClassId("classId2")
+                  .vocabularyId("V3")
+                  .domainId("Measurement")
+                  .countValue(256L)
+                  .prevalence(0.4F)
+                  .conceptSynonyms(new ArrayList<>());
   private static final String BUCKET_URI =
-      String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
+          String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
-  @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
-  @Autowired private WorkspacesController workspacesController;
-  @Autowired FakeClock fakeClock;
+  @Autowired
+  private BillingProjectBufferService billingProjectBufferService;
+  @Autowired
+  private WorkspaceAuditor mockWorkspaceAuditor;
+  @Autowired
+  private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  @Autowired
+  private WorkspacesController workspacesController;
+  @Autowired
+  FakeClock fakeClock;
 
-  @MockBean FreeTierBillingService mockFreeTierBillingService;
+  @MockBean
+  FreeTierBillingService mockFreeTierBillingService;
 
   @Qualifier(GoogleApisConfig.END_USER_CLOUD_BILLING)
   @Autowired
@@ -273,58 +279,58 @@ public class WorkspacesControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({
-    CdrVersionService.class,
-    CohortAnnotationDefinitionController.class,
-    CohortAnnotationDefinitionMapperImpl.class,
-    CohortAnnotationDefinitionServiceImpl.class,
-    CohortCloningService.class,
-    CohortFactoryImpl.class,
-    CohortMapperImpl.class,
-    CohortReviewController.class,
-    CohortReviewMapperImpl.class,
-    CohortReviewServiceImpl.class,
-    CohortsController.class,
-    CommonMappers.class,
-    ConceptSetMapperImpl.class,
-    ConceptSetsController.class,
-    ConceptSetService.class,
-    DataSetController.class,
-    DataSetMapperImpl.class,
-    DataSetServiceImpl.class,
-    FirecloudMapperImpl.class,
-    LogsBasedMetricServiceFakeImpl.class,
-    NotebooksServiceImpl.class,
-    ParticipantCohortAnnotationMapperImpl.class,
-    ParticipantCohortStatusMapperImpl.class,
-    ReviewQueryBuilder.class,
-    UserMapperImpl.class,
-    WorkspaceAuthService.class,
-    WorkspaceMapperImpl.class,
-    WorkspaceResourcesServiceImpl.class,
-    WorkspacesController.class,
-    WorkspaceServiceImpl.class,
+          CdrVersionService.class,
+          CohortAnnotationDefinitionController.class,
+          CohortAnnotationDefinitionMapperImpl.class,
+          CohortAnnotationDefinitionServiceImpl.class,
+          CohortCloningService.class,
+          CohortFactoryImpl.class,
+          CohortMapperImpl.class,
+          CohortReviewController.class,
+          CohortReviewMapperImpl.class,
+          CohortReviewServiceImpl.class,
+          CohortsController.class,
+          CommonMappers.class,
+          ConceptSetMapperImpl.class,
+          ConceptSetsController.class,
+          ConceptSetService.class,
+          DataSetController.class,
+          DataSetMapperImpl.class,
+          DataSetServiceImpl.class,
+          FirecloudMapperImpl.class,
+          LogsBasedMetricServiceFakeImpl.class,
+          NotebooksServiceImpl.class,
+          ParticipantCohortAnnotationMapperImpl.class,
+          ParticipantCohortStatusMapperImpl.class,
+          ReviewQueryBuilder.class,
+          UserMapperImpl.class,
+          WorkspaceAuthService.class,
+          WorkspaceMapperImpl.class,
+          WorkspaceResourcesServiceImpl.class,
+          WorkspacesController.class,
+          WorkspaceServiceImpl.class,
   })
   @MockBean({
-    BigQueryService.class,
-    BillingProjectAuditor.class,
-    BillingProjectBufferService.class,
-    CdrBigQuerySchemaConfigService.class,
-    CloudStorageClient.class,
-    CohortBuilderMapper.class,
-    CohortBuilderService.class,
-    CohortMaterializationService.class,
-    CohortQueryBuilder.class,
-    ConceptBigQueryService.class,
-    CohortService.class,
-    FireCloudService.class,
-    MailService.class,
-    MonitoringService.class,
-    UserRecentResourceService.class,
-    UserService.class,
-    GenomicExtractionService.class,
-    WorkspaceAuditor.class,
-    AccessTierService.class,
-    CdrVersionService.class,
+          BigQueryService.class,
+          BillingProjectAuditor.class,
+          BillingProjectBufferService.class,
+          CdrBigQuerySchemaConfigService.class,
+          CloudStorageClient.class,
+          CohortBuilderMapper.class,
+          CohortBuilderService.class,
+          CohortMaterializationService.class,
+          CohortQueryBuilder.class,
+          ConceptBigQueryService.class,
+          CohortService.class,
+          FireCloudService.class,
+          MailService.class,
+          MonitoringService.class,
+          UserRecentResourceService.class,
+          UserService.class,
+          GenomicExtractionService.class,
+          WorkspaceAuditor.class,
+          AccessTierService.class,
+          CdrVersionService.class,
   })
   static class Configuration {
 
@@ -356,28 +362,51 @@ public class WorkspacesControllerTest extends SpringTest {
   private static DbUser currentUser;
   private static FirecloudWorkspaceACL fcWorkspaceAcl;
   private static WorkbenchConfig workbenchConfig;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired private WorkspaceService workspaceService;
-  @Autowired CloudStorageClient cloudStorageClient;
-  @Autowired BigQueryService bigQueryService;
-  @SpyBean @Autowired WorkspaceDao workspaceDao;
-  @Autowired UserDao userDao;
-  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired AccessTierDao accessTierDao;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired CohortsController cohortsController;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptSetsController conceptSetsController;
-  @Autowired DataSetController dataSetController;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetService dataSetService;
-  @Autowired UserRecentResourceService userRecentResourceService;
-  @Autowired CohortReviewController cohortReviewController;
-  @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @Autowired
+  FireCloudService fireCloudService;
+  @Autowired
+  private WorkspaceService workspaceService;
+  @Autowired
+  CloudStorageClient cloudStorageClient;
+  @Autowired
+  BigQueryService bigQueryService;
+  @SpyBean
+  @Autowired
+  WorkspaceDao workspaceDao;
+  @Autowired
+  UserDao userDao;
+  @Autowired
+  UserRecentWorkspaceDao userRecentWorkspaceDao;
+  @Autowired
+  AccessTierDao accessTierDao;
+  @Autowired
+  CdrVersionDao cdrVersionDao;
+  @Autowired
+  CohortDao cohortDao;
+  @Autowired
+  CohortReviewDao cohortReviewDao;
+  @Autowired
+  CohortsController cohortsController;
+  @Autowired
+  ConceptSetDao conceptSetDao;
+  @Autowired
+  ConceptSetService conceptSetService;
+  @Autowired
+  ConceptSetsController conceptSetsController;
+  @Autowired
+  DataSetController dataSetController;
+  @Autowired
+  DataSetDao dataSetDao;
+  @Autowired
+  DataSetService dataSetService;
+  @Autowired
+  UserRecentResourceService userRecentResourceService;
+  @Autowired
+  CohortReviewController cohortReviewController;
+  @Autowired
+  ConceptBigQueryService conceptBigQueryService;
+  @Autowired
+  WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private DbAccessTier accessTier;
   private DbCdrVersion cdrVersion;
@@ -408,7 +437,7 @@ public class WorkspacesControllerTest extends SpringTest {
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     DbCdrVersion archivedCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+            TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
@@ -435,18 +464,18 @@ public class WorkspacesControllerTest extends SpringTest {
 
   private FirecloudWorkspaceACL createWorkspaceACL() {
     return createWorkspaceACL(
-        new JSONObject()
-            .put(
-                currentUser.getUsername(),
-                new JSONObject()
-                    .put("accessLevel", "OWNER")
-                    .put("canCompute", true)
-                    .put("canShare", true)));
+            new JSONObject()
+                    .put(
+                            currentUser.getUsername(),
+                            new JSONObject()
+                                    .put("accessLevel", "OWNER")
+                                    .put("canCompute", true)
+                                    .put("canShare", true)));
   }
 
   private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
-        .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
+            .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
   }
 
   private void mockBillingProjectBuffer(String projectName) {
@@ -458,7 +487,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
   private void stubFcUpdateWorkspaceACL() {
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
-        .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
+            .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
   }
 
   private void stubFcGetWorkspaceACL() {
@@ -476,7 +505,7 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private void stubGetWorkspace(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
+          String ns, String name, String creator, WorkspaceAccessLevel access) {
     stubGetWorkspace(testMockFactory.createFirecloudWorkspace(ns, name, creator), access);
   }
 
@@ -485,8 +514,8 @@ public class WorkspacesControllerTest extends SpringTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     doReturn(fcResponse)
-        .when(fireCloudService)
-        .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
+            .when(fireCloudService)
+            .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
     List<FirecloudWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
@@ -504,7 +533,7 @@ public class WorkspacesControllerTest extends SpringTest {
     fcResponse.setCreatedBy(creator);
 
     when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
-        .thenReturn(fcResponse);
+            .thenReturn(fcResponse);
 
     return fcResponse;
   }
@@ -512,25 +541,25 @@ public class WorkspacesControllerTest extends SpringTest {
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
     Iterable testIterable =
-        new Iterable() {
-          @Override
-          public Iterator iterator() {
-            List<FieldValue> list = new ArrayList<>();
-            list.add(null);
-            return list.iterator();
-          }
-        };
+            new Iterable() {
+              @Override
+              public Iterator iterator() {
+                List<FieldValue> list = new ArrayList<>();
+                list.add(null);
+                return list.iterator();
+              }
+            };
     Map<String, Integer> rm =
-        ImmutableMap.<String, Integer>builder()
-            .put("person_id", 0)
-            .put("birth_datetime", 1)
-            .put("gender_concept_id", 2)
-            .put("race_concept_id", 3)
-            .put("ethnicity_concept_id", 4)
-            .put("sex_at_birth_concept_id", 5)
-            .put("count", 6)
-            .put("deceased", 7)
-            .build();
+            ImmutableMap.<String, Integer>builder()
+                    .put("person_id", 0)
+                    .put("birth_datetime", 1)
+                    .put("gender_concept_id", 2)
+                    .put("race_concept_id", 3)
+                    .put("ethnicity_concept_id", 4)
+                    .put("sex_at_birth_concept_id", 5)
+                    .put("count", 6)
+                    .put("deceased", 7)
+                    .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
     when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -558,11 +587,11 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   public ArrayList<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
-      List<UserRole> collaborators) {
+          List<UserRole> collaborators) {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     for (UserRole userRole : collaborators) {
       FirecloudWorkspaceACLUpdate aclUpdate =
-          new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
+              new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
       aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
@@ -577,8 +606,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+            testMockFactory.createFirecloudWorkspace(
+                    workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -591,18 +620,18 @@ public class WorkspacesControllerTest extends SpringTest {
     mockBillingProjectBuffer(workspace.getNamespace());
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
-        .createWorkspace(
-            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
+            .createWorkspace(
+                    workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
     stubGetWorkspace(
-        workspace.getNamespace(),
-        workspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+            workspace.getNamespace(),
+            workspace.getName(),
+            LOGGED_IN_USER_EMAIL,
+            WorkspaceAccessLevel.OWNER);
     Workspace retrievedWorkspace =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
     assertThat(retrievedWorkspace.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getCdrVersionId()).isEqualTo(cdrVersionId);
@@ -621,27 +650,27 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(retrievedWorkspace.getResearchPurpose().getEducational()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getDrugDevelopment()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getAdditionalNotes())
-        .isEqualTo("additional notes");
+            .isEqualTo("additional notes");
     assertThat(retrievedWorkspace.getResearchPurpose().getReasonForAllOfUs())
-        .isEqualTo("reason for aou");
+            .isEqualTo("reason for aou");
     assertThat(retrievedWorkspace.getResearchPurpose().getIntendedStudy())
-        .isEqualTo("intended study");
+            .isEqualTo("intended study");
     assertThat(retrievedWorkspace.getResearchPurpose().getAnticipatedFindings())
-        .isEqualTo("anticipated findings");
+            .isEqualTo("anticipated findings");
     assertThat(retrievedWorkspace.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(retrievedWorkspace.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(retrievedWorkspace.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
     verify(endUserCloudbillingProvider.get().projects())
-        .updateBillingInfo(
-            "projects/" + workspace.getGoogleProject(),
-            new ProjectBillingInfo()
-                .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
+            .updateBillingInfo(
+                    "projects/" + workspace.getGoogleProject(),
+                    new ProjectBillingInfo()
+                            .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
     verify(fireCloudService, never())
-        .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
+            .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
-        .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
+            .isEqualTo(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
 
     // Now switch to v2 Billing and fire the same request. It is generally not recommaned to use
     // one test method testing multiple-funtions, but consider we will migrate to v2 soon, this
@@ -649,7 +678,7 @@ public class WorkspacesControllerTest extends SpringTest {
     workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
     Workspace v2Workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
-        .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
+            .createAllOfUsBillingProject(v2Workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(v2Workspace).isEqualTo(workspace);
   }
 
@@ -663,18 +692,18 @@ public class WorkspacesControllerTest extends SpringTest {
       workspacesController.createWorkspace(workspace).getBody();
     } catch (Exception e) {
       verify(endUserCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(workspace.getBillingAccountName())));
+              .updateBillingInfo(
+                      any(),
+                      eq(
+                              new ProjectBillingInfo()
+                                      .setBillingAccountName(workspace.getBillingAccountName())));
       verify(serviceAccountCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(
-                          workbenchConfig.billing.freeTierBillingAccountName())));
+              .updateBillingInfo(
+                      any(),
+                      eq(
+                              new ProjectBillingInfo()
+                                      .setBillingAccountName(
+                                              workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
@@ -689,9 +718,9 @@ public class WorkspacesControllerTest extends SpringTest {
     workspacesController.createWorkspace(workspace);
 
     verify(endUserCloudbillingProvider.get().projects())
-        .updateBillingInfo(
-            any(),
-            eq(new ProjectBillingInfo().setBillingAccountName(workspace.getBillingAccountName())));
+            .updateBillingInfo(
+                    any(),
+                    eq(new ProjectBillingInfo().setBillingAccountName(workspace.getBillingAccountName())));
   }
 
   @Test
@@ -726,10 +755,10 @@ public class WorkspacesControllerTest extends SpringTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     Workspace workspace2 =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
     assertThat(workspace2.getResearchPurpose().getApproved()).isNotEqualTo(true);
   }
 
@@ -747,11 +776,13 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void testCreateWorkspace_archivedCdrVersionThrows() {
-    Workspace workspace = createWorkspace();
-    workspace.setCdrVersionId(archivedCdrVersionId);
-    workspacesController.createWorkspace(workspace).getBody();
+      assertThrows(FailedPreconditionException.class, () -> {
+          Workspace workspace = createWorkspace();
+          workspace.setCdrVersionId(archivedCdrVersionId);
+          workspacesController.createWorkspace(workspace).getBody();
+      });
   }
 
   // we do not actually use the accessTierShortName of the Workspace passed to
@@ -764,7 +795,7 @@ public class WorkspacesControllerTest extends SpringTest {
     requestedWorkspace.setAccessTierShortName("some nonsense value!");
 
     final Workspace createdWorkspace =
-        workspacesController.createWorkspace(requestedWorkspace).getBody();
+            workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
   }
 
@@ -773,7 +804,7 @@ public class WorkspacesControllerTest extends SpringTest {
     final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     DbCdrVersion controlledTierCdr =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+            TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     controlledTierCdr.setAccessTier(controlledTier);
     controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
 
@@ -785,7 +816,7 @@ public class WorkspacesControllerTest extends SpringTest {
     requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
     final Workspace createdWorkspace =
-        workspacesController.createWorkspace(requestedWorkspace).getBody();
+            workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
   }
 
@@ -816,7 +847,7 @@ public class WorkspacesControllerTest extends SpringTest {
     request.setApproved(true);
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
     ws =
-        workspacesController.getWorkspace(ws.getNamespace(), ws.getName()).getBody().getWorkspace();
+            workspacesController.getWorkspace(ws.getNamespace(), ws.getName()).getBody().getWorkspace();
     researchPurpose = ws.getResearchPurpose();
 
     assertThat(researchPurpose.getApproved()).isTrue();
@@ -832,26 +863,26 @@ public class WorkspacesControllerTest extends SpringTest {
     ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+            workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
-        ArgumentCaptor.forClass(ProjectBillingInfo.class);
+            ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
-        .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+            .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + ws.getGoogleProject()).isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
-        .isEqualTo(billingCaptor.getAllValues().get(1));
+            .isEqualTo(billingCaptor.getAllValues().get(1));
 
     ws.setName("updated-name2");
     updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+            workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
     Workspace got =
-        workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
+            workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
   }
 
@@ -861,9 +892,9 @@ public class WorkspacesControllerTest extends SpringTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+            .when(mockFreeTierBillingService)
+            .userHasRemainingFreeTierCredits(
+                    argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
     // Creating the workspace with a user provided billing account
     endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -883,17 +914,17 @@ public class WorkspacesControllerTest extends SpringTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     doReturn(false)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+            .when(mockFreeTierBillingService)
+            .userHasRemainingFreeTierCredits(
+                    argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     request.setWorkspace(workspace);
     Workspace response =
-        workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
-            .getBody();
+            workspacesController
+                    .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+                    .getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
   }
@@ -904,31 +935,31 @@ public class WorkspacesControllerTest extends SpringTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doReturn(true)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
+            .when(mockFreeTierBillingService)
+            .userHasRemainingFreeTierCredits(
+                    argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     workspace.setEtag("\"1\"");
     request.setWorkspace(workspace);
     Workspace response =
-        workspacesController
-            .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
-            .getBody();
+            workspacesController
+                    .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+                    .getBody();
 
     assertThat(response.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
   }
 
   @Test
   public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount()
-      throws Exception {
+          throws Exception {
     final String closedBillingAccountName = "closed-billing-account";
 
     Workspace workspace = createWorkspace();
@@ -938,26 +969,26 @@ public class WorkspacesControllerTest extends SpringTest {
 
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
     doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(false))
-        .when(getRequest)
-        .execute();
+            .when(getRequest)
+            .execute();
     when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
-        .thenReturn(getRequest);
+            .thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(closedBillingAccountName);
     request.setWorkspace(workspace);
 
     BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+            assertThrows(
+                    BadRequestException.class,
+                    () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
-        .contains("Provided billing account is closed. Please provide an open account.");
+            .contains("Provided billing account is closed. Please provide an open account.");
   }
 
   @Test
   public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount_nullIsOpen()
-      throws Exception {
+          throws Exception {
     final String closedBillingAccountName = "closed-billing-account";
 
     Workspace workspace = createWorkspace();
@@ -967,42 +998,42 @@ public class WorkspacesControllerTest extends SpringTest {
 
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
     doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(null))
-        .when(getRequest)
-        .execute();
+            .when(getRequest)
+            .execute();
     when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
-        .thenReturn(getRequest);
+            .thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName(closedBillingAccountName);
     request.setWorkspace(workspace);
 
     BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
+            assertThrows(
+                    BadRequestException.class,
+                    () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
     assertThat(exception.getErrorResponse().getMessage())
-        .contains("Provided billing account is closed. Please provide an open account.");
+            .contains("Provided billing account is closed. Please provide an open account.");
   }
 
   @Test
   public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()
-      throws Exception {
+          throws Exception {
     final String openBillingAccountName = "open-billing-account";
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
     Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
     doReturn(new BillingAccount().setOpen(true)).when(getRequest).execute();
     when(endUserCloudbillingProvider.get().billingAccounts().get(openBillingAccountName))
-        .thenReturn(getRequest);
+            .thenReturn(getRequest);
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     workspace.setBillingAccountName("active-billing-account");
@@ -1011,7 +1042,7 @@ public class WorkspacesControllerTest extends SpringTest {
     workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
 
     assertThat(workspaceDao.findById(dbWorkspace.getWorkspaceId()).get().getBillingStatus())
-        .isEqualTo(BillingStatus.ACTIVE);
+            .isEqualTo(BillingStatus.ACTIVE);
   }
 
   @Test
@@ -1028,18 +1059,18 @@ public class WorkspacesControllerTest extends SpringTest {
 
     try {
       workspacesController
-          .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
-          .getBody();
+              .updateWorkspace(workspace.getNamespace(), workspace.getId(), request)
+              .getBody();
     } catch (Exception e) {
       ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<ProjectBillingInfo> billingCaptor =
-          ArgumentCaptor.forClass(ProjectBillingInfo.class);
+              ArgumentCaptor.forClass(ProjectBillingInfo.class);
       verify(endUserCloudbillingProvider.get().projects(), times(3))
-          .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+              .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
       assertThat("projects/" + workspace.getGoogleProject())
-          .isEqualTo(projectCaptor.getAllValues().get(2));
+              .isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
-          .isEqualTo(billingCaptor.getAllValues().get(2));
+              .isEqualTo(billingCaptor.getAllValues().get(2));
       return;
     }
 
@@ -1052,26 +1083,26 @@ public class WorkspacesControllerTest extends SpringTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ResearchPurpose rp =
-        new ResearchPurpose()
-            .diseaseFocusedResearch(false)
-            .diseaseOfFocus(null)
-            .methodsDevelopment(false)
-            .controlSet(false)
-            .ancestry(false)
-            .commercialPurpose(false)
-            .populationHealth(false)
-            .socialBehavioral(false)
-            .drugDevelopment(false)
-            .additionalNotes(null)
-            .reviewRequested(false);
+            new ResearchPurpose()
+                    .diseaseFocusedResearch(false)
+                    .diseaseOfFocus(null)
+                    .methodsDevelopment(false)
+                    .controlSet(false)
+                    .ancestry(false)
+                    .commercialPurpose(false)
+                    .populationHealth(false)
+                    .socialBehavioral(false)
+                    .drugDevelopment(false)
+                    .additionalNotes(null)
+                    .reviewRequested(false);
     ws.setResearchPurpose(rp);
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
     ResearchPurpose updatedRp =
-        workspacesController
-            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
-            .getBody()
-            .getResearchPurpose();
+            workspacesController
+                    .updateWorkspace(ws.getNamespace(), ws.getId(), request)
+                    .getBody()
+                    .getResearchPurpose();
 
     assertThat(updatedRp.getDiseaseFocusedResearch()).isFalse();
     assertThat(updatedRp.getDiseaseOfFocus()).isNull();
@@ -1086,63 +1117,57 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(updatedRp.getReviewRequested()).isFalse();
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testReaderUpdateWorkspaceThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      assertThrows(ForbiddenException.class, () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testWriterUpdateWorkspaceThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      assertThrows(ForbiddenException.class, () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testUpdateWorkspaceAccessTierThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    ws.setAccessTierShortName("new tier");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      assertThrows(BadRequestException.class, () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          ws.setAccessTierShortName("new tier");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void testUpdateWorkspaceStaleThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(
-        new Workspace()
-            .name("updated-name")
-            .billingAccountName("billing-account")
-            .accessTierShortName(ws.getAccessTierShortName())
-            .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-
-    // Still using the initial now-stale etag; this should throw.
-    request.setWorkspace(
-        new Workspace()
-            .name("updated-name2")
-            .billingAccountName("billing-account")
-            .accessTierShortName(ws.getAccessTierShortName())
-            .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      assertThrows(ConflictException.class, () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(new Workspace().name("updated-name").billingAccountName("billing-account").accessTierShortName(ws.getAccessTierShortName()).etag(ws.getEtag()));
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+          // Still using the initial now-stale etag; this should throw.
+          request.setWorkspace(new Workspace().name("updated-name2").billingAccountName("billing-account").accessTierShortName(ws.getAccessTierShortName()).etag(ws.getEtag()));
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+      });
   }
 
   @Test
@@ -1164,23 +1189,23 @@ public class WorkspacesControllerTest extends SpringTest {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testRejectAfterApproveThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
-    request.setApproved(true);
-    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
-
-    request.setApproved(false);
-    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+      assertThrows(BadRequestException.class, () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
+          request.setApproved(true);
+          workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+          request.setApproved(false);
+          workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+      });
   }
 
   @Test
   public void testListForApproval() {
     List<Workspace> forApproval =
-        workspacesController.getWorkspacesForReview().getBody().getItems();
+            workspacesController.getWorkspacesForReview().getBody().getItems();
     assertThat(forApproval).isEmpty();
 
     Workspace ws;
@@ -1232,21 +1257,21 @@ public class WorkspacesControllerTest extends SpringTest {
     shareWorkspaceRequest.setWorkspaceEtag(originalWorkspace.getEtag());
 
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, writerUser.getUsername(), WorkspaceAccessLevel.WRITER);
+            shareWorkspaceRequest, writerUser.getUsername(), WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
+            originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modPurpose.setPopulationDetails(
-        ImmutableList.of(
-            SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+            ImmutableList.of(
+                    SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
     modPurpose.setDisseminateResearchFindingList(
-        ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
+            ImmutableList.of(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES));
     modPurpose.setResearchOutcomeList(
-        ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
+            ImmutableList.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN));
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -1257,37 +1282,37 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     final FirecloudWorkspace clonedFirecloudWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedFirecloudWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
 
     mockBillingProjectBuffer("cloned-ns");
     final Workspace clonedWorkspace =
-        workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
     verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
-        ArgumentCaptor.forClass(ProjectBillingInfo.class);
+            ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
-        .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+            .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + clonedWorkspace.getGoogleProject())
-        .isEqualTo(projectCaptor.getAllValues().get(1));
+            .isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
-        .isEqualTo(billingCaptor.getAllValues().get(1));
+            .isEqualTo(billingCaptor.getAllValues().get(1));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
     final Workspace retrievedWorkspace =
-        workspacesController
-            .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
+                    .getBody()
+                    .getWorkspace();
 
     // Hack so lists can be compared in isEqualTo regardless of order. Order doesn't matter
     // semantically, but I don't want to go down the rabbit hole of an out-of-class equality
@@ -1296,8 +1321,8 @@ public class WorkspacesControllerTest extends SpringTest {
     sortPopulationDetails(retrievedWorkspace.getResearchPurpose());
     sortPopulationDetails(modPurpose);
     assertWithMessage("get and clone responses are inconsistent")
-        .that(clonedWorkspace)
-        .isEqualTo(retrievedWorkspace);
+            .that(clonedWorkspace)
+            .isEqualTo(retrievedWorkspace);
 
     assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
@@ -1307,13 +1332,13 @@ public class WorkspacesControllerTest extends SpringTest {
     // When V2 Billing enabled
     workbenchConfig.featureFlags.enableFireCloudV2Billing = true;
     Workspace v2ClonedWorkspace =
-        workspacesController
-            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
     verify(fireCloudService)
-        .createAllOfUsBillingProject(
-            v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
+            .createAllOfUsBillingProject(
+                    v2ClonedWorkspace.getNamespace(), accessTier.getServicePerimeter());
 
     // Hack so lists can be compared in isEqualTo regardless of order.  See comment above.
     sortPopulationDetails(v2ClonedWorkspace.getResearchPurpose());
@@ -1334,8 +1359,8 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     final FirecloudWorkspace clonedFirecloudWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
 
@@ -1343,23 +1368,23 @@ public class WorkspacesControllerTest extends SpringTest {
 
     try {
       workspacesController
-          .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
-          .getBody()
-          .getWorkspace();
+              .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+              .getBody()
+              .getWorkspace();
     } catch (Exception e) {
       verify(endUserCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(modWorkspace.getBillingAccountName())));
+              .updateBillingInfo(
+                      any(),
+                      eq(
+                              new ProjectBillingInfo()
+                                      .setBillingAccountName(modWorkspace.getBillingAccountName())));
       verify(serviceAccountCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(
-                          workbenchConfig.billing.freeTierBillingAccountName())));
+              .updateBillingInfo(
+                      any(),
+                      eq(
+                              new ProjectBillingInfo()
+                                      .setBillingAccountName(
+                                              workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
@@ -1383,48 +1408,44 @@ public class WorkspacesControllerTest extends SpringTest {
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
     final FirecloudWorkspace clonedFirecloudWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
 
     workspacesController.cloneWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+            originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
 
     verifyZeroInteractions(endUserCloudbillingProvider.get());
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspace_accessTierMismatch() {
-    Workspace originalWorkspace = createWorkspace();
-    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
-
-    DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    altAccessTier = accessTierDao.save(altAccessTier);
-
-    DbCdrVersion altCdrVersion = new DbCdrVersion();
-    altCdrVersion.setCdrVersionId(2);
-    altCdrVersion.setName("CDR 2");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    altCdrVersion.setCdrDbName("");
-    altCdrVersion.setAccessTier(altAccessTier);
-    altCdrVersion = cdrVersionDao.save(altCdrVersion);
-
-    final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    modWorkspace.setResearchPurpose(new ResearchPurpose());
-    modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
-
-    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    workspacesController.cloneWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+      assertThrows(BadRequestException.class, () -> {
+          Workspace originalWorkspace = createWorkspace();
+          originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+          DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+          altAccessTier = accessTierDao.save(altAccessTier);
+          DbCdrVersion altCdrVersion = new DbCdrVersion();
+          altCdrVersion.setCdrVersionId(2);
+          altCdrVersion.setName("CDR 2");
+          // set the db name to be empty since test cases currently
+          // run in the workbench schema only.
+          altCdrVersion.setCdrDbName("");
+          altCdrVersion.setAccessTier(altAccessTier);
+          altCdrVersion = cdrVersionDao.save(altCdrVersion);
+          final Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+          modWorkspace.setResearchPurpose(new ResearchPurpose());
+          modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
+          final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          req.setWorkspace(modWorkspace);
+          stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+          workspacesController.cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+      });
   }
 
   // DbWorkspace stores several fields as Sets, but Workspace sees them as Lists of arbitrary order.
@@ -1432,7 +1453,7 @@ public class WorkspacesControllerTest extends SpringTest {
   // want to use the basic equality test, we need to enforce a consistent ordering.
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
     final List<SpecificPopulationEnum> populationDetailsSorted =
-        researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
+            researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
     researchPurpose.setPopulationDetails(populationDetailsSorted);
   }
 
@@ -1444,9 +1465,9 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private void addUserRoleToShareWorkspaceRequest(
-      ShareWorkspaceRequest shareWorkspaceRequest,
-      String email,
-      WorkspaceAccessLevel workspaceAccessLevel) {
+          ShareWorkspaceRequest shareWorkspaceRequest,
+          String email,
+          WorkspaceAccessLevel workspaceAccessLevel) {
     final UserRole userRole = new UserRole();
     userRole.setEmail(email);
     userRole.setRole(workspaceAccessLevel);
@@ -1480,167 +1501,167 @@ public class WorkspacesControllerTest extends SpringTest {
     CreateReviewRequest reviewReq = new CreateReviewRequest();
     reviewReq.setSize(1);
     CohortReview cr1 =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
-                reviewReq)
-            .getBody();
+            cohortReviewController
+                    .createCohortReview(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c1.getId(),
+                            cdrVersion.getCdrVersionId(),
+                            reviewReq)
+                    .getBody();
     CohortAnnotationDefinition cad1EnumResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c1.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c1.getId())
-                    .annotationType(AnnotationType.ENUM)
-                    .columnName("cad")
-                    .enumValues(Arrays.asList("value")))
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .createCohortAnnotationDefinition(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c1.getId(),
+                            new CohortAnnotationDefinition()
+                                    .cohortId(c1.getId())
+                                    .annotationType(AnnotationType.ENUM)
+                                    .columnName("cad")
+                                    .enumValues(Arrays.asList("value")))
+                    .getBody();
     ParticipantCohortAnnotation pca1EnumResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cr1.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad1EnumResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueEnum("value")
-                    .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
-            .getBody();
+            cohortReviewController
+                    .createParticipantCohortAnnotation(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            cr1.getCohortReviewId(),
+                            participantId,
+                            new ParticipantCohortAnnotation()
+                                    .cohortAnnotationDefinitionId(
+                                            cad1EnumResponse.getCohortAnnotationDefinitionId())
+                                    .annotationValueEnum("value")
+                                    .participantId(participantId)
+                                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .getBody();
     CohortAnnotationDefinition cad1StringResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c1.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c1.getId())
-                    .annotationType(AnnotationType.STRING)
-                    .columnName("cad1"))
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .createCohortAnnotationDefinition(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c1.getId(),
+                            new CohortAnnotationDefinition()
+                                    .cohortId(c1.getId())
+                                    .annotationType(AnnotationType.STRING)
+                                    .columnName("cad1"))
+                    .getBody();
     ParticipantCohortAnnotation pca1StringResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cr1.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad1StringResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueString("value1")
-                    .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
-            .getBody();
+            cohortReviewController
+                    .createParticipantCohortAnnotation(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            cr1.getCohortReviewId(),
+                            participantId,
+                            new ParticipantCohortAnnotation()
+                                    .cohortAnnotationDefinitionId(
+                                            cad1StringResponse.getCohortAnnotationDefinitionId())
+                                    .annotationValueString("value1")
+                                    .participantId(participantId)
+                                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .getBody();
 
     reviewReq.setSize(2);
     CohortReview cr2 =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
-                reviewReq)
-            .getBody();
+            cohortReviewController
+                    .createCohortReview(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c2.getId(),
+                            cdrVersion.getCdrVersionId(),
+                            reviewReq)
+                    .getBody();
     CohortAnnotationDefinition cad2EnumResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c2.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c2.getId())
-                    .annotationType(AnnotationType.ENUM)
-                    .columnName("cad")
-                    .enumValues(Arrays.asList("value")))
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .createCohortAnnotationDefinition(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c2.getId(),
+                            new CohortAnnotationDefinition()
+                                    .cohortId(c2.getId())
+                                    .annotationType(AnnotationType.ENUM)
+                                    .columnName("cad")
+                                    .enumValues(Arrays.asList("value")))
+                    .getBody();
     ParticipantCohortAnnotation pca2EnumResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cr2.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad2EnumResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueEnum("value")
-                    .participantId(participantId)
-                    .cohortReviewId(cr2.getCohortReviewId()))
-            .getBody();
+            cohortReviewController
+                    .createParticipantCohortAnnotation(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            cr2.getCohortReviewId(),
+                            participantId,
+                            new ParticipantCohortAnnotation()
+                                    .cohortAnnotationDefinitionId(
+                                            cad2EnumResponse.getCohortAnnotationDefinitionId())
+                                    .annotationValueEnum("value")
+                                    .participantId(participantId)
+                                    .cohortReviewId(cr2.getCohortReviewId()))
+                    .getBody();
     CohortAnnotationDefinition cad2BooleanResponse =
-        cohortAnnotationDefinitionController
-            .createCohortAnnotationDefinition(
-                workspace.getNamespace(),
-                workspace.getId(),
-                c2.getId(),
-                new CohortAnnotationDefinition()
-                    .cohortId(c2.getId())
-                    .annotationType(AnnotationType.BOOLEAN)
-                    .columnName("cad1"))
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .createCohortAnnotationDefinition(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            c2.getId(),
+                            new CohortAnnotationDefinition()
+                                    .cohortId(c2.getId())
+                                    .annotationType(AnnotationType.BOOLEAN)
+                                    .columnName("cad1"))
+                    .getBody();
     ParticipantCohortAnnotation pca2BooleanResponse =
-        cohortReviewController
-            .createParticipantCohortAnnotation(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cr2.getCohortReviewId(),
-                participantId,
-                new ParticipantCohortAnnotation()
-                    .cohortAnnotationDefinitionId(
-                        cad2BooleanResponse.getCohortAnnotationDefinitionId())
-                    .annotationValueBoolean(Boolean.TRUE)
-                    .participantId(participantId)
-                    .cohortReviewId(cr2.getCohortReviewId()))
-            .getBody();
+            cohortReviewController
+                    .createParticipantCohortAnnotation(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            cr2.getCohortReviewId(),
+                            participantId,
+                            new ParticipantCohortAnnotation()
+                                    .cohortAnnotationDefinitionId(
+                                            cad2BooleanResponse.getCohortAnnotationDefinitionId())
+                                    .annotationValueBoolean(Boolean.TRUE)
+                                    .participantId(participantId)
+                                    .cohortReviewId(cr2.getCohortReviewId()))
+                    .getBody();
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
+            DbConceptSetConceptId.builder()
+                    .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .addStandard(true)
+                    .build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
-            .addStandard(true)
-            .build();
+            DbConceptSetConceptId.builder()
+                    .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+                    .addStandard(true)
+                    .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(123);
+            .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet1 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
-            .getBody();
+            conceptSetsController
+                    .createConceptSet(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new CreateConceptSetRequest()
+                                    .conceptSet(
+                                            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
+                    .getBody();
     ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
     conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_3.getConceptId());
     conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet2 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId2))
-            .getBody();
+            conceptSetsController
+                    .createConceptSet(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new CreateConceptSetRequest()
+                                    .conceptSet(
+                                            new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
+                                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId2))
+                    .getBody();
     ConceptSetConceptId conceptSetConceptId3 = new ConceptSetConceptId();
     conceptSetConceptId3.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId3.setStandard(true);
@@ -1648,16 +1669,16 @@ public class WorkspacesControllerTest extends SpringTest {
     conceptSetConceptId4.setConceptId(CLIENT_CONCEPT_2.getConceptId());
     conceptSetConceptId4.setStandard(true);
     conceptSet1 =
-        conceptSetsController
-            .updateConceptSetConcepts(
-                workspace.getNamespace(),
-                workspace.getId(),
-                conceptSet1.getId(),
-                new UpdateConceptSetRequest()
-                    .etag(conceptSet1.getEtag())
-                    .addedConceptSetConceptIds(
-                        ImmutableList.of(conceptSetConceptId3, conceptSetConceptId4)))
-            .getBody();
+            conceptSetsController
+                    .updateConceptSetConcepts(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            conceptSet1.getId(),
+                            new UpdateConceptSetRequest()
+                                    .etag(conceptSet1.getEtag())
+                                    .addedConceptSetConceptIds(
+                                            ImmutableList.of(conceptSetConceptId3, conceptSetConceptId4)))
+                    .getBody();
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
@@ -1671,106 +1692,106 @@ public class WorkspacesControllerTest extends SpringTest {
 
     req.setWorkspace(modWorkspace);
     final FirecloudWorkspace clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
 
     List<Cohort> cohorts =
-        cohortsController
-            .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId())
-            .getBody()
-            .getItems();
+            cohortsController
+                    .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId())
+                    .getBody()
+                    .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
     assertThat(cohortsByName.keySet()).containsAllOf("c1", "c2");
     assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
-        .containsNoneOf(c1.getId(), c2.getId());
+            .containsNoneOf(c1.getId(), c2.getId());
 
     CohortReview gotCr1 =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c1").getId(),
-                cdrVersion.getCdrVersionId(),
-                new PageFilterRequest())
-            .getBody()
-            .getCohortReview();
+            cohortReviewController
+                    .getParticipantCohortStatuses(
+                            cloned.getNamespace(),
+                            cloned.getId(),
+                            cohortsByName.get("c1").getId(),
+                            cdrVersion.getCdrVersionId(),
+                            new PageFilterRequest())
+                    .getBody()
+                    .getCohortReview();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
 
     CohortAnnotationDefinitionListResponse clonedCad1List =
-        cohortAnnotationDefinitionController
-            .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId())
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .getCohortAnnotationDefinitions(
+                            cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId())
+                    .getBody();
     assertCohortAnnotationDefinitions(
-        clonedCad1List,
-        Arrays.asList(cad1EnumResponse, cad1StringResponse),
-        cohortsByName.get("c1").getId());
+            clonedCad1List,
+            Arrays.asList(cad1EnumResponse, cad1StringResponse),
+            cohortsByName.get("c1").getId());
 
     ParticipantCohortAnnotationListResponse clonedPca1List =
-        cohortReviewController
-            .getParticipantCohortAnnotations(
-                cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
-            .getBody();
+            cohortReviewController
+                    .getParticipantCohortAnnotations(
+                            cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
+                    .getBody();
     assertParticipantCohortAnnotation(
-        clonedPca1List,
-        clonedCad1List,
-        Arrays.asList(pca1EnumResponse, pca1StringResponse),
-        gotCr1.getCohortReviewId(),
-        participantId);
+            clonedPca1List,
+            clonedCad1List,
+            Arrays.asList(pca1EnumResponse, pca1StringResponse),
+            gotCr1.getCohortReviewId(),
+            participantId);
 
     CohortReview gotCr2 =
-        cohortReviewController
-            .getParticipantCohortStatuses(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c2").getId(),
-                cdrVersion.getCdrVersionId(),
-                new PageFilterRequest())
-            .getBody()
-            .getCohortReview();
+            cohortReviewController
+                    .getParticipantCohortStatuses(
+                            cloned.getNamespace(),
+                            cloned.getId(),
+                            cohortsByName.get("c2").getId(),
+                            cdrVersion.getCdrVersionId(),
+                            new PageFilterRequest())
+                    .getBody()
+                    .getCohortReview();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
 
     CohortAnnotationDefinitionListResponse clonedCad2List =
-        cohortAnnotationDefinitionController
-            .getCohortAnnotationDefinitions(
-                cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId())
-            .getBody();
+            cohortAnnotationDefinitionController
+                    .getCohortAnnotationDefinitions(
+                            cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId())
+                    .getBody();
     assertCohortAnnotationDefinitions(
-        clonedCad2List,
-        Arrays.asList(cad2EnumResponse, cad2BooleanResponse),
-        cohortsByName.get("c2").getId());
+            clonedCad2List,
+            Arrays.asList(cad2EnumResponse, cad2BooleanResponse),
+            cohortsByName.get("c2").getId());
 
     ParticipantCohortAnnotationListResponse clonedPca2List =
-        cohortReviewController
-            .getParticipantCohortAnnotations(
-                cloned.getNamespace(), cloned.getId(), gotCr2.getCohortReviewId(), participantId)
-            .getBody();
+            cohortReviewController
+                    .getParticipantCohortAnnotations(
+                            cloned.getNamespace(), cloned.getId(), gotCr2.getCohortReviewId(), participantId)
+                    .getBody();
     assertParticipantCohortAnnotation(
-        clonedPca2List,
-        clonedCad2List,
-        Arrays.asList(pca2EnumResponse, pca2BooleanResponse),
-        gotCr2.getCohortReviewId(),
-        participantId);
+            clonedPca2List,
+            clonedCad2List,
+            Arrays.asList(pca2EnumResponse, pca2BooleanResponse),
+            gotCr2.getCohortReviewId(),
+            participantId);
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
-        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortReviewId());
+            .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortReviewId());
 
     List<ConceptSet> conceptSets =
-        conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
-            .getBody()
-            .getItems();
+            conceptSetsController
+                    .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
+                    .getBody()
+                    .getItems();
     assertThat(conceptSets.size()).isEqualTo(2);
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
     assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
@@ -1798,18 +1819,18 @@ public class WorkspacesControllerTest extends SpringTest {
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
+            DbConceptSetConceptId.builder()
+                    .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .addStandard(true)
+                    .build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
-            .addStandard(true)
-            .build();
+            DbConceptSetConceptId.builder()
+                    .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+                    .addStandard(true)
+                    .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(123);
+            .thenReturn(123);
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
@@ -1818,16 +1839,16 @@ public class WorkspacesControllerTest extends SpringTest {
     conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_2.getConceptId());
     conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet1 =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addedConceptSetConceptIds(
-                        ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
-            .getBody();
+            conceptSetsController
+                    .createConceptSet(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new CreateConceptSetRequest()
+                                    .conceptSet(
+                                            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                                    .addedConceptSetConceptIds(
+                                            ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
+                    .getBody();
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
@@ -1842,25 +1863,25 @@ public class WorkspacesControllerTest extends SpringTest {
     req.setWorkspace(modWorkspace);
 
     FirecloudWorkspace clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
-        .thenReturn(456);
+            .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
     List<ConceptSet> conceptSets =
-        conceptSetsController
-            .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
-            .getBody()
-            .getItems();
+            conceptSetsController
+                    .getConceptSetsInWorkspace(cloned.getNamespace(), cloned.getId())
+                    .getBody()
+                    .getItems();
     assertThat(conceptSets.size()).isEqualTo(1);
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
   }
@@ -1872,10 +1893,10 @@ public class WorkspacesControllerTest extends SpringTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbWorkspace dbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            workspace.getNamespace(),
-            workspace.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
@@ -1891,10 +1912,10 @@ public class WorkspacesControllerTest extends SpringTest {
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
     DbConceptSetConceptId dbConceptSetConceptId =
-        DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
-            .addStandard(true)
-            .build();
+            DbConceptSetConceptId.builder()
+                    .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .addStandard(true)
+                    .build();
     originalConceptSet.setConceptSetConceptIds(Collections.singleton(dbConceptSetConceptId));
     originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalConceptSet = conceptSetDao.save(originalConceptSet);
@@ -1923,7 +1944,7 @@ public class WorkspacesControllerTest extends SpringTest {
     originalDataSet.setName(expectedDatasetName);
     originalDataSet.setVersion(1);
     originalDataSet.setConceptSetIds(
-        Collections.singletonList(originalConceptSet.getConceptSetId()));
+            Collections.singletonList(originalConceptSet.getConceptSetId()));
     originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
     originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalDataSet.setPrePackagedConceptSetEnum(Arrays.asList(PrePackagedConceptSetEnum.NONE));
@@ -1942,28 +1963,28 @@ public class WorkspacesControllerTest extends SpringTest {
     req.setWorkspace(modWorkspace);
 
     stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+            modWorkspace.getNamespace(),
+            modWorkspace.getName(),
+            LOGGED_IN_USER_EMAIL,
+            WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
     FirecloudWorkspace clonedWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+            stubCloneWorkspace(
+                    modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
 
     DbWorkspace clonedDbWorkspace =
-        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-            cloned.getNamespace(),
-            cloned.getId(),
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+                    cloned.getNamespace(),
+                    cloned.getId(),
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
@@ -1976,9 +1997,9 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
     assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
     assertThat(conceptSets.get(0).getConceptSetConceptIds())
-        .isEqualTo(Collections.singleton(dbConceptSetConceptId));
+            .isEqualTo(Collections.singleton(dbConceptSetConceptId));
     assertThat(conceptSets.get(0).getConceptSetId())
-        .isNotEqualTo(originalConceptSet.getConceptSetId());
+            .isNotEqualTo(originalConceptSet.getConceptSetId());
 
     List<DbCohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
@@ -1987,47 +2008,47 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
 
     Set<DbCohortReview> cohortReviews =
-        cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
+            cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
     assertThat(cohortReviews).hasSize(1);
     assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);
     assertThat(cohortReviews.iterator().next().getCohortDefinition())
-        .isEqualTo(expectedCohortReviewDefinition);
+            .isEqualTo(expectedCohortReviewDefinition);
     assertThat(cohortReviews.iterator().next().getCohortReviewId())
-        .isNotEqualTo(originalCohortReview.getCohortReviewId());
+            .isNotEqualTo(originalCohortReview.getCohortReviewId());
   }
 
   private void assertConceptSetClone(
-      ConceptSet clonedConceptSet,
-      ConceptSet originalConceptSet,
-      Workspace clonedWorkspace,
-      long participantCount) {
+          ConceptSet clonedConceptSet,
+          ConceptSet originalConceptSet,
+          Workspace clonedWorkspace,
+          long participantCount) {
     // Get the full concept set in order to retrieve the concepts.
     clonedConceptSet =
-        conceptSetsController
-            .getConceptSet(
-                clonedWorkspace.getNamespace(), clonedWorkspace.getId(), clonedConceptSet.getId())
-            .getBody();
+            conceptSetsController
+                    .getConceptSet(
+                            clonedWorkspace.getNamespace(), clonedWorkspace.getId(), clonedConceptSet.getId())
+                    .getBody();
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
     assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
     assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime())
-        .isEqualTo(clonedWorkspace.getLastModifiedTime());
+            .isEqualTo(clonedWorkspace.getLastModifiedTime());
     assertThat(clonedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(clonedConceptSet.getParticipantCount()).isEqualTo(participantCount);
   }
 
   private void assertCohortAnnotationDefinitions(
-      CohortAnnotationDefinitionListResponse responseList,
-      List<CohortAnnotationDefinition> expectedCads,
-      Long cohortId) {
+          CohortAnnotationDefinitionListResponse responseList,
+          List<CohortAnnotationDefinition> expectedCads,
+          Long cohortId) {
     assertThat(responseList.getItems().size()).isEqualTo(expectedCads.size());
     int i = 0;
     for (CohortAnnotationDefinition clonedDefinition : responseList.getItems()) {
       CohortAnnotationDefinition expectedCad = expectedCads.get(i++);
       assertThat(clonedDefinition.getCohortAnnotationDefinitionId())
-          .isNotEqualTo(expectedCad.getCohortAnnotationDefinitionId());
+              .isNotEqualTo(expectedCad.getCohortAnnotationDefinitionId());
       assertThat(clonedDefinition.getCohortId()).isEqualTo(cohortId);
       assertThat(clonedDefinition.getColumnName()).isEqualTo(expectedCad.getColumnName());
       assertThat(clonedDefinition.getAnnotationType()).isEqualTo(expectedCad.getAnnotationType());
@@ -2036,20 +2057,20 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private void assertParticipantCohortAnnotation(
-      ParticipantCohortAnnotationListResponse pcaResponseList,
-      CohortAnnotationDefinitionListResponse cadResponseList,
-      List<ParticipantCohortAnnotation> expectedPcas,
-      Long cohortReviewId,
-      Long participantId) {
+          ParticipantCohortAnnotationListResponse pcaResponseList,
+          CohortAnnotationDefinitionListResponse cadResponseList,
+          List<ParticipantCohortAnnotation> expectedPcas,
+          Long cohortReviewId,
+          Long participantId) {
     assertThat(pcaResponseList.getItems().size()).isEqualTo(expectedPcas.size());
     int i = 0;
     for (ParticipantCohortAnnotation clonedAnnotation : pcaResponseList.getItems()) {
       ParticipantCohortAnnotation expectedPca = expectedPcas.get(i);
       assertThat(clonedAnnotation.getAnnotationId()).isNotEqualTo(expectedPca.getAnnotationId());
       assertThat(clonedAnnotation.getAnnotationValueEnum())
-          .isEqualTo(expectedPca.getAnnotationValueEnum());
+              .isEqualTo(expectedPca.getAnnotationValueEnum());
       assertThat(clonedAnnotation.getCohortAnnotationDefinitionId())
-          .isEqualTo(cadResponseList.getItems().get(i++).getCohortAnnotationDefinitionId());
+              .isEqualTo(cadResponseList.getItems().get(i++).getCohortAnnotationDefinitionId());
       assertThat(clonedAnnotation.getCohortReviewId()).isEqualTo(cohortReviewId);
       assertThat(clonedAnnotation.getParticipantId()).isEqualTo(participantId);
     }
@@ -2080,10 +2101,10 @@ public class WorkspacesControllerTest extends SpringTest {
     mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
   }
@@ -2100,78 +2121,57 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .billingAccountName("billing-account")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId(cdrVersionId2);
+            new Workspace()
+                    .name("cloned")
+                    .namespace("cloned-ns")
+                    .billingAccountName("billing-account")
+                    .researchPurpose(workspace.getResearchPurpose())
+                    .cdrVersionId(cdrVersionId2);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
     mockBillingProjectBuffer("cloned-ns");
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
     Workspace workspace2 =
-        workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+                    .getBody()
+                    .getWorkspace();
 
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
   }
 
-  @Test(expected = NumberFormatException.class)
+  @Test
   public void testCloneWorkspaceBadCdrVersion() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId("bad-cdr-version-id");
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+      assertThrows(NumberFormatException.class, () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace = new Workspace().name("cloned").namespace("cloned-ns").researchPurpose(workspace.getResearchPurpose()).cdrVersionId("bad-cdr-version-id");
+          stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), new CloneWorkspaceRequest().workspace(modWorkspace));
+      });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspaceMissingCdrVersion() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId("100");
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+      assertThrows(BadRequestException.class, () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace = new Workspace().name("cloned").namespace("cloned-ns").researchPurpose(workspace.getResearchPurpose()).cdrVersionId("100");
+          stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), new CloneWorkspaceRequest().workspace(modWorkspace));
+      });
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void testCloneWorkspaceArchivedCdrVersionThrows() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId(archivedCdrVersionId);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+      assertThrows(FailedPreconditionException.class, () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace = new Workspace().name("cloned").namespace("cloned-ns").researchPurpose(workspace.getResearchPurpose()).cdrVersionId(archivedCdrVersionId);
+          stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), new CloneWorkspaceRequest().workspace(modWorkspace));
+      });
   }
 
   @Test
@@ -2182,128 +2182,128 @@ public class WorkspacesControllerTest extends SpringTest {
     DbUser writer = createUser("writer@gmail.com");
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
     List<UserRole> collaborators =
-        new ArrayList<>(
-            Arrays.asList(
-                new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
-                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
+            new ArrayList<>(
+                    Arrays.asList(
+                            new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
+                            new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+                            new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
+                            new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
     FirecloudWorkspaceACL workspaceAclsFromCloned =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    "cloner@gmail.com",
+            createWorkspaceACL(
                     new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true)));
+                            .put(
+                                    "cloner@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "OWNER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true)));
 
     FirecloudWorkspaceACL workspaceAclsFromOriginal =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    "cloner@gmail.com",
+            createWorkspaceACL(
                     new JSONObject()
-                        .put("accessLevel", "READER")
-                        .put("canCompute", true)
-                        .put("canShare", true))
-                .put(
-                    "reader@gmail.com",
-                    new JSONObject()
-                        .put("accessLevel", "READER")
-                        .put("canCompute", false)
-                        .put("canShare", false))
-                .put(
-                    "writer@gmail.com",
-                    new JSONObject()
-                        .put("accessLevel", "WRITER")
-                        .put("canCompute", true)
-                        .put("canShare", false))
-                .put(
-                    LOGGED_IN_USER_EMAIL,
-                    new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true)));
+                            .put(
+                                    "cloner@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "READER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true))
+                            .put(
+                                    "reader@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "READER")
+                                            .put("canCompute", false)
+                                            .put("canShare", false))
+                            .put(
+                                    "writer@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "WRITER")
+                                            .put("canCompute", true)
+                                            .put("canShare", false))
+                            .put(
+                                    LOGGED_IN_USER_EMAIL,
+                                    new JSONObject()
+                                            .put("accessLevel", "OWNER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true)));
 
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
-        .thenReturn(workspaceAclsFromCloned);
+            .thenReturn(workspaceAclsFromCloned);
     when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(workspaceAclsFromOriginal);
+            .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
 
     Workspace modWorkspace =
-        new Workspace()
-            .namespace("cloned-ns")
-            .name("cloned")
-            .researchPurpose(workspace.getResearchPurpose())
-            .billingAccountName("billing-account");
+            new Workspace()
+                    .namespace("cloned-ns")
+                    .name("cloned")
+                    .researchPurpose(workspace.getResearchPurpose())
+                    .billingAccountName("billing-account");
 
     stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
     mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
-        workspacesController
-            .cloneWorkspace(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .cloneWorkspace(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+                    .getBody()
+                    .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
-        convertUserRolesToUpdateAclRequestList(collaborators);
+            convertUserRolesToUpdateAclRequestList(collaborators);
 
     verify(fireCloudService)
-        .updateWorkspaceACL(
-            eq("cloned-ns"),
-            eq("cloned"),
-            // Accept the ACL update list in any order.
-            argThat(arg -> new HashSet(updateACLRequestList).equals(new HashSet(arg))));
+            .updateWorkspaceACL(
+                    eq("cloned-ns"),
+                    eq("cloned"),
+                    // Accept the ACL update list in any order.
+                    argThat(arg -> new HashSet(updateACLRequestList).equals(new HashSet(arg))));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspaceBadRequest() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    req.setWorkspace(modWorkspace);
-    // Missing research purpose.
-    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+      assertThrows(BadRequestException.class, () -> {
+          Workspace workspace = createWorkspace();
+          workspace = workspacesController.createWorkspace(workspace).getBody();
+          CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          req.setWorkspace(modWorkspace);
+          // Missing research purpose.
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+      });
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testClonePermissionDenied() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    // Clone with a different user.
-    DbUser cloner = new DbUser();
-    cloner.setUsername("cloner@gmail.com");
-    cloner.setUserId(456L);
-    cloner.setDisabled(false);
-    currentUser = userDao.save(cloner);
-
-    // Permission denied manifests as a 404 in Firecloud.
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenThrow(new NotFoundException());
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    req.setWorkspace(modWorkspace);
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+      assertThrows(NotFoundException.class, () -> {
+          Workspace workspace = createWorkspace();
+          workspace = workspacesController.createWorkspace(workspace).getBody();
+          // Clone with a different user.
+          DbUser cloner = new DbUser();
+          cloner.setUsername("cloner@gmail.com");
+          cloner.setUserId(456L);
+          cloner.setDisabled(false);
+          currentUser = userDao.save(cloner);
+          // Permission denied manifests as a 404 in Firecloud.
+          when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName())).thenThrow(new NotFoundException());
+          CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          req.setWorkspace(modWorkspace);
+          ResearchPurpose modPurpose = new ResearchPurpose();
+          modPurpose.setAncestry(true);
+          modWorkspace.setResearchPurpose(modPurpose);
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+      });
   }
 
   @Test
@@ -2318,30 +2318,30 @@ public class WorkspacesControllerTest extends SpringTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+            shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, "readerfriend@gmail.com", WorkspaceAccessLevel.READER);
+            shareWorkspaceRequest, "readerfriend@gmail.com", WorkspaceAccessLevel.READER);
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
+            shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     WorkspaceUserRolesResponse shareResp =
-        workspacesController
-            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
-            .getBody();
+            workspacesController
+                    .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+                    .getBody();
     verify(mockWorkspaceAuditor).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getName())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getName())
+                    .getBody()
+                    .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
-        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
   }
 
@@ -2355,23 +2355,23 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest =
-        new ShareWorkspaceRequest()
-            .workspaceEtag(workspace.getEtag())
-            .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
-            .addItemsItem(
-                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
-            .addItemsItem(
-                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
+            new ShareWorkspaceRequest()
+                    .workspaceEtag(workspace.getEtag())
+                    .addItemsItem(
+                            new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
+                    .addItemsItem(
+                            new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
+                    .addItemsItem(
+                            new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+            workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
     verify(fireCloudService, times(1))
-        .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
+            .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
     verify(fireCloudService, never())
-        .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
+            .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
   }
 
   @Test
@@ -2381,47 +2381,47 @@ public class WorkspacesControllerTest extends SpringTest {
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
     when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
-        .thenReturn(
-            createWorkspaceACL(
-                new JSONObject()
-                    .put(
-                        currentUser.getUsername(),
-                        new JSONObject()
-                            .put("accessLevel", "OWNER")
-                            .put("canCompute", true)
-                            .put("canShare", true))
-                    .put(
-                        writerUser.getUsername(),
-                        new JSONObject()
-                            .put("accessLevel", "WRITER")
-                            .put("canCompute", true)
-                            .put("canShare", true))
-                    .put(
-                        ownerUser.getUsername(),
-                        new JSONObject()
-                            .put("accessLevel", "OWNER")
-                            .put("canCompute", true)
-                            .put("canShare", true))));
+            .thenReturn(
+                    createWorkspaceACL(
+                            new JSONObject()
+                                    .put(
+                                            currentUser.getUsername(),
+                                            new JSONObject()
+                                                    .put("accessLevel", "OWNER")
+                                                    .put("canCompute", true)
+                                                    .put("canShare", true))
+                                    .put(
+                                            writerUser.getUsername(),
+                                            new JSONObject()
+                                                    .put("accessLevel", "WRITER")
+                                                    .put("canCompute", true)
+                                                    .put("canShare", true))
+                                    .put(
+                                            ownerUser.getUsername(),
+                                            new JSONObject()
+                                                    .put("accessLevel", "OWNER")
+                                                    .put("canCompute", true)
+                                                    .put("canShare", true))));
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest =
-        new ShareWorkspaceRequest()
-            .workspaceEtag(workspace.getEtag())
-            .addItemsItem(
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
-            // Removed WRITER, demoted OWNER to READER.
-            .addItemsItem(
-                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
+            new ShareWorkspaceRequest()
+                    .workspaceEtag(workspace.getEtag())
+                    .addItemsItem(
+                            new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
+                    // Removed WRITER, demoted OWNER to READER.
+                    .addItemsItem(
+                            new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+            workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
     verify(fireCloudService, times(1))
-        .removeOwnerFromBillingProject(
-            ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
+            .removeOwnerFromBillingProject(
+                    ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
     verify(fireCloudService, never())
-        .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
+            .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
     verify(fireCloudService, never()).addOwnerToBillingProject(any(), any());
   }
 
@@ -2434,7 +2434,7 @@ public class WorkspacesControllerTest extends SpringTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+            shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     shareWorkspaceRequest.addItemsItem(writer);
@@ -2444,7 +2444,7 @@ public class WorkspacesControllerTest extends SpringTest {
     stubFcUpdateWorkspaceACL();
     try {
       workspacesController.shareWorkspace(
-          workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+              workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
       fail("expected bad request exception for no role");
     } catch (BadRequestException e) {
       // Expected
@@ -2476,26 +2476,26 @@ public class WorkspacesControllerTest extends SpringTest {
 
     // Mock firecloud ACLs
     FirecloudWorkspaceACL workspaceACLs =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    LOGGED_IN_USER_EMAIL,
+            createWorkspaceACL(
                     new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true))
-                .put(
-                    "writerfriend@gmail.com",
-                    new JSONObject()
-                        .put("accessLevel", "WRITER")
-                        .put("canCompute", true)
-                        .put("canShare", false))
-                .put(
-                    "readerfriend@gmail.com",
-                    new JSONObject()
-                        .put("accessLevel", "READER")
-                        .put("canCompute", false)
-                        .put("canShare", false)));
+                            .put(
+                                    LOGGED_IN_USER_EMAIL,
+                                    new JSONObject()
+                                            .put("accessLevel", "OWNER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true))
+                            .put(
+                                    "writerfriend@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "WRITER")
+                                            .put("canCompute", true)
+                                            .put("canShare", false))
+                            .put(
+                                    "readerfriend@gmail.com",
+                                    new JSONObject()
+                                            .put("accessLevel", "READER")
+                                            .put("canCompute", false)
+                                            .put("canShare", false)));
     when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
 
     fakeClock.increment(1000);
@@ -2506,28 +2506,28 @@ public class WorkspacesControllerTest extends SpringTest {
     shareWorkspaceRequest.addItemsItem(writer);
 
     WorkspaceUserRolesResponse shareResp =
-        workspacesController
-            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
-            .getBody();
+            workspacesController
+                    .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+                    .getBody();
     Workspace workspace2 =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     // add the reader with NO_ACCESS to mock
     shareWorkspaceRequest.addItemsItem(reader);
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
-        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
-        .updateWorkspaceACL(
-            any(),
-            any(),
-            eq(
-                updateACLRequestList.stream()
-                    .sorted(Comparator.comparing(FirecloudWorkspaceACLUpdate::getEmail))
-                    .collect(Collectors.toList())));
+            .updateWorkspaceACL(
+                    any(),
+                    any(),
+                    eq(
+                            updateACLRequestList.stream()
+                                    .sorted(Comparator.comparing(FirecloudWorkspaceACLUpdate::getEmail))
+                                    .collect(Collectors.toList())));
   }
 
   @Test
@@ -2538,14 +2538,14 @@ public class WorkspacesControllerTest extends SpringTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+            shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();
     stubFcGetWorkspaceACL();
     workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+            workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     fakeClock.increment(1000);
@@ -2554,80 +2554,79 @@ public class WorkspacesControllerTest extends SpringTest {
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     try {
       workspacesController.shareWorkspace(
-          workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+              workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
       fail("expected conflict exception when sharing with stale etag");
     } catch (ConflictException e) {
       // Expected
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testUnableToShareWithNonExistentUser() {
-    Workspace workspace = createWorkspace();
-    workspacesController.createWorkspace(workspace);
-    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
-    workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+      assertThrows(BadRequestException.class, () -> {
+          Workspace workspace = createWorkspace();
+          workspacesController.createWorkspace(workspace);
+          ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+          addUserRoleToShareWorkspaceRequest(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+          addUserRoleToShareWorkspaceRequest(shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
+          workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+      });
   }
 
   @Test
   public void testNotebookFileList() {
     when(fireCloudService.getWorkspace("project", "workspace"))
-        .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+            .thenReturn(
+                    new FirecloudWorkspaceResponse()
+                            .workspace(new FirecloudWorkspace().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
     when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/mockFile"));
+            .thenReturn(NotebooksService.withNotebookExtension("notebooks/mockFile"));
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
+            .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
     when(cloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
-        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
+            .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
     List<String> gotNames =
-        workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(FileDetail::getName)
-            .collect(Collectors.toList());
+            workspacesController.getNoteBookList("project", "workspace").getBody().stream()
+                    .map(FileDetail::getName)
+                    .collect(Collectors.toList());
     assertThat(gotNames)
-        .isEqualTo(
-            ImmutableList.of(
-                NotebooksService.withNotebookExtension("mockFile"),
-                NotebooksService.withNotebookExtension("two words")));
+            .isEqualTo(
+                    ImmutableList.of(
+                            NotebooksService.withNotebookExtension("mockFile"),
+                            NotebooksService.withNotebookExtension("two words")));
   }
 
   @Test
   public void testNotebookFileListOmitsExtraDirectories() {
     when(fireCloudService.getWorkspace("project", "workspace"))
-        .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspace().bucketName("bucket")));
+            .thenReturn(
+                    new FirecloudWorkspaceResponse()
+                            .workspace(new FirecloudWorkspace().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
+            .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
     when(cloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
-        .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
+            .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =
-        workspacesController.getNoteBookList("project", "workspace").getBody().stream()
-            .map(FileDetail::getName)
-            .collect(Collectors.toList());
+            workspacesController.getNoteBookList("project", "workspace").getBody().stream()
+                    .map(FileDetail::getName)
+                    .collect(Collectors.toList());
     assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }
 
   @Test
   public void testNotebookFileListNotFound() {
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace"))
-        .thenThrow(new NotFoundException());
+            .thenThrow(new NotFoundException());
     try {
       workspacesController.getNoteBookList("mockProject", "mockWorkspace");
       fail();
@@ -2641,7 +2640,7 @@ public class WorkspacesControllerTest extends SpringTest {
     when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
-          workspacesController.getWorkspaces();
+              workspacesController.getWorkspaces();
       assertThat(response.getBody().getItems()).isEmpty();
     } catch (Exception ex) {
       fail();
@@ -2664,13 +2663,13 @@ public class WorkspacesControllerTest extends SpringTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+            .copyBlob(
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
-        .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
+            .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -2689,13 +2688,13 @@ public class WorkspacesControllerTest extends SpringTest {
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+            .copyBlob(
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
-        .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
+            .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -2710,26 +2709,26 @@ public class WorkspacesControllerTest extends SpringTest {
     String expectedNotebookName = newNotebookName + NotebooksService.NOTEBOOK_EXTENSION;
 
     CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
+            new CopyRequest()
+                    .toWorkspaceName(toWorkspace.getName())
+                    .toWorkspaceNamespace(toWorkspace.getNamespace())
+                    .newName(newNotebookName);
 
     workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+            fromWorkspace.getNamespace(),
+            fromWorkspace.getName(),
+            fromNotebookName,
+            copyNotebookRequest);
 
     verify(cloudStorageClient)
-        .copyBlob(
-            BlobId.of(
-                TestMockFactory.WORKSPACE_BUCKET_NAME,
-                "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + expectedNotebookName));
+            .copyBlob(
+                    BlobId.of(
+                            TestMockFactory.WORKSPACE_BUCKET_NAME,
+                            "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + expectedNotebookName));
 
     verify(userRecentResourceService)
-        .updateNotebookEntry(2l, 1l, BUCKET_URI + "notebooks/" + expectedNotebookName);
+            .updateNotebookEntry(2l, 1l, BUCKET_URI + "notebooks/" + expectedNotebookName);
   }
 
   @Test
@@ -2743,160 +2742,94 @@ public class WorkspacesControllerTest extends SpringTest {
     String newNotebookName = NotebooksService.withNotebookExtension("new");
 
     CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
+            new CopyRequest()
+                    .toWorkspaceName(toWorkspace.getName())
+                    .toWorkspaceNamespace(toWorkspace.getNamespace())
+                    .newName(newNotebookName);
 
     workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+            fromWorkspace.getNamespace(),
+            fromWorkspace.getName(),
+            fromNotebookName,
+            copyNotebookRequest);
 
     verify(cloudStorageClient)
-        .copyBlob(
-            BlobId.of(
-                TestMockFactory.WORKSPACE_BUCKET_NAME,
-                "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName));
+            .copyBlob(
+                    BlobId.of(
+                            TestMockFactory.WORKSPACE_BUCKET_NAME,
+                            "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.READER);
-    String newNotebookName = "new";
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(ForbiddenException.class, () -> {
+      Workspace fromWorkspace = createWorkspace();
+      fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+      String fromNotebookName = "origin";
+      Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+      toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+      stubGetWorkspace(toWorkspace.getNamespace(), toWorkspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
+      String newNotebookName = "new";
+      CopyRequest copyNotebookRequest = new CopyRequest().toWorkspaceName(toWorkspace.getName()).toWorkspaceNamespace(toWorkspace.getNamespace()).newName(newNotebookName);
+      workspacesController.copyNotebook(fromWorkspace.getNamespace(), fromWorkspace.getName(), fromNotebookName, copyNotebookRequest);
+    });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void copyNotebook_noAccessOnSource() {
-    Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    stubGetWorkspace(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.NO_ACCESS);
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.WRITER);
-    String newNotebookName = "new";
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(ForbiddenException.class, () -> {
+      Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
+      fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+      stubGetWorkspace(fromWorkspace.getNamespace(), fromWorkspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+      String fromNotebookName = "origin";
+      Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+      toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+      stubGetWorkspace(toWorkspace.getNamespace(), toWorkspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.WRITER);
+      String newNotebookName = "new";
+      CopyRequest copyNotebookRequest = new CopyRequest().toWorkspaceName(toWorkspace.getName()).toWorkspaceNamespace(toWorkspace.getNamespace()).newName(newNotebookName);
+      workspacesController.copyNotebook(fromWorkspace.getNamespace(), fromWorkspace.getName(), fromNotebookName, copyNotebookRequest);
+    });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void copyNotebook_alreadyExists() {
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    BlobId newBlobId =
-        BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
-
-    doReturn(Collections.singleton(newBlobId))
-        .when(cloudStorageClient)
-        .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(ConflictException.class, () -> {
+      Workspace fromWorkspace = createWorkspace();
+      fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+      String fromNotebookName = "origin";
+      Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+      toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+      String newNotebookName = NotebooksService.withNotebookExtension("new");
+      CopyRequest copyNotebookRequest = new CopyRequest().toWorkspaceName(toWorkspace.getName()).toWorkspaceNamespace(toWorkspace.getNamespace()).newName(newNotebookName);
+      BlobId newBlobId = BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
+      doReturn(Collections.singleton(newBlobId)).when(cloudStorageClient).getExistingBlobIdsIn(Collections.singletonList(newBlobId));
+      workspacesController.copyNotebook(fromWorkspace.getNamespace(), fromWorkspace.getName(), fromNotebookName, copyNotebookRequest);
+    });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCopyNotebook_notAllowedBetweenTiers() {
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    DbCdrVersion controlledCdr =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
-    controlledCdr.setName("2");
-    controlledCdr.setAccessTier(controlledTier);
-    controlledCdr = cdrVersionDao.save(controlledCdr);
-
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    stubGetWorkspace(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    // a CDR Version in the Registered Tier
-    toWorkspace.setCdrVersionId(cdrVersionId);
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(BadRequestException.class, () -> {
+      final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+      DbCdrVersion controlledCdr = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+      controlledCdr.setName("2");
+      controlledCdr.setAccessTier(controlledTier);
+      controlledCdr = cdrVersionDao.save(controlledCdr);
+      Workspace fromWorkspace = createWorkspace();
+      fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
+      fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+      String fromNotebookName = "origin";
+      stubGetWorkspace(fromWorkspace.getNamespace(), fromWorkspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+      Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+      // a CDR Version in the Registered Tier
+      toWorkspace.setCdrVersionId(cdrVersionId);
+      toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+      String newNotebookName = NotebooksService.withNotebookExtension("new");
+      stubGetWorkspace(toWorkspace.getNamespace(), toWorkspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+      CopyRequest copyNotebookRequest = new CopyRequest().toWorkspaceName(toWorkspace.getName()).toWorkspaceNamespace(toWorkspace.getNamespace()).newName(newNotebookName);
+      workspacesController.copyNotebook(fromWorkspace.getNamespace(), fromWorkspace.getName(), fromNotebookName, copyNotebookRequest);
+    });
   }
 
   @Test
@@ -2909,11 +2842,11 @@ public class WorkspacesControllerTest extends SpringTest {
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     workspacesController.cloneNotebook(
-        workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
+            workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageClient)
-        .copyBlob(
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
-            BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
+            .copyBlob(
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
+                    BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
@@ -2926,7 +2859,7 @@ public class WorkspacesControllerTest extends SpringTest {
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     workspacesController.deleteNotebook(
-        workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
+            workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
@@ -2941,18 +2874,18 @@ public class WorkspacesControllerTest extends SpringTest {
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
     workspace =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
     assertThat(workspace.getPublished()).isTrue();
 
     workspacesController.unpublishWorkspace(workspace.getNamespace(), workspace.getId());
     workspace =
-        workspacesController
-            .getWorkspace(workspace.getNamespace(), workspace.getId())
-            .getBody()
-            .getWorkspace();
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
     assertThat(workspace.getPublished()).isFalse();
   }
 
@@ -2967,13 +2900,13 @@ public class WorkspacesControllerTest extends SpringTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+            testMockFactory.createFirecloudWorkspace(
+                    workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
-        .isEqualTo(1);
+            .isEqualTo(1);
   }
 
   @Test
@@ -2987,8 +2920,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+            testMockFactory.createFirecloudWorkspace(
+                    workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -3006,8 +2939,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+            testMockFactory.createFirecloudWorkspace(
+                    workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -3025,8 +2958,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
-        testMockFactory.createFirecloudWorkspace(
-            workspace.getNamespace(), workspace.getName(), null));
+            testMockFactory.createFirecloudWorkspace(
+                    workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -3036,27 +2969,27 @@ public class WorkspacesControllerTest extends SpringTest {
   @Test
   public void notebookLockingEmailHashTest() {
     final String[][] knownTestData = {
-      {
-        "fc-bucket-id-1",
-        "user@aou",
-        "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"
-      },
-      {
-        "fc-bucket-id-1",
-        "another-user@aou",
-        "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"
-      },
-      {
-        "fc-bucket-id-2",
-        "user@aou",
-        "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
-      },
-      // catches an edge case where the hash has a leading 0
-      {
-        "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
-        "brubenst2@fake-research-aou.org",
-        "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
-      }
+            {
+                    "fc-bucket-id-1",
+                    "user@aou",
+                    "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"
+            },
+            {
+                    "fc-bucket-id-1",
+                    "another-user@aou",
+                    "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"
+            },
+            {
+                    "fc-bucket-id-2",
+                    "user@aou",
+                    "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
+            },
+            // catches an edge case where the hash has a leading 0
+            {
+                    "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+                    "brubenst2@fake-research-aou.org",
+                    "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
+            }
     };
 
     for (final String[] test : knownTestData) {
@@ -3069,31 +3002,31 @@ public class WorkspacesControllerTest extends SpringTest {
   }
 
   private void assertNotebookLockingMetadata(
-      Map<String, String> gcsMetadata,
-      NotebookLockingMetadataResponse expectedResponse,
-      FirecloudWorkspaceACL acl) {
+          Map<String, String> gcsMetadata,
+          NotebookLockingMetadataResponse expectedResponse,
+          FirecloudWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
     FirecloudWorkspace fcWorkspace =
-        testMockFactory.createFirecloudWorkspace(
-            testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+            testMockFactory.createFirecloudWorkspace(
+                    testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
 
     final String testNotebookPath = "notebooks/" + testNotebook;
     doReturn(gcsMetadata)
-        .when(cloudStorageClient)
-        .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
+            .when(cloudStorageClient)
+            .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
             workspacesController
-                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-                .getBody())
-        .isEqualTo(expectedResponse);
+                    .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                    .getBody())
+            .isEqualTo(expectedResponse);
   }
 
   @Test
@@ -3102,21 +3035,21 @@ public class WorkspacesControllerTest extends SpringTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
+            new ImmutableMap.Builder<String, String>()
+                    .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+                    .put(
+                            LAST_LOCKING_USER_KEY,
+                            WorkspacesController.notebookLockingEmailHash(
+                                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                    .put("extraMetadata", "is not a problem")
+                    .build();
 
     // I can see that I have locked it myself, and when
 
     final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy(lastLockedUser);
+            new NotebookLockingMetadataResponse()
+                    .lockExpirationTime(lockExpirationTime)
+                    .lastLockedBy(lastLockedUser);
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
@@ -3126,40 +3059,40 @@ public class WorkspacesControllerTest extends SpringTest {
     final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
 
     FirecloudWorkspaceACL workspaceACL =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    currentUser.getUsername(),
+            createWorkspaceACL(
                     new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true))
-                .put(
-                    readerOnMyWorkspace,
-                    new JSONObject()
-                        .put("accessLevel", "READER")
-                        .put("canCompute", true)
-                        .put("canShare", true)));
+                            .put(
+                                    currentUser.getUsername(),
+                                    new JSONObject()
+                                            .put("accessLevel", "OWNER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true))
+                            .put(
+                                    readerOnMyWorkspace,
+                                    new JSONObject()
+                                            .put("accessLevel", "READER")
+                                            .put("canCompute", true)
+                                            .put("canShare", true)));
 
     final String lastLockedUser = readerOnMyWorkspace;
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
+            new ImmutableMap.Builder<String, String>()
+                    .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+                    .put(
+                            LAST_LOCKING_USER_KEY,
+                            WorkspacesController.notebookLockingEmailHash(
+                                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                    .put("extraMetadata", "is not a problem")
+                    .build();
 
     // I'm the owner so I can see readers on my workspace
 
     final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy(readerOnMyWorkspace);
+            new NotebookLockingMetadataResponse()
+                    .lockExpirationTime(lockExpirationTime)
+                    .lastLockedBy(readerOnMyWorkspace);
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
   }
@@ -3170,21 +3103,21 @@ public class WorkspacesControllerTest extends SpringTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            .put(
-                LAST_LOCKING_USER_KEY,
-                WorkspacesController.notebookLockingEmailHash(
-                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
-            .put("extraMetadata", "is not a problem")
-            .build();
+            new ImmutableMap.Builder<String, String>()
+                    .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+                    .put(
+                            LAST_LOCKING_USER_KEY,
+                            WorkspacesController.notebookLockingEmailHash(
+                                    TestMockFactory.WORKSPACE_BUCKET_NAME, lastLockedUser))
+                    .put("extraMetadata", "is not a problem")
+                    .build();
 
     // This user is not listed in the DbWorkspace ACL so I don't know them
 
     final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy("UNKNOWN");
+            new NotebookLockingMetadataResponse()
+                    .lockExpirationTime(lockExpirationTime)
+                    .lastLockedBy("UNKNOWN");
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
@@ -3195,7 +3128,7 @@ public class WorkspacesControllerTest extends SpringTest {
     ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
-        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+            workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(0.0d);
   }
 
@@ -3208,16 +3141,18 @@ public class WorkspacesControllerTest extends SpringTest {
     when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
     WorkspaceBillingUsageResponse workspaceBillingUsageResponse =
-        workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
+            workspacesController.getBillingUsage(ws.getNamespace(), ws.getId()).getBody();
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetBillingUsageWithoutAccess() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-    workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+    assertThrows(ForbiddenException.class, () -> {
+      Workspace ws = createWorkspace();
+      ws = workspacesController.createWorkspace(ws).getBody();
+      stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+      workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+    });
   }
 
   @Test
@@ -3226,20 +3161,20 @@ public class WorkspacesControllerTest extends SpringTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new ImmutableMap.Builder<String, String>()
-            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
-            // store directly in plaintext, to show that this does not work
-            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
-            .put("extraMetadata", "is not a problem")
-            .build();
+            new ImmutableMap.Builder<String, String>()
+                    .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+                    // store directly in plaintext, to show that this does not work
+                    .put(LAST_LOCKING_USER_KEY, lastLockedUser)
+                    .put("extraMetadata", "is not a problem")
+                    .build();
 
     // in case of accidentally storing the user email in plaintext
     // it can't be retrieved by this endpoint
 
     final NotebookLockingMetadataResponse expectedResponse =
-        new NotebookLockingMetadataResponse()
-            .lockExpirationTime(lockExpirationTime)
-            .lastLockedBy("UNKNOWN");
+            new NotebookLockingMetadataResponse()
+                    .lockExpirationTime(lockExpirationTime)
+                    .lastLockedBy("UNKNOWN");
 
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
@@ -3269,24 +3204,24 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(
-        workspace.getNamespace(),
-        workspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+            workspace.getNamespace(),
+            workspace.getName(),
+            LOGGED_IN_USER_EMAIL,
+            WorkspaceAccessLevel.OWNER);
     DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
-        workspacesController.getUserRecentWorkspaces();
+            workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
     assertThat(recentWorkspace.getWorkspace().getNamespace())
-        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
+            .isEqualTo(dbWorkspace.getWorkspaceNamespace());
     assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 
   @Test
   public void updateRecentWorkspaces_nullWorkspace() {
     assertThrows(
-        NotFoundException.class, () -> workspacesController.updateRecentWorkspaces("foo", "bar"));
+            NotFoundException.class, () -> workspacesController.updateRecentWorkspaces("foo", "bar"));
   }
 
   @Test
@@ -3298,10 +3233,10 @@ public class WorkspacesControllerTest extends SpringTest {
     workspaceDao.save(dbWorkspace);
 
     assertThrows(
-        ForbiddenException.class,
-        () ->
-            workspacesController.cloneNotebook(
-                workspace.getNamespace(), workspace.getId(), "notebook"));
+            ForbiddenException.class,
+            () ->
+                    workspacesController.cloneNotebook(
+                            workspace.getNamespace(), workspace.getId(), "notebook"));
   }
 
   @Test
@@ -3315,10 +3250,10 @@ public class WorkspacesControllerTest extends SpringTest {
     NotebookRename request = new NotebookRename().name("a").newName("b");
 
     assertThrows(
-        ForbiddenException.class,
-        () ->
-            workspacesController.renameNotebook(
-                workspace.getNamespace(), workspace.getId(), request));
+            ForbiddenException.class,
+            () ->
+                    workspacesController.renameNotebook(
+                            workspace.getNamespace(), workspace.getId(), request));
   }
 
   @Test
@@ -3330,37 +3265,37 @@ public class WorkspacesControllerTest extends SpringTest {
     workspaceDao.save(dbWorkspace);
 
     CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(workspace.getName())
-            .toWorkspaceNamespace(workspace.getNamespace())
-            .newName("x");
+            new CopyRequest()
+                    .toWorkspaceName(workspace.getName())
+                    .toWorkspaceNamespace(workspace.getNamespace())
+                    .newName("x");
 
     assertThrows(
-        ForbiddenException.class,
-        () ->
-            workspacesController.copyNotebook(
-                workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
+            ForbiddenException.class,
+            () ->
+                    workspacesController.copyNotebook(
+                            workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
   }
 
   // Does not compare: etag, lastModifiedTime, page, pageSize, participantCohortStatuses,
   // queryResultSize, reviewedCount, reviewSize, reviewStatus, sortColumn, sortOrder
   private void compareCohortReviewFields(
-      CohortReview observedCohortReview, CohortReview expectedCohortReview) {
+          CohortReview observedCohortReview, CohortReview expectedCohortReview) {
     assertThat(observedCohortReview.getCdrVersionId())
-        .isEqualTo(expectedCohortReview.getCdrVersionId());
+            .isEqualTo(expectedCohortReview.getCdrVersionId());
     assertThat(observedCohortReview.getCohortDefinition())
-        .isEqualTo(expectedCohortReview.getCohortDefinition());
+            .isEqualTo(expectedCohortReview.getCohortDefinition());
     assertThat(observedCohortReview.getCohortId()).isEqualTo(expectedCohortReview.getCohortId());
     assertThat(observedCohortReview.getCohortName())
-        .isEqualTo(expectedCohortReview.getCohortName());
+            .isEqualTo(expectedCohortReview.getCohortName());
     assertThat(observedCohortReview.getCohortReviewId())
-        .isEqualTo(expectedCohortReview.getCohortReviewId());
+            .isEqualTo(expectedCohortReview.getCohortReviewId());
     assertThat(observedCohortReview.getCreationTime())
-        .isEqualTo(expectedCohortReview.getCreationTime());
+            .isEqualTo(expectedCohortReview.getCreationTime());
     assertThat(observedCohortReview.getDescription())
-        .isEqualTo(expectedCohortReview.getDescription());
+            .isEqualTo(expectedCohortReview.getDescription());
     assertThat(observedCohortReview.getMatchedParticipantCount())
-        .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
+            .isEqualTo(expectedCohortReview.getMatchedParticipantCount());
   }
 
   private void compareDatasetMetadata(DataSet observedDataSet, DataSet expectedDataSet) {
@@ -3368,12 +3303,12 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(observedDataSet.getEtag()).isEqualTo(expectedDataSet.getEtag());
     assertThat(observedDataSet.getId()).isEqualTo(expectedDataSet.getId());
     assertThat(observedDataSet.getIncludesAllParticipants())
-        .isEqualTo(expectedDataSet.getIncludesAllParticipants());
+            .isEqualTo(expectedDataSet.getIncludesAllParticipants());
     assertThat(observedDataSet.getLastModifiedTime())
-        .isEqualTo(expectedDataSet.getLastModifiedTime());
+            .isEqualTo(expectedDataSet.getLastModifiedTime());
     assertThat(observedDataSet.getName()).isEqualTo(expectedDataSet.getName());
     assertThat(observedDataSet.getPrePackagedConceptSet())
-        .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
+            .isEqualTo(expectedDataSet.getPrePackagedConceptSet());
   }
 
   @Test
@@ -3382,83 +3317,83 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Cohort cohort =
-        cohortsController
-            .createCohort(
-                workspace.getNamespace(), workspace.getId(), createDefaultCohort("cohort"))
-            .getBody();
+            cohortsController
+                    .createCohort(
+                            workspace.getNamespace(), workspace.getId(), createDefaultCohort("cohort"))
+                    .getBody();
     stubBigQueryCohortCalls();
     CohortReview cohortReview =
-        cohortReviewController
-            .createCohortReview(
-                workspace.getNamespace(),
-                workspace.getId(),
-                cohort.getId(),
-                cdrVersion.getCdrVersionId(),
-                new CreateReviewRequest().size(1))
-            .getBody();
+            cohortReviewController
+                    .createCohortReview(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            cohort.getId(),
+                            cdrVersion.getCdrVersionId(),
+                            new CreateReviewRequest().size(1))
+                    .getBody();
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(
-                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
-            .getBody();
+            conceptSetsController
+                    .createConceptSet(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new CreateConceptSetRequest()
+                                    .conceptSet(
+                                            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
+                    .getBody();
     DataSet dataSet =
-        dataSetController
-            .createDataSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new DataSetRequest()
-                    .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
-                    .addConceptSetIdsItem(conceptSet.getId())
-                    .addCohortIdsItem(cohort.getId())
-                    .name("dataset")
-                    .domainValuePairs(
-                        ImmutableList.of(
-                            new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
-            .getBody();
+            dataSetController
+                    .createDataSet(
+                            workspace.getNamespace(),
+                            workspace.getId(),
+                            new DataSetRequest()
+                                    .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE))
+                                    .addConceptSetIdsItem(conceptSet.getId())
+                                    .addCohortIdsItem(cohort.getId())
+                                    .name("dataset")
+                                    .domainValuePairs(
+                                            ImmutableList.of(
+                                                    new DomainValuePair().value("VALUE").domain(Domain.CONDITION))))
+                    .getBody();
 
     WorkspaceResourcesRequest workspaceResourcesRequest = new WorkspaceResourcesRequest();
     workspaceResourcesRequest.setTypesToFetch(
-        ImmutableList.of(
-            ResourceType.COHORT,
-            ResourceType.COHORT_REVIEW,
-            ResourceType.CONCEPT_SET,
-            ResourceType.DATASET));
+            ImmutableList.of(
+                    ResourceType.COHORT,
+                    ResourceType.COHORT_REVIEW,
+                    ResourceType.CONCEPT_SET,
+                    ResourceType.DATASET));
 
     WorkspaceResourceResponse workspaceResourceResponse =
-        workspacesController
-            .getWorkspaceResources(
-                workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest)
-            .getBody();
+            workspacesController
+                    .getWorkspaceResources(
+                            workspace.getNamespace(), workspace.getId(), workspaceResourcesRequest)
+                    .getBody();
     assertThat(workspaceResourceResponse.size()).isEqualTo(4);
     List<Cohort> cohorts =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getCohort)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            workspaceResourceResponse.stream()
+                    .map(WorkspaceResource::getCohort)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
     List<CohortReview> cohortReviews =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getCohortReview)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            workspaceResourceResponse.stream()
+                    .map(WorkspaceResource::getCohortReview)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
     List<ConceptSet> conceptSets =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getConceptSet)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            workspaceResourceResponse.stream()
+                    .map(WorkspaceResource::getConceptSet)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
     List<DataSet> dataSets =
-        workspaceResourceResponse.stream()
-            .map(WorkspaceResource::getDataSet)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            workspaceResourceResponse.stream()
+                    .map(WorkspaceResource::getDataSet)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0)).isEqualTo(cohort);
     assertThat(cohortReviews).hasSize(1);

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -24,8 +23,6 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
-
 
 public class LeonardoRuntimeAuditorTest {
   private DbUser user1;
