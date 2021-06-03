@@ -86,9 +86,9 @@ def main():
 
         for row in rows:
 
-            if skip_row(row):
+            if process_row(row):
                 field_annotation, field_annotation_array, question_label, question_code, \
-                text_validation, choices, section_header, min_value, \
+                text_validation, choices, min_value, \
                 max_value = parse_row_columns(row)
                 row_number += 1
 
@@ -116,7 +116,10 @@ def main():
 
                 # contains the long code as key and short code as key
                 # EX: CompletelyQuitAgePreferNotToAnswer=AttemptQuitSmoking_CompletelyQuitAgePreferNo
+                # items that are marked as suppressed will be stored with the key as flag
+                # and the values as a list
                 long_code_to_short_code = {}
+                answer_suppression = {}
                 for item in field_annotation_array:
                     if item not in annotation_flags:
                         split_codes = item.split('=')
@@ -130,18 +133,13 @@ def main():
                                 long_code_to_short_code[split_codes[0].strip().lower()] = \
                                     split_codes[1].strip().lower()
 
-                # items that are marked as suppressed will be stored with the key as flag
-                # and the values as a list
-                answer_suppression = {}
-                for item in field_annotation_array:
-                    split = item.split('=')
-                    if "CONTROLLED_ANSWER_SUPPRESSED" in split:
-                        answer_suppression.setdefault("CONTROLLED_ANSWER_SUPPRESSED", [])
-                        answer_suppression["CONTROLLED_ANSWER_SUPPRESSED"].append(split[1].lower())
+                        if "CONTROLLED_ANSWER_SUPPRESSED" in split_codes:
+                            answer_suppression.setdefault("CONTROLLED_ANSWER_SUPPRESSED", [])
+                            answer_suppression["CONTROLLED_ANSWER_SUPPRESSED"].append(split_codes[1].lower())
 
-                    if "REGISTERED_ANSWER_SUPPRESSED" in split:
-                        answer_suppression.setdefault("REGISTERED_ANSWER_SUPPRESSED", [])
-                        answer_suppression["REGISTERED_ANSWER_SUPPRESSED"].append(split[1].lower())
+                        if "REGISTERED_ANSWER_SUPPRESSED" in split_codes:
+                            answer_suppression.setdefault("REGISTERED_ANSWER_SUPPRESSED", [])
+                            answer_suppression["REGISTERED_ANSWER_SUPPRESSED"].append(split_codes[1].lower())
 
                 ############ Topic ############
                 if len(row['Section Header']) > 0:
@@ -173,7 +171,7 @@ def main():
                     if item_flags["REGISTERED_TOPIC_SUPPRESSED"] != 1:
                         topic_id_register = id_registered
                         write_row(registered_writer, survey_id_registered, topic_code, header
-                                  , 'TOPIC', None, None, item_flags, 'register', long_code_to_short_code)
+                                  , 'TOPIC', None, None, item_flags, 'registered', long_code_to_short_code)
 
                 ############ Question and Answer ############
                 # if there is a topic use it otherwise use the survey as parent_id
@@ -275,7 +273,7 @@ def files_exist(date):
                             " does not exist!")
 
 
-def skip_row(row):
+def process_row(row):
     return row['Variable / Field Name'].lower() != 'record_id' \
            and row['Field Type'].lower() != 'descriptive' \
            and 'please specify' not in row['Field Label'].lower()
@@ -285,18 +283,17 @@ def parse_row_columns(row):
     field_annotation = row['Field Annotation']
     field_annotation_array = []
     if field_annotation != '  ':
-        [field_annotation_array.append(item.strip()) for item in
-         field_annotation.split(',')]
+        for item in field_annotation.split(','):
+            field_annotation_array.append(item.strip())
     # replace all '\n' with empty string
     question_label = row['Field Label'].replace('\n', '')
     question_code = row['Variable / Field Name']
     text_validation = row['Text Validation Type OR Show Slider Number']
     choices = row['Choices, Calculations, OR Slider Labels']
-    section_header = row['Section Header']
     min_value = row['Text Validation Min']
     max_value = row['Text Validation Max']
     return field_annotation, field_annotation_array, question_label, question_code, \
-           text_validation, choices, section_header, min_value, max_value
+           text_validation, choices,  min_value, max_value
 
 
 def get_blob(file):
@@ -362,7 +359,7 @@ def write_row_all(writer, parent_id, code, name, item_type, min_val, max_val,
     id_all += 1
 
 
-# builds the OutputControlled/OutputRegistered row 
+# builds the OutputControlled/OutputRegistered row
 def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
               flags, file_type, long_code_to_short_code):
     global id_controlled
@@ -416,7 +413,7 @@ def add_all_answers(writer, question_code, choices, parent_id, min_value, max_va
 
 
 def add_answers(writer, choices, question_code, parent_id, min_value, max_value, flags, file_type,
-                long_code_to_short_code,answer_suppression):
+                long_code_to_short_code, answer_suppression):
     if choices != '':
 
         # ex: COPE_A_43, A lot | COPE_A_3, Somewhat | COPE_A_67, A little | COPE_A_168, Not at all
@@ -460,8 +457,6 @@ def add_numeric_answer(writer, parent_id, min_value, max_value, flags, file_type
 def get_short_code(code, long_code_to_short_code):
     if code in long_code_to_short_code:
         code = long_code_to_short_code[code]
-    else:
-        code
     return code
 
 
