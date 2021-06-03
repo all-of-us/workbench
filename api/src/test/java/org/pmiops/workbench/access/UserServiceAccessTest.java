@@ -197,8 +197,7 @@ public class UserServiceAccessTest {
     // add a proper DUA completion which will expire soon, but remove DUA bypass
 
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(START_INSTANT.minus(EXPIRATION_DAYS - 1, ChronoUnit.DAYS)));
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(Duration.ofDays(1)));
     dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
@@ -257,7 +256,7 @@ public class UserServiceAccessTest {
     // (and still would be so, with enableAccessRenewal = true)
     assertRegisteredTierEnabled(dbUser);
 
-    // Time passing beyond the EXPIRATION_DAYS would cause the user to become
+    // Time passing beyond the expiration window would cause the user to become
     // noncompliant when enableAccessRenewal = true
     advanceClockDays(EXPIRATION_DAYS + 1);
 
