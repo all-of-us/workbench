@@ -1,6 +1,7 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
@@ -63,7 +65,8 @@ public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
         new VerifiedInstitutionalAffiliation().institutionShortName("not in DB");
     final DbVerifiedInstitutionalAffiliation target = new DbVerifiedInstitutionalAffiliation();
 
-    mapper.setDbInstitution(target, source, institutionService);
+    assertThrows(
+        NotFoundException.class, () -> mapper.setDbInstitution(target, source, institutionService));
   }
 
   @Test

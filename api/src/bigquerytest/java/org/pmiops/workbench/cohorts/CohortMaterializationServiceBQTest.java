@@ -1474,7 +1474,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id"));
     tableQuery.setOrderBy(
-        ImmutasdbleList.of("gender_concept.vocabulary_id", "descending(person_id)"));
+        ImmutableList.of("gender_concept.vocabulary_id", "descending(person_id)"));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response =
