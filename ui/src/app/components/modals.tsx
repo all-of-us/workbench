@@ -2,10 +2,15 @@ import * as Color from 'color';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
+import {Button} from 'app/components/buttons';
 import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
+import {notificationStore, NotificationStore, useStore} from 'app/utils/stores';
+import * as fp from 'lodash/fp';
 import {animated, useSpring} from 'react-spring';
 import {SpinnerOverlay} from './spinners';
+
+const { useEffect} = React;
 
 const styles = reactStyles({
   modal: {
@@ -73,3 +78,33 @@ export const AnimatedModal = ({width = 450, ...props}) => {
 export const ModalTitle = withStyle(styles.modalTitle)('div');
 export const ModalBody = withStyle(styles.modalBody)('div');
 export const ModalFooter = withStyle(styles.modalFooter)('div');
+
+// This modal is rendered when there is data present in the notificationStore - rendered at the router level until Angular is gone
+export const NotificationModal = () => {
+  const notification = useStore(notificationStore);
+  const {title = '', message = '', onDismiss = fp.noop} = notification || {};
+
+  useEffect(() => onDismiss);
+
+  return notification && <Modal>
+    <ModalTitle>{title}</ModalTitle>
+    <ModalBody>{message}</ModalBody>
+    <ModalFooter>
+      <Button onClick={() => notificationStore.set(null)}>OK</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
+  try {
+    return await wrappedFn(...args);
+  } catch (e) {
+    notificationStore.set(notificationState);
+  }
+});
+
+export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
+  const response = await wrappedFn(...args);
+  notificationStore.set(notificationState);
+  return response;
+});

@@ -72,6 +72,15 @@ export const profileStore = atom<ProfileStore>({
   })
 });
 
+
+export interface NotificationStore {
+  title: string;
+  message: string;
+  onDismiss?: () => void;
+}
+
+export const notificationStore = atom<NotificationStore | null>(null);
+
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;
   aborter: AbortController;

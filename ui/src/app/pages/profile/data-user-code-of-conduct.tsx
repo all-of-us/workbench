@@ -1,6 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
+import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
@@ -13,13 +14,16 @@ import {
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
+import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
+
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -92,8 +96,20 @@ export const DataUserCodeOfConduct = withUserProfile()(
       };
     }
 
+    submitCodeOfConductWithRenewal = fp.flow(
+      withSuccessModal({
+        title: 'Your agreement has been updated',
+        message: 'You will be redirected to the access renewal page upon closing this dialog.',
+        onDismiss: () => navigate(['access-renewal'])
+      }),
+      withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
+    )(async(initials) => {
+      const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
+      const profile = await profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
+      this.props.profileState.updateCache(profile);
+    });
+
     submitDataUserCodeOfConduct(initials) {
-      this.setState({submitting: true});
       const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
@@ -241,10 +257,14 @@ export const DataUserCodeOfConduct = withUserProfile()(
                       data-test-id={'submit-ducc-button'}
                       disabled={errors || submitting}
                       onClick={() => {
+                        this.setState({submitting: true});
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
-                        this.submitDataUserCodeOfConduct(initialMonitoring);
+                        wasReferredFromRenewal()
+                          ? this.submitCodeOfConductWithRenewal(initialMonitoring)
+                          : this.submitDataUserCodeOfConduct(initialMonitoring);
+                        this.setState({submitting: false});
                       }}
                   >
                     Accept
