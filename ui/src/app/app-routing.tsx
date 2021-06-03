@@ -109,6 +109,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   const {authLoaded = false} = useStore(authStore);
 
   return authLoaded && <React.Fragment>
+    {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     <AppRouter>
       <AppRoute
