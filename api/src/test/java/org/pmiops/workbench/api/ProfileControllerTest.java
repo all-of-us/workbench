@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
@@ -160,7 +161,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String USER_PREFIX = "bob";
   private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String ZIP_CODE = "12345";
-  private static final Timestamp TIMESTAMP = new Timestamp(fakeClock.millis());
+  private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.directory.model.User googleUser;
@@ -195,12 +196,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
-    @Bean
-    @Primary
-    Clock clock() {
-      return fakeClock;
-    }
-
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser dbUser() {
