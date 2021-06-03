@@ -870,7 +870,7 @@ public class UserServiceAccessTest {
     verifyZeroInteractions(mailService);
   }
 
-  // one day plus most of a day (to demonstrate we are truncating, not rounding)
+  // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
   }
