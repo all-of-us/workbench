@@ -78,5 +78,15 @@ export const styles = reactStyles({
     textTransform: 'none',
     padding: 0,
     height: 'auto'
+  },
+  renewalBox: {
+    borderRadius: 5,
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: colorWithWhiteness(colors.warning, 0.7),
+    marginBottom: '1.5rem',
+    height: '2.1rem',
+    marginRight: '0.75rem',
+    border: `1px solid ${colors.warning}`
   }
 });

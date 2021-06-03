@@ -16,6 +16,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
+import {NotificationModal} from './components/modals';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -106,28 +107,30 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  return authLoaded && <AppRouter>
-    <AppRoute
-        path='/cookie-policy'
-        component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-    />
-    <AppRoute
-        path='/login'
-        component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/session-expired'
-        component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/sign-in-again'
-        component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-    />
-    <AppRoute
-        path='/user-disabled'
-        component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-    />
 
+  return authLoaded && <React.Fragment>
+    <NotificationModal/>
+    <AppRouter>
+      <AppRoute
+          path='/cookie-policy'
+          component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
+      />
+      <AppRoute
+          path='/login'
+          component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/session-expired'
+          component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/sign-in-again'
+          component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+      />
+      <AppRoute
+          path='/user-disabled'
+          component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+      />
     <ProtectedRoutes guards={[signInGuard]}>
       <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
           ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
@@ -378,7 +381,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
-  </AppRouter>;
+  </AppRouter>
+  </React.Fragment>;
 };
 
 @AComponent({

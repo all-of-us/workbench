@@ -7,8 +7,8 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 
 const Selector = {
-  editButton: '//div[normalize-space(text())="Edit"]',
-  playgroundButton: '//div[normalize-space(text())="Run (Playground Mode)"]'
+  editLink: '//div[normalize-space(text())="Edit"]',
+  runPlaygroundModeLink: '//div[normalize-space(text())="Run (Playground Mode)"]'
 };
 
 export default class NotebookPreviewPage extends AuthenticatedPage {
@@ -19,8 +19,8 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     await waitWhileLoading(this.page);
     await Promise.all([
-      this.page.waitForXPath(Selector.editButton, { visible: true }),
-      this.page.waitForXPath(Selector.playgroundButton, { visible: true }),
+      this.page.waitForXPath(Selector.editLink, { visible: true }),
+      this.page.waitForXPath(Selector.runPlaygroundModeLink, { visible: true }),
       this.page.waitForXPath('//*[text()="Preview (Read-Only)"]', { visible: true })
     ]);
     return true;
@@ -30,8 +30,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
    * Click "Edit" link to open notebook in Edit mode.
    */
   async openEditMode(notebookName: string): Promise<NotebookPage> {
-    const link = new Link(this.page, Selector.editButton);
-    await link.click();
+    await this.getEditLink().click();
     // Restarting notebook server may take a while.
     await waitWhileLoading(this.page, 60 * 20 * 1000);
 
@@ -40,9 +39,21 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     return notebookPage;
   }
 
-  async getFormattedCode(): Promise<string> {
-    const codeContent = await this.waitForCssSelector('#notebook-container pre');
-    return getPropValue<string>(codeContent, 'textContent');
+  async getFormattedCode(): Promise<string[]> {
+    const css = '#notebook-container pre';
+    await this.waitForCssSelector(css);
+    const textContents = await this.findNotebookIframe().then((frame) => {
+      return frame.$$(css);
+    });
+    return Promise.all(textContents.map(async (content) => await getPropValue<string>(content, 'textContent')));
+  }
+
+  getEditLink(): Link {
+    return new Link(this.page, Selector.editLink);
+  }
+
+  getRunPlaygroundModeLink(): Link {
+    return new Link(this.page, Selector.runPlaygroundModeLink);
   }
 
   /**

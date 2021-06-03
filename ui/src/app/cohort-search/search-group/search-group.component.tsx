@@ -274,7 +274,7 @@ export const SearchGroup = withCurrentWorkspace()(
     getGroupCount() {
       this.abortPendingCalls();
       this.setState({error: false, loading: true});
-      const {group, role, workspace: {cdrVersionId}} = this.props;
+      const {group, role, workspace: {id, namespace}} = this.props;
       const mappedGroup = mapGroup(group);
       const request = {
         includes: [],
@@ -282,7 +282,7 @@ export const SearchGroup = withCurrentWorkspace()(
         dataFilters: [],
         [role]: [mappedGroup]
       };
-      cohortBuilderApi().countParticipants(+cdrVersionId, request, {signal: this.aborter.signal})
+      cohortBuilderApi().countParticipants(namespace, id , request, {signal: this.aborter.signal})
         .then(count => this.setState({count, initializing: false, loading: false}))
         .catch(error => {
           if (!isAbortError(error)) {

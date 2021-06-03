@@ -214,7 +214,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     }
 
     async componentDidMount() {
-      const {cohortContext: {domain}, workspace: {cdrVersionId}} = this.props;
+      const {cohortContext: {domain}, workspace: {id, namespace}} = this.props;
       const {formState} = this.state;
       if (domain !== Domain.SURVEY) {
         formState.push({
@@ -259,7 +259,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         if (!encountersOptions) {
           // get options for visit modifier from api
           const res = await cohortBuilderApi().findCriteriaBy(
-            +cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]);
+            namespace, id, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]);
           encountersOptions = res.items;
           encountersStore.next(encountersOptions);
         }
@@ -381,7 +381,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
     }
 
     calculate = async() => {
-      const {selections, cohortContext: {domain, role}, workspace: {cdrVersionId}} = this.props;
+      const {selections, cohortContext: {domain, role}, workspace: {id , namespace}} = this.props;
       this.trackEvent('Calculate');
       try {
         this.setState({calculating: true, count: null, calculateError: false});
@@ -397,7 +397,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           }],
           dataFilters: []
         };
-        await cohortBuilderApi().countParticipants(+cdrVersionId, request)
+        await cohortBuilderApi().countParticipants(namespace, id, request)
           .then(response => this.setState({count: response, calculating: false}));
       } catch (error) {
         console.error(error);
