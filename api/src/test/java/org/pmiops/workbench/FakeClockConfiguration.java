@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
-public class BaseTestConfiguration {
+public class FakeClockConfiguration {
 
   public static final Timestamp NOW = Timestamp.from(Instant.now());
   public static final long NOW_TIME = NOW.getTime();

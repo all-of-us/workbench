@@ -12,8 +12,9 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReporting
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
-import org.pmiops.workbench.BaseTestConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
@@ -22,15 +23,20 @@ import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-public class ReportingSnapshotServiceTest extends SpringTest {
+public class ReportingSnapshotServiceTest extends SpringTest{
+  private static final long NOW_EPOCH_MILLI = 1594404482000L;
+  private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
+
   @MockBean private ReportingQueryService mockReportingQueryService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
@@ -43,12 +49,17 @@ public class ReportingSnapshotServiceTest extends SpringTest {
     ReportingSnapshotServiceImpl.class
   })
   @MockBean({BigQueryService.class})
-  public static class Configuration {}
+  public static class Configuration {
+    @Bean
+    public Clock getClock() {
+      return new FakeClock(NOW_INSTANT);
+    }
+  }
 
   @Test
   public void testGetSnapshot_noEntries() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    assertThat(snapshot.getCaptureTimestamp()).isEqualTo(BaseTestConfiguration.NOW_TIME);
+    assertThat(snapshot.getCaptureTimestamp()).isEqualTo(NOW_EPOCH_MILLI);
     assertThat(snapshot.getCohorts()).isEmpty();
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
@@ -63,7 +74,7 @@ public class ReportingSnapshotServiceTest extends SpringTest {
     mockInstitutions();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    assertTimeApprox(snapshot.getCaptureTimestamp(), BaseTestConfiguration.NOW_TIME);
+    assertTimeApprox(snapshot.getCaptureTimestamp(), NOW_INSTANT.toEpochMilli());
 
     assertThat(snapshot.getCohorts()).hasSize(1);
     assertCohortFields(snapshot.getCohorts().get(0));

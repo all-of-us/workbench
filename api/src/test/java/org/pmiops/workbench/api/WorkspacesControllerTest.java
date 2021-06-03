@@ -19,7 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.BaseTestConfiguration.NOW_TIME;
+import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -301,6 +302,7 @@ public class WorkspacesControllerTest extends SpringTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    FakeClockConfiguration.class,
   })
   @MockBean({
     BigQueryService.class,

@@ -21,8 +21,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.bitbucket.radistao.test.annotation.AfterAllMethods;
-import org.bitbucket.radistao.test.annotation.BeforeAllMethods;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.testconfig.TestBigQueryConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -44,7 +44,7 @@ public abstract class BigQueryBaseTest extends SpringTest {
 
   public static final String BASE_PATH = "src/bigquerytest/resources/bigquery/";
 
-  @BeforeAllMethods
+  @BeforeAll
   public void beforeAllMethodsSetUp() throws Exception {
     createDataSet(workbenchConfig.bigquery.dataSetId);
     for (String tableName : getTableNames()) {
@@ -53,7 +53,7 @@ public abstract class BigQueryBaseTest extends SpringTest {
     }
   }
 
-  @AfterAllMethods
+  @AfterAll
   public void beforeAllMethodsTearDown() throws Exception {
     for (String tableName : getTableNames()) {
       deleteTable(workbenchConfig.bigquery.dataSetId, tableName);
