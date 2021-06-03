@@ -503,6 +503,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
     dbUser.setEraCommonsBypassTime(TIMESTAMP);
     dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
+    dbUser.setPublicationsLastConfirmedTime(TIMESTAMP);
+    dbUser.setProfileLastConfirmedTime(TIMESTAMP);
     userDao.save(dbUser);
 
     // sign the older version
