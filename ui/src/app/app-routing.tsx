@@ -127,7 +127,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         path='/user-disabled'
         component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
     />
-     <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
+
+    <ProtectedRoutes guards={[signInGuard]}>
+      <AppRoute path='/access-renewal' component={() => serverConfigStore.get().config.enableAccessRenewal
           ? <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
           : <Navigate to={'/profile'}/>
       }/>
@@ -211,7 +213,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
       <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
-      <ProtectedRoutes guards={[registrationGuard]}>
+      <ProtectedRoutes guards={[expiredGuard, registrationGuard]}>
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
