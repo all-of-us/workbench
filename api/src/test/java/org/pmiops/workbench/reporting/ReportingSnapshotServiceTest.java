@@ -33,7 +33,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-public class ReportingSnapshotServiceTest extends SpringTest{
+public class ReportingSnapshotServiceTest extends SpringTest {
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
