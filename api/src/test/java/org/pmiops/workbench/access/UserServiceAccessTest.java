@@ -2,6 +2,8 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -76,6 +78,8 @@ public class UserServiceAccessTest {
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
+
+  @MockBean private MailService mailService;
 
   @Import({
     UserServiceTestConfiguration.class,
@@ -546,6 +550,57 @@ public class UserServiceAccessTest {
 
           return userDao.save(user);
         });
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail() {
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    // TODO - this is only true because it's not implemented
+    verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    dbUser.setProfileLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser.setPublicationsLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // 363.5 days ago, so it's expiring in 1.5 days, which will trigger the 1-day warning
+    final Instant expiringSoon =
+        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
+    dbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_FF_false() {
+    // these are up to date
+    dbUser.setProfileLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser.setPublicationsLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // 363.5 days ago, so it's expiring in 1.5 days, which would trigger the 1-day warning
+    final Instant expiringSoon =
+        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
+    dbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
+
+    // but the feature flag is off
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
   }
 
   private void advanceClockDays(long days) {

@@ -5,13 +5,11 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +70,6 @@ public class UserServiceTest {
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private MailService mailService;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
 
@@ -83,6 +80,9 @@ public class UserServiceTest {
   @Import({
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
+  })
+  @MockBean({
+    MailService.class,
   })
   @TestConfiguration
   static class Configuration {
@@ -512,56 +512,5 @@ public class UserServiceTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail() {
-    userService.maybeSendAccessExpirationEmail(providedDbUser);
-
-    // TODO - this is only true because it's not implemented
-    verifyZeroInteractions(mailService);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expiring() {
-    providedWorkbenchConfig.access.enableAccessRenewal = true;
-
-    // these are up to date
-    providedDbUser.setProfileLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    providedDbUser.setPublicationsLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    providedDbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    providedDbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // 363.5 days ago, so it's expiring in 1.5 days, which will trigger the 1-day warning
-    final Instant expiringSoon =
-        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
-    providedDbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
-
-    userService.maybeSendAccessExpirationEmail(providedDbUser);
-
-    verify(mailService).alertUserRegisteredTierWarningThreshold(providedDbUser, 1);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_FF_false() {
-    // these are up to date
-    providedDbUser.setProfileLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    providedDbUser.setPublicationsLastConfirmedTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    providedDbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    providedDbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // 363.5 days ago, so it's expiring in 1.5 days, which would trigger the 1-day warning
-    final Instant expiringSoon =
-        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
-    providedDbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
-
-    // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = true;
-
-    userService.maybeSendAccessExpirationEmail(providedDbUser);
-
-    verifyZeroInteractions(mailService);
   }
 }
