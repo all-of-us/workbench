@@ -27,7 +27,6 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -41,6 +40,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
@@ -52,14 +53,12 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -67,9 +66,9 @@ import org.springframework.context.annotation.Import;
  * complex (e.g. by having multiple public methods on each service), then we could share the setup
  * code and have separate tests.
  */
-public class ReportingUploadServiceTest {
+public class ReportingUploadServiceTest extends SpringTest {
 
-  private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
   private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
 
@@ -88,12 +87,7 @@ public class ReportingUploadServiceTest {
   @TestConfiguration
   @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
   @MockBean({ReportingVerificationService.class})
-  public static class config {
-    @Bean
-    public Clock getClock() {
-      return new FakeClock(NOW);
-    }
-  }
+  public static class config {}
 
   @BeforeEach
   public void setup() {

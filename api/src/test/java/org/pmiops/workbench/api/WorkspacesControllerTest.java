@@ -55,7 +55,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -302,7 +301,6 @@ public class WorkspacesControllerTest extends SpringTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    FakeClockConfiguration.class,
   })
   @MockBean({
     BigQueryService.class,

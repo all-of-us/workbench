@@ -16,13 +16,13 @@ import java.util.Arrays
 import javax.inject.Provider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.extension.ExtendWith
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 class ActionAuditServiceTest {
     private val mockLogging = mock<Logging>()
 
