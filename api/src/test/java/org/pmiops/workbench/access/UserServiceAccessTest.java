@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -635,8 +636,58 @@ public class UserServiceAccessTest {
     verifyZeroInteractions(mailService);
   }
 
+  // one or more bypassed modules will not affect whether emails are sent.
+  // we consider only the unbypassed
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_bypass() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // this is bypassed
+    dbUser.setDataUseAgreementBypassTime(now);
+
+    // expiring in 1.5 days will trigger the 1-day warning
+
+    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
+  // bypass times are not relevant to expiration emails
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_older_bypass() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 1.5 days will trigger the 1-day warning
+
+    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+
+    // a bypass which would "expire" in 30.5 does NOT trigger a 30-day warning
+    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
+    dbUser.setDataUseAgreementBypassTime(willExpireAfter(thirtyAndAHalf));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
   // we do not send an email if the expiration time is within the day.
-  // we sent one for 1 day already and we will send another once it actually expires.
+  // we sent one yesterday for 1 day already, and we will send another once it actually expires.
 
   @Test
   public void test_maybeSendAccessExpirationEmail_expiring_today() {
@@ -674,8 +725,8 @@ public class UserServiceAccessTest {
 
     // expiring in 30.5 days will trigger the 30-day warning
 
-    final Duration oneAndAHalfDays = Duration.ofDays(30).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyAndAHalf));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -696,8 +747,66 @@ public class UserServiceAccessTest {
 
     // expiring in 31.5 days will not trigger a warning
 
-    final Duration oneAndAHalfDays = Duration.ofDays(31).plus(Duration.ofHours(12));
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+    final Duration thirtyOneAndAHalf = Duration.ofDays(31).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyOneAndAHalf));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // 15 days is sooner, so that's the email we send rather than 30
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_15_and_30() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 30.5 days would trigger the 30-day warning...
+
+    final Duration thirtyAndAHalf = Duration.ofDays(30).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyAndAHalf));
+
+    // but 15.5 days is sooner, so trigger 15 instead
+
+    final Duration fifteenAndAHalf = Duration.ofDays(15).plus(Duration.ofHours(12));
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fifteenAndAHalf));
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 15);
+    verify(mailService, never()).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+  }
+
+  // 14 days is sooner than 15, but 14 days is not one of our email warning thresholds
+  // so we send no email
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_14_and_15() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 15.5 days would trigger the 15-day warning...
+
+    final Duration fifteenAndAHalf = Duration.ofDays(15).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(fifteenAndAHalf));
+
+    // but 14.5 days is sooner, so no email is sent
+
+    final Duration fourteenAndAHalf = Duration.ofDays(14).plus(Duration.ofHours(12));
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fourteenAndAHalf));
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
