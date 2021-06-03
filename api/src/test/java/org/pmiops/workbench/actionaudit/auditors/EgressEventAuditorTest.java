@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -146,8 +147,13 @@ public class EgressEventAuditorTest extends SpringTest {
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.empty());
-    egressEventAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX));
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            egressEventAuditor.fireEgressEvent(
+                new EgressEvent()
+                    .projectName(EGRESS_EVENT_PROJECT_NAME)
+                    .vmPrefix(EGRESS_EVENT_VM_PREFIX)));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 

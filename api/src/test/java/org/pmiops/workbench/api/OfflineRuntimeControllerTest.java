@@ -7,14 +7,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -23,7 +22,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +33,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 
 public class OfflineRuntimeControllerTest extends SpringTest {
-  private static final Instant NOW = Instant.parse("1988-12-26T00:00:00Z");
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static final Duration MAX_AGE = Duration.ofDays(14);
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
   @Import({OfflineRuntimeController.class, LeonardoMapperImpl.class})
   static class Configuration {
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-
     @Bean
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
@@ -69,7 +60,6 @@ public class OfflineRuntimeControllerTest extends SpringTest {
 
   @BeforeEach
   public void setUp() {
-    CLOCK.setInstant(NOW);
     projectIdIndex = 0;
   }
 

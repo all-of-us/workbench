@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -28,7 +29,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
-public class UserServiceAuditorTest {
+public class UserServiceAuditorTest extends SpringTest {
   @TestConfiguration
   @Import({UserServiceAuditorImpl.class, ActionAuditTestConfig.class})
   @MockBean(ActionAuditService.class)

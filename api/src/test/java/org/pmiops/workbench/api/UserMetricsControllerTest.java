@@ -9,8 +9,6 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +48,6 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
@@ -64,7 +61,6 @@ public class UserMetricsControllerTest extends SpringTest {
   @Mock private WorkspaceAuthService workspaceAuthService;
 
   private UserMetricsController userMetricsController;
-  private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
   @Autowired private CommonMappers commonMappers;
   @Autowired private FirecloudMapper firecloudMapper;
@@ -82,7 +78,6 @@ public class UserMetricsControllerTest extends SpringTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class, FirecloudMapperImpl.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
   @BeforeEach

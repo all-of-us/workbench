@@ -167,7 +167,6 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     completionPropsKey: 'rasLoginGovLinked',
     loadingPropsKey: 'rasLoginGovLoading',
     title: 'Connect Your Login.Gov Account',
-    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
     description: 'Connect your Researcher Workbench account to your login.gov account. ',
     buttonText: 'Connect',
     completedText: 'Linked',
