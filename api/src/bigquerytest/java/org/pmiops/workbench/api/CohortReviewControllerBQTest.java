@@ -15,11 +15,9 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -95,7 +93,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 

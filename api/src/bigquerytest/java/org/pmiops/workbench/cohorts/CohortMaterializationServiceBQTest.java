@@ -17,10 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
@@ -66,7 +64,6 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
   BigQueryTestService.class,
   CohortQueryBuilder.class,
