@@ -207,12 +207,15 @@ public class LogsBasedMetricsServiceTest extends SpringTest {
 
   @Test
   public void testRecordElapsedTime_throws() {
-      assertThrows(IllegalAccessError.class, ()-> logsBasedMetricService.recordElapsedTime(
-              MeasurementBundle.builder(),
-              DistributionMetric.COHORT_OPERATION_TIME,
-              () -> {
+    assertThrows(
+        IllegalAccessError.class,
+        () ->
+            logsBasedMetricService.recordElapsedTime(
+                MeasurementBundle.builder(),
+                DistributionMetric.COHORT_OPERATION_TIME,
+                () -> {
                   throw new IllegalAccessError("Boo!");
-              }));
+                }));
   }
 
   @Test

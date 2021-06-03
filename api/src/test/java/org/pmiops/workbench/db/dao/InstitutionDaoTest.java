@@ -21,24 +21,23 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InstitutionDaoTest extends SpringTest {
 
-  @Autowired
-  InstitutionDao institutionDao;
+  @Autowired InstitutionDao institutionDao;
 
   private DbInstitution testInst;
 
   @BeforeEach
   public void setUp() {
     testInst =
-            institutionDao.save(
-                    new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
+        institutionDao.save(
+            new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
   }
 
   @Test
   public void test_save() {
     final DbInstitution toSave =
-            new DbInstitution()
-                    .setShortName("VUMC")
-                    .setDisplayName("Vanderbilt University Medical Center");
+        new DbInstitution()
+            .setShortName("VUMC")
+            .setDisplayName("Vanderbilt University Medical Center");
     final DbInstitution saved = institutionDao.save(toSave);
     assertThat(saved).isEqualTo(toSave);
   }
@@ -76,39 +75,51 @@ public class InstitutionDaoTest extends SpringTest {
 
   @Test
   public void test_shortNameRequired() {
-      assertThrows(DataIntegrityViolationException.class, () -> {
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
           final DbInstitution testInst = new DbInstitution();
           testInst.setDisplayName("so long");
           institutionDao.save(testInst);
-      });
+        });
   }
 
   @Test
   public void test_displayNameRequired() {
-      assertThrows(DataIntegrityViolationException.class, () -> {
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
           final DbInstitution testInst = new DbInstitution();
           testInst.setShortName("VUMC");
           institutionDao.save(testInst);
-      });
+        });
   }
 
   @Test
   public void test_uniqueShortNameRequired() {
-      assertThrows(DataIntegrityViolationException.class, () -> {
-          final DbInstitution snowflake1 = new DbInstitution().setShortName("unique?").setDisplayName("We are all individuals");
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution snowflake1 =
+              new DbInstitution().setShortName("unique?").setDisplayName("We are all individuals");
           institutionDao.save(snowflake1);
-          final DbInstitution snowflake2 = new DbInstitution().setShortName("unique?").setDisplayName("I'm not");
+          final DbInstitution snowflake2 =
+              new DbInstitution().setShortName("unique?").setDisplayName("I'm not");
           institutionDao.save(snowflake2);
-      });
+        });
   }
 
   @Test
   public void test_uniqueDisplayNameRequired() {
-      assertThrows(DataIntegrityViolationException.class, () -> {
-          final DbInstitution snowflake1 = new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution snowflake1 =
+              new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
           institutionDao.save(snowflake1);
-          final DbInstitution snowflake2 = new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
+          final DbInstitution snowflake2 =
+              new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
           institutionDao.save(snowflake2);
-      });
+        });
   }
 }

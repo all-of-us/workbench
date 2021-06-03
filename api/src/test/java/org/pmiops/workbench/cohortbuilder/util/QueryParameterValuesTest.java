@@ -106,7 +106,9 @@ public class QueryParameterValuesTest {
 
   @Test
   public void testTimestampQpvToInstant_wrongQpvType() {
-    assertThrows(IllegalArgumentException.class, () -> timestampQpvToInstant(QueryParameterValue.bool(false)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> timestampQpvToInstant(QueryParameterValue.bool(false)));
   }
 
   @Test

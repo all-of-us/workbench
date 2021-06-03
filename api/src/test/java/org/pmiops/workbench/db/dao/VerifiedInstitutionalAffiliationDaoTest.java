@@ -217,12 +217,15 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
-    assertThrows(DataIntegrityViolationException.class, () -> verifiedInstitutionalAffiliationDao.save(
-        new DbVerifiedInstitutionalAffiliation()
-            .setUser(testUser)
-            .setInstitution(newInst)
-            .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
-            .setInstitutionalRoleOtherText(
-                "Arbitrary and does not actually require enum to be OTHER")));
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () ->
+            verifiedInstitutionalAffiliationDao.save(
+                new DbVerifiedInstitutionalAffiliation()
+                    .setUser(testUser)
+                    .setInstitution(newInst)
+                    .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
+                    .setInstitutionalRoleOtherText(
+                        "Arbitrary and does not actually require enum to be OTHER")));
   }
 }

@@ -360,25 +360,28 @@ public class CohortAnnotationDefinitionControllerTest {
   public void deleteCohortAnnotationDefinitionWrongWorkspace() {
     setupWorkspace2ServiceMock(WorkspaceAccessLevel.WRITER);
 
-    assertThrows(NotFoundException.class, () -> cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-            NAMESPACE2,
-            NAME2,
-            cohort.getCohortId(),
-            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
-    );
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+                NAMESPACE2,
+                NAME2,
+                cohort.getCohortId(),
+                dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
   @Test
   public void getCohortAnnotationDefinitionWrongWorkspace() {
     setupWorkspace2ServiceMock(WorkspaceAccessLevel.READER);
 
-
-    assertThrows(NotFoundException.class, () ->   cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-            NAMESPACE2,
-            NAME2,
-            cohort.getCohortId(),
-            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
-    );
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+                NAMESPACE2,
+                NAME2,
+                cohort.getCohortId(),
+                dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
   @Test
@@ -393,12 +396,15 @@ public class CohortAnnotationDefinitionControllerTest {
             .etag(Etags.fromVersion(0))
             .cohortId(cohort.getCohortId());
 
-    assertThrows(NotFoundException.class, () -> cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-            NAMESPACE2,
-            NAME2,
-            cohort.getCohortId(),
-            dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
-            request));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+                NAMESPACE2,
+                NAME2,
+                cohort.getCohortId(),
+                dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
+                request));
   }
 
   @Test

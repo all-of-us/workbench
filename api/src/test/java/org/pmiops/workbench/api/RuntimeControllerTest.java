@@ -732,7 +732,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_NullBillingProject() {
-    assertThrows(NotFoundException.class, ()-> runtimeController.getRuntime(null));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null));
   }
 
   @Test

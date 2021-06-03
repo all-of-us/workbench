@@ -131,7 +131,9 @@ public class UserControllerTest {
   @Test
   public void testUnregistered() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
-    assertThrows(ForbiddenException.class, () -> userController.user("Robinson", null, null, null).getBody());
+    assertThrows(
+        ForbiddenException.class,
+        () -> userController.user("Robinson", null, null, null).getBody());
   }
 
   @Test
