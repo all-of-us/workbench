@@ -636,6 +636,30 @@ public class UserServiceAccessTest {
     verifyZeroInteractions(mailService);
   }
 
+  // if any module is incomplete, we don't send an email
+  // because the user is not expiring soon - they never had access at all
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expired_but_missing() {
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 1.5 days would trigger the 1-day warning...
+
+    final Duration oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
+
+    // but this module is incomplete (and also not bypassed)
+    dbUser.setDataUseAgreementCompletionTime(null);
+    dbUser.setDataUseAgreementBypassTime(null);
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
   // one or more bypassed modules will not affect whether emails are sent.
   // we consider only the unbypassed
 
