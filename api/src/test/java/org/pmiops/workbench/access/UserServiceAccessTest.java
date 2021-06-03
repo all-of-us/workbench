@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -571,10 +573,10 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // 363.5 days ago, so it's expiring in 1.5 days, which will trigger the 1-day warning
-    final Instant expiringSoon =
-        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
-    dbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
+    // expiring in 1.5 days will trigger the 1-day warning
+
+    final TemporalAmount oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
@@ -590,17 +592,25 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // 363.5 days ago, so it's expiring in 1.5 days, which would trigger the 1-day warning
-    final Instant expiringSoon =
-        PROVIDED_CLOCK.instant().minus(363, ChronoUnit.DAYS).minus(1, ChronoUnit.HALF_DAYS);
-    dbUser.setComplianceTrainingCompletionTime(Timestamp.from(expiringSoon));
+    // expiring in 1.5 days would trigger the 1-day warning...
+
+    final TemporalAmount oneAndAHalfDays = Duration.ofDays(1).plus(Duration.ofHours(12));
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneAndAHalfDays));
 
     // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verifyZeroInteractions(mailService);
+  }
+
+  // set a completion timestamp which will expire after `time`
+  // by choosing a timestamp of (oneExpirationCycleAgo + time)
+  private Timestamp willExpireAfter(TemporalAmount time) {
+    final Instant oneExpirationCycleAgo =
+        PROVIDED_CLOCK.instant().minus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+    return Timestamp.from(oneExpirationCycleAgo.plus(time));
   }
 
   private void advanceClockDays(long days) {
