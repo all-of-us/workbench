@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -24,7 +25,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
-public class DevUserRegistrationServiceTest {
+public class DevUserRegistrationServiceTest extends SpringTest {
 
   @MockBean private DirectoryService directoryService;
   @MockBean private InstitutionService institutionService;
