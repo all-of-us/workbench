@@ -60,6 +60,7 @@ public class UserServiceAccessTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static final long EXPIRATION_DAYS = 365L;
 
   private static DbUser dbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -114,6 +115,7 @@ public class UserServiceAccessTest {
   @Before
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
@@ -181,7 +183,6 @@ public class UserServiceAccessTest {
   public void testSimulateUserFlowThroughRenewal() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
 
     // initialize user as registered with generic values including bypassed DUA
 
@@ -192,9 +193,7 @@ public class UserServiceAccessTest {
 
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
     dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(
-            START_INSTANT.minus(
-                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+        Timestamp.from(START_INSTANT.minus(EXPIRATION_DAYS - 1, ChronoUnit.DAYS)));
     dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
@@ -224,8 +223,6 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableAccessRenewal = false;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
     final Timestamp willExpire = Timestamp.from(START_INSTANT);
 
     // initialize user as registered, including:
@@ -255,9 +252,9 @@ public class UserServiceAccessTest {
     // (and still would be so, with enableAccessRenewal = true)
     assertRegisteredTierEnabled(dbUser);
 
-    // Time passing beyond the expirationWindow would cause the user to become
+    // Time passing beyond the EXPIRATION_DAYS would cause the user to become
     // noncompliant when enableAccessRenewal = true
-    advanceClockDays(expirationWindow + 1);
+    advanceClockDays(EXPIRATION_DAYS + 1);
 
     dbUser =
         updateUserWithRetries(
@@ -300,6 +297,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableBetaAccess = true;
+
     testUnregistration(
         user -> {
           user.setBetaAccessBypassTime(null);
@@ -333,6 +331,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableEraCommons = true;
+
     testUnregistration(
         user -> {
           user.setEraCommonsBypassTime(null);
@@ -357,6 +356,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
@@ -368,7 +368,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
@@ -381,16 +381,13 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setComplianceTrainingCompletionTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -403,6 +400,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -414,6 +412,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -426,6 +425,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -439,7 +439,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -451,7 +451,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_missing_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -464,7 +464,7 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_dua_unbypassed_aar_wrong_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -479,9 +479,6 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -489,7 +486,7 @@ public class UserServiceAccessTest {
           user.setDataUseAgreementCompletionTime(willExpire);
           user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -500,7 +497,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_publications_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setPublicationsLastConfirmedTime(null);
@@ -512,15 +509,12 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_publications_expired() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setPublicationsLastConfirmedTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -531,7 +525,7 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_profile_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setProfileLastConfirmedTime(null);
@@ -543,15 +537,12 @@ public class UserServiceAccessTest {
   public void test_updateUserWithRetries_profile_expired() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setProfileLastConfirmedTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
