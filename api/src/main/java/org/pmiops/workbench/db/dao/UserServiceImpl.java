@@ -1158,10 +1158,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private void maybeSendRegisteredTierExpirationEmail(DbUser user, Timestamp expiration) {
     long millisRemaining = expiration.getTime() - clock.millis();
-    if (millisRemaining < 0) {
+    long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
+
+    // we only want to send the expiration email on the day of the actual expiration
+    if (millisRemaining < 0 && daysRemaining == 0) {
       sendRegisteredTierExpirationEmail(user);
     } else {
-      long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
       if (warningThresholds.contains(daysRemaining)) {
         sendRegisteredTierWarningEmail(user, daysRemaining);
       }

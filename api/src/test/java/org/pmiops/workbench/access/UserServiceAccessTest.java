@@ -872,6 +872,34 @@ public class UserServiceAccessTest {
     verifyZeroInteractions(mailService);
   }
 
+  // don't send an email if we have been expired for more than a day
+  // because we sent the expiration email yesterday
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_extra_expired() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // but this expired yesterday
+
+    final Instant aYearAgo = PROVIDED_CLOCK.instant().minus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+    final Timestamp extraExpired =
+        Timestamp.from(aYearAgo.minus(Duration.ofDays(1)).minus(Duration.ofHours(1)));
+
+    dbUser.setComplianceTrainingCompletionTime(extraExpired);
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
