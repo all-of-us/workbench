@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
@@ -229,6 +230,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private class ModuleTimes {
     public Optional<Timestamp> completion;
     public Optional<Timestamp> bypass;
+    final long minExpirationEpochMs = 1625097600000L; // 2021-07-01T00:00:00.000Z
 
     public ModuleTimes(Timestamp nullableCompletion, Timestamp nullableBypass) {
       completion = Optional.ofNullable(nullableCompletion);
@@ -251,14 +253,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Preconditions.checkNotNull(
           expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-      return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
+      return completion.map(
+          c -> new Timestamp(Math.max(c.getTime() + expiryDaysInMs, minExpirationEpochMs)));
     }
 
-    // IMPORTANT: do not use this method as the sole method of determining access compliance!
-    // We must ALSO confirm module completion.
-    // Modules which are not complete are also "not expired"
     public boolean hasExpired() {
+      Preconditions.checkArgument(
+          isComplete(), "Cannot check expiration on module that has not been completed");
       final Timestamp now = new Timestamp(clock.millis());
+      if (now.before(new Timestamp(minExpirationEpochMs))) {
+        return false;
+      }
       return getExpiration().map(x -> x.before(now)).orElse(false);
     }
   }
@@ -267,7 +272,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return new RenewableAccessModuleStatus()
         .moduleName(name)
         .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
-        .hasExpired(times.hasExpired());
+        .hasExpired(times.isComplete() && times.hasExpired());
   }
 
   public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
