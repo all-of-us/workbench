@@ -44,10 +44,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
@@ -619,8 +617,6 @@ public class DataSetControllerTest extends SpringTest {
                     .dataSetRequest(finalDataSet)));
   }
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
     final DataSetRequest dataSet =
@@ -629,12 +625,15 @@ public class DataSetControllerTest extends SpringTest {
             .addCohortIdsItem(cohort.getId())
             .addConceptSetIdsItem(conceptSet1.getId());
 
-    expectedException.expect(NotFoundException.class);
-
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest().kernelType(KernelTypeEnum.PYTHON).dataSetRequest(dataSet));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(dataSet)));
   }
 
   @Test
@@ -658,34 +657,38 @@ public class DataSetControllerTest extends SpringTest {
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setCohortIds(cohortIds);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing name");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing name");
 
     dataSet.setName("dataSet");
     dataSet.setCohortIds(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing cohort ids");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing cohort ids");
 
     dataSet.setCohortIds(cohortIds);
     dataSet.setConceptSetIds(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing concept set ids");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing concept set ids");
 
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setDomainValuePairs(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing values");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing values");
   }
 
   @Test
@@ -1091,17 +1094,16 @@ public class DataSetControllerTest extends SpringTest {
     when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
 
-    DataSet dataSet =
-        dataSetController
-            .createDataSet(
-                otherWorkspace.getNamespace(), otherWorkspace.getName(), buildValidDataSetRequest())
-            .getBody();
-
+    Workspace finalOtherWorkspace = otherWorkspace;
     assertThrows(
         NotFoundException.class,
         () ->
-            dataSetController.getDataSet(
-                workspace.getNamespace(), workspace.getName(), dataSet.getId()));
+            dataSetController
+                .createDataSet(
+                    finalOtherWorkspace.getNamespace(),
+                    finalOtherWorkspace.getName(),
+                    buildValidDataSetRequest())
+                .getBody());
   }
 
   @Test
@@ -1174,8 +1176,12 @@ public class DataSetControllerTest extends SpringTest {
 
     dataSetController.deleteDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
-    expectedException.expect(NotFoundException.class);
-    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    DataSet finalDataSet = dataSet;
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.getDataSet(
+                workspace.getNamespace(), workspace.getName(), finalDataSet.getId()));
   }
 
   DataSetRequest buildValidDataSetRequest() {

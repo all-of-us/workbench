@@ -5,9 +5,7 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +49,6 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 public class DataSetMapperTest extends SpringTest {
@@ -62,8 +59,7 @@ public class DataSetMapperTest extends SpringTest {
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
   @Autowired private CohortDao mockCohortDao;
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  @Autowired private FakeClock fakeClock;
 
   @TestConfiguration
   @Import({
@@ -76,7 +72,6 @@ public class DataSetMapperTest extends SpringTest {
   })
   @MockBean({
     BigQueryService.class,
-    Clock.class,
     CloudStorageClient.class,
     ConceptSetDao.class,
     ConceptBigQueryService.class,
@@ -88,12 +83,7 @@ public class DataSetMapperTest extends SpringTest {
     WgsExtractCromwellSubmissionDao.class,
     UserDao.class
   })
-  static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-  }
+  static class Configuration {}
 
   @BeforeEach
   public void setUp() {
@@ -164,7 +154,7 @@ public class DataSetMapperTest extends SpringTest {
     request.setName("New Name");
     request.setPrePackagedConceptSet(
         Arrays.asList(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.FITBIT_ACTIVITY));
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, fakeClock);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
     assertThat(toDataSet.getIncludesAllParticipants())
@@ -195,7 +185,7 @@ public class DataSetMapperTest extends SpringTest {
     request.setIncludesAllParticipants(false);
     request.setPrePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
     request.setDomainValuePairs(ImmutableList.of(domainValuePair));
-    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, CLOCK);
+    final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, fakeClock);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(cohortIds);
     assertThat(toDataSet.getIncludesAllParticipants()).isFalse();

@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.SpringTest;
@@ -63,8 +61,6 @@ public class EgressEventAuditorTest extends SpringTest {
   @MockBean private UserDao mockUserDao;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
-
-  @Rule public final ExpectedException exception = ExpectedException.none();
 
   @TestConfiguration
   @Import({
@@ -142,8 +138,6 @@ public class EgressEventAuditorTest extends SpringTest {
 
   @Test
   public void testNoWorkspaceFound() {
-    exception.expect(BadRequestException.class);
-
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.empty());
@@ -159,8 +153,6 @@ public class EgressEventAuditorTest extends SpringTest {
 
     // Some of the properties should be nulled out, since we can't identify the target workspace
     // for the egress event.
-    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
-        .containsExactly(0);
     assertThat(
             events.stream()
                 .map(event -> event.getAgentEmailMaybe())

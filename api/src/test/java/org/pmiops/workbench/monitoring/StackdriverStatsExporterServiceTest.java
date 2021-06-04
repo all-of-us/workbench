@@ -10,6 +10,7 @@ import com.google.appengine.api.modules.ModulesService;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-public class StackdriverStatsExporterServiceTest {
+public class StackdriverStatsExporterServiceTest extends SpringTest {
 
   private static final String PROJECT_ID = "fake-project";
   private static final String FOUND_NODE_ID = "node-11001001";

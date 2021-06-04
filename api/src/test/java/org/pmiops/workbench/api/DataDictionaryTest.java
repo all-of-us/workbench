@@ -1,14 +1,10 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionMapper;
@@ -43,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -55,11 +50,8 @@ public class DataDictionaryTest extends SpringTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetController dataSetController;
+  @Autowired private FakeClock fakeClock;
 
-  @Rule public ExpectedException expectedEx = ExpectedException.none();
-
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static DbCdrVersion cdrVersion;
 
   @TestConfiguration
@@ -86,12 +78,7 @@ public class DataDictionaryTest extends SpringTest {
     CdrVersionMapper.class,
     GenomicExtractionService.class
   })
-  static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-  }
+  static class Configuration {}
 
   @BeforeEach
   public void setUp() {
@@ -144,25 +131,27 @@ public class DataDictionaryTest extends SpringTest {
 
   @Test
   public void testGetDataDictionaryEntry_invalidCdr() {
-    expectedEx.expect(BadRequestException.class);
-    expectedEx.expectMessage("Invalid CDR Version");
-
-    dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD");
+    assertThrows(
+        BadRequestException.class,
+        () -> dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD"),
+        "Invalid CDR Version");
   }
 
   @Test
   public void testGetDataDictionaryEntry_invalidDomain() {
-    expectedEx.expect(BadRequestException.class);
-    expectedEx.expectMessage("Invalid Domain");
-
-    dataSetController.getDataDictionaryEntry(
-        cdrVersionDao.findAll().iterator().next().getCdrVersionId(), "random", "TEST FIELD");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.getDataDictionaryEntry(
+                cdrVersionDao.findAll().iterator().next().getCdrVersionId(),
+                "random",
+                "TEST FIELD"));
   }
 
   @Test
   public void testGetDataDictionaryEntry_notFound() {
-    expectedEx.expect(NotFoundException.class);
-
-    dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
+    assertThrows(
+        NotFoundException.class,
+        () -> dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random"));
   }
 }

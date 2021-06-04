@@ -182,16 +182,11 @@ public class DataSetServiceTest extends SpringTest {
 
   @Test
   public void testThrowsForNoCohortOrConcept() {
+    final DataSetRequest invalidRequest = buildEmptyRequest();
+    invalidRequest.setDomainValuePairs(
+        ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
     assertThrows(
-        BadRequestException.class,
-        () -> {
-          final DataSetRequest invalidRequest = buildEmptyRequest();
-          invalidRequest.setDomainValuePairs(
-              ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
-          assertThrows(
-              BadRequestException.class,
-              () -> dataSetServiceImpl.domainToBigQueryConfig(invalidRequest));
-        });
+        BadRequestException.class, () -> dataSetServiceImpl.domainToBigQueryConfig(invalidRequest));
   }
 
   @Test

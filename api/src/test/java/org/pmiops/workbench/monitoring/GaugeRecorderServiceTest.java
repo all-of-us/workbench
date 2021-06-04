@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
-import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +20,6 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -76,11 +74,6 @@ public class GaugeRecorderServiceTest extends SpringTest {
     WorkspaceServiceImpl.class
   })
   public static class Config {
-    @Bean
-    public Clock getClock() {
-      return new FakeClock();
-    }
-
     /**
      * This is "yet another" GaugeDataCollector implementation, meant to showcase how we just grab
      * all of the implementers nad inject them into the GaugeRecorderService, and that the two

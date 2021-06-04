@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class CohortMapperTest extends SpringTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class})
-  @MockBean({UserDao.class, Clock.class})
+  @MockBean({UserDao.class})
   static class Configuration {}
 
   @BeforeEach

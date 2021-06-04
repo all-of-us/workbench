@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -77,13 +76,7 @@ public class WorkspaceMapperTest extends SpringTest {
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({
-    UserDao.class,
-    WorkspaceDao.class,
-    Clock.class,
-    ConceptSetService.class,
-    CohortService.class
-  })
+  @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
   static class Configuration {}
 
   @BeforeEach

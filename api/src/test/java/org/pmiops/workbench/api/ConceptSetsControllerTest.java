@@ -8,9 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +162,6 @@ public class ConceptSetsControllerTest extends SpringTest {
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_NAME_2 = "name2";
   private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static DbUser currentUser;
   private Workspace workspace;
   private Workspace workspace2;
@@ -186,6 +183,8 @@ public class ConceptSetsControllerTest extends SpringTest {
   @Autowired ConceptBigQueryService conceptBigQueryService;
 
   @Autowired WorkspacesController workspacesController;
+
+  @Autowired private FakeClock fakeClock;
 
   @TestConfiguration
   @Import({
@@ -235,11 +234,6 @@ public class ConceptSetsControllerTest extends SpringTest {
     @Bean
     Cloudbilling cloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -463,7 +457,7 @@ public class ConceptSetsControllerTest extends SpringTest {
     conceptSet.setDescription("new description");
     conceptSet.setName("new name");
     Instant newInstant = NOW.plusMillis(1);
-    CLOCK.setInstant(newInstant);
+    fakeClock.setInstant(newInstant);
     ConceptSet updatedConceptSet =
         conceptSetsController
             .updateConceptSet(

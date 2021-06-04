@@ -25,10 +25,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.mail.MessagingException;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
@@ -117,8 +116,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@ExtendWith(SpringExtension.class)
 public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
@@ -168,8 +169,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private int DUA_VERSION;
   private DbAccessTier registeredTier;
 
-  @Rule public final ExpectedException exception = ExpectedException.none();
-
   @TestConfiguration
   @Import({
     ActionAuditQueryServiceImpl.class,
@@ -191,6 +190,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceTestConfiguration.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
     AccessTierServiceImpl.class,
+    FakeClockConfiguration.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
@@ -456,11 +456,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());
-    exception.expect(BadRequestException.class);
-    exception.expectMessage(
+    assertThrows(
+        BadRequestException.class,
+        this::createAccountAndDbUserWithAffiliation,
         "Username should be at least 3 characters and not more than 64 characters");
-    createAccountAndDbUserWithAffiliation();
-    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
   }
 
   @Test

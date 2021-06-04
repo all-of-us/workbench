@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.time.Clock;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -17,7 +16,6 @@ import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 public class CohortAnnotationDefinitionMapperTest extends SpringTest {
@@ -26,7 +24,6 @@ public class CohortAnnotationDefinitionMapperTest extends SpringTest {
 
   @TestConfiguration
   @Import({CohortAnnotationDefinitionMapperImpl.class, CommonMappers.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
   @Test
