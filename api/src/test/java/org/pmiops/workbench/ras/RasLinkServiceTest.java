@@ -19,10 +19,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Random;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -46,11 +46,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class RasLinkServiceTest {
+public class RasLinkServiceTest extends SpringTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
@@ -139,7 +137,7 @@ public class RasLinkServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rasLinkService = new RasLinkService(userService, mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);

@@ -2,6 +2,7 @@ package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -11,9 +12,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -31,9 +31,7 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @Import({
   InstitutionServiceImpl.class,
@@ -65,7 +63,7 @@ public class InstitutionServiceTest extends SpringTest {
           .emailAddresses(Collections.emptyList())
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
 
-  @Before
+  @BeforeEach
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
@@ -104,15 +102,23 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void test_deleteInstitutionMissing() {
-    service.deleteInstitution("missing");
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          service.deleteInstitution("missing");
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void test_deleteInstitutionWithAffiliation() {
-    createAffiliation(createUser("any email"), testInst.getShortName());
-    service.deleteInstitution(testInst.getShortName());
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          createAffiliation(createUser("any email"), testInst.getShortName());
+          service.deleteInstitution(testInst.getShortName());
+        });
   }
 
   @Test
@@ -291,29 +297,37 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.updateInstitution("missing", updateInstitution)).isEmpty();
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void test_nonUniqueIds() {
-    service.createInstitution(
-        new Institution()
-            .shortName("test")
-            .displayName("We are all individuals")
-            .organizationTypeEnum(OrganizationType.INDUSTRY));
-    service
-        .createInstitution(new Institution().shortName("test").displayName("I'm not"))
-        .organizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          service.createInstitution(
+              new Institution()
+                  .shortName("test")
+                  .displayName("We are all individuals")
+                  .organizationTypeEnum(OrganizationType.INDUSTRY));
+          service
+              .createInstitution(new Institution().shortName("test").displayName("I'm not"))
+              .organizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void test_nonUniqueDisplayName() {
-    service.createInstitution(
-        new Institution()
-            .shortName("test")
-            .displayName("We are all individuals")
-            .organizationTypeEnum(OrganizationType.INDUSTRY));
-    service
-        .createInstitution(
-            new Institution().shortName("testing").displayName("We are all individuals"))
-        .organizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          service.createInstitution(
+              new Institution()
+                  .shortName("test")
+                  .displayName("We are all individuals")
+                  .organizationTypeEnum(OrganizationType.INDUSTRY));
+          service
+              .createInstitution(
+                  new Institution().shortName("testing").displayName("We are all individuals"))
+              .organizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
+        });
   }
 
   @Test
@@ -475,9 +489,13 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getInstitutionUserInstructions(testInst.getShortName())).isEmpty();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void getInstitutionUserInstructions_instNotFound() {
-    service.getInstitutionUserInstructions("not found");
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          service.getInstitutionUserInstructions("not found");
+        });
   }
 
   @Test
@@ -510,14 +528,18 @@ public class InstitutionServiceTest extends SpringTest {
         .hasValue(instructions2);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void setInstitutionUserInstructions_instNotFound() {
-    final String instructions = "Do some science";
-    final InstitutionUserInstructions inst =
-        new InstitutionUserInstructions()
-            .institutionShortName("not found")
-            .instructions(instructions);
-    service.setInstitutionUserInstructions(inst);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          final String instructions = "Do some science";
+          final InstitutionUserInstructions inst =
+              new InstitutionUserInstructions()
+                  .institutionShortName("not found")
+                  .instructions(instructions);
+          service.setInstitutionUserInstructions(inst);
+        });
   }
 
   @Test
@@ -542,9 +564,13 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.deleteInstitutionUserInstructions(testInst.getShortName())).isFalse();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void deleteInstitutionUserInstructions_instNotFound() {
-    service.deleteInstitutionUserInstructions("not found");
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          service.deleteInstitutionUserInstructions("not found");
+        });
   }
 
   @Test
@@ -567,15 +593,19 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.validateOperationalUser(institution)).isFalse();
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void test_createInstitution_MissingOrganizationType() {
-    Institution institution_NoOrgType =
-        new Institution()
-            .displayName("No Organization")
-            .duaTypeEnum(DuaType.MASTER)
-            .emailAddresses(Arrays.asList("testDomain.com"))
-            .userInstructions("Should throw exception");
-    service.createInstitution(institution_NoOrgType);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Institution institution_NoOrgType =
+              new Institution()
+                  .displayName("No Organization")
+                  .duaTypeEnum(DuaType.MASTER)
+                  .emailAddresses(Arrays.asList("testDomain.com"))
+                  .userInstructions("Should throw exception");
+          service.createInstitution(institution_NoOrgType);
+        });
   }
 
   @Test
@@ -592,37 +622,52 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(createdInstitution).isEqualTo(institutionWithDua);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void test_createInstitution_IncorrectEmailAddressFormat() {
-    Institution institution_EmailAddress =
-        new Institution()
-            .displayName("No Organization")
-            .duaTypeEnum(DuaType.RESTRICTED)
-            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
-    service.createInstitution(institution_EmailAddress);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Institution institution_EmailAddress =
+              new Institution()
+                  .displayName("No Organization")
+                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .emailAddresses(
+                      Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .organizationTypeEnum(OrganizationType.INDUSTRY);
+          service.createInstitution(institution_EmailAddress);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void test_createInstitution_DisplayNameWithSpaces() {
-    Institution institution_EmailAddress =
-        new Institution()
-            .displayName("     ")
-            .duaTypeEnum(DuaType.RESTRICTED)
-            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
-            .organizationTypeEnum(OrganizationType.INDUSTRY);
-    service.createInstitution(institution_EmailAddress);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Institution institution_EmailAddress =
+              new Institution()
+                  .displayName("     ")
+                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .emailAddresses(
+                      Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .organizationTypeEnum(OrganizationType.INDUSTRY);
+          service.createInstitution(institution_EmailAddress);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void test_createInstitution_OtherOrganizationType_noOtherText() {
-    Institution institution_withOtherOrganizationType =
-        new Institution()
-            .displayName("     ")
-            .duaTypeEnum(DuaType.RESTRICTED)
-            .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
-            .organizationTypeEnum(OrganizationType.OTHER);
-    service.createInstitution(institution_withOtherOrganizationType);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Institution institution_withOtherOrganizationType =
+              new Institution()
+                  .displayName("     ")
+                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .emailAddresses(
+                      Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .organizationTypeEnum(OrganizationType.OTHER);
+          service.createInstitution(institution_withOtherOrganizationType);
+        });
   }
 
   @Test

@@ -4,9 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Date;
-import java.time.Clock;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -15,18 +14,14 @@ import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class ParticipantCohortStatusMapperTest {
+public class ParticipantCohortStatusMapperTest extends SpringTest {
 
   @Autowired private ParticipantCohortStatusMapper participantCohortStatusMapper;
 
   @TestConfiguration
   @Import({ParticipantCohortStatusMapperImpl.class, CommonMappers.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
   @Test

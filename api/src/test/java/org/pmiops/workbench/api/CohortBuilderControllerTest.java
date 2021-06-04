@@ -1,16 +1,14 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
@@ -59,9 +57,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortBuilderControllerTest extends SpringTest {
@@ -92,9 +88,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   private static final String WORKSPACE_ID = "workspaceId";
   private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
-  @Rule public ExpectedException badRequestThrown = ExpectedException.none();
-
-  @Before
+  @BeforeEach
   public void setUp() {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
@@ -280,18 +274,27 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   @Test
   public void findCriteriaByExceptions() {
-    badRequestThrown.expect(BadRequestException.class);
-    badRequestThrown.expectMessage(
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, null, null, false, null),
         "Bad Request: Please provide a valid domain. null is not valid.");
-    controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, null, null, false, null);
 
-    badRequestThrown.expectMessage(
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, "blah", null, false, null),
         "Bad Request: Please provide a valid domain. blah is not valid.");
-    controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, "blah", null, false, null);
-
-    badRequestThrown.expectMessage("Bad Request: Please provide a valid type. blah is not valid.");
-    controller.findCriteriaBy(
-        WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), "blah", false, null);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaBy(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.toString(),
+                "blah",
+                false,
+                null),
+        "Bad Request: Please provide a valid type. blah is not valid.");
   }
 
   @Test
@@ -410,20 +413,32 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   @Test
   public void findCriteriaAutoCompleteExceptions() {
-    badRequestThrown.expect(BadRequestException.class);
-    badRequestThrown.expectMessage(
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null),
         "Bad Request: Please provide a valid domain. null is not valid.");
-    controller.findCriteriaAutoComplete(
-        WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null);
 
-    badRequestThrown.expectMessage(
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null),
         "Bad Request: Please provide a valid domain. blah is not valid.");
-    controller.findCriteriaAutoComplete(
-        WORKSPACE_NAMESPACE, WORKSPACE_ID, "blah", "blah", "blah", null, null);
 
-    badRequestThrown.expectMessage("Bad Request: Please provide a valid type. blah is not valid.");
-    controller.findCriteriaAutoComplete(
-        WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), "blah", "blah", null, null);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.toString(),
+                "blah",
+                "blah",
+                null,
+                null),
+        "Bad Request: Please provide a valid type. blah is not valid.");
   }
 
   @Test

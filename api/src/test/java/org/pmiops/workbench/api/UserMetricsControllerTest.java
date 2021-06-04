@@ -9,17 +9,15 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -50,13 +48,10 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class UserMetricsControllerTest {
+public class UserMetricsControllerTest extends SpringTest {
 
   @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
@@ -66,14 +61,12 @@ public class UserMetricsControllerTest {
   @Mock private WorkspaceAuthService workspaceAuthService;
 
   private UserMetricsController userMetricsController;
-  private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
   @Autowired private CommonMappers commonMappers;
   @Autowired private FirecloudMapper firecloudMapper;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-
-  private final FakeClock fakeClock = new FakeClock(NOW);
+  @Autowired private FakeClock fakeClock;
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;
@@ -85,10 +78,9 @@ public class UserMetricsControllerTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class, FirecloudMapperImpl.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final DbCdrVersion dbCdrVersion =
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);

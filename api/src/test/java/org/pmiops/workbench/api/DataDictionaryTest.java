@@ -1,15 +1,11 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -34,7 +30,6 @@ import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -43,25 +38,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DataDictionaryTest {
+public class DataDictionaryTest extends SpringTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetController dataSetController;
 
-  @Rule public ExpectedException expectedEx = ExpectedException.none();
-
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static DbCdrVersion cdrVersion;
 
   @TestConfiguration
@@ -88,14 +76,9 @@ public class DataDictionaryTest {
     CdrVersionMapper.class,
     GenomicExtractionService.class
   })
-  static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-  }
+  static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
@@ -146,25 +129,27 @@ public class DataDictionaryTest {
 
   @Test
   public void testGetDataDictionaryEntry_invalidCdr() {
-    expectedEx.expect(BadRequestException.class);
-    expectedEx.expectMessage("Invalid CDR Version");
-
-    dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD");
+    assertThrows(
+        BadRequestException.class,
+        () -> dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD"),
+        "Invalid CDR Version");
   }
 
   @Test
   public void testGetDataDictionaryEntry_invalidDomain() {
-    expectedEx.expect(BadRequestException.class);
-    expectedEx.expectMessage("Invalid Domain");
-
-    dataSetController.getDataDictionaryEntry(
-        cdrVersionDao.findAll().iterator().next().getCdrVersionId(), "random", "TEST FIELD");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.getDataDictionaryEntry(
+                cdrVersionDao.findAll().iterator().next().getCdrVersionId(),
+                "random",
+                "TEST FIELD"));
   }
 
   @Test
   public void testGetDataDictionaryEntry_notFound() {
-    expectedEx.expect(NotFoundException.class);
-
-    dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
+    assertThrows(
+        NotFoundException.class,
+        () -> dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random"));
   }
 }

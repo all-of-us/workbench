@@ -1,6 +1,7 @@
 package org.pmiops.workbench.dataset;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -35,9 +36,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
@@ -83,12 +84,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DataSetServiceTest {
+public class DataSetServiceTest extends SpringTest {
 
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
@@ -142,7 +141,7 @@ public class DataSetServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workspace = workspaceDao.save(new DbWorkspace());
     cohort = cohortDao.save(buildSimpleCohort(workspace));
@@ -181,12 +180,13 @@ public class DataSetServiceTest {
         .prePackagedConceptSet(ImmutableList.of(PrePackagedConceptSetEnum.NONE));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testThrowsForNoCohortOrConcept() {
     final DataSetRequest invalidRequest = buildEmptyRequest();
     invalidRequest.setDomainValuePairs(
         ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
-    dataSetServiceImpl.domainToBigQueryConfig(invalidRequest);
+    assertThrows(
+        BadRequestException.class, () -> dataSetServiceImpl.domainToBigQueryConfig(invalidRequest));
   }
 
   @Test
@@ -524,14 +524,17 @@ public class DataSetServiceTest {
     assertThat(datasets).containsExactly(dataset);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testGetDataSets_cohortWrongWorkspace() {
-    DbDataset dbDataset = new DbDataset();
-    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
-    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
-    dataSetServiceImpl.saveDataSet(dbDataset);
-
-    dataSetServiceImpl.getDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          DbDataset dbDataset = new DbDataset();
+          dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+          dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+          dataSetServiceImpl.saveDataSet(dbDataset);
+          dataSetServiceImpl.getDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
+        });
   }
 
   @Test
@@ -552,40 +555,49 @@ public class DataSetServiceTest {
     assertThat(datasets).containsExactly(dataset);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testGetDataSets_conceptSetWrongWorkspace() {
-    long WORKSPACE_ID = 1L;
-
-    DbConceptSet dbConceptSet = new DbConceptSet();
-    dbConceptSet.setConceptSetId(3L);
-    dbConceptSet.setWorkspaceId(WORKSPACE_ID);
-    dbConceptSet = conceptSetDao.save(dbConceptSet);
-
-    DbDataset dbDataset = new DbDataset();
-    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
-    dbDataset.setWorkspaceId(WORKSPACE_ID);
-    dataSetServiceImpl.saveDataSet(dbDataset);
-
-    dataSetServiceImpl.getDataSets(101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          long WORKSPACE_ID = 1L;
+          DbConceptSet dbConceptSet = new DbConceptSet();
+          dbConceptSet.setConceptSetId(3L);
+          dbConceptSet.setWorkspaceId(WORKSPACE_ID);
+          dbConceptSet = conceptSetDao.save(dbConceptSet);
+          DbDataset dbDataset = new DbDataset();
+          dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
+          dbDataset.setWorkspaceId(WORKSPACE_ID);
+          dataSetServiceImpl.saveDataSet(dbDataset);
+          dataSetServiceImpl.getDataSets(
+              101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+        });
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testUpdateDataSet_wrongWorkspace() {
-    DbDataset dbDataset = new DbDataset();
-    dbDataset.setDataSetId(1L);
-    dbDataset.setWorkspaceId(2L);
-
-    DataSetRequest request = buildEmptyRequest();
-    dataSetServiceImpl.updateDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId(), request);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          DbDataset dbDataset = new DbDataset();
+          dbDataset.setDataSetId(1L);
+          dbDataset.setWorkspaceId(2L);
+          DataSetRequest request = buildEmptyRequest();
+          dataSetServiceImpl.updateDataSet(
+              dbDataset.getWorkspaceId(), dbDataset.getDataSetId(), request);
+        });
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testDeleteDataSet_wrongWorkspace() {
-    DbDataset dbDataset = new DbDataset();
-    dbDataset.setDataSetId(1L);
-    dbDataset.setWorkspaceId(2L);
-
-    dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          DbDataset dbDataset = new DbDataset();
+          dbDataset.setDataSetId(1L);
+          dbDataset.setWorkspaceId(2L);
+          dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
+        });
   }
 
   //  valid extraction exists but has an empty string directory (extractions that were created

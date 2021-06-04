@@ -8,8 +8,8 @@ import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AuditAction;
 import org.pmiops.workbench.model.AuditAgent;
@@ -20,10 +20,8 @@ import org.pmiops.workbench.model.AuditTargetPropertyChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class AuditLogEntryMapperTest {
+public class AuditLogEntryMapperTest extends SpringTest {
 
   private static final OffsetDateTime EVENT_TIME_1 = OffsetDateTime.parse("2010-06-30T01:20+02:00");
   private static final OffsetDateTime EVENT_TIME_2 = OffsetDateTime.parse("2015-06-30T01:20+02:00");

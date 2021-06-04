@@ -19,20 +19,18 @@ import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.Tagger;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class MonitoringServiceTest {
+public class MonitoringServiceTest extends SpringTest {
 
   // These objects are not injected by Spring.
   @Mock private MeasureMap mockMeasureMap;
@@ -57,7 +55,7 @@ public class MonitoringServiceTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setup() {
     initMockMeasureMap();
 

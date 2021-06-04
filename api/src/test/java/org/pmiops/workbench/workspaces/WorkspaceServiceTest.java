@@ -17,9 +17,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -56,9 +55,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
@@ -120,7 +117,7 @@ public class WorkspaceServiceTest {
 
   private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     doReturn(NOW).when(mockClock).instant();
 

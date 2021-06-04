@@ -7,9 +7,8 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.model.Institution;
@@ -18,9 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import(InstitutionMapperImpl.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -31,7 +28,7 @@ public class InstitutionMapperTest extends SpringTest {
   private List<String> sortedModelDomains;
   private List<String> sortedModelAddresses;
 
-  @Before
+  @BeforeEach
   public void setup() {
     sortedModelDomains = Lists.newArrayList("broad.org", "verily.com");
     sortedModelAddresses = Lists.newArrayList("alice@nih.gov", "joel@other-inst.org");

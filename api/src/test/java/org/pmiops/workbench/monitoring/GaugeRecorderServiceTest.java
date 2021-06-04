@@ -6,22 +6,20 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
-import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,10 +27,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class GaugeRecorderServiceTest {
+public class GaugeRecorderServiceTest extends SpringTest {
 
   private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =
       ImmutableList.of(
@@ -78,11 +74,6 @@ public class GaugeRecorderServiceTest {
     WorkspaceServiceImpl.class
   })
   public static class Config {
-    @Bean
-    public Clock getClock() {
-      return new FakeClock();
-    }
-
     /**
      * This is "yet another" GaugeDataCollector implementation, meant to showcase how we just grab
      * all of the implementers nad inject them into the GaugeRecorderService, and that the two
@@ -98,7 +89,7 @@ public class GaugeRecorderServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     doReturn(Collections.singleton(WORKSPACE_MEASUREMENT_BUNDLE))
         .when(mockWorkspaceServiceImpl)

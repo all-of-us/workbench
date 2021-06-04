@@ -9,8 +9,8 @@ import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
 import javax.inject.Provider
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
@@ -40,7 +40,7 @@ class ProfileAuditorTest {
     private var profileAuditAdapter: ProfileAuditor? = null
     private var user: DbUser? = null
 
-    @Before
+    @BeforeEach
     fun setUp() {
         user = DbUser()
                 .apply { userId = 1001 }

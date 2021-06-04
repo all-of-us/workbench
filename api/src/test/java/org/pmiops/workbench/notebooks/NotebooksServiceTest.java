@@ -12,10 +12,10 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.storage.Blob;
 import java.time.Clock;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -41,11 +41,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class NotebooksServiceTest {
+public class NotebooksServiceTest extends SpringTest {
   private static final JSONObject NOTEBOOK_CONTENTS =
       new JSONObject().put("who", "I'm a notebook!");
   private static final String BUCKET_NAME = "notebook.bucket";
@@ -88,7 +86,7 @@ public class NotebooksServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     dbUser = new DbUser();
     dbUser.setUserId(101L);

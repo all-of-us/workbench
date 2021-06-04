@@ -25,9 +25,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -52,10 +52,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class RdrExportServiceImplTest {
+public class RdrExportServiceImplTest extends SpringTest {
   @Autowired private RdrExportService rdrExportService;
 
   @MockBean private ApiClient mockApiClient;
@@ -87,7 +85,7 @@ public class RdrExportServiceImplTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rdrExportService = spy(rdrExportService);
     when(mockRdrApi.getApiClient()).thenReturn(mockApiClient);

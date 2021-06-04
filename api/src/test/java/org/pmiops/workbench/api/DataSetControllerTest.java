@@ -44,14 +44,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -151,18 +149,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 // TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
 //   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
 //   and mock out DataSetService here.
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class DataSetControllerTest {
+public class DataSetControllerTest extends SpringTest {
 
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
@@ -303,7 +299,7 @@ public class DataSetControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     doAnswer(
             (invocation) -> {
@@ -581,7 +577,7 @@ public class DataSetControllerTest {
         .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testGetQueryFailsWithNoCohort() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
@@ -589,13 +585,19 @@ public class DataSetControllerTest {
             .addConceptSetIdsItem(conceptSet1.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest().kernelType(KernelTypeEnum.PYTHON).dataSetRequest(dataSet));
+    DataSetRequest finalDataSet = dataSet;
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(finalDataSet)));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testGetQueryFailsWithNoConceptSet() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
@@ -603,13 +605,17 @@ public class DataSetControllerTest {
             .addCohortIdsItem(cohort.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest().kernelType(KernelTypeEnum.PYTHON).dataSetRequest(dataSet));
+    DataSetRequest finalDataSet = dataSet;
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(finalDataSet)));
   }
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
@@ -619,12 +625,15 @@ public class DataSetControllerTest {
             .addCohortIdsItem(cohort.getId())
             .addConceptSetIdsItem(conceptSet1.getId());
 
-    expectedException.expect(NotFoundException.class);
-
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest().kernelType(KernelTypeEnum.PYTHON).dataSetRequest(dataSet));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(dataSet)));
   }
 
   @Test
@@ -648,34 +657,38 @@ public class DataSetControllerTest {
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setCohortIds(cohortIds);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing name");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing name");
 
     dataSet.setName("dataSet");
     dataSet.setCohortIds(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing cohort ids");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing cohort ids");
 
     dataSet.setCohortIds(cohortIds);
     dataSet.setConceptSetIds(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing concept set ids");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing concept set ids");
 
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setDomainValuePairs(null);
 
-    expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing values");
-
-    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet),
+        "Missing values");
   }
 
   @Test
@@ -693,25 +706,31 @@ public class DataSetControllerTest {
             eq(WORKSPACE_BUCKET_NAME), eq(request.getNotebookName()), any(JSONObject.class));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void exportToNotebook_noAccess() {
-    dataSetController.exportToNotebook(
-        noAccessWorkspace.getNamespace(),
-        noAccessWorkspace.getName(),
-        new DataSetExportRequest()
-            .dataSetRequest(new DataSetRequest().includesAllParticipants(true)));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.exportToNotebook(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                new DataSetExportRequest()
+                    .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void exportToNotebook_noAccessDataSet() {
-    dataSetController.exportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId())));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.exportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void exportToNotebook_requiresActiveBilling() {
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
@@ -722,77 +741,102 @@ public class DataSetControllerTest {
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request = new DataSetExportRequest();
-    dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.exportToNotebook(
+                workspace.getNamespace(), workspace.getName(), request));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void exportToNotebook_cohortInvalid() {
-    dataSetController.exportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .dataSetRequest(
-                new DataSetRequest()
-                    .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
-                    .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId()))));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.exportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .dataSetRequest(
+                        new DataSetRequest()
+                            .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+                            .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId())))));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void exportToNotebook_conceptSetInvalid() {
-    dataSetController.exportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .dataSetRequest(
-                new DataSetRequest()
-                    .conceptSetIds(
-                        ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId()))));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.exportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .dataSetRequest(
+                        new DataSetRequest()
+                            .conceptSetIds(
+                                ImmutableList.of(
+                                    conceptSet1.getId(), noAccessConceptSet.getId())))));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void generateCode_noAccess() {
-    dataSetController.previewExportToNotebook(
-        noAccessWorkspace.getNamespace(),
-        noAccessWorkspace.getName(),
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(new DataSetRequest().includesAllParticipants(true)));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(new DataSetRequest().includesAllParticipants(true))));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void generateCode_noAccessDataSet() {
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId())));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId()))));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void generateCode_cohortInvalid() {
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                new DataSetRequest()
-                    .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
-                    .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId()))));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        new DataSetRequest()
+                            .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+                            .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId())))));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void generateCode_conceptSetInvalid() {
-    dataSetController.previewExportToNotebook(
-        workspace.getNamespace(),
-        workspace.getName(),
-        new DataSetExportRequest()
-            .kernelType(KernelTypeEnum.PYTHON)
-            .dataSetRequest(
-                new DataSetRequest()
-                    .conceptSetIds(
-                        ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId()))));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.previewExportToNotebook(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        new DataSetRequest()
+                            .conceptSetIds(
+                                ImmutableList.of(
+                                    conceptSet1.getId(), noAccessConceptSet.getId())))));
   }
 
   @Test
@@ -1013,27 +1057,31 @@ public class DataSetControllerTest {
     verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testAbortGenomicExtractionJob_readerCannotAbort() {
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
-    dataSetController.abortGenomicExtractionJob(
-        workspace.getNamespace(), workspace.getName(), "lol");
-
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.abortGenomicExtractionJob(
+                workspace.getNamespace(), workspace.getName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testAbortGenomicExtractionJob_noAccess() {
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
-    dataSetController.abortGenomicExtractionJob(
-        workspace.getNamespace(), workspace.getName(), "lol");
-
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.abortGenomicExtractionJob(
+                workspace.getNamespace(), workspace.getName(), "lol"));
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testGetDataset_wrongWorkspace() {
     Workspace otherWorkspace = new Workspace();
     otherWorkspace.setName("Other Workspace");
@@ -1046,49 +1094,71 @@ public class DataSetControllerTest {
     when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
 
-    DataSet dataSet =
-        dataSetController
-            .createDataSet(
-                otherWorkspace.getNamespace(), otherWorkspace.getName(), buildValidDataSetRequest())
-            .getBody();
-
-    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    Workspace finalOtherWorkspace = otherWorkspace;
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController
+                .createDataSet(
+                    finalOtherWorkspace.getNamespace(),
+                    finalOtherWorkspace.getName(),
+                    buildValidDataSetRequest())
+                .getBody());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetDataSet_noAccess() {
-    dataSetController.getDataSet(
-        noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.getDataSet(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                noAccessDataSet.getId()));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testUpdateDataSet_noAccess() {
-    dataSetController.updateDataSet(
-        noAccessWorkspace.getNamespace(),
-        noAccessWorkspace.getName(),
-        noAccessDataSet.getId(),
-        new DataSetRequest().etag("1"));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.updateDataSet(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                noAccessDataSet.getId(),
+                new DataSetRequest().etag("1")));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testUpdateDataSet_noAccessMismatchDataSetId() {
-    dataSetController.updateDataSet(
-        workspace.getNamespace(),
-        workspace.getName(),
-        noAccessDataSet.getId(),
-        new DataSetRequest().etag("1"));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.updateDataSet(
+                workspace.getNamespace(),
+                workspace.getName(),
+                noAccessDataSet.getId(),
+                new DataSetRequest().etag("1")));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testDeleteDataSet_noAccess() {
-    dataSetController.deleteDataSet(
-        noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            dataSetController.deleteDataSet(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                noAccessDataSet.getId()));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testDeleteDataSet_noAccessMismatchDataSetId() {
-    dataSetController.deleteDataSet(
-        workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId());
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.deleteDataSet(
+                workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId()));
   }
 
   @Test
@@ -1106,8 +1176,12 @@ public class DataSetControllerTest {
 
     dataSetController.deleteDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
-    expectedException.expect(NotFoundException.class);
-    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    DataSet finalDataSet = dataSet;
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            dataSetController.getDataSet(
+                workspace.getNamespace(), workspace.getName(), finalDataSet.getId()));
   }
 
   DataSetRequest buildValidDataSetRequest() {

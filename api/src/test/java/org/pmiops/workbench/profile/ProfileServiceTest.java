@@ -1,6 +1,7 @@
 package org.pmiops.workbench.profile;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,10 +16,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -57,11 +58,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class ProfileServiceTest {
+public class ProfileServiceTest extends SpringTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.parse("2000-01-01T00:00:00.00Z"));
 
   private static final DbInstitution BROAD_INSTITUTION =
@@ -140,7 +139,7 @@ public class ProfileServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     loggedInUser = new DbUser();
     loggedInUser.setUserId(1000);
@@ -247,78 +246,87 @@ public class ProfileServiceTest {
     assertThat(affiliationSpy.getValue().getInstitution().getShortName()).isEqualTo("Broad");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateInstitutionalAffiliation_noAffiliation() {
-    profileService.validateAffiliation(new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          profileService.validateAffiliation(new Profile());
+        });
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void validateInstitutionalAffiliation_noInstitution() {
-    Profile profile = new Profile().verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
-
-    when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.empty());
-
-    profileService.validateAffiliation(profile);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          Profile profile = new Profile().verifiedInstitutionalAffiliation(BROAD_AFFILIATION);
+          when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.empty());
+          profileService.validateAffiliation(profile);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateInstitutionalAffiliation_noRole() {
-    VerifiedInstitutionalAffiliation affiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName("Broad")
-            .institutionDisplayName("The Broad Institute");
-
-    Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
-
-    when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
-
-    profileService.validateAffiliation(profile);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          VerifiedInstitutionalAffiliation affiliation =
+              new VerifiedInstitutionalAffiliation()
+                  .institutionShortName("Broad")
+                  .institutionDisplayName("The Broad Institute");
+          Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
+          when(mockInstitutionDao.findOneByShortName("Broad"))
+              .thenReturn(Optional.of(BROAD_INSTITUTION));
+          profileService.validateAffiliation(profile);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateInstitutionalAffiliation_noOtherText() {
-    VerifiedInstitutionalAffiliation affiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName("Broad")
-            .institutionDisplayName("The Broad Institute")
-            .institutionalRoleEnum(InstitutionalRole.OTHER);
-
-    Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
-
-    when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
-
-    profileService.validateAffiliation(profile);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          VerifiedInstitutionalAffiliation affiliation =
+              new VerifiedInstitutionalAffiliation()
+                  .institutionShortName("Broad")
+                  .institutionDisplayName("The Broad Institute")
+                  .institutionalRoleEnum(InstitutionalRole.OTHER);
+          Profile profile = new Profile().verifiedInstitutionalAffiliation(affiliation);
+          when(mockInstitutionDao.findOneByShortName("Broad"))
+              .thenReturn(Optional.of(BROAD_INSTITUTION));
+          profileService.validateAffiliation(profile);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateInstitutionalAffilation_badEmail() {
-    VerifiedInstitutionalAffiliation affiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName("Broad")
-            .institutionDisplayName("The Broad Institute")
-            .institutionalRoleEnum(InstitutionalRole.OTHER)
-            .institutionalRoleOtherText("Kibitzing");
-
-    Profile profile =
-        new Profile()
-            .verifiedInstitutionalAffiliation(affiliation)
-            .contactEmail("kibitz@broadinstitute.org");
-
-    when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
-
-    when(mockInstitutionService.validateAffiliation(
-            any(DbVerifiedInstitutionalAffiliation.class), anyString()))
-        .thenReturn(false);
-
-    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
-        new DbVerifiedInstitutionalAffiliation();
-    dbVerifiedInstitutionalAffiliation.setInstitution(BROAD_INSTITUTION);
-
-    when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
-            affiliation, mockInstitutionService))
-        .thenReturn(dbVerifiedInstitutionalAffiliation);
-
-    profileService.validateAffiliation(profile);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          VerifiedInstitutionalAffiliation affiliation =
+              new VerifiedInstitutionalAffiliation()
+                  .institutionShortName("Broad")
+                  .institutionDisplayName("The Broad Institute")
+                  .institutionalRoleEnum(InstitutionalRole.OTHER)
+                  .institutionalRoleOtherText("Kibitzing");
+          Profile profile =
+              new Profile()
+                  .verifiedInstitutionalAffiliation(affiliation)
+                  .contactEmail("kibitz@broadinstitute.org");
+          when(mockInstitutionDao.findOneByShortName("Broad"))
+              .thenReturn(Optional.of(BROAD_INSTITUTION));
+          when(mockInstitutionService.validateAffiliation(
+                  any(DbVerifiedInstitutionalAffiliation.class), anyString()))
+              .thenReturn(false);
+          DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+              new DbVerifiedInstitutionalAffiliation();
+          dbVerifiedInstitutionalAffiliation.setInstitution(BROAD_INSTITUTION);
+          when(mockVerifiedInstitutionalAffiliationMapper.modelToDbWithoutUser(
+                  affiliation, mockInstitutionService))
+              .thenReturn(dbVerifiedInstitutionalAffiliation);
+          profileService.validateAffiliation(profile);
+        });
   }
 
   @Test
@@ -361,17 +369,19 @@ public class ProfileServiceTest {
     profileService.updateProfile(user, updatedProfile, previousProfile);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void updateProfile_cant_change_contactEmail() {
-    Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
-    Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
-
-    DbUser user = new DbUser();
-    user.setUserId(10);
-    user.setGivenName("John");
-    user.setFamilyName("Doe");
-
-    profileService.updateProfile(user, updatedProfile, previousProfile);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile previousProfile = createValidProfile().contactEmail("researcher@nih.gov");
+          Profile updatedProfile = createValidProfile().contactEmail("other-researcher@nih.gov");
+          DbUser user = new DbUser();
+          user.setUserId(10);
+          user.setGivenName("John");
+          user.setFamilyName("Doe");
+          profileService.updateProfile(user, updatedProfile, previousProfile);
+        });
   }
 
   @Test
@@ -427,11 +437,16 @@ public class ProfileServiceTest {
     profileService.validateProfile(new Profile(), new Profile());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_emptyNewObject() {
-    // The 'prevProfile' argument is null, so this is considered a new object and all validation
-    // is executed. The empty Profile object is obviously rejected.
-    profileService.validateNewProfile(new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // The 'prevProfile' argument is null, so this is considered a new object and all
+          // validation
+          // is executed. The empty Profile object is obviously rejected.
+          profileService.validateNewProfile(new Profile());
+        });
   }
 
   @Test
@@ -444,37 +459,60 @@ public class ProfileServiceTest {
     profileService.validateNewProfile(VALID_PROFILE);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_usernameChanged_user() {
-    // Username changes are disallowed for users
-    profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // Username changes are disallowed for users
+          profileService.validateProfile(
+              new Profile().username("new"), new Profile().username("old"));
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_usernameChanged_admin() {
-    // Username changes are still disallowed for admins
-    when(mockUserService.hasAuthority(loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
-        .thenReturn(true);
-
-    profileService.validateProfile(new Profile().username("new"), new Profile().username("old"));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // Username changes are still disallowed for admins
+          when(mockUserService.hasAuthority(
+                  loggedInUser.getUserId(), Authority.ACCESS_CONTROL_ADMIN))
+              .thenReturn(true);
+          profileService.validateProfile(
+              new Profile().username("new"), new Profile().username("old"));
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_usernameTooShort() {
-    profileService.validateProfile(new Profile().username("ab"), new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          profileService.validateProfile(new Profile().username("ab"), new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_usernameTooLong() {
-    profileService.validateProfile(
-        new Profile().username(StringUtils.repeat("asdf", 30)), new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          profileService.validateProfile(
+              new Profile().username(StringUtils.repeat("asdf", 30)), new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_contactEmailChanged_user() {
-    // Contact email changes are disallowed for users.
-    profileService.validateProfile(
-        new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // Contact email changes are disallowed for users.
+          profileService.validateProfile(
+              new Profile().contactEmail("new@gmail.com"),
+              new Profile().contactEmail("old@gmail.com"));
+        });
   }
 
   @Test
@@ -487,65 +525,93 @@ public class ProfileServiceTest {
         new Profile().contactEmail("new@gmail.com"), new Profile().contactEmail("old@gmail.com"));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_givenNameTooShort() {
-    Profile newProfile = new Profile().givenName("");
-    profileService.validateProfile(newProfile, new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile newProfile = new Profile().givenName("");
+          profileService.validateProfile(newProfile, new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_FamilyNameTooLong() {
-    Profile newProfile = new Profile().familyName(StringUtils.repeat("123", 30));
-    profileService.validateProfile(newProfile, new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile newProfile = new Profile().familyName(StringUtils.repeat("123", 30));
+          profileService.validateProfile(newProfile, new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_addressRemoved() {
-    // Ensures we validate the address when the field has been removed entirely.
-    Profile oldProfile = new Profile().address(new Address().streetAddress1("asdf"));
-    Profile newProfile = new Profile();
-    profileService.validateProfile(newProfile, oldProfile);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // Ensures we validate the address when the field has been removed entirely.
+          Profile oldProfile = new Profile().address(new Address().streetAddress1("asdf"));
+          Profile newProfile = new Profile();
+          profileService.validateProfile(newProfile, oldProfile);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_addressRemoveZipCode() {
-    // Ensures we validate the address when only a subfield has changed.
-    Address oldAddress =
-        new Address()
-            .streetAddress1("asdf")
-            .city("asdf")
-            .state("asdf")
-            .country("asdf")
-            .zipCode("asdf");
-    Address newAddress =
-        new Address().streetAddress1("asdf").city("asdf").state("asdf").country("asdf");
-    profileService.validateProfile(
-        new Profile().address(newAddress), new Profile().address(oldAddress));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          // Ensures we validate the address when only a subfield has changed.
+          Address oldAddress =
+              new Address()
+                  .streetAddress1("asdf")
+                  .city("asdf")
+                  .state("asdf")
+                  .country("asdf")
+                  .zipCode("asdf");
+          Address newAddress =
+              new Address().streetAddress1("asdf").city("asdf").state("asdf").country("asdf");
+          profileService.validateProfile(
+              new Profile().address(newAddress), new Profile().address(oldAddress));
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_addressIncomplete() {
-    Profile newProfile = new Profile().address(new Address().streetAddress1("asdf"));
-    profileService.validateProfile(newProfile, new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile newProfile = new Profile().address(new Address().streetAddress1("asdf"));
+          profileService.validateProfile(newProfile, new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_EmptyAreaOfResearch() {
-    Profile newProfile = new Profile().areaOfResearch("");
-    profileService.validateProfile(newProfile, new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile newProfile = new Profile().areaOfResearch("");
+          profileService.validateProfile(newProfile, new Profile());
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateProfile_noInstitutionMatch() {
-    Profile newProfile =
-        new Profile()
-            .contactEmail("not-a-match@gmail.com")
-            .verifiedInstitutionalAffiliation(VALID_PROFILE.getVerifiedInstitutionalAffiliation());
-
-    when(mockInstitutionDao.findOneByShortName("Broad")).thenReturn(Optional.of(BROAD_INSTITUTION));
-    when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(false);
-
-    profileService.validateProfile(newProfile, new Profile());
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Profile newProfile =
+              new Profile()
+                  .contactEmail("not-a-match@gmail.com")
+                  .verifiedInstitutionalAffiliation(
+                      VALID_PROFILE.getVerifiedInstitutionalAffiliation());
+          when(mockInstitutionDao.findOneByShortName("Broad"))
+              .thenReturn(Optional.of(BROAD_INSTITUTION));
+          when(mockInstitutionService.validateAffiliation(any(), any())).thenReturn(false);
+          profileService.validateProfile(newProfile, new Profile());
+        });
   }
 
   @Test

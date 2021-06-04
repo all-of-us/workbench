@@ -5,7 +5,7 @@ import static com.google.common.truth.Truth8.assertThat;
 
 import java.time.Clock;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;

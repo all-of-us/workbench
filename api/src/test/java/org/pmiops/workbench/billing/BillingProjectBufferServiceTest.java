@@ -2,6 +2,7 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,9 +43,8 @@ import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.javers.common.collections.Sets;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
@@ -79,11 +79,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 public class BillingProjectBufferServiceTest {
   private static final Logger log =
@@ -141,7 +139,7 @@ public class BillingProjectBufferServiceTest {
 
   private DbAccessTier registeredTier;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
@@ -694,12 +692,15 @@ public class BillingProjectBufferServiceTest {
         .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
-  @Test(expected = EmptyBufferException.class)
+  @Test
   public void assignBillingProjectInvalidTier() {
-    DbUser user = mock(DbUser.class);
-    doReturn("fake-email@aou.org").when(user).getUsername();
-
-    billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
+    assertThrows(
+        EmptyBufferException.class,
+        () -> {
+          DbUser user = mock(DbUser.class);
+          doReturn("fake-email@aou.org").when(user).getUsername();
+          billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
+        });
   }
 
   @Test

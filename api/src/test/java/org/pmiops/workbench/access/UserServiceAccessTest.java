@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -43,7 +42,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Tests to cover access change determinations by executing {@link
@@ -53,7 +51,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  * UserServiceImpl#shouldUserBeRegistered(org.pmiops.workbench.db.model.DbUser)} to make this
  * determination.
  */
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
@@ -111,7 +108,7 @@ public class UserServiceAccessTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
 

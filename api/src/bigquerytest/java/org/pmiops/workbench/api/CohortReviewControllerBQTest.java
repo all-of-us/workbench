@@ -15,11 +15,9 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -95,7 +93,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
@@ -190,7 +187,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     return CB_DATA;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser dbUser = new DbUser();
     dbUser.setUsername("bob@gmail.com");
@@ -243,7 +240,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     saveParticipantCohortStatus(PARTICIPANT_ID2, reviewWithEHRData.getCohortReviewId());
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     workspaceDao.deleteById(workspace.getWorkspaceId());
     cdrVersionDao.deleteById(cdrVersion.getCdrVersionId());
