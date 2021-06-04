@@ -30,7 +30,6 @@ import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -50,7 +49,6 @@ public class DataDictionaryTest extends SpringTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetController dataSetController;
-  @Autowired private FakeClock fakeClock;
 
   private static DbCdrVersion cdrVersion;
 

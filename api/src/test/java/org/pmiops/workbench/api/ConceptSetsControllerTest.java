@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -161,7 +162,7 @@ public class ConceptSetsControllerTest extends SpringTest {
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_NAME_2 = "name2";
-  private static final Instant NOW = Instant.now();
+  private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
   private static DbUser currentUser;
   private Workspace workspace;
   private Workspace workspace2;
@@ -434,7 +435,6 @@ public class ConceptSetsControllerTest extends SpringTest {
   @Test
   public void testGetSurveyConceptSetWrongConceptId() {
     makeSurveyConceptSet1();
-    conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
     assertThrows(
         NotFoundException.class,
         () ->

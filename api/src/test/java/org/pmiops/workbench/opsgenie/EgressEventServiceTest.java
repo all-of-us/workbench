@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -41,6 +40,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaceadmin.WorkspaceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ import org.springframework.context.annotation.Scope;
 
 public class EgressEventServiceTest extends SpringTest {
 
-  private static final Instant NOW = FakeClockConfiguration.NOW.toInstant();
+  private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String INSTITUTION_2_NAME = "Auburn University";
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";
   private static WorkbenchConfig workbenchConfig;
@@ -76,6 +76,7 @@ public class EgressEventServiceTest extends SpringTest {
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
   @Autowired private EgressEventService egressEventService;
+  @Autowired private FakeClock fakeClock;
   private static final TestMockFactory TEST_MOCK_FACTORY = new TestMockFactory();
   private static final User USER_1 =
       new User()
@@ -154,6 +155,7 @@ public class EgressEventServiceTest extends SpringTest {
     doReturn(Optional.of(dbWorkspace))
         .when(workspaceDao)
         .getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
+    fakeClock.setInstant(NOW);
   }
 
   @Test
