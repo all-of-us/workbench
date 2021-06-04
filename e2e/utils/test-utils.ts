@@ -64,13 +64,13 @@ export async function signOut(page: Page): Promise<void> {
 }
 
 export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
-  const token = fs.readFileSync(tokenFilename, 'ascii');
+  const accessToken = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
   // See sign-in.service.ts.
-  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
+  await page.evaluate((token) => `window.setTestAccessTokenOverride('${token}')`, accessToken);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
