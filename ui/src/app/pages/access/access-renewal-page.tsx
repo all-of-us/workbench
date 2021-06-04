@@ -1,17 +1,19 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {maybeDaysRemaining} from 'app/components/access-renewal-notification';
 import {withRouteData} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {FlexColumn } from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Arrow, ClrIcon, ExclamationTriangle, withCircleBackground} from 'app/components/icons';
 import {RadioButton} from 'app/components/inputs';
+import {withErrorModal, withSuccessModal} from 'app/components/modals';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {styles} from 'app/pages/profile/profile-styles';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   cond,
   daysFromNow,
@@ -19,10 +21,12 @@ import {
   useId,
   withStyle
 } from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 
-const {useState} = React;
+
+const {useState, useEffect} = React;
 // Lookback period - at what point do we give users the option to update their compliance items?
 // In an effort to allow users to sync all of their training, we are setting at 330 to start.
 const LOOKBACK_PERIOD = 330;
@@ -41,6 +45,13 @@ const renewalStyle = {
     fontSize: '0.675rem',
     fontWeight: 600
   },
+  completionBox: {
+    height: '3.5rem',
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: 5 ,
+    marginTop: '0.5rem',
+    padding: '0.75rem'
+  },
   card: {
     backgroundColor: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
@@ -55,6 +66,45 @@ const renewalStyle = {
     width: 560
   }
 };
+
+
+// Async Calls with error handling
+const reloadProfile = withErrorModal({
+  title: 'Could Not Load Profile',
+  message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
+},
+  profileStore.get().reload
+);
+
+const confirmPublications = fp.flow(
+  withSuccessModal({
+    title: 'Confirmed Publications',
+    message: 'You have successfully reported your publications',
+    onDismiss: reloadProfile
+  }),
+  withErrorModal({
+    title: 'Failed To Confirm Publications',
+    message: 'An error occurred trying to confirm your publications. Please try again.',
+  })
+)(async() => await profileApi().confirmPublications());
+
+
+const syncAndReload = fp.flow(
+  withSuccessModal({
+    title: 'Compliance Status Refreshed',
+    message: 'Your compliance training has been refreshed. If you are not seeing the correct status, try again in a few minutes.',
+    onDismiss: reloadProfile
+  }),
+  withErrorModal({
+    title: 'Failed To Refresh',
+    message: 'An error occurred trying to refresh your compliance training status. Please try again.',
+  })
+)(async() => {
+  await profileApi().syncComplianceTrainingStatus();
+});
+
+
+// Helper Functions
 const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= LOOKBACK_PERIOD;
 
 const withInvalidDateHandling = date => {
@@ -95,6 +145,8 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
   );
 };
 
+
+// Helper / Stateless Components
 interface CompletedButtonInterface {
   buttonText: string;
   wasBypassed: boolean;
@@ -152,10 +204,13 @@ const RenewalCard = withStyle(renewalStyle.card)(
   }
 );
 
+
+// Page to render
 export const AccessRenewalPage = fp.flow(
   withRouteData,
   withProfileErrorModal
 )(() => {
+  // State
   const {profile: {
     complianceTrainingCompletionTime,
     dataUseAgreementCompletionTime,
@@ -169,15 +224,34 @@ export const AccessRenewalPage = fp.flow(
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
-  const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
+  const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
 
+
+  // onMount - as we move between pages, let's make sure we have the latest profile
+  useEffect(() => {
+    const getProfile = async() => {
+      setLoading(true);
+      await reloadProfile();
+      setLoading(false);
+    };
+
+    getProfile();
+  }, []);
+
+
+  // Helpers
+  const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
+  const anyModuleIsExpiring = fp.flow(fp.map('expirationEpochMillis'), fp.some(isExpiring))(modules);
+
+
+  // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-
       {maybeDaysRemaining(profile) < 0
         ? <React.Fragment>
-            <ExclamationTriangle style={{height: '1.5rem', width: '1.5rem'}}/>
-            <div style={styles.h1}>Access to the Researcher Workbench revoked.</div>
+            <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
+            <div style={styles.h1}>Researcher workbench access has expired.</div>
           </React.Fragment>
         : <React.Fragment>
             <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
@@ -188,6 +262,12 @@ export const AccessRenewalPage = fp.flow(
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
+      {!anyModuleIsExpiring && <div style={{...renewalStyle.completionBox, gridColumnStart: 2}}>
+        <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
+        <div>
+          Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.
+        </div>
+      </div>}
     </div>
     <div style={{...renewalStyle.h2, margin: '1rem 0'}}>Please complete the following steps</div>
     <div style={{display: 'grid', gridTemplateColumns: 'auto 1fr', marginBottom: '1rem', alignItems: 'center', gap: '1rem'}}>
@@ -221,7 +301,11 @@ export const AccessRenewalPage = fp.flow(
           <ActionButton isComplete={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
-            onClick={fp.noop}
+            onClick={async() => {
+              setLoading(true);
+              await confirmPublications();
+              setLoading(false);
+            }}
             wasBypassed={false}
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
@@ -247,11 +331,28 @@ export const AccessRenewalPage = fp.flow(
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('complianceTraining'))}
-          actionButtonText='Complete Training'
-          completedButtonText='Completed'
-          onClick={fp.noop}
-          wasBypassed={!!complianceTrainingBypassTime}/>
+        {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime &&
+          <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
+            When you have completed the training click the refresh button or reload the page.
+          </div>}
+        <FlexRow style={{marginTop: 'auto'}}>
+          <ActionButton isComplete={!isExpiring(getExpirationTimeFor('complianceTraining'))}
+            actionButtonText='Complete Training'
+            completedButtonText='Completed'
+            onClick={() => {
+              setRefreshButtonDisabled(false);
+              redirectToTraining();
+            }}
+            wasBypassed={!!complianceTrainingBypassTime}/>
+          {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime && <Button
+            disabled={refreshButtonDisabled}
+            onClick={async() => {
+              setLoading(true);
+              await syncAndReload();
+              setLoading(false);
+            }}
+            style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>}
+        </FlexRow>
       </RenewalCard>
       {/* DUCC */}
       <RenewalCard step={4}
@@ -263,9 +364,10 @@ export const AccessRenewalPage = fp.flow(
         <ActionButton isComplete={!isExpiring(getExpirationTimeFor('dataUseAgreement'))}
           actionButtonText='View & Sign'
           completedButtonText='Completed'
-          onClick={() => navigate(['data-code-of-conduct'])}
+          onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
           wasBypassed={!!dataUseAgreementBypassTime}/>
       </RenewalCard>
     </div>
+    {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}
   </FadeBox>;
 });

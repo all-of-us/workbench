@@ -12,12 +12,12 @@ import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -106,12 +106,6 @@ function redirectToRas(): void {
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
   window.open(url, '_blank');
-}
-
-async function redirectToTraining() {
-  AnalyticsTracker.Registration.EthicsTraining();
-  await profileApi().updatePageVisits({page: 'moodle'});
-  window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
 interface RegistrationTask {
