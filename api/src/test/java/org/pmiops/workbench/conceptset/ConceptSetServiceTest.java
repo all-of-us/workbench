@@ -2,7 +2,6 @@ package org.pmiops.workbench.conceptset;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,24 +58,10 @@ public class ConceptSetServiceTest {
   }
 
   private DbConceptSet mockConceptSet() {
-    DbConceptSetConceptId dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
-    DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
-    DbConceptSetConceptId dbConceptSetConceptId3 =
-        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
-    DbConceptSetConceptId dbConceptSetConceptId4 =
-        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
-    DbConceptSetConceptId dbConceptSetConceptId5 =
-        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
     Set<DbConceptSetConceptId> dbConceptSetConceptIds =
-        Stream.of(
-                dbConceptSetConceptId1,
-                dbConceptSetConceptId2,
-                dbConceptSetConceptId3,
-                dbConceptSetConceptId4,
-                dbConceptSetConceptId5)
-            .collect(Collectors.toCollection(HashSet::new));
+        Stream.of(1L, 2L, 3L, 4L, 5L)
+            .map(id -> DbConceptSetConceptId.builder().addConceptId(id).addStandard(true).build())
+            .collect(Collectors.toSet());
 
     DbConceptSet conceptSet = new DbConceptSet();
     conceptSet.setConceptSetConceptIds(dbConceptSetConceptIds);
