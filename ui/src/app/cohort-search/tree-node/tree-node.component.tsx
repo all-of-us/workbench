@@ -152,7 +152,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
-    const {autocompleteSelection, node: {domainId, group}, searchTerms} = this.props;
+    const {autocompleteSelection, node: {group}, searchTerms} = this.props;
     if (this.inMemorySearch && group && searchTerms !== prevProps.searchTerms) {
       this.searchChildren();
     }
@@ -331,7 +331,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {autocompleteSelection, groupSelections, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable},
+    const {autocompleteSelection, groupSelections, node, node: {code, count, id, group, hasAttributes, name, selectable},
       source, scrollToMatch, searchTerms, select, selectedIds, setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = this.inMemorySearch ? node.children : children;
