@@ -18,15 +18,18 @@ import {
   cond,
   daysFromNow,
   displayDateWithoutHours,
+  switchCase,
   useId,
   withStyle
 } from 'app/utils';
 import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
-
+import {RenewableAccessModuleStatus} from 'generated/fetch';
+import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
 const {useState, useEffect} = React;
+
 // Lookback period - at what point do we give users the option to update their compliance items?
 // In an effort to allow users to sync all of their training, we are setting at 330 to start.
 const LOOKBACK_PERIOD = 330;
@@ -167,7 +170,7 @@ const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterf
   </Button>;
 
 interface ActionButtonInterface {
-  isComplete: boolean;
+  isModuleExpiring: boolean;
   wasBypassed: boolean;
   actionButtonText: string;
   completedButtonText: string;
@@ -176,8 +179,8 @@ interface ActionButtonInterface {
   style?: React.CSSProperties;
 }
 const ActionButton = (
-  {isComplete, disabled, wasBypassed, actionButtonText, completedButtonText, onClick, style}: ActionButtonInterface) => {
-  return wasBypassed || isComplete
+  {isModuleExpiring, wasBypassed, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
+  return !isModuleExpiring || wasBypassed
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
@@ -242,8 +245,16 @@ export const AccessRenewalPage = fp.flow(
 
   // Helpers
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
-  const anyModuleIsExpiring = fp.flow(fp.map('expirationEpochMillis'), fp.some(isExpiring))(modules);
 
+  const wasBypassed = moduleName => switchCase(moduleName,
+        [ModuleNameEnum.DataUseAgreement, () => !!dataUseAgreementBypassTime],
+        [ModuleNameEnum.ComplianceTraining, () => !!complianceTrainingBypassTime],
+      // these cannot be bypassed
+      [ModuleNameEnum.ProfileConfirmation, () => false],
+      [ModuleNameEnum.PublicationConfirmation, () => false]);
+
+  const completeOrBypassed = moduleName => wasBypassed(moduleName) || !isExpiring(getExpirationTimeFor(moduleName));
+  const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
 
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
@@ -262,7 +273,7 @@ export const AccessRenewalPage = fp.flow(
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
-      {!anyModuleIsExpiring && <div style={{...renewalStyle.completionBox, gridColumnStart: 2}}>
+      {allModulesCompleteOrBypassed && <div style={{...renewalStyle.completionBox, gridColumnStart: 2}}>
         <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
         <div>
           Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.
@@ -275,22 +286,22 @@ export const AccessRenewalPage = fp.flow(
       <RenewalCard step={1}
         TitleComponent={() => 'Update your profile'}
         lastCompletionTime={profileLastConfirmedTime}
-        nextReviewTime={getExpirationTimeFor('profileConfirmation')}>
+        nextReviewTime={getExpirationTimeFor(ModuleNameEnum.ProfileConfirmation)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
-        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('profileConfirmation'))}
+        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.ProfileConfirmation))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
           onClick={() => navigateByUrl('profile?renewal=1')}
-          wasBypassed={false} />
+          wasBypassed={wasBypassed(ModuleNameEnum.ProfileConfirmation)} />
       </RenewalCard>
       {/* Publications */}
       <RenewalCard step={2}
         TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
         lastCompletionTime={publicationsLastConfirmedTime}
-        nextReviewTime={getExpirationTimeFor('publicationConfirmation')}>
+        nextReviewTime={getExpirationTimeFor(ModuleNameEnum.PublicationConfirmation)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
@@ -298,7 +309,7 @@ export const AccessRenewalPage = fp.flow(
               href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
-          <ActionButton isComplete={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
+          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.PublicationConfirmation))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
             onClick={async() => {
@@ -306,16 +317,16 @@ export const AccessRenewalPage = fp.flow(
               await confirmPublications();
               setLoading(false);
             }}
-            wasBypassed={false}
+            wasBypassed={wasBypassed(ModuleNameEnum.PublicationConfirmation)}
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
           <RadioButton id={noReportId}
-            disabled={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
+            disabled={!isExpiring(getExpirationTimeFor(ModuleNameEnum.PublicationConfirmation))}
             style={{justifySelf: 'end'}} checked={publications === true}
             onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
           <RadioButton id={reportId}
-            disabled={!isExpiring(getExpirationTimeFor('publicationConfirmation'))}
+            disabled={!isExpiring(getExpirationTimeFor(ModuleNameEnum.PublicationConfirmation))}
             style={{justifySelf: 'end'}}
             checked={publications === false}
             onChange={() => setPublications(false)}/>
@@ -326,25 +337,25 @@ export const AccessRenewalPage = fp.flow(
       <RenewalCard step={3}
         TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
         lastCompletionTime={complianceTrainingCompletionTime}
-        nextReviewTime={getExpirationTimeFor('complianceTraining')}
+        nextReviewTime={getExpirationTimeFor(ModuleNameEnum.ComplianceTraining)}
         bypassTime={complianceTrainingBypassTime}>
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime &&
+        {isExpiring(getExpirationTimeFor(ModuleNameEnum.ComplianceTraining)) && !complianceTrainingBypassTime &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
-          <ActionButton isComplete={!isExpiring(getExpirationTimeFor('complianceTraining'))}
+          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.ComplianceTraining))}
             actionButtonText='Complete Training'
             completedButtonText='Completed'
             onClick={() => {
               setRefreshButtonDisabled(false);
               redirectToTraining();
             }}
-            wasBypassed={!!complianceTrainingBypassTime}/>
-          {isExpiring(getExpirationTimeFor('complianceTraining')) && !complianceTrainingBypassTime && <Button
+            wasBypassed={wasBypassed(ModuleNameEnum.ComplianceTraining)}/>
+          {isExpiring(getExpirationTimeFor(ModuleNameEnum.ComplianceTraining)) && !complianceTrainingBypassTime && <Button
             disabled={refreshButtonDisabled}
             onClick={async() => {
               setLoading(true);
@@ -358,14 +369,14 @@ export const AccessRenewalPage = fp.flow(
       <RenewalCard step={4}
         TitleComponent={() => 'Sign Data User Code of Conduct'}
         lastCompletionTime={dataUseAgreementCompletionTime}
-        nextReviewTime={getExpirationTimeFor('dataUseAgreement')}
+        nextReviewTime={getExpirationTimeFor(ModuleNameEnum.DataUseAgreement)}
         bypassTime={dataUseAgreementBypassTime}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
-        <ActionButton isComplete={!isExpiring(getExpirationTimeFor('dataUseAgreement'))}
+        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.DataUseAgreement))}
           actionButtonText='View & Sign'
           completedButtonText='Completed'
           onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
-          wasBypassed={!!dataUseAgreementBypassTime}/>
+          wasBypassed={wasBypassed(ModuleNameEnum.DataUseAgreement)}/>
       </RenewalCard>
     </div>
     {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}
