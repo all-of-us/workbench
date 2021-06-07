@@ -41,6 +41,7 @@ export class SignInService {
     if (environment.allowTestAccessTokenOverride) {
       window.setTestAccessTokenOverride = (token: string) => {
         if (token) {
+          console.log('Setting access token override in local storage');
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
         } else {
           window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
@@ -78,6 +79,8 @@ export class SignInService {
     if (environment.allowTestAccessTokenOverride) {
       this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       if (this.testAccessTokenOverride) {
+        console.log('Found access token override in local storage, bypassing sign in');
+        
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
         this.zone.run(() => {
