@@ -180,7 +180,7 @@ interface ActionButtonInterface {
 }
 const ActionButton = (
   {isModuleExpiring, wasBypassed, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
-  return !isModuleExpiring || wasBypassed
+  return wasBypassed || !isModuleExpiring
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
@@ -247,8 +247,8 @@ export const AccessRenewalPage = fp.flow(
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
   const wasBypassed = moduleName => switchCase(moduleName,
-        [ModuleNameEnum.DataUseAgreement, () => !!dataUseAgreementBypassTime],
-        [ModuleNameEnum.ComplianceTraining, () => !!complianceTrainingBypassTime],
+      [ModuleNameEnum.DataUseAgreement, () => !!dataUseAgreementBypassTime],
+      [ModuleNameEnum.ComplianceTraining, () => !!complianceTrainingBypassTime],
       // these cannot be bypassed
       [ModuleNameEnum.ProfileConfirmation, () => false],
       [ModuleNameEnum.PublicationConfirmation, () => false]);
