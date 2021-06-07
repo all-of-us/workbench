@@ -157,11 +157,11 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
     constructor(props: Props) {
       super(props);
       this.state = {
-        ageType: AgeType.AGE,
+        ageType: AgeType.AGEATCDR,
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
-        currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
+        currentGraphOptions: {ageType: AgeType.AGEATCDR, genderOrSexType: GenderOrSexType.GENDER},
         deleting: false,
         genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
