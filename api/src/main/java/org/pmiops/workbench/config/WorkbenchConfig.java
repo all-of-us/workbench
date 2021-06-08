@@ -38,8 +38,8 @@ public class WorkbenchConfig {
     config.access = new AccessConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
-    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.cdr = new CdrConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
@@ -254,8 +254,6 @@ public class WorkbenchConfig {
     // This will be removed when we implement Controlled Tier access modules for Beta launch.
     // This should never go to Prod.
     public boolean unsafeAllowAccessToAllTiersForRegisteredUsers;
-    // Flag to indicate if USER/WORKSPACE data is exported to RDR
-    public boolean enableRdrExport;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
