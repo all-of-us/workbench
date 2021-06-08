@@ -25,7 +25,7 @@ declare global {
 if (environment.allowTestAccessTokenOverride) {
   window.setTestAccessTokenOverride = (token: string) => {
     if (token) {
-      console.log('Setting access token override in local storage');
+      setTimeout(() => console.log('Setting access token override in local storage'), 2000);
       window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
     } else {
       window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
