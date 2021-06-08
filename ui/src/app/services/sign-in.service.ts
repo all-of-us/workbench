@@ -20,6 +20,8 @@ declare global {
   interface Window { setTestAccessTokenOverride: (token: string) => void; }
 }
 
+let signInWithAccessTokenCallback: (token: string) => void;
+
 // Set this as early as possible in the application boot-strapping process,
 // so it's available for Puppeteer to call.
 console.log('initializing setAccessTokenOverride'); // XXX: remove
@@ -28,6 +30,10 @@ if (environment.allowTestAccessTokenOverride) {
     if (token) {
       console.log('Setting access token override in local storage');
       window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+      if (signInWithAccessTokenCallback) {
+        console.log('Using callback to initialize access token login');
+        signInWithAccessTokenCallback(token);
+      }
       return 'set localstorage token at ' + Date(); // XXX: remove
     } else {
       window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
@@ -78,18 +84,26 @@ export class SignInService {
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
     if (environment.allowTestAccessTokenOverride) {
-      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      if (this.testAccessTokenOverride) {
-        console.log('Found access token override in local storage, bypassing sign in');
+      const signInWithAccessToken = (token: string) => {
+        console.log('bypassing sign in');
+        this.testAccessTokenOverride = token
 
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
         this.zone.run(() => {
           this.isSignedIn.next(true);
         });
+      };
+
+      const storedToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      if (storedToken) {
+        console.log('Found access token override in local storage');
+        signInWithAccessToken(storedToken);
         return;
       } else {
         console.log('No access token override found');
+        // Leave a callback hook in place, in case a test call comes in after this point.
+        signInWithAccessTokenCallback = signInWithAccessToken;
       }
     }
 
