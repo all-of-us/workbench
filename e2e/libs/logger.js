@@ -4,7 +4,10 @@ const { createLogger, format } = winston;
 const timeNow = () => {
   return new Date().toLocaleString('en-US', {
     timeZone: 'America/New_York',
-    hour12: false
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
 };
 
