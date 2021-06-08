@@ -70,7 +70,7 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   await homePage.gotoUrl(PageUrl.Home.toString());
 
   // See sign-in.service.ts.
-  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
+  logger.info(await page.evaluate(`window.setTestAccessTokenOverride('${token}')`));
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
