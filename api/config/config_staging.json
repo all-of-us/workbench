@@ -111,7 +111,6 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
     "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false

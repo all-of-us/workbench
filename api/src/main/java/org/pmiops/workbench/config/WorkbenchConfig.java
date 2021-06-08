@@ -264,8 +264,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
-    // If true, reporting cron job will write data to configured BigQuery reporting dataset.
-    public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
     // If true, enable genomic extraction functionality for datasets which have genomics data
