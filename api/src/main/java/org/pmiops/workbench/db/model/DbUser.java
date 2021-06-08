@@ -35,6 +35,8 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
+  // user "system account" fields besides those related to access modules
+
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify
@@ -44,58 +46,81 @@ public class DbUser {
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
-  private String givenName;
-  private String familyName;
-  private String phoneNumber;
-  private String professionalUrl;
-  private String currentPosition;
-  private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
-  private Short freeTierCreditsLimitDaysOverride = null;
-  private Timestamp lastFreeTierCreditsTimeCheck;
   private Timestamp firstSignInTime;
-  private Timestamp firstRegistrationCompletionTime;
   private Set<Short> authorities = new HashSet<>();
-  private Boolean idVerificationIsValid;
-  private List<Short> degrees;
-  private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
-  private Short emailVerificationStatus;
   private Set<DbPageVisit> pageVisits = new HashSet<>();
-  private String aboutYou;
-  private String areaOfResearch;
-  private Integer billingProjectRetries;
-  private Integer moodleId;
+  private Timestamp demographicSurveyCompletionTime;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+
+  // possibly obsolete system account fields (not used)
+
+  private Short freeTierCreditsLimitDaysOverride = null;
+  private Timestamp lastFreeTierCreditsTimeCheck;
+  private Timestamp firstRegistrationCompletionTime;
+  private Integer billingProjectRetries;
+
+  // user-editable Profile fields
+
+  private String givenName;
+  private String familyName;
+  private String professionalUrl;
+  private List<Short> degrees;
+  private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
 
+  // potentially obsolete profile-style fields (not used)
+
+  private String phoneNumber;
+  private String currentPosition;
+  private String organization;
+  private String aboutYou;
+
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
+
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
+  private Timestamp eraCommonsBypassTime;
+
   private String rasLinkLoginGovUsername;
   private Timestamp rasLinkLoginGovCompletionTime;
   private Timestamp rasLinkLoginGovExpireTime;
   private Timestamp rasLinkLoginGovBypassTime;
+
   private Timestamp betaAccessRequestTime;
   private Timestamp betaAccessBypassTime;
+
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
   private Integer dataUseAgreementSignedVersion;
+
   private Timestamp complianceTrainingCompletionTime;
   private Timestamp complianceTrainingBypassTime;
   private Timestamp complianceTrainingExpirationTime;
-  private Timestamp eraCommonsBypassTime;
-  private Timestamp emailVerificationCompletionTime;
-  private Timestamp emailVerificationBypassTime;
-  private Timestamp idVerificationCompletionTime;
-  private Timestamp idVerificationBypassTime;
+
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+
   private Timestamp profileLastConfirmedTime;
+
   private Timestamp publicationsLastConfirmedTime;
+
+  // potentially obsolete access module fields.  These are likely to be deleted in the near future.
+
+  private Boolean idVerificationIsValid;
+  private Timestamp idVerificationCompletionTime;
+  private Timestamp idVerificationBypassTime;
+
+  private Short emailVerificationStatus;
+  private Timestamp emailVerificationCompletionTime;
+  private Timestamp emailVerificationBypassTime;
+
+  // Moodle badges are indexed by username, not this value.  See ComplianceService.
+  private Integer moodleId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
