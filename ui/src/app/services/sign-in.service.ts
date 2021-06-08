@@ -20,6 +20,19 @@ declare global {
   interface Window { setTestAccessTokenOverride: (token: string) => void; }
 }
 
+// Set this as early as possible in the application boot-strapping process,
+// so it's available for Puppeteer to call.
+if (environment.allowTestAccessTokenOverride) {
+  window.setTestAccessTokenOverride = (token: string) => {
+    if (token) {
+      console.log('Setting access token override in local storage');
+      window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+    } else {
+      window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+    }
+  };
+}
+
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 @Injectable()
@@ -33,21 +46,6 @@ export class SignInService {
 
   constructor(private zone: NgZone) {
     this.zone = zone;
-
-    // Set this as early as possible in the application boot-strapping process,
-    // so it's available for Puppeteer to call. If we need this even earlier in
-    // the page, it could go into something like main.ts, but ideally we'd keep
-    // this logic in one place, and keep main.ts minimal.
-    if (environment.allowTestAccessTokenOverride) {
-      window.setTestAccessTokenOverride = (token: string) => {
-        if (token) {
-          console.log('Setting access token override in local storage');
-          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-        } else {
-          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        }
-      };
-    }
 
     if (serverConfigStore.get().config) {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
