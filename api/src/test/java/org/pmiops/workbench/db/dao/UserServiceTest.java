@@ -33,6 +33,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -78,6 +79,9 @@ public class UserServiceTest extends SpringTest {
   @Import({
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
+  })
+  @MockBean({
+    MailService.class,
   })
   @TestConfiguration
   static class Configuration {
