@@ -208,4 +208,28 @@ describe('Access Renewal Page', () => {
     // State check
     expect(findNodesContainingText(wrapper, 'click the refresh button').length).toBe(0);
   });
+
+  it('should show the correct state when all items are complete or bypassed', async () => {
+    expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('publicationConfirmation', oneYearFromNow());
+
+    setBypassTimes(oneYearFromNow);
+
+    setCompletionTimes(oneYearFromNow);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // Training and DUCC are bypassed
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
+
+    // Publications and Profile are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
+
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+  });
 });

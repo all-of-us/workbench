@@ -22,4 +22,8 @@ public interface MailService {
       throws MessagingException;
 
   void alertUserFreeTierExpiration(final DbUser user) throws MessagingException;
+
+  void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining);
+
+  void alertUserRegisteredTierExpiration(final DbUser user);
 }

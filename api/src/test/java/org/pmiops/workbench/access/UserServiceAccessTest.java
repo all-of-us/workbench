@@ -2,10 +2,14 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -28,6 +32,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
@@ -57,6 +62,7 @@ public class UserServiceAccessTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
   private static final Instant START_INSTANT = Instant.parse("2030-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static final long EXPIRATION_DAYS = 365L;
 
   private static DbUser dbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -73,6 +79,8 @@ public class UserServiceAccessTest {
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
 
+  @MockBean private MailService mailService;
+
   @Import({
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
@@ -81,6 +89,7 @@ public class UserServiceAccessTest {
     ComplianceService.class,
     DirectoryService.class,
     FireCloudService.class,
+    MailService.class,
     UserServiceAuditor.class,
   })
   @TestConfiguration
@@ -111,6 +120,7 @@ public class UserServiceAccessTest {
   @BeforeEach
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
@@ -178,7 +188,6 @@ public class UserServiceAccessTest {
   public void testSimulateUserFlowThroughRenewal() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
 
     // initialize user as registered with generic values including bypassed DUA
 
@@ -188,10 +197,7 @@ public class UserServiceAccessTest {
     // add a proper DUA completion which will expire soon, but remove DUA bypass
 
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(
-        Timestamp.from(
-            START_INSTANT.minus(
-                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(Duration.ofDays(1)));
     dbUser = updateUserWithRetries(this::removeDuaBypass);
 
     // User is compliant
@@ -264,8 +270,6 @@ public void testGracePeriod() {
     providedWorkbenchConfig.access.enableAccessRenewal = false;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
     final Timestamp willExpire = Timestamp.from(START_INSTANT);
 
     // initialize user as registered, including:
@@ -295,9 +299,9 @@ public void testGracePeriod() {
     // (and still would be so, with enableAccessRenewal = true)
     assertRegisteredTierEnabled(dbUser);
 
-    // Time passing beyond the expirationWindow would cause the user to become
+    // Time passing beyond the expiration window would cause the user to become
     // noncompliant when enableAccessRenewal = true
-    advanceClockDays(expirationWindow + 1);
+    advanceClockDays(EXPIRATION_DAYS + 1);
 
     dbUser =
         updateUserWithRetries(
@@ -340,6 +344,7 @@ public void testGracePeriod() {
   @Test
   public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableBetaAccess = true;
+
     testUnregistration(
         user -> {
           user.setBetaAccessBypassTime(null);
@@ -373,6 +378,7 @@ public void testGracePeriod() {
   @Test
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
     providedWorkbenchConfig.access.enableEraCommons = true;
+
     testUnregistration(
         user -> {
           user.setEraCommonsBypassTime(null);
@@ -397,6 +403,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
@@ -408,7 +415,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
@@ -421,16 +428,13 @@ public void testGracePeriod() {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           user.setComplianceTrainingBypassTime(null);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setComplianceTrainingCompletionTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -443,6 +447,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -454,6 +459,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -466,6 +472,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = false;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -479,7 +486,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -491,7 +498,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_aar_missing_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -504,7 +511,7 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_dua_unbypassed_aar_wrong_version_noncompliant() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -519,9 +526,6 @@ public void testGracePeriod() {
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           user.setDataUseAgreementBypassTime(null);
@@ -529,7 +533,7 @@ public void testGracePeriod() {
           user.setDataUseAgreementCompletionTime(willExpire);
           user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -540,7 +544,7 @@ public void testGracePeriod() {
   @Test
   public void test_updateUserWithRetries_publications_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setPublicationsLastConfirmedTime(null);
@@ -552,15 +556,12 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_publications_expired() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setPublicationsLastConfirmedTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
@@ -571,7 +572,7 @@ public void testGracePeriod() {
   @Test
   public void test_updateUserWithRetries_profile_not_confirmed() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
-    providedWorkbenchConfig.accessRenewal.expiryDays = 365L;
+
     testUnregistration(
         user -> {
           user.setProfileLastConfirmedTime(null);
@@ -583,18 +584,381 @@ public void testGracePeriod() {
   public void test_updateUserWithRetries_profile_expired() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
-    final long expirationWindow = 365L;
-    providedWorkbenchConfig.accessRenewal.expiryDays = expirationWindow;
-
     testUnregistration(
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           user.setProfileLastConfirmedTime(willExpire);
 
-          advanceClockDays(expirationWindow + 1);
+          advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
         });
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_up_to_date() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    dbUser.setComplianceTrainingCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // bypassed modules do not expire: so no email
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_bypassed_is_up_to_date() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+
+    dbUser.setDataUseAgreementBypassTime(now);
+    dbUser.setComplianceTrainingBypassTime(now);
+
+    // these 2 are not bypassable
+
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 1 day (plus some) will trigger the 1-day warning
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1_FF_false() {
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 1 day (plus some) would trigger the 1-day warning...
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+
+    // but the feature flag is off
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // if any module is incomplete, we don't send an email
+  // because the user is not expiring soon - they never had access at all
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expired_but_missing() {
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 1 day (plus some) would trigger the 1-day warning...
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+
+    // but this module is incomplete (and also not bypassed)
+    dbUser.setDataUseAgreementCompletionTime(null);
+    dbUser.setDataUseAgreementBypassTime(null);
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // one or more bypassed modules will not affect whether emails are sent.
+  // we consider only the unbypassed
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_bypass() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // this is bypassed
+    dbUser.setDataUseAgreementBypassTime(now);
+
+    // expiring in 1 day (plus some) will trigger the 1-day warning
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
+  // bypass times are not relevant to expiration emails
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_older_bypass() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // expiring in 1 day (plus some) will trigger the 1-day warning
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
+
+    // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
+    dbUser.setDataUseAgreementBypassTime(willExpireAfter(daysPlusSome(30)));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+  }
+
+  // we do not send an email if the expiration time is within the day.
+  // we sent one yesterday for 1 day already, and we will send another once it actually expires.
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_today() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in .5 days will not trigger an email
+
+    final Duration halfDay = Duration.ofHours(12);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(halfDay));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_30() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 30 days (plus) will trigger the 30-day warning
+
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_31() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 31 days (plus) will not trigger a warning
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(31)));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // 15 days is sooner, so that's the email we send rather than 30
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_15_and_30() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 30 days (plus) would trigger the 30-day warning...
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
+
+    // but 15 days (plus) is sooner, so trigger 15 instead
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(15)));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 15);
+    verify(mailService, never()).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+  }
+
+  // 14 days is sooner than 15, but 14 days is not one of our email warning thresholds
+  // so we send no email
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expiring_14_and_15() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // expiring in 15 days (plus) would trigger the 15-day warning...
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(15)));
+
+    // but 14 days (plus) is sooner, so no email is sent
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(14)));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expired() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // but this is expired
+    dbUser.setComplianceTrainingCompletionTime(expired());
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verify(mailService).alertUserRegisteredTierExpiration(dbUser);
+  }
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expired_FF_false() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // this would be expired...
+    dbUser.setComplianceTrainingCompletionTime(expired());
+
+    // but the feature flag is off
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // don't send an email if we have been expired for more than a day
+  // because we sent the expiration email yesterday
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_extra_expired() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // but this expired yesterday
+
+    final Instant aYearAgo = PROVIDED_CLOCK.instant().minus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+    final Timestamp extraExpired =
+        Timestamp.from(aYearAgo.minus(Duration.ofDays(1)).minus(Duration.ofHours(1)));
+
+    dbUser.setComplianceTrainingCompletionTime(extraExpired);
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    verifyZeroInteractions(mailService);
+  }
+
+  // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
+  private Duration daysPlusSome(long days) {
+    return Duration.ofDays(days).plus(Duration.ofHours(18));
+  }
+
+  private Instant expirationBoundary() {
+    return PROVIDED_CLOCK.instant().minus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+  }
+
+  // set a completion timestamp which will expire after `duration`
+  // by choosing a timestamp of (expirationBoundary() + duration)
+  private Timestamp willExpireAfter(Duration duration) {
+    return Timestamp.from(expirationBoundary().plus(duration));
+  }
+
+  // set a completion timestamp which is expired
+  // by choosing a timestamp of (expirationBoundary() - a small duration)
+  private Timestamp expired() {
+    return Timestamp.from(expirationBoundary().minus(Duration.ofHours(1)));
   }
 
   private void advanceClockDays(long days) {

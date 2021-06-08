@@ -1629,6 +1629,22 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/sendAccessExpirationEmails":
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: Check each user daily for access expiration (or approaching expiration) and
+        send expiration or warning emails as appropriate.
+      operationId: sendAccessExpirationEmails
+      responses:
+        204:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:

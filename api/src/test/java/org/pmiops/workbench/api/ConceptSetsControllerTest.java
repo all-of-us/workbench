@@ -59,6 +59,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -225,6 +226,7 @@ public class ConceptSetsControllerTest extends SpringTest {
     FireCloudService.class,
     FirecloudMapperImpl.class,
     FreeTierBillingService.class,
+    MailService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,

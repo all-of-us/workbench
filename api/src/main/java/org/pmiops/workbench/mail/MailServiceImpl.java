@@ -172,6 +172,30 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining) {
+    // not implemented
+    final boolean emailSent = false;
+
+    final String logMsg =
+        String.format(
+                "Registered Tier access expiration will occur for user %s in %d days. ",
+                user.getUsername(), daysRemaining)
+            + (emailSent ? "Email sent." : "Email NOT sent.");
+    log.info(logMsg);
+  }
+
+  @Override
+  public void alertUserRegisteredTierExpiration(final DbUser user) {
+    // not implemented
+    final boolean emailSent = false;
+
+    final String logMsg =
+        String.format("Registered Tier access has expired for user %s. ", user.getUsername())
+            + (emailSent ? "Email sent." : "Email NOT sent.");
+    log.info(logMsg);
+  }
+
+  @Override
   public void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
       throws MessagingException {
 

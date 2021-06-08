@@ -72,6 +72,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
@@ -234,6 +235,7 @@ public class CohortsControllerTest extends SpringTest {
     FireCloudService.class,
     FreeTierBillingService.class,
     LeonardoNotebooksClient.class,
+    MailService.class,
     MonitoringService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
