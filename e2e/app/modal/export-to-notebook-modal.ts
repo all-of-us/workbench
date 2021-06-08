@@ -43,7 +43,7 @@ export default class ExportToNotebookModal extends Modal {
     return radio.select();
   }
 
-  async clickExportButton() {
+  async clickExportButton(): Promise<void> {
     return this.clickButton(LinkText.Export, { waitForClose: true });
   }
 

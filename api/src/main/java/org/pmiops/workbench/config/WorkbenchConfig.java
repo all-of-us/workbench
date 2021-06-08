@@ -38,8 +38,8 @@ public class WorkbenchConfig {
     config.access = new AccessConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
-    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.cdr = new CdrConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
@@ -254,8 +254,6 @@ public class WorkbenchConfig {
     // This will be removed when we implement Controlled Tier access modules for Beta launch.
     // This should never go to Prod.
     public boolean unsafeAllowAccessToAllTiersForRegisteredUsers;
-    // Flag to indicate if USER/WORKSPACE data is exported to RDR
-    public boolean enableRdrExport;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
@@ -266,8 +264,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
-    // If true, reporting cron job will write data to configured BigQuery reporting dataset.
-    public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
     // If true, enable genomic extraction functionality for datasets which have genomics data

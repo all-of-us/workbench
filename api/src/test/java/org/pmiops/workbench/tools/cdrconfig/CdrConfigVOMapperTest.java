@@ -6,9 +6,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -20,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import({CdrConfigVOMapperImpl.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -33,7 +30,7 @@ public class CdrConfigVOMapperTest {
   private AccessTierVO testTierJson;
   private CdrVersionVO testVersionJson;
 
-  @Before
+  @BeforeEach
   public void setup() {
     testTierJson = new AccessTierVO();
     testTierJson.accessTierId = 5;

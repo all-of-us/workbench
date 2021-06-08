@@ -6,17 +6,18 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpMethods;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.OfflineAuditApi;
 import org.pmiops.workbench.api.WorkspacesApi;
 import org.springframework.web.method.HandlerMethod;
 
-public class CronInterceptorTest {
+public class CronInterceptorTest extends SpringTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Mock private HandlerMethod handler;
@@ -25,7 +26,7 @@ public class CronInterceptorTest {
 
   private CronInterceptor interceptor;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     interceptor = new CronInterceptor();
   }

@@ -7,9 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
@@ -28,6 +27,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AuthDomainCreatedResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
@@ -38,9 +38,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthDomainControllerTest extends SpringTest {
@@ -61,6 +59,7 @@ public class AuthDomainControllerTest extends SpringTest {
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
   @Mock private FireCloudService fireCloudService;
+  @Mock private MailService mailService;
   @Mock private Provider<DbUser> userProvider;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
@@ -73,7 +72,7 @@ public class AuthDomainControllerTest extends SpringTest {
   private final FirecloudManagedGroupWithMembers testGroup =
       new FirecloudManagedGroupWithMembers().groupEmail(testGroupEmail);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);
@@ -98,7 +97,8 @@ public class AuthDomainControllerTest extends SpringTest {
             fireCloudService,
             complianceService,
             directoryService,
-            accessTierService);
+            accessTierService,
+            mailService);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);

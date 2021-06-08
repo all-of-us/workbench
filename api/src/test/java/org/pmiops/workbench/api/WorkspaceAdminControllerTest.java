@@ -1,18 +1,18 @@
 package org.pmiops.workbench.api;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -48,11 +48,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class WorkspaceAdminControllerTest {
+public class WorkspaceAdminControllerTest extends SpringTest {
 
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String FIRECLOUD_WORKSPACE_CREATOR_USERNAME = "jay@allofus.biz";
@@ -113,11 +111,10 @@ public class WorkspaceAdminControllerTest {
     NotebooksService.class,
     ConceptSetService.class,
     CohortService.class,
-    Clock.class
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final TestMockFactory testMockFactory = new TestMockFactory();
 
@@ -168,13 +165,15 @@ public class WorkspaceAdminControllerTest {
         .thenReturn(fcWorkspaceResponse);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void getWorkspaceAdminView_404sWhenNotFound() {
     doThrow(
             new NotFoundException(
                 String.format("No workspace found for namespace %s", NONSENSE_NAMESPACE)))
         .when(mockWorkspaceAdminService)
         .getWorkspaceAdminView(NONSENSE_NAMESPACE);
-    workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE);
+    assertThrows(
+        NotFoundException.class,
+        () -> workspaceAdminController.getWorkspaceAdminView(NONSENSE_NAMESPACE));
   }
 }

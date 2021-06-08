@@ -1,8 +1,10 @@
 import {
   faBan,
-  faCheckCircle, faClipboard,
+  faCheckCircle,
+  faClipboard,
   faEllipsisV,
-  faExclamationTriangle, faTrash
+  faExclamationTriangle,
+  faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -16,6 +18,7 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
+import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
@@ -129,6 +132,10 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
            disabled={!isRunning || !canWrite}
            onClick={() => {
              dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
+             const workspaceJobs = genomicExtractionStore.get()[workspace.namespace];
+             const abortedJobIndex = fp.findIndex(j => j.genomicExtractionJobId === job.genomicExtractionJobId, workspaceJobs);
+             workspaceJobs[abortedJobIndex].status = TerraJobStatus.ABORTING;
+             updateGenomicExtractionStore(workspace.namespace, workspaceJobs);
            }}
            tooltip={tooltip}
        >
@@ -230,17 +237,20 @@ const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
   </FlexRow>
 </div>;
 
-export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspace}) => {
-  const [extractionJobs, setExtractionJobs] = useState(null);
+export const GenomicsExtractionTable = fp.flow(
+  withCurrentWorkspace(),
+  withStore(genomicExtractionStore, 'genomicExtraction')
+)(({workspace, genomicExtraction}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id)
-      .then(resp => setExtractionJobs(resp.jobs))
+      .then(resp => updateGenomicExtractionStore(workspace.namespace, resp.jobs))
       .finally(() => setIsLoading(false));
   }, [workspace]);
 
-  const requestFailed = !isLoading && extractionJobs === null;
+  const workspaceExtractionJobs = genomicExtraction[workspace.namespace];
+  const requestFailed = !isLoading && workspaceExtractionJobs === undefined;
 
   return <div id='extraction-data-table-container' className='extraction-data-table-container'>
     <div className='slim-scroll-bar'>
@@ -263,9 +273,14 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspa
                 ? <FailedRequestMessage/>
                 : <DataTable autoLayout
                          emptyMessage={<EmptyTableMessage/>}
-                         sortField={extractionJobs.length !== 0 ? 'dateStarted' : ''}
+                         sortField={
+                           !workspaceExtractionJobs
+                           || workspaceExtractionJobs.length !== 0
+                               ? 'dateStarted'
+                               : ''
+                         }
                          sortOrder={-1}
-                         value={extractionJobs.map(job => mapJobToTableRow(job, workspace))}
+                         value={workspaceExtractionJobs.map(job => mapJobToTableRow(job, workspace))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
                     <Column header='Dataset Name'
                             field='datasetNameDisplay'

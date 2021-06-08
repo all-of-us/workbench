@@ -1,6 +1,7 @@
 package org.pmiops.workbench.interceptors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -15,13 +16,13 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
@@ -42,7 +43,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.method.HandlerMethod;
 
 /** mimicing a Swagger-generated wrapper */
@@ -56,8 +56,7 @@ class FakeController {
   public void handle() {}
 }
 
-@RunWith(SpringRunner.class)
-public class AuthInterceptorTest {
+public class AuthInterceptorTest extends SpringTest {
 
   private static final long USER_ID = 123L;
 
@@ -88,7 +87,7 @@ public class AuthInterceptorTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
@@ -143,15 +142,17 @@ public class AuthInterceptorTest {
     verify(mockResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void preHandleGet_userInfoError() throws Exception {
     mockGetCallWithBearerToken();
     when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
+    assertThrows(
+        NotFoundException.class,
+        () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void preHandleGet_firecloudLookupFails() throws Exception {
     mockGetCallWithBearerToken();
 
@@ -160,7 +161,9 @@ public class AuthInterceptorTest {
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(fireCloudService.getMe()).thenThrow(new NotFoundException());
 
-    interceptor.preHandle(mockRequest, mockResponse, mockHandler);
+    assertThrows(
+        NotFoundException.class,
+        () -> interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
   @Test

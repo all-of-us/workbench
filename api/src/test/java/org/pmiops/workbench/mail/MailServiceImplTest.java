@@ -1,5 +1,6 @@
 package org.pmiops.workbench.mail;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
@@ -11,12 +12,13 @@ import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import javax.mail.MessagingException;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.mandrill.ApiException;
@@ -27,7 +29,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.test.Providers;
 
-public class MailServiceImplTest {
+public class MailServiceImplTest extends SpringTest {
 
   private MailServiceImpl service;
   private static final String GIVEN_NAME = "Bob";
@@ -42,7 +44,7 @@ public class MailServiceImplTest {
   @Mock private MandrillMessageStatus msgStatus;
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Before
+  @BeforeEach
   public void setUp() throws ApiException {
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
     msgStatuses.add(msgStatus);
@@ -57,27 +59,31 @@ public class MailServiceImplTest {
             Providers.of(createWorkbenchConfig()));
   }
 
-  @Test(expected = MessagingException.class)
+  @Test
   public void testSendWelcomeEmail_throwsMessagingException()
       throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     User user = createUser();
-    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
+    assertThrows(
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(1)).send(any());
   }
 
-  @Test(expected = MessagingException.class)
+  @Test
   public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
     doThrow(ApiException.class).when(mandrillApi).send(any());
     User user = createUser();
-    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
+    assertThrows(
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(3)).send(any());
   }
 
-  @Test(expected = MessagingException.class)
+  @Test
   public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
     User user = createUser();
-    service.sendWelcomeEmail("Nota valid email", PASSWORD, user);
+    assertThrows(
+        MessagingException.class,
+        () -> service.sendWelcomeEmail("Nota valid email", PASSWORD, user));
   }
 
   @Test

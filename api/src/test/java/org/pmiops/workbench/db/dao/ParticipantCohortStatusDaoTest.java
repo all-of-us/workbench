@@ -7,9 +7,8 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
@@ -30,9 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import({TestJpaConfig.class, CommonConfig.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ParticipantCohortStatusDaoTest extends SpringTest {
@@ -44,7 +41,7 @@ public class ParticipantCohortStatusDaoTest extends SpringTest {
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
-  @Before
+  @BeforeEach
   public void onSetup() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrDbName("");

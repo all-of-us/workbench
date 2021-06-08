@@ -15,18 +15,17 @@ import com.ifountain.opsgenie.client.swagger.api.AlertApi;
 import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
@@ -51,10 +50,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class EgressEventServiceTest {
+public class EgressEventServiceTest extends SpringTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String INSTITUTION_2_NAME = "Auburn University";
@@ -68,7 +65,6 @@ public class EgressEventServiceTest {
           .egressMibThreshold(100.0)
           .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
           .timeWindowDuration(600L);
-  private static final Clock CLOCK = new FakeClock(NOW);
 
   @MockBean private AlertApi mockAlertApi;
   @MockBean private EgressEventAuditor egressEventAuditor;
@@ -80,6 +76,7 @@ public class EgressEventServiceTest {
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
   @Autowired private EgressEventService egressEventService;
+  @Autowired private FakeClock fakeClock;
   private static final TestMockFactory TEST_MOCK_FACTORY = new TestMockFactory();
   private static final User USER_1 =
       new User()
@@ -123,14 +120,9 @@ public class EgressEventServiceTest {
     WorkbenchConfig getWorkbenchConfig() {
       return workbenchConfig;
     }
-
-    @Bean
-    public Clock clock() {
-      return CLOCK;
-    }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
@@ -163,6 +155,7 @@ public class EgressEventServiceTest {
     doReturn(Optional.of(dbWorkspace))
         .when(workspaceDao)
         .getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
+    fakeClock.setInstant(NOW);
   }
 
   @Test

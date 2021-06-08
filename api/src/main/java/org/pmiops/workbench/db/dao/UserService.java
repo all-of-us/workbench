@@ -165,4 +165,7 @@ public interface UserService {
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   DbUser confirmPublications();
+
+  /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
+  void maybeSendAccessExpirationEmail(DbUser user);
 }

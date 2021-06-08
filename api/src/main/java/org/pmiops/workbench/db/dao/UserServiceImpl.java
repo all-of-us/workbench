@@ -5,6 +5,8 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -21,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
@@ -46,6 +49,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
@@ -93,10 +97,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
-  private final FireCloudService fireCloudService;
+  private final AccessTierService accessTierService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final AccessTierService accessTierService;
+  private final FireCloudService fireCloudService;
+  private final MailService mailService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -115,7 +120,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       FireCloudService fireCloudService,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      AccessTierService accessTierService) {
+      AccessTierService accessTierService,
+      MailService mailService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -130,6 +136,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.complianceService = complianceService;
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
+    this.mailService = mailService;
   }
 
   @VisibleForTesting
@@ -254,10 +261,28 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
 
+    // IMPORTANT: do not use this method as the sole method of determining access compliance!
+    // We must ALSO confirm module completion.
+    // Modules which are not complete are also "not expired"
     public boolean hasExpired() {
       final Timestamp now = new Timestamp(clock.millis());
       return getExpiration().map(x -> x.before(now)).orElse(false);
     }
+  }
+
+  // TODO split into registered tier and controlled tier versions, when available
+  public Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
+    return ImmutableMap.of(
+        ModuleNameEnum.COMPLIANCETRAINING,
+            new ModuleTimes(
+                user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()),
+        ModuleNameEnum.DATAUSEAGREEMENT,
+            new ModuleTimes(
+                user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()),
+        ModuleNameEnum.PROFILECONFIRMATION,
+            new ModuleTimes(user.getProfileLastConfirmedTime(), null),
+        ModuleNameEnum.PUBLICATIONCONFIRMATION,
+            new ModuleTimes(user.getPublicationsLastConfirmedTime(), null));
   }
 
   private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
@@ -268,22 +293,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
-    return ImmutableList.of(
-        mkStatus(
-            ModuleNameEnum.COMPLIANCETRAINING,
-            new ModuleTimes(
-                user.getComplianceTrainingCompletionTime(),
-                user.getComplianceTrainingBypassTime())),
-        mkStatus(
-            ModuleNameEnum.DATAUSEAGREEMENT,
-            new ModuleTimes(
-                user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime())),
-        mkStatus(
-            ModuleNameEnum.PROFILECONFIRMATION,
-            new ModuleTimes(user.getProfileLastConfirmedTime(), null)),
-        mkStatus(
-            ModuleNameEnum.PUBLICATIONCONFIRMATION,
-            new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
+    return getRenewableAccessModules(user).entrySet().stream()
+        .map(x -> mkStatus(x.getKey(), x.getValue()))
+        .collect(Collectors.toList());
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
@@ -320,6 +332,27 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
   }
 
+  // these 2 modules will not be checked at all until we flip the feature flag
+
+  private boolean isProfileConfirmationCompliant(DbUser user) {
+    if (!configProvider.get().access.enableAccessRenewal) {
+      return true;
+    }
+
+    final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
+    return profileTimes.isComplete() && !profileTimes.hasExpired();
+  }
+
+  private boolean isPublicationConfirmationCompliant(DbUser user) {
+    if (!configProvider.get().access.enableAccessRenewal) {
+      return true;
+    }
+
+    final ModuleTimes publicationTimes =
+        new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
+    return publicationTimes.isComplete() && !publicationTimes.hasExpired();
+  }
+
   private boolean shouldUserBeRegistered(DbUser user) {
     // beta access bypass and 2FA do not need to be checked for annual renewal
     boolean betaAccessGranted =
@@ -333,6 +366,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
+        && isPublicationConfirmationCompliant(user)
+        && isProfileConfirmationCompliant(user)
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
@@ -1069,5 +1104,77 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asUser(dbUser));
+  }
+
+  /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
+  @Override
+  public void maybeSendAccessExpirationEmail(DbUser user) {
+    // TODO combine with CT expiration logic when available to send AT MOST ONE email
+
+    final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
+    rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  }
+
+  /**
+   * Return the user's registered tier access expiration time, for the purpose of sending an access
+   * renewal reminder or expiration email.
+   *
+   * <p>First: ignore any bypassed modules. These are in compliance and do not need to be renewed.
+   *
+   * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
+   * If no, either the feature flag is not set or the user does not have access for reasons other
+   * than access renewal compliance. In either negative case, we should not send an email.
+   *
+   * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
+   * SHOULD NOT BE USED FOR ACCESS DECISIONS.
+   */
+  private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
+    // Collection<Optional<T>> is usually a code smell.
+    // Here we do need to know if any are EMPTY, for the next step.
+    final Set<Optional<Timestamp>> expirations =
+        getRenewableAccessModules(user).values().stream()
+            .filter(times -> !times.isBypassed())
+            .map(ModuleTimes::getExpiration)
+            .collect(Collectors.toSet());
+
+    // if any un-bypassed modules are incomplete, we know:
+    // * this user does not currently have access
+    // * this user has never previously had access
+    // therefore: the user is neither "expired" nor "expiring" and we should not send an email
+
+    if (!expirations.stream().allMatch(Optional::isPresent)) {
+      return Optional.empty();
+    } else {
+      return expirations.stream()
+          .map(Optional::get)
+          // note: min() returns EMPTY if the stream is empty at this point,
+          // which is also an indicator that we should not send an email
+          .min(Timestamp::compareTo);
+    }
+  }
+
+  // TODO config values
+  final Set<Long> warningThresholds = ImmutableSet.of(1L, 3L, 7L, 15L, 30L);
+
+  private void maybeSendRegisteredTierExpirationEmail(DbUser user, Timestamp expiration) {
+    long millisRemaining = expiration.getTime() - clock.millis();
+    long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
+
+    // we only want to send the expiration email on the day of the actual expiration
+    if (millisRemaining < 0 && daysRemaining == 0) {
+      sendRegisteredTierExpirationEmail(user);
+    } else {
+      if (warningThresholds.contains(daysRemaining)) {
+        sendRegisteredTierWarningEmail(user, daysRemaining);
+      }
+    }
+  }
+
+  private void sendRegisteredTierExpirationEmail(DbUser user) {
+    mailService.alertUserRegisteredTierExpiration(user);
+  }
+
+  private void sendRegisteredTierWarningEmail(DbUser user, long daysRemaining) {
+    mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
   }
 }

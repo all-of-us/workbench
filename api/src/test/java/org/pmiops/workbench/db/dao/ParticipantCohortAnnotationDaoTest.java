@@ -3,9 +3,8 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
@@ -16,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import({CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -32,7 +29,7 @@ public class ParticipantCohortAnnotationDaoTest extends SpringTest {
   private long cohortReviewId = 3L;
   private long participantId = 4L;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCohortAnnotationDefinition enumAnnotationDefinition =
         new DbCohortAnnotationDefinition()

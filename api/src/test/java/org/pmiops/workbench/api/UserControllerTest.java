@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
@@ -10,16 +11,14 @@ import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.collections4.ListUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -35,6 +34,7 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.User;
@@ -55,14 +55,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserControllerTest {
+public class UserControllerTest extends SpringTest {
 
-  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  @Autowired private FakeClock fakeClock;
   private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -74,12 +72,13 @@ public class UserControllerTest {
     AccessTierServiceImpl.class,
   })
   @MockBean({
-    FireCloudService.class,
+    AdminActionHistoryDao.class,
     ComplianceService.class,
     DirectoryService.class,
-    AdminActionHistoryDao.class,
-    UserServiceAuditor.class,
+    FireCloudService.class,
     FreeTierBillingService.class,
+    MailService.class,
+    UserServiceAuditor.class,
   })
   static class Configuration {
 
@@ -87,11 +86,6 @@ public class UserControllerTest {
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
       return config;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -122,7 +116,7 @@ public class UserControllerTest {
   private static DbAccessTier registeredTier;
   private static DbUser user;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     user = userDao.save(new DbUser());
@@ -130,10 +124,12 @@ public class UserControllerTest {
     saveFamily();
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testUnregistered() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
-    userController.user("Robinson", null, null, null).getBody();
+    assertThrows(
+        ForbiddenException.class,
+        () -> userController.user("Robinson", null, null, null).getBody());
   }
 
   @Test
@@ -486,7 +482,7 @@ public class UserControllerTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
+    user.setFirstSignInTime(new Timestamp(fakeClock.instant().toEpochMilli()));
     incrementedUserId++;
     user = userDao.save(user);
 

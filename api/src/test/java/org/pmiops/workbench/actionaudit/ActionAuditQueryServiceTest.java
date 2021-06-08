@@ -18,8 +18,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.AuditLogEntry;
@@ -33,10 +33,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class ActionAuditQueryServiceTest {
+public class ActionAuditQueryServiceTest extends SpringTest {
 
   // N.B. Field order must match that of SELECT statement in Workspaces query
   private static final Schema WORKSPACE_QUERY_SCHEMA =

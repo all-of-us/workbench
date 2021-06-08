@@ -11,9 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.DataSetDao.InvalidToCountResult;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -25,9 +24,7 @@ import org.pmiops.workbench.utils.Booleans;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataSetDaoTest extends SpringTest {
@@ -39,7 +36,7 @@ public class DataSetDaoTest extends SpringTest {
   @Autowired private DataSetDao dataSetDao;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @Before
+  @BeforeEach
   public void setup() {
     // FK constraint requires a real workspaceID
     workspace = workspaceDao.save(new DbWorkspace());

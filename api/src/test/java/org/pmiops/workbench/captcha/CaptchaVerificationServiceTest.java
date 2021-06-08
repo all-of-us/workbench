@@ -3,10 +3,10 @@ package org.pmiops.workbench.captcha;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -18,10 +18,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class CaptchaVerificationServiceTest {
+public class CaptchaVerificationServiceTest extends SpringTest {
 
   final String prodAllOfUsUrl = "https://workbench.researchallofus.org/login";
   final String testUrl = "testkey.google.com";
@@ -44,7 +42,7 @@ public class CaptchaVerificationServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, ApiException {
     config = WorkbenchConfig.createEmptyConfig();
     config.admin.loginUrl = "hostname";

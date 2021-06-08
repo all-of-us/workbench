@@ -19,10 +19,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Random;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -46,11 +47,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class RasLinkServiceTest {
+public class RasLinkServiceTest extends SpringTest {
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
@@ -99,13 +98,14 @@ public class RasLinkServiceTest {
     UserServiceTestConfiguration.class,
   })
   @MockBean({
-    FireCloudService.class,
+    AccessTierService.class,
     ComplianceService.class,
     DirectoryService.class,
-    UserServiceAuditor.class,
+    FireCloudService.class,
     FreeTierBillingService.class,
     HttpTransport.class,
-    AccessTierService.class,
+    MailService.class,
+    UserServiceAuditor.class,
   })
   static class Configuration {
     @Bean
@@ -139,7 +139,7 @@ public class RasLinkServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     rasLinkService = new RasLinkService(userService, mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);

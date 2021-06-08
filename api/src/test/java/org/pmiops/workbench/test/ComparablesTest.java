@@ -3,7 +3,7 @@ package org.pmiops.workbench.test;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.time.Duration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.utils.Comparables;
 
 public class ComparablesTest {

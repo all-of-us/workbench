@@ -2,8 +2,8 @@ package org.pmiops.workbench.cohortbuilder.mapper;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
@@ -20,10 +20,8 @@ import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class CohortBuilderMapperTest {
+public class CohortBuilderMapperTest extends SpringTest {
 
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
 

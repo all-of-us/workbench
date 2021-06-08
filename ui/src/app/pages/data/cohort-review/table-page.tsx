@@ -261,7 +261,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
     async componentDidMount() {
       const {filters} = this.state;
       let {demoFilters} = this.state;
-      const {cdrVersionId} = this.props.workspace;
       const promises = [];
       const {ns, wsid} = urlParamsStore.getValue();
       const review = cohortReviewStore.getValue();
@@ -290,7 +289,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         });
       }
       promises.push(
-        cohortBuilderApi().findParticipantDemographics(+cdrVersionId).then(data => {
+        cohortBuilderApi().findParticipantDemographics(ns, wsid).then(data => {
           const extract = (arr, _type?) => fp.uniq([
             ...arr.map(i => {
               filters[_type].push(i.conceptId.toString());

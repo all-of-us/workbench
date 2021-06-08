@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.util;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.buildParameter;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.decorateParameterName;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToQpv;
@@ -22,12 +23,13 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
-public class QueryParameterValuesTest {
+public class QueryParameterValuesTest extends SpringTest {
 
   private static final Map<String, QueryParameterValue> PARAM_MAP = new HashMap<>();
   private static final Instant INSTANT = Instant.parse("2012-12-13T00:00:00.00Z");
@@ -36,13 +38,13 @@ public class QueryParameterValuesTest {
   private static final QueryParameterValue TIMESTAMP_QPV =
       QueryParameterValue.timestamp(INSTANT.toEpochMilli() * MICROSECONDS_IN_MILLISECOND);
 
-  @Before
+  @BeforeEach
   public void setup() {
     PARAM_MAP.put("foo", QueryParameterValue.int64(99));
     PARAM_MAP.put("bar", QueryParameterValue.string("hooray"));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     PARAM_MAP.clear();
   }
@@ -103,9 +105,11 @@ public class QueryParameterValuesTest {
     assertThat(timestampQpvToInstant(QueryParameterValue.timestamp((String) null))).isEmpty();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testTimestampQpvToInstant_wrongQpvType() {
-    timestampQpvToInstant(QueryParameterValue.bool(false));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> timestampQpvToInstant(QueryParameterValue.bool(false)));
   }
 
   @Test

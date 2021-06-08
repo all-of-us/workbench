@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,13 +11,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -36,10 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class EgressEventAuditorTest {
+public class EgressEventAuditorTest extends SpringTest {
 
   private static final long USER_ID = 1L;
   private static final String USER_EMAIL = "user@researchallofus.org";
@@ -65,8 +62,6 @@ public class EgressEventAuditorTest {
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
 
-  @Rule public final ExpectedException exception = ExpectedException.none();
-
   @TestConfiguration
   @Import({
     // Import the impl class to allow autowiring the bean.
@@ -76,7 +71,7 @@ public class EgressEventAuditorTest {
   })
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     dbUser = new DbUser();
     dbUser.setUserId(USER_ID);
@@ -143,20 +138,21 @@ public class EgressEventAuditorTest {
 
   @Test
   public void testNoWorkspaceFound() {
-    exception.expect(BadRequestException.class);
-
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
     when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.empty());
-    egressEventAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX));
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            egressEventAuditor.fireEgressEvent(
+                new EgressEvent()
+                    .projectName(EGRESS_EVENT_PROJECT_NAME)
+                    .vmPrefix(EGRESS_EVENT_VM_PREFIX)));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Some of the properties should be nulled out, since we can't identify the target workspace
     // for the egress event.
-    assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
-        .containsExactly(0);
     assertThat(
             events.stream()
                 .map(event -> event.getAgentEmailMaybe())

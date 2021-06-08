@@ -260,7 +260,7 @@ export default class NotebookPage extends AuthenticatedPage {
     await this.waitForKernelIdle(timeOut);
     const [output] = await Promise.all([
       cell.waitForOutput(timeOut),
-      this.waitForKernelIdle(timeOut) // Wait for kernel idle again because sometimes kernel turns unexpectely.
+      this.waitForKernelIdle(timeOut) // Wait for kernel idle again because sometimes kernel turns unexpectedly.
     ]);
     return output;
   }

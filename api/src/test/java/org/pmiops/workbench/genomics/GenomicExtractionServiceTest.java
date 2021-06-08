@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -73,9 +72,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class GenomicExtractionServiceTest {
@@ -141,7 +138,7 @@ public class GenomicExtractionServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws ApiException {
     cloudStorageClient = mock(CloudStorageClient.class);
     Blob blob = mock(Blob.class);
@@ -406,10 +403,13 @@ public class GenomicExtractionServiceTest {
         .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
-    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset));
   }
 
   @Test

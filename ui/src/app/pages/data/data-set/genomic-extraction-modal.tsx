@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
@@ -6,6 +7,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
+import {genomicExtractionStore, updateGenomicExtractionStore} from 'app/utils/stores';
 import {DataSet} from 'generated/fetch';
 
 const {useState} = React;
@@ -53,8 +55,15 @@ export const GenomicExtractionModal = ({
               onClick={async() => {
                 setLoading(true);
                 try {
-                  await dataSetApi().extractGenomicData(
+                  const job = await dataSetApi().extractGenomicData(
                     workspaceNamespace, workspaceFirecloudName, dataSet.id);
+                  updateGenomicExtractionStore(
+                    workspaceNamespace,
+                    fp.concat(
+                      genomicExtractionStore.get()[workspaceNamespace] || [],
+                      job
+                    )
+                  );
                   closeFunction();
                 } catch (e) {
                   setError(true);

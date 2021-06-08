@@ -181,14 +181,14 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     async loadDomainsAndSurveys() {
-      const {cohortContext, workspace: {cdrVersionId}} = this.props;
-      const getDomainInfo = cohortBuilderApi().findDomainInfos(+cdrVersionId)
+      const {cohortContext, workspace: {id, namespace}} = this.props;
+      const getDomainInfo = cohortBuilderApi().findDomainInfos(namespace, id)
         .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
         .catch((e) => {
           this.setState({domainInfoError: true});
           console.error(e);
         });
-      const getSurveyInfo = cohortBuilderApi().findSurveyModules(+cdrVersionId)
+      const getSurveyInfo = cohortBuilderApi().findSurveyModules(namespace, id)
         .then(surveysInfo => this.setState({conceptSurveysList: surveysInfo.items}))
         .catch((e) => {
           this.setState({surveyInfoError: true});
@@ -202,7 +202,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     async updateCardCounts() {
-      const {cdrVersionId} = this.props.workspace;
+      const {id, namespace} = this.props.workspace;
       const {conceptDomainList, conceptSurveysList, currentInputString} = this.state;
       this.setState({
         domainsLoading: conceptDomainList.map(domain => domain.domain),
@@ -210,7 +210,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       });
       const promises = [];
       conceptDomainList.forEach(conceptDomain => {
-        promises.push(cohortBuilderApi().findDomainCount(+cdrVersionId, conceptDomain.domain.toString(), currentInputString)
+        promises.push(cohortBuilderApi().findDomainCount(namespace, id, conceptDomain.domain.toString(), currentInputString)
           .then(domainCount => {
             conceptDomain.allConceptCount = domainCount.conceptCount;
             this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
@@ -218,7 +218,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
         );
       });
       conceptSurveysList.forEach(conceptSurvey => {
-        promises.push(cohortBuilderApi().findSurveyCount(+cdrVersionId, conceptSurvey.name, currentInputString)
+        promises.push(cohortBuilderApi().findSurveyCount(namespace, id, conceptSurvey.name, currentInputString)
           .then(surveyCount => {
             conceptSurvey.questionCount = surveyCount.conceptCount;
             this.setState({surveysLoading: this.state.surveysLoading.filter(survey => survey !== conceptSurvey.name)});

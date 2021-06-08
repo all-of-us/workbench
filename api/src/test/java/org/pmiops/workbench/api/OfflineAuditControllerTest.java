@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -35,15 +35,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class OfflineAuditControllerTest {
+public class OfflineAuditControllerTest extends SpringTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_V1_PROJECT_ID = "cdr1-project";
@@ -68,7 +66,7 @@ public class OfflineAuditControllerTest {
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);

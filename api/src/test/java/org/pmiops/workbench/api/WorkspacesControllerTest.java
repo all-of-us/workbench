@@ -19,7 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.BaseTestConfiguration.NOW_TIME;
+import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -52,9 +52,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
@@ -199,11 +198,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -387,7 +384,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
   private TestMockFactory testMockFactory;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
@@ -748,11 +745,15 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void testCreateWorkspace_archivedCdrVersionThrows() {
-    Workspace workspace = createWorkspace();
-    workspace.setCdrVersionId(archivedCdrVersionId);
-    workspacesController.createWorkspace(workspace).getBody();
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> {
+          Workspace workspace = createWorkspace();
+          workspace.setCdrVersionId(archivedCdrVersionId);
+          workspacesController.createWorkspace(workspace).getBody();
+        });
   }
 
   // we do not actually use the accessTierShortName of the Workspace passed to
@@ -1087,63 +1088,77 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(updatedRp.getReviewRequested()).isFalse();
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testReaderUpdateWorkspaceThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testWriterUpdateWorkspaceThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testUpdateWorkspaceAccessTierThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ws.setName("updated-name");
-    ws.setAccessTierShortName("new tier");
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(ws);
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ws.setName("updated-name");
+          ws.setAccessTierShortName("new tier");
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(ws);
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void testUpdateWorkspaceStaleThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(
-        new Workspace()
-            .name("updated-name")
-            .billingAccountName("billing-account")
-            .accessTierShortName(ws.getAccessTierShortName())
-            .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-
-    // Still using the initial now-stale etag; this should throw.
-    request.setWorkspace(
-        new Workspace()
-            .name("updated-name2")
-            .billingAccountName("billing-account")
-            .accessTierShortName(ws.getAccessTierShortName())
-            .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+          request.setWorkspace(
+              new Workspace()
+                  .name("updated-name")
+                  .billingAccountName("billing-account")
+                  .accessTierShortName(ws.getAccessTierShortName())
+                  .etag(ws.getEtag()));
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+          // Still using the initial now-stale etag; this should throw.
+          request.setWorkspace(
+              new Workspace()
+                  .name("updated-name2")
+                  .billingAccountName("billing-account")
+                  .accessTierShortName(ws.getAccessTierShortName())
+                  .etag(ws.getEtag()));
+          workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+        });
   }
 
   @Test
@@ -1165,17 +1180,19 @@ public class WorkspacesControllerTest extends SpringTest {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testRejectAfterApproveThrows() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-
-    ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
-    request.setApproved(true);
-    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
-
-    request.setApproved(false);
-    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
+          request.setApproved(true);
+          workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+          request.setApproved(false);
+          workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+        });
   }
 
   @Test
@@ -1396,36 +1413,36 @@ public class WorkspacesControllerTest extends SpringTest {
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspace_accessTierMismatch() {
-    Workspace originalWorkspace = createWorkspace();
-    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
-
-    DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    altAccessTier = accessTierDao.save(altAccessTier);
-
-    DbCdrVersion altCdrVersion = new DbCdrVersion();
-    altCdrVersion.setCdrVersionId(2);
-    altCdrVersion.setName("CDR 2");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    altCdrVersion.setCdrDbName("");
-    altCdrVersion.setAccessTier(altAccessTier);
-    altCdrVersion = cdrVersionDao.save(altCdrVersion);
-
-    final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    modWorkspace.setResearchPurpose(new ResearchPurpose());
-    modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
-
-    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    workspacesController.cloneWorkspace(
-        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace originalWorkspace = createWorkspace();
+          originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+          DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+          altAccessTier = accessTierDao.save(altAccessTier);
+          DbCdrVersion altCdrVersion = new DbCdrVersion();
+          altCdrVersion.setCdrVersionId(2);
+          altCdrVersion.setName("CDR 2");
+          // set the db name to be empty since test cases currently
+          // run in the workbench schema only.
+          altCdrVersion.setCdrDbName("");
+          altCdrVersion.setAccessTier(altAccessTier);
+          altCdrVersion = cdrVersionDao.save(altCdrVersion);
+          final Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+          modWorkspace.setResearchPurpose(new ResearchPurpose());
+          modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
+          final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          req.setWorkspace(modWorkspace);
+          stubCloneWorkspace(
+              modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+          workspacesController.cloneWorkspace(
+              originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+        });
   }
 
   // DbWorkspace stores several fields as Sets, but Workspace sees them as Lists of arbitrary order.
@@ -2121,58 +2138,70 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
   }
 
-  @Test(expected = NumberFormatException.class)
+  @Test
   public void testCloneWorkspaceBadCdrVersion() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId("bad-cdr-version-id");
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+    assertThrows(
+        NumberFormatException.class,
+        () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace =
+              new Workspace()
+                  .name("cloned")
+                  .namespace("cloned-ns")
+                  .researchPurpose(workspace.getResearchPurpose())
+                  .cdrVersionId("bad-cdr-version-id");
+          stubCloneWorkspace(
+              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(
+              workspace.getNamespace(),
+              workspace.getId(),
+              new CloneWorkspaceRequest().workspace(modWorkspace));
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspaceMissingCdrVersion() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId("100");
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace =
+              new Workspace()
+                  .name("cloned")
+                  .namespace("cloned-ns")
+                  .researchPurpose(workspace.getResearchPurpose())
+                  .cdrVersionId("100");
+          stubCloneWorkspace(
+              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(
+              workspace.getNamespace(),
+              workspace.getId(),
+              new CloneWorkspaceRequest().workspace(modWorkspace));
+        });
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test
   public void testCloneWorkspaceArchivedCdrVersionThrows() {
-    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-
-    Workspace modWorkspace =
-        new Workspace()
-            .name("cloned")
-            .namespace("cloned-ns")
-            .researchPurpose(workspace.getResearchPurpose())
-            .cdrVersionId(archivedCdrVersionId);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
-    mockBillingProjectBuffer("cloned-ns");
-    workspacesController.cloneWorkspace(
-        workspace.getNamespace(),
-        workspace.getId(),
-        new CloneWorkspaceRequest().workspace(modWorkspace));
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> {
+          Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+          Workspace modWorkspace =
+              new Workspace()
+                  .name("cloned")
+                  .namespace("cloned-ns")
+                  .researchPurpose(workspace.getResearchPurpose())
+                  .cdrVersionId(archivedCdrVersionId);
+          stubCloneWorkspace(
+              modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+          mockBillingProjectBuffer("cloned-ns");
+          workspacesController.cloneWorkspace(
+              workspace.getNamespace(),
+              workspace.getId(),
+              new CloneWorkspaceRequest().workspace(modWorkspace));
+        });
   }
 
   @Test
@@ -2267,44 +2296,49 @@ public class WorkspacesControllerTest extends SpringTest {
             argThat(arg -> new HashSet(updateACLRequestList).equals(new HashSet(arg))));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCloneWorkspaceBadRequest() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    req.setWorkspace(modWorkspace);
-    // Missing research purpose.
-    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace workspace = createWorkspace();
+          workspace = workspacesController.createWorkspace(workspace).getBody();
+          CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          req.setWorkspace(modWorkspace);
+          // Missing research purpose.
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+        });
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testClonePermissionDenied() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    // Clone with a different user.
-    DbUser cloner = new DbUser();
-    cloner.setUsername("cloner@gmail.com");
-    cloner.setUserId(456L);
-    cloner.setDisabled(false);
-    currentUser = userDao.save(cloner);
-
-    // Permission denied manifests as a 404 in Firecloud.
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenThrow(new NotFoundException());
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-    req.setWorkspace(modWorkspace);
-    ResearchPurpose modPurpose = new ResearchPurpose();
-    modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
-    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+    assertThrows(
+        NotFoundException.class,
+        () -> {
+          Workspace workspace = createWorkspace();
+          workspace = workspacesController.createWorkspace(workspace).getBody();
+          // Clone with a different user.
+          DbUser cloner = new DbUser();
+          cloner.setUsername("cloner@gmail.com");
+          cloner.setUserId(456L);
+          cloner.setDisabled(false);
+          currentUser = userDao.save(cloner);
+          // Permission denied manifests as a 404 in Firecloud.
+          when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+              .thenThrow(new NotFoundException());
+          CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+          Workspace modWorkspace = new Workspace();
+          modWorkspace.setName("cloned");
+          modWorkspace.setNamespace("cloned-ns");
+          req.setWorkspace(modWorkspace);
+          ResearchPurpose modPurpose = new ResearchPurpose();
+          modPurpose.setAncestry(true);
+          modWorkspace.setResearchPurpose(modPurpose);
+          workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+        });
   }
 
   @Test
@@ -2562,17 +2596,21 @@ public class WorkspacesControllerTest extends SpringTest {
     }
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testUnableToShareWithNonExistentUser() {
-    Workspace workspace = createWorkspace();
-    workspacesController.createWorkspace(workspace);
-    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
-    workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          Workspace workspace = createWorkspace();
+          workspacesController.createWorkspace(workspace);
+          ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+          addUserRoleToShareWorkspaceRequest(
+              shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+          addUserRoleToShareWorkspaceRequest(
+              shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
+          workspacesController.shareWorkspace(
+              workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        });
   }
 
   @Test
@@ -2763,141 +2801,141 @@ public class WorkspacesControllerTest extends SpringTest {
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.READER);
-    String newNotebookName = "new";
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace fromWorkspace = createWorkspace();
+          fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+          String fromNotebookName = "origin";
+          Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+          toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+          stubGetWorkspace(
+              toWorkspace.getNamespace(),
+              toWorkspace.getName(),
+              LOGGED_IN_USER_EMAIL,
+              WorkspaceAccessLevel.READER);
+          String newNotebookName = "new";
+          CopyRequest copyNotebookRequest =
+              new CopyRequest()
+                  .toWorkspaceName(toWorkspace.getName())
+                  .toWorkspaceNamespace(toWorkspace.getNamespace())
+                  .newName(newNotebookName);
+          workspacesController.copyNotebook(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              fromNotebookName,
+              copyNotebookRequest);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void copyNotebook_noAccessOnSource() {
-    Workspace fromWorkspace = testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    stubGetWorkspace(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.NO_ACCESS);
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.WRITER);
-    String newNotebookName = "new";
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace fromWorkspace =
+              testMockFactory.createWorkspace("fromWorkspaceNs", "fromworkspace");
+          fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+          stubGetWorkspace(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              LOGGED_IN_USER_EMAIL,
+              WorkspaceAccessLevel.NO_ACCESS);
+          String fromNotebookName = "origin";
+          Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+          toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+          stubGetWorkspace(
+              toWorkspace.getNamespace(),
+              toWorkspace.getName(),
+              LOGGED_IN_USER_EMAIL,
+              WorkspaceAccessLevel.WRITER);
+          String newNotebookName = "new";
+          CopyRequest copyNotebookRequest =
+              new CopyRequest()
+                  .toWorkspaceName(toWorkspace.getName())
+                  .toWorkspaceNamespace(toWorkspace.getNamespace())
+                  .newName(newNotebookName);
+          workspacesController.copyNotebook(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              fromNotebookName,
+              copyNotebookRequest);
+        });
   }
 
-  @Test(expected = ConflictException.class)
+  @Test
   public void copyNotebook_alreadyExists() {
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    BlobId newBlobId =
-        BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
-
-    doReturn(Collections.singleton(newBlobId))
-        .when(cloudStorageClient)
-        .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(
+        ConflictException.class,
+        () -> {
+          Workspace fromWorkspace = createWorkspace();
+          fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+          String fromNotebookName = "origin";
+          Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+          toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+          String newNotebookName = NotebooksService.withNotebookExtension("new");
+          CopyRequest copyNotebookRequest =
+              new CopyRequest()
+                  .toWorkspaceName(toWorkspace.getName())
+                  .toWorkspaceNamespace(toWorkspace.getNamespace())
+                  .newName(newNotebookName);
+          BlobId newBlobId =
+              BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
+          doReturn(Collections.singleton(newBlobId))
+              .when(cloudStorageClient)
+              .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
+          workspacesController.copyNotebook(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              fromNotebookName,
+              copyNotebookRequest);
+        });
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCopyNotebook_notAllowedBetweenTiers() {
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-
-    DbCdrVersion controlledCdr =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
-    controlledCdr.setName("2");
-    controlledCdr.setAccessTier(controlledTier);
-    controlledCdr = cdrVersionDao.save(controlledCdr);
-
-    Workspace fromWorkspace = createWorkspace();
-    fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
-    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
-    String fromNotebookName = "origin";
-
-    stubGetWorkspace(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-
-    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
-    // a CDR Version in the Registered Tier
-    toWorkspace.setCdrVersionId(cdrVersionId);
-    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = NotebooksService.withNotebookExtension("new");
-
-    stubGetWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
-
-    CopyRequest copyNotebookRequest =
-        new CopyRequest()
-            .toWorkspaceName(toWorkspace.getName())
-            .toWorkspaceNamespace(toWorkspace.getNamespace())
-            .newName(newNotebookName);
-
-    workspacesController.copyNotebook(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        fromNotebookName,
-        copyNotebookRequest);
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          final DbAccessTier controlledTier =
+              TestMockFactory.createControlledTierForTests(accessTierDao);
+          DbCdrVersion controlledCdr =
+              TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+          controlledCdr.setName("2");
+          controlledCdr.setAccessTier(controlledTier);
+          controlledCdr = cdrVersionDao.save(controlledCdr);
+          Workspace fromWorkspace = createWorkspace();
+          fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
+          fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+          String fromNotebookName = "origin";
+          stubGetWorkspace(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              LOGGED_IN_USER_EMAIL,
+              WorkspaceAccessLevel.OWNER);
+          Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+          // a CDR Version in the Registered Tier
+          toWorkspace.setCdrVersionId(cdrVersionId);
+          toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+          String newNotebookName = NotebooksService.withNotebookExtension("new");
+          stubGetWorkspace(
+              toWorkspace.getNamespace(),
+              toWorkspace.getName(),
+              LOGGED_IN_USER_EMAIL,
+              WorkspaceAccessLevel.OWNER);
+          CopyRequest copyNotebookRequest =
+              new CopyRequest()
+                  .toWorkspaceName(toWorkspace.getName())
+                  .toWorkspaceNamespace(toWorkspace.getNamespace())
+                  .newName(newNotebookName);
+          workspacesController.copyNotebook(
+              fromWorkspace.getNamespace(),
+              fromWorkspace.getName(),
+              fromNotebookName,
+              copyNotebookRequest);
+        });
   }
 
   @Test
@@ -3213,12 +3251,17 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(workspaceBillingUsageResponse.getCost()).isEqualTo(cost);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetBillingUsageWithoutAccess() {
-    Workspace ws = createWorkspace();
-    ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-    workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          Workspace ws = createWorkspace();
+          ws = workspacesController.createWorkspace(ws).getBody();
+          stubGetWorkspace(
+              ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
+          workspacesController.getBillingUsage(ws.getNamespace(), ws.getId());
+        });
   }
 
   @Test

@@ -6,9 +6,8 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -20,9 +19,7 @@ import org.pmiops.workbench.model.Surveys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ConceptSetDaoTest extends SpringTest {
@@ -32,7 +29,7 @@ public class ConceptSetDaoTest extends SpringTest {
   @Autowired private WorkspaceDao workspaceDao;
   private DbConceptSet dbConceptSet;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbWorkspace ws = new DbWorkspace();
     ws.setVersion(1);

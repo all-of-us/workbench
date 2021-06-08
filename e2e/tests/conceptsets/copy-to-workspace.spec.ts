@@ -17,13 +17,12 @@ async function createConceptSet(
   await srcWorkspaceCard.clickWorkspaceName();
   // Open Concept Sets tab.
   const dataPage = new WorkspaceDataPage(page);
-  await dataPage.openConceptSetsSubtab();
 
   // Create new Concept Set
   const { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
 
   // Search by Procedure name.
-  const procedureName = 'Radiologic examination';
+  const procedureName = 'Surgery';
   await criteriaSearch.searchCriteria(procedureName);
 
   // Select first two rows.

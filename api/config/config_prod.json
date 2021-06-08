@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -106,12 +106,10 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
-    "enableRdrExport": true,
     "enableBillingUpgrade": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
     "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false
@@ -139,6 +137,6 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }

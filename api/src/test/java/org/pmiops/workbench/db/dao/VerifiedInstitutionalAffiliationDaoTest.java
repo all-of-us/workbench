@@ -2,10 +2,10 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
@@ -29,7 +27,7 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
   private DbInstitution testInst =
       new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testUser = userDao.save(testUser);
     testInst = institutionDao.save(testInst);
@@ -208,7 +206,7 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
         .hasValue(testInst);
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_twoAffiliationsForUser() {
     verifiedInstitutionalAffiliationDao.save(
         new DbVerifiedInstitutionalAffiliation()
@@ -219,12 +217,15 @@ public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
     final DbInstitution newInst =
         institutionDao.save(new DbInstitution().setShortName("VUMC").setDisplayName("Vanderbilt"));
 
-    verifiedInstitutionalAffiliationDao.save(
-        new DbVerifiedInstitutionalAffiliation()
-            .setUser(testUser)
-            .setInstitution(newInst)
-            .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
-            .setInstitutionalRoleOtherText(
-                "Arbitrary and does not actually require enum to be OTHER"));
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () ->
+            verifiedInstitutionalAffiliationDao.save(
+                new DbVerifiedInstitutionalAffiliation()
+                    .setUser(testUser)
+                    .setInstitution(newInst)
+                    .setInstitutionalRoleEnum(InstitutionalRole.OTHER)
+                    .setInstitutionalRoleOtherText(
+                        "Arbitrary and does not actually require enum to be OTHER")));
   }
 }

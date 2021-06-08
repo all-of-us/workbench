@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
@@ -14,9 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -44,11 +44,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -100,7 +98,7 @@ public class CdrVersionServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
 
     user = new DbUser();
@@ -148,39 +146,51 @@ public class CdrVersionServiceTest {
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionDefaultForbiddenNotInTier() {
-    cdrVersionService.setCdrVersion(defaultCdrVersion);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.setCdrVersion(defaultCdrVersion);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionDefaultIdForbiddenNotInTier() {
-    cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+        });
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
   // but the user is not in the right auth domain according to Terra
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionDefaultForbiddenNotInGroup() {
-    accessTierService.addUserToTier(user, registeredTier);
-
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), registeredTier.getAuthDomainName()))
-        .thenReturn(false);
-
-    cdrVersionService.setCdrVersion(defaultCdrVersion);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          accessTierService.addUserToTier(user, registeredTier);
+          when(fireCloudService.isUserMemberOfGroup(
+                  user.getUsername(), registeredTier.getAuthDomainName()))
+              .thenReturn(false);
+          cdrVersionService.setCdrVersion(defaultCdrVersion);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionDefaultIdForbiddenNotInGroup() {
-    accessTierService.addUserToTier(user, registeredTier);
-
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), registeredTier.getAuthDomainName()))
-        .thenReturn(false);
-
-    cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          accessTierService.addUserToTier(user, registeredTier);
+          when(fireCloudService.isUserMemberOfGroup(
+                  user.getUsername(), registeredTier.getAuthDomainName()))
+              .thenReturn(false);
+          cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+        });
   }
 
   @Test
@@ -197,39 +207,51 @@ public class CdrVersionServiceTest {
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionControlledForbiddenNotInTier() {
-    cdrVersionService.setCdrVersion(controlledCdrVersion);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.setCdrVersion(controlledCdrVersion);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionControlledIdForbiddenNotInTier() {
-    cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+        });
   }
 
   // these tests fail because the user is in the right tier according to the AoU DB
   // but the user is not in the right auth domain according to Terra
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionControlledForbiddenNotInGroup() {
-    accessTierService.addUserToTier(user, controlledTier);
-
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(false);
-
-    cdrVersionService.setCdrVersion(controlledCdrVersion);
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          accessTierService.addUserToTier(user, controlledTier);
+          when(fireCloudService.isUserMemberOfGroup(
+                  user.getUsername(), controlledTier.getAuthDomainName()))
+              .thenReturn(false);
+          cdrVersionService.setCdrVersion(controlledCdrVersion);
+        });
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testSetCdrVersionControlledIdForbiddenNotInGroup() {
-    accessTierService.addUserToTier(user, controlledTier);
-
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(false);
-
-    cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          accessTierService.addUserToTier(user, controlledTier);
+          when(fireCloudService.isUserMemberOfGroup(
+                  user.getUsername(), controlledTier.getAuthDomainName()))
+              .thenReturn(false);
+          cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
+        });
   }
 
   // Tests for deprecated registered-tier-only getCdrVersions()
@@ -247,9 +269,13 @@ public class CdrVersionServiceTest {
     assertThat(response.getDefaultCdrVersionId()).isEqualTo(expectedId);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetCdrVersionsUnregistered() {
-    cdrVersionService.getCdrVersions();
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.getCdrVersions();
+        });
   }
 
   // Tests for multi-tier getCdrVersionsByTier()
@@ -273,9 +299,13 @@ public class CdrVersionServiceTest {
         controlledCdrVersion);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void testGetCdrVersionsByTierUnregistered() {
-    cdrVersionService.getCdrVersionsByTier();
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cdrVersionService.getCdrVersionsByTier();
+        });
   }
 
   private void assertResponseMultiTier(

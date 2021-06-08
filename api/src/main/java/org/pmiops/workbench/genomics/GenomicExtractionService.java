@@ -183,6 +183,9 @@ public class GenomicExtractionService {
                 extractionFolder + "/person_ids.txt",
                 String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
 
+    final String outputDir =
+        "gs://" + fcUserWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/";
+
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
             .get()
@@ -236,13 +239,7 @@ public class GenomicExtractionService {
                             // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
                             // etc
                             .put(EXTRACT_WORKFLOW_NAME + ".output_file_base_name", "\"interval\"")
-                            .put(
-                                EXTRACT_WORKFLOW_NAME + ".output_gcs_dir",
-                                "\"gs://"
-                                    + fcUserWorkspace.getBucketName()
-                                    + "/"
-                                    + extractionFolder
-                                    + "/vcfs/\"")
+                            .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
                                 "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar\"")
@@ -279,7 +276,10 @@ public class GenomicExtractionService {
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     dbSubmission.setTerraSubmissionDate(
         CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
+    dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     dbSubmission.setSampleCount((long) personIds.size());
+    dbSubmission.setOutputDir(outputDir);
+    dbSubmission.setTerraStatusEnum(TerraJobStatus.RUNNING);
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider
@@ -290,7 +290,7 @@ public class GenomicExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
+    return genomicExtractionMapper.toApi(dbSubmission);
   }
 
   public void abortGenomicExtractionJob(DbWorkspace dbWorkspace, String jobId) throws ApiException {

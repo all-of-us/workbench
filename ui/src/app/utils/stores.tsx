@@ -1,7 +1,13 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  ConfigResponse,
+  GenomicExtractionJob,
+  Profile,
+  Runtime,
+} from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
@@ -26,6 +32,19 @@ interface AuthStore {
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
 export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
+
+export interface GenomicExtractionStore {
+  [workspaceNamespace: string]: GenomicExtractionJob[];
+}
+
+export const genomicExtractionStore = atom<GenomicExtractionStore>({});
+
+export const updateGenomicExtractionStore = (workspaceNamespace: string, extractions: GenomicExtractionJob[]) => {
+  genomicExtractionStore.set({
+    ...genomicExtractionStore.get(),
+    [workspaceNamespace]: extractions
+  });
+};
 
 export interface ProfileStore {
   profile?: Profile;
@@ -52,6 +71,15 @@ export const profileStore = atom<ProfileStore>({
     profile: p
   })
 });
+
+
+export interface NotificationStore {
+  title: string;
+  message: string;
+  onDismiss?: () => void;
+}
+
+export const notificationStore = atom<NotificationStore | null>(null);
 
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;

@@ -5,9 +5,9 @@ import static com.google.common.truth.Truth.assertThat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.model.StatusAlert;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
-public class StatusAlertControllerTest {
+public class StatusAlertControllerTest extends SpringTest {
   private static final Instant NOW = Instant.now();
   private String STATUS_ALERT_INITIAL_TITLE = "Hello World";
   private String STATUS_ALERT_INITIAL_DESCRIPTION = "Status alert description";
@@ -36,7 +34,7 @@ public class StatusAlertControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     StatusAlert initialStatusAlert =
         new StatusAlert()

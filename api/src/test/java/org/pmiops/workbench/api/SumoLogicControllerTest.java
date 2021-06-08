@@ -12,9 +12,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -30,10 +30,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class SumoLogicControllerTest {
+public class SumoLogicControllerTest extends SpringTest {
 
   private static final String API_KEY = "12345";
 
@@ -59,7 +57,7 @@ public class SumoLogicControllerTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws JsonProcessingException {
     config = WorkbenchConfig.createEmptyConfig();
 
