@@ -13,14 +13,11 @@ import { makeWorkspaceName } from 'utils/str-utils';
 jest.setTimeout(10 * 60 * 1000);
 
 describe('Create Dataset', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-  });
-
   const workspace = makeWorkspaceName();
   let datasetName;
 
   test('Cannot create dataset when required inputs are blank', async () => {
+    await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button.
@@ -91,6 +88,7 @@ describe('Create Dataset', () => {
   });
 
   test('Create dataset with all available inputs', async () => {
+    await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button.
