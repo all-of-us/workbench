@@ -22,13 +22,16 @@ declare global {
 
 // Set this as early as possible in the application boot-strapping process,
 // so it's available for Puppeteer to call.
+console.log('initializing setAccessTokenOverride'); // XXX: remove
 if (environment.allowTestAccessTokenOverride) {
   window.setTestAccessTokenOverride = (token: string) => {
     if (token) {
-      setTimeout(() => console.log('Setting access token override in local storage'), 2000);
+      console.log('Setting access token override in local storage');
       window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+      return 'set localstorage token at ' + Date(); // XXX: remove
     } else {
       window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      return 'cleared localstorage token at ' + Date(); // XXX: remove
     }
   };
 }
