@@ -107,12 +107,10 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
-    "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false
