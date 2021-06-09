@@ -113,11 +113,16 @@ beforeEach(async () => {
       );
     } catch (ex) {
       // arg.jsonValue() sometimes throws exception. Try another way when encountering error.
-      logger.error(`Exception thrown when reading page console: ${ex}`);
-      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
-      const concatenatedText = args.filter((arg) => !!arg).join('\n');
-      const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
+      logger.error(`Exception thrown when reading page console (approach 1): ${ex}`);
+      await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
+        .then((args) => {
+          const concatenatedText = args.filter((arg) => !!arg).join('\n');
+          const msgType = message.type() === 'warning' ? 'warn' : message.type();
+          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
+        })
+        .catch((ex1) => {
+          logger.error(`Exception thrown when reading page console (approach 2): ${ex1}`);
+        });
     }
   });
 
@@ -152,7 +157,7 @@ const getPageTitle = async () => {
       return title.textContent;
     })
     .catch(() => {
-      return 'getPageTitle() func failed';
+      return '';
     });
 };
 
