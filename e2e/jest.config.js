@@ -57,5 +57,5 @@ module.exports = {
   modulePaths: ['<rootDir>'],
   devServer: {
     liveReload: false,
-  },
+  }
 };
