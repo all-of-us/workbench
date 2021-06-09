@@ -157,7 +157,7 @@ const getPageTitle = async () => {
       return title.textContent;
     })
     .catch(() => {
-      return 'getPageTitle() func failed';
+      return '';
     });
 };
 
