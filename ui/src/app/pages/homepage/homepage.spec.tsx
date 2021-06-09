@@ -15,9 +15,11 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
 import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
 
+
 describe('HomepageComponent', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
+
 
   const component = () => {
     return mount(<Homepage/>);
