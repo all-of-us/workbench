@@ -1,6 +1,6 @@
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
-import { ConsoleMessage, Request } from 'puppeteer';
+import { ConsoleMessage, JSHandle, Request } from 'puppeteer';
 
 const { CIRCLE_BUILD_NUM } = process.env;
 
@@ -96,20 +96,29 @@ beforeEach(async () => {
   page.on('console', async (message: ConsoleMessage) => {
     const title = await getPageTitle();
     const args = await message.args();
-    await Promise.all(
-      args.map(async (arg) => {
-        const val = await arg.jsonValue();
-        // value is not serializable.
-        if (JSON.stringify(val) === JSON.stringify({})) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const { subtype, description } = arg._remoteObject;
-          logger.info(`Page Console ${subtype.toUpperCase()}: "${title}"\n${description}`);
-        } else {
-          logger.info(`Page Console: "${title}"\n${val}`);
-        }
-      })
-    );
+    try {
+      await Promise.all(
+        args.map(async (arg) => {
+          const val = await arg.jsonValue();
+          // value is not serializable.
+          if (JSON.stringify(val) === JSON.stringify({})) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const { subtype, description } = arg._remoteObject;
+            logger.info(`Page Console ${subtype ? subtype.toUpperCase() : ''}: "${title}"\n${description}`);
+          } else {
+            logger.info(`Page Console: "${title}"\n${val}`);
+          }
+        })
+      );
+    } catch (ex) {
+      // arg.jsonValue() sometimes throws exception. Try another way when encountering error.
+      logger.error(`Exception thrown when reading page console: ${ex}`);
+      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
+      const concatenatedText = args.filter((arg) => !!arg).join('\n');
+      const msgType = message.type() === 'warning' ? 'warn' : message.type();
+      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
+    }
   });
 
   /** Emitted when the page crashes. */
@@ -145,6 +154,15 @@ const getPageTitle = async () => {
     .catch(() => {
       return 'getPageTitle() func failed';
     });
+};
+
+const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
+  return jsHandle.executionContext().evaluate((obj) => {
+    if (obj instanceof Error) {
+      return obj.message;
+    }
+    return obj;
+  }, jsHandle);
 };
 
 const stringifyData = (data: string): string => {
