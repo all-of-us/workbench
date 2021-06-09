@@ -104,7 +104,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final MailService mailService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
-  private static final long minExpirationEpochMs = Instant.parse("2021-01-01T00:00:00.00Z").toEpochMilli();    
+  private static final long minExpirationEpochMs =
+      Instant.parse("2021-01-01T00:00:00.00Z").toEpochMilli();
 
   @Autowired
   public UserServiceImpl(

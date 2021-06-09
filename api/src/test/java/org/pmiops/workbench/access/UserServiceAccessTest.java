@@ -961,7 +961,7 @@ public class UserServiceAccessTest {
   }
 
   private void advanceClockDays(long days) {
-    PROVIDED_CLOCK.increment(Duration.ofDays(days).toMillis());  
+    PROVIDED_CLOCK.increment(Duration.ofDays(days).toMillis());
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
