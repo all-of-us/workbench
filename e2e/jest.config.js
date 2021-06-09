@@ -54,5 +54,8 @@ module.exports = {
       : ['<rootDir>/tests(?!/nightly)/**/*.spec.ts'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!tests)'],
   moduleFileExtensions: [...defaults.moduleFileExtensions],
-  modulePaths: ['<rootDir>']
+  modulePaths: ['<rootDir>'],
+  devServer: {
+    liveReload: false,
+  },
 };
