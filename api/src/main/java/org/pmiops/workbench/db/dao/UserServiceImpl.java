@@ -104,6 +104,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final MailService mailService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
+  private static final long minExpirationEpochMs = Instant.parse("2021-01-01T00:00:00.00Z").toEpochMilli();    
 
   @Autowired
   public UserServiceImpl(
@@ -236,7 +237,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private class ModuleTimes {
     public Optional<Timestamp> completion;
     public Optional<Timestamp> bypass;
-    final long minExpirationEpochMs = 1625097600000L; // 2021-07-01T00:00:00.000Z
 
     public ModuleTimes(Timestamp nullableCompletion, Timestamp nullableBypass) {
       completion = Optional.ofNullable(nullableCompletion);
