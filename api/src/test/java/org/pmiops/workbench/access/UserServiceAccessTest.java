@@ -60,7 +60,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final Instant START_INSTANT = Instant.parse("2030-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final long EXPIRATION_DAYS = 365L;
 
@@ -72,7 +72,7 @@ public class UserServiceAccessTest {
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
   private Function<DbUser, DbUser> registerUserNow =
-      registerUserWithTime.apply(Timestamp.from(Instant.now()));
+      registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -209,6 +209,48 @@ public class UserServiceAccessTest {
     assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
+              return user;
+            });
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  // This should be removed after June 30 2021
+  @Test
+  public void testGracePeriod() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
+    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
+    Instant julyFirst = Instant.parse("2021-07-01T01:00:00.00Z");
+    PROVIDED_CLOCK.setInstant(mayFirst);
+
+    // initialize user as registered with generic values including bypassed DUA
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // add a proper DUA completion which will expire soon, but remove DUA bypass
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser = updateUserWithRetries(this::removeDuaBypass);
+
+    // User is compliant
+    assertRegisteredTierEnabled(dbUser);
+
+    // Simulate time passing, user is granted a grace period
+    advanceClockDays(providedWorkbenchConfig.accessRenewal.expiryDays);
+    dbUser = updateUserWithRetries(Function.identity());
+    assertRegisteredTierEnabled(dbUser);
+
+    // The grace period is over, and the user loses access
+    PROVIDED_CLOCK.setInstant(julyFirst);
+    dbUser = updateUserWithRetries(Function.identity());
+    assertRegisteredTierDisabled(dbUser);
+
+    // The user updates their agreement, they are compliant again
     dbUser =
         updateUserWithRetries(
             user -> {
@@ -919,7 +961,7 @@ public class UserServiceAccessTest {
   }
 
   private void advanceClockDays(long days) {
-    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(days, ChronoUnit.DAYS));
+    PROVIDED_CLOCK.increment(Duration.ofDays(days).toMillis());
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that

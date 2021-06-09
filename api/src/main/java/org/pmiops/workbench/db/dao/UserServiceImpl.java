@@ -104,6 +104,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final MailService mailService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
+  private static final long minExpirationEpochMs =
+      Instant.parse("2021-01-01T00:00:00.00Z").toEpochMilli();
 
   @Autowired
   public UserServiceImpl(
@@ -258,14 +260,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Preconditions.checkNotNull(
           expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-      return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
+      return completion.map(
+          c -> new Timestamp(Math.max(c.getTime() + expiryDaysInMs, minExpirationEpochMs)));
     }
 
-    // IMPORTANT: do not use this method as the sole method of determining access compliance!
-    // We must ALSO confirm module completion.
-    // Modules which are not complete are also "not expired"
     public boolean hasExpired() {
+      Preconditions.checkArgument(
+          isComplete(), "Cannot check expiration on module that has not been completed");
       final Timestamp now = new Timestamp(clock.millis());
+      if (now.before(new Timestamp(minExpirationEpochMs))) {
+        return false;
+      }
       return getExpiration().map(x -> x.before(now)).orElse(false);
     }
   }
@@ -289,7 +294,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return new RenewableAccessModuleStatus()
         .moduleName(name)
         .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
-        .hasExpired(times.hasExpired());
+        .hasExpired(times.isComplete() && times.hasExpired());
   }
 
   public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
