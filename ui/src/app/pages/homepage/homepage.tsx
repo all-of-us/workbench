@@ -33,7 +33,7 @@ import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 export const styles = reactStyles({
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
-    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '2rem'
+    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '2rem',
   },
   bottomLinks: {
     color: colors.white, fontSize: '.5rem', height: '1rem',

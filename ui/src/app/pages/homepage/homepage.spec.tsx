@@ -20,7 +20,6 @@ describe('HomepageComponent', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
 
-
   const component = () => {
     return mount(<Homepage/>);
   };
