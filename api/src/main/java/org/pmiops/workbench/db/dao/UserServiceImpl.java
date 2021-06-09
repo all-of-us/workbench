@@ -84,6 +84,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
+  private static final long MIN_ACCESS_EXPIRATION_EPOCH_MS =
+      Instant.parse("2021-07-01T00:00:00.00Z").toEpochMilli();
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -104,8 +106,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final MailService mailService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
-  private static final long MIN_ACCESS_EXPIRATION_EPOCH_MS =
-      Instant.parse("2021-07-01T00:00:00.00Z").toEpochMilli();
 
   @Autowired
   public UserServiceImpl(
