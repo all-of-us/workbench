@@ -192,7 +192,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   async loadRootNodes() {
     try {
-      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+      const {node: {domainId, id, isStandard, subtype, type}, selectedSurvey} = this.props;
       this.setState({loading: true});
       const workspace = currentWorkspaceStore.getValue();
       const cdrVersionId = workspace.cdrVersionId;
@@ -230,7 +230,12 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         const selectedSurveyChild = rootNodes.items.filter(child => child.id === this.props.node.parentId);
         this.updatePpiSurveys(rootNodes, selectedSurveyChild);
       } else {
-        this.setState({children: rootNodes.items});
+        this.setState({
+          children: domainId === Domain.MEASUREMENT.toString() ?
+            // For Measurements, only show the subtype of the node selected in list search and don't display the code
+            rootNodes.items.filter(node => node.subtype === subtype).map(node => ({...node, code: null})) :
+            rootNodes.items
+        });
         if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
