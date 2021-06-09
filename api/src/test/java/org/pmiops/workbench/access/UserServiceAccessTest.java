@@ -128,6 +128,9 @@ public class UserServiceAccessTest {
     user.setUsername(USERNAME);
     user = userDao.save(user);
     dbUser = user;
+
+    // reset the clock so tests changing this don't affect each other
+    PROVIDED_CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
