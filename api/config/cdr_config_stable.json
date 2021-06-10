@@ -5,7 +5,8 @@
       "shortName": "registered",
       "displayName": "Registered Tier",
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
-      "authDomainName": "all-of-us-registered-stable"
+      "authDomainName": "all-of-us-registered-stable",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-stable@firecloud.org"
     }
   ],
   "cdrVersions": [

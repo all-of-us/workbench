@@ -5,14 +5,16 @@
       "shortName": "registered",
       "displayName": "Registered Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
-      "authDomainName": "all-of-us-registered-test"
+      "authDomainName": "all-of-us-registered-test",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
     },
     {
       "accessTierId": 1,
       "shortName": "invalid",
       "displayName": "Invalid Duplicate Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
-      "authDomainName": "all-of-us-registered-test"
+      "authDomainName": "all-of-us-registered-test",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
     }
   ],
   "cdrVersions": [

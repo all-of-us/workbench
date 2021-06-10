@@ -15,6 +15,7 @@ public class DbAccessTier {
   private String displayName;
   private String servicePerimeter;
   private String authDomainName;
+  private String authDomainGroupEmail;
 
   public DbAccessTier() {}
 
@@ -69,6 +70,16 @@ public class DbAccessTier {
     return this;
   }
 
+  @Column(name = "auth_domain_group_email", nullable = false)
+  public String getAuthDomainGroupEmail() {
+    return authDomainGroupEmail;
+  }
+
+  public DbAccessTier setAuthDomainGroupEmail(String authDomainGroupEmail) {
+    this.authDomainGroupEmail = authDomainGroupEmail;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -81,11 +92,13 @@ public class DbAccessTier {
     return Objects.equal(shortName, that.shortName)
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(servicePerimeter, that.servicePerimeter)
-        && Objects.equal(authDomainName, that.authDomainName);
+        && Objects.equal(authDomainName, that.authDomainName)
+        && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(shortName, displayName, servicePerimeter, authDomainName);
+    return Objects.hashCode(
+        shortName, displayName, servicePerimeter, authDomainName, authDomainGroupEmail);
   }
 }

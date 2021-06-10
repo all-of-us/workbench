@@ -5,14 +5,16 @@
       "shortName": "registered",
       "displayName": "Registered Tier",
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
-      "authDomainName": "all-of-us-registered-staging"
+      "authDomainName": "all-of-us-registered-staging",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-staging@firecloud.org"
     },
     {
       "accessTierId": 2,
       "shortName": "controlled",
       "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging_2",
-      "authDomainName": "all-of-us-controlled-staging"
+      "authDomainName": "all-of-us-controlled-staging",
+      "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org"
     }
   ],
   "cdrVersions": [
