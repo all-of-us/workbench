@@ -893,7 +893,7 @@ public class UserServiceAccessTest {
     verify(mailService).alertUserRegisteredTierExpiration(dbUser);
   }
 
-  // don't send an email if we in the initial-launch grace period
+  // don't send an email if we are in the initial-launch grace period
   // before 30 June 2021
 
   @Test
@@ -910,16 +910,16 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
-    // this is expired...
+    // this would be expired...
     dbUser.setComplianceTrainingCompletionTime(expired());
 
-    // ... and this will expire in 1 day ...
+    // ... and this would expire in 1 day ...
     final Duration oneDayPlusSome = daysPlusSome(1);
     dbUser.setPublicationsLastConfirmedTime(willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    // ... but the email sent references 30 days from now, which is the end of the grace period.
+    // ... but the grace period means that no one expires until 30 days from now
     verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
   }
 
