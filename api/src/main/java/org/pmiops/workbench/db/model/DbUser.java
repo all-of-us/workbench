@@ -35,6 +35,8 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
+  // user "system account" fields besides those related to access modules
+
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify
@@ -44,58 +46,78 @@ public class DbUser {
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
-  private String givenName;
-  private String familyName;
-  private String phoneNumber;
-  private String professionalUrl;
-  private String currentPosition;
-  private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
-  private Short freeTierCreditsLimitDaysOverride = null;
-  private Timestamp lastFreeTierCreditsTimeCheck;
   private Timestamp firstSignInTime;
-  private Timestamp firstRegistrationCompletionTime;
   private Set<Short> authorities = new HashSet<>();
-  private Boolean idVerificationIsValid;
-  private List<Short> degrees;
-  private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
-  private Short emailVerificationStatus;
   private Set<DbPageVisit> pageVisits = new HashSet<>();
-  private String aboutYou;
-  private String areaOfResearch;
-  private Integer billingProjectRetries;
-  private Integer moodleId;
+  private Timestamp demographicSurveyCompletionTime;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+
+  // possibly obsolete system account fields (not used)
+
+  @Deprecated private Short freeTierCreditsLimitDaysOverride = null;
+  @Deprecated private Timestamp firstRegistrationCompletionTime;
+
+  // user-editable Profile fields
+
+  private String givenName;
+  private String familyName;
+  private String professionalUrl;
+  private List<Short> degrees;
+  private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
 
+  // potentially obsolete profile-style fields (not used)
+
+  @Deprecated private String phoneNumber;
+  @Deprecated private String currentPosition;
+  @Deprecated private String organization;
+  @Deprecated private String aboutYou;
+
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
+
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
+  private Timestamp eraCommonsBypassTime;
+
   private String rasLinkLoginGovUsername;
   private Timestamp rasLinkLoginGovCompletionTime;
   private Timestamp rasLinkLoginGovExpireTime;
   private Timestamp rasLinkLoginGovBypassTime;
+
   private Timestamp betaAccessRequestTime;
   private Timestamp betaAccessBypassTime;
+
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
   private Integer dataUseAgreementSignedVersion;
+
   private Timestamp complianceTrainingCompletionTime;
   private Timestamp complianceTrainingBypassTime;
   private Timestamp complianceTrainingExpirationTime;
-  private Timestamp eraCommonsBypassTime;
-  private Timestamp emailVerificationCompletionTime;
-  private Timestamp emailVerificationBypassTime;
-  private Timestamp idVerificationCompletionTime;
-  private Timestamp idVerificationBypassTime;
+
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+
   private Timestamp profileLastConfirmedTime;
+
   private Timestamp publicationsLastConfirmedTime;
+
+  // potentially obsolete access module fields.  These are likely to be deleted in the near future.
+
+  @Deprecated private Timestamp idVerificationCompletionTime;
+  @Deprecated private Timestamp idVerificationBypassTime;
+
+  @Deprecated private Short emailVerificationStatus;
+  @Deprecated private Timestamp emailVerificationCompletionTime;
+  @Deprecated private Timestamp emailVerificationBypassTime;
+
+  // Moodle badges are indexed by username, not this value.  See ComplianceService.
+  @Deprecated private Integer moodleId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -176,29 +198,35 @@ public class DbUser {
   }
 
   // TODO: consider dropping this (do we want researcher phone numbers?)
+  @Deprecated
   @Column(name = "phone_number")
   public String getPhoneNumber() {
     return phoneNumber;
   }
 
+  @Deprecated
   public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
   }
 
+  @Deprecated
   @Column(name = "current_position")
   public String getCurrentPosition() {
     return currentPosition;
   }
 
+  @Deprecated
   public void setCurrentPosition(String currentPosition) {
     this.currentPosition = currentPosition;
   }
 
+  @Deprecated
   @Column(name = "organization")
   public String getOrganization() {
     return organization;
   }
 
+  @Deprecated
   public void setOrganization(String organization) {
     this.organization = organization;
   }
@@ -222,16 +250,6 @@ public class DbUser {
     this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
-  @Deprecated
-  @Column(name = "last_free_tier_credits_time_check")
-  public Timestamp getLastFreeTierCreditsTimeCheck() {
-    return lastFreeTierCreditsTimeCheck;
-  }
-
-  public void setLastFreeTierCreditsTimeCheck(Timestamp lastFreeTierCreditsTimeCheck) {
-    this.lastFreeTierCreditsTimeCheck = lastFreeTierCreditsTimeCheck;
-  }
-
   @Column(name = "first_sign_in_time")
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
@@ -241,11 +259,13 @@ public class DbUser {
     this.firstSignInTime = firstSignInTime;
   }
 
+  @Deprecated
   @Column(name = "first_registration_completion_time")
   public Timestamp getFirstRegistrationCompletionTime() {
     return firstRegistrationCompletionTime;
   }
 
+  @Deprecated
   @VisibleForTesting
   public void setFirstRegistrationCompletionTime(Timestamp registrationCompletionTime) {
     this.firstRegistrationCompletionTime = registrationCompletionTime;
@@ -327,15 +347,6 @@ public class DbUser {
     this.pageVisits = newPageVisits;
   }
 
-  @Column(name = "id_verification_is_valid")
-  public Boolean getIdVerificationIsValid() {
-    return idVerificationIsValid;
-  }
-
-  public void setIdVerificationIsValid(Boolean value) {
-    idVerificationIsValid = value;
-  }
-
   @Column(name = "demographic_survey_completion_time")
   public Timestamp getDemographicSurveyCompletionTime() {
     return demographicSurveyCompletionTime;
@@ -354,30 +365,36 @@ public class DbUser {
     this.disabled = disabled;
   }
 
+  @Deprecated
   @Column(name = "email_verification_status")
   public Short getEmailVerificationStatus() {
     return emailVerificationStatus;
   }
 
+  @Deprecated
   public void setEmailVerificationStatus(Short emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
+  @Deprecated
   @Transient
   public EmailVerificationStatus getEmailVerificationStatusEnum() {
     return DbStorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
   }
 
+  @Deprecated
   public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
     setEmailVerificationStatus(
         DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
+  @Deprecated
   @Column(name = "about_you")
   public String getAboutYou() {
     return aboutYou;
   }
 
+  @Deprecated
   public void setAboutYou(String aboutYou) {
     this.aboutYou = aboutYou;
   }
@@ -391,15 +408,6 @@ public class DbUser {
     this.areaOfResearch = areaOfResearch;
   }
 
-  @Column(name = "billing_project_retries")
-  public Integer getBillingProjectRetries() {
-    return billingProjectRetries;
-  }
-
-  public void setBillingProjectRetries(Integer billingProjectRetries) {
-    this.billingProjectRetries = billingProjectRetries;
-  }
-
   @Column(name = "beta_access_request_time")
   public Timestamp getBetaAccessRequestTime() {
     return betaAccessRequestTime;
@@ -409,11 +417,13 @@ public class DbUser {
     this.betaAccessRequestTime = betaAccessRequestTime;
   }
 
+  @Deprecated
   @Column(name = "moodle_id")
   public Integer getMoodleId() {
     return moodleId;
   }
 
+  @Deprecated
   public void setMoodleId(Integer moodleId) {
     this.moodleId = moodleId;
   }
@@ -543,20 +553,24 @@ public class DbUser {
     this.betaAccessBypassTime = betaAccessBypassTime;
   }
 
+  @Deprecated
   @Column(name = "email_verification_completion_time")
   public Timestamp getEmailVerificationCompletionTime() {
     return emailVerificationCompletionTime;
   }
 
+  @Deprecated
   public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
     this.emailVerificationCompletionTime = emailVerificationCompletionTime;
   }
 
+  @Deprecated
   @Column(name = "email_verification_bypass_time")
   public Timestamp getEmailVerificationBypassTime() {
     return emailVerificationBypassTime;
   }
 
+  @Deprecated
   public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
     this.emailVerificationBypassTime = emailVerificationBypassTime;
   }
@@ -580,15 +594,18 @@ public class DbUser {
     return idVerificationCompletionTime;
   }
 
+  @Deprecated
   public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
     this.idVerificationCompletionTime = idVerificationCompletionTime;
   }
 
   @Column(name = "id_verification_bypass_time")
+  @Deprecated
   public Timestamp getIdVerificationBypassTime() {
     return idVerificationBypassTime;
   }
 
+  @Deprecated
   public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
     this.idVerificationBypassTime = idVerificationBypassTime;
   }
