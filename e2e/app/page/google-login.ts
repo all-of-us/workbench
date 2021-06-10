@@ -148,9 +148,8 @@ export default class GoogleLoginPage {
     }
 
     await this.load(); // Load the Google Sign In page.
-    await jestPuppeteer.debug();
     await this.loginButton().then((button) => button.click());
-    await jestPuppeteer.debug();
+
     await this.enterEmail(user);
     await this.page.waitForTimeout(500); // Reduces probablity of getting Google login captcha
     await this.enterPassword(pwd);
