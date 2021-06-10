@@ -20,28 +20,6 @@ declare global {
   interface Window { setTestAccessTokenOverride: (token: string) => void; }
 }
 
-let signInWithAccessTokenCallback: (token: string) => void;
-
-// Set this as early as possible in the application boot-strapping process,
-// so it's available for Puppeteer to call.
-console.log('initializing setAccessTokenOverride'); // XXX: remove
-if (environment.allowTestAccessTokenOverride) {
-  window.setTestAccessTokenOverride = (token: string) => {
-    if (token) {
-      console.log('Setting access token override in local storage');
-      window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-      if (signInWithAccessTokenCallback) {
-        console.log('Using callback to initialize access token login');
-        signInWithAccessTokenCallback(token);
-      }
-      return 'set localstorage token at ' + Date(); // XXX: remove
-    } else {
-      window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      return 'cleared localstorage token at ' + Date(); // XXX: remove
-    }
-  };
-}
-
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 @Injectable()
@@ -55,6 +33,23 @@ export class SignInService {
 
   constructor(private zone: NgZone) {
     this.zone = zone;
+
+    // Set this as early as possible in the application boot-strapping process,
+    // so it's available for Puppeteer to call. If we need this even earlier in
+    // the page, it could go into something like main.ts, but ideally we'd keep
+    // this logic in one place, and keep main.ts minimal.
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        // Disclaimer: console.log statements here are unlikely to captured by
+        // Puppeteer, since it typically reloads the page immediately after
+        // invoking this function.
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+    }
 
     if (serverConfigStore.get().config) {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
@@ -84,26 +79,16 @@ export class SignInService {
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
     if (environment.allowTestAccessTokenOverride) {
-      const signInWithAccessToken = (token: string) => {
-        console.log('bypassing sign in');
-        this.testAccessTokenOverride = token
+      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      if (this.testAccessTokenOverride) {
+        console.log('found test access token in local storage, skipping normal auth flow');
 
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
         this.zone.run(() => {
           this.isSignedIn.next(true);
         });
-      };
-
-      const storedToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      if (storedToken) {
-        console.log('Found access token override in local storage');
-        signInWithAccessToken(storedToken);
         return;
-      } else {
-        console.log('No access token override found');
-        // Leave a callback hook in place, in case a test call comes in after this point.
-        signInWithAccessTokenCallback = signInWithAccessToken;
       }
     }
 
