@@ -89,9 +89,6 @@ public class DbUser {
   private Timestamp rasLinkLoginGovExpireTime;
   private Timestamp rasLinkLoginGovBypassTime;
 
-  private Timestamp betaAccessRequestTime;
-  private Timestamp betaAccessBypassTime;
-
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
   private Integer dataUseAgreementSignedVersion;
@@ -108,6 +105,9 @@ public class DbUser {
   private Timestamp publicationsLastConfirmedTime;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
+
+  @Deprecated private Timestamp betaAccessRequestTime;
+  @Deprecated private Timestamp betaAccessBypassTime;
 
   @Deprecated private Timestamp idVerificationCompletionTime;
   @Deprecated private Timestamp idVerificationBypassTime;
@@ -408,11 +408,13 @@ public class DbUser {
     this.areaOfResearch = areaOfResearch;
   }
 
+  @Deprecated
   @Column(name = "beta_access_request_time")
   public Timestamp getBetaAccessRequestTime() {
     return betaAccessRequestTime;
   }
 
+  @Deprecated
   public void setBetaAccessRequestTime(Timestamp betaAccessRequestTime) {
     this.betaAccessRequestTime = betaAccessRequestTime;
   }
@@ -544,11 +546,13 @@ public class DbUser {
     this.complianceTrainingExpirationTime = null;
   }
 
+  @Deprecated
   @Column(name = "beta_access_bypass_time")
   public Timestamp getBetaAccessBypassTime() {
     return betaAccessBypassTime;
   }
 
+  @Deprecated
   public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
     this.betaAccessBypassTime = betaAccessBypassTime;
   }
