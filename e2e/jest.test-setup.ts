@@ -94,34 +94,35 @@ beforeEach(async () => {
    * https://github.com/puppeteer/puppeteer/issues/3397#issuecomment-429325514
    */
   page.on('console', async (message: ConsoleMessage) => {
+    if ((await message.args()).length === 0) return;
     const title = await getPageTitle();
-    const args = await message.args();
     try {
-      await Promise.all(
-        args.map(async (arg) => {
-          const val = await arg.jsonValue();
-          // value is not serializable.
-          if (JSON.stringify(val) === JSON.stringify({})) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            const { subtype, description } = arg._remoteObject;
-            logger.info(`Page Console ${subtype ? subtype.toUpperCase() : ''}: "${title}"\n${description}`);
-          } else {
-            logger.info(`Page Console: "${title}"\n${val}`);
-          }
-        })
-      );
+      await Promise.all(message.args().map((arg) => arg.jsonValue())).then((values) => {
+        const allMessages = values
+          .filter((value) => {
+            if (JSON.stringify(value) === JSON.stringify({})) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              const { subtype, description } = arg._remoteObject;
+              return `${subtype ? subtype.toUpperCase() : ''}:\n${description}`;
+            }
+            return values;
+          })
+          .join('\n');
+        if (allMessages.trim().length > 0) {
+          logger.info(`Page Console: ${title}\n${allMessages}`);
+        }
+      });
     } catch (ex) {
       // arg.jsonValue() sometimes throws exception. Try another way when encountering error.
-      logger.error(`Exception thrown when reading page console (approach 1): ${ex}`);
       await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
         .then((args) => {
-          const concatenatedText = args.filter((arg) => !!arg).join('\n');
+          const allMessages = args.filter((arg) => !!arg).join('\n');
           const msgType = message.type() === 'warning' ? 'warn' : message.type();
-          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
+          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${allMessages}`);
         })
         .catch((ex1) => {
-          logger.error(`Exception thrown when reading page console (approach 2): ${ex1}`);
+          logger.error(`Exception thrown when reading page console: ${ex1}`);
         });
     }
   });
@@ -163,12 +164,17 @@ const getPageTitle = async () => {
 };
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
-  return jsHandle.executionContext().evaluate((obj) => {
-    if (obj instanceof Error) {
-      return obj.message;
-    }
-    return obj;
-  }, jsHandle);
+  return jsHandle
+    .executionContext()
+    .evaluateHandle((obj) => {
+      if (obj instanceof Error) {
+        return obj.message;
+      }
+      return obj;
+    }, jsHandle)
+    .then(async (jsHandle) => {
+      return (await jsHandle.jsonValue()) as string;
+    });
 };
 
 const stringifyData = (data: string): string => {
