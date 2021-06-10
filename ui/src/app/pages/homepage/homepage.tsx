@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {navigate, queryParamsStore} from 'app/utils/navigation';
-
+// force ui
 import {
   Clickable, StyledAnchorTag,
 } from 'app/components/buttons';
