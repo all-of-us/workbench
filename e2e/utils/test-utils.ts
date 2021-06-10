@@ -69,9 +69,17 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
-  // See sign-in.service.ts.
+  // Once ready, initialize the token on the page (this is stored in local storage).
+  // See sign-in.service.ts for details.
+  await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
 
+  // Force a page reload; auth will be re-initialized with the token now that
+  // localstorage has been updated.
+  // Disclaimer: any hard page load may result in truncation of browser console
+  // logs; there is some delay between a console.log() execution and capture by
+  // Puppeteer. Any console.log() within the above global function, for example,
+  // is unlikely to be captured.
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
 }

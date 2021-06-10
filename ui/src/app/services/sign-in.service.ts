@@ -40,6 +40,9 @@ export class SignInService {
     // this logic in one place, and keep main.ts minimal.
     if (environment.allowTestAccessTokenOverride) {
       window.setTestAccessTokenOverride = (token: string) => {
+        // Disclaimer: console.log statements here are unlikely to captured by
+        // Puppeteer, since it typically reloads the page immediately after
+        // invoking this function.
         if (token) {
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
         } else {
@@ -78,6 +81,8 @@ export class SignInService {
     if (environment.allowTestAccessTokenOverride) {
       this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       if (this.testAccessTokenOverride) {
+        console.log('found test access token in local storage, skipping normal auth flow');
+
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
         this.zone.run(() => {
