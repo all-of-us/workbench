@@ -6,7 +6,7 @@ import {
     maybeDaysRemaining,
     MILLIS_PER_DAY,
     NOTIFICATION_THRESHOLD_DAYS
-} from "./access-renewal-notification";
+} from "app/utils/access-utils";
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
 // 10 minutes, in millis

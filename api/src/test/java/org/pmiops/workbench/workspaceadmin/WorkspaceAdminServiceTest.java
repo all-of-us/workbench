@@ -27,9 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -78,10 +78,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class WorkspaceAdminServiceTest {
+public class WorkspaceAdminServiceTest extends SpringTest {
 
   private static final long DB_WORKSPACE_ID = 2222L;
   private static final String GOOGLE_PROJECT_ID = DEFAULT_GOOGLE_PROJECT;
@@ -139,7 +137,7 @@ public class WorkspaceAdminServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final TestMockFactory testMockFactory = new TestMockFactory();
 

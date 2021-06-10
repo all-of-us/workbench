@@ -10,6 +10,9 @@ import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 
+// 10 minutes.
+jest.setTimeout(10 * 60 * 1000);
+
 describe('Datasets card snowman menu actions', () => {
   const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
 
@@ -52,8 +55,8 @@ describe('Datasets card snowman menu actions', () => {
     expect(await conceptSetCheckBox.isChecked()).toBe(true);
 
     // Export button is enabled.
-    const exportButton = datasetEditPage.getExportButton();
-    expect(await exportButton.isCursorNotAllowed()).toBe(false);
+    const analyzeButton = datasetEditPage.getAnalyzeButton();
+    expect(await analyzeButton.isCursorNotAllowed()).toBe(false);
 
     // Save button is disabled.
     const saveButton = datasetEditPage.getSaveButton();

@@ -5,11 +5,10 @@ import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -20,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class CohortMapperTest {
+public class CohortMapperTest extends SpringTest {
 
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;
@@ -33,10 +30,10 @@ public class CohortMapperTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class})
-  @MockBean({UserDao.class, Clock.class})
+  @MockBean({UserDao.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     sourceClientCohort =
         new Cohort()

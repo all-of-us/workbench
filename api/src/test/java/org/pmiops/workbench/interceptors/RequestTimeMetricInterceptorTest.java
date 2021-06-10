@@ -10,32 +10,31 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.api.client.http.HttpMethods;
 import java.lang.reflect.Method;
-import java.time.Clock;
 import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-@RunWith(SpringRunner.class)
-public class RequestTimeMetricInterceptorTest {
+public class RequestTimeMetricInterceptorTest extends SpringTest {
 
-  private static final Instant START_INSTANT = Instant.parse("2007-01-03T00:00:00.00Z");
+  private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final long DURATION_MILLIS = 1500L;
   private static final Instant END_INSTANT = START_INSTANT.plusMillis(DURATION_MILLIS);
   private static final String METHOD_NAME = "frobnicate";
@@ -46,7 +45,6 @@ public class RequestTimeMetricInterceptorTest {
   @Mock private Method mockMethod;
   @Mock private ModelAndView mockModelAndView;
 
-  @MockBean private Clock mockClock;
   @MockBean private LogsBasedMetricService mockLogsBasedMetricService;
 
   @Captor private ArgumentCaptor<String> attributeKeyCaptor;
@@ -54,14 +52,14 @@ public class RequestTimeMetricInterceptorTest {
   @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
 
   @Autowired private RequestTimeMetricInterceptor requestTimeMetricInterceptor;
+  @Autowired FakeClock fakeClock;
 
   @TestConfiguration
   @Import({RequestTimeMetricInterceptor.class})
   public static class Config {}
 
-  @Before
+  @BeforeEach
   public void setup() {
-    doReturn(START_INSTANT).when(mockClock).instant();
     doReturn(HttpMethods.GET).when(mockHttpServletRequest).getMethod();
     doReturn(METHOD_NAME).when(mockMethod).getName();
     doReturn(mockMethod).when(mockHandlerMethod).getMethod();
@@ -104,7 +102,7 @@ public class RequestTimeMetricInterceptorTest {
 
   @Test
   public void testPostHandle() {
-    doReturn(END_INSTANT).when(mockClock).instant();
+    fakeClock.setInstant(END_INSTANT);
     doReturn(START_INSTANT)
         .when(mockHttpServletRequest)
         .getAttribute(RequestAttribute.START_INSTANT.getKeyName());

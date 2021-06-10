@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohorts;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -16,10 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
@@ -65,7 +64,6 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
   BigQueryTestService.class,
   CohortQueryBuilder.class,
@@ -121,7 +119,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     return result;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -200,9 +198,13 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     return request;
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testMaterializeCohortBadSpec() {
-    cohortMaterializationService.materializeCohort(null, "badSpec", null, makeRequest(1000));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          cohortMaterializationService.materializeCohort(null, "badSpec", null, makeRequest(1000));
+        });
   }
 
   @Test
@@ -1479,26 +1481,29 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     assertThat(response.getNextPageToken()).isNull();
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testMaterializeCohortConceptSetNoConcepts() {
-    TableQuery tableQuery = new TableQuery();
-    tableQuery.setTableName("condition_occurrence");
-    tableQuery.setColumns(
-        ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
-    FieldSet fieldSet = new FieldSet();
-    fieldSet.setTableQuery(tableQuery);
-    cohortMaterializationService.materializeCohort(
-        null,
-        SearchRequests.allGenders(),
-        ImmutableSet.of(123456L),
-        0,
-        makeRequest(fieldSet, 1000));
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          TableQuery tableQuery = new TableQuery();
+          tableQuery.setTableName("condition_occurrence");
+          tableQuery.setColumns(
+              ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
+          FieldSet fieldSet = new FieldSet();
+          fieldSet.setTableQuery(tableQuery);
+          cohortMaterializationService.materializeCohort(
+              null,
+              SearchRequests.allGenders(),
+              ImmutableSet.of(123456L),
+              0,
+              makeRequest(fieldSet, 1000));
+        });
   }
 
   @Test
   public void testMaterializeCohortConceptSetNoMatchingConcepts() {
     cbCriteriaDao.save(DbCriteria.builder().addConceptId("2").addStandard(true).build());
-
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
     tableQuery.setColumns(
@@ -1515,7 +1520,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Test
   public void testMaterializeCohortConceptSetOneStandardConcept() {
     cbCriteriaDao.save(DbCriteria.builder().addConceptId("192819").addStandard(true).build());
-
     TableQuery tableQuery =
         new TableQuery()
             .tableName("condition_occurrence")

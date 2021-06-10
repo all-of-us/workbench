@@ -1,2277 +1,964 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.cdr.cache.MySQLStopWords;
+import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cdr.model.DbDataFilter;
-import org.pmiops.workbench.cdr.model.DbPerson;
+import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
+import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.google.CloudStorageClientImpl;
-import org.pmiops.workbench.google.StorageConfig;
-import org.pmiops.workbench.model.AgeType;
-import org.pmiops.workbench.model.AttrName;
-import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaRequest;
+import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataFilter;
-import org.pmiops.workbench.model.DemoChartInfo;
-import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.GenderOrSexType;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.ModifierType;
-import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TemporalMention;
-import org.pmiops.workbench.model.TemporalTime;
-import org.pmiops.workbench.testconfig.TestJpaConfig;
-import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.model.SurveyModule;
+import org.pmiops.workbench.model.SurveyVersionListResponse;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
-// Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
-// a bad interaction with BeforeAfterSpringTestRunner.
-@Import({
-  TestJpaConfig.class,
-  CohortBuilderControllerBQTest.Configuration.class,
-  StorageConfig.class
-})
-public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
-
-  @TestConfiguration
-  @Import({
-    BigQueryTestService.class,
-    CloudStorageClientImpl.class,
-    CohortQueryBuilder.class,
-    CohortBuilderServiceImpl.class,
-    SearchGroupItemQueryBuilder.class,
-    CdrVersionService.class,
-    CohortBuilderMapperImpl.class
-  })
-  @MockBean({
-    FireCloudService.class,
-    AccessTierService.class,
-    CdrVersionService.class,
-  })
-  static class Configuration {
-    @Bean
-    public DbUser user() {
-      DbUser user = new DbUser();
-      user.setUsername("bob@gmail.com");
-      return user;
-    }
-  }
+@DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+public class CohortBuilderControllerBQTest extends SpringTest {
 
   private CohortBuilderController controller;
 
-  private DbCdrVersion cdrVersion;
-
-  @Autowired private BigQueryService bigQueryService;
-
-  @Autowired private CloudStorageClient cloudStorageClient;
-
-  @Autowired private CohortBuilderService cohortBuilderService;
-
-  @Autowired private CdrVersionDao cdrVersionDao;
-
+  @Mock private BigQueryService bigQueryService;
+  @Mock private CloudStorageClient cloudStorageClient;
+  @Mock private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private CBCriteriaDao cbCriteriaDao;
-
-  @Autowired private CdrVersionService cdrVersionService;
-
-  @Autowired private FireCloudService firecloudService;
-
-  @Autowired private PersonDao personDao;
-
+  @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
-
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-
-  @Autowired private AccessTierDao accessTierDao;
-
+  @Autowired private CriteriaMenuDao criteriaMenuDao;
+  @Autowired private DomainInfoDao domainInfoDao;
+  @Autowired private PersonDao personDao;
+  @Autowired private SurveyModuleDao surveyModuleDao;
+  @Autowired private JdbcTemplate jdbcTemplate;
+  @Autowired private CohortBuilderMapper cohortBuilderMapper;
+  @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<WorkbenchConfig> configProvider;
+  @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
 
-  private DbCriteria drugNode1;
-  private DbCriteria drugNode2;
-  private DbCriteria criteriaParent;
-  private DbCriteria criteriaChild;
-  private DbCriteria icd9;
-  private DbCriteria icd10;
-  private DbCriteria snomedSource;
-  private DbCriteria snomedStandard;
-  private DbCriteria cpt4;
-  private DbCriteria temporalParent1;
-  private DbCriteria temportalChild1;
-  private DbCriteria procedureParent1;
-  private DbCriteria procedureChild1;
-  private DbCriteria surveyNode;
-  private DbCriteria questionNode;
-  private DbCriteria answerNode;
-  private DbPerson dbPerson1;
-  private DbPerson dbPerson2;
-  private DbPerson dbPerson3;
+  @TestConfiguration
+  @Import({CohortBuilderMapperImpl.class})
+  @MockBean({WorkspaceAuthService.class})
+  static class Configuration {}
 
-  @Override
-  public List<String> getTableNames() {
-    return ImmutableList.of(
-        "person",
-        "death",
-        "cb_search_person",
-        "cb_search_all_events",
-        "cb_criteria",
-        "cb_criteria_ancestor");
-  }
+  private static final String WORKSPACE_ID = "workspaceId";
+  private static final String WORKSPACE_NAMESPACE = "workspaceNS";
 
-  @Override
-  public String getTestDataDirectory() {
-    return CB_DATA;
-  }
-
-  @Before
+  @BeforeEach
   public void setUp() {
-    WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
-    testConfig.elasticsearch.enableElasticsearchBackend = false;
-
-    when(configProvider.get()).thenReturn(testConfig);
-
-    when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
-
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
+    CohortBuilderService cohortBuilderService =
+        new CohortBuilderServiceImpl(
+            bigQueryService,
+            cohortQueryBuilder,
+            cbCriteriaAttributeDao,
+            cbCriteriaDao,
+            criteriaMenuDao,
+            cbDataFilterDao,
+            domainInfoDao,
+            personDao,
+            surveyModuleDao,
+            cohortBuilderMapper,
+            mySQLStopWordsProvider);
     controller =
         new CohortBuilderController(
-            cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
+            elasticSearchService, configProvider, cohortBuilderService, workspaceAuthService);
 
-    cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(1L);
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
+    doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(1l);
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    dbWorkspace.setName("Saved workspace");
+    dbWorkspace.setFirecloudName(WORKSPACE_ID);
+    dbWorkspace.setCdrVersion(cdrVersion);
+  }
 
-    cdrVersion = cdrVersionDao.save(cdrVersion);
-
-    drugNode1 = saveCriteriaWithPath("0", drugCriteriaParent());
-    drugNode2 = saveCriteriaWithPath(drugNode1.getPath(), drugCriteriaChild(drugNode1.getId()));
-
-    criteriaParent = saveCriteriaWithPath("0", icd9CriteriaParent());
-    criteriaChild =
-        saveCriteriaWithPath(criteriaParent.getPath(), icd9CriteriaChild(criteriaParent.getId()));
-
-    icd9 =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.CONDITION.toString())
-                .addType(CriteriaType.ICD9CM.toString())
-                .addStandard(false)
-                .addConceptId("44823922")
-                .addFullText("+[CONDITION_rank1]")
-                .build());
-    icd10 =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.CONDITION.toString())
-                .addType(CriteriaType.ICD10CM.toString())
-                .addStandard(false)
-                .build());
-    snomedStandard =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.CONDITION.toString())
-                .addType(CriteriaType.SNOMED.toString())
-                .addStandard(true)
-                .addConceptId("44823923")
-                .addFullText("+[CONDITION_rank1]")
-                .build());
-    snomedSource =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.CONDITION.toString())
-                .addType(CriteriaType.SNOMED.toString())
-                .addStandard(false)
-                .build());
-    cpt4 =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.PROCEDURE.toString())
-                .addType(CriteriaType.CPT4.toString())
-                .addStandard(false)
-                .build());
-
-    temporalParent1 =
-        saveCriteriaWithPath(
-            "0",
-            DbCriteria.builder()
-                .addAncestorData(false)
-                .addCode("001")
-                .addConceptId("0")
-                .addDomainId(Domain.CONDITION.toString())
-                .addType(CriteriaType.ICD10CM.toString())
+  @Test
+  public void findCriteriaMenu() {
+    DbCriteriaMenu dbCriteriaMenu =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Condition")
                 .addGroup(true)
-                .addSelectable(true)
-                .addStandard(false)
-                .addSynonyms("+[CONDITION_rank1]")
+                .addName("Condition")
+                .addSortOrder(2L)
                 .build());
-    temportalChild1 =
-        saveCriteriaWithPath(
-            temporalParent1.getPath(),
-            temportalChild1 =
-                DbCriteria.builder()
-                    .addParentId(temporalParent1.getId())
-                    .addAncestorData(false)
-                    .addCode("001.1")
-                    .addConceptId("1")
-                    .addDomainId(Domain.CONDITION.toString())
-                    .addType(CriteriaType.ICD10CM.toString())
-                    .addGroup(false)
-                    .addSelectable(true)
-                    .addStandard(false)
-                    .addSynonyms("+[CONDITION_rank1]")
-                    .build());
+    assertThat(
+            controller
+                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
+  }
 
-    procedureParent1 =
-        saveCriteriaWithPath(
-            "0",
-            DbCriteria.builder()
-                .addParentId(99999)
-                .addDomainId(Domain.PROCEDURE.toString())
-                .addType(CriteriaType.SNOMED.toString())
-                .addStandard(true)
-                .addCode("386637004")
-                .addName("Obstetric procedure")
-                .addCount(36673L)
-                .addGroup(true)
-                .addSelectable(true)
-                .addAncestorData(false)
-                .addConceptId("4302541")
-                .addSynonyms("+[PROCEDURE_rank1]")
-                .build());
-    procedureChild1 =
-        saveCriteriaWithPath(
-            procedureParent1.getPath(),
-            DbCriteria.builder()
-                .addParentId(procedureParent1.getId())
-                .addDomainId(Domain.PROCEDURE.toString())
-                .addType(CriteriaType.SNOMED.toString())
-                .addStandard(true)
-                .addCode("386639001")
-                .addName("Termination of pregnancy")
-                .addCount(50L)
-                .addGroup(false)
-                .addSelectable(true)
-                .addAncestorData(false)
-                .addConceptId("4")
-                .addSynonyms("+[PROCEDURE_rank1]")
-                .build());
+  @Test
+  public void findDomainInfos() {
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0)
+            .addFullText("term*[CONDITION_rank1]")
+            .build());
+    DbDomainInfo dbDomainInfo =
+        domainInfoDao.save(
+            new DbDomainInfo()
+                .conceptId(1L)
+                .domain((short) 0)
+                .domainId("CONDITION")
+                .name("Conditions")
+                .description("descr")
+                .allConceptCount(10)
+                .standardConceptCount(0)
+                .participantCount(1000));
 
-    surveyNode =
-        saveCriteriaWithPath(
-            "0",
+    DomainInfo domainInfo =
+        controller.findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
+    assertThat(domainInfo.getName()).isEqualTo(dbDomainInfo.getName());
+    assertThat(domainInfo.getDescription()).isEqualTo(dbDomainInfo.getDescription());
+    assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainInfo.getParticipantCount());
+    assertThat(domainInfo.getAllConceptCount()).isEqualTo(10);
+    assertThat(domainInfo.getStandardConceptCount()).isEqualTo(0);
+  }
+
+  @Test
+  public void findSurveyModules() {
+    DbCriteria surveyCriteria =
+        cbCriteriaDao.save(
             DbCriteria.builder()
-                .addParentId(0)
-                .addDomainId(Domain.SURVEY.toString())
-                .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.SURVEY.toString())
-                .addGroup(true)
-                .addSelectable(true)
-                .addStandard(false)
-                .addConceptId("22")
-                .build());
-    questionNode =
-        saveCriteriaWithPath(
-            surveyNode.getPath(),
-            DbCriteria.builder()
-                .addParentId(surveyNode.getId())
                 .addDomainId(Domain.SURVEY.toString())
                 .addType(CriteriaType.PPI.toString())
                 .addSubtype(CriteriaSubType.QUESTION.toString())
-                .addGroup(true)
-                .addSelectable(true)
+                .addCount(0L)
+                .addHierarchy(true)
                 .addStandard(false)
-                .addName("In what country were you born?")
-                .addConceptId("1585899")
-                .addSynonyms("[SURVEY_rank1]")
+                .addParentId(0)
+                .addConceptId("1")
+                .addName("The Basics")
                 .build());
-    answerNode =
-        saveCriteriaWithPath(
-            questionNode.getPath(),
-            DbCriteria.builder()
-                .addParentId(questionNode.getId())
-                .addDomainId(Domain.SURVEY.toString())
-                .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.ANSWER.toString())
-                .addGroup(false)
-                .addSelectable(true)
-                .addStandard(false)
-                .addName("USA")
-                .addConceptId("5")
-                .addSynonyms("[SURVEY_rank1]")
-                .build());
-
-    dbPerson1 = personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
-    dbPerson2 = personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
-    dbPerson3 = personDao.save(DbPerson.builder().addAgeAtConsent(34).addAgeAtCdr(35).build());
-    cbDataFilterDao.save(
-        DbDataFilter.builder()
-            .addDataFilterId(1L)
-            .addDisplayName("displayName1")
-            .addName("name1")
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.SURVEY.toString())
+            .addType(CriteriaType.PPI.toString())
+            .addSubtype(CriteriaSubType.ANSWER.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0)
+            .addConceptId("1")
+            .addFullText("term*[SURVEY_rank1]")
+            .addPath(String.valueOf(surveyCriteria.getId()))
             .build());
-    cbDataFilterDao.save(
-        DbDataFilter.builder()
-            .addDataFilterId(2L)
-            .addDisplayName("displayName2")
-            .addName("name2")
-            .build());
-  }
+    DbSurveyModule dbSurveyModule =
+        surveyModuleDao.save(
+            new DbSurveyModule()
+                .conceptId(1L)
+                .name("The Basics")
+                .description("descr")
+                .questionCount(1)
+                .participantCount(1000));
 
-  @After
-  public void tearDown() {
-    delete(
-        drugNode1,
-        drugNode2,
-        criteriaParent,
-        criteriaChild,
-        icd9,
-        icd10,
-        snomedSource,
-        snomedStandard,
-        cpt4,
-        temporalParent1,
-        temportalChild1,
-        procedureParent1,
-        procedureChild1,
-        surveyNode,
-        questionNode,
-        answerNode);
-    personDao.deleteById(dbPerson1.getPersonId());
-    personDao.deleteById(dbPerson2.getPersonId());
-    personDao.deleteById(dbPerson3.getPersonId());
-  }
-
-  private static SearchParameter icd9() {
-    return new SearchParameter()
-        .domain(Domain.CONDITION.toString())
-        .type(CriteriaType.ICD9CM.toString())
-        .standard(false)
-        .ancestorData(false)
-        .group(false)
-        .conceptId(1L);
-  }
-
-  private static SearchParameter icd10() {
-    return new SearchParameter()
-        .domain(Domain.CONDITION.toString())
-        .type(CriteriaType.ICD10CM.toString())
-        .standard(false)
-        .ancestorData(false)
-        .group(false)
-        .conceptId(9L);
-  }
-
-  private static SearchParameter snomed() {
-    return new SearchParameter()
-        .domain(Domain.CONDITION.toString())
-        .type(CriteriaType.SNOMED.toString())
-        .standard(false)
-        .ancestorData(false)
-        .group(false)
-        .conceptId(4L);
-  }
-
-  private static SearchParameter drug() {
-    return new SearchParameter()
-        .domain(Domain.DRUG.toString())
-        .type(CriteriaType.ATC.toString())
-        .group(false)
-        .ancestorData(true)
-        .standard(true)
-        .conceptId(11L);
-  }
-
-  private static SearchParameter measurement() {
-    return new SearchParameter()
-        .domain(Domain.MEASUREMENT.toString())
-        .type(CriteriaType.LOINC.toString())
-        .subtype(CriteriaSubType.LAB.toString())
-        .group(false)
-        .ancestorData(false)
-        .standard(true)
-        .conceptId(3L);
-  }
-
-  private static SearchParameter visit() {
-    return new SearchParameter()
-        .domain(Domain.VISIT.toString())
-        .type(CriteriaType.VISIT.toString())
-        .group(false)
-        .ancestorData(false)
-        .standard(true)
-        .conceptId(1L);
-  }
-
-  private static SearchParameter procedure() {
-    return new SearchParameter()
-        .domain(Domain.PROCEDURE.toString())
-        .type(CriteriaType.CPT4.toString())
-        .group(false)
-        .ancestorData(false)
-        .standard(false)
-        .conceptId(10L);
-  }
-
-  private static SearchParameter bloodPressure() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.BP.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(false);
-  }
-
-  private static SearchParameter hrDetail() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.HR_DETAIL.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(false)
-        .conceptId(903126L);
-  }
-
-  private static SearchParameter hr() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.HR.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(false)
-        .conceptId(1586218L);
-  }
-
-  private static SearchParameter height() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.HEIGHT.toString())
-        .group(false)
-        .conceptId(903133L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter weight() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.WEIGHT.toString())
-        .group(false)
-        .conceptId(903121L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter bmi() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.BMI.toString())
-        .group(false)
-        .conceptId(903124L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter waistCircumference() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.WC.toString())
-        .group(false)
-        .conceptId(903135L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter hipCircumference() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.HC.toString())
-        .group(false)
-        .conceptId(903136L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter pregnancy() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.PREG.toString())
-        .group(false)
-        .conceptId(903120L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter wheelchair() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.WHEEL.toString())
-        .group(false)
-        .conceptId(903111L)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  /**
-   * This SearchParameter specifically represents the case that uses the
-   * has_physical_measurement_data flag.
-   */
-  private static SearchParameter physicalMeasurementDataNoConceptId() {
-    return new SearchParameter()
-        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
-        .type(CriteriaType.PPI.toString())
-        .group(false)
-        .ancestorData(false)
-        .standard(false);
-  }
-
-  private static SearchParameter age() {
-    return new SearchParameter()
-        .domain(Domain.PERSON.toString())
-        .type(CriteriaType.AGE.toString())
-        .group(false)
-        .ancestorData(false)
-        .standard(true);
-  }
-
-  private static SearchParameter male() {
-    return new SearchParameter()
-        .domain(Domain.PERSON.toString())
-        .type(CriteriaType.GENDER.toString())
-        .group(false)
-        .standard(true)
-        .ancestorData(false)
-        .conceptId(8507L);
-  }
-
-  private static SearchParameter race() {
-    return new SearchParameter()
-        .domain(Domain.PERSON.toString())
-        .type(CriteriaType.RACE.toString())
-        .group(false)
-        .standard(true)
-        .ancestorData(false)
-        .conceptId(1L);
-  }
-
-  private static SearchParameter ethnicity() {
-    return new SearchParameter()
-        .domain(Domain.PERSON.toString())
-        .type(CriteriaType.ETHNICITY.toString())
-        .group(false)
-        .standard(true)
-        .ancestorData(false)
-        .conceptId(9898L);
-  }
-
-  private static SearchParameter deceased() {
-    return new SearchParameter()
-        .domain(Domain.PERSON.toString())
-        .type(CriteriaType.DECEASED.toString())
-        .group(false)
-        .standard(true)
-        .ancestorData(false);
-  }
-
-  private static SearchParameter fitbit() {
-    return new SearchParameter()
-        .domain(Domain.FITBIT.toString())
-        .group(false)
-        .standard(true)
-        .ancestorData(false);
-  }
-
-  private static SearchParameter wholeGenomeVariant() {
-    return new SearchParameter()
-        .domain(Domain.WHOLE_GENOME_VARIANT.toString())
-        .group(false)
-        .standard(false)
-        .ancestorData(false);
-  }
-
-  private static SearchParameter survey() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.SURVEY.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(22L);
-  }
-
-  private static SearchParameter surveyAnswer() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.ANSWER.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(5L);
-  }
-
-  private static SearchParameter copeSurveyQuestion() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.QUESTION.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(44L)
-        .attributes(
-            ImmutableList.of(
-                new Attribute()
-                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("100", "101"))));
-  }
-
-  private static SearchParameter copeSurveyQuestionAnyValue() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.QUESTION.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(44L)
-        .attributes(ImmutableList.of(new Attribute().name(AttrName.ANY)));
-  }
-
-  private static SearchParameter copeSurveyQuestionVersionAndAnyValue() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.QUESTION.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(44L)
-        .attributes(
-            ImmutableList.of(
-                new Attribute().name(AttrName.ANY),
-                new Attribute()
-                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("100", "101"))));
-  }
-
-  private static SearchParameter copeSurveyAnswer() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.QUESTION.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(44L)
-        .attributes(
-            ImmutableList.of(
-                new Attribute()
-                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("100", "101")),
-                new Attribute()
-                    .name(AttrName.CAT)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("10"))));
-  }
-
-  private static SearchParameter copeSurveyCatAndNum() {
-    return new SearchParameter()
-        .domain(Domain.SURVEY.toString())
-        .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.QUESTION.toString())
-        .ancestorData(false)
-        .standard(false)
-        .group(true)
-        .conceptId(44L)
-        .attributes(
-            ImmutableList.of(
-                new Attribute()
-                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("100", "101")),
-                new Attribute()
-                    .name(AttrName.CAT)
-                    .operator(Operator.IN)
-                    .operands(ImmutableList.of("10")),
-                new Attribute()
-                    .name(AttrName.NUM)
-                    .operator(Operator.EQUAL)
-                    .operands(ImmutableList.of("10"))));
-  }
-
-  private static Modifier ageModifier() {
-    return new Modifier()
-        .name(ModifierType.AGE_AT_EVENT)
-        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(ImmutableList.of("25"));
-  }
-
-  private static Modifier visitModifier() {
-    return new Modifier()
-        .name(ModifierType.ENCOUNTERS)
-        .operator(Operator.IN)
-        .operands(ImmutableList.of("1"));
-  }
-
-  private static Modifier occurrencesModifier() {
-    return new Modifier()
-        .name(ModifierType.NUM_OF_OCCURRENCES)
-        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(ImmutableList.of("1"));
-  }
-
-  private static Modifier eventDateModifier() {
-    return new Modifier()
-        .name(ModifierType.EVENT_DATE)
-        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(ImmutableList.of("2009-12-03"));
-  }
-
-  private static List<Attribute> wheelchairAttributes() {
-    return ImmutableList.of(
-        new Attribute()
-            .name(AttrName.CAT)
-            .operator(Operator.IN)
-            .operands(ImmutableList.of("4023190")));
-  }
-
-  private static List<Attribute> bpAttributes() {
-    return ImmutableList.of(
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-            .operands(ImmutableList.of("90"))
-            .conceptId(903118L),
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.BETWEEN)
-            .operands(ImmutableList.of("60", "80"))
-            .conceptId(903115L));
-  }
-
-  private static DbCriteria drugCriteriaParent() {
-    return DbCriteria.builder()
-        .addParentId(99999)
-        .addDomainId(Domain.DRUG.toString())
-        .addType(CriteriaType.ATC.toString())
-        .addConceptId("21600932")
-        .addGroup(true)
-        .addStandard(true)
-        .addSelectable(true)
-        .build();
-  }
-
-  private static DbCriteria drugCriteriaChild(long parentId) {
-    return DbCriteria.builder()
-        .addParentId(parentId)
-        .addDomainId(Domain.DRUG.toString())
-        .addType(CriteriaType.RXNORM.toString())
-        .addConceptId("1520218")
-        .addGroup(false)
-        .addSelectable(true)
-        .build();
-  }
-
-  private static DbCriteria icd9CriteriaParent() {
-    return DbCriteria.builder()
-        .addParentId(99999)
-        .addDomainId(Domain.CONDITION.toString())
-        .addType(CriteriaType.ICD9CM.toString())
-        .addStandard(false)
-        .addCode("001")
-        .addName("Cholera")
-        .addCount(19L)
-        .addGroup(true)
-        .addSelectable(true)
-        .addAncestorData(false)
-        .addConceptId("2")
-        .addSynonyms("[CONDITION_rank1]")
-        .build();
-  }
-
-  private static DbCriteria icd9CriteriaChild(long parentId) {
-    return DbCriteria.builder()
-        .addParentId(parentId)
-        .addDomainId(Domain.CONDITION.toString())
-        .addType(CriteriaType.ICD9CM.toString())
-        .addStandard(false)
-        .addCode("001.1")
-        .addName("Cholera")
-        .addCount(19L)
-        .addGroup(false)
-        .addSelectable(true)
-        .addAncestorData(false)
-        .addConceptId("1")
-        .build();
+    SurveyModule surveyModule =
+        controller.findSurveyModules(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
+    assertThat(surveyModule.getName()).isEqualTo(dbSurveyModule.getName());
+    assertThat(surveyModule.getDescription()).isEqualTo(dbSurveyModule.getDescription());
+    assertThat(surveyModule.getParticipantCount()).isEqualTo(dbSurveyModule.getParticipantCount());
+    assertThat(surveyModule.getQuestionCount()).isEqualTo(1);
   }
 
   @Test
-  public void findDataFilters() {
-    List<DataFilter> filters =
-        controller.findDataFilters(cdrVersion.getCdrVersionId()).getBody().getItems();
+  public void findCriteriaBy() {
+    DbCriteria icd9CriteriaParent =
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(0L)
+            .build();
+    cbCriteriaDao.save(icd9CriteriaParent);
+    DbCriteria icd9Criteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.ICD9CM.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(false)
+            .addParentId(icd9CriteriaParent.getId())
+            .build();
+    cbCriteriaDao.save(icd9Criteria);
+
     assertThat(
-            filters.contains(
-                new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
-        .isTrue();
+            controller
+                .findCriteriaBy(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.CONDITION.toString(),
+                    CriteriaType.ICD9CM.toString(),
+                    false,
+                    0L)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(icd9CriteriaParent));
+
     assertThat(
-            filters.contains(
-                new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")))
-        .isTrue();
-  }
-
-  @Test
-  public void validateAttribute() {
-    SearchParameter demo = age();
-    Attribute attribute = new Attribute().name(AttrName.NUM);
-    demo.attributes(ImmutableList.of(attribute));
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(demo), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operator null is not valid.");
-    }
-
-    attribute.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operands are empty.");
-    }
-
-    attribute.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
-    }
-
-    attribute.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: attribute NUM operands must be numeric.");
-    }
-
-    attribute.operands(ImmutableList.of("10", "20"));
-    attribute.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
-    }
-  }
-
-  @Test
-  public void validateModifiers() {
-    Modifier modifier = ageModifier().operator(null).operands(new ArrayList<>());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operator null is not valid.");
-    }
-
-    modifier.operator(Operator.BETWEEN);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operands are empty.");
-    }
-
-    modifier.operands(ImmutableList.of("20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
-    }
-
-    modifier.operands(ImmutableList.of("s", "20"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
-    }
-
-    modifier.operands(ImmutableList.of("10", "20"));
-    modifier.operator(Operator.EQUAL);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
-    }
-
-    modifier.name(ModifierType.EVENT_DATE);
-    modifier.operands(ImmutableList.of("10"));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: modifier EVENT_DATE must be a valid date.");
-    }
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildHasEHRData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildHasPMData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_PHYSICAL_MEASUREMENT_DATA");
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildHasPPISurveyData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_PPI_SURVEY_DATA");
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildHasEHRAndPPISurveyData() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA").addDataFiltersItem("HAS_PPI_SURVEY_DATA");
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void temporalGroupExceptions() {
-    SearchGroupItem icd9SGI =
-        new SearchGroupItem().type(Domain.CONDITION.toString()).addSearchParametersItem(icd9());
-
-    SearchGroup temporalGroup = new SearchGroup().items(ImmutableList.of(icd9SGI)).temporal(true);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: search group item temporal group null is not valid.");
-    }
-
-    icd9SGI.temporalGroup(0);
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage())
-          .isEqualTo(
-              "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
-    }
-  }
-
-  @Test
-  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers() {
-    SearchGroupItem icd9SGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(icd9())
-            .temporalGroup(0)
-            .addModifiersItem(ageModifier());
-    SearchGroupItem icd10SGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(icd10())
-            .temporalGroup(1)
-            .addModifiersItem(visitModifier());
-    SearchGroupItem snomedSGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(snomed())
-            .temporalGroup(0);
-
-    // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(icd9SGI, snomedSGI, icd10SGI))
-            .temporal(true)
-            .mention(TemporalMention.FIRST_MENTION)
-            .time(TemporalTime.X_DAYS_AFTER)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    // matches icd9SGI in group 0 and icd10SGI in group 1
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsForSurveyWithAgeModifiers() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(),
-            ImmutableList.of(survey().conceptId(1585899L)),
-            ImmutableList.of(ageModifier()));
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() {
-    SearchGroupItem drugSGI =
-        new SearchGroupItem()
-            .type(Domain.DRUG.toString())
-            .addSearchParametersItem(drug().conceptId(21600932L))
-            .temporalGroup(0);
-    SearchGroupItem icd10SGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(icd10())
-            .temporalGroup(1)
-            .addModifiersItem(visitModifier());
-
-    // First Mention Of Drug 5 Days Before ICD10 w/modifiers
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(drugSGI, icd10SGI))
-            .temporal(true)
-            .mention(TemporalMention.FIRST_MENTION)
-            .time(TemporalTime.X_DAYS_BEFORE)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void anyMentionOfCPT5DaysAfterICD10Child() {
-    SearchGroupItem cptSGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(
-                icd9().type(CriteriaType.CPT4.toString()).group(false).conceptId(1L))
-            .temporalGroup(0)
-            .addModifiersItem(visitModifier());
-    SearchGroupItem icd10SGI =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .addSearchParametersItem(icd10())
-            .temporalGroup(1);
-
-    // Any Mention Of CPT 5 Days After ICD10
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(cptSGI, icd10SGI))
-            .temporal(true)
-            .mention(TemporalMention.ANY_MENTION)
-            .time(TemporalTime.X_DAYS_AFTER)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void anyMentionOfCPTWithIn5DaysOfVisit() {
-    SearchGroupItem cptSGI =
-        new SearchGroupItem()
-            .type(Domain.PROCEDURE.toString())
-            .addSearchParametersItem(procedure())
-            .temporalGroup(0);
-    SearchGroupItem visitSGI =
-        new SearchGroupItem()
-            .type(Domain.VISIT.toString())
-            .addSearchParametersItem(visit())
-            .temporalGroup(1);
-
-    // Any Mention Of ICD10 Parent within 5 Days of visit
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(visitSGI, cptSGI))
-            .temporal(true)
-            .mention(TemporalMention.ANY_MENTION)
-            .time(TemporalTime.WITHIN_X_DAYS_OF)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() {
-    SearchGroupItem drugSGI =
-        new SearchGroupItem()
-            .type(Domain.DRUG.toString())
-            .addSearchParametersItem(drug())
-            .temporalGroup(0);
-    SearchGroupItem measurementSGI =
-        new SearchGroupItem()
-            .type(Domain.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement())
-            .temporalGroup(1);
-
-    // First Mention Of Drug during same encounter as measurement
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(drugSGI, measurementSGI))
-            .temporal(true)
-            .mention(TemporalMention.FIRST_MENTION)
-            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() {
-    SearchGroupItem drugSGI =
-        new SearchGroupItem()
-            .type(Domain.DRUG.toString())
-            .addSearchParametersItem(drug())
-            .temporalGroup(0);
-    SearchGroupItem measurementSGI =
-        new SearchGroupItem()
-            .type(Domain.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement())
-            .temporalGroup(1);
-
-    // Last Mention Of Drug during same encounter as measurement
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(drugSGI, measurementSGI))
-            .temporal(true)
-            .mention(TemporalMention.LAST_MENTION)
-            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() {
-    SearchGroupItem drugSGI =
-        new SearchGroupItem()
-            .type(Domain.DRUG.toString())
-            .addSearchParametersItem(drug())
-            .temporalGroup(0);
-    SearchGroupItem measurementSGI =
-        new SearchGroupItem()
-            .type(Domain.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement())
-            .temporalGroup(1);
-    SearchGroupItem visitSGI =
-        new SearchGroupItem()
-            .type(Domain.VISIT.toString())
-            .addSearchParametersItem(visit())
-            .temporalGroup(1);
-
-    // Last Mention Of Drug during same encounter as measurement
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(drugSGI, measurementSGI, visitSGI))
-            .temporal(true)
-            .mention(TemporalMention.LAST_MENTION)
-            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() {
-    SearchGroupItem measurementSGI =
-        new SearchGroupItem()
-            .type(Domain.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement())
-            .temporalGroup(0);
-    SearchGroupItem visitSGI =
-        new SearchGroupItem()
-            .type(Domain.VISIT.toString())
-            .addSearchParametersItem(visit())
-            .temporalGroup(0);
-    SearchGroupItem drugSGI =
-        new SearchGroupItem()
-            .type(Domain.DRUG.toString())
-            .addSearchParametersItem(drug().group(true).conceptId(21600932L))
-            .temporalGroup(1);
-
-    // Last Mention Of Measurement or Visit 5 days after Drug
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(ImmutableList.of(drugSGI, measurementSGI, visitSGI))
-            .temporal(true)
-            .mention(TemporalMention.LAST_MENTION)
-            .time(TemporalTime.X_DAYS_AFTER)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionChildAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(ageModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionChildEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9()),
-            ImmutableList.of(visitModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionChildAgeAtEventBetween() {
-    Modifier modifier =
-        ageModifier().operator(Operator.BETWEEN).operands(ImmutableList.of("37", "39"));
-
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9()),
-            ImmutableList.of(ageModifier(), occurrencesModifier().operands(ImmutableList.of("2"))));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9(), icd9().conceptId(2L)),
-            ImmutableList.of(ageModifier(), occurrencesModifier(), eventDateModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionChildEventDate() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9()),
-            ImmutableList.of(eventDateModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionNumOfOccurrences() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9()),
-            ImmutableList.of(occurrencesModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9Child() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionParent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9().group(true).conceptId(44823922L)),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsDemoGender() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoRace() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoEthnicity() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PERSON.toString(), ImmutableList.of(ethnicity()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoDec() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countParticipantsFitbit() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countParticipantsWholeGenomeVariant() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.WHOLE_GENOME_VARIANT.toString(),
-            ImmutableList.of(wholeGenomeVariant()),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoAge() {
-    int lo = getTestPeriod().getYears() - 1;
-    int hi = getTestPeriod().getYears() + 1;
-    SearchParameter demo = age();
-    demo.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.AGE)
-                .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
-  }
-
-  @Test
-  public void countSubjectsDemoAgeAtConsent() {
-    SearchParameter demo = age();
-    demo.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.AGE_AT_CONSENT)
-                .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of("29", "30"))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 3);
-  }
-
-  @Test
-  public void countSubjectsDemoAgeAtCdr() {
-    SearchParameter demo = age();
-    demo.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.AGE_AT_CDR)
-                .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of("29", "30"))));
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
-  }
-
-  @Test
-  public void countSubjectsICD9AndDemo() {
-    SearchParameter demoAgeSearchParam = age();
-    int lo = getTestPeriod().getYears() - 1;
-    int hi = getTestPeriod().getYears() + 1;
-
-    demoAgeSearchParam.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.AGE)
-                .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
-
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
-
-    SearchGroupItem anotherSearchGroupItem =
-        new SearchGroupItem()
-            .type(Domain.CONDITION.toString())
-            .searchParameters(ImmutableList.of(icd9().conceptId(3L)))
-            .modifiers(new ArrayList<>());
-
-    SearchGroupItem anotherNewSearchGroupItem =
-        new SearchGroupItem()
-            .type(Domain.PERSON.toString())
-            .searchParameters(ImmutableList.of(demoAgeSearchParam))
-            .modifiers(new ArrayList<>());
-
-    searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
-    searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
-  }
-
-  @Test
-  public void countSubjectsDemoExcluded() {
-    SearchGroupItem excludeSearchGroupItem =
-        new SearchGroupItem()
-            .type(Domain.PERSON.toString())
-            .searchParameters(ImmutableList.of(male()));
-    SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
-
-    SearchRequest searchRequests =
-        createSearchRequests(Domain.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
-    searchRequests.getExcludes().add(excludeSearchGroup);
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
-  }
-
-  @Test
-  public void countSubjectsICD9ParentAndICD10ChildCondition() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 2);
-  }
-
-  @Test
-  public void countSubjectsCPTProcedure() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PROCEDURE.toString(),
-            ImmutableList.of(procedure().conceptId(4L)),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsSnomedChildCondition() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.CONDITION.toString(),
-            ImmutableList.of(snomed().standard(true).conceptId(6L)),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsSnomedParentProcedure() {
-    SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PROCEDURE.toString(), ImmutableList.of(snomed), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsVisit() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.VISIT.toString(), ImmutableList.of(visit().conceptId(10L)), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsVisitModifiers() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.VISIT.toString(),
-            ImmutableList.of(visit().conceptId(10L)),
-            ImmutableList.of(occurrencesModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsDrugChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(Domain.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsDrugParent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.DRUG.toString(),
-            ImmutableList.of(drug().group(true).conceptId(21600932L)),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsDrugParentAndChild() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.DRUG.toString(),
-            ImmutableList.of(drug().group(true).conceptId(21600932L), drug()),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsDrugChildEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(visitModifier()));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsDrugChildAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(ageModifier()));
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsLabEncounter() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.MEASUREMENT.toString(),
-            ImmutableList.of(measurement()),
-            ImmutableList.of(visitModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabNumericalBetween() {
-    SearchParameter lab = measurement();
-    lab.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of("0", "1"))));
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.MEASUREMENT.toString(), ImmutableList.of(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabCategoricalIn() {
-    SearchParameter lab = measurement();
-    lab.attributes(
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.CAT)
-                .operator(Operator.IN)
-                .operands(ImmutableList.of("1"))));
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothNumericalAndCategorical() {
-    SearchParameter lab = measurement();
-    Attribute numerical =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.EQUAL)
-            .operands(ImmutableList.of("0.1"));
-    Attribute categorical =
-        new Attribute()
-            .name(AttrName.CAT)
-            .operator(Operator.IN)
-            .operands(ImmutableList.of("1", "2"));
-    lab.attributes(ImmutableList.of(numerical, categorical));
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabCategoricalAgeAtEvent() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.MEASUREMENT.toString(),
-            ImmutableList.of(measurement()),
-            ImmutableList.of(ageModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabMoreThanOneSearchParameter() {
-    SearchParameter lab1 = measurement();
-    SearchParameter lab2 = measurement().conceptId(9L);
-    SearchParameter lab3 = measurement().conceptId(11L);
-    Attribute labCategorical =
-        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(ImmutableList.of("77"));
-    lab3.attributes(ImmutableList.of(labCategorical));
-    SearchRequest searchRequest =
-        createSearchRequests(
-            lab1.getDomain(), ImmutableList.of(lab1, lab2, lab3), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() {
-    SearchParameter icd9 = icd9();
-    SearchParameter snomed = snomed().standard(true);
-    SearchRequest searchRequest =
-        createSearchRequests(icd9.getDomain(), ImmutableList.of(icd9, snomed), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsBloodPressure() {
-    SearchParameter pm = bloodPressure().attributes(bpAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(pm.getDomain(), ImmutableList.of(pm), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureAny() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
-            new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
-    SearchParameter pm = bloodPressure().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureOrHeartRateDetail() {
-    SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
-
-    List<Attribute> hrAttributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.EQUAL)
-                .operands(ImmutableList.of("71")));
-    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
-
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(),
-            ImmutableList.of(bpPm, hrPm),
-            new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() {
-    SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(bpPm), new ArrayList<>());
-
-    List<Attribute> hrAttributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.EQUAL)
-                .operands(ImmutableList.of("71")));
-    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
-    SearchGroupItem anotherSearchGroupItem =
-        new SearchGroupItem()
-            .type(Domain.PHYSICAL_MEASUREMENT.toString())
-            .searchParameters(ImmutableList.of(hrPm))
-            .modifiers(new ArrayList<>());
-
-    searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
-
-    List<Attribute> irrAttributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.CAT)
-                .operator(Operator.IN)
-                .operands(ImmutableList.of("4262985")));
-    SearchParameter hrIrrPm = hr().attributes(irrAttributes);
-    SearchGroupItem heartRateIrrSearchGroupItem =
-        new SearchGroupItem()
-            .type(Domain.PHYSICAL_MEASUREMENT.toString())
-            .searchParameters(ImmutableList.of(hrIrrPm))
-            .modifiers(new ArrayList<>());
-
-    searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
-  }
-
-  @Test
-  public void countSubjectsHeartRateAny() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(),
-            ImmutableList.of(hrDetail().conceptId(1586218L)),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsHeartRate() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-                .operands(ImmutableList.of("45")));
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(),
-            ImmutableList.of(hrDetail().conceptId(1586218L).attributes(attributes)),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsHeight() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(ImmutableList.of("168")));
-    SearchParameter pm = height().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsWeight() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(ImmutableList.of("201")));
-    SearchParameter pm = weight().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsBMI() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(ImmutableList.of("263")));
-    SearchParameter pm = bmi().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectWaistCircumferenceAndHipCircumference() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.EQUAL)
-                .operands(ImmutableList.of("31")));
-    SearchParameter pm = waistCircumference().attributes(attributes);
-    SearchParameter pm1 = hipCircumference().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm, pm1), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectPregnant() {
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.CAT)
-                .operator(Operator.IN)
-                .operands(ImmutableList.of("45877994")));
-    SearchParameter pm = pregnancy().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectWheelChairUser() {
-    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectHasPhysicalMeasurementData() {
-    SearchParameter pm = physicalMeasurementDataNoConceptId();
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsSurvey() {
-    // Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(),
-            ImmutableList.of(survey().conceptId(1585899L)),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsCopeSurveyQuestion() {
-    // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsCopeSurveyQuestionVersionAndAnyValue() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(),
-            ImmutableList.of(copeSurveyQuestionVersionAndAnyValue()),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsCopeSurveyQuestionAnyValue() {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(),
-            ImmutableList.of(copeSurveyQuestionAnyValue()),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsCopeSurveyAnswer() {
-    // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyAnswer()), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsCopeSurveyCatAndNum() {
-    // Cope Survey
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyCatAndNum()), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsQuestion() {
-    // Question
-    SearchParameter ppiQuestion =
-        survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            ppiQuestion.getDomain(), ImmutableList.of(ppiQuestion), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsSurveyValueSourceConceptId() {
-    // value source concept id
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.CAT)
-                .operator(Operator.IN)
-                .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsConceptId = surveyAnswer().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            ppiValueAsConceptId.getDomain(),
-            ImmutableList.of(ppiValueAsConceptId),
-            new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void countSubjectsSurveyValueAsNumber() {
-    // value as number
-    List<Attribute> attributes =
-        ImmutableList.of(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.EQUAL)
-                .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsNumer = surveyAnswer().attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
-    ResponseEntity<Long> response =
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    assertParticipants(response, 1);
-  }
-
-  @Test
-  public void findDemoChartInfo() {
-    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    DemoChartInfoListResponse response =
+            controller
+                .findCriteriaBy(
+                    "1",
+                    "1",
+                    Domain.CONDITION.toString(),
+                    CriteriaType.ICD9CM.toString(),
+                    false,
+                    icd9CriteriaParent.getId())
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(icd9Criteria));
+  }
+
+  @Test
+  public void findCriteriaByExceptions() {
+    assertThrows(
+        BadRequestException.class,
+        () -> controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, null, null, false, null),
+        "Bad Request: Please provide a valid domain. null is not valid.");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaBy(WORKSPACE_NAMESPACE, WORKSPACE_ID, "blah", null, false, null),
+        "Bad Request: Please provide a valid domain. blah is not valid.");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaBy(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.toString(),
+                "blah",
+                false,
+                null),
+        "Bad Request: Please provide a valid type. blah is not valid.");
+  }
+
+  @Test
+  public void findCriteriaByDemo() {
+    DbCriteria demoCriteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.AGE.toString())
+            .addCount(0L)
+            .addParentId(0L)
+            .build();
+    cbCriteriaDao.save(demoCriteria);
+
+    assertThat(
+            controller
+                .findCriteriaBy(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.PERSON.toString(),
+                    CriteriaType.AGE.toString(),
+                    false,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(demoCriteria));
+  }
+
+  @Test
+  public void findCriteriaAutoCompleteMatchesSynonyms() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.MEASUREMENT.toString())
+            .addType(CriteriaType.LOINC.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(true)
+            .addFullText("LP12*[MEASUREMENT_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaAutoComplete(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.MEASUREMENT.toString(),
+                    "LP12",
+                    CriteriaType.LOINC.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findCriteriaAutoCompleteMatchesCode() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.MEASUREMENT.toString())
+            .addType(CriteriaType.LOINC.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(true)
+            .addCode("LP123")
+            .addFullText("+[MEASUREMENT_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaAutoComplete(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.MEASUREMENT.toString(),
+                    "LP12",
+                    CriteriaType.LOINC.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findCriteriaAutoCompleteSnomed() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.SNOMED.toString())
+            .addCount(0L)
+            .addHierarchy(true)
+            .addStandard(true)
+            .addFullText("LP12*[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaAutoComplete(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.CONDITION.toString(),
+                    "LP12",
+                    CriteriaType.SNOMED.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findCriteriaAutoCompleteExceptions() {
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, null, "blah", null, null, null),
+        "Bad Request: Please provide a valid domain. null is not valid.");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, "blah", "blah", "blah", null, null),
+        "Bad Request: Please provide a valid domain. blah is not valid.");
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            controller.findCriteriaAutoComplete(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                Domain.CONDITION.toString(),
+                "blah",
+                "blah",
+                null,
+                null),
+        "Bad Request: Please provide a valid type. blah is not valid.");
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermPhysicalMeasurement() {
+    DbCriteria dbCriteria =
+        DbCriteria.builder()
+            .addCode("12345")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
+            .addGroup(Boolean.FALSE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.PPI.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addFullText("[PHYSICAL_MEASUREMENT_CSS_rank1]")
+            .build();
+    cbCriteriaDao.save(dbCriteria);
+
+    assertThat(cohortBuilderMapper.dbModelToClient(dbCriteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.PHYSICAL_MEASUREMENT_CSS.toString(),
+                    "12345",
+                    null,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0));
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ICD9CM.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addFullText("[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "001", null, null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermLikeSourceCode() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("00")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ICD9CM.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addFullText("+[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    List<Criteria> results =
         controller
-            .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
-                GenderOrSexType.GENDER.toString(),
-                AgeType.AGE.toString(),
-                searchRequest)
-            .getBody();
-    assertDemographics(response);
-  }
-
-  @Test
-  public void findDemoChartInfoGenderAgeAtConsentWithEHRData() {
-    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-    searchRequest.addDataFiltersItem("HAS_EHR_DATA");
-
-    DemoChartInfoListResponse response =
-        controller
-            .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
-                GenderOrSexType.GENDER.toString(),
-                AgeType.AGE_AT_CONSENT.toString(),
-                searchRequest)
-            .getBody();
-    assertDemographics(response);
-  }
-
-  @Test
-  public void findDemoChartInfoSexAtBirthAgeAtCdr() {
-    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
-    SearchRequest searchRequest =
-        createSearchRequests(
-            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
-
-    DemoChartInfoListResponse response =
-        controller
-            .findDemoChartInfo(
-                cdrVersion.getCdrVersionId(),
-                GenderOrSexType.SEX_AT_BIRTH.toString(),
-                AgeType.AGE_AT_CDR.toString(),
-                searchRequest)
-            .getBody();
-    assertDemographics(response);
-  }
-
-  @Test
-  public void findCriteriaForCohortEdit() {
-    ImmutableList<Long> sourceConceptIds = ImmutableList.of(44823922L);
-    ImmutableList<Long> standardConceptIds = ImmutableList.of(44823923L);
-    CriteriaRequest request =
-        new CriteriaRequest()
-            .sourceConceptIds(sourceConceptIds)
-            .standardConceptIds(standardConceptIds);
-    List<Criteria> criteriaList =
-        controller
-            .findCriteriaForCohortEdit(
-                cdrVersion.getCdrVersionId(), Domain.CONDITION.toString(), request)
+            .findCriteriaByDomainAndSearchTerm(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "00", null, null)
             .getBody()
             .getItems();
-    assertThat(criteriaList).hasSize(2);
-    assertThat(criteriaList.get(0).getId()).isEqualTo(icd9.getId());
-    assertThat(criteriaList.get(1).getId()).isEqualTo(snomedStandard.getId());
+
+    assertThat(1).isEqualTo(results.size());
+    assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria));
   }
 
   @Test
-  public void filterBigQueryConfig_WithoutTableName() {
-    final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
-    QueryJobConfiguration queryJobConfiguration =
-        QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
-    final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-    assertThat(expectedResult)
-        .isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
+  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() {
+    DbCriteria criteria1 =
+        DbCriteria.builder()
+            .addCode("672535")
+            .addCount(-1L)
+            .addConceptId("19001487")
+            .addDomainId(Domain.DRUG.toString())
+            .addGroup(Boolean.FALSE)
+            .addSelectable(Boolean.TRUE)
+            .addName("4-Way")
+            .addParentId(0)
+            .addType(CriteriaType.BRAND.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("[DRUG_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria1);
+
+    List<Criteria> results =
+        controller
+            .findCriteriaByDomainAndSearchTerm(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), "672535", null, null)
+            .getBody()
+            .getItems();
+    assertThat(1).isEqualTo(results.size());
+    assertThat(results.get(0)).isEqualTo(createResponseCriteria(criteria1));
   }
 
-  protected String getTablePrefix() {
-    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("LP12")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
   }
 
-  private Period getTestPeriod() {
-    DateTime birthDate = new DateTime(1980, 8, 1, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    return new Period(birthDate, now);
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("LP12*[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+
+    assertThat(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
   }
 
-  private SearchRequest createSearchRequests(
-      String type, List<SearchParameter> parameters, List<Modifier> modifiers) {
-    final SearchGroupItem searchGroupItem =
-        new SearchGroupItem().type(type).searchParameters(parameters).modifiers(modifiers);
+  @Test
+  public void findCriteriaByDomainAndSearchTermEmptyTerm() {
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.CONDITION.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.LOINC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("LP12*[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
 
-    final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
-
-    List<SearchGroup> groups = new ArrayList<>();
-    groups.add(searchGroup);
-    return new SearchRequest().includes(groups);
+    assertThat(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), "", null, null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
   }
 
-  private void assertParticipants(ResponseEntity response, Integer expectedCount) {
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  @Test
+  public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() {
+    jdbcTemplate.execute(
+        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addCode("001")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.DRUG.toString())
+            .addGroup(Boolean.TRUE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.ATC.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(true)
+            .addFullText("LP12*[DRUG_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
 
-    Long participantCount = (Long) response.getBody();
-    assertThat(participantCount).isEqualTo(expectedCount);
+    assertThat(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.DRUG.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
-  private DbCriteria saveCriteriaWithPath(String path, DbCriteria criteria) {
-    criteria = cbCriteriaDao.save(criteria);
-    String pathEnd = String.valueOf(criteria.getId());
-    criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    return cbCriteriaDao.save(criteria);
+  @Test
+  public void findStandardCriteriaByDomainAndConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    DbCriteria criteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.CONDITION.toString())
+            .addType(CriteriaType.ICD10CM.toString())
+            .addStandard(true)
+            .addCount(1L)
+            .addConceptId("1")
+            .addFullText("[CONDITION_rank1]")
+            .build();
+    cbCriteriaDao.save(criteria);
+    assertThat(
+            controller
+                .findStandardCriteriaByDomainAndConceptId(
+                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.toString(), 12345L)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(criteria));
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
-  private void delete(DbCriteria... criteriaList) {
-    Arrays.stream(criteriaList).forEach(c -> cbCriteriaDao.deleteById(c.getId()));
+  @Test
+  public void findDrugBrandOrIngredientByName() {
+    DbCriteria drugATCCriteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.DRUG.toString())
+            .addType(CriteriaType.ATC.toString())
+            .addParentId(0L)
+            .addCode("LP12345")
+            .addName("drugName")
+            .addConceptId("12345")
+            .addGroup(true)
+            .addSelectable(true)
+            .addCount(12L)
+            .build();
+    cbCriteriaDao.save(drugATCCriteria);
+    DbCriteria drugBrandCriteria =
+        DbCriteria.builder()
+            .addDomainId(Domain.DRUG.toString())
+            .addType(CriteriaType.BRAND.toString())
+            .addParentId(0L)
+            .addCode("LP6789")
+            .addName("brandName")
+            .addConceptId("1235")
+            .addGroup(true)
+            .addSelectable(true)
+            .addCount(33L)
+            .build();
+    cbCriteriaDao.save(drugBrandCriteria);
+
+    assertThat(
+            controller
+                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "drugN", null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(drugATCCriteria));
+
+    assertThat(
+            controller
+                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "brandN", null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(drugBrandCriteria));
+
+    assertThat(
+            controller
+                .findDrugBrandOrIngredientByValue(WORKSPACE_NAMESPACE, WORKSPACE_ID, "LP6789", null)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(createResponseCriteria(drugBrandCriteria));
   }
 
-  private void assertDemographics(DemoChartInfoListResponse response) {
-    assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L))
-        .isEqualTo(response.getItems().get(0));
-    assertThat(new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L))
-        .isEqualTo(response.getItems().get(1));
+  @Test
+  public void findCriteriaAttributeByConceptId() {
+    DbCriteriaAttribute criteriaAttributeMin =
+        cbCriteriaAttributeDao.save(
+            DbCriteriaAttribute.builder()
+                .addConceptId(1L)
+                .addConceptName("MIN")
+                .addEstCount("10")
+                .addType("NUM")
+                .addValueAsConceptId(0L)
+                .build());
+    DbCriteriaAttribute criteriaAttributeMax =
+        cbCriteriaAttributeDao.save(
+            DbCriteriaAttribute.builder()
+                .addConceptId(1L)
+                .addConceptName("MAX")
+                .addEstCount("100")
+                .addType("NUM")
+                .addValueAsConceptId(0L)
+                .build());
+
+    List<CriteriaAttribute> attrs =
+        controller
+            .findCriteriaAttributeByConceptId(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, criteriaAttributeMin.getConceptId())
+            .getBody()
+            .getItems();
+    assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin))).isTrue();
+    assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax))).isTrue();
+  }
+
+  @Test
+  public void findParticipantDemographics() {
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.GENDER.toString())
+            .addName("Male")
+            .addStandard(true)
+            .addConceptId("1")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.RACE.toString())
+            .addName("African American")
+            .addStandard(true)
+            .addConceptId("2")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.ETHNICITY.toString())
+            .addName("Not Hispanic or Latino")
+            .addStandard(true)
+            .addConceptId("3")
+            .addParentId(1)
+            .build());
+    cbCriteriaDao.save(
+        DbCriteria.builder()
+            .addDomainId(Domain.PERSON.toString())
+            .addType(CriteriaType.SEX.toString())
+            .addName("Male")
+            .addStandard(true)
+            .addConceptId("4")
+            .addParentId(1)
+            .build());
+    ParticipantDemographics demos =
+        controller.findParticipantDemographics(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody();
+    assertThat(new ConceptIdName().conceptId(1L).conceptName("Male"))
+        .isEqualTo(demos.getGenderList().get(0));
+    assertThat(new ConceptIdName().conceptId(2L).conceptName("African American"))
+        .isEqualTo(demos.getRaceList().get(0));
+    assertThat(new ConceptIdName().conceptId(3L).conceptName("Not Hispanic or Latino"))
+        .isEqualTo(demos.getEthnicityList().get(0));
+    assertThat(new ConceptIdName().conceptId(4L).conceptName("Male"))
+        .isEqualTo(demos.getSexAtBirthList().get(0));
+  }
+
+  @Test
+  public void findSurveyVersionByQuestionConceptId() {
+    jdbcTemplate.execute(
+        "create table cb_survey_version(survey_version_concept_id integer, survey_concept_id integer, display_name varchar(50), display_order integer)");
+    jdbcTemplate.execute(
+        "create table cb_survey_attribute(id integer, question_concept_id integer, answer_concept_id integer, survey_version_concept_id integer, item_count integer)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (100, 1333342, 'May 2020', 1)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (101, 1333342, 'June 2020', 2)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_version(survey_version_concept_id, survey_concept_id, display_name, display_order) values (102, 1333342, 'July 2020', 3)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (1, 715713, 0, 100, 291)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (2, 715713, 0, 101, 148)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (3, 715713, 0, 102, 150)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (4, 715713, 903096, 100, 154)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (5, 715713, 903096, 101, 82)");
+    jdbcTemplate.execute(
+        "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
+    SurveyVersionListResponse response =
+        controller
+            .findSurveyVersionByQuestionConceptId(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, 1333342L, 715713L)
+            .getBody();
+    assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(new Long("100"));
+    assertThat(response.getItems().get(0).getDisplayName()).isEqualTo("May 2020");
+    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(new Long("291"));
+    assertThat(response.getItems().get(1).getSurveyVersionConceptId()).isEqualTo(new Long("101"));
+    assertThat(response.getItems().get(1).getDisplayName()).isEqualTo("June 2020");
+    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(new Long("148"));
+    assertThat(response.getItems().get(2).getSurveyVersionConceptId()).isEqualTo(new Long("102"));
+    assertThat(response.getItems().get(2).getDisplayName()).isEqualTo("July 2020");
+    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
+    jdbcTemplate.execute("drop table cb_survey_version");
+    jdbcTemplate.execute("drop table cb_survey_attribute");
+  }
+
+  @Test
+  public void isApproximate() {
+    SearchParameter inSearchParameter = new SearchParameter();
+    SearchParameter exSearchParameter = new SearchParameter();
+    SearchGroupItem inSearchGroupItem =
+        new SearchGroupItem().addSearchParametersItem(inSearchParameter);
+    SearchGroupItem exSearchGroupItem =
+        new SearchGroupItem().addSearchParametersItem(exSearchParameter);
+    SearchGroup inSearchGroup = new SearchGroup().addItemsItem(inSearchGroupItem);
+    SearchGroup exSearchGroup = new SearchGroup().addItemsItem(exSearchGroupItem);
+    SearchRequest searchRequest =
+        new SearchRequest().addIncludesItem(inSearchGroup).addExcludesItem(exSearchGroup);
+    // Temporal includes
+    inSearchGroup.temporal(true);
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // BP includes
+    inSearchGroup.temporal(false);
+    inSearchParameter.subtype(CriteriaSubType.BP.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // Deceased includes
+    inSearchParameter.type(CriteriaType.DECEASED.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // Temporal and BP includes
+    inSearchGroup.temporal(true);
+    inSearchParameter.subtype(CriteriaSubType.BP.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // No temporal/BP/Decease
+    inSearchGroup.temporal(false);
+    inSearchParameter.type(CriteriaType.ETHNICITY.toString()).subtype(null);
+    assertThat(controller.isApproximate(searchRequest)).isFalse();
+    // Temporal excludes
+    exSearchGroup.temporal(true);
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // BP excludes
+    exSearchGroup.temporal(false);
+    exSearchParameter.subtype(CriteriaSubType.BP.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // Deceased excludes
+    exSearchParameter.type(CriteriaType.DECEASED.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+    // Temporal and BP excludes
+    exSearchGroup.temporal(true);
+    exSearchParameter.subtype(CriteriaSubType.BP.toString());
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
+  }
+
+  private Criteria createResponseCriteria(DbCriteria dbCriteria) {
+    return new Criteria()
+        .code(dbCriteria.getCode())
+        .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
+        .count(dbCriteria.getCount())
+        .parentCount(dbCriteria.getParentCount())
+        .childCount(dbCriteria.getChildCount())
+        .domainId(dbCriteria.getDomainId())
+        .group(dbCriteria.getGroup())
+        .hasAttributes(dbCriteria.getAttribute())
+        .id(dbCriteria.getId())
+        .name(dbCriteria.getName())
+        .parentId(dbCriteria.getParentId())
+        .selectable(dbCriteria.getSelectable())
+        .subtype(dbCriteria.getSubtype())
+        .type(dbCriteria.getType())
+        .path(dbCriteria.getPath())
+        .hasAncestorData(dbCriteria.getAncestorData())
+        .hasHierarchy(dbCriteria.getHierarchy())
+        .isStandard(dbCriteria.getStandard())
+        .value(dbCriteria.getValue());
+  }
+
+  private CriteriaAttribute createResponseCriteriaAttribute(
+      DbCriteriaAttribute dbCriteriaAttribute) {
+    return new CriteriaAttribute()
+        .id(dbCriteriaAttribute.getId())
+        .valueAsConceptId(dbCriteriaAttribute.getValueAsConceptId())
+        .conceptName(dbCriteriaAttribute.getConceptName())
+        .type(dbCriteriaAttribute.getType())
+        .estCount(dbCriteriaAttribute.getEstCount());
   }
 }

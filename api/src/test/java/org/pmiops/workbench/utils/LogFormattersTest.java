@@ -5,7 +5,7 @@ import static org.pmiops.workbench.utils.LogFormatters.formatDurationPretty;
 import static org.pmiops.workbench.utils.LogFormatters.rate;
 
 import java.time.Duration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LogFormattersTest {
 

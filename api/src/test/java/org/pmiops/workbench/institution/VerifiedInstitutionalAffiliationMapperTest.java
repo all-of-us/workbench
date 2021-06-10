@@ -1,10 +1,10 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import({
   VerifiedInstitutionalAffiliationMapperImpl.class,
   InstitutionServiceImpl.class,
@@ -40,7 +38,7 @@ public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
 
   private Institution testInstitution;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testInstitution =
         institutionService.createInstitution(
@@ -61,13 +59,14 @@ public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
     assertThat(target.getInstitution().getShortName()).isEqualTo(testInstitution.getShortName());
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void test_setDbInstitution_missing() {
     final VerifiedInstitutionalAffiliation source =
         new VerifiedInstitutionalAffiliation().institutionShortName("not in DB");
     final DbVerifiedInstitutionalAffiliation target = new DbVerifiedInstitutionalAffiliation();
 
-    mapper.setDbInstitution(target, source, institutionService);
+    assertThrows(
+        NotFoundException.class, () -> mapper.setDbInstitution(target, source, institutionService));
   }
 
   @Test

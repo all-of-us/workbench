@@ -1,15 +1,16 @@
 package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -23,10 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class DevUserRegistrationServiceTest {
+public class DevUserRegistrationServiceTest extends SpringTest {
 
   @MockBean private DirectoryService directoryService;
   @MockBean private InstitutionService institutionService;
@@ -42,7 +41,7 @@ public class DevUserRegistrationServiceTest {
   @Import({DevUserRegistrationServiceImpl.class, VerifiedInstitutionalAffiliationMapperImpl.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     userInfo = new Userinfoplus().setEmail("gjordan@fake-research-aou.org");
   }
@@ -71,7 +70,7 @@ public class DevUserRegistrationServiceTest {
     assertThat(dbAffiliationCaptor.getValue().getInstitution().getShortName()).isEqualTo("Google");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testCreateUserFromUserInfo_NoMatchingInstitution() {
     // If no matching institution could be found, an exception is thrown.
     when(directoryService.getContactEmail(eq("gjordan@fake-research-aou.org")))
@@ -79,6 +78,6 @@ public class DevUserRegistrationServiceTest {
     when(institutionService.getFirstMatchingInstitution("gregory.jordan.123@gmail.com"))
         .thenReturn(Optional.empty());
 
-    service.createUser(userInfo);
+    assertThrows(BadRequestException.class, () -> service.createUser(userInfo));
   }
 }

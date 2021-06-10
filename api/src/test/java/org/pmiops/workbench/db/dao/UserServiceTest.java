@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -17,9 +18,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -48,12 +49,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserServiceTest {
+public class UserServiceTest extends SpringTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
@@ -105,7 +104,7 @@ public class UserServiceTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
@@ -227,14 +226,14 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testSyncComplianceTrainingStatusBadgeNotFoundV2() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
-    userService.syncComplianceTrainingStatusV2();
+    assertThrows(NotFoundException.class, () -> userService.syncComplianceTrainingStatusV2());
   }
 
   @Test

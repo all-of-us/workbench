@@ -2,10 +2,10 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -15,9 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @Import({CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -27,7 +25,7 @@ public class InstitutionDaoTest extends SpringTest {
 
   private DbInstitution testInst;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     testInst =
         institutionDao.save(
@@ -75,39 +73,53 @@ public class InstitutionDaoTest extends SpringTest {
     assertThat(institutionDao.findOneByDisplayName("The National Institutes of Health")).isEmpty();
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_shortNameRequired() {
-    final DbInstitution testInst = new DbInstitution();
-    testInst.setDisplayName("so long");
-    institutionDao.save(testInst);
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution testInst = new DbInstitution();
+          testInst.setDisplayName("so long");
+          institutionDao.save(testInst);
+        });
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_displayNameRequired() {
-    final DbInstitution testInst = new DbInstitution();
-    testInst.setShortName("VUMC");
-    institutionDao.save(testInst);
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution testInst = new DbInstitution();
+          testInst.setShortName("VUMC");
+          institutionDao.save(testInst);
+        });
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_uniqueShortNameRequired() {
-    final DbInstitution snowflake1 =
-        new DbInstitution().setShortName("unique?").setDisplayName("We are all individuals");
-    institutionDao.save(snowflake1);
-
-    final DbInstitution snowflake2 =
-        new DbInstitution().setShortName("unique?").setDisplayName("I'm not");
-    institutionDao.save(snowflake2);
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution snowflake1 =
+              new DbInstitution().setShortName("unique?").setDisplayName("We are all individuals");
+          institutionDao.save(snowflake1);
+          final DbInstitution snowflake2 =
+              new DbInstitution().setShortName("unique?").setDisplayName("I'm not");
+          institutionDao.save(snowflake2);
+        });
   }
 
-  @Test(expected = DataIntegrityViolationException.class)
+  @Test
   public void test_uniqueDisplayNameRequired() {
-    final DbInstitution snowflake1 =
-        new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
-    institutionDao.save(snowflake1);
-
-    final DbInstitution snowflake2 =
-        new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
-    institutionDao.save(snowflake2);
+    assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          final DbInstitution snowflake1 =
+              new DbInstitution().setShortName("Inst1").setDisplayName("Not Unique");
+          institutionDao.save(snowflake1);
+          final DbInstitution snowflake2 =
+              new DbInstitution().setShortName("Inst2").setDisplayName("Not Unique");
+          institutionDao.save(snowflake2);
+        });
   }
 }

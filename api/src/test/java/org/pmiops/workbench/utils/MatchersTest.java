@@ -8,11 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(SpringRunner.class)
 public class MatchersTest {
 
   private static final Pattern SINGLE_GROUP_PATTERN = Pattern.compile("abcd(?<next>[efg])");

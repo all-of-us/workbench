@@ -28,16 +28,14 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.test.FakeClock;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class DelegatedUserCredentialsTest {
+public class DelegatedUserCredentialsTest extends SpringTest {
 
   static final String USER_EMAIL = "john.doe@researchallofus.org";
   static final String SERVICE_ACCOUNT_EMAIL = "gsuite-admin@test-project.iam.gserviceaccount.com";
@@ -68,7 +66,7 @@ public class DelegatedUserCredentialsTest {
   private DelegatedUserCredentials delegatedCredentials;
   private FakeClock fakeClock;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     mockTokenServerTransport = new MockTokenServerTransport();
     fakeClock = new FakeClock(Instant.ofEpochSecond(12345));

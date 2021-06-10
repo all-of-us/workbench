@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 
-const faker = require('faker/locale/en_US');
+import faker from 'faker';
 
 export function makeString(charLimit?: number): string {
   let loremStr: string = faker.lorem.paragraphs();

@@ -7,9 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import javax.inject.Provider;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
@@ -38,9 +37,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthDomainControllerTest extends SpringTest {
@@ -73,7 +70,7 @@ public class AuthDomainControllerTest extends SpringTest {
   private final FirecloudManagedGroupWithMembers testGroup =
       new FirecloudManagedGroupWithMembers().groupEmail(testGroupEmail);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);

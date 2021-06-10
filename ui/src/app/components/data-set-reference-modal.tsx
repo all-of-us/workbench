@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
@@ -48,7 +47,7 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
   render() {
     const {referencedResource, dataSets, onCancel} = this.props;
 
-    const resourceName = fp.startCase(getDisplayName(referencedResource));
+    const resourceName = getDisplayName(referencedResource);
     const resourceElem = <span style={styles.resource}>{resourceName}</span>;
     const resourceWithTypeElem = <span>{getTypeString(referencedResource)} {resourceElem}</span>;
     const dataSetsElem = <span style={styles.dataSets}>{dataSets}</span>;
@@ -59,7 +58,7 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
                 <div style={{paddingBottom: '1rem'}}>
                     The {resourceWithTypeElem} is referenced by the following datasets: {dataSetsElem}.
                     Deleting the {resourceWithTypeElem} will make these datasets unavailable for use.
-                    Are you sure you want to delete {resourceElem} ?
+                    Are you sure you want to delete {resourceElem}?
                 </div>
                 <div style={{float: 'right'}}>
                     <Button type='secondary' style={{marginRight: '2rem'}} onClick={onCancel}>Cancel</Button>

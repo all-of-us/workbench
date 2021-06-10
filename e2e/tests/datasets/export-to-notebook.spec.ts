@@ -1,13 +1,13 @@
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity, Sex} from 'app/page/cohort-participants-group';
-import {Language, LinkText, MenuOption, ResourceCard} from 'app/text-labels';
+import { Ethnicity, Sex } from 'app/page/cohort-participants-group';
+import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
@@ -51,7 +51,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    const exportModal = await datasetBuildPage.clickExportButton();
+    const exportModal = await datasetBuildPage.clickAnalyzeButton();
 
     await exportModal.enterNotebookName(notebookName);
     await exportModal.pickLanguage(Language.Python);
@@ -60,7 +60,7 @@ describe('Export to notebook tests', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
 
-    const analysisPage = await notebookPreviewPage.goAnalysisPage()
+    const analysisPage = await notebookPreviewPage.goAnalysisPage();
 
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
 
@@ -105,7 +105,7 @@ describe('Export to notebook tests', () => {
     const createModal = await datasetBuildPage.clickCreateButton();
     const datasetName = await createModal.createDataset();
 
-    await datasetBuildPage.clickExportButton();
+    await datasetBuildPage.clickAnalyzeButton();
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();
 
@@ -123,11 +123,11 @@ describe('Export to notebook tests', () => {
     const code = await notebookPreviewPage.getFormattedCode();
     switch (kernelLanguage.LANGUAGE) {
       case Language.Python:
-        expect(code).toContain('import pandas');
-        expect(code).toContain('import os');
+        expect(code.some((item) => item.includes('import pandas'))).toBe(true);
+        expect(code.some((item) => item.includes('import os'))).toBe(true);
         break;
       case Language.R:
-        expect(code).toContain('library(bigrquery)');
+        expect(code.some((item) => item.includes('library(bigrquery)'))).toBe(true);
         break;
     }
 

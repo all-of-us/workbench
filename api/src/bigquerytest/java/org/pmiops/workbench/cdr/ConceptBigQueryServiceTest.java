@@ -5,11 +5,9 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -19,14 +17,13 @@ import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({BigQueryTestService.class, ConceptBigQueryService.class})
 public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

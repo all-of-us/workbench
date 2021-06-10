@@ -2,31 +2,38 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
-import {DataSetComponent, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/data-set-component';
+import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/dataset-page';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
+import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {
   CdrVersionsApi,
   CohortsApi,
   ConceptSetsApi,
   DataSetApi,
-  Domain,
-  WorkspaceAccessLevel
+  Domain, PrePackagedConceptSetEnum,
+  WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSetPage', () => {
+  let datasetApiStub;
+
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
-    registerApiClient(DataSetApi, new DataSetApiStub());
+    datasetApiStub = new DataSetApiStub();
+    registerApiClient(DataSetApi, datasetApiStub);
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
@@ -37,28 +44,28 @@ describe('DataSetPage', () => {
   });
 
   it('should render', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it ('should display all concepts sets in workspace', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
 
   it('should display all cohorts in workspace', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="cohort-list-item"]').length)
       .toBe(exampleCohortStubs.length);
   });
 
   it('should display values based on Domain of Concept selected in workspace', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
@@ -88,7 +95,7 @@ describe('DataSetPage', () => {
 
   it('should select all values by default on selection on concept set only if the new domain is unique',
     async() => {
-      const wrapper = mount(<DataSetComponent/>);
+      const wrapper = mount(<DatasetPage/>);
       await waitOneTickAndUpdate(wrapper);
 
       // Select Condition Concept set
@@ -109,7 +116,7 @@ describe('DataSetPage', () => {
       measurementConceptSet.simulate('change');
       await waitOneTickAndUpdate(wrapper);
       valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-      checkedValuesList = valueListItems.filterWhere(value => value.props().checked)
+      checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
       // All values condition + measurement will be selected
       expect(valueListItems.length).toBe(5);
       expect(checkedValuesList.length).toBe(5);
@@ -117,7 +124,7 @@ describe('DataSetPage', () => {
       // Unselect first Condition value
       valueListItems.first().find('input').first().simulate('change');
       valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-      checkedValuesList = valueListItems.filterWhere(value => value.props().checked)
+      checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
       expect(checkedValuesList.length).toBe(4);
 
       // Select another condition concept set
@@ -134,10 +141,10 @@ describe('DataSetPage', () => {
 
       // Should be no change in selected values
       expect(checkedValuesList.length).toBe(4);
-  });
+    });
 
   it('should display correct values on rapid selection of multiple domains', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
@@ -156,7 +163,7 @@ describe('DataSetPage', () => {
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',
     async() => {
-      const wrapper = mount(<DataSetComponent />);
+      const wrapper = mount(<DatasetPage />);
       await waitOneTickAndUpdate(wrapper);
 
       // Preview Button and Save Button should be disabled by default
@@ -191,7 +198,7 @@ describe('DataSetPage', () => {
 
   it('should display preview data table once preview button is clicked', async() => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
 
     // Select one cohort , concept and value
@@ -221,7 +228,7 @@ describe('DataSetPage', () => {
 
   it('should display preview data for current domains only', async() => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
 
     // Select a cohort.
@@ -249,7 +256,7 @@ describe('DataSetPage', () => {
   });
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
     // Mock out navigateByUrl
@@ -268,7 +275,7 @@ describe('DataSetPage', () => {
   it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     const isTooltipDisable =
         wrapper.find({'data-test-id': 'save-tooltip'}).first().props().disabled;
     const isSaveButtonDisable =
@@ -280,7 +287,7 @@ describe('DataSetPage', () => {
   it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     const plusIconTooltip = wrapper.find({'data-test-id': 'plus-icon-tooltip'});
     const cohortplusIcon = wrapper.find({'data-test-id': 'cohorts-link'});
     const conceptSetplusIcon = wrapper.find({'data-test-id': 'concept-sets-link'});
@@ -291,7 +298,7 @@ describe('DataSetPage', () => {
 
   it('should call load data dictionary when caret is expanded', async() => {
     const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
 
     // Select one cohort , concept and value
@@ -316,7 +323,7 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect any workspace Cohort if PrePackaged is selected', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
     // Select one cohort
     wrapper.find('[data-test-id="cohort-list-item"]').first()
@@ -333,59 +340,96 @@ describe('DataSetPage', () => {
   });
 
   it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async() => {
-    const wrapper = mount(<DataSetComponent />);
+    const wrapper = mount(<DatasetPage />);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="all-participant"]').first()
-        .find('input').first().simulate('change');
+      .find('input').first().simulate('change');
 
     expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeFalsy();
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeTruthy();
 
     // Select one cohort
     wrapper.find('[data-test-id="cohort-list-item"]').first()
-        .find('input').first().simulate('change');
+      .find('input').first().simulate('change');
 
     expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
   });
 
-  it('should display Pre packaged concept set as per CDR data', async () => {
-    let wrapper = mount(<DataSetComponent/>);
+  it('should display Pre packaged concept set as per CDR data', async() => {
+    let wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
-    wrapper = mount(<DataSetComponent/>);
+    wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
 
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
-    wrapper = mount(<DataSetComponent/>);
+    wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(3);
 
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
-    wrapper = mount(<DataSetComponent/>);
+    wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
   });
 
-  it('should display Pre packaged concept set per genomics extraction flag', async () => {
+  it('should display Pre packaged concept set per genomics extraction flag', async() => {
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = true;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
 
-    let wrapper = mount(<DataSetComponent/>);
+    let wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
 
     serverConfigStore.set({config: {enableGenomicExtraction: false, gsuiteDomain: ''}});
-    wrapper = mount(<DataSetComponent/>);
+    wrapper = mount(<DatasetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
   });
+
+  it('should open Export modal if Analyze is clicked and WGS concept is not selected', async() => {
+    datasetApiStub.getDatasetMock = {
+      ...stubDataSet(),
+      conceptSets: [{id: 345, domain: Domain.PERSON}],
+      cohorts: [{id: 0}],
+      domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
+      prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
+    };
+    urlParamsStore.next({dataSetId: 0});
+    const wrapper = mount(<DatasetPage />);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
+    expect(wrapper.find(ExportDatasetModal).exists()).toBeTruthy();
+    wrapper.find(ExportDatasetModal).find('[data-test-id="export-dataset-modal-cancel-button"]').simulate('click');
+  });
+
+  it('should open Extract modal if Analyze is clicked and WGS concept is selected', async() => {
+    datasetApiStub.getDatasetMock = {
+      ...stubDataSet(),
+      conceptSets: [{
+        id: ConceptSetsApiStub.stubConceptSets().find(cs => cs.domain === Domain.WHOLEGENOMEVARIANT).id,
+        domain: Domain.WHOLEGENOMEVARIANT
+      }],
+      cohorts: [{id: 0}],
+      domainValuePairs: [{domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs'}],
+      prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
+    };
+    urlParamsStore.next({dataSetId: 0});
+    const wrapper = mount(<DatasetPage />);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="analyze-button"]').simulate('click');
+    expect(wrapper.find(GenomicExtractionModal).exists()).toBeTruthy();
+  });
+
 });

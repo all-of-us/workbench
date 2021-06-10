@@ -3,9 +3,8 @@ package org.pmiops.workbench.cohortreview.mapper;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
-import java.time.Clock;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.model.CohortReview;
@@ -13,18 +12,14 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class CohortReviewMapperTest {
+public class CohortReviewMapperTest extends SpringTest {
 
   @Autowired private CohortReviewMapper cohortReviewMapper;
 
   @TestConfiguration
   @Import({CohortReviewMapperImpl.class, CommonMappers.class})
-  @MockBean({Clock.class})
   static class Configuration {}
 
   @Test

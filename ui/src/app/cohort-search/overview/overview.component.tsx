@@ -157,11 +157,11 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
     constructor(props: Props) {
       super(props);
       this.state = {
-        ageType: AgeType.AGE,
+        ageType: AgeType.AGEATCDR,
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
-        currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
+        currentGraphOptions: {ageType: AgeType.AGEATCDR, genderOrSexType: GenderOrSexType.GENDER},
         deleting: false,
         genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
@@ -235,10 +235,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
     callApi() {
       const {searchRequest} = this.props;
       const {ageType, genderOrSexType} = this.state;
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const {id, namespace} = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
       return cohortBuilderApi()
-        .findDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
+        .findDemoChartInfo(namespace, id, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
     }
 
     get hasActiveItems() {

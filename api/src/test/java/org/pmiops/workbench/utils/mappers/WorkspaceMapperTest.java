@@ -4,13 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
@@ -39,10 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class WorkspaceMapperTest {
+public class WorkspaceMapperTest extends SpringTest {
   private static final String FIRECLOUD_NAMESPACE = "aou-xxxxxxx";
   private static final String CREATOR_EMAIL = "ojc@verily.biz";
   private static final long CREATOR_USER_ID = 101L;
@@ -79,16 +76,10 @@ public class WorkspaceMapperTest {
     FirecloudMapperImpl.class,
     WorkspaceMapperImpl.class,
   })
-  @MockBean({
-    UserDao.class,
-    WorkspaceDao.class,
-    Clock.class,
-    ConceptSetService.class,
-    CohortService.class
-  })
+  @MockBean({UserDao.class, WorkspaceDao.class, ConceptSetService.class, CohortService.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setUp() {
     sourceFirecloudWorkspace =
         new FirecloudWorkspace()

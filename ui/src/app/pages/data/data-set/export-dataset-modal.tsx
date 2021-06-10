@@ -1,27 +1,35 @@
 import {Button} from 'app/components/buttons';
-import {AnimatedModal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
-import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
-
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
-import {BillingStatus, DataSet, DataSetRequest, KernelTypeEnum, } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {useEffect, useState} from 'react';
 
 import {FlexRow} from 'app/components/flex';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
 import {RadioButton, Select, TextInput} from 'app/components/inputs';
 import {ErrorMessage} from 'app/components/messages';
+import {AnimatedModal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
+
+import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {
+  BillingStatus,
+  DataSet,
+  DataSetExportRequest,
+  DataSetRequest,
+  KernelTypeEnum,
+  PrePackagedConceptSetEnum,
+} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
 import {validate} from 'validate.js';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   closeFunction: Function;
@@ -33,10 +41,21 @@ interface HocProps extends Props {
   workspace: WorkspaceData;
 }
 
+const styles = reactStyles({
+  radioButtonLabel: {
+    display: 'inline-flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: '1rem',
+    color: colors.primary
+  }
+});
+
 export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCurrentWorkspace())(
   ({workspace, dataset, closeFunction}: HocProps) => {
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
+    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(GenomicsAnalysisToolEnum.HAIL);
     const [isExporting, setIsExporting] = useState(false);
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
@@ -50,14 +69,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       setErrorMsg(null);
       setIsExporting(true);
       try {
-        await dataSetApi().exportToNotebook(
-          workspace.namespace, workspace.id,
-          {
-            dataSetRequest: createDataSetRequest(),
-            kernelType: kernelType,
-            notebookName: notebookName,
-            newNotebook: creatingNewNotebook
-          });
+        await dataSetApi().exportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest());
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/`
           + appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
@@ -67,6 +79,17 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         setIsExporting(false);
         setErrorMsg('The request cannot be completed. Please try again or contact Support in the left hand navigation');
       }
+    }
+
+    function createExportDatasetRequest(): DataSetExportRequest {
+      return {
+        dataSetRequest: createDataSetRequest(),
+        kernelType,
+        genomicsAnalysisTool,
+        generateGenomicsAnalysisCode: hasWgs(),
+        notebookName,
+        newNotebook: creatingNewNotebook
+      };
     }
 
     function createDataSetRequest(): DataSetRequest {
@@ -98,15 +121,11 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       return <iframe scrolling='no' style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
     }
 
-    function loadCodePreview(kernel: KernelTypeEnum) {
+    function loadCodePreview() {
       setIsLoadingNotebook(true);
       setErrorMsg(null);
-      dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, {
-        dataSetRequest: createDataSetRequest(),
-        kernelType: kernel,
-        newNotebook: false,
-        notebookName: '',
-      }).then(resp => setCodePreview(loadHtmlStringIntoIFrame(resp.html)))
+      dataSetApi().previewExportToNotebook(workspace.namespace, workspace.id, createExportDatasetRequest())
+        .then(resp => setCodePreview(loadHtmlStringIntoIFrame(resp.html)))
         .catch(() => setErrorMsg('Could not load code preview. Please try again or continue exporting to a notebook.'))
         .finally(() => setIsLoadingNotebook(false));
     }
@@ -116,7 +135,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         setCodePreview(null);
       } else {
         AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-        loadCodePreview(kernelType);
+        loadCodePreview();
       }
     }
 
@@ -137,6 +156,22 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
+    function genomicsToolRadioButton(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
+      return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
+        <RadioButton
+          style={{marginRight: '0.25rem'}}
+          disabled={loadingNotebook}
+          data-test-id={'genomics-tool-' + genomicsTool}
+          checked={genomicsAnalysisTool === genomicsTool}
+          onChange={() => setGenomicsAnalysisTool(genomicsTool)}/>
+        {displayName}
+      </label>;
+    }
+
+    function hasWgs() {
+      return fp.includes(PrePackagedConceptSetEnum.WHOLEGENOME, dataset.prePackagedConceptSet);
+    }
+
     useEffect(() => {
       workspacesApi().getNoteBookList(workspace.namespace, workspace.id)
         .then(notebooks => setExistingNotebooks(notebooks.map(fileDetail => fileDetail.name.slice(0, -6))))
@@ -145,9 +180,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
     useEffect(() => {
       if (codePreview) {
-        loadCodePreview(kernelType);
+        loadCodePreview();
       }
-    }, [kernelType]);
+    }, [kernelType, genomicsAnalysisTool]);
 
     const errors = {
       ...validate({notebookName}, {
@@ -201,8 +236,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
             </div>
             {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
               .map((kernelTypeEnum, i) =>
-                <label key={i} style={
-                  {display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+                <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
                     style={{marginRight: '0.25rem'}}
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
@@ -212,6 +246,15 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                   />
                   {kernelTypeEnum}
                 </label>)}
+
+            {kernelType === KernelTypeEnum.Python && <React.Fragment>
+                <div style={headerStyles.formLabel}>
+                    Select analysis tool for genetic variant data
+                </div>
+              {genomicsToolRadioButton('Hail', GenomicsAnalysisToolEnum.HAIL)}
+              {genomicsToolRadioButton('PLINK', GenomicsAnalysisToolEnum.PLINK)}
+              {genomicsToolRadioButton('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
+            </React.Fragment>}
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
               <Button type={'secondarySmall'}
@@ -227,6 +270,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
+                    data-test-id='export-dataset-modal-cancel-button'
                     onClick={closeFunction}
                     style={{marginRight: '2rem'}}>
               Cancel

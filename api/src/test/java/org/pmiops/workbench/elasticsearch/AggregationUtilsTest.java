@@ -7,13 +7,10 @@ import static org.pmiops.workbench.elasticsearch.AggregationUtils.RACE;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_18_44;
 
 import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.GenderOrSexType;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 public class AggregationUtilsTest {
 
   @Test

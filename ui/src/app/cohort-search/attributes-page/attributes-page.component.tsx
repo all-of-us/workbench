@@ -296,7 +296,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
     }
 
     async getSurveyAttributes() {
-      const {node: {conceptId, parentId, path, subtype, value}} = this.props;
+      const {node: {conceptId, parentId, path, subtype, value}, workspace: {namespace, id}} = this.props;
       const {form, options} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const surveyId = path.split('.')[0];
@@ -304,11 +304,12 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
       if (!!surveyNode && surveyNode.name === COPE_SURVEY_GROUP_NAME) {
         const promises = [];
         if (subtype === CriteriaSubType.QUESTION || (subtype === CriteriaSubType.ANSWER && !value)) {
-          promises.push(cohortBuilderApi().findSurveyVersionByQuestionConceptId(+cdrVersionId, surveyNode.conceptId, conceptId));
+          promises.push(cohortBuilderApi().findSurveyVersionByQuestionConceptId(namespace, id, surveyNode.conceptId, conceptId));
         } else {
           promises.push(
             cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-              +cdrVersionId,
+              namespace,
+              name,
               surveyNode.conceptId,
               ppiQuestions.getValue()[parentId].conceptId,
               +value
@@ -316,7 +317,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           );
         }
         if (subtype === CriteriaSubType.ANSWER) {
-          promises.push(cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId));
+          promises.push(cohortBuilderApi().findCriteriaAttributeByConceptId(namespace, id, conceptId));
         }
         const [surveyVersions, numericalAttributes] = await Promise.all(promises);
         form.cat = surveyVersions.items.map(attr => ({
@@ -348,10 +349,9 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
     }
 
     getAttributes() {
-      const {node: {conceptId}} = this.props;
+      const {node: {conceptId}, workspace: {id, namespace}} = this.props;
       const{form} = this.state;
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
+      cohortBuilderApi().findCriteriaAttributeByConceptId(namespace, id, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
             // NUM attributes set the min and max range for the number inputs in the attributes form
@@ -614,13 +614,14 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
     }
 
     requestPreview() {
+      const {workspace: {id, namespace}} = this.props;
+
       this.setState({count: null, calculating: true, countError: false});
       const param = this.paramWithAttributes;
       // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
       if (this.isPhysicalMeasurement) {
         this.trackEvent(param.subtype, 'Calculate');
       }
-      const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
       const request = {
         excludes: [],
         includes: [{
@@ -633,7 +634,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
         }],
         dataFilters: []
       };
-      cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
+      cohortBuilderApi().countParticipants(namespace, id, request).then(response => {
         this.setState({count: response, calculating: false});
       }, () => {
         this.setState({calculating: false, countError: true});

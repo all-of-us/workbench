@@ -1,6 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -23,12 +24,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
@@ -41,10 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class LogsBasedMetricsServiceTest {
+public class LogsBasedMetricsServiceTest extends SpringTest {
 
   private static final Duration OPERATION_DURATION = Duration.ofMillis(15);
   private static MonitoredResource MONITORED_RESOURCE =
@@ -63,7 +62,7 @@ public class LogsBasedMetricsServiceTest {
   @Import({LogsBasedMetricServiceImpl.class})
   static class Configuration {}
 
-  @Before
+  @BeforeEach
   public void setup() {
     doReturn(MONITORED_RESOURCE)
         .when(mockStackdriverStatsExporterService)
@@ -206,14 +205,17 @@ public class LogsBasedMetricsServiceTest {
         .isEqualTo(OPERATION_DURATION.toMillis());
   }
 
-  @Test(expected = IllegalAccessError.class)
+  @Test
   public void testRecordElapsedTime_throws() {
-    logsBasedMetricService.recordElapsedTime(
-        MeasurementBundle.builder(),
-        DistributionMetric.COHORT_OPERATION_TIME,
-        () -> {
-          throw new IllegalAccessError("Boo!");
-        });
+    assertThrows(
+        IllegalAccessError.class,
+        () ->
+            logsBasedMetricService.recordElapsedTime(
+                MeasurementBundle.builder(),
+                DistributionMetric.COHORT_OPERATION_TIME,
+                () -> {
+                  throw new IllegalAccessError("Boo!");
+                }));
   }
 
   @Test

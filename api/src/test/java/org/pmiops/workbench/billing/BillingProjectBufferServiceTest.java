@@ -2,6 +2,7 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.billing.BillingProjectBufferService.PROJECT_BILLING_ID_SIZE;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -41,9 +43,8 @@ import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.javers.common.collections.Sets;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
@@ -78,11 +79,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
 @DataJpaTest
 public class BillingProjectBufferServiceTest {
   private static final Logger log =
@@ -140,7 +139,7 @@ public class BillingProjectBufferServiceTest {
 
   private DbAccessTier registeredTier;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
@@ -693,12 +692,15 @@ public class BillingProjectBufferServiceTest {
         .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
-  @Test(expected = EmptyBufferException.class)
+  @Test
   public void assignBillingProjectInvalidTier() {
-    DbUser user = mock(DbUser.class);
-    doReturn("fake-email@aou.org").when(user).getUsername();
-
-    billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
+    assertThrows(
+        EmptyBufferException.class,
+        () -> {
+          DbUser user = mock(DbUser.class);
+          doReturn("fake-email@aou.org").when(user).getUsername();
+          billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
+        });
   }
 
   @Test
@@ -1018,6 +1020,26 @@ public class BillingProjectBufferServiceTest {
             .collect(Collectors.toList());
 
     assertThat(observedExpiredAssigning).containsExactlyElementsIn(expectedExpiredAssigning);
+  }
+
+  @Test
+  public void createBillingProjectName_withUnderScore() {
+    String prefix = "prefix-";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = billingProjectBufferService.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix)).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + PROJECT_BILLING_ID_SIZE);
+  }
+
+  @Test
+  public void createBillingProjectName_withoutUnderScore() {
+    String prefix = "prefix";
+    workbenchConfig.billing.projectNamePrefix = prefix;
+    String projectName = billingProjectBufferService.createBillingProjectName();
+
+    assertThat(projectName.startsWith(prefix + "-")).isTrue();
+    assertThat(projectName.length()).isEqualTo(prefix.length() + 1 + PROJECT_BILLING_ID_SIZE);
   }
 
   private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {

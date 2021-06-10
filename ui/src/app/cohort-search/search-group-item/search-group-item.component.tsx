@@ -160,7 +160,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      const {item: {count, modifiers}, workspace: {cdrVersionId}} = this.props;
+      const {item: {count, modifiers}, workspace: {id, namespace}} = this.props;
       const {encounters} = this.state;
       if (count !== undefined) {
         this.setState({loading: false});
@@ -168,7 +168,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         this.getItemCount();
       }
       if (!!modifiers && modifiers.some(mod => mod.name === ModifierType.ENCOUNTERS) && !encounters) {
-        cohortBuilderApi().findCriteriaBy(+cdrVersionId, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
+        cohortBuilderApi().findCriteriaBy(namespace, id, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]).then(res => {
           encountersStore.next(res.items);
           this.setState({encounters: res.items});
         });
@@ -186,7 +186,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item, role, updateGroup} = this.props;
       try {
         updateGroup();
-        const {cdrVersionId} = currentWorkspaceStore.getValue();
+        const {id, namespace} = currentWorkspaceStore.getValue();
         const mappedItem = mapGroupItem(item, false);
         const request = {
           includes: [],
@@ -194,7 +194,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           dataFilters: [],
           [role]: [{items: [mappedItem], temporal: false}]
         };
-        await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.updateSearchRequest('count', count, false));
+        await cohortBuilderApi().countParticipants(namespace, id, request).then(count => this.updateSearchRequest('count', count, false));
       } catch (error) {
         console.error(error);
         this.setState({error: true});

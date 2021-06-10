@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "staging-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -50,9 +50,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-staging",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
-    "extractionCohortsDataset": "",
-    "extractionDestinationDataset": "",
-    "extractionTempTablesDataset": ""
+    "extractionCohortsDataset": "fc-aou-cdr-staging-ct.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-staging-ct.wgs_extraction_destination",
+    "extractionTempTablesDataset": "fc-aou-cdr-staging-ct.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": true
@@ -107,14 +107,13 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": false
+    "enableGenomicExtraction": false,
+    "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -139,6 +138,6 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365 
+    "expiryDays": 365
   }
 }

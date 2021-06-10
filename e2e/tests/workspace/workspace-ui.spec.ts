@@ -82,7 +82,7 @@ describe('Workspace UI tests', () => {
     // Click Create New Workspace link on the Workspaces page.
     const editPage = await workspaces.clickCreateNewWorkspace();
 
-    const dataAccessTierSelect = await editPage.getDataAccessTierSelect();
+    const dataAccessTierSelect = editPage.getDataAccessTierSelect();
     expect(await dataAccessTierSelect.isDisabled()).toBe(false);
 
     // 1000 characters is the limit in textarea.
@@ -144,16 +144,16 @@ describe('Workspace UI tests', () => {
     const pageTitle = await page.title();
     expect(pageTitle).toContain('Duplicate Workspace');
 
-    const workspaceNameInput = await workspaceEditPage.getWorkspaceNameTextbox();
+    const workspaceNameInput = workspaceEditPage.getWorkspaceNameTextbox();
     expect(await workspaceNameInput.isDisabled()).toBe(false);
 
-    const dataAccessTierSelect = await workspaceEditPage.getDataAccessTierSelect();
+    const dataAccessTierSelect = workspaceEditPage.getDataAccessTierSelect();
     expect(await dataAccessTierSelect.isDisabled()).toBe(true);
 
-    const duplicateButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+    const duplicateButton = workspaceEditPage.getDuplicateWorkspaceButton();
     expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
 
-    const shareWorkspaceCheckbox = await workspaceEditPage.getShareWithCollaboratorsCheckbox();
+    const shareWorkspaceCheckbox = workspaceEditPage.getShareWithCollaboratorsCheckbox();
     expect(await shareWorkspaceCheckbox.isChecked()).toBe(false);
 
     // Textarea character count should be a positive number and less than 1000.

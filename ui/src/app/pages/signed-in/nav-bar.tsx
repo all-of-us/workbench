@@ -9,6 +9,7 @@ import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
+import {ProfileStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
@@ -65,6 +66,7 @@ const styles = reactStyles({
 
 export interface Props {
   profile: Profile;
+  profileState: ProfileStore;
   bannerAdminActive: boolean;
   workspaceAdminActive: boolean;
   headerImg: string;
@@ -221,7 +223,7 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
-        <AccessRenewalNotificationMaybe profile={this.props.profile}/>
+        <AccessRenewalNotificationMaybe/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}
@@ -239,7 +241,7 @@ export const NavBar = withUserProfile()(
         {
           this.state.sideNavVisible
           && <SideNav
-            profile={this.props.profile}
+            profile={this.props.profileState.profile}
             bannerAdminActive={this.props.bannerAdminActive}
             homeActive={this.props.homeActive}
             libraryActive={this.props.libraryActive}

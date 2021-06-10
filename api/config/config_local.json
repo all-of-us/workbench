@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "xAppIdValue": "local-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -108,14 +108,13 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
-    "enableReportingUploadCron": true,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": true
+    "enableGenomicExtraction": true,
+    "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

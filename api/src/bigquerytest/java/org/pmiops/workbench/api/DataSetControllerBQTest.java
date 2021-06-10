@@ -19,12 +19,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -48,6 +46,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -90,7 +89,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class, DataSetControllerBQTest.Configuration.class})
 public class DataSetControllerBQTest extends BigQueryBaseTest {
 
@@ -119,6 +117,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private WgsExtractCromwellSubmissionDao submissionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private GenomicExtractionService genomicExtractionService;
@@ -211,7 +210,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     return CB_DATA;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
@@ -226,6 +225,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             dsLinkingDao,
             dsDataDictionaryDao,
             dataSetMapper,
+            submissionDao,
             prefixProvider,
             workbenchConfigProvider,
             CLOCK);
@@ -365,7 +365,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     return dbConceptSet;
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     cohortDao.deleteById(dbCohort1.getCohortId());
     cohortDao.deleteById(dbCohort2.getCohortId());
