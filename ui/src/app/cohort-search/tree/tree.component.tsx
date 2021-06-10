@@ -192,20 +192,19 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   async loadRootNodes() {
     try {
-      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+      const {node: {domainId, id, isStandard, parentId, subtype, type}, selectedSurvey} = this.props;
       this.setState({loading: true});
-      const workspace = currentWorkspaceStore.getValue();
-      const cdrVersionId = workspace.cdrVersionId;
+      const {cdrVersionId, id: workspaceId, namespace} = currentWorkspaceStore.getValue();
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const promises = this.sendOnlyCriteriaType(domainId)
-          ? [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType)]
-          : [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType, isStandard, id)];
+          ? [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType)]
+          : [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType, isStandard, id)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
           standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
         };
-        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(workspace.namespace, workspace.id, domainId, criteriaRequest));
+        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(namespace, workspaceId, domainId, criteriaRequest));
       }
       const [rootNodes, criteriaLookup] = await Promise.all(promises);
       if (criteriaLookup) {
@@ -227,10 +226,14 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         // Temp: This should be handle in API
         this.updatePpiSurveys(rootNodes, rootNodes.items.filter(child => child.name === selectedSurvey));
       } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-        const selectedSurveyChild = rootNodes.items.filter(child => child.id === this.props.node.parentId);
-        this.updatePpiSurveys(rootNodes, selectedSurveyChild);
+        this.updatePpiSurveys(rootNodes, rootNodes.items.filter(child => child.id === parentId));
       } else {
-        this.setState({children: rootNodes.items});
+        this.setState({
+          children: domainId === Domain.MEASUREMENT.toString() ?
+            // For Measurements, only show the subtype of the node selected in list search and don't display the code
+            rootNodes.items.filter(node => node.subtype === subtype).map(node => ({...node, code: null})) :
+            rootNodes.items
+        });
         if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
