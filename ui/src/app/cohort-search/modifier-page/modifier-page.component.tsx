@@ -16,7 +16,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortSearchContextStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Criteria, CriteriaType, Domain, ModifierType, Operator} from 'generated/fetch';
+import {Criteria, CriteriaType, Domain, Modifier, ModifierType, Operator} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -160,7 +160,7 @@ interface Selection extends Criteria {
 
 interface Props {
   selections: Array<Selection>;
-  closeModifiers: Function;
+  closeModifiers: (modifiers?: Array<Modifier>) => void;
   workspace: WorkspaceData;
   cohortContext: any;
 }
@@ -372,7 +372,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       const {cohortContext} = this.props;
       cohortContext.item.modifiers = this.getModifiersFromForm();
       currentCohortSearchContextStore.next(cohortContext);
-      this.props.closeModifiers();
+      this.props.closeModifiers(cohortContext.item.modifiers);
     }
 
     get addEncounters() {
