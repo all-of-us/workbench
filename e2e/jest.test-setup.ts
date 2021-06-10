@@ -149,7 +149,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await page.setRequestInterception(false);
-  await jestPuppeteer.resetBrowser();
+  // await jestPuppeteer.resetBrowser();
 });
 
 const getPageTitle = async () => {
