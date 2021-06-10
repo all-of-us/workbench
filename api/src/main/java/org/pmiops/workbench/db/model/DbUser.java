@@ -205,6 +205,11 @@ public class DbUser {
   }
 
   @Deprecated
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  @Deprecated
   @Column(name = "current_position")
   public String getCurrentPosition() {
     return currentPosition;
@@ -416,6 +421,11 @@ public class DbUser {
   @Column(name = "moodle_id")
   public Integer getMoodleId() {
     return moodleId;
+  }
+
+  @Deprecated
+  public void setMoodleId(Integer moodleId) {
+    this.moodleId = moodleId;
   }
 
   @Column(name = "era_commons_linked_nih_username")
