@@ -268,9 +268,7 @@ export async function findAllCards(page: Page): Promise<WorkspaceCard[]> {
       fp.map(async (card: WorkspaceCard) => {
         const workspaceTime = Date.parse(await card.getLastChangedTime());
         const timeDiff = now - workspaceTime;
-        if (timeDiff > halfHourMilliSec) {
-          return card;
-        }
+        return timeDiff > halfHourMilliSec ? card : null;
       })
     )(existingCards)
   );
