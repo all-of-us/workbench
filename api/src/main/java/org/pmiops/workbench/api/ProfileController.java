@@ -5,12 +5,14 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -58,6 +60,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -633,5 +636,19 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> confirmPublications() {
     userService.confirmPublications();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierExpirations() {
+    return ResponseEntity.ok(
+        userService.getRegisteredTierExpirations().entrySet().stream()
+            .map(
+                e ->
+                    new UserAccessExpirations()
+                        .userName(e.getKey().getUsername())
+                        .contactEmail(e.getKey().getContactEmail())
+                        .expirationDate(e.getValue().toInstant().toString()))
+            .collect(Collectors.toList()));
   }
 }
