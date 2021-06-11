@@ -26,7 +26,6 @@ describe('Workspace UI tests', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     const homePageCards = await findAllCards(page);
-    console.log(`cards length: ${homePageCards.length}`);
     let width;
     let height;
     for (const card of homePageCards) {
@@ -76,7 +75,7 @@ describe('Workspace UI tests', () => {
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
-  test('CANCEL in Edit page goes back to Your Workspaces page', async () => {
+  xtest('CANCEL in Edit page goes back to Your Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
     await workspaces.load();
 
@@ -102,7 +101,7 @@ describe('Workspace UI tests', () => {
     expect(await workspaces.isLoaded()).toBe(true);
   });
 
-  test('Workspaces display by access level filter', async () => {
+  xtest('Workspaces display by access level filter', async () => {
     const filter = ['Owner', 'Writer', 'Reader'];
 
     const workspacesPage = new WorkspacesPage(page);
@@ -131,7 +130,7 @@ describe('Workspace UI tests', () => {
     }
   });
 
-  test('Duplicate Workspace page', async () => {
+  xtest('Duplicate Workspace page', async () => {
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
 
@@ -175,7 +174,7 @@ describe('Workspace UI tests', () => {
     expect(await homePage.isLoaded()).toBe(true);
   });
 
-  test('Workspace Card Snowman menu options', async () => {
+  xtest('Workspace Card Snowman menu options', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
