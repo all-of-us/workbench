@@ -26,6 +26,7 @@ describe('Workspace UI tests', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     const homePageCards = await findAllCards(page);
+    console.log(`cards length: ${homePageCards.length}`);
     let width;
     let height;
     for (const card of homePageCards) {

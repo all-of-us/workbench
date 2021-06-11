@@ -101,12 +101,15 @@ executors:
   puppeteer-executor:
     docker:
       - image: << pipeline.parameters.workbench-image >>
+        environment:
+          TZ: "America/New_York"
     working_directory: ~/workbench
     environment:
       CI: true
       NODE_ENV: development
       WORKBENCH_ENV: test
       TEST_MODE: integration
+      TZ: "America/New_York"
 
 # -------------------------
 #   COMMANDS
