@@ -796,6 +796,14 @@ public class UserServiceAccessTest {
     verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
   }
 
+  /*
+  This is how I would parameterize a test in JS
+  [
+    {params: {one: 1, two: 2, three: 3}}, expect: {expectOne: true, expectTwo: true, expectThree: true}, 
+    {params: {one: 2, two: 3, three: 3}}, expect: {expectOne: false, expectTwo: false, expectThree: true}}
+  ].forEach(({params, expect}) => test(params, expect))
+*/
+
   @Test
   public void test_maybeSendAccessExpirationEmail_expiring_31() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
