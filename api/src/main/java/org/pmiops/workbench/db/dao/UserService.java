@@ -4,6 +4,7 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -168,4 +169,10 @@ public interface UserService {
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   void maybeSendAccessExpirationEmail(DbUser user);
+
+  /**
+   * Return a mapping of users to their Annual Access Renewal expiration date
+   * for Registered Tier, for users who have them
+   */
+  Map<DbUser, Timestamp> getRegisteredTierExpirations();
 }

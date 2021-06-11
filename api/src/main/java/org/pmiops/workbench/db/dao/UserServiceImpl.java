@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -278,7 +280,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   // TODO split into registered tier and controlled tier versions, when available
-  public Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
+  private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
     return ImmutableMap.of(
         ModuleNameEnum.COMPLIANCETRAINING,
             new ModuleTimes(
@@ -1120,6 +1122,22 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  }
+
+  /**
+   * Return a mapping of users to their Annual Access Renewal expiration date
+   * for Registered Tier, for users who have them
+   */
+  @Override
+  public Map<DbUser, Timestamp> getRegisteredTierExpirations() {
+    final List<DbUser> rtUsers = accessTierService.getAllRegisteredTierUsers();
+
+    return rtUsers.stream()
+        .map(u -> ImmutablePair.of(u, getRegisteredTierExpirationForEmails(u)))
+        // don't return users who don't have expiration dates.
+        // see getRegisteredTierExpirationForEmails() for details on how this might happen
+        .filter(e -> e.getValue().isPresent())
+        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().get()));
   }
 
   /**
