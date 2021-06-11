@@ -1143,6 +1143,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     .contactEmail(e.getKey().getContactEmail())
                     .givenName(e.getKey().getGivenName())
                     .familyName(e.getKey().getFamilyName())
+                    // converts to UTC
                     .expirationDate(e.getValue().get().toInstant().toString()))
         .collect(Collectors.toList());
   }
