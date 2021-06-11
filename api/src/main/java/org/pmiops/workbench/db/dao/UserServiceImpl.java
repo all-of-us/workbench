@@ -1141,6 +1141,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 new UserAccessExpirations()
                     .userName(e.getKey().getUsername())
                     .contactEmail(e.getKey().getContactEmail())
+                    .givenName(e.getKey().getGivenName())
+                    .familyName(e.getKey().getFamilyName())
                     .expirationDate(e.getValue().get().toInstant().toString()))
         .collect(Collectors.toList());
   }

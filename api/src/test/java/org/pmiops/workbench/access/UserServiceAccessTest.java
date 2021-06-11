@@ -999,6 +999,8 @@ public class UserServiceAccessTest {
     assertThat(expirations.size()).isEqualTo(1);
     assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
     assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
+    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
   }
 
@@ -1023,6 +1025,8 @@ public class UserServiceAccessTest {
     assertThat(expirations.size()).isEqualTo(1);
     assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
     assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
+    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
 
     // ... but 5/1/2021 is before the initial enforcement date
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(initialEnforcementDate);

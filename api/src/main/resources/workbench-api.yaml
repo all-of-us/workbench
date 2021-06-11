@@ -5711,6 +5711,12 @@ definitions:
       contactEmail:
         type: string
         description: the institutional contact email of the user
+      givenName:
+        type: string
+        description: the user's given name (first name)
+      familyName:
+        type: string
+        description: the user's family name (last name)
       expirationDate:
         type: string
         description: the time a user's access will expire, in ISO-8601 format
