@@ -197,19 +197,7 @@ export async function findOrCreateWorkspace(
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
-  const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
-  // Filter to include Workspaces older than 30 minutes
-  const halfHourMilliSec = 1000 * 60 * 30;
-  const now = Date.now();
-  const olderWorkspaceCards = [];
-  for (const card of existingCards) {
-    const workspaceTime = Date.parse(await card.getLastChangedTime());
-    const timeDiff = now - workspaceTime;
-    if (timeDiff > halfHourMilliSec) {
-      olderWorkspaceCards.push(card);
-    }
-  }
-
+  const olderWorkspaceCards = await findAllCards(page);
   // Create new workspace if did not find a suitable workspace.
   if (olderWorkspaceCards.length === 0) {
     return await createWorkspace(page, { workspaceName });
@@ -265,6 +253,27 @@ export async function findOrCreateWorkspaceCard(
   }
   logger.info(`Found Workspace card name: "${workspaceName}"`);
   return cardFound;
+}
+
+/**
+ * Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
+ */
+export async function findAllCards(page: Page): Promise<WorkspaceCard[]> {
+  const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+  // Filter to include Workspaces older than 30 minutes
+  const halfHourMilliSec = 1000 * 60 * 30;
+  const now = Date.now();
+  return Promise.all(
+    fp.flow(
+      fp.map(async (card: WorkspaceCard) => {
+        const workspaceTime = Date.parse(await card.getLastChangedTime());
+        const timeDiff = now - workspaceTime;
+        if (timeDiff > halfHourMilliSec) {
+          return card;
+        }
+      })
+    )(existingCards)
+  );
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

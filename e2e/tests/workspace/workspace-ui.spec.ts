@@ -1,8 +1,7 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
-import WorkspaceCard from 'app/component/workspace-card';
 import WorkspacesPage from 'app/page/workspaces-page';
-import { signInWithAccessToken } from 'utils/test-utils';
+import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import ReactSelect from 'app/element/react-select';
 import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
@@ -20,16 +19,16 @@ describe('Workspace UI tests', () => {
   });
 
   // Tests don't require creating new workspace
-  test('Workspace cards', async () => {
+  test('Workspace cards in Home and All Workspaces pages', async () => {
     // In Home page, Workspace cards have same size.
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
 
-    const cards = await WorkspaceCard.findAllCards(page);
+    const homePageCards = await findAllCards(page);
     let width;
     let height;
-    for (const card of cards) {
+    for (const card of homePageCards) {
       const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
@@ -48,12 +47,13 @@ describe('Workspace UI tests', () => {
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
-    if ((await WorkspaceCard.findAllCards(page)).length === 0) {
+    const workspacesPageCards = await findAllCards(page);
+    if (workspacesPageCards.length === 0) {
       return; // End test now, no Workspace card.
     }
 
     // Randomly choose one card to check
-    const card = await WorkspaceCard.findAnyCard(page);
+    const card = workspacesPageCards[0];
     const workspaceName = await card.getWorkspaceName();
     const accessLevel = await card.getWorkspaceAccessLevel();
     const lastChangedTime = Date.parse(await card.getLastChangedTime());
@@ -107,6 +107,11 @@ describe('Workspace UI tests', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
+    const workspacesPageCards = await findAllCards(page);
+    if (workspacesPageCards.length === 0) {
+      return; // End test now, no Workspace card.
+    }
+
     // Default Filter by Select menu value is 'All'.
     const selectMenu = new ReactSelect(page, { name: 'Filter by' });
     const defaultSelectedValue = await selectMenu.getSelectedOption();
@@ -116,7 +121,7 @@ describe('Workspace UI tests', () => {
     for (const accessLevel of filter) {
       const filterSelectedValue = await workspacesPage.filterByAccessLevel(accessLevel);
       expect(filterSelectedValue).toEqual(accessLevel); // Verify selected option
-      const cards = await WorkspaceCard.findAllCards(page);
+      const cards = await findAllCards(page);
       // If any card exists, get its Access Level and compare with filter level.
       for (const card of cards) {
         const workspaceAccessLevel = await card.getWorkspaceAccessLevel();
@@ -129,12 +134,12 @@ describe('Workspace UI tests', () => {
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
 
-    const cards = await WorkspaceCard.findAllCards(page);
+    const cards = await findAllCards(page);
     if (cards.length === 0) {
       return; // End test now, no Workspace card.
     }
 
-    const workspaceCard = cards[0];
+    const workspaceCard = fp.shuffle(cards)[0];
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
@@ -173,7 +178,7 @@ describe('Workspace UI tests', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const cards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+    const cards = await findAllCards(page);
     if (cards.length === 0) {
       return; // End test now, no Workspace card.
     }
