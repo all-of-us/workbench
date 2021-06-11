@@ -60,6 +60,8 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
+  // long after the end of the "grace period" represented by
+  // UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS
   private static final Instant START_INSTANT = Instant.parse("2030-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final long EXPIRATION_DAYS = 365L;
@@ -128,6 +130,9 @@ public class UserServiceAccessTest {
     user.setUsername(USERNAME);
     user = userDao.save(user);
     dbUser = user;
+
+    // reset the clock so tests changing this don't affect each other
+    PROVIDED_CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
@@ -886,6 +891,36 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verify(mailService).alertUserRegisteredTierExpiration(dbUser);
+  }
+
+  // don't send an email if we are in the initial-launch grace period
+  // before 30 June 2021
+
+  @Test
+  public void test_maybeSendAccessExpirationEmail_expired_grace_period() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // set "today" to be June 1
+    PROVIDED_CLOCK.setInstant(Instant.parse("2021-06-01T00:00:00Z"));
+
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setDataUseAgreementCompletionTime(now);
+    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // this would be expired...
+    dbUser.setComplianceTrainingCompletionTime(expired());
+
+    // ... and this would expire in 1 day ...
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    dbUser.setPublicationsLastConfirmedTime(willExpireAfter(oneDayPlusSome));
+
+    userService.maybeSendAccessExpirationEmail(dbUser);
+
+    // ... but the grace period means that no one expires until 30 days from now
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
   }
 
   @Test
