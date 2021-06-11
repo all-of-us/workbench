@@ -70,4 +70,6 @@ public interface AccessTierService {
    * @return the list of tiers which Registered users have access to.
    */
   List<DbAccessTier> getTiersForRegisteredUsers();
+
+  List<DbUser> getAllRegisteredTierUsers();
 }

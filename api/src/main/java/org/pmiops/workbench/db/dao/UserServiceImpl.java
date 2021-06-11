@@ -1125,14 +1125,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /**
-   * Return a mapping of users to their Annual Access Renewal expiration date
-   * for Registered Tier, for users who have them
+   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
+   * for users who have them
    */
   @Override
   public Map<DbUser, Timestamp> getRegisteredTierExpirations() {
-    final List<DbUser> rtUsers = accessTierService.getAllRegisteredTierUsers();
-
-    return rtUsers.stream()
+    // restrict to current RT users
+    return accessTierService.getAllRegisteredTierUsers().stream()
         .map(u -> ImmutablePair.of(u, getRegisteredTierExpirationForEmails(u)))
         // don't return users who don't have expiration dates.
         // see getRegisteredTierExpirationForEmails() for details on how this might happen

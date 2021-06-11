@@ -171,8 +171,8 @@ public interface UserService {
   void maybeSendAccessExpirationEmail(DbUser user);
 
   /**
-   * Return a mapping of users to their Annual Access Renewal expiration date
-   * for Registered Tier, for users who have them
+   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
+   * for users who have them
    */
   Map<DbUser, Timestamp> getRegisteredTierExpirations();
 }
