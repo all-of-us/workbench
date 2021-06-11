@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -58,6 +57,7 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -1129,14 +1129,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * for users who have them
    */
   @Override
-  public Map<DbUser, Timestamp> getRegisteredTierExpirations() {
+  public List<UserAccessExpirations> getRegisteredTierExpirations() {
     // restrict to current RT users
     return accessTierService.getAllRegisteredTierUsers().stream()
         .map(u -> ImmutablePair.of(u, getRegisteredTierExpirationForEmails(u)))
         // don't return users who don't have expiration dates.
         // see getRegisteredTierExpirationForEmails() for details on how this might happen
         .filter(e -> e.getValue().isPresent())
-        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().get()));
+        .map(
+            e ->
+                new UserAccessExpirations()
+                    .userName(e.getKey().getUsername())
+                    .contactEmail(e.getKey().getContactEmail())
+                    .expirationDate(e.getValue().get().toInstant().toString()))
+        .collect(Collectors.toList());
   }
 
   /**

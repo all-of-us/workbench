@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -36,6 +35,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -982,7 +982,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_getRegisteredTierExpirations_1() {
+  public void test_getRegisteredTierExpirations_one_year() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // register user by setting 2 bypassable modules' bypass to now
@@ -992,12 +992,14 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
 
     // the 2 unbypassable modules will expire in a year
-    final Instant aYearFromNow = PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+    final String aYearFromNow =
+        PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS).toString();
 
-    final Map<DbUser, Timestamp> expirationMap = userService.getRegisteredTierExpirations();
-    assertThat(expirationMap.size()).isEqualTo(1);
-    assertThat(expirationMap).containsKey(dbUser);
-    assertThat(expirationMap.get(dbUser)).isEqualTo(Timestamp.from(aYearFromNow));
+    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    assertThat(expirations.size()).isEqualTo(1);
+    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
+    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
+    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
   }
 
   @Test
@@ -1012,16 +1014,18 @@ public class UserServiceAccessTest {
     dbUser = updateUserWithRetries(registerUserWithTime.apply(Timestamp.from(mayFirst)));
     assertRegisteredTierEnabled(dbUser);
 
-    // the 2 unbypassable modules would expire in a year, but 5/1/2021 is before the initial
-    // enforcement date (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
-    final Instant initialEnforcement = Instant.parse("2021-07-01T00:00:00.00Z");
+    // the 2 unbypassable modules would expire in a year (5/1/2021)
+    // but this is before the initial enforcement date, so we use that value instead
+    // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
+    final String initialEnforcementDate = "2021-07-01T00:00:00.00Z";
 
-    final Map<DbUser, Timestamp> expirationMap = userService.getRegisteredTierExpirations();
-    assertThat(expirationMap.size()).isEqualTo(1);
-    assertThat(expirationMap).containsKey(dbUser);
+    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    assertThat(expirations.size()).isEqualTo(1);
+    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
+    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
 
     // ... but 5/1/2021 is before the initial enforcement date
-    assertThat(expirationMap.get(dbUser)).isEqualTo(Timestamp.from(initialEnforcement));
+    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(initialEnforcementDate);
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)

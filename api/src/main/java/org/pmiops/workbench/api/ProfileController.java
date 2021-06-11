@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -638,17 +637,18 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
+  /**
+   * Get a JSON list of users and their registered tier access expiration dates.
+   *
+   * <p>This endpoint is intended as a temporary manual measure to assist with user communication
+   * during the rollout of Annual Access Renewal (AAR).
+   *
+   * <p>Once fully rolled out, we will have an automated expiration email process and this can
+   * likely be removed. See RW-6689 and RW-6703.
+   */
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierAccessExpirations() {
-    return ResponseEntity.ok(
-        userService.getRegisteredTierExpirations().entrySet().stream()
-            .map(
-                e ->
-                    new UserAccessExpirations()
-                        .userName(e.getKey().getUsername())
-                        .contactEmail(e.getKey().getContactEmail())
-                        .expirationDate(e.getValue().toInstant().toString()))
-            .collect(Collectors.toList()));
+    return ResponseEntity.ok(userService.getRegisteredTierExpirations());
   }
 }

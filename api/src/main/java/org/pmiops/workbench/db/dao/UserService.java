@@ -4,7 +4,6 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -17,6 +16,7 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
@@ -174,5 +174,5 @@ public interface UserService {
    * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
    * for users who have them
    */
-  Map<DbUser, Timestamp> getRegisteredTierExpirations();
+  List<UserAccessExpirations> getRegisteredTierExpirations();
 }
