@@ -1019,7 +1019,7 @@ public class UserServiceAccessTest {
     // the 2 unbypassable modules would expire in a year (5/1/2021)
     // but this is before the initial enforcement date, so we use that value instead
     // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
-    final String initialEnforcementDate = "2021-07-01T00:00:00.00Z";
+    final String initialEnforcementDate = "2021-07-01T00:00:00Z";
 
     final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
     assertThat(expirations.size()).isEqualTo(1);
