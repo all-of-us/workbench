@@ -53,7 +53,7 @@ describe('Workspace UI tests', () => {
     }
 
     // Randomly choose one card to check
-    const card = workspacesPageCards[0];
+    const card = fp.shuffle(workspacesPageCards)[0];
     const workspaceName = await card.getWorkspaceName();
     const accessLevel = await card.getWorkspaceAccessLevel();
     const lastChangedTime = Date.parse(await card.getLastChangedTime());
@@ -75,7 +75,7 @@ describe('Workspace UI tests', () => {
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
   });
 
-  xtest('CANCEL in Edit page goes back to Your Workspaces page', async () => {
+  test('CANCEL in Edit page goes back to Your Workspaces page', async () => {
     const workspaces = new WorkspacesPage(page);
     await workspaces.load();
 
@@ -101,7 +101,7 @@ describe('Workspace UI tests', () => {
     expect(await workspaces.isLoaded()).toBe(true);
   });
 
-  xtest('Workspaces display by access level filter', async () => {
+  test('Workspaces display by access level filter', async () => {
     const filter = ['Owner', 'Writer', 'Reader'];
 
     const workspacesPage = new WorkspacesPage(page);
@@ -130,7 +130,7 @@ describe('Workspace UI tests', () => {
     }
   });
 
-  xtest('Duplicate Workspace page', async () => {
+  test('Duplicate Workspace page', async () => {
     const homePage = new HomePage(page);
     await homePage.waitForLoad();
 
@@ -174,7 +174,7 @@ describe('Workspace UI tests', () => {
     expect(await homePage.isLoaded()).toBe(true);
   });
 
-  xtest('Workspace Card Snowman menu options', async () => {
+  test('Workspace Card Snowman menu options', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
