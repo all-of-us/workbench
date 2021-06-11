@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -972,6 +973,55 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_empty() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    assertThat(userService.getRegisteredTierExpirations()).isEmpty();
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_1() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // register user by setting 2 bypassable modules' bypass to now
+    // and the 2 unbypassable modules' completions to now
+
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // the 2 unbypassable modules will expire in a year
+    final Instant aYearFromNow = PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+
+    final Map<DbUser, Timestamp> expirationMap = userService.getRegisteredTierExpirations();
+    assertThat(expirationMap.size()).isEqualTo(1);
+    assertThat(expirationMap).containsKey(dbUser);
+    assertThat(expirationMap.get(dbUser)).isEqualTo(Timestamp.from(aYearFromNow));
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_initial_enforcement_date() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
+    PROVIDED_CLOCK.setInstant(mayFirst);
+
+    // register user by setting 2 bypassable modules' bypass to 5/1/2020
+    // and the 2 unbypassable modules' completions to 5/1/2020
+
+    dbUser = updateUserWithRetries(registerUserWithTime.apply(Timestamp.from(mayFirst)));
+    assertRegisteredTierEnabled(dbUser);
+
+    // the 2 unbypassable modules would expire in a year, but 5/1/2021 is before the initial
+    // enforcement date (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
+    final Instant initialEnforcement = Instant.parse("2021-07-01T00:00:00.00Z");
+
+    final Map<DbUser, Timestamp> expirationMap = userService.getRegisteredTierExpirations();
+    assertThat(expirationMap.size()).isEqualTo(1);
+    assertThat(expirationMap).containsKey(dbUser);
+
+    // ... but 5/1/2021 is before the initial enforcement date
+    assertThat(expirationMap.get(dbUser)).isEqualTo(Timestamp.from(initialEnforcement));
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
