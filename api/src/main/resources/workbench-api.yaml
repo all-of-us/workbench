@@ -1282,14 +1282,12 @@ paths:
           description: User associated with request could not be found
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/users/expirations":
-    post:
+  "/v1/admin/accessExpirations":
+    get:
       tags:
         - profile
-      consumes:
-        - application/json
       description: 'Retrieves a mapping of users to access expiration times.  Requires ACCESS_CONTROL_ADMIN authority.'
-      operationId: getRegisteredTierExpirations
+      operationId: getRegisteredTierAccessExpirations
       responses:
         200:
           description: 'An array of users and their access expirations'

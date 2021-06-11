@@ -640,7 +640,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierExpirations() {
+  public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierAccessExpirations() {
     return ResponseEntity.ok(
         userService.getRegisteredTierExpirations().entrySet().stream()
             .map(
