@@ -16,20 +16,6 @@ bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_event
 
 
 ############################################################
-# create cb_survey_version and populate it
-############################################################
-echo "cb_survey_version - creating table"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
-(
-      survey_version_concept_id     INT64
-    , survey_concept_id             INT64
-    , display_name                  STRING
-    , display_order                 INT64
-)"
-
-
-############################################################
 # insert source condition data into cb_search_all_events
 ############################################################
 echo "Inserting source conditions data into cb_search_all_events"
