@@ -7,7 +7,7 @@
     "allowUnreachableCode": false,
     "skipLibCheck": true,
     "target": "es2018",
-    "module": "esnext",
+    "module": "commonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "importHelpers": true,
