@@ -638,7 +638,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   /**
-   * Get a JSON list of users and their registered tier access expiration dates.
+   * Gets a JSON list of users and their registered tier access expiration dates.
    *
    * <p>This endpoint is intended as a temporary manual measure to assist with user communication
    * during the rollout of Annual Access Renewal (AAR).
