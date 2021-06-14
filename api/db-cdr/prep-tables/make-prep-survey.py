@@ -63,7 +63,7 @@ def main():
 
         # open your file writers for this survey and write headers
         controlled_writer, registered_writer, all_writer = \
-            open_writers_with_headers(name)
+            open_writers_with_headers(name, date)
 
         # made these global in order to add rows in selected output files
         global id_controlled
@@ -354,11 +354,13 @@ def query_topic_code(project, dataset, concept_name):
     return query_job.result()
 
 
-def open_writers_with_headers(name):
+def open_writers_with_headers(name, date):
     file_prefix = home_dir + "/" + surveys.get(name)
-    csv_controlled = open(file_prefix + "_controlled.csv", 'w')
-    csv_registered = open(file_prefix + "_registered.csv", 'w')
-    csv_all = open(file_prefix + "_all.csv", 'w')
+    csv_controlled = open(file_prefix + "_controlled" + '_' + date + ".csv",
+                          'w')
+    csv_registered = open(file_prefix + "_registered" + '_' + date + ".csv",
+                          'w')
+    csv_all = open(file_prefix + "_all" + '_' + date + ".csv", 'w')
     controlled_writer = csv.DictWriter(csv_controlled, fieldnames=headers)
     controlled_writer.writeheader()
     registered_writer = csv.DictWriter(csv_registered, fieldnames=headers)
