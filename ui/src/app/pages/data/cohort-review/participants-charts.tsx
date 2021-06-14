@@ -1,10 +1,10 @@
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {CohortReview} from 'generated/fetch';
 import * as React from 'react';
 
 const css = `
@@ -101,6 +101,7 @@ const styles = reactStyles({
 
 export interface ParticipantsChartsProps {
   domain: string;
+  review: CohortReview;
   workspace: WorkspaceData;
 }
 
@@ -123,9 +124,8 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {domain, workspace: {id, namespace}} = this.props;
-      cohortReviewApi().getCohortChartData(namespace, id,
-        cohortReviewStore.getValue().cohortReviewId, domain, 10)
+      const {domain, review, workspace: {id, namespace}} = this.props;
+      cohortReviewApi().getCohortChartData(namespace, id, review.cohortReviewId, domain, 10)
         .then(resp => {
           const data = resp.items.map(item => {
             this.nameRefs.push(React.createRef());

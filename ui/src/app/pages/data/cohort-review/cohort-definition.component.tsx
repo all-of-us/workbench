@@ -1,8 +1,7 @@
 import {domainToTitle} from 'app/cohort-search/utils';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {CriteriaType, Domain} from 'generated/fetch';
+import {CohortReview, CriteriaType, Domain} from 'generated/fetch';
 import * as React from 'react';
 
 const css = `
@@ -49,7 +48,7 @@ const styles = reactStyles({
   }
 });
 
-export class CohortDefinition extends React.Component<{}, {definition: any}> {
+export class CohortDefinition extends React.Component<{review: CohortReview}, {definition: any}> {
   constructor(props: any) {
     super(props);
     this.state = {definition: null};
@@ -60,8 +59,8 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   }
 
   mapDefinition() {
-    const review = cohortReviewStore.getValue();
-    const def = JSON.parse(review.cohortDefinition);
+    const {review: {cohortDefinition}} = this.props;
+    const def = JSON.parse(cohortDefinition);
     const definition = ['includes', 'excludes'].reduce((acc, role) => {
       if (def[role].length) {
         const roleObj = {role, groups: []};
