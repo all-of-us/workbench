@@ -112,7 +112,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": false,
+    "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
