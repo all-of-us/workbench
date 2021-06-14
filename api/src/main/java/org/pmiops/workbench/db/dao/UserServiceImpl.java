@@ -57,7 +57,7 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
-import org.pmiops.workbench.model.UserAccessExpirations;
+import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -1129,20 +1129,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * for users who have them
    */
   @Override
-  public List<UserAccessExpirations> getRegisteredTierExpirations() {
+  public List<UserAccessExpiration> getRegisteredTierExpirations() {
     // restrict to current RT users
     return accessTierService.getAllRegisteredTierUsers().stream()
-        .flatMap(this::maybeAccessExpirations)
+        .flatMap(this::maybeAccessExpiration)
         .collect(Collectors.toList());
   }
 
-  // streams a UserAccessExpirations object, if the user has an expiration
-  private Stream<UserAccessExpirations> maybeAccessExpirations(DbUser user) {
+  // streams a UserAccessExpiration object, if the user has an expiration
+  private Stream<UserAccessExpiration> maybeAccessExpiration(DbUser user) {
     return getRegisteredTierExpirationForEmails(user)
         .map(
             exp ->
                 Stream.of(
-                    new UserAccessExpirations()
+                    new UserAccessExpiration()
                         .userName(user.getUsername())
                         .contactEmail(user.getContactEmail())
                         .givenName(user.getGivenName())

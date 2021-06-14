@@ -35,7 +35,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.model.UserAccessExpirations;
+import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -995,7 +995,7 @@ public class UserServiceAccessTest {
     final String aYearFromNow =
         PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS).toString();
 
-    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
     assertThat(expirations.size()).isEqualTo(1);
     assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
     assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
@@ -1022,7 +1022,7 @@ public class UserServiceAccessTest {
     // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
     final String initialEnforcementDate = "2021-07-01T00:00:00Z";
 
-    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
     assertThat(expirations.size()).isEqualTo(1);
     assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
     assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());

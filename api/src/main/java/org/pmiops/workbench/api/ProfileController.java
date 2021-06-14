@@ -59,7 +59,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.model.UserAccessExpirations;
+import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -648,7 +648,7 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierAccessExpirations() {
+  public ResponseEntity<List<UserAccessExpiration>> getRegisteredTierAccessExpirations() {
     return ResponseEntity.ok(userService.getRegisteredTierExpirations());
   }
 }

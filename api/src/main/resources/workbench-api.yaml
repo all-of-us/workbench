@@ -1294,7 +1294,7 @@ paths:
           schema:
             type: array
             items:
-              "$ref": "#/definitions/UserAccessExpirations"
+              "$ref": "#/definitions/UserAccessExpiration"
         403:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
@@ -5702,7 +5702,7 @@ definitions:
         type: boolean
         description: Whether this module has expired according to the server's clock.
 
-  UserAccessExpirations:
+  UserAccessExpiration:
     type: object
     properties:
       userName:
