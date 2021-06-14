@@ -952,7 +952,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "# Create a single merged VCF file\n"
                 + "# This can take a few hours for a dataset with hundreds of participants\n"
                 + "\n"
-                + "!bcftools concat -a"
+                + "!bcftools concat -a "
                 + localVcfDir
                 + "/*.vcf.gz -o "
                 + mergedVcfFilepath,
@@ -961,7 +961,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + localVcfDir
                 + "/ if you plan to only use Plink\n"
                 + "# and no longer need the VCF files\n"
-                + "!ls dataset_43789957_plink.*");
+                + "!ls "
+                + plinkBinaryPrefix
+                + ".*");
 
     return Stream.concat(
             generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
