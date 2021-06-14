@@ -961,7 +961,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + localVcfDir
                 + "/ if you plan to only use Plink\n"
                 + "# and no longer need the VCF files\n"
-                + "!ls " + plinkBinaryPrefix + ".*");
+                + "!ls "
+                + plinkBinaryPrefix
+                + ".*");
 
     return Stream.concat(
             generateDownloadVcfCode(qualifier, dataSetExportRequest).stream(), plinkCode.stream())
