@@ -128,6 +128,15 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     is_standard             INT64
 )"
 
+# table that holds CPT4 ancestor information for parent counts
+echo "CREATE TABLES - prep_cpt_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\`
+(
+    ancestor_id     INT64,
+    descendant_id   INT64
+)"
+
 # holds atc and rxnorm concept relationships for drugs
 echo "CREATE TABLES - prep_atc_rel_in_data"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -233,497 +242,21 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-
-################################################
-# ICD9 - SOURCE
-################################################
-echo "ICD9 - SOURCE - add data (do not insert zero count children)"
+# create merged table of concept and prep_concept
+echo "CREATE TABLES - prep_concept_merged"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , concept_id
-        , code
-        , name
-        , rollup_count
-        , item_count
-        , est_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT
-      a.id
-    , a.parent_id
-    , a.domain_id
-    , a.is_standard
-    , a.type
-    , a.subtype
-    , a.concept_id
-    , a.code
-    , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
-    , CASE WHEN a.is_selectable = 1 THEN 0 ELSE null END AS rollup_count
-    , CASE
-        WHEN a.is_selectable = 1 THEN
-            CASE
-                WHEN c.cnt is null THEN 0
-                ELSE c.cnt
-            END
-        ELSE null
-      END AS item_count
-    , CASE WHEN a.is_group = 0 and a.is_selectable = 1 THEN c.cnt ELSE null END AS est_count
-    , a.is_group
-    , a.is_selectable
-    , a.has_attribute
-    , a.has_hierarchy
-    , a.path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-LEFT JOIN
-    (
-        SELECT concept_id, concept_name
-        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-        -- there are two ICD9 codes = 92, this gets the one that is valid
-        WHERE (vocabulary_id in ('ICD9CM', 'ICD9Proc') and concept_code != '92')
-            OR (vocabulary_id = 'ICD9Proc' and concept_code = '92')
-    ) b on a.concept_id = b.concept_id
-LEFT JOIN
-    (
-        -- get the count of distinct patients coded with each concept
-        SELECT concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id in
-                (
-                    -- get all concepts that are selectable
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
-                    WHERE type in ('ICD9CM', 'ICD9Proc')
-                        AND is_selectable = 1
-                )
-        GROUP BY 1
-    ) c on b.concept_id = c.concept_id
-WHERE a.type in ('ICD9CM', 'ICD9Proc')
-    AND
-        (
-            -- get all parents and get all children that have a count
-            is_group = 1
-            OR
-            (
-                is_group = 0
-                AND is_selectable = 1
-                AND
-                    (
-                        c.cnt != 0
-                        OR c.cnt is not null
-                    )
-            )
-      )
-ORDER BY 1"
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` AS
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+UNION ALL
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept\`"
 
-echo "ICD9 - SOURCE - generate parent rollup counts"
+# create merged table of concept_relationship and prep_concept_relationship
+echo "CREATE TABLES - prep_concept_relationship_merged"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET x.rollup_count = y.cnt
-    ,x.est_count = y.cnt
-FROM
-    (
-        SELECT e.id, COUNT(DISTINCT f.person_id) cnt
-        FROM
-            (
-                -- for each parent, get it and all items under it
-                SELECT a.id, b.descendant_id
-                FROM
-                    (
-                        -- get all parents that are selectable
-                        SELECT id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        WHERE type in ('ICD9CM', 'ICD9Proc')
-                            and is_group = 1
-                            and is_selectable = 1
-                    ) a
-                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
-            ) e
-        LEFT JOIN
-            (
-                SELECT c.id, d.person_id, d.concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-                JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` d on c.concept_id = d.concept_id
-                WHERE c.type in ('ICD9CM', 'ICD9Proc')
-                    and c.is_selectable = 1
-                    and d.is_standard = 0
-            ) f on e.descendant_id = f.id
-        GROUP BY 1
-    ) y
-WHERE x.id = y.id"
-
-echo "ICD9 - SOURCE - delete parents that have no count"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"DELETE
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-WHERE type in ('ICD9CM', 'ICD9Proc')
-    and is_group = 1
-    and is_selectable = 1
-    and rollup_count = 0"
-
-
-################################################
-# ICD10CM / ICD10PCS - SOURCE
-################################################
-echo "ICD10CM - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , concept_id
-        , code
-        , name
-        , rollup_count
-        , item_count
-        , est_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT
-      a.id
-    , a.parent_id
-    , a.domain_id
-    , a.is_standard
-    , a.type
-    , a.subtype
-    , b.concept_id
-    , a.code
-    , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
-    , CASE WHEN a.is_selectable = 1 THEN 0 ELSE null END AS rollup_count
-    , CASE
-        WHEN a.is_selectable = 1 THEN
-            CASE
-                WHEN c.cnt is null THEN 0
-                ELSE c.cnt
-            END
-        ELSE null
-      END AS item_count
-    , CASE WHEN a.is_group = 0 and a.is_selectable = 1 THEN c.cnt ELSE null END AS est_count
-    , a.is_group
-    , a.is_selectable
-    , a.has_attribute
-    , a.has_hierarchy
-    , a.path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-LEFT JOIN
-    (
-        SELECT concept_id, concept_name, concept_code, vocabulary_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-        WHERE vocabulary_id = 'ICD10CM'
-    ) b on (a.type = b.vocabulary_id and a.code = b.concept_code)
-LEFT JOIN
-    (
-        -- get the count of distinct patients coded with each concept
-        SELECT concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id in
-                (
-                    -- get all concepts that are selectable
-                    SELECT b.concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-                    JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b ON (a.type = b.vocabulary_id and a.code = b.concept_code)
-                    WHERE a.type = 'ICD10CM'
-                        and a.is_selectable = 1
-                )
-        GROUP BY 1
-    ) c on b.concept_id = c.concept_id
-WHERE a.type = 'ICD10CM'
-    AND (a.code NOT LIKE 'U07%' OR a.code is NULL) -- removing U07 and children as parent doesn't have a concept id
-    AND
-        (
-            -- get all parents and get all children that have a count
-            is_group = 1
-            OR
-            (
-                is_group = 0
-                AND is_selectable = 1
-                AND
-                    (
-                        c.cnt != 0
-                        OR c.cnt is not null
-                    )
-            )
-      )
-ORDER BY 1"
-
-echo "ICD10PCS - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , concept_id
-        , code
-        , name
-        , rollup_count
-        , item_count
-        , est_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT
-      a.id
-    , a.parent_id
-    , a.domain_id
-    , a.is_standard
-    , a.type
-    , a.subtype
-    , b.concept_id
-    , a.code
-    , CASE WHEN b.concept_id is not null THEN b.concept_name ELSE a.name END AS name
-    , CASE WHEN a.is_selectable = 1 THEN 0 ELSE null END AS rollup_count
-    , CASE
-        WHEN a.is_selectable = 1 THEN
-            CASE
-                WHEN c.cnt is null THEN 0
-                ELSE c.cnt
-            END
-        ELSE null
-      END AS item_count
-    , CASE WHEN a.is_group = 0 and a.is_selectable = 1 THEN c.cnt ELSE null END AS est_count
-    , a.is_group
-    , a.is_selectable
-    , a.has_attribute
-    , a.has_hierarchy
-    , a.path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-LEFT JOIN
-    (
-        SELECT concept_id, concept_name, concept_code, vocabulary_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-        WHERE vocabulary_id = 'ICD10PCS'
-    ) b on (a.type = b.vocabulary_id and a.code = b.concept_code)
-LEFT JOIN
-    (
-        -- get the count of distinct patients coded with each concept
-        SELECT concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        WHERE is_standard = 0
-            and concept_id in
-                (
-                    -- get all concepts that are selectable
-                    SELECT b.concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-                    JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b ON (a.type = b.vocabulary_id and a.code = b.concept_code)
-                    WHERE a.type = 'ICD10PCS'
-                        and a.is_selectable = 1
-                )
-        GROUP BY 1
-    ) c on b.concept_id = c.concept_id
-WHERE a.type = 'ICD10PCS'
-    AND
-        (
-            -- get all parents and all children that have a count
-            is_group = 1
-            OR
-            (
-                is_group = 0
-                AND is_selectable = 1
-                AND
-                    (
-                        c.cnt != 0
-                        OR c.cnt is not null
-                    )
-            )
-      )
-ORDER BY 1"
-
-# Join Count: 8
-echo "ICD10CM / ICD10PCS - SOURCE - add items into staging table for use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-    (
-          ancestor_concept_id
-        , domain_id
-        , type
-        , is_standard
-        , concept_id_1
-        , concept_id_2
-        , concept_id_3
-        , concept_id_4
-        , concept_id_5
-        , concept_id_6
-        , concept_id_7
-    )
-SELECT DISTINCT a.concept_id as ancestor_concept_id
-    , a.domain_id
-    , a.type
-    , a.is_standard
-    , b.concept_id c1
-    , c.concept_id c2
-    , d.concept_id c3
-    , e.concept_id c4
-    , f.concept_id c5
-    , g.concept_id c6
-    , h.concept_id c7
-FROM
-    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS') and is_group = 1 and is_selectable = 1 and concept_id is not null) a
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) b on a.id = b.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) c on b.id = c.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) d on c.id = d.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) e on d.id = e.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) f on e.id = f.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) g on f.id = g.parent_id
-    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD10CM','ICD10PCS')) h on g.id = h.parent_id"
-
-# Count: 8 - If count above is changed, the number of JOINS below must be updated
-echo "ICD10CM / ICD10PCS - SOURCE - add items into ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-    (
-          ancestor_concept_id
-        , descendant_concept_id
-        , is_standard
-    )
-SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_7 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_6 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_5 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_4 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_3 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_2 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
-SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE concept_id_1 is not null
-    and type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0
-UNION DISTINCT
--- this statement is to add the ancestor item to itself
-SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
-WHERE type in ('ICD10CM','ICD10PCS')
-    and is_standard = 0"
-
-echo "ICD10CM - SOURCE - generate parent rollup counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET x.rollup_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT ancestor_concept_id as concept_id
-            , COUNT(DISTINCT person_id) cnt
-        FROM
-            (
-                SELECT ancestor_concept_id
-                    , descendant_concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-                WHERE ancestor_concept_id in
-                    (
-                        SELECT DISTINCT concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        WHERE type = 'ICD10CM'
-                            and is_standard = 0
-                            and is_group = 1
-                    )
-                    and is_standard = 0
-            ) a
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` b on a.descendant_concept_id = b.concept_id
-        WHERE b.is_standard = 0
-        GROUP BY 1
-    ) y
-WHERE x.concept_id = y.concept_id
-    and x.type = 'ICD10CM'
-    and x.is_standard = 0
-    and x.is_group = 1"
-
-echo "ICD10PCS - SOURCE - generate parent rollup counts"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-SET x.rollup_count = y.cnt
-    , x.est_count = y.cnt
-FROM
-    (
-        SELECT ancestor_concept_id as concept_id
-            , COUNT(DISTINCT person_id) cnt
-        FROM
-            (
-                SELECT ancestor_concept_id
-                    , descendant_concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-                WHERE ancestor_concept_id in
-                    (
-                        SELECT DISTINCT concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        WHERE type = 'ICD10PCS'
-                            and is_standard = 0
-                            and is_group = 1
-                    )
-                    and is_standard = 0
-            ) a
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` b on a.descendant_concept_id = b.concept_id
-        WHERE b.is_standard = 0
-        GROUP BY 1
-    ) y
-WHERE x.concept_id = y.concept_id
-    and x.type = 'ICD10PCS'
-    and x.is_standard = 0
-    and x.is_group = 1"
-
-echo "ICD10CM / ICD10PCS - SOURCE - delete zero count parents"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"DELETE
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-WHERE type IN ('ICD10CM', 'ICD10PCS')
-    and is_group = 1
-    and is_selectable = 1
-    and rollup_count = 0"
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\` AS
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\`
+UNION ALL
+SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship\`"
 
 
 ################################################
@@ -817,6 +350,25 @@ WHERE a.type = 'CPT4'
       )
 ORDER BY 1"
 
+echo "CPT4 - SOURCE - add ancestor data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\`
+    (
+          ancestor_id
+        , descendant_id
+    )
+SELECT
+      DISTINCT a.id ancestor_id
+    , coalesce(h.id, g.id, f.id, e.id, d.id, c.id, b.id) descendant_id
+FROM (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'CPT4' and is_standard = 0 and is_group = 1 and parent_id != 0) a
+JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) b on a.id = b.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) c on b.id = c.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) d on c.id = d.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) e on d.id = e.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) f on e.id = f.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) g on f.id = g.parent_id
+LEFT JOIN (SELECT id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) h on g.id = h.parent_id"
+
 echo "CPT4 - SOURCE - generate parent counts"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
@@ -838,7 +390,7 @@ FROM
                             and parent_id != 0
                             and is_group = 1
                     ) a
-                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_cpt_ancestor\` b on a.id = b.ancestor_id
             ) e
         LEFT JOIN
             (
@@ -896,8 +448,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-      id
-    , parent_id
+      a.new_id as id
+    , CASE WHEN a.parent_id = 0 THEN 0 ELSE b.new_id END as parent_id
     , domain_id
     , is_standard
     , type
@@ -912,9 +464,10 @@ SELECT
     , is_selectable
     , has_attribute
     , has_hierarchy
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
-WHERE domain_id = 'PHYSICAL_MEASUREMENT'
+FROM (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_physical_measurement\`) a
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_physical_measurement\`) b on a.parent_id = b.id
 ORDER BY 1"
+
 
 echo "PM - counts for Heart Rate, Height, Weight, BMI, Waist Circumference, Hip Circumference"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1105,14 +658,14 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , path
     )
 SELECT
-      a.id
-    , a.parent_id
+      a.new_id as id
+    , CASE WHEN a.parent_id = 0 THEN 0 ELSE b.new_id END as parent_id
     , a.domain_id
     , a.is_standard
     , a.type
     , a.subtype
     , a.concept_id
-    , b.concept_code
+    , a.code
     , a.name
     , a.value
     , CASE
@@ -1131,11 +684,13 @@ SELECT
     , a.is_selectable
     , a.has_attribute
     , a.has_hierarchy
-    , a.path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id = b.concept_id
-WHERE a.domain_id = 'SURVEY'
-    and a.type = 'PPI'
+    , REGEXP_REPLACE( IFNULL(e.new_id,-1) ||'.'|| IFNULL(d.new_id,-1) ||'.'|| IFNULL(c.new_id,-1) ||'.'|| IFNULL(b.new_id,-1) ||'.'|| IFNULL(a.new_id,-1), '(-1.)*' ,'' ) as path
+FROM
+    (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, * FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) a
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) b on a.parent_id = b.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) c on b.parent_id = c.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) d on c.parent_id = d.id
+    LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as new_id, id, parent_id FROM \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`) e on d.parent_id = e.id
 ORDER BY 1"
 
 echo "PPI SURVEYS - insert extra answers (Skip, Prefer Not To Answer, Dont Know)"
@@ -1203,7 +758,7 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` e on
     (d.observation_source_concept_id = e.concept_id and e.domain_id = 'SURVEY' and e.is_group = 1)"
 
-# the concept_id of the answer, is the concept_id for the question
+# the concept_id of the answer is the concept_id for the question
 # we do this because there are a few answers that are attached to a topic and we want to get those as well
 echo "PPI SURVEYS - add items to ancestor table"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1746,6 +1301,1182 @@ FROM
         GROUP BY 1, 2
     ) a"
 
+
+################################################
+# ICD9 - SOURCE
+################################################
+echo "ICD9 - SOURCE - inserting roots"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , domain_id
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 1
+    , 0
+    , 0
+    , 1
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+-- these are the four root nodes
+WHERE concept_id in (2500000024, 2500000023,2500000025,2500000080)"
+
+echo "ICD9 - SOURCE - inserting level 2 (only groups at this level)"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , p.id AS parent_id
+    , p.domain_id
+    , p.is_standard
+    , p.type
+    , c.concept_id AS concept_id
+    , c.concept_code AS code
+    , c.concept_name AS name
+    , 1
+    , 0
+    , 0
+    , 1
+    ,CONCAT(p.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+-- in order to get level 2, we will link it from its level 1 parent
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type in ('ICD9CM', 'ICD9Proc')
+            and parent_id = 0
+    ) p
+JOIN
+    (
+        SELECT concept_id_1, concept_id_2
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\`
+        WHERE relationship_id = 'Subsumes'
+    ) x on p.concept_id = x.concept_id_1
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on x.concept_id_2 = c.concept_id"
+
+echo "ICD9 - SOURCE - inserting level 3 (only groups at this level)"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , item_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , p.id AS parent_id
+    , p.domain_id
+    , p.is_standard
+    , p.type
+    , c.concept_id AS concept_id
+    , c.concept_code AS code
+    , c.concept_name AS name
+    , CASE WHEN d.cnt is null THEN 0 ELSE d.cnt END AS item_count
+    , 1
+    , 1
+    , 0
+    , 1
+    , CONCAT(p.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+-- in order to get level 3, we will link it from its level 2 parent
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE type in ('ICD9CM', 'ICD9Proc')
+            and parent_id != 0
+            and is_group = 1
+            and is_selectable = 0
+    ) p
+JOIN
+    (
+        SELECT concept_id_1, concept_id_2
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\`
+        WHERE relationship_id = 'Subsumes'
+    ) x on p.concept_id = x.concept_id_1
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on  x.concept_id_2 = c.concept_id
+LEFT JOIN
+    (
+        -- get the count of distinct patients coded with each concept
+        SELECT concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE is_standard = 0
+            and concept_id in
+                (
+                    -- get all concepts
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+                    WHERE vocabulary_id in ('ICD9CM', 'ICD9Proc')
+                )
+        GROUP BY 1
+    ) d on c.concept_id = d.concept_id"
+
+echo "ICD9 - SOURCE - inserting level 4 (parents and children)"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+        id
+      , parent_id
+      , domain_id
+      , is_standard
+      , type
+      , concept_id
+      , code
+      , name
+      , rollup_count
+      , item_count
+      , est_count
+      , is_group
+      , is_selectable
+      , has_attribute
+      , has_hierarchy
+      , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , b.id AS parent_id
+    , b.domain_id
+    , b.is_standard
+    , a.vocabulary_id AS type
+    , a.concept_id
+    , a.concept_code AS code
+    , a.concept_name AS name
+    , CASE WHEN c.code is null THEN 0 ELSE null END AS rollup_count     -- c.code is null = child
+    , CASE WHEN d.cnt is null THEN 0 ELSE d.cnt END AS item_count
+    , CASE WHEN c.code is null THEN d.cnt ELSE null END AS est_count
+    , CASE WHEN c.code is null THEN 0 ELSE 1 END as is_group
+    , 1
+    , 0
+    , 1
+    ,CONCAT(b.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY b.id, a.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+-- in order to get level 4, we will link it to its level 3 parent
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+        WHERE vocabulary_id in ('ICD9CM','ICD9Proc')
+            -- level 4 codes have a decimal with 1 digit after (ex: 98.0)
+            and REGEXP_CONTAINS(concept_code, r'^\w{1,}\.\d$')
+    ) a
+-- in order to find its parent, which is just its whole number (ex: 98.0's parent is 98), we will use regex to extract the whole number
+JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` b on (REGEXP_EXTRACT(a.concept_code, r'^\w{1,}') = b.code and a.vocabulary_id = b.type)
+LEFT JOIN
+    (
+        -- determine if this item is a parent or child by seeing if it has any child items
+        -- ex: V09.8 > V09.80 so is_group = 1
+        -- ex: E879.5 > nothing so is_group = 0
+        SELECT distinct REGEXP_EXTRACT(concept_code, r'^\w{1,}\.\d') code
+        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+        WHERE vocabulary_id in ('ICD9CM','ICD9Proc')
+            and REGEXP_CONTAINS(concept_code, r'^\w{1,}\.\d{2}$')
+    ) c on a.concept_code = c.code
+LEFT JOIN
+    (
+        -- get the count of distinct patients coded with each concept
+        SELECT concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE is_standard = 0
+            and concept_id in
+                (
+                    -- get all concepts
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+                    WHERE vocabulary_id in ('ICD9CM', 'ICD9Proc')
+                ) GROUP BY 1
+    ) d on a.concept_id = d.concept_id
+WHERE
+    (
+        -- get all parents OR get all children that have a count
+        c.code is not null
+        OR
+        (
+            c.code is null
+            AND d.cnt is not null
+        )
+    )"
+
+echo "ICD9 - SOURCE - inserting level 5 (children)"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , rollup_count
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , CASE WHEN b.id is not null THEN b.id ELSE c.id END AS parent_id
+    , CASE WHEN b.domain_id is not null THEN b.domain_id ELSE c.domain_id END as domain_id
+    , 0
+    , a.vocabulary_id AS type
+    , a.concept_id,a.concept_code AS code
+    , a.concept_name AS name
+    , 0 as rollup_count
+    , d.cnt AS item_count
+    , d.cnt AS est_count
+    , 0
+    , 1
+    , 0
+    , 1
+    , CASE
+        WHEN b.id is not null THEN
+            b.path || '.' || CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+        ELSE
+            c.path || '.' || CAST(ROW_NUMBER() OVER (ORDER BY b.id,a.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+        END as path
+-- in order to get level 5, we will link it to its level 4 parent
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+        WHERE vocabulary_id in ('ICD9CM','ICD9Proc')
+        -- codes such as 98.01, V09.71, etc.
+        and REGEXP_CONTAINS(concept_code, r'^\w{1,}\.\d{2}$')
+    ) a
+-- get any level 4 parents that link to this item
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` b on (REGEXP_EXTRACT(a.concept_code, r'^\w{1,}\.\d') = b.code and a.vocabulary_id = b.type)
+-- get any level 3 parents that link to this item (this is because some level 5 items only link to a level 3 item)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c on (REGEXP_EXTRACT(a.concept_code, r'^\w{1,}') = c.code and a.vocabulary_id = c.type)
+LEFT JOIN
+    (
+        -- get the count of distinct patients coded with each concept
+        SELECT concept_id, COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE is_standard = 0
+            and concept_id in
+                (
+                    -- get all concepts
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+                    WHERE vocabulary_id in ('ICD9CM', 'ICD9Proc')
+                ) GROUP BY 1
+    ) d on a.concept_id = d.concept_id
+WHERE d.cnt is not null"
+
+echo "ICD9 - SOURCE - add items into staging table for use in next query"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+    (
+          ancestor_concept_id
+        , domain_id
+        , type
+        , is_standard
+        , concept_id_1
+        , concept_id_2
+    )
+SELECT DISTINCT
+      a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+FROM
+    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD9CM','ICD9Proc') and is_group = 1 and is_selectable = 1 and is_standard = 0) a
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD9CM','ICD9Proc')) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type in ('ICD9CM','ICD9Proc')) c on b.id = c.parent_id"
+
+echo "ICD9 - SOURCE - inserting into prep_concept_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (
+          ancestor_concept_id
+        , descendant_concept_id
+        , is_standard
+    )
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_2 is not null
+    and type in ('ICD9CM','ICD9Proc')
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_1 is not null
+    and type in ('ICD9CM','ICD9Proc')
+    and is_standard = 0
+UNION DISTINCT
+-- this statement is to add the ancestor item to itself
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE type in ('ICD9CM','ICD9Proc')
+and is_standard = 0"
+
+echo "ICD9 - SOURCE - generate rollup counts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT ancestor_concept_id as concept_id
+            , COUNT(distinct person_id) cnt
+        FROM
+            (
+                SELECT ancestor_concept_id
+                    , descendant_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT DISTINCT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE type in ('ICD9CM', 'ICD9Proc')
+                            and is_standard = 0
+                            and is_selectable = 1
+                            and is_group = 1
+                    )
+                    and is_standard = 0
+                ) a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` b on a.descendant_concept_id = b.concept_id
+        WHERE b.is_standard = 0
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type in ('ICD9CM', 'ICD9Proc')
+    and x.is_standard = 0
+    and x.is_group = 1"
+
+echo "ICD9 - SOURCE - delete parents that have no count"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"DELETE
+FROM\`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+WHERE type in ('ICD9CM', 'ICD9Proc')
+    and is_group = 1
+    and is_selectable = 1
+    and rollup_count is null"
+
+# TODO there are still some parents that don't actually have any children and never will. WHAT TO DO?
+
+
+################################################
+# ICD10CM - SOURCE
+################################################
+# some items have multiple parent relationsips which should not happen
+# used rank to assign concept to its one-up parent
+# ex: Z83.438 has three parents Z83.43, Z83.4, and Z83
+echo "ICD10CM - SOURCE - create prep_icd10_rel_cm_src"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\` AS
+SELECT * EXCEPT(rnk)
+FROM
+    (
+        SELECT DISTINCT
+              c1.concept_id AS p_concept_id
+            , c1.concept_code AS p_concept_code
+            , c1.concept_name AS p_concept_name
+            , c2.concept_id
+            , c2.concept_code
+            , c2.concept_name
+            , RANK() OVER (PARTITION BY c2.concept_code ORDER BY LENGTH(c1.concept_code) DESC) rnk
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\` cr
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`c1 ON cr.concept_id_1 = c1.concept_id
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`c2 ON cr.concept_id_2 = c2.concept_id
+        WHERE c1.vocabulary_id ='ICD10CM'
+            AND c2.vocabulary_id ='ICD10CM'
+            AND cr.relationship_id = 'Subsumes'
+    )
+WHERE rnk =1"
+
+# adding in child items that fell out due to not having a relationship to a parent in concept_relationship
+# from the joins below we are going through parents, grandparents, great grandparents to find the first parent that exists
+echo "ICD10CM - SOURCE - adding extra child items to prep_icd10_rel_cm_src"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+    (
+          p_concept_id
+        , p_concept_code
+        , p_concept_name
+        , concept_id
+        , concept_code
+        , concept_name
+    )
+SELECT
+      COALESCE(d.concept_id, e.concept_id, f.concept_id) as p_concept_id
+    , COALESCE(d.concept_code, e.concept_code, f.concept_code) as p_concept_code
+    , COALESCE(d.concept_name, e.concept_name, f.concept_name) as p_concept_name
+    , c.concept_id
+    , c.concept_code
+    , c.concept_name
+FROM
+    (
+        SELECT DISTINCT
+              a.concept_id
+            , b.concept_code
+            , b.vocabulary_id
+            , b.concept_name
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id = b.concept_id
+        WHERE a.is_standard = 0
+            and b.vocabulary_id = 'ICD10CM'
+            and a.concept_id not in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+            )
+    ) c
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on ( TRIM(LEFT(c.concept_code, LENGTH(c.concept_code)-1), '.') = d.concept_code and c.vocabulary_id = d.vocabulary_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on ( TRIM(LEFT(c.concept_code, LENGTH(c.concept_code)-2), '.') = e.concept_code and c.vocabulary_id = e.vocabulary_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` f on ( TRIM(LEFT(c.concept_code, LENGTH(c.concept_code)-3), '.') = f.concept_code and c.vocabulary_id = f.vocabulary_id)"
+
+# adding in parent items that fell out due to not having a relationship in concept_relationship
+echo "ICD10CM - SOURCE - adding extra parent items to prep_icd10_rel_cm_src"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+    (
+          p_concept_id
+        , p_concept_code
+        , p_concept_name
+        , concept_id
+        , concept_code
+        , concept_name
+    )
+SELECT
+      b.concept_id as p_concept_id
+    , b.concept_code as p_concept_name
+    , b.concept_name as p_concept_name
+    , a.p_concept_id as concept_id
+    , a.p_concept_code as concept_code
+    , a.p_concept_name as concept_name
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\` a
+JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on ( TRIM(LEFT(a.p_concept_code, LENGTH(a.p_concept_code)-1), '.') = b.concept_code and b.vocabulary_id = 'ICD10CM' )
+WHERE a.p_concept_id NOT IN
+    (
+        SELECT DISTINCT concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+    )
+    and a.p_concept_code is not null"
+
+echo "ICD10CM - SOURCE - temp table inserting level 0"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
+    (
+        p_concept_id    INT64,
+        p_concept_code  STRING,
+        p_concept_name  STRING,
+        concept_id      INT64,
+        concept_code    STRING,
+        concept_name    STRING
+    )
+AS SELECT *
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+WHERE concept_id in
+    (
+        SELECT DISTINCT a.concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` b on a.concept_id = b.concept_id
+        WHERE a.is_standard = 0
+            and b.vocabulary_id = 'ICD10CM'
+    )"
+
+# for each loop, add all items (children/parents) related to the items that were previously added
+# we loop one more time that is actually needed
+for i in {1..5};
+do
+    echo "ICD10CM - SOURCE - temp table inserting level $i"
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
+        (
+              p_concept_id
+            , p_concept_code
+            , p_concept_name
+            , concept_id
+            , concept_code
+            , concept_name
+        )
+    SELECT *
+    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+    WHERE
+        concept_id in
+            (
+                SELECT p_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
+            )
+        and concept_id not in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\`
+            )"
+done
+
+echo "ICD10CM - SOURCE - inserting root"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        ,is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , domain_id
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 1
+    , 0
+    , 0
+    , 1
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+--- this is the root for ICD10CM
+WHERE concept_id = 2500000000"
+
+echo "ICD10CM - SOURCE - inserting second level"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , p.id AS parent_id
+    , p.domain_id
+    , p.is_standard
+    , p.type
+    , c.concept_id AS concept_id
+    , c.concept_code AS code
+    , c.concept_name AS name
+    , 1
+    , 0
+    , 0
+    , 1
+    ,CONCAT(p.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE parent_id = 0
+            and type = 'ICD10CM'
+    ) p
+JOIN
+    (
+        SELECT concept_id_1, concept_id_2
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\`
+        WHERE relationship_id = 'Subsumes'
+    ) b on p.concept_id = b.concept_id_1
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on  b.concept_id_2 = c.concept_id"
+
+# for each loop, add all items (children/parents) related to the items that were previously added
+# only need to loop 5 times, but do 6 to be safe
+for i in {1..6};
+do
+    echo "ICD10CM - SOURCE - inserting level $i"
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        (
+              id
+            , parent_id
+            , domain_id
+            , is_standard
+            , type
+            , concept_id
+            , code
+            , name
+            , rollup_count
+            , item_count
+            , is_group
+            , is_selectable
+            , has_attribute
+            , has_hierarchy
+            , path
+        )
+    SELECT
+          ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
+        , p.id
+        , p.domain_id
+        , p.is_standard
+        , p.type
+        , c.concept_id
+        , c.concept_code
+        , c.concept_name
+        , 0
+        , 0
+        , CASE WHEN l.concept_code is null THEN 1 ELSE 0 END as is_group
+        , 1
+        , 0
+        , 1
+        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
+    JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\` c on p.code = c.p_concept_code
+    LEFT JOIN
+        (
+            SELECT DISTINCT a.concept_code
+            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\` a
+            LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_src_in_data\` b on a.concept_id = b.p_concept_id
+            WHERE b.concept_id is null
+        ) l on c.concept_code = l.concept_code
+    WHERE p.type = 'ICD10CM'
+        and p.is_standard = 0
+        and p.id not in
+            (
+                SELECT parent_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            )"
+done
+
+echo "ICD10CM - SOURCE - add items into ancestor staging to use in next query"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+    (
+          ancestor_concept_id
+        , domain_id
+        , type
+        , is_standard
+        , concept_id_1
+        , concept_id_2
+        , concept_id_3
+        , concept_id_4
+    )
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+
+FROM
+    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM' and is_group = 1 and is_selectable = 1 and is_standard = 0) a
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10CM') e on d.id = e.parent_id"
+
+echo "ICD10CM - SOURCE - insert into prep_concept_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (
+          ancestor_concept_id
+        , descendant_concept_id
+        , is_standard
+    )
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_4 is not null
+    and type = 'ICD10CM'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_3 is not null
+    and type = 'ICD10CM'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_2 is not null
+    and type = 'ICD10CM'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_1 is not null
+    and type = 'ICD10CM'
+    and is_standard = 0
+UNION DISTINCT
+-- this statement is to add the ancestor item to itself
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE type = 'ICD10CM'
+and is_standard = 0"
+
+echo "ICD10CM - SOURCE - update item counts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.item_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT a.concept_id, COUNT(distinct a.person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` b on a.concept_id = b.concept_id
+        WHERE a.is_standard = 0
+            AND b.vocabulary_id = 'ICD10CM'
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type = 'ICD10CM'
+    and x.is_standard = 0
+    and x.is_selectable = 1"
+
+echo "ICD10CM - SOURCE - generate rollup counts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT ancestor_concept_id as concept_id
+                , COUNT(distinct person_id) cnt
+        FROM
+            (
+                SELECT ancestor_concept_id
+                        , descendant_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT DISTINCT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE type = 'ICD10CM'
+                            and is_standard = 0
+                            and is_selectable = 1
+                            and is_group = 1
+                    )
+                    and is_standard = 0
+                ) a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` b on a.descendant_concept_id = b.concept_id
+        WHERE b.is_standard = 0
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type = 'ICD10CM'
+    and x.is_standard = 0
+    and x.is_group = 1"
+
+
+################################################
+# ICD10PCS - SOURCE
+################################################
+echo "ICD10PCS - SOURCE - create prep_icd10pcs_rel_src"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\` AS
+SELECT DISTINCT
+      c1.concept_id AS p_concept_id
+    , c1.concept_code AS p_concept_code
+    , c1.concept_name AS p_concept_name
+    , c2.concept_id
+    , c2.concept_code
+    , c2.concept_name
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\` cr
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`c1 ON cr.concept_id_1 = c1.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`c2 ON cr.concept_id_2 = c2.concept_id
+WHERE c1.vocabulary_id = 'ICD10PCS'
+    AND c2.vocabulary_id = 'ICD10PCS'
+    AND cr.relationship_id = 'Subsumes'"
+
+echo "ICD10PCS - SOURCE - temp table insert level 0"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
+        (
+            p_concept_id    INT64,
+            p_concept_code  STRING,
+            p_concept_name  STRING,
+            concept_id      INT64,
+            concept_code    STRING,
+            concept_name    STRING
+        )
+AS SELECT *
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\`
+WHERE concept_id in
+    (
+        SELECT DISTINCT a.concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` b on a.concept_id = b.concept_id
+        WHERE a.is_standard = 0
+            and b.vocabulary_id = 'ICD10PCS'
+    )"
+
+
+# for each loop, add all items (children/parents) related to the items that were previously added
+# we do this one more time than is necessary
+for i in {1..7};
+do
+    echo "ICD10PCS - SOURCE - temp table insert level $i"
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
+        (
+             p_concept_id
+            , p_concept_code
+            , p_concept_name
+            , concept_id
+            , concept_code
+            , concept_name
+        )
+    SELECT *
+    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src\`
+    WHERE
+        concept_id in
+            (
+                SELECT p_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
+            )
+        and concept_id not in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\`
+            )"
+done
+
+echo "ICD10PCS - SOURCE - adding root"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        ,is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER (ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , 0
+    , domain_id
+    , 0
+    , vocabulary_id
+    , concept_id
+    , concept_code
+    , concept_name
+    , 1
+    , 0
+    , 0
+    , 1
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_id) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
+-- this is the root concept
+WHERE concept_id = 2500000022"
+
+echo "ICD10PCS - SOURCE - adding second level"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        ,is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+    ROW_NUMBER() OVER (ORDER BY p.parent_id, c.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , p.id AS parent_id
+    , p.domain_id
+    , p.is_standard
+    , p.type
+    , c.concept_id AS concept_id
+    , c.concept_code AS code
+    , c.concept_name AS name
+    , 1
+    , 0
+    , 0
+    , 1
+    ,CONCAT(p.path, '.',
+        CAST(ROW_NUMBER() OVER (ORDER BY p.parent_id,c.concept_code) +
+        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        WHERE parent_id = 0
+            and type = 'ICD10PCS'
+    ) p
+JOIN
+    (
+        SELECT concept_id_1,concept_id_2
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_relationship_merged\`
+        WHERE relationship_id = 'Subsumes'
+    ) b on p.concept_id = b.concept_id_1
+JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on  b.concept_id_2 = c.concept_id"
+
+# for each loop, add all items (children/parents) related to the items that were previously added
+# only need to loop 6 times, but do 7 to be safe
+for i in {1..7};
+do
+    echo "ICD10PCS - SOURCE - adding level $i"
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        (
+              id
+            , parent_id
+            , domain_id
+            , is_standard
+            , type
+            , concept_id
+            , code
+            , name
+            , rollup_count
+            , item_count
+            , is_group
+            ,is_selectable
+            , has_attribute
+            , has_hierarchy
+            , path
+        )
+    SELECT
+        ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)
+        , p.id
+        , p.domain_id
+        , p.is_standard
+        , p.type
+        , c.concept_id
+        , c.concept_code
+        , c.concept_name
+        , 0
+        , 0
+        , CASE WHEN l.concept_code is null THEN 1 ELSE 0 END as is_group
+        , 1
+        , 0
+        , 1
+        , CONCAT(p.path, '.', CAST(ROW_NUMBER() OVER (ORDER BY p.id, c.concept_code) +
+            (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING))
+    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` p
+    JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\` c on p.code = c.p_concept_code
+    LEFT JOIN
+        (
+            SELECT DISTINCT a.concept_code
+            FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\` a
+            LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_icd10pcs_rel_src_in_data\` b on a.concept_id = b.p_concept_id
+            WHERE b.concept_id is null
+        ) l on c.concept_code = l.concept_code
+    WHERE p.type = 'ICD10PCS'
+        and p.is_standard = 0
+        and p.id not in
+            (
+                SELECT parent_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            )"
+done
+
+echo "ICD10PCS - SOURCE - add items into ancestor staging to use in next query"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+    (
+          ancestor_concept_id
+        , domain_id
+        , type
+        , is_standard
+        , concept_id_1
+        , concept_id_2
+        , concept_id_3
+        , concept_id_4
+        , concept_id_5
+    )
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+    , f.concept_id c5
+
+FROM
+    (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS' and is_group = 1 and is_selectable = 1 and is_standard = 0) a
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS') b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS') c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS') d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS') e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ICD10PCS') f on e.id = f.parent_id"
+
+echo "ICD10PCS - SOURCE - insert into prep_concept_ancestor"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (
+          ancestor_concept_id
+        , descendant_concept_id
+        , is_standard
+    )
+SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_5 is not null
+    and type = 'ICD10PCS'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_4 is not null
+    and type = 'ICD10PCS'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_3 is not null
+    and type = 'ICD10PCS'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_2 is not null
+    and type = 'ICD10PCS'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE concept_id_1 is not null
+    and type = 'ICD10PCS'
+    and is_standard = 0
+UNION DISTINCT
+-- this statement is to add the ancestor item to itself
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
+WHERE type = 'ICD10PCS'
+and is_standard = 0"
+
+echo "ICD10PCS - SOURCE - generate item counts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.item_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT concept_id, COUNT(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE is_standard = 0
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type = 'ICD10PCS'
+    and x.is_standard = 0
+    and x.is_selectable = 1"
+
+echo "ICD10PCS - SOURCE - generate rollup counts"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT ancestor_concept_id as concept_id
+                , COUNT(distinct person_id) cnt
+        FROM
+            (
+                SELECT ancestor_concept_id
+                        , descendant_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT DISTINCT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE type = 'ICD10PCS'
+                            and is_standard = 0
+                            and is_selectable = 1
+                            and is_group = 1
+                    )
+                    and is_standard = 0
+                ) a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` b on a.descendant_concept_id = b.concept_id
+        WHERE b.is_standard = 0
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id
+    and x.type = 'ICD10PCS'
+    and x.is_standard = 0
+    and x.is_group = 1"
+
+exit
 
 ################################################
 # CONDITION_OCCURRENCE - SNOMED - SOURCE
