@@ -35,6 +35,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -972,6 +973,63 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verifyZeroInteractions(mailService);
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_empty() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    assertThat(userService.getRegisteredTierExpirations()).isEmpty();
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_one_year() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+
+    // register user by setting 2 bypassable modules' bypass to now
+    // and the 2 unbypassable modules' completions to now
+
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // the 2 unbypassable modules will expire in a year
+    final String aYearFromNow =
+        PROVIDED_CLOCK.instant().plus(EXPIRATION_DAYS, ChronoUnit.DAYS).toString();
+
+    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    assertThat(expirations.size()).isEqualTo(1);
+    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
+    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
+    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
+
+    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
+  }
+
+  @Test
+  public void test_getRegisteredTierExpirations_initial_enforcement_date() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
+    PROVIDED_CLOCK.setInstant(mayFirst);
+
+    // register user by setting 2 bypassable modules' bypass to 5/1/2020
+    // and the 2 unbypassable modules' completions to 5/1/2020
+
+    dbUser = updateUserWithRetries(registerUserWithTime.apply(Timestamp.from(mayFirst)));
+    assertRegisteredTierEnabled(dbUser);
+
+    // the 2 unbypassable modules would expire in a year (5/1/2021)
+    // but this is before the initial enforcement date, so we use that value instead
+    // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
+    final String initialEnforcementDate = "2021-07-01T00:00:00Z";
+
+    final List<UserAccessExpirations> expirations = userService.getRegisteredTierExpirations();
+    assertThat(expirations.size()).isEqualTo(1);
+    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
+    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
+    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
+
+    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(initialEnforcementDate);
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)

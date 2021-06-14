@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -56,6 +57,7 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -278,7 +280,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   // TODO split into registered tier and controlled tier versions, when available
-  public Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
+  private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
     return ImmutableMap.of(
         ModuleNameEnum.COMPLIANCETRAINING,
             new ModuleTimes(
@@ -1120,6 +1122,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
     rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  }
+
+  /**
+   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
+   * for users who have them
+   */
+  @Override
+  public List<UserAccessExpirations> getRegisteredTierExpirations() {
+    // restrict to current RT users
+    return accessTierService.getAllRegisteredTierUsers().stream()
+        .map(u -> ImmutablePair.of(u, getRegisteredTierExpirationForEmails(u)))
+        // don't return users who don't have expiration dates.
+        // see getRegisteredTierExpirationForEmails() for details on how this might happen
+        .filter(e -> e.getValue().isPresent())
+        .map(
+            e ->
+                new UserAccessExpirations()
+                    .userName(e.getKey().getUsername())
+                    .contactEmail(e.getKey().getContactEmail())
+                    .givenName(e.getKey().getGivenName())
+                    .familyName(e.getKey().getFamilyName())
+                    // converts to UTC
+                    .expirationDate(e.getValue().get().toInstant().toString()))
+        .collect(Collectors.toList());
   }
 
   /**

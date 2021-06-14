@@ -11,4 +11,6 @@ public interface UserAccessTierDao extends CrudRepository<DbUserAccessTier, Long
   Optional<DbUserAccessTier> getByUserAndAccessTier(DbUser user, DbAccessTier accessTier);
 
   List<DbUserAccessTier> getAllByUser(DbUser user);
+
+  List<DbUserAccessTier> getAllByAccessTier(DbAccessTier accessTier);
 }

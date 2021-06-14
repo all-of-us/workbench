@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -58,6 +59,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.model.UserAccessExpirations;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -633,5 +635,20 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> confirmPublications() {
     userService.confirmPublications();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  /**
+   * Gets a JSON list of users and their registered tier access expiration dates.
+   *
+   * <p>This endpoint is intended as a temporary manual measure to assist with user communication
+   * during the rollout of Annual Access Renewal (AAR).
+   *
+   * <p>Once fully rolled out, we will have an automated expiration email process and this can
+   * likely be removed. See RW-6689 and RW-6703.
+   */
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<List<UserAccessExpirations>> getRegisteredTierAccessExpirations() {
+    return ResponseEntity.ok(userService.getRegisteredTierExpirations());
   }
 }

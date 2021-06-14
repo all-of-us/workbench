@@ -191,18 +191,28 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public List<DbAccessTier> getTiersForRegisteredUsers() {
-    // check this regardless of feature flag
-    final DbAccessTier registeredTier =
-        accessTierDao
-            .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
-            .orElseThrow(
-                () -> new ServerErrorException("Cannot find Registered Tier in database."));
+    // sanity check this regardless of feature flag
+    final DbAccessTier registeredTier = getRegisteredTierOrThrow();
 
     if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
       return getAllTiers();
     } else {
       return Collections.singletonList(registeredTier);
     }
+  }
+
+  @Override
+  public List<DbUser> getAllRegisteredTierUsers() {
+    return userAccessTierDao.getAllByAccessTier(getRegisteredTierOrThrow()).stream()
+        .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
+        .map(DbUserAccessTier::getUser)
+        .collect(Collectors.toList());
+  }
+
+  private DbAccessTier getRegisteredTierOrThrow() {
+    return accessTierDao
+        .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
+        .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
   }
 
   private Timestamp now() {
