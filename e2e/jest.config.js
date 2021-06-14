@@ -1,3 +1,6 @@
+const { defaults } = require('jest-config');
+const { TEST_MODE } = process.env;
+
 module.exports = {
   verbose: false,
   preset: 'jest-puppeteer',
@@ -46,10 +49,10 @@ module.exports = {
   },
   testPathIgnorePatterns: ['/node_modules/', '/tsc-out/'],
   testMatch:
-    process.env.TEST_MODE === 'nightly-integration'
+    TEST_MODE === 'nightly-integration'
       ? ['<rootDir>/tests/nightly/**/*.spec.ts']
       : ['<rootDir>/tests(?!/nightly)/**/*.spec.ts'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!tests)'],
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  moduleFileExtensions: [...defaults.moduleFileExtensions],
   modulePaths: ['<rootDir>']
 };

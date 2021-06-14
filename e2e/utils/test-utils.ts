@@ -20,6 +20,14 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   logger.info('Sign in with Google to Workbench application');
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
+  // This element exists in DOM after user has logged in. But it could takes a while.
+  await page
+    .waitForFunction(() => !!document.querySelector('app-signed-in'), { timeout: 30000 })
+    .catch((err) => {
+      logger.error('signIn() failed while waiting for "app-signed-in" element');
+      logger.error(err);
+      throw new Error(err);
+    });
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
