@@ -24,8 +24,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -1132,20 +1132,24 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public List<UserAccessExpirations> getRegisteredTierExpirations() {
     // restrict to current RT users
     return accessTierService.getAllRegisteredTierUsers().stream()
-        .map(u -> ImmutablePair.of(u, getRegisteredTierExpirationForEmails(u)))
-        // don't return users who don't have expiration dates.
-        // see getRegisteredTierExpirationForEmails() for details on how this might happen
-        .filter(e -> e.getValue().isPresent())
-        .map(
-            e ->
-                new UserAccessExpirations()
-                    .userName(e.getKey().getUsername())
-                    .contactEmail(e.getKey().getContactEmail())
-                    .givenName(e.getKey().getGivenName())
-                    .familyName(e.getKey().getFamilyName())
-                    // converts to UTC
-                    .expirationDate(e.getValue().get().toInstant().toString()))
+        .flatMap(this::maybeAccessExpirations)
         .collect(Collectors.toList());
+  }
+
+  // streams a UserAccessExpirations object, if the user has an expiration
+  private Stream<UserAccessExpirations> maybeAccessExpirations(DbUser user) {
+    return getRegisteredTierExpirationForEmails(user)
+        .map(
+            exp ->
+                Stream.of(
+                    new UserAccessExpirations()
+                        .userName(user.getUsername())
+                        .contactEmail(user.getContactEmail())
+                        .givenName(user.getGivenName())
+                        .familyName(user.getFamilyName())
+                        // converts to UTC
+                        .expirationDate(exp.toInstant().toString())))
+        .orElse(Stream.empty());
   }
 
   /**
