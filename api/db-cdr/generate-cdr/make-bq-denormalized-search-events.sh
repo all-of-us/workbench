@@ -28,21 +28,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     , display_order                 INT64
 )"
 
-echo "cb_survey_version - adding data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
-(
-      survey_version_concept_id
-    , survey_concept_id
-    , display_name
-    , display_order
-)
-VALUES
-      (2100000002, 1333342, 'May 2020', 1)
-    , (2100000003, 1333342, 'June 2020', 2)
-    , (2100000004, 1333342, 'July 2020', 3)
-"
-
 
 ############################################################
 # insert source condition data into cb_search_all_events
