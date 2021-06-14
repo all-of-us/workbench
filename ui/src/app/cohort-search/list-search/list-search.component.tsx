@@ -495,7 +495,6 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
             {row.conceptId}
           </StyledAnchorTag>
         </td>
-        {/*<td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>*/}
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
