@@ -9090,6 +9090,8 @@ definitions:
       cost:
         type: number
         format: currency
+      outputDir:
+        type: string
       status:
         "$ref": '#/definitions/TerraJobStatus'
       submissionDate:
