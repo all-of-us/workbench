@@ -7,11 +7,11 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
+import {TooltipTrigger} from 'app/components/popups';
 import {genomicExtractionStore, updateGenomicExtractionStore, useStore} from 'app/utils/stores';
+import {ago, verboseDatetime} from 'app/utils/time';
 import {DataSet, GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
-import {ago, verboseDatetime} from "app/utils/time";
-import {useEffect} from "react";
-import {TooltipTrigger} from "app/components/popups";
+import {useEffect} from 'react';
 
 const {useState} = React;
 
@@ -23,8 +23,8 @@ const TimeAgoWithVerboseTooltip = (epoch) => {
     }}>
       {ago(epoch)}
     </span>
-  </TooltipTrigger>
-}
+  </TooltipTrigger>;
+};
 
 interface Props {
   dataSet: DataSet;
@@ -46,22 +46,22 @@ export const GenomicExtractionModal = ({
   const extractsForDataset = fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name, extractsForWorkspace);
 
   useEffect(() => {
-    if(!(workspaceNamespace in genomicExtractions)) {
+    if (!(workspaceNamespace in genomicExtractions)) {
       dataSetApi().getGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName)
-      .then(resp => updateGenomicExtractionStore(workspaceNamespace, resp.jobs))
-      .finally(() => setLoading(false));
+        .then(resp => updateGenomicExtractionStore(workspaceNamespace, resp.jobs))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [workspaceNamespace]);
 
   const runningExtract = fp.flow(
-      fp.orderBy((extract: GenomicExtractionJob) => extract.submissionDate, 'desc'),
-      fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.RUNNING)
+    fp.orderBy((extract: GenomicExtractionJob) => extract.submissionDate, 'desc'),
+    fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.RUNNING)
   )(extractsForDataset);
   const succeededExtract = fp.flow(
-      fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc'),
-      fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.SUCCEEDED)
+    fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc'),
+    fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.SUCCEEDED)
   )(extractsForDataset);
 
   return <Modal loading={loading}>
@@ -80,12 +80,12 @@ export const GenomicExtractionModal = ({
       </TextColumn>
     </ModalBody>
     {runningExtract &&
-      <WarningMessage iconSize={30} iconPosition={'center'}>
+      <WarningMessage iconSize={30} iconPosition={'top'}>
         An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(runningExtract.submissionDate)}
       </WarningMessage>
     }
     {!runningExtract && succeededExtract &&
-      <WarningMessage iconSize={30} iconPosition={'center'}>
+      <WarningMessage iconSize={30} iconPosition={'top'}>
           VCF file(s) already exist for this dataset.
           Last extracted files for this dataset: {TimeAgoWithVerboseTooltip(succeededExtract.completionTime)}.
           The file is located in the Workspace storage panel.
