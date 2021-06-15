@@ -1,0 +1,62 @@
+[
+  {
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "parent_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "domain_id",
+    "type": "STRING"
+  },
+  {
+    "name": "is_standard",
+    "type": "INTEGER"
+  },
+  {
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "name": "subtype",
+    "type": "STRING"
+  },
+  {
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "code",
+    "type": "STRING"
+  },
+  {
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "name": "value",
+    "type": "STRING"
+  },
+  {
+    "name": "is_group",
+    "type": "INTEGER"
+  },
+  {
+    "name": "is_selectable",
+    "type": "INTEGER"
+  },
+  {
+    "name": "has_attribute",
+    "type": "INTEGER"
+  },
+  {
+    "name": "has_hierarchy",
+    "type": "INTEGER"
+  },
+  {
+    "name": "survey",
+    "type": "STRING"
+  }
+]

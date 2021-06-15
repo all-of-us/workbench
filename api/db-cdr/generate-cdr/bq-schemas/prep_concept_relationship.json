@@ -23,5 +23,10 @@
     "mode": "NULLABLE",
     "name": "valid_end_date",
     "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "invalid_reason",
+    "type": "STRING"
   }
 ]
