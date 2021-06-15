@@ -2476,7 +2476,6 @@ WHERE x.concept_id = y.concept_id
     and x.is_standard = 0
     and x.is_group = 1"
 
-exit
 
 ################################################
 # CONDITION_OCCURRENCE - SNOMED - SOURCE

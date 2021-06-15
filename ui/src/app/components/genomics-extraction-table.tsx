@@ -7,6 +7,7 @@ import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {FlexRow} from 'app/components/flex';
+import {GenomicsExtractionMenu} from 'app/components/genomics-extraction-menu';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
@@ -24,7 +25,6 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {GenomicsExtractionMenu} from './genomics-extraction-menu';
 
 const styles = {
   spinStyles: {
