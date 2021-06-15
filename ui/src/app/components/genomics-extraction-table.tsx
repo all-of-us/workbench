@@ -1,7 +1,6 @@
 import {
   faBan,
   faCheckCircle,
-  faClipboard,
   faEllipsisV,
   faExclamationTriangle,
   faTrash
@@ -15,7 +14,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {addOpacity} from 'app/styles/colors';
 import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
 import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
@@ -31,13 +30,21 @@ import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
 import {MenuItem} from './buttons';
 
-const spinStyles = {
-  animationName: 'spin',
-  animationDuration: '5000ms',
-  animationIterationCount: 'infinite',
-  animationTimingFunction: 'linear'
+const styles = {
+  spinStyles: {
+    animationName: 'spin',
+    animationDuration: '5000ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  hr: {
+    border: '0',
+    borderTop: '1px solid ' + addOpacity(colors.dark, 0.2),
+    borderBottom: '1px solid ' + colors.white,
+    marginTop: '0',
+    marginBottom: '0'
+  }
 };
-
 
 const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
@@ -46,7 +53,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'Processing extraction',
       style: {
         color: colors.success,
-        ...spinStyles
+        ...styles.spinStyles
       }
     };
   } else if (status === TerraJobStatus.SUCCEEDED) {
@@ -70,7 +77,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       iconTooltip: 'Aborting this extraction. This may take a few minutes.',
       style: {
         color: colors.warning,
-        ...spinStyles
+        ...styles.spinStyles
       }
     };
   } else if (status === TerraJobStatus.ABORTED) {
@@ -119,14 +126,7 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
        >
         View Path
        </MenuItem>
-       <MenuItem
-           faIcon={faClipboard}
-           disabled
-           onClick={() => {}}
-       >
-         Copy Snippet
-       </MenuItem>
-       <hr/>
+       <hr style={styles.hr}/>
        <MenuItem
            faIcon={faBan}
            disabled={!isRunning || !canWrite}
@@ -141,7 +141,7 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
        >
          Abort Extraction
        </MenuItem>
-       <hr/>
+       <hr style={styles.hr}/>
        <MenuItem
          faIcon={faTrash}
          disabled
@@ -159,7 +159,8 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
           fontSize: '.7rem',
           marginLeft: 0,
           paddingRight: 0,
-          display: 'block'
+          display: 'block',
+          cursor: 'pointer'
         }}
     />
   </PopupTrigger>;
