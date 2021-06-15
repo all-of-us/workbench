@@ -2,15 +2,29 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {ErrorMessage} from 'app/components/messages';
+import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
-import {genomicExtractionStore, updateGenomicExtractionStore} from 'app/utils/stores';
-import {DataSet} from 'generated/fetch';
+import {genomicExtractionStore, updateGenomicExtractionStore, useStore} from 'app/utils/stores';
+import {DataSet, GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
+import {ago, verboseDatetime} from "app/utils/time";
+import {useEffect} from "react";
+import {TooltipTrigger} from "app/components/popups";
 
 const {useState} = React;
+
+const TimeAgoWithVerboseTooltip = (epoch) => {
+  return <TooltipTrigger content={verboseDatetime(epoch)}>
+    <span style={{
+      'textDecoration': 'underline',
+      'textDecorationStyle': 'dotted'
+    }}>
+      {ago(epoch)}
+    </span>
+  </TooltipTrigger>
+}
 
 interface Props {
   dataSet: DataSet;
@@ -25,7 +39,31 @@ interface Props {
 export const GenomicExtractionModal = ({
     dataSet, workspaceNamespace, workspaceFirecloudName, closeFunction, title, cancelText, confirmText}: Props) => {
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const genomicExtractions = useStore(genomicExtractionStore);
+  const extractsForWorkspace = genomicExtractions && genomicExtractions[workspaceNamespace] || [];
+  const extractsForDataset = fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name, extractsForWorkspace);
+
+  useEffect(() => {
+    if(!(workspaceNamespace in genomicExtractions)) {
+      dataSetApi().getGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName)
+      .then(resp => updateGenomicExtractionStore(workspaceNamespace, resp.jobs))
+      .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [workspaceNamespace]);
+
+  const runningExtract = fp.flow(
+      fp.orderBy((extract: GenomicExtractionJob) => extract.submissionDate, 'desc'),
+      fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.RUNNING)
+  )(extractsForDataset);
+  const succeededExtract = fp.flow(
+      fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc'),
+      fp.find((extract: GenomicExtractionJob) => extract.status === TerraJobStatus.SUCCEEDED)
+  )(extractsForDataset);
+
   return <Modal loading={loading}>
     <ModalTitle style={{marginBottom: '0'}}>{ title || 'Launch VCF extraction' }</ModalTitle>
     <ModalBody>
@@ -41,6 +79,18 @@ export const GenomicExtractionModal = ({
         </span>
       </TextColumn>
     </ModalBody>
+    {runningExtract &&
+      <WarningMessage iconSize={30} iconPosition={'center'}>
+        An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(runningExtract.submissionDate)}
+      </WarningMessage>
+    }
+    {!runningExtract && succeededExtract &&
+      <WarningMessage iconSize={30} iconPosition={'center'}>
+          VCF file(s) already exist for this dataset.
+          Last extracted files for this dataset: {TimeAgoWithVerboseTooltip(succeededExtract.completionTime)}.
+          The file is located in the Workspace storage panel.
+      </WarningMessage>
+    }
     {error &&
      <ErrorMessage iconSize={16}>
        Failed to launch extraction, please try again.
