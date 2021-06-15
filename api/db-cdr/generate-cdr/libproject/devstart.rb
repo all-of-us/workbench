@@ -62,9 +62,14 @@ def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter=
   # validate the CDR's tier label against the user-supplied tier, as a safety check
 
   cdr_metadata = JSON.parse(`bq show --format=json "#{source_fq_dataset}"`)
-  dataset_tier = cdr_metadata['labels']['data_tier']
-  unless dataset_tier == tier_name
-    raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
+  dataset_tier = cdr_metadata.dig('labels', 'data_tier')
+
+  if dataset_tier
+    unless dataset_tier == tier_name
+      raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
+    end
+  else
+    puts "WARNING: no data_tier label found for #{source_fq_dataset}"
   end
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
