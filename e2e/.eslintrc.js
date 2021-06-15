@@ -66,7 +66,7 @@ module.exports = {
     // TODO Fix rule warnings, then remove the rule in this file.
     '@typescript-eslint/restrict-template-expressions': 1,
     '@typescript-eslint/no-non-null-assertion': 1,
-    '@typescript-eslint/no-unsafe-member-access': 1,
+    '@typescript-eslint/no-unsafe-member-access': 0,
     '@typescript-eslint/no-unsafe-assignment': 1,
     '@typescript-eslint/no-unsafe-call': 1,
     '@typescript-eslint/no-unsafe-return': 1,
