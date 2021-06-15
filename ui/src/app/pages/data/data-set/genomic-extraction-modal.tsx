@@ -80,12 +80,12 @@ export const GenomicExtractionModal = ({
       </TextColumn>
     </ModalBody>
     {runningExtract &&
-      <WarningMessage iconSize={30} iconPosition={'top'}>
+      <WarningMessage iconSize={30} iconPosition={'top'} data-test-id='running-extract-warning'>
         An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(runningExtract.submissionDate)}
       </WarningMessage>
     }
     {!runningExtract && succeededExtract &&
-      <WarningMessage iconSize={30} iconPosition={'top'}>
+      <WarningMessage iconSize={30} iconPosition={'top'} data-test-id='preexisting-extract-warning'>
           VCF file(s) already exist for this dataset.
           Last extracted files for this dataset: {TimeAgoWithVerboseTooltip(succeededExtract.completionTime)}.
           The file is located in the Workspace storage panel.
