@@ -16,7 +16,7 @@ const logger = createLogger({
     format.splat(),
     format.timestamp({ format: timeNow }),
     format.printf((info) => {
-      return `${info.level.toUpperCase()}: [${info.timestamp}] - ${info.message}`;
+      return `[${info.timestamp}] - ${info.message}`;
     })
   ),
   transports: [new winston.transports.Console({ handleExceptions: true })],

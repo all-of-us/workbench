@@ -191,7 +191,7 @@ export class SearchBar extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Readonly<Props>): void {
     const {node: {domainId}, searchTerms} = this.props;
     if (searchTerms !== prevProps.searchTerms) {
-      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString() || domainId === Domain.VISIT.toString()) {
         triggerEvent(`Cohort Builder Search - Physical Measurements`, 'Search', searchTerms);
       } else if (this.state.optionSelected) {
         this.setState({optionSelected: false});
@@ -202,7 +202,7 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   handleInput() {
-    const {node: {domainId, isStandard, type}, searchTerms} = this.props;
+    const {node: {domainId, isStandard, subtype, type}, searchTerms} = this.props;
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerms);
     this.setState({inputErrors: [], loading: true});
     const {id, namespace} = currentWorkspaceStore.getValue();
@@ -212,7 +212,7 @@ export class SearchBar extends React.Component<Props, State> {
     apiCall.then(resp => {
       const optionNames: Array<string> = [];
       const options = resp.items.filter(option => {
-        if (!optionNames.includes(option.name)) {
+        if (!optionNames.includes(option.name) && (domainId !== Domain.MEASUREMENT.toString() || option.subtype === subtype)) {
           optionNames.push(option.name);
           return true;
         }

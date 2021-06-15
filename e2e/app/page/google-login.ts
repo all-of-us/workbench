@@ -111,6 +111,7 @@ export default class GoogleLoginPage {
       // At this time, we can only handle "Enter Recover Email" page if it exists.
       const found = await this.fillOutRecoverEmail();
       if (!found) {
+        console.error(err);
         throw err;
       }
     });
@@ -171,16 +172,19 @@ export default class GoogleLoginPage {
    * @private
    */
   private async fillOutRecoverEmail(): Promise<boolean> {
-    const recoverEmailXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
-    const [elementHandle] = await this.page.$x(recoverEmailXpath);
-    if (elementHandle) {
-      await elementHandle.type(config.institutionContactEmail);
+    const [recoverAccountButton] = await this.page.$x('//button[./*[.="Recover account"]]');
+    if (recoverAccountButton) {
+      await recoverAccountButton.click();
+      await this.page.waitForTimeout(1000);
+    }
+    const emailInputXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
+    const [emailInput] = await this.page.$x(emailInputXpath);
+    if (emailInput) {
+      await emailInput.type(config.institutionContactEmail);
       await Promise.all([
-        this.page.waitForNavigation({ waitUntil: ['networkidle2', 'load'], timeout: 30000 }),
-        this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        this.page.waitForSelector('app-signed-in', { timeout: 0 })
+        this.page.waitForNavigation({ waitUntil: ['networkidle2', 'load'], timeout: 60000 }),
+        this.page.keyboard.press(String.fromCharCode(13)) // Press Enter key.
       ]);
-      await elementHandle.dispose();
       return true;
     }
     // "Enter Recover Email" input not found.

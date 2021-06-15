@@ -6,6 +6,7 @@ require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 require_relative "cloudsqlproxycontext"
+require_relative "environments"
 require_relative "gcloudcontext"
 require_relative "wboptionsparser"
 require "benchmark"
@@ -18,7 +19,6 @@ require "tempfile"
 require "net/http"
 require "json"
 
-TEST_PROJECT = "all-of-us-workbench-test"
 INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
@@ -27,99 +27,9 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
-def make_gae_vars(min_idle_instances = 0, max_instances = 10, instance_class = 'F1')
-  {
-    "GAE_MIN_IDLE_INSTANCES" => min_idle_instances.to_s,
-    "GAE_MAX_INSTANCES" => max_instances.to_s,
-    'GAE_INSTANCE_CLASS' => instance_class
-  }
-end
-
-# TODO: Make environment/project flags consistent across commands, consider
-# using a environment keywords as dict keys here, e.g. :test, :staging, etc.
-ENVIRONMENTS = {
-  "local" => {
-    :env_name => "local",
-    :api_endpoint_host => "localhost:8081",
-    :cdr_sql_instance => "workbench",
-    :config_json => "config_local.json",
-    :cdr_config_json => "cdr_config_local.json",
-    :featured_workspaces_json => "featured_workspaces_local.json",
-    :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev"
-  },
-  "all-of-us-workbench-test" => {
-    :env_name => "test",
-    :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
-    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_test.json",
-    :cdr_config_json => "cdr_config_test.json",
-    :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(0, 10, 'F4'),
-    :source_cdr_project => "all-of-us-ehr-dev"
-  },
-  "all-of-us-rw-staging" => {
-    :env_name => "staging",
-    :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
-    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_staging.json",
-    :cdr_config_json => "cdr_config_staging.json",
-    :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => make_gae_vars(0, 10, 'F2'),
-    :source_cdr_project => "all-of-us-ehr-dev"
-  },
-  "all-of-us-rw-perf" => {
-    :env_name => "perf",
-    :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
-    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_perf.json",
-    :cdr_config_json => "cdr_config_perf.json",
-    :featured_workspaces_json => "featured_workspaces_perf.json",
-    :gae_vars => make_gae_vars(20, 20),
-    :source_cdr_project => "all-of-us-ehr-dev"
-  },
-  "all-of-us-rw-stable" => {
-    :env_name => "stable",
-    :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
-    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_stable.json",
-    :cdr_config_json => "cdr_config_stable.json",
-    :featured_workspaces_json => "featured_workspaces_stable.json",
-    :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev"
-  },
-  "all-of-us-rw-preprod" => {
-    :env_name => "preprod",
-    :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
-    :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
-    :config_json => "config_preprod.json",
-    :cdr_config_json => "cdr_config_preprod.json",
-    :featured_workspaces_json => "featured_workspaces_preprod.json",
-    :gae_vars => make_gae_vars,
-    :source_cdr_project => "aou-res-curation-output-prod"
-  },
-  "all-of-us-rw-prod" => {
-    :env_name => "prod",
-    :api_endpoint_host => "api.workbench.researchallofus.org",
-    :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
-    :config_json => "config_prod.json",
-    :cdr_config_json => "cdr_config_prod.json",
-    :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(8, 64, 'F4'),
-    :source_cdr_project => "aou-res-curation-output-prod"
-  }
-}
-
 def run_inline_or_log(dry_run, args)
   cmd_prefix = dry_run ? DRY_RUN_CMD : []
   Common.new.run_inline(cmd_prefix + args)
-end
-
-def must_get_env_value(env, key)
-  unless ENVIRONMENTS.fetch(env, {}).has_key?(key)
-    raise ArgumentError.new("env '#{env}' lacks key #{key}")
-  end
-  return ENVIRONMENTS[env][key]
 end
 
 def get_cdr_sql_project(project)
@@ -2610,19 +2520,6 @@ end
 def get_config_file(project)
   config_json = must_get_env_value(project, :config_json)
   return "config/#{config_json}"
-end
-
-def get_config(project)
-  return JSON.parse(File.read(get_config_file(project)))
-end
-
-def get_cdr_config_file(project)
-  cdr_config_json = must_get_env_value(project, :cdr_config_json)
-  return "config/#{cdr_config_json}"
-end
-
-def get_cdr_config(project)
-  return JSON.parse(File.read(get_cdr_config_file(project)))
 end
 
 def get_fc_config(project)

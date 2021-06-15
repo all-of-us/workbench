@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
@@ -165,4 +166,13 @@ public interface UserService {
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   DbUser confirmPublications();
+
+  /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
+  void maybeSendAccessExpirationEmail(DbUser user);
+
+  /**
+   * Return a mapping of users to their Annual Access Renewal expiration date for Registered Tier,
+   * for users who have them
+   */
+  List<UserAccessExpiration> getRegisteredTierExpirations();
 }

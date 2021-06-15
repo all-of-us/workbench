@@ -176,6 +176,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         }, () => this.setUnsavedChanges());
       }
     });
+    // Check for changes when the search context changes, mainly to detect modifier changes
+    this.subscription.add(currentCohortSearchContextStore.subscribe(() => this.setUnsavedChanges()));
   }
 
   componentWillUnmount() {
@@ -204,7 +206,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
           // If a lookup has been done, we delete the ids before comparing search parameters and selections
           selectionsClone.forEach(selection => delete selection.id);
         }
-        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selectionsClone);
+        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selectionsClone) ||
+          JSON.stringify(item.modifiers) !== JSON.stringify(requestItem.modifiers);
       }
     }
     this.setState({unsavedChanges});

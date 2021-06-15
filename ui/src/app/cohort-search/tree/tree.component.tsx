@@ -192,30 +192,30 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   async loadRootNodes() {
     try {
-      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+      const {node: {domainId, id, isStandard, parentId, subtype, type}, selectedSurvey} = this.props;
       this.setState({loading: true});
-      const workspace = currentWorkspaceStore.getValue();
-      const cdrVersionId = workspace.cdrVersionId;
+      const {cdrVersionId, id: workspaceId, namespace} = currentWorkspaceStore.getValue();
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const promises = this.sendOnlyCriteriaType(domainId)
-          ? [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType)]
-          : [cohortBuilderApi().findCriteriaBy(workspace.namespace, workspace.id, domainId, criteriaType, isStandard, id)];
+          ? [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType)]
+          : [cohortBuilderApi().findCriteriaBy(namespace, workspaceId, domainId, criteriaType, isStandard, id)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
           standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
         };
-        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(workspace.namespace, workspace.id, domainId, criteriaRequest));
+        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(namespace, workspaceId, domainId, criteriaRequest));
       }
       const [rootNodes, criteriaLookup] = await Promise.all(promises);
       if (criteriaLookup) {
         this.updateCriteriaSelectionStore(criteriaLookup.items);
       }
-      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString() || domainId === Domain.VISIT.toString()) {
         let children = [];
+        const rootParentId = domainId === Domain.VISIT.toString() ? -1 : 0;
         rootNodes.items.forEach(child => {
           child['children'] = [];
-          if (child.parentId === 0) {
+          if (child.parentId === rootParentId) {
             children.push(child);
           } else {
             children = this.addChildToParent(child, children);
@@ -226,10 +226,14 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         // Temp: This should be handle in API
         this.updatePpiSurveys(rootNodes, rootNodes.items.filter(child => child.name === selectedSurvey));
       } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-        const selectedSurveyChild = rootNodes.items.filter(child => child.id === this.props.node.parentId);
-        this.updatePpiSurveys(rootNodes, selectedSurveyChild);
+        this.updatePpiSurveys(rootNodes, rootNodes.items.filter(child => child.id === parentId));
       } else {
-        this.setState({children: rootNodes.items});
+        this.setState({
+          children: domainId === Domain.MEASUREMENT.toString() ?
+            // For Measurements, only show the subtype of the node selected in list search and don't display the code
+            rootNodes.items.filter(node => node.subtype === subtype).map(node => ({...node, code: null})) :
+            rootNodes.items
+        });
         if (domainId === Domain.SURVEY.toString()) {
           const rootSurveys = ppiSurveys.getValue();
           if (!rootSurveys[cdrVersionId]) {
@@ -346,15 +350,13 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding
         more.
       </div>}
-      {node.domainId !== Domain.VISIT.toString() &&
-        <div style={styles.searchBarContainer}>
-          <SearchBar node={node}
-                     searchTerms={searchTerms}
-                     selectOption={selectOption}
-                     setIngredients={(i) => this.setState({ingredients: i})}
-                     setInput={(v) => setSearchTerms(v)}/>
-        </div>
-      }
+      <div style={styles.searchBarContainer}>
+        <SearchBar node={node}
+                   searchTerms={searchTerms}
+                   selectOption={selectOption}
+                   setIngredients={(i) => this.setState({ingredients: i})}
+                   setInput={(v) => setSearchTerms(v)}/>
+      </div>
       {!loading && <div style={{paddingTop: this.showHeader ? '1.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>

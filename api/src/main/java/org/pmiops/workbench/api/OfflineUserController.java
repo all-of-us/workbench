@@ -260,12 +260,20 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> synchronizeUserAccess() {
-    userService.getAllUsers().stream()
+    userService
+        .getAllUsers()
         .forEach(
-            user ->
-                // This will update the access tiers for a given user, based on compliance rules
-                // If a user is no longer compliant it will remove them from an access tier
-                userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem()));
+            user -> {
+              // This will update the access tiers for a given user, based on compliance rules
+              // If a user is no longer compliant it will remove them from an access tier
+              userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
+            });
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> sendAccessExpirationEmails() {
+    userService.getAllUsers().forEach(userService::maybeSendAccessExpirationEmail);
     return ResponseEntity.noContent().build();
   }
 

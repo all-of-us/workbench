@@ -17,8 +17,7 @@ const userAgent =
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-  await jestPuppeteer.resetPage();
-  await jestPuppeteer.resetBrowser();
+  await page.deleteCookie(...(await page.cookies()));
   await page.setUserAgent(userAgent);
   await page.setViewport({ width: 1300, height: 0 });
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
@@ -92,17 +91,39 @@ beforeEach(async () => {
   /**
    * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log.
    * Also emitted if the page throws an error or a warning.
+   * https://github.com/puppeteer/puppeteer/issues/3397#issuecomment-429325514
    */
   page.on('console', async (message: ConsoleMessage) => {
-    if (!message.args().length) return;
+    if ((await message.args()).length === 0) return;
     const title = await getPageTitle();
     try {
-      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
-      const concatenatedText = args.filter((arg) => !!arg).join('\n');
-      const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
-    } catch (err) {
-      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}`);
+      await Promise.all(message.args().map((arg) => arg.jsonValue())).then((values) => {
+        const allMessages = values
+          .filter((value) => {
+            if (JSON.stringify(value) === JSON.stringify({})) {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              const { subtype, description } = arg._remoteObject;
+              return `${subtype ? subtype.toUpperCase() : ''}:\n${description}`;
+            }
+            return values;
+          })
+          .join('\n');
+        if (allMessages.trim().length > 0) {
+          logger.info(`Page Console: ${title}\n${allMessages}`);
+        }
+      });
+    } catch (ex) {
+      // arg.jsonValue() sometimes throws exception. Try another way when encountering error.
+      await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)))
+        .then((args) => {
+          const allMessages = args.filter((arg) => !!arg).join('\n');
+          const msgType = message.type() === 'warning' ? 'warn' : message.type();
+          logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${allMessages}`);
+        })
+        .catch((ex1) => {
+          logger.error(`Exception thrown when reading page console: ${ex1}`);
+        });
     }
   });
 
@@ -112,7 +133,7 @@ beforeEach(async () => {
     try {
       logger.error(`PAGE ERROR: "${title}"\n${error}`);
     } catch (err) {
-      console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
+      console.error(`❗ Exception when getting page error.\n${err}`);
     }
   });
 
@@ -122,13 +143,14 @@ beforeEach(async () => {
     try {
       logger.error(`PAGEERROR: "${title}"\n${error}`);
     } catch (err) {
-      console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
+      console.error(`❗ Exception when getting pageerror.\n${err}`);
     }
   });
 });
 
 afterEach(async () => {
   await page.setRequestInterception(false);
+  await jestPuppeteer.resetBrowser();
 });
 
 const getPageTitle = async () => {
@@ -137,14 +159,22 @@ const getPageTitle = async () => {
       return title.textContent;
     })
     .catch(() => {
-      return 'getPageTitle() func failed';
+      return '';
     });
 };
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
-  return jsHandle.executionContext().evaluate((obj) => {
-    return obj;
-  }, jsHandle);
+  return jsHandle
+    .executionContext()
+    .evaluateHandle((obj) => {
+      if (obj instanceof Error) {
+        return obj.message;
+      }
+      return obj;
+    }, jsHandle)
+    .then(async (jsHandle) => {
+      return (await jsHandle.jsonValue()) as string;
+    });
 };
 
 const stringifyData = (data: string): string => {
@@ -265,9 +295,3 @@ const transformResponseBody = async (request: Request): Promise<string> => {
 const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
 const getRequestData = fp.flow(getRequestPostData, stringifyData);
 const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
-
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/puppeteer/index.d.ts
-
-afterEach(async () => {
-  await page.setRequestInterception(false);
-});

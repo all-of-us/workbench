@@ -273,7 +273,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     checkCriteriaChanges() {
       const {cohortContext: {groupId, item, role}, criteria} = this.props;
       if (criteria.length === 0) {
-        this.setState({disableSave: true});
+        this.setState({disableSave: true, modifiers: []});
       } else {
         const requestItem = getItemFromSearchRequest(groupId, item.id, role);
         if (requestItem) {
@@ -296,6 +296,13 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     removeCriteria(criteriaToDel) {
       const updateList = fp.remove((selection) => selection.parameterId === criteriaToDel.parameterId, this.props.criteria);
       currentCohortCriteriaStore.next(updateList);
+    }
+
+    closeModifiers(modifiers) {
+      if (modifiers) {
+        this.setState({modifiers}, () => this.checkCriteriaChanges());
+      }
+      this.setState({showModifiersSlide: false});
     }
 
     closeSidebar() {
@@ -396,10 +403,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
             </FlexRowWrap>
           </React.Fragment>}
           {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
-                                               closeModifiers={() => {
-                                                 this.setState({showModifiersSlide: false});
-                                                 this.checkCriteriaChanges();
-                                               }}/>}
+                                                                       closeModifiers={(modifiers) => this.closeModifiers(modifiers)}/>}
           {!!attributesSelection && <AttributesPage back={() => this.closeSidebar()}
                                                     close={() => attributesSelectionStore.next(undefined)}
                                                     node={attributesSelection}/>}

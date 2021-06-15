@@ -130,7 +130,8 @@ public class ProfileService {
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
             .modules(modulesStatus)
-            .anyModuleHasExpired(modulesStatus.stream().anyMatch(x -> x.getHasExpired()));
+            .anyModuleHasExpired(
+                modulesStatus.stream().anyMatch(RenewableAccessModuleStatus::getHasExpired));
 
     return profileMapper.toModel(
         user,
