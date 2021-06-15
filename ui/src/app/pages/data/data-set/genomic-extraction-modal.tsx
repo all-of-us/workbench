@@ -9,19 +9,19 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
 import {TooltipTrigger} from 'app/components/popups';
 import {genomicExtractionStore, updateGenomicExtractionStore, useStore} from 'app/utils/stores';
-import {ago, verboseDatetime} from 'app/utils/time';
 import {DataSet, GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import {useEffect} from 'react';
+import * as moment from "moment";
 
 const {useState} = React;
 
 const TimeAgoWithVerboseTooltip = (epoch) => {
-  return <TooltipTrigger content={verboseDatetime(epoch)}>
+  return <TooltipTrigger content={moment(epoch).format('MMMM Do YYYY, h:mm:ss a')}>
     <span style={{
       'textDecoration': 'underline',
       'textDecorationStyle': 'dotted'
     }}>
-      {ago(epoch)}
+      {moment(epoch).fromNow()}
     </span>
   </TooltipTrigger>;
 };
