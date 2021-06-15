@@ -45,38 +45,31 @@ export default class GoogleLoginPage {
    * @param email
    */
   async enterEmail(userEmail: string): Promise<void> {
-    try {
-      // Handle Google "Use another account" modal if it exists
-      const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
-      const elemt1 = await Promise.race([
-        this.page.waitForXPath(FieldSelector.EmailInput, { visible: true, timeout: 60000 }),
-        this.page.waitForXPath(useAnotherAccountXpath, { visible: true, timeout: 60000 })
-      ]);
+    // Handle Google "Use another account" modal if it exists
+    const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
+    const elemt1 = await Promise.race([
+      this.page.waitForXPath(FieldSelector.EmailInput, { visible: true, timeout: 60000 }),
+      this.page.waitForXPath(useAnotherAccountXpath, { visible: true, timeout: 60000 })
+    ]);
 
-      // compare to the "Use another Account" link
-      const [link] = await this.page.$x(useAnotherAccountXpath);
-      if (link) {
-        const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
-        if (isLink) {
-          // click "Use another Account" link and wait for navigation.
-          await link.click();
-        }
-        await link.dispose();
+    // compare to the "Use another Account" link
+    const [link] = await this.page.$x(useAnotherAccountXpath);
+    if (link) {
+      const isLink = await this.page.evaluate((e1, e2) => e1 === e2, elemt1, link);
+      if (isLink) {
+        // click "Use another Account" link and wait for navigation.
+        await link.click();
       }
-
-      const emailInput = await this.email();
-      await emailInput.focus();
-      await emailInput.type(userEmail, { delay: 15 });
-      await emailInput.dispose();
-
-      const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, { visible: true });
-      await nextButton.click();
-      await nextButton.dispose();
-    } catch (error) {
-      await takeScreenshot(this.page);
-      await savePageToFile(this.page);
-      throw error;
+      await link.dispose();
     }
+
+    const emailInput = await this.email();
+    await emailInput.focus();
+    await emailInput.type(userEmail, { delay: 15 });
+    await emailInput.dispose();
+
+    const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, { visible: true });
+    await nextButton.click();
   }
 
   /**
