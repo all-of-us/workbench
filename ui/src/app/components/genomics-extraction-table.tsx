@@ -11,7 +11,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import colors, {addOpacity} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
 import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
@@ -32,17 +32,6 @@ const styles = {
     animationDuration: '5000ms',
     animationIterationCount: 'infinite',
     animationTimingFunction: 'linear'
-  },
-  hr: {
-    border: '0',
-    borderTop: '1px solid ' + addOpacity(colors.dark, 0.2),
-    borderBottom: '1px solid ' + colors.white,
-    marginTop: '0',
-    marginBottom: '0'
-  },
-  menuItem: {
-    marginTop: '0.1rem',
-    marginBottom: '0.1rem'
   }
 };
 

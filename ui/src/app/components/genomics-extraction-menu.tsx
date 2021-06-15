@@ -2,6 +2,9 @@ import {faBan, faEllipsisV, faTrash} from '@fortawesome/free-solid-svg-icons';
 
 import {faLocationCircle} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {MenuItem} from 'app/components/buttons';
+import {CopySnippetModal} from 'app/components/copy-snippet-modal';
+import {PopupTrigger} from 'app/components/popups';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {switchCase} from 'app/utils';
@@ -12,9 +15,6 @@ import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useState} from 'react';
 import * as React from 'react';
-import {MenuItem} from './buttons';
-import {CopySnippetModal} from './copy-snippet-modal';
-import {PopupTrigger} from './popups';
 
 const styles = {
   hr: {
@@ -59,10 +59,7 @@ export const GenomicsExtractionMenu = ({job, workspace}: Props) => {
               style={styles.menuItem}
               faIcon={faLocationCircle}
               disabled={!(job.status === TerraJobStatus.SUCCEEDED && job.outputDir)}
-              onClick={() => {
-                console.log('hi?');
-                setModalState(true);
-              }}
+              onClick={() => setModalState(true)}
             >
               View Path
             </MenuItem>
@@ -111,8 +108,7 @@ export const GenomicsExtractionMenu = ({job, workspace}: Props) => {
           title={`GCS Path for ${job.datasetName} VCFs`}
           copyText={job.outputDir}
           closeFunction={() => setModalState(false)}
-        />
-      }
+        />}
     </React.Fragment>
   );
 };

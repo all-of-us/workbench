@@ -1,10 +1,10 @@
 import {faCheck, faClipboard} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
 import {useState} from 'react';
 import * as React from 'react';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
 interface Props {
   title: string;
@@ -28,6 +28,8 @@ export const CopySnippetModal = ({title, copyText, closeFunction}: Props) => {
                   navigator.clipboard.writeText(copyText);
                   setIsCopied(true);
 
+                  // The desired behavior is that clicking the button will always copy the text onto the clipboard
+                  // but the "Copied" state is only shown for two seconds after the latest click
                   clearTimeout(timer);
                   setTimer(setTimeout(() => setIsCopied(false), 2000));
                 }}>
