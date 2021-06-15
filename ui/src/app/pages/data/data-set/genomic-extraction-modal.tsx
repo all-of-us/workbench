@@ -10,8 +10,8 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {TooltipTrigger} from 'app/components/popups';
 import {genomicExtractionStore, updateGenomicExtractionStore, useStore} from 'app/utils/stores';
 import {DataSet, GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
+import * as moment from 'moment';
 import {useEffect} from 'react';
-import * as moment from "moment";
 
 const {useState} = React;
 
