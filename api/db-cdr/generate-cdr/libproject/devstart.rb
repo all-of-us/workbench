@@ -47,7 +47,7 @@ def service_account_context_for_bq(project, account)
 end
 
 # By default, skip empty lines only.
-def bq_ingest(tier, source_project, dataset_name, table_match_filter="", table_skip_filter="^$")
+def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter="", table_skip_filter="^$")
   common = Common.new
   source_fq_dataset = "#{source_project}:#{dataset_name}"
   ingest_fq_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{dataset_name}"
@@ -58,6 +58,14 @@ def bq_ingest(tier, source_project, dataset_name, table_match_filter="", table_s
   # need to delete cached BigQuery creds on your local machine. Try running
   # bq init --delete_credentials as recommended in the output.
   # TODO(RW-3768): Find a better solution for Google credentials in docker.
+
+  # validate the CDR's tier label against the user-supplied tier, as a safety check
+
+  cdr_metadata = JSON.parse(`bq show --format=json "#{source_fq_dataset}"`)
+  dataset_tier = cdr_metadata['labels']['data_tier']
+  unless dataset_tier == tier_name
+    raise ArgumentError.new("The source dataset's access tier #{dataset_tier} differs from #{tier_name}")
+  end
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
   # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
@@ -159,7 +167,7 @@ def publish_cdr(cmd_name, args)
   dest_fq_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, source_cdr_project, op.opts.bq_dataset, table_match_filter, table_skip_filter)
+    bq_ingest(tier, op.opts.tier, source_cdr_project, op.opts.bq_dataset, table_match_filter, table_skip_filter)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, existing_users|
       auth_domain_group_email = tier.fetch(:auth_domain_group_email)
@@ -233,7 +241,7 @@ def publish_cdr_wgs(cmd_name, args)
   extraction_proxy_group = must_get_wgs_proxy_group(op.opts.project)
 
   service_account_context_for_bq(op.opts.project, env.fetch(:publisher_account)) do
-    bq_ingest(tier, source_project, op.opts.bq_dataset, WGS_TABLE_FILTER)
+    bq_ingest(tier, op.opts.tier, source_project, op.opts.bq_dataset, WGS_TABLE_FILTER)
 
     bq_update_acl(dest_fq_dataset) do |acl_json, existing_groups, _existing_users|
       if existing_groups.include?(extraction_proxy_group)
