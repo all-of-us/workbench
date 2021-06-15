@@ -61,7 +61,7 @@ def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter=
 
   # validate the CDR's tier label against the user-supplied tier, as a safety check
 
-  cdr_metadata = JSON.parse(`bq show --format=json "#{source_fq_dataset}"`)
+  cdr_metadata = JSON.parse(common.capture_stdout %{bq show --format=json #{source_fq_dataset}})
   dataset_tier = cdr_metadata.dig('labels', 'data_tier')
 
   if dataset_tier
