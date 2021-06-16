@@ -70,25 +70,27 @@ public class CreateTerraMethodSnapshot {
 
   private static final Pattern importWdlRegex = Pattern.compile("import \"(.+)\" as (.+)");
 
-  private String swapWDLImports(String wdlSource, String rawGithubDirectoryUrl) {
+  private String resolveRelativeImports(String wdlSource, String rawGithubDirectoryUrl) {
     return Arrays.stream(wdlSource.split("\n"))
-        .map(line -> {
-          Matcher m = importWdlRegex.matcher(line);
+        .map(
+            line -> {
+              Matcher m = importWdlRegex.matcher(line);
 
-          if (m.find()) {
-            final String importFilePath = m.group(1);
-            final String alias = m.group(2);
+              if (m.find()) {
+                final String importFilePath = m.group(1);
+                final String alias = m.group(2);
 
-            if (importFilePath.contains("/")) {
-              throw new IllegalArgumentException("Only file imports in the same directory as the source file are supported.");
-            }
+                if (importFilePath.contains("/")) {
+                  throw new IllegalArgumentException(
+                      "Only file imports in the same directory as the source file are supported.");
+                }
 
-            final String httpImport = rawGithubDirectoryUrl + "/" + importFilePath;
-            return "import \"" + httpImport + "\" as " + alias;
-          }
+                final String httpImport = rawGithubDirectoryUrl + "/" + importFilePath;
+                return "import \"" + httpImport + "\" as " + alias;
+              }
 
-          return line;
-        })
+              return line;
+            })
         .collect(Collectors.joining("\n"));
   }
 
@@ -111,10 +113,15 @@ public class CreateTerraMethodSnapshot {
           CreateWgsCohortExtractionBillingProjectWorkspace
               .wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
-      String sourceFileContents = swapWDLImports(
-          getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef),
-          "https://raw.githubusercontent.com/" + sourceGitRepo + "/" + sourceGitRef + "/" + sourceGitPathFolder
-      );
+      String sourceFileContents =
+          resolveRelativeImports(
+              getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef),
+              "https://raw.githubusercontent.com/"
+                  + sourceGitRepo
+                  + "/"
+                  + sourceGitRef
+                  + "/"
+                  + sourceGitPathFolder);
 
       List<FirecloudMethodResponse> existingMethods =
           apiClientFactory
