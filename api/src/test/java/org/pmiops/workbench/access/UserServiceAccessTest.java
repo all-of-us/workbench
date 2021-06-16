@@ -1032,6 +1032,15 @@ public class UserServiceAccessTest {
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(initialEnforcementDate);
   }
 
+  @Test
+  public void no_asserts() {
+    doStuff();
+  }
+
+  private void doStuff() {
+    assertThat(true).isTrue();
+  }
+
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
