@@ -6,10 +6,13 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -65,6 +68,30 @@ public class CreateTerraMethodSnapshot {
 
   private static final Logger log = Logger.getLogger(CreateTerraMethodSnapshot.class.getName());
 
+  private static final Pattern importWdlRegex = Pattern.compile("import \"(.+)\" as (.+)");
+
+  private String swapWDLImports(String wdlSource, String rawGithubDirectoryUrl) {
+    return Arrays.stream(wdlSource.split("\n"))
+        .map(line -> {
+          Matcher m = importWdlRegex.matcher(line);
+
+          if (m.find()) {
+            final String importFilePath = m.group(1);
+            final String alias = m.group(2);
+
+            if (importFilePath.contains("/")) {
+              throw new IllegalArgumentException("Only file imports in the same directory as the source file are supported.");
+            }
+
+            final String httpImport = rawGithubDirectoryUrl + "/" + importFilePath;
+            return "import \"" + httpImport + "\" as " + alias;
+          }
+
+          return line;
+        })
+        .collect(Collectors.joining("\n"));
+  }
+
   @Bean
   public CommandLineRunner run() {
     return (args) -> {
@@ -73,6 +100,7 @@ public class CreateTerraMethodSnapshot {
       String configJsonFilepath = opts.getOptionValue(configJsonOpt.getLongOpt());
       String sourceGitRepo = opts.getOptionValue(sourceGitRepoOpt.getLongOpt());
       String sourceGitPath = opts.getOptionValue(sourceGitPathOpt.getLongOpt());
+      final String sourceGitPathFolder = sourceGitPath.substring(0, sourceGitPath.lastIndexOf("/"));
       String sourceGitRef = opts.getOptionValue(sourceGitRefOpt.getLongOpt());
       String methodNamespace = opts.getOptionValue(methodNamespaceOpt.getLongOpt());
       String methodName = opts.getOptionValue(methodNameOpt.getLongOpt());
@@ -83,7 +111,10 @@ public class CreateTerraMethodSnapshot {
           CreateWgsCohortExtractionBillingProjectWorkspace
               .wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
-      String sourceFileContents = getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef);
+      String sourceFileContents = swapWDLImports(
+          getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef),
+          "https://raw.githubusercontent.com/" + sourceGitRepo + "/" + sourceGitRef + "/" + sourceGitPathFolder
+      );
 
       List<FirecloudMethodResponse> existingMethods =
           apiClientFactory
