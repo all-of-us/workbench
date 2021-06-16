@@ -489,6 +489,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbDemographicSurvey.setUser(dbUser);
     }
 
+    // we require users to re-confirm their profile and publications as part of the
+    // Annual Access Renewal process.  Here we start the clock for new users.
+
+    dbUser.setProfileLastConfirmedTime(new Timestamp(clock.millis()));
+    dbUser.setPublicationsLastConfirmedTime(new Timestamp(clock.millis()));
+
     try {
       dbUser = userDao.save(dbUser);
       dbVerifiedAffiliation.setUser(dbUser);
