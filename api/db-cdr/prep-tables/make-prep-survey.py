@@ -62,8 +62,8 @@ def main():
         print("Reading & Parsing... " + name)
 
         # open your file writers for this survey and write headers
-        controlled_writer, registered_writer, all_writer = \
-            open_writers_with_headers(name, date)
+        controlled_writer, registered_writer, all_writer, controlled_file, registered_file, all_file \
+            = open_writers_with_headers(name, date)
 
         # made these global in order to add rows in selected output files
         global id_controlled
@@ -264,6 +264,8 @@ def main():
                                     , None, None, item_flags, 'registered',
                                     long_code_to_short_code, answer_suppression)
 
+    flush_and_close_files(controlled_file, registered_file, all_file)
+
     # copy local output files and upload it to the bucket
     storage_client = storage.Client.from_service_account_json(
         '../../sa-key.json')
@@ -356,18 +358,18 @@ def query_topic_code(project, dataset, concept_name):
 
 def open_writers_with_headers(name, date):
     file_prefix = home_dir + "/" + surveys.get(name)
-    csv_controlled = open(file_prefix + "_controlled" + '_' + date + ".csv",
-                          'w')
-    csv_registered = open(file_prefix + "_registered" + '_' + date + ".csv",
-                          'w')
-    csv_all = open(file_prefix + "_all" + '_' + date + ".csv", 'w')
-    controlled_writer = csv.DictWriter(csv_controlled, fieldnames=headers)
+    controlled_file = open(file_prefix + "_controlled" + '_' + date + ".csv",
+                           'w')
+    registered_file = open(file_prefix + "_registered" + '_' + date + ".csv",
+                           'w')
+    all_file = open(file_prefix + "_all" + '_' + date + ".csv", 'w')
+    controlled_writer = csv.DictWriter(controlled_file, fieldnames=headers)
     controlled_writer.writeheader()
-    registered_writer = csv.DictWriter(csv_registered, fieldnames=headers)
+    registered_writer = csv.DictWriter(registered_file, fieldnames=headers)
     registered_writer.writeheader()
-    all_writer = csv.DictWriter(csv_all, fieldnames=headersAll)
+    all_writer = csv.DictWriter(all_file, fieldnames=headersAll)
     all_writer.writeheader()
-    return controlled_writer, registered_writer, all_writer
+    return controlled_writer, registered_writer, all_writer, controlled_file, registered_file, all_file
 
 
 def write_row_all(writer, parent_id, code, name, item_type, min_val, max_val,
@@ -516,6 +518,15 @@ def get_short_code(code, long_code_to_short_code):
     if code in long_code_to_short_code:
         code = long_code_to_short_code[code]
     return code
+
+
+def flush_and_close_files(controlled_file, registered_file, all_file):
+    controlled_file.flush()
+    controlled_file.close()
+    registered_file.flush()
+    registered_file.close()
+    all_file.flush()
+    all_file.close()
 
 
 if __name__ == '__main__':
