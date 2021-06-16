@@ -19,5 +19,5 @@ CSV_FILES=("cb_criteria_menu.csv"
 "prep_physical_measurement.csv")
 
 for file in ${CSV_FILES[@]}; do
-  gsutil cp gs://$BUCKET/$PREVIOUS_CDR_VERSION/$FOLDER/$file gs://$BUCKET/$NEW_CDR_VERSION/$FOLDER/
+  gsutil cp gs://"$BUCKET"/"$PREVIOUS_CDR_VERSION"/"$FOLDER"/"$file" gs://"$BUCKET"/"$NEW_CDR_VERSION"/"$FOLDER"/
 done
