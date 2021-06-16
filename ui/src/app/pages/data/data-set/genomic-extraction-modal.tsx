@@ -44,10 +44,10 @@ export const GenomicExtractionModal = ({
   const genomicExtractions = useStore(genomicExtractionStore);
   const extractsForWorkspace = genomicExtractions && genomicExtractions[workspaceNamespace] || [];
   const sortedExtractsForDataset: GenomicExtractionJob[] = fp.flow(
-      fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name),
+    fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name),
       // This, incidentally to the implementation of orderBy, puts falsey values at the front...
       // ... which is actually what we want, but it's kind of bad to rely on implementation detail
-      fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc')
+    fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc')
   )(extractsForWorkspace);
 
   useEffect(() => {
