@@ -3,11 +3,11 @@ const { TEST_MODE } = process.env;
 
 module.exports = {
   verbose: false,
-  preset: 'jest-puppeteer',
+  //preset: 'jest-puppeteer',
   testTimeout: 1200000,
   testRunner: 'jest-circus/runner',
   testEnvironment: '<rootDir>/puppeteer-custom-environment.ts',
-  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/libs/browser.ts'],
   setupFiles: ['dotenv/config'],
   reporters: [
     'default',

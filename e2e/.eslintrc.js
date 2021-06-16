@@ -16,10 +16,6 @@ module.exports = {
     browser: true
   },
   globals: {
-    page: true,
-    browser: true,
-    context: true,
-    jestPuppeteer: true
   },
   parserOptions: {
     project: './tsconfig.json',
@@ -104,6 +100,6 @@ module.exports = {
         asyncArrow: 'always'
       }
     ],
-    'quote-props': [2, 'as-needed']
+    'quote-props': [2, 'consistent-as-needed']
   }
 };
