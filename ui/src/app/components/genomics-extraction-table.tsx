@@ -1,25 +1,22 @@
 import {
   faBan,
   faCheckCircle,
-  faEllipsisV,
-  faExclamationTriangle,
-  faTrash
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import {faLocationCircle} from '@fortawesome/pro-solid-svg-icons';
 import {FlexRow} from 'app/components/flex';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {GenomicsExtractionMenu} from 'app/components/genomics-extraction-menu';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import colors, {addOpacity} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {DEFAULT, switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
 import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -28,7 +25,6 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {MenuItem} from './buttons';
 
 const styles = {
   spinStyles: {
@@ -36,13 +32,6 @@ const styles = {
     animationDuration: '5000ms',
     animationIterationCount: 'infinite',
     animationTimingFunction: 'linear'
-  },
-  hr: {
-    border: '0',
-    borderTop: '1px solid ' + addOpacity(colors.dark, 0.2),
-    borderBottom: '1px solid ' + colors.white,
-    marginTop: '0',
-    marginBottom: '0'
   }
 };
 
@@ -103,67 +92,6 @@ const formatDuration = (durationMoment) => {
   const minStr = Math.floor(durationMoment.minutes()) + ' min';
 
   return (hours > 0 ? hours + ' hr, ' : '') + minStr;
-};
-
-const GenomicsExtractionMenu = ({job, workspace}) => {
-  const isRunning = job.status === TerraJobStatus.RUNNING;
-  const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
-  const tooltip = switchCase({r: isRunning, w: canWrite},
-      [{r: true, w: true}, () => ''],
-      [{r: true, w: false}, () => 'You do not have permission to modify this workspace'],
-      [{r: false, w: true}, () => 'Extraction job is not currently running'],
-      [{r: false, w: false}, () => 'Extraction job is not currently running']
-  );
-  return <PopupTrigger
-    side='bottom-left'
-    closeOnClick
-    content={
-     <React.Fragment>
-       <MenuItem
-           faIcon={faLocationCircle}
-           disabled
-           onClick={() => {}}
-       >
-        View Path
-       </MenuItem>
-       <hr style={styles.hr}/>
-       <MenuItem
-           faIcon={faBan}
-           disabled={!isRunning || !canWrite}
-           onClick={() => {
-             dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
-             const workspaceJobs = genomicExtractionStore.get()[workspace.namespace];
-             const abortedJobIndex = fp.findIndex(j => j.genomicExtractionJobId === job.genomicExtractionJobId, workspaceJobs);
-             workspaceJobs[abortedJobIndex].status = TerraJobStatus.ABORTING;
-             updateGenomicExtractionStore(workspace.namespace, workspaceJobs);
-           }}
-           tooltip={tooltip}
-       >
-         Abort Extraction
-       </MenuItem>
-       <hr style={styles.hr}/>
-       <MenuItem
-         faIcon={faTrash}
-         disabled
-         onClick={() => {}}
-       >
-         Delete Extract
-       </MenuItem>
-     </React.Fragment>
-    }
-  >
-    <FontAwesomeIcon
-        icon={faEllipsisV}
-        style={{
-          color: colors.accent,
-          fontSize: '.7rem',
-          marginLeft: 0,
-          paddingRight: 0,
-          display: 'block',
-          cursor: 'pointer'
-        }}
-    />
-  </PopupTrigger>;
 };
 
 const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
