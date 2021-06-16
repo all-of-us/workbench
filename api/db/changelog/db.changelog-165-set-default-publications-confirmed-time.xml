@@ -8,14 +8,14 @@
     <addDefaultValue tableName="user" columnName="publications_last_confirmed_time" defaultValue="CURRENT_TIMESTAMP"/>
 
     <sql>
-      -- migration copied from 162
+      -- migration copied and modified from 162
       UPDATE user u
       INNER JOIN user_access_tier uat ON u.user_id = uat.user_id
       INNER JOIN access_tier a ON uat.access_tier_id = a.access_tier_id
 
       SET
       u.publications_last_confirmed_time = uat.first_enabled
-      WHERE u.publications_last_confirmed_time is null
+      WHERE a.short_name = 'registered' and u.publications_last_confirmed_time is null
     </sql>
 
     <addNotNullConstraint
