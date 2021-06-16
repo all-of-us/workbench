@@ -4,22 +4,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="psantos-dmohs" id="changelog-165-set-default-publications-confirmed-time">
-    <addDefaultValue tableName="user" columnName="publications_last_confirmed_time" defaultValue="CURRENT_TIMESTAMP"/>
+  <changeSet author="psantos-dmohs-jmthibault" id="changelog-165-set-default-publications-confirmed-time">
+    <addDefaultValue tableName="user" columnName="publications_last_confirmed_time" defaultValue="current_timestamp"/>
 
     <sql>
-      -- migration copied and modified from 162
-      UPDATE user u
-      INNER JOIN user_access_tier uat ON u.user_id = uat.user_id
-      INNER JOIN access_tier a ON uat.access_tier_id = a.access_tier_id
-
-      SET
-      u.publications_last_confirmed_time = uat.first_enabled
-      WHERE a.short_name = 'registered' and u.publications_last_confirmed_time is null
+      update user
+      set publications_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
+      where publications_last_confirmed_time is null
     </sql>
 
-    <addNotNullConstraint
-            columnName="publications_last_confirmed_time"
-            tableName="user"/>
+    <addNotNullConstraint columnName="publications_last_confirmed_time" columnDataType="datetime" tableName="user"/>
   </changeSet>
 </databaseChangeLog>
