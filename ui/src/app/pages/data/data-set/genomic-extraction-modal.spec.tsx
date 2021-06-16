@@ -7,6 +7,7 @@ import {DataSetApi, TerraJobStatus} from "generated/fetch";
 import {mount} from "enzyme";
 import {workspaceDataStub} from "testing/stubs/workspaces";
 import {genomicExtractionStore} from "app/utils/stores";
+import moment = require("moment");
 
 describe('GenomicExtractionModal', () => {
   let dataset;
@@ -54,34 +55,34 @@ describe('GenomicExtractionModal', () => {
         },
         {
           status: TerraJobStatus.SUCCEEDED,
-          completionTime: oneHourAgo.getTime(),
+          completionTime: moment().subtract(1, 'hour').unix(),
           datasetName: dataset.name,
         },
         {
           status: TerraJobStatus.FAILED,
-          completionTime: oneHourAgo.getTime(),
+          completionTime: moment().subtract(2, 'hour').unix(),
           datasetName: dataset.name,
         }
       ]
     });
 
     const wrapper = mount(component());
-    expect(wrapper.find('[data-test-id="running-extract-warning"]')).toBeTruthy();
+    const warning = wrapper.find('[data-test-id="extract-warning"]');
+    expect(warning).toBeTruthy();
+    expect(warning.text()).toContain("An extraction is currently running");
   });
 
-  it('should show a warning message when there is a preexisting completed extract for the dataset', () => {
-    const oneHourAgo = new Date();
-    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+  it('should show a warning message when the most recent extract has succeeded', () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
           status: TerraJobStatus.SUCCEEDED,
-          completionTime: oneHourAgo.getTime(),
+          completionTime: moment().unix(),
           datasetName: dataset.name,
         },
         {
           status: TerraJobStatus.FAILED,
-          completionTime: new Date().getTime(),
+          completionTime: moment().subtract(1, 'hour').unix(),
           datasetName: dataset.name,
         },
         {
@@ -92,15 +93,22 @@ describe('GenomicExtractionModal', () => {
     });
 
     const wrapper = mount(component());
-    expect(wrapper.find('[data-test-id="preexisting-extract-warning"]')).toBeTruthy();
+    const warning = wrapper.find('[data-test-id="extract-warning"]');
+    expect(warning).toBeTruthy();
+    expect(warning.text()).toContain("VCF file(s) already exist for this dataset.");
   });
 
-  it('should not show a warning message when there are only failed extracts for this dataset', () => {
+  it('should show a warning message the most recent extract has failed', () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
           status: TerraJobStatus.FAILED,
-          completionTime: new Date().getTime(),
+          completionTime: moment().unix(),
+          datasetName: dataset.name,
+        },
+        {
+          status: TerraJobStatus.SUCCEEDED,
+          completionTime: moment().subtract(1, 'hour').unix(),
           datasetName: dataset.name,
         },
         {
@@ -111,7 +119,27 @@ describe('GenomicExtractionModal', () => {
     });
 
     const wrapper = mount(component());
-    expect(wrapper.find('[data-test-id="preexisting-extract-warning"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="running-extract-warning"]').exists()).toBeFalsy();
+    const warning = wrapper.find('[data-test-id="extract-warning"]');
+    expect(warning).toBeTruthy();
+    expect(warning.text()).toContain("Last time a VCF extract was attempted for this workflow, it failed.");
+  });
+
+  it('should not show a warning message with no succeded, failed, or running extracts for this dataste', () => {
+    genomicExtractionStore.set({
+      [workspaceDataStub.namespace]: [
+        {
+          status: TerraJobStatus.ABORTED,
+          completionTime: moment().unix(),
+          datasetName: dataset.name,
+        },
+        {
+          status: TerraJobStatus.RUNNING,
+          datasetName: 'some other data set with a different name',
+        }
+      ]
+    });
+
+    const wrapper = mount(component());
+    expect(wrapper.find('[data-test-id="extract-warning"]').exists()).toBeFalsy();
   });
 });
