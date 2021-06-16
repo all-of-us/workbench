@@ -69,7 +69,7 @@ def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter=
       raise ArgumentError.new("The dataset's access tier '#{dataset_tier}' differs from the requested '#{tier_name}'. Aborting.")
     end
   else
-    puts "WARNING: no data_tier label found for #{source_fq_dataset}"
+    common.warning "no data_tier label found for #{source_fq_dataset}"
   end
 
   # Copy through an intermediate project and delete after (include TTL in case later steps fail).
