@@ -37,10 +37,6 @@ describe('NotificationModal', () => {
     // Click button to dismiss - modal should not render
     wrapper.find('[role="button"]').first().simulate('click');
 
-    // enzyme needs some encouragement
-    await waitOneTickAndUpdate(wrapper);
-    expect(notificationStore.get()).toEqual(null);
-
     // Modal should be gone
     await waitOneTickAndUpdate(wrapper);
     expect(findNodesByExactText(wrapper, meta.title).length).toBe(0);
