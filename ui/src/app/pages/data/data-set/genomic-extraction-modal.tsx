@@ -43,24 +43,20 @@ export const GenomicExtractionModal = ({
 
   const genomicExtractions = useStore(genomicExtractionStore);
   const extractsForWorkspace = genomicExtractions && genomicExtractions[workspaceNamespace] || [];
-  const sortedExtractsForDataset: GenomicExtractionJob[] = fp.flow(
+  const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name),
       // This, incidentally to the implementation of orderBy, puts falsey values at the front...
       // ... which is actually what we want, but it's kind of bad to rely on implementation detail
-    fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc')
+    fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc'),
+    fp.head
   )(extractsForWorkspace);
 
   useEffect(() => {
-    if (!(workspaceNamespace in genomicExtractions)) {
-      dataSetApi().getGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName)
-        .then(resp => updateGenomicExtractionStore(workspaceNamespace, resp.jobs))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    dataSetApi().getGenomicExtractionJobs(workspaceNamespace, workspaceFirecloudName)
+      .then(resp => updateGenomicExtractionStore(workspaceNamespace, resp.jobs))
+      .finally(() => setLoading(false));
   }, [workspaceNamespace]);
 
-  const mostRecentExtract = fp.head(sortedExtractsForDataset);
   const runningExtract = mostRecentExtract && mostRecentExtract.status === TerraJobStatus.RUNNING;
   const succeededExtract = mostRecentExtract && mostRecentExtract.status === TerraJobStatus.SUCCEEDED;
   const failedExtract = mostRecentExtract && mostRecentExtract.status === TerraJobStatus.FAILED;
