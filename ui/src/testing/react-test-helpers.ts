@@ -9,7 +9,8 @@ import * as fp from 'lodash/fp';
 // And fails with:
 //   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
-  const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve));
+  // const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve));
+  const waitImmediate = () => new Promise<void>(resolve => setTimeout(resolve, 0));
   await act(waitImmediate);
   wrapper.update();
 }
