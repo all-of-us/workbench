@@ -20,14 +20,6 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   logger.info('Sign in with Google to Workbench application');
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
-  // This element exists in DOM after user has logged in. But it could takes a while.
-  await page
-    .waitForFunction(() => !!document.querySelector('app-signed-in'), { timeout: 30000 })
-    .catch((err) => {
-      logger.error('signIn() failed while waiting for "app-signed-in" element');
-      logger.error(err);
-      throw new Error(err);
-    });
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -197,19 +189,7 @@ export async function findOrCreateWorkspace(
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
-  const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
-  // Filter to include Workspaces older than 30 minutes
-  const halfHourMilliSec = 1000 * 60 * 30;
-  const now = Date.now();
-  const olderWorkspaceCards = [];
-  for (const card of existingCards) {
-    const workspaceTime = Date.parse(await card.getLastChangedTime());
-    const timeDiff = now - workspaceTime;
-    if (timeDiff > halfHourMilliSec) {
-      olderWorkspaceCards.push(card);
-    }
-  }
-
+  const olderWorkspaceCards = await findAllCards(page);
   // Create new workspace if did not find a suitable workspace.
   if (olderWorkspaceCards.length === 0) {
     return await createWorkspace(page, { workspaceName });
@@ -267,6 +247,18 @@ export async function findOrCreateWorkspaceCard(
   return cardFound;
 }
 
+/**
+ * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
+ */
+export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Promise<WorkspaceCard[]> {
+  const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
+  // Filter to exclude Workspaces younger than 30 minutes.
+  const halfHourAgoMillis = Date.now() - millisAgo;
+  return Promise.all(
+    await asyncFilter(existingCards, async (card) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime()))
+  );
+}
+
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {
   const box = await element.boundingBox();
   const { x, y, height, width } = box;
@@ -306,3 +298,6 @@ export function isValidDate(date: string) {
   }
   return d.toISOString().slice(0, 10) === date;
 }
+
+const asyncFilter = async (arr, predicate) =>
+  arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
