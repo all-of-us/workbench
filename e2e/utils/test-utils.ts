@@ -248,18 +248,14 @@ export async function findOrCreateWorkspaceCard(
 }
 
 /**
- * Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
+ * Find a suitable workspace among existing workspaces with OWNER role and older than specified time difference.
  */
-export async function findAllCards(page: Page): Promise<WorkspaceCard[]> {
+export async function findAllCards(page: Page, millisAgo = 1000 * 60 * 30): Promise<WorkspaceCard[]> {
   const existingCards: WorkspaceCard[] = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
-  // Filter to include Workspaces older than 30 minutes
-  const halfHourMilliSec = 1000 * 60 * 30;
-  const now = Date.now();
+  // Filter to exclude Workspaces younger than 30 minutes.
+  const halfHourAgoMillis = Date.now() - millisAgo;
   return Promise.all(
-    await filter(existingCards, async (card) => {
-      const workspaceTime = Date.parse(await card.getLastChangedTime());
-      return now - workspaceTime > halfHourMilliSec;
-    })
+    await asyncFilter(existingCards, async (card) => halfHourAgoMillis > Date.parse(await card.getLastChangedTime()))
   );
 }
 
@@ -303,5 +299,5 @@ export function isValidDate(date: string) {
   return d.toISOString().slice(0, 10) === date;
 }
 
-const filter = async (arr, predicate) =>
+const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
