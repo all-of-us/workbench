@@ -50,6 +50,6 @@ module.exports = {
       ? ['<rootDir>/tests/nightly/**/*.spec.ts']
       : ['<rootDir>/tests(?!/nightly)/**/*.spec.ts'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!tests)'],
-  moduleFileExtensions: ['js', 'ts'],
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   modulePaths: ['<rootDir>']
 };
