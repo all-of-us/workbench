@@ -257,8 +257,6 @@ public class ProfileController implements ProfileApiDelegate {
               profile.getFamilyName(),
               googleUser.getPrimaryEmail(),
               profile.getContactEmail(),
-              profile.getCurrentPosition(),
-              profile.getOrganization(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
               profile.getDegrees(),

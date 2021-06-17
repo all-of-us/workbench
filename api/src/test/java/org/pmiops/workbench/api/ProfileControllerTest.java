@@ -146,12 +146,10 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CITY = "Exampletown";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String COUNTRY = "Example";
-  private static final String CURRENT_POSITION = "Tester";
   private static final String FAMILY_NAME = "Bobberson";
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String ORGANIZATION = "Test";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
@@ -233,8 +231,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setFamilyName(FAMILY_NAME);
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USER_PREFIX);
-    profile.setCurrentPosition(CURRENT_POSITION);
-    profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
     profile.setAddress(
         new Address()
@@ -1080,7 +1076,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // we make an arbitrary change
 
-    profile.setAboutYou("I'm a changed person.");
+    profile.setProfessionalUrl("http://google.com/");
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
@@ -1595,7 +1591,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
-    assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 
     DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(user).isNotNull();

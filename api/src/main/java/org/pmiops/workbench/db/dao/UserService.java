@@ -37,8 +37,6 @@ public interface UserService {
       String familyName,
       String userName,
       String contactEmail,
-      String currentPosition,
-      String organization,
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,

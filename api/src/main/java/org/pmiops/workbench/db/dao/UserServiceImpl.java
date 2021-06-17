@@ -435,8 +435,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
-        null,
-        null,
         dbVerifiedAffiliation);
   }
 
@@ -447,8 +445,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String familyName,
       String username,
       String contactEmail,
-      String currentPosition,
-      String organization,
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
@@ -460,8 +456,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
-    dbUser.setCurrentPosition(currentPosition);
-    dbUser.setOrganization(organization);
     dbUser.setAreaOfResearch(areaOfResearch);
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);

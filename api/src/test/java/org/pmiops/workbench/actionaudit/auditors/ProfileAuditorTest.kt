@@ -91,11 +91,7 @@ class ProfileAuditorTest {
                 .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
                 .apply { givenName = "Robert" }
                 .apply { familyName = "Paulson" }
-                .apply { phoneNumber = "867-5309" }
-                .apply { currentPosition = "Grad Student" }
-                .apply { organization = "Classified" }
                 .apply { disabled = false }
-                .apply { aboutYou = "Nobody in particular" }
                 .apply { areaOfResearch = "Aliens" }
                 .apply { professionalUrl = "linkedin.com" }
                 .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
