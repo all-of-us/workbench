@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +48,8 @@ public class MailServiceImpl implements MailService {
       "emails/dollarthresholdemail/content.html";
   private static final String FREE_TIER_EXPIRATION_RESOURCE =
       "emails/freecreditsexpirationemail/content.html";
+  private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
+      "emails/rt_access_threshold_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -153,25 +156,52 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining) {
+  public void alertUserRegisteredTierWarningThreshold(
+      final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
+    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+
+    // TODO: feature flag?
+    final boolean emailSent = true;
+
+    final String logMsg =
+        String.format(
+                "Registered Tier access expiration will occur for user %s at %s (in %d days). ",
+                user.getUsername(), formatCentralTime(expirationTime), daysRemaining)
+            + (emailSent ? "Email sent." : "Email NOT sent.");
+    log.info(logMsg);
+
+    final String msgHtml =
+        buildHtml(
+            REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
+            registeredTierAccessThresholdSubstitutionMap(expirationTime));
+    final String subject =
+        "Your access to All of Us Registered Tier Data will expire "
+            + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining));
+
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
+            .html(msgHtml)
+            .subject(subject)
+            .fromEmail(workbenchConfig.mandrill.fromEmail);
+
+    sendWithRetries(
+        msg,
+        String.format(
+            "User %s will lose registered tier access in %d days",
+            user.getUsername(), daysRemaining));
+  }
+
+  @Override
+  public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
+      throws MessagingException {
     // not implemented
     final boolean emailSent = false;
 
     final String logMsg =
         String.format(
-                "Registered Tier access expiration will occur for user %s in %d days. ",
-                user.getUsername(), daysRemaining)
-            + (emailSent ? "Email sent." : "Email NOT sent.");
-    log.info(logMsg);
-  }
-
-  @Override
-  public void alertUserRegisteredTierExpiration(final DbUser user) {
-    // not implemented
-    final boolean emailSent = false;
-
-    final String logMsg =
-        String.format("Registered Tier access has expired for user %s. ", user.getUsername())
+                "Registered Tier access expired for user %s at %s. ",
+                user.getUsername(), formatCentralTime(expirationTime))
             + (emailSent ? "Email sent." : "Email NOT sent.");
     log.info(logMsg);
   }
@@ -230,6 +260,16 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
+        .build();
+  }
+
+  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessThresholdSubstitutionMap(
+      Instant expirationTime) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
+        .put(EmailSubstitutionField.URL, getURLAsHref())
         .build();
   }
 
@@ -355,5 +395,18 @@ public class MailServiceImpl implements MailService {
 
   private String formatCurrency(double currentUsage) {
     return NumberFormat.getCurrencyInstance().format(currentUsage);
+  }
+
+  private String formatCentralTime(Instant date) {
+    // e.g. April 5, 2021 at 1:23PM Central Time
+    return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
+        .withLocale(Locale.US)
+        .withZone(ZoneId.of("America/Chicago"))
+        .format(date);
+  }
+
+  private String getURLAsHref() {
+    final String url = workbenchConfigProvider.get().server.uiBaseUrl;
+    return String.format("<a href=\"%s\">%s</a>", url, url);
   }
 }

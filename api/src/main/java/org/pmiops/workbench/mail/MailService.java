@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.directory.model.User;
+import java.time.Instant;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
 
@@ -20,7 +21,9 @@ public interface MailService {
 
   void alertUserFreeTierExpiration(final DbUser user) throws MessagingException;
 
-  void alertUserRegisteredTierWarningThreshold(final DbUser user, long daysRemaining);
+  void alertUserRegisteredTierWarningThreshold(
+      final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException;
 
-  void alertUserRegisteredTierExpiration(final DbUser user);
+  void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
+      throws MessagingException;
 }
