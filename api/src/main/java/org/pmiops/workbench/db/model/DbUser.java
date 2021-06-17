@@ -71,7 +71,6 @@ public class DbUser {
 
   // potentially obsolete profile-style fields (not used)
 
-  @Deprecated private String phoneNumber;
   @Deprecated private String currentPosition;
   @Deprecated private String organization;
   @Deprecated private String aboutYou;
@@ -193,18 +192,6 @@ public class DbUser {
 
   public void setFamilyName(String familyName) {
     this.familyName = familyName;
-  }
-
-  // TODO: consider dropping this (do we want researcher phone numbers?)
-  @Deprecated
-  @Column(name = "phone_number")
-  public String getPhoneNumber() {
-    return phoneNumber;
-  }
-
-  @Deprecated
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
   }
 
   @Deprecated
