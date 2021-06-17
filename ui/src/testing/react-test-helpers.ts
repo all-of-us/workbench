@@ -10,8 +10,14 @@ import * as fp from 'lodash/fp';
 //   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   // Make sure to use setTimeout. Combining setTimeout (used in UI) and setImmediate can result in a non-deterministic order of events
-  const waitImmediate = () => new Promise<void>(resolve => setTimeout(resolve, 0));
+  const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve))
   await act(waitImmediate);
+  wrapper.update();
+}
+
+export async function waitOnTimersAndUpdate(wrapper: ReactWrapper){
+  const waitForTimeout = () => new Promise<void>(resolve => setTimeout(resolve, 0));
+  await act(waitForTimeout);
   wrapper.update();
 }
 
