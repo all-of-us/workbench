@@ -63,7 +63,7 @@ class ProfileAuditorTest {
         argumentCaptor<List<ActionAuditEvent>>().apply {
             verify(mockActionAuditService).send(capture())
             val sentEvents: List<ActionAuditEvent> = firstValue
-            assertThat(sentEvents).hasSize(13)
+            assertThat(sentEvents).hasSize(ProfileTargetProperty.values().size)
             assertThat(sentEvents.all { it.actionType == ActionType.CREATE })
             assertThat(sentEvents.map { ActionAuditEvent::actionId }.distinct().count() == 1)
         }
@@ -84,6 +84,14 @@ class ProfileAuditorTest {
                 .apply { identifiesAsLgbtq = true }
                 .apply { lgbtqIdentity = "gay" }
 
+        val addr = Address()
+            .apply { streetAddress1 = "415 Main Street" }
+            .apply { streetAddress2 = "7th floor" }
+            .apply { zipCode = "12345" }
+            .apply { city = "Cambridge" }
+            .apply { state = "MA" }
+            .apply { country = "USA" }
+
         return Profile()
                 .apply { userId = 444 }
                 .apply { username = "slim_shady" }
@@ -96,6 +104,7 @@ class ProfileAuditorTest {
                 .apply { professionalUrl = "linkedin.com" }
                 .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
                 .apply { demographicSurvey = demographicSurvey1 }
+                .apply { address = addr }
     }
 
     @Test
