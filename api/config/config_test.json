@@ -138,6 +138,6 @@
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
   },
   "accessRenewal": {
-    "expiryDays": 3650
+    "expiryDays": 365
   }
 }

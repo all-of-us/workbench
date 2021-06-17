@@ -213,9 +213,6 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
                             .put(
-                                EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_cohorts_dataset",
-                                "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
-                            .put(
                                 EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
                                 "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
                             .put(
@@ -242,7 +239,7 @@ public class GenomicExtractionService {
                             .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar\"")
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-344-g7325330-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
@@ -254,18 +251,22 @@ public class GenomicExtractionService {
                 cohortExtractionConfig.operationalTerraWorkspaceName)
             .getMethodConfiguration();
 
-    FirecloudSubmissionResponse submissionResponse =
-        submissionApiProvider
-            .get()
-            .createSubmission(
-                new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(false)
-                    .methodConfigurationNamespace(methodConfig.getNamespace())
-                    .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false),
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName);
-
+    FirecloudSubmissionResponse submissionResponse = null;
+    try {
+      submissionResponse =
+          submissionApiProvider
+              .get()
+              .createSubmission(
+                  new FirecloudSubmissionRequest()
+                      .deleteIntermediateOutputFiles(false)
+                      .methodConfigurationNamespace(methodConfig.getNamespace())
+                      .methodConfigurationName(methodConfig.getName())
+                      .useCallCache(false),
+                  cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                  cohortExtractionConfig.operationalTerraWorkspaceName);
+    } catch (ApiException e) {
+      System.out.println(e.getResponseBody());
+    }
     // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
     // check for such jobs.
     DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
