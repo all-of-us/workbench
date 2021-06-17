@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,10 +68,8 @@ public class CreateTerraMethodSnapshot {
 
   private static final Logger log = Logger.getLogger(CreateTerraMethodSnapshot.class.getName());
 
-  private static final Pattern importWdlRegex = Pattern.compile("^import \"(.+)\"");
+  private static final Pattern importWdlRegex = Pattern.compile("import \"(.+)\" as (.+)");
 
-  // Agora needs to HTTP URLS as import paths so we're "resolving" the relative import
-  // defined by the WDL with the HTTP file URL that's hosted by github
   private String resolveRelativeImports(String wdlSource, String rawGithubDirectoryUrl) {
     return Arrays.stream(wdlSource.split("\n"))
         .map(
@@ -81,6 +78,7 @@ public class CreateTerraMethodSnapshot {
 
               if (m.find()) {
                 final String importFilePath = m.group(1);
+                final String alias = m.group(2);
 
                 if (importFilePath.contains("/")) {
                   throw new IllegalArgumentException(
@@ -88,9 +86,7 @@ public class CreateTerraMethodSnapshot {
                 }
 
                 final String httpImport = rawGithubDirectoryUrl + "/" + importFilePath;
-                final String maybeAlias = line.substring(m.end()).trim();
-                final String resolvedImport = "import \"" + httpImport + "\"" + " " + maybeAlias;
-                return resolvedImport.trim();
+                return "import \"" + httpImport + "\" as " + alias;
               }
 
               return line;

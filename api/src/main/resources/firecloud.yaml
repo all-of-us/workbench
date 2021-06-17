@@ -1632,54 +1632,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorReport'
-  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/workflows/{workflowId}/outputs:
-    get:
-      tags:
-        - Submissions
-      summary: |
-        Get workflow outputs.
-      operationId: getWorkflowOutputs
-      parameters:
-        - name: workspaceNamespace
-          in: path
-          description: Workspace Namespace
-          required: true
-          schema:
-            type: string
-        - name: workspaceName
-          in: path
-          description: Workspace Name
-          required: true
-          schema:
-            type: string
-        - name: submissionId
-          in: path
-          description: Submission ID
-          required: true
-          schema:
-            type: string
-        - name: workflowId
-          in: path
-          description: Workflow ID
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Get workflow outputs
-          content: {}
-        404:
-          description: Workspace, Submission or Workflow not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
-        500:
-          description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
 components:
   schemas:
     BillingProjectMember:
