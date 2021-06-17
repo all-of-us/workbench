@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="psantos-dmohs-jmthibault" id="changelog-165-set-default-publications-confirmed-time">
+
+    <sql>
+      -- Update and backfill profile confirmation time
+
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp;
+
+      update user
+      set profile_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
+      where profile_last_confirmed_time is null;
+
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp not null;
+
+      -- Update and backfill publication confirmation time
+
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp;
+
+      update user
+      set publications_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
+      where publications_last_confirmed_time is null;
+
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp not null;
+    </sql>
+
+    <rollback>
+      alter table user modify publications_last_confirmed_time datetime;
+      alter table user modify profile_last_confirmed_time datetime;
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

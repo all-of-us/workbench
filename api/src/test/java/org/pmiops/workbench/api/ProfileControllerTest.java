@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1076,16 +1077,25 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateProfile_confirmsProfile() {
+    final long initialTestTime = fakeClock.millis();
+
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertThat(profile.getProfileLastConfirmedTime()).isNull();
+    assertThat(profile.getProfileLastConfirmedTime()).isEqualTo(initialTestTime);
 
-    // make an arbitrary change
+    // time passes
+
+    fakeClock.increment(Duration.ofDays(1).toMillis());
+    final long laterTime = fakeClock.millis();
+    assertThat(laterTime).isGreaterThan(initialTestTime);
+
+    // we make an arbitrary change
+
     profile.setAboutYou("I'm a changed person.");
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertThat(updatedProfile.getProfileLastConfirmedTime()).isEqualTo(fakeClock.millis());
+    assertThat(updatedProfile.getProfileLastConfirmedTime()).isEqualTo(laterTime);
   }
 
   @Test
@@ -1625,6 +1635,12 @@ public class ProfileControllerTest extends BaseControllerTest {
         .isWithin(TIME_TOLERANCE_MILLIS)
         .of(ProfileControllerTest.TIMESTAMP.getTime());
     assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
+    assertThat((double) user.getProfileLastConfirmedTime().getTime())
+        .isWithin(TIME_TOLERANCE_MILLIS)
+        .of(ProfileControllerTest.TIMESTAMP.getTime());
+    assertThat((double) user.getPublicationsLastConfirmedTime().getTime())
+        .isWithin(TIME_TOLERANCE_MILLIS)
+        .of(ProfileControllerTest.TIMESTAMP.getTime());
   }
 
   private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
