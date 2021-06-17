@@ -8,26 +8,36 @@
 
     <!-- Update and backfill profile confirmation time -->
 
-    <addDefaultValue tableName="user" columnName="profile_last_confirmed_time" defaultValueDate="current_timestamp"/>
-
+    <sql>
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp
+    </sql>
     <sql>
       update user
       set profile_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
       where profile_last_confirmed_time is null
     </sql>
-
-    <addNotNullConstraint columnName="profile_last_confirmed_time" columnDataType="datetime" tableName="user"/>
+    <sql>
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp not null
+    </sql>
 
     <!-- Update and backfill publication confirmation time -->
 
-    <addDefaultValue tableName="user" columnName="publications_last_confirmed_time" defaultValueDate="current_timestamp"/>
-
+    <sql>
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp
+    </sql>
     <sql>
       update user
       set publications_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
       where publications_last_confirmed_time is null
     </sql>
+    <sql>
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp not null
+    </sql>
 
-    <addNotNullConstraint columnName="publications_last_confirmed_time" columnDataType="datetime" tableName="user"/>
+    <rollback>
+      alter table user modify publications_last_confirmed_time datetime;
+      alter table user modify profile_last_confirmed_time datetime;
+    </rollback>
+
   </changeSet>
 </databaseChangeLog>
