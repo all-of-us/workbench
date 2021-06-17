@@ -1065,14 +1065,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
-        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets =
+            dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
+                resourceId, workspaceId, false);
         break;
       case CONCEPT_SET:
         DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
         if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
-        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets =
+            dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(
+                resourceId, workspaceId, false);
         break;
     }
     return dbDataSets;
