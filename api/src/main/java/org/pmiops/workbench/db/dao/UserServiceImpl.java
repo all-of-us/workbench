@@ -6,7 +6,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -1193,9 +1192,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  // TODO config values
-  final Set<Long> warningThresholds = ImmutableSet.of(1L, 3L, 7L, 15L, 30L);
-
   private void maybeSendRegisteredTierExpirationEmail(DbUser user, Timestamp expiration) {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
@@ -1204,7 +1200,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (millisRemaining < 0 && daysRemaining == 0) {
       sendRegisteredTierExpirationEmail(user);
     } else {
-      if (warningThresholds.contains(daysRemaining)) {
+      if (configProvider.get().accessRenewal.expiryDaysWarningThresholds.contains(daysRemaining)) {
         sendRegisteredTierWarningEmail(user, daysRemaining);
       }
     }

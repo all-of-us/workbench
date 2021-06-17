@@ -1,6 +1,7 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -325,5 +326,7 @@ public class WorkbenchConfig {
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
+    // Thresholds for email alerting based on approaching module expiration, in days
+    public List<Long> expiryDaysWarningThresholds;
   }
 }

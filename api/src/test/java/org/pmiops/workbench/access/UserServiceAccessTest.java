@@ -124,6 +124,8 @@ public class UserServiceAccessTest {
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
+    providedWorkbenchConfig.accessRenewal.expiryDaysWarningThresholds =
+        ImmutableList.of(1L, 3L, 7L, 15L, 30L);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 

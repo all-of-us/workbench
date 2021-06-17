@@ -138,6 +138,7 @@
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
   },
   "accessRenewal": {
-    "expiryDays": 3650
+    "expiryDays": 3650,
+    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   }
 }
