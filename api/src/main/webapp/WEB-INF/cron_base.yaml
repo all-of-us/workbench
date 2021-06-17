@@ -86,4 +86,12 @@ cron:
   schedule: every day 23:00
   timezone: America/Chicago
   target: api
+- description: >
+    Check each user to determine when they will no longer meet compliance guidelines.
+    Send warning emails to those users who will be expiring soon, and expiration emails for
+    those who have expired in the last 24 hours.
+  url: /v1/cron/sendAccessExpirationEmails
+  schedule: every day 23:30
+  timezone: America/Chicago
+  target: api
 
