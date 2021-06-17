@@ -347,10 +347,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
-    return retryHandler.run((context) -> {
-      throw new ApiException("hi");
-//      return workspacesApi.createWorkspace(workspaceIngest);
-    });
+    return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
   @Override
