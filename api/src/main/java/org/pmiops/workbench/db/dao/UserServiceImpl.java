@@ -463,6 +463,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DbDemographicSurvey dbDemographicSurvey,
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
@@ -476,6 +477,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(dbAddress);
+    dbUser.setProfileLastConfirmedTime(now);
+    dbUser.setPublicationsLastConfirmedTime(now);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
