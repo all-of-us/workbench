@@ -1994,9 +1994,21 @@ Common.register_command({
   :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
 })
 
-def get_github_commit_hash(repo, branch)
-  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/branches/#{branch}"))
-  return JSON.parse(response)['commit']['sha']
+def get_github_commit_hash(repo, ref)
+  # Check if we got a commit and return it if so
+  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/commits/#{ref}"))
+  begin
+    return JSON.parse(response)['sha']
+  rescue NoMethodError
+  end
+
+  # Otherwise, try to resolve it as a branch name
+  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/branches/#{ref}"))
+  begin
+    return JSON.parse(response)['commit']['sha']
+  rescue NoMethodError
+    raise ArgumentError.new("Branch #{ref} not found in Github repository #{repo}")
+  end
 end
 
 def create_terra_method_snapshot(cmd_name, *args)
@@ -2014,21 +2026,23 @@ def create_terra_method_snapshot(cmd_name, *args)
     "--all-projects [all-projects]",
     ->(opts, _) { opts.all_projects = true},
     "Create snapshot in every AoU environment. Cannot be used with --project.")
-  op.opts.source_git_repo = "broadinstitute/gatk"
+
   op.add_option(
     "--source-git-repo [source-git-repo]",
     ->(opts, v) { opts.source_git_repo = v},
-    "git owner/repo where the source file is located. default: #{op.opts.source_git_repo}")
-  op.opts.source_git_path = "scripts/variantstore/wdl/ngs_cohort_extract.wdl"
+    "git owner/repo where the source file is located. ex. broadinstitute/gatk")
+
   op.add_option(
     "--source-git-path [source-git-path]",
     ->(opts, v) { opts.source_git_path = v},
-    "git path where the source file is located, relative to the repo's root directory. default: #{op.opts.source_git_path}")
-  op.opts.source_git_branch = "ah_var_store"
+    "git path where the source file is located, relative to the repo's root directory.
+          ex. scripts/variantstore/wdl/GvsExtractCohortFromSampleNames.wdl")
+
   op.add_option(
-    "--source-git-branch[source-git-branch]",
+    "--source-git-ref [source-git-ref]",
     ->(opts, v) { opts.source_git_ref = v},
-    "git branch where the source file is located. default: #{op.opts.source_git_branch}")
+    "git commit or branch where the source file is located. ex. ah_var_store")
+
   op.add_option(
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
@@ -2046,7 +2060,7 @@ def create_terra_method_snapshot(cmd_name, *args)
   GcloudContextV2.validate_gcloud_auth()
   op.parse.validate
 
-  source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_branch)
+  source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_ref)
 
   projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
   projects.each { |project|
