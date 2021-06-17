@@ -6,32 +6,26 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="psantos-dmohs-jmthibault" id="changelog-165-set-default-publications-confirmed-time">
 
-    <!-- Update and backfill profile confirmation time -->
+    <sql>
+      -- Update and backfill profile confirmation time
 
-    <sql>
-      alter table user modify profile_last_confirmed_time datetime default current_timestamp
-    </sql>
-    <sql>
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp;
+
       update user
       set profile_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
-      where profile_last_confirmed_time is null
-    </sql>
-    <sql>
-      alter table user modify profile_last_confirmed_time datetime default current_timestamp not null
-    </sql>
+      where profile_last_confirmed_time is null;
 
-    <!-- Update and backfill publication confirmation time -->
+      alter table user modify profile_last_confirmed_time datetime default current_timestamp not null;
 
-    <sql>
-      alter table user modify publications_last_confirmed_time datetime default current_timestamp
-    </sql>
-    <sql>
+      -- Update and backfill publication confirmation time
+
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp;
+
       update user
       set publications_last_confirmed_time = coalesce(first_sign_in_time, current_timestamp)
-      where publications_last_confirmed_time is null
-    </sql>
-    <sql>
-      alter table user modify publications_last_confirmed_time datetime default current_timestamp not null
+      where publications_last_confirmed_time is null;
+
+      alter table user modify publications_last_confirmed_time datetime default current_timestamp not null;
     </sql>
 
     <rollback>
