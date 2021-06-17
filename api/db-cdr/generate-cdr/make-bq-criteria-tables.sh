@@ -1784,32 +1784,35 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on ( TRIM(LEFT(c.concept_code, L
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` f on ( TRIM(LEFT(c.concept_code, LENGTH(c.concept_code)-3), '.') = f.concept_code and c.vocabulary_id = f.vocabulary_id)"
 
 # adding in parent items that fell out due to not having a relationship in concept_relationship
-echo "ICD10CM - SOURCE - adding extra parent items to prep_icd10_rel_cm_src"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
-    (
-          p_concept_id
-        , p_concept_code
-        , p_concept_name
-        , concept_id
-        , concept_code
-        , concept_name
-    )
-SELECT
-      b.concept_id as p_concept_id
-    , b.concept_code as p_concept_name
-    , b.concept_name as p_concept_name
-    , a.p_concept_id as concept_id
-    , a.p_concept_code as concept_code
-    , a.p_concept_name as concept_name
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\` a
-JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on ( TRIM(LEFT(a.p_concept_code, LENGTH(a.p_concept_code)-1), '.') = b.concept_code and b.vocabulary_id = 'ICD10CM' )
-WHERE a.p_concept_id NOT IN
-    (
-        SELECT DISTINCT concept_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
-    )
-    and a.p_concept_code is not null"
+for i in {1..2};
+do
+  echo "ICD10CM - SOURCE - adding extra parent items to prep_icd10_rel_cm_src"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+      (
+            p_concept_id
+          , p_concept_code
+          , p_concept_name
+          , concept_id
+          , concept_code
+          , concept_name
+      )
+  SELECT DISTINCT
+        b.concept_id as p_concept_id
+      , b.concept_code as p_concept_name
+      , b.concept_name as p_concept_name
+      , a.p_concept_id as concept_id
+      , a.p_concept_code as concept_code
+      , a.p_concept_name as concept_name
+  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\` a
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on ( TRIM(LEFT(a.p_concept_code, LENGTH(a.p_concept_code)-1), '.') = b.concept_code and b.vocabulary_id = 'ICD10CM' )
+  WHERE a.p_concept_id NOT IN
+      (
+          SELECT DISTINCT concept_id
+          FROM \`$BQ_PROJECT.$BQ_DATASET.prep_icd10_rel_cm_src\`
+      )
+      and a.p_concept_code is not null"
+done
 
 echo "ICD10CM - SOURCE - temp table inserting level 0"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
