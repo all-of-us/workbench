@@ -26,9 +26,12 @@ import java.util.logging.Logger;
  * testing purposes only.
  *
  * <p>Limitations:
- * <li>Only Google App Engine cloud tasks are supported
- * <li>Only task creation is supported
- * <li>Queue configuration (queue name, project name) are not validated
+ *
+ * <ul>
+ *   <li>Only Google App Engine cloud tasks are supported
+ *   <li>Only task creation is supported
+ *   <li>Queue configuration (queue name, project name) are not validated
+ * </ul>
  */
 public class ForwardingCloudTasksStub extends CloudTasksStub {
   private static final Logger log = Logger.getLogger(ForwardingCloudTasksStub.class.getName());
