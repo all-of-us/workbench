@@ -428,8 +428,8 @@ def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
     if item_type == 'QUESTION':
         dict_row_register['code'] = get_short_code(code,
                                                    long_code_to_short_code)
-    if item_type != 'QUESTION':
-        dict_row_control['answers_bucketed'] = 0
+   else:
+        dict_row_register['answers_bucketed'] = 0
 
     if file_type == 'controlled':
         writer.writerow(dict_row_control)
