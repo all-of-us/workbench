@@ -912,9 +912,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
-        "# Initialize Hail\n"
-            + "# Note: Hail must be run from a \"Hail Genomics Analysis\" cloud analysis environment"
+        "# Confirm Spark is installed.\n"
+            + "try:\n"
+            + "    import pyspark\n"
+            + "except ModuleNotFoundError:\n"
+            + "    print(\"!\" * 100 + \"\\n\\n\"\n"
+            + "          \"Hail is only supported on Dataproc Clusters; \"\n"
+            + "          \"use the Compute side-panel to update your runtime compute type.\\n\\n\" +\n"
+            + "          \"!\" * 100)\n"
             + "\n"
+            + "# Initialize Hail\n"
             + "import hail as hl\n"
             + "import os\n"
             + "from hail.plot import show\n"
