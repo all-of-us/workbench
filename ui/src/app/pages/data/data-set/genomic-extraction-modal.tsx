@@ -38,8 +38,9 @@ interface Props {
 
 export const GenomicExtractionModal = ({
     dataSet, workspaceNamespace, workspaceFirecloudName, closeFunction, title, cancelText, confirmText}: Props) => {
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<{status: number, message: string}>(null);
+  const isClientError = error && 400 <= error.status && error.status < 500;
 
   const genomicExtractions = useStore(genomicExtractionStore);
   const extractsForWorkspace = genomicExtractions && genomicExtractions[workspaceNamespace] || [];
@@ -76,32 +77,36 @@ export const GenomicExtractionModal = ({
         </span>
       </TextColumn>
     </ModalBody>
-    {(runningExtract || succeededExtract || failedExtract) &&
-      <WarningMessage iconSize={30} iconPosition={'top'} data-test-id='extract-warning'>
-        {runningExtract && <React.Fragment>
-          An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(mostRecentExtract.submissionDate)}.
-        </React.Fragment>}
-        {succeededExtract && <React.Fragment>
-          VCF file(s) already exist for this dataset.
-          Last extracted files for this dataset: {TimeAgoWithVerboseTooltip(mostRecentExtract.completionTime)}.
-          The file is located in the Workspace storage panel.
-        </React.Fragment>}
-        {failedExtract && <React.Fragment>
-          Last time a VCF extract was attempted for this workflow, it failed.
-          The workflow failed {TimeAgoWithVerboseTooltip(mostRecentExtract.completionTime)}.
-        </React.Fragment>}
-      </WarningMessage>
-    }
-    {error &&
-     <ErrorMessage iconSize={16}>
-       Failed to launch extraction, please try again.
-     </ErrorMessage>}
+    {(() => {
+      if (error) {
+        return <ErrorMessage iconSize={30} iconPosition={'top'} data-test-id='extract-error'>
+          Failed to launch extraction: {error.message}.
+        </ErrorMessage>;
+      } else if (runningExtract || succeededExtract || failedExtract) {
+        return <WarningMessage iconSize={30} iconPosition={'top'} data-test-id='extract-warning'>
+          {runningExtract && <React.Fragment>
+            An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(mostRecentExtract.submissionDate)}.
+          </React.Fragment>}
+          {succeededExtract && <React.Fragment>
+            VCF file(s) already exist for this dataset.
+            Last extracted files for this dataset: {TimeAgoWithVerboseTooltip(mostRecentExtract.completionTime)}.
+            Details can be found in the Genomic Extraction History panel.
+          </React.Fragment>}
+          {failedExtract && <React.Fragment>
+            Last time a VCF extract was attempted for this workflow, it failed.
+            The workflow failed {TimeAgoWithVerboseTooltip(mostRecentExtract.completionTime)}.
+          </React.Fragment>}
+        </WarningMessage>;
+      } else {
+        return <React.Fragment/>;
+      }
+     })()}
     <ModalFooter>
       <Button type='secondary' onClick={() => closeFunction()}>
         { cancelText || 'Cancel' }
       </Button>
       <Button data-test-id='extract-button'
-              disabled={loading}
+              disabled={loading || isClientError}
               style={{marginLeft: '0.5rem'}}
               onClick={async() => {
                 setLoading(true);
@@ -117,7 +122,11 @@ export const GenomicExtractionModal = ({
                   );
                   closeFunction();
                 } catch (e) {
-                  setError(true);
+                  const errJson = await e.json().catch(() => {}) || {};
+                  setError({
+                    status: e.status,
+                    message: errJson.message || 'unknown error'
+                  });
                 }
                 setLoading(false);
               }}>

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -406,6 +408,17 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
+
+    assertThrows(
+        FailedPreconditionException.class,
+        () -> genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset));
+  }
+
+  @Test
+  public void submitExtractionJob_tooManySamples() throws ApiException {
+    final List<String> largePersonIdList =
+        LongStream.range(1, 6_000).boxed().map(id -> id.toString()).collect(Collectors.toList());
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
 
     assertThrows(
         FailedPreconditionException.class,

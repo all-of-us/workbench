@@ -47,6 +47,8 @@ import org.springframework.stereotype.Service;
 public class GenomicExtractionService {
 
   public static final String EXTRACT_WORKFLOW_NAME = "GvsExtractCohortFromSampleNames";
+  // Theoretical maximum is 20K-30K, keep it lower during the initial alpha period.
+  private static final int MAX_EXTRACTION_SAMPLE_COUNT = 5_000;
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -170,6 +172,13 @@ public class GenomicExtractionService {
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");
+    }
+    if (personIds.size() > MAX_EXTRACTION_SAMPLE_COUNT) {
+      throw new FailedPreconditionException(
+          String.format(
+              "provided dataset contains %d individuals with whole genome data, the current limit "
+                  + "for extraction is %d",
+              personIds.size(), MAX_EXTRACTION_SAMPLE_COUNT));
     }
 
     Blob personIdsFile =

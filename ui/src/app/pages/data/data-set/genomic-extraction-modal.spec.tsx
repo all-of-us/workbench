@@ -8,6 +8,7 @@ import {mount} from "enzyme";
 import {workspaceDataStub} from "testing/stubs/workspaces";
 import {genomicExtractionStore} from "app/utils/stores";
 import moment = require("moment");
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
 describe('GenomicExtractionModal', () => {
   let dataset;
@@ -124,7 +125,7 @@ describe('GenomicExtractionModal', () => {
     expect(warning.text()).toContain("Last time a VCF extract was attempted for this workflow, it failed.");
   });
 
-  it('should not show a warning message with no succeded, failed, or running extracts for this dataste', () => {
+  it('should not show a warning message with no succeeded, failed, or running extracts for this dataset', () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
@@ -141,5 +142,47 @@ describe('GenomicExtractionModal', () => {
 
     const wrapper = mount(component());
     expect(wrapper.find('[data-test-id="extract-warning"]').exists()).toBeFalsy();
+  });
+
+  it('should show error text on known failed extract', async() => {
+    genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
+
+    const message = 'invalid dataset';
+    jest.spyOn(datasetApiStub, 'extractGenomicData').mockRejectedValueOnce(
+      new Response(JSON.stringify({message}), {status: 412}));
+
+    const wrapper = mount(component());
+    await waitOneTickAndUpdate(wrapper);
+
+    const extractButton = () => wrapper.find('[data-test-id="extract-button"]').first();
+    extractButton().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    const error = wrapper.find('[data-test-id="extract-error"]');
+    expect(error.exists()).toBeTruthy();
+    expect(error.text()).toContain(message);
+
+    // Client errors will not work on retry, disable the extract button.
+    expect(extractButton().prop('disabled')).toBe(true);
+  });
+
+  it('should show error text on unknown error', async() => {
+    genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
+
+    jest.spyOn(datasetApiStub, 'extractGenomicData').mockRejectedValueOnce(
+      new Response(null, {status: 500}));
+
+    const wrapper = mount(component());
+    await waitOneTickAndUpdate(wrapper);
+
+    const extractButton = () => wrapper.find('[data-test-id="extract-button"]').first();
+    extractButton().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    const error = wrapper.find('[data-test-id="extract-error"]');
+    expect(error.exists()).toBeTruthy();
+
+    // Unknown errors may be transient, allow the user to try again.
+    expect(extractButton().prop('disabled')).toBe(false);
   });
 });
