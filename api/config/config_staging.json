@@ -102,7 +102,8 @@
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableAccessRenewal": true
+    "enableAccessRenewal": true,
+    "enableRasLoginGovLinking": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -111,7 +112,6 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableRasLoginGovLinking": false,
     "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false
   },
