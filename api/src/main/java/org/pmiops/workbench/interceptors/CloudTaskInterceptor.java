@@ -1,10 +1,10 @@
 package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
+import com.google.common.base.Strings;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
@@ -42,7 +42,8 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
       }
     }
 
-    boolean hasQueueNameHeader = Strings.isNotEmpty(request.getHeader(QUEUE_NAME_REQUEST_HEADER));
+    boolean hasQueueNameHeader =
+        !Strings.isNullOrEmpty(request.getHeader(QUEUE_NAME_REQUEST_HEADER));
     if (requireCloudTaskHeader && !hasQueueNameHeader) {
       response.sendError(
           HttpServletResponse.SC_FORBIDDEN,

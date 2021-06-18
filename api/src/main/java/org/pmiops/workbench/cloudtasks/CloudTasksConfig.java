@@ -1,9 +1,9 @@
 package org.pmiops.workbench.cloudtasks;
 
 import com.google.cloud.tasks.v2.CloudTasksClient;
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.logging.Logger;
-import org.apache.logging.log4j.util.Strings;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class CloudTasksConfig {
   @Bean(destroyMethod = "close")
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   CloudTasksClient cloudTasksClient(WorkbenchConfig workbenchConfig) throws IOException {
-    if (Strings.isNotEmpty(workbenchConfig.offlineBatch.unsafeCloudTasksForwardingHost)) {
+    if (!Strings.isNullOrEmpty(workbenchConfig.offlineBatch.unsafeCloudTasksForwardingHost)) {
       log.warning(
           String.format(
               "Cloud Tasks will be forwarded synchronously to '%s'. This should only happen during "
