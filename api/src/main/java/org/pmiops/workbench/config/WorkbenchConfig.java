@@ -244,6 +244,8 @@ public class WorkbenchConfig {
     public boolean enableBetaAccess;
     // If true, users can be expired on the system, losing access
     public boolean enableAccessRenewal;
+    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
+    public boolean enableRasLoginGovLinking;
   }
 
   public static class FeatureFlagsConfig {
@@ -265,8 +267,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
-    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
-    public boolean enableRasLoginGovLinking;
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
