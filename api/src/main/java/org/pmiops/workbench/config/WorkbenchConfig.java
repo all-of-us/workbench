@@ -32,6 +32,7 @@ public class WorkbenchConfig {
   public ReportingConfig reporting;
   public RasConfig ras;
   public AccessRenewalConfig accessRenewal;
+  public OfflineBatchConfig offlineBatch;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -58,6 +59,7 @@ public class WorkbenchConfig {
     config.reporting = new ReportingConfig();
     config.ras = new RasConfig();
     config.accessRenewal = new AccessRenewalConfig();
+    config.offlineBatch = new OfflineBatchConfig();
     return config;
   }
 
@@ -328,5 +330,9 @@ public class WorkbenchConfig {
     public Long expiryDays;
     // Thresholds for email alerting based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
+  }
+
+  public static class OfflineBatchConfig {
+    public String unsafeCloudTasksForwardingHost;
   }
 }
