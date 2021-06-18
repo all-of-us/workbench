@@ -171,10 +171,11 @@ def main():
                     # get the concept codes for the topics and write topics into file
                     topic_codes = query_topic_code(project, dataset,
                                                    header.replace("'", "\\'"))
+
                     topic_id_all = id_all
                     topic_code = ''
-                    if not topic_codes:
-                        topic_code = topic_codes[0]
+                    for code in topic_codes:
+                        topic_code = code['concept_code']
                     write_row_all(all_writer, survey_id_all, topic_code, header,
                                   'TOPIC', None, None, item_flags,
                                   long_code_to_short_code)
@@ -414,6 +415,9 @@ def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
     if item_type == 'QUESTION':
         dict_row_control['code'] = get_short_code(code, long_code_to_short_code)
 
+    if item_type != 'QUESTION':
+        dict_row_control['answers_bucketed'] = 0
+
     global id_registered
     dict_row_register = {'id': id_registered, 'parent_id': parent_id,
                          'code': code,
@@ -425,6 +429,8 @@ def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
     if item_type == 'QUESTION':
         dict_row_register['code'] = get_short_code(code,
                                                    long_code_to_short_code)
+    if item_type != 'QUESTION':
+        dict_row_control['answers_bucketed'] = 0
 
     if file_type == 'controlled':
         writer.writerow(dict_row_control)
