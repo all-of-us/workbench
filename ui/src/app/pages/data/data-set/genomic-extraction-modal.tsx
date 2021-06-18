@@ -85,7 +85,8 @@ export const GenomicExtractionModal = ({
       } else if (runningExtract || succeededExtract || failedExtract) {
         return <WarningMessage iconSize={30} iconPosition={'top'} data-test-id='extract-warning'>
           {runningExtract && <React.Fragment>
-            An extraction is currently running for this dataset; it was started {TimeAgoWithVerboseTooltip(mostRecentExtract.submissionDate)}.
+            An extraction is currently running for this dataset; it was
+            started {TimeAgoWithVerboseTooltip(mostRecentExtract.submissionDate)}.
           </React.Fragment>}
           {succeededExtract && <React.Fragment>
             VCF file(s) already exist for this dataset.
@@ -100,7 +101,7 @@ export const GenomicExtractionModal = ({
       } else {
         return <React.Fragment/>;
       }
-     })()}
+    })()}
     <ModalFooter>
       <Button type='secondary' onClick={() => closeFunction()}>
         { cancelText || 'Cancel' }
