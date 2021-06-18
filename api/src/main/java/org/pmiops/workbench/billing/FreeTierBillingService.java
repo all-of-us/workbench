@@ -240,7 +240,7 @@ public class FreeTierBillingService {
     final Map<String, DbWorkspace> workspacesIndexedByProject =
         // don't record cost for OLD or MIGRATED workspaces - only NEW
         workspaceDao.findAllByBillingMigrationStatus(BillingMigrationStatus.NEW).stream()
-            .collect(Collectors.toMap(DbWorkspace::getWorkspaceNamespace, Function.identity()));
+            .collect(Collectors.toMap(DbWorkspace::getGoogleProject, Function.identity()));
 
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
