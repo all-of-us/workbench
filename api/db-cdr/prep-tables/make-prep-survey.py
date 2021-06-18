@@ -414,8 +414,7 @@ def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
 
     if item_type == 'QUESTION':
         dict_row_control['code'] = get_short_code(code, long_code_to_short_code)
-
-    if item_type != 'QUESTION':
+    else:
         dict_row_control['answers_bucketed'] = 0
 
     global id_registered
