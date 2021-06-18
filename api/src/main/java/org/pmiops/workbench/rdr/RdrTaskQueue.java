@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RdrTaskQueue {
-  private static final Logger log = Logger.getLogger(RdrTaskQueue.class.getName());
   private static final String BASE_PATH = "/v1/cloudTask";
   public static final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   public static final String EXPORT_USER_PATH = BASE_PATH + "/exportWorkspaceData";
