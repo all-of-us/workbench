@@ -50,16 +50,6 @@ public class CloudTaskInterceptorTest extends SpringTest {
   }
 
   @Test
-  public void prehandleForCloudTaskWithBadHeader() throws Exception {
-    when(request.getMethod()).thenReturn(HttpMethods.POST);
-    when(handler.getMethod())
-        .thenReturn(
-            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
-    when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER)).thenReturn("asdf");
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-  }
-
-  @Test
   public void prehandleForCloudTaskWithHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())

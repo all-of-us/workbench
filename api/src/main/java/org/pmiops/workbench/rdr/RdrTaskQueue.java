@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -21,18 +20,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RdrTaskQueue {
-  private static final Logger log = Logger.getLogger(RdrTaskQueue.class.getName());
   private static final String BASE_PATH = "/v1/cloudTask";
   public static final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   public static final String EXPORT_USER_PATH = BASE_PATH + "/exportWorkspaceData";
 
   private WorkbenchLocationConfigService locationConfigService;
+  private Provider<CloudTasksClient> cloudTasksClientProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public RdrTaskQueue(
       WorkbenchLocationConfigService locationConfigService,
+      Provider<CloudTasksClient> cloudTasksClientProvider,
       Provider<WorkbenchConfig> configProvider) {
     this.locationConfigService = locationConfigService;
+    this.cloudTasksClientProvider = cloudTasksClientProvider;
     this.workbenchConfigProvider = configProvider;
   }
 
@@ -68,27 +69,20 @@ public class RdrTaskQueue {
     }
   }
 
-  private static void createAndPushTask(List<Long> ids, String queuePath, String taskUri)
+  private void createAndPushTask(List<Long> ids, String queuePath, String taskUri)
       throws IOException {
-    List<String> idsAsString = ids.stream().map(id -> id.toString()).collect(Collectors.toList());
     Gson gson = new Gson();
     String jsonIds = gson.toJson(ids);
-    try (CloudTasksClient client = CloudTasksClient.create()) {
-      AppEngineHttpRequest req =
-          AppEngineHttpRequest.newBuilder()
-              .setRelativeUri(taskUri)
-              .setBody(ByteString.copyFromUtf8(jsonIds))
-              .setHttpMethod(HttpMethod.POST)
-              .putHeaders("Content-type", "application/json")
-              .build();
-      client.createTask(queuePath, Task.newBuilder().setAppEngineHttpRequest(req).build());
-    } catch (IOException ex) {
-      log.severe(
-          String.format(
-              "Error while creating task to push to queue for IDS %s and path %s. "
-                  + "Re-throwing error",
-              idsAsString, taskUri));
-      throw ex;
-    }
+    CloudTasksClient client = cloudTasksClientProvider.get();
+    client.createTask(
+        queuePath,
+        Task.newBuilder()
+            .setAppEngineHttpRequest(
+                AppEngineHttpRequest.newBuilder()
+                    .setRelativeUri(taskUri)
+                    .setBody(ByteString.copyFromUtf8(jsonIds))
+                    .setHttpMethod(HttpMethod.POST)
+                    .putHeaders("Content-type", "application/json"))
+            .build());
   }
 }
