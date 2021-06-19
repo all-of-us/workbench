@@ -2675,6 +2675,26 @@ paths:
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
+  "/v1/cloudTask/auditProjectAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: 'Audits the provided user\'s access to GCP resources'
+      operationId: auditProjectAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Audit configuration to run.
+        schema:
+          "$ref": "#/definitions/AuditProjectAccessRequest"
+      responses:
+        200:
+          description: 'Audit ran successfully (possibly with audit findings)'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -8145,6 +8165,17 @@ definitions:
         format: int64
       conceptName:
         type: string
+
+  AuditProjectAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: ''
+        type: array
+        items:
+          type: integer
+          format: int64
+
   WorkspaceAuditLogQueryResponse:
     type: object
     description: >

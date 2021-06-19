@@ -75,6 +75,8 @@ public interface UserService {
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
+  List<Long> getAllUserIds();
+
   List<DbUser> getAllUsers();
 
   List<DbUser> getAllUsersExcludingDisabled();

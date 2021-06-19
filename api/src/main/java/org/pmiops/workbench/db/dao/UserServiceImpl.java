@@ -703,6 +703,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public List<Long> getAllUserIds() {
+    return userDao.findUserIds();
+  }
+
+  @Override
   public List<DbUser> getAllUsers() {
     return userDao.findUsers();
   }

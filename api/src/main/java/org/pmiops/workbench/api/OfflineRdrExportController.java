@@ -1,8 +1,8 @@
 package org.pmiops.workbench.api;
 
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.RdrExportService;
-import org.pmiops.workbench.rdr.RdrTaskQueue;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
 
   private RdrExportService rdrExportService;
-  private RdrTaskQueue rdrTaskQueue;
+  private TaskQueueService taskQueueService;
 
-  OfflineRdrExportController(RdrExportService rdrExportService, RdrTaskQueue rdrTaskQueue) {
-    this.rdrTaskQueue = rdrTaskQueue;
+  OfflineRdrExportController(RdrExportService rdrExportService, TaskQueueService taskQueueService) {
+    this.taskQueueService = taskQueueService;
     this.rdrExportService = rdrExportService;
   }
 
@@ -38,14 +38,13 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     // Its important to send all researcher information first to RDR before sending workspace since
     // workspace object will contain collaborator information (userId)
     try {
-      rdrTaskQueue.groupIdsAndPushTask(
-          rdrExportService.findAllUserIdsToExport(), RdrTaskQueue.EXPORT_RESEARCHER_PATH);
+      taskQueueService.groupAndPushRdrResearcherTasks(rdrExportService.findAllUserIdsToExport());
     } catch (Exception ex) {
       throw new ServerErrorException("Error creating RDR export Cloud Tasks for users", ex);
     }
     try {
-      rdrTaskQueue.groupIdsAndPushTask(
-          rdrExportService.findAllWorkspacesIdsToExport(), RdrTaskQueue.EXPORT_USER_PATH);
+      taskQueueService.groupAndPushRdrResearcherTasks(
+          rdrExportService.findAllWorkspacesIdsToExport());
     } catch (Exception ex) {
       throw new ServerErrorException("Error creating RDR export Cloud Tasks for workspaces", ex);
     }
