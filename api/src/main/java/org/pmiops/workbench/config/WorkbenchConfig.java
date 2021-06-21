@@ -32,6 +32,7 @@ public class WorkbenchConfig {
   public ReportingConfig reporting;
   public RasConfig ras;
   public AccessRenewalConfig accessRenewal;
+  public OfflineBatchConfig offlineBatch;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -58,6 +59,7 @@ public class WorkbenchConfig {
     config.reporting = new ReportingConfig();
     config.ras = new RasConfig();
     config.accessRenewal = new AccessRenewalConfig();
+    config.offlineBatch = new OfflineBatchConfig();
     return config;
   }
 
@@ -244,6 +246,8 @@ public class WorkbenchConfig {
     public boolean enableBetaAccess;
     // If true, users can be expired on the system, losing access
     public boolean enableAccessRenewal;
+    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
+    public boolean enableRasLoginGovLinking;
   }
 
   public static class FeatureFlagsConfig {
@@ -265,8 +269,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
-    // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
-    public boolean enableRasLoginGovLinking;
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
@@ -328,5 +330,9 @@ public class WorkbenchConfig {
     public Long expiryDays;
     // Thresholds for email alerting based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
+  }
+
+  public static class OfflineBatchConfig {
+    public String unsafeCloudTasksForwardingHost;
   }
 }

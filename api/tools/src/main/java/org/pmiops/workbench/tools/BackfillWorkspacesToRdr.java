@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.logging.Logger;
@@ -62,8 +63,9 @@ public class BackfillWorkspacesToRdr {
   @Bean
   private RdrTaskQueue rdrTaskQueue(
       WorkbenchLocationConfigService locationConfigService,
+      Provider<CloudTasksClient> cloudTasksClientProvider,
       Provider<WorkbenchConfig> configProvider) {
-    return new RdrTaskQueue(locationConfigService, configProvider);
+    return new RdrTaskQueue(locationConfigService, cloudTasksClientProvider, configProvider);
   }
 
   @Bean

@@ -3,7 +3,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
 import {cohortReviewStore} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
@@ -16,7 +16,8 @@ import {
   CohortReview,
   Domain,
   GenderOrSexType,
-  SearchRequest
+  SearchRequest,
+  SortOrder
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -192,8 +193,9 @@ export interface QueryReportState {
   cohort: Cohort;
   data: any;
   groupedData: any;
-  loading: boolean;
+  chartsLoading: boolean;
   review: CohortReview;
+  reviewLoading: boolean;
 }
 
 export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
@@ -205,23 +207,38 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         cohort: undefined,
         data: null,
         groupedData: null,
-        loading: true,
-        review: cohortReviewStore.getValue()
+        chartsLoading: true,
+        review: cohortReviewStore.getValue(),
+        reviewLoading: true
       };
     }
 
-    componentDidMount() {
-      const {cdrVersionTiersResponse} = this.props;
+    async componentDidMount() {
+      const {cdrVersionTiersResponse, workspace: {cdrVersionId}} = this.props;
       const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
+      let request: SearchRequest;
+      if (review) {
+        this.setState({reviewLoading: false});
+        request = (JSON.parse(review.cohortDefinition));
+      } else {
+        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+          page: 0,
+          pageSize: 25,
+          sortOrder: SortOrder.Asc
+        }).then(({cohortReview}) => {
+          request = (JSON.parse(cohortReview.cohortDefinition));
+          this.setState({review: cohortReview, reviewLoading: false});
+          cohortReviewStore.next(cohortReview);
+        });
+      }
       cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
-      const cdrName = findCdrVersion(review.cdrVersionId.toString(), cdrVersionTiersResponse).name;
+      const cdrName = findCdrVersion(cdrVersionId, cdrVersionTiersResponse).name;
       this.setState({cdrName});
-      const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
       cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
         .then(response => {
           this.groupChartData(response.items);
-          this.setState({data: response.items, loading: false});
+          this.setState({data: response.items, chartsLoading: false});
         });
     }
 
@@ -259,8 +276,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     render() {
-      const {cdrName, cohort, data, groupedData, loading, review} = this.state;
-      const totalCount = review.matchedParticipantCount;
+      const {cdrName, cohort, data, groupedData, chartsLoading, review, reviewLoading} = this.state;
       // TODO can we use the creation time from the review instead of the cohort here?
       const created = !!cohort ? moment(cohort.creationTime).format('YYYY-MM-DD') : null;
       return <React.Fragment>
@@ -271,7 +287,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           onClick={() => this.goBack()}>
           Back to review set
         </button>
-        <div style={styles.reportBackground}>
+        {reviewLoading ? <SpinnerOverlay/> : <div style={styles.reportBackground}>
           <div style={styles.container}>
             <div style={styles.row}>
               <div style={columns.col6}>
@@ -306,7 +322,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                       </div>
                     </div>
                     <div style={columns.col12}>
-                      <CohortDefinition/>
+                      <CohortDefinition review={review}/>
                     </div>
                   </div>
                 </div>
@@ -354,14 +370,14 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                           {groupedData[group][row].count.toLocaleString()}
                         </div>
                         <div style={columns.col3}>
-                          {Math.round(groupedData[group][row].count / totalCount * 100)}%
+                          {Math.round(groupedData[group][row].count / review.matchedParticipantCount * 100)}%
                         </div>
                       </div>
                     </div>
                   ))}
                   </div>
                 ))}
-                {loading && <SpinnerOverlay />}
+                {chartsLoading && <SpinnerOverlay />}
               </div>
             </div>
           </div>
@@ -383,13 +399,13 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                       <div style={demoTitle}>Demographics</div>
                       <div style={styles.graphBorder}>
                         {data && <ComboChart mode={'stacked'} data={data} />}
-                        {loading && <SpinnerOverlay />}
+                        {chartsLoading && <SpinnerOverlay />}
                       </div>
                     </div>
                     <div style={{...styles.col, flex: '0 0 83.33333%', maxWidth: '83.33333%'}}>
                       {domains.map((domain, i) => (
                         <div key={i} style={{minHeight: '10rem', position: 'relative'}}>
-                          <ParticipantsCharts domain={domain}/>
+                          <ParticipantsCharts domain={domain} review={review}/>
                         </div>
                       ))}
                     </div>
@@ -398,7 +414,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </React.Fragment>;
     }
   }
