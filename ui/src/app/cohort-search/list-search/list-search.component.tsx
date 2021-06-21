@@ -5,7 +5,7 @@ import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
 import {AlertDanger} from 'app/components/alert';
-import {Clickable} from 'app/components/buttons';
+import {Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -22,6 +22,7 @@ import {
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {environment} from 'environments/environment';
 import {
   CdrVersion,
   CdrVersionTiersResponse,
@@ -447,6 +448,11 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       return this.props.searchContext.domain === Domain.SURVEY;
     }
 
+    getConceptLink(conceptId) {
+      return environment.publicUiUrl + '/ehr/' +
+        domainToTitle(this.props.searchContext.domain).toLowerCase() + '?search=' + conceptId;
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.searchContext.source === 'cohort' && row.hasAttributes;
@@ -484,7 +490,11 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
             </div>
           </TooltipTrigger>
         </td>
-        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>
+          <StyledAnchorTag href={this.getConceptLink(row.conceptId)} target='_blank'>
+            {row.conceptId}
+          </StyledAnchorTag>
+        </td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
