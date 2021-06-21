@@ -47,7 +47,6 @@
     "@types/faker": "^5.1.5",
     "@types/fs-extra": "^9.0.8",
     "@types/jest": "^26.0.16",
-    "@types/jest-environment-puppeteer": "^4.4.0",
     "@types/lodash": "^4.14.165",
     "@types/node": "^14.14.10",
     "@types/puppeteer": "^5.4.1",

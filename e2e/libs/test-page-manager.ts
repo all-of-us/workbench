@@ -1,8 +1,9 @@
 import fp from 'lodash/fp';
 import fs from 'fs-extra';
 import { logger } from 'libs/logger';
-import { Browser, ConsoleMessage, defaultArgs, JSHandle, launch, Page, Request } from 'puppeteer';
-import { savePageToFile, takeScreenshot } from './report-test-error';
+import { Browser, ConsoleMessage, defaultArgs, JSHandle, launch, LaunchOptions, Page, Request } from 'puppeteer';
+import { savePageToFile, takeScreenshot } from './test-error-manager';
+import GoogleLoginPage from 'app/page/google-login';
 
 const { PUPPETEER_DEBUG, PUPPETEER_HEADLESS, CI, CIRCLE_BUILD_NUM } = process.env;
 const failScreenshotDir = 'logs/screenshot';
@@ -51,11 +52,11 @@ const defaultLaunchOptions = {
   args: isCi ? ciChromeOptions : defaultChromeOptions
 };
 
-const setUpBeforeEachTest = async (page: Page): Promise<void> => {
+const setupPageBeforeEachTest = async (page: Page): Promise<void> => {
   page.setDefaultNavigationTimeout(90000); // Puppeteer default timeout is 30 seconds.
   await page.setUserAgent(userAgent);
   await page.setViewport({ width: 1300, height: 0 });
-  //await page.setRequestInterception(true);
+  await page.setRequestInterception(true);
 
   /**
    * Emitted when a page issues a request. The request object is read-only.
@@ -182,31 +183,85 @@ const setUpBeforeEachTest = async (page: Page): Promise<void> => {
   });
 };
 
-export const withBrowser = async (test): Promise<unknown> => {
+/**
+ *
+ * @param launchOpts: {@link LaunchOptions} New browser launch options.
+ */
+export const withBrowser = (launchOpts?: LaunchOptions) => async (
+  testFn: (browser: Browser) => Promise<void>
+): Promise<void> => {
   console.log(`PUPPETEER_DEBUG: ${PUPPETEER_DEBUG}`);
   console.log(`PUPPETEER_HEADLESS: ${PUPPETEER_HEADLESS}`);
   console.log(`isDebug: ${isDebug}`);
 
-  const browser = await launch(defaultLaunchOptions);
-
+  const browser = await launch(launchOpts ? launchOpts : defaultLaunchOptions);
   try {
-    console.log('begin browser');
-    return await test(browser);
+    console.log('withBrowser begin');
+    return await testFn(browser);
   } catch (err) {
     if (err instanceof Error) {
       logger.error(err.message);
     }
     throw err;
   } finally {
-    await browser.close();
+    await browser.close().catch((err) => {
+      console.error(`Unable to close page. Error message: ${err.message}`);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 };
 
-export const withPage = (browser: Browser) => async (test): Promise<unknown> => {
+/**
+ * Launch new browser and incognito page. Opens Workbench Login page.
+ * @param launchOpts: {@link LaunchOptions} New browser launch options.
+ */
+export const withPage = (launchOpts?: LaunchOptions) => async (
+  testFn: (page: Page, browser: Browser) => Promise<void>
+): Promise<void> => {
+  let incognitoPage;
+  await withBrowser(launchOpts)(async (browser) => {
+    try {
+      console.log('withPage begin');
+      incognitoPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
+      await setupPageBeforeEachTest(incognitoPage);
+      await new GoogleLoginPage(incognitoPage).load();
+      return await testFn(incognitoPage, browser);
+    } catch (err) {
+      if (err instanceof Error) {
+        logger.error(err.message);
+      }
+      await fs.ensureDir(failScreenshotDir);
+      await fs.ensureDir(failHtmlDir);
+      const testName = testNames[testNames.length - 1];
+      const screenshotFile = `${failScreenshotDir}/${testName}.png`;
+      const htmlFile = `${failHtmlDir}/${testName}.html`;
+      await takeScreenshot(incognitoPage, screenshotFile);
+      await savePageToFile(incognitoPage, htmlFile);
+      throw err;
+    } finally {
+      await incognitoPage.close().catch((err) => {
+        console.error(`Unable to close page. Error message: ${err.message}`);
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  });
+};
+
+/*
+export const withPage = (browser: Browser) => async (
+  test,
+  opts: { signInWithToken?: boolean; userEmail?: string; pwd?: string } = {}
+): Promise<unknown> => {
+  const { signInWithToken = true, userEmail, pwd } = opts;
   const page = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
   try {
-    console.log('begin page');
+    console.log('withPage begin');
     await setUpBeforeEachTest(page);
+    if (signInWithToken) {
+      await signInWithAccessToken(page);
+    } else if (userEmail && pwd) {
+      await signIn(page, userEmail, pwd);
+    }
     return await test(page);
   } catch (err) {
     if (err instanceof Error) {
@@ -220,22 +275,27 @@ export const withPage = (browser: Browser) => async (test): Promise<unknown> => 
     await takeScreenshot(page, screenshotFile);
     await savePageToFile(page, htmlFile);
     throw err;
+  } finally {
+    await page.close().catch((err) => {
+      console.error(`ERROR when close page.\n${err}`);
+    });
   }
 };
+*/
 
-export const withNewPage = (browser: Browser) => async (test: (page: Page) => Promise<unknown>): Promise<void> => {
-  const page = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
-  try {
-    await test(page);
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error(err.message);
-      await fs.ensureDir(failScreenshotDir);
-      await fs.ensureDir(failHtmlDir);
-    }
-    throw err;
-  }
+/*
+export const withAuthenticatedUser = async (authOpts: { userEmail?: string; pwd?: string } = {}): Promise<void> => {
+  const { userEmail, pwd } = authOpts;
+  const loginFn = async (page) => {
+    !!userEmail && !!pwd ? await signIn(page, userEmail, pwd) : await signInWithAccessToken(page);
+  };
+  await Promise.all(
+      fp.flow(
+      fp.flow(withBrowser, withPage, loginFn)),
+  )
+  return page;
 };
+*/
 
 const getPageTitle = async (page: Page) => {
   return await page
