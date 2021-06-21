@@ -1,7 +1,7 @@
 import CookiePolicyPage from 'app/page/cookie-policy';
 import GoogleLoginPage from 'app/page/google-login';
 import { config } from 'resources/workbench-config';
-import { withPage } from 'libs/test-page-manager';
+import { withPage } from 'libs/page-manager';
 
 describe('Login tests:', () => {
   test('Cookie banner visible on login page', async () => {
