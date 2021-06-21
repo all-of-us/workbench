@@ -205,7 +205,7 @@ export const withBrowser = (launchOpts?: LaunchOptions) => async (
     throw err;
   } finally {
     await browser.close().catch((err) => {
-      console.error(`Unable to close page. Error message: ${err.message}`);
+      console.error(`Unable to close browser. Error message: ${err.message}`);
     });
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
@@ -246,56 +246,6 @@ export const withPage = (launchOpts?: LaunchOptions) => async (
     }
   });
 };
-
-/*
-export const withPage = (browser: Browser) => async (
-  test,
-  opts: { signInWithToken?: boolean; userEmail?: string; pwd?: string } = {}
-): Promise<unknown> => {
-  const { signInWithToken = true, userEmail, pwd } = opts;
-  const page = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
-  try {
-    console.log('withPage begin');
-    await setUpBeforeEachTest(page);
-    if (signInWithToken) {
-      await signInWithAccessToken(page);
-    } else if (userEmail && pwd) {
-      await signIn(page, userEmail, pwd);
-    }
-    return await test(page);
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error(err.message);
-    }
-    await fs.ensureDir(failScreenshotDir);
-    await fs.ensureDir(failHtmlDir);
-    const testName = testNames[testNames.length - 1];
-    const screenshotFile = `${failScreenshotDir}/${testName}.png`;
-    const htmlFile = `${failHtmlDir}/${testName}.html`;
-    await takeScreenshot(page, screenshotFile);
-    await savePageToFile(page, htmlFile);
-    throw err;
-  } finally {
-    await page.close().catch((err) => {
-      console.error(`ERROR when close page.\n${err}`);
-    });
-  }
-};
-*/
-
-/*
-export const withAuthenticatedUser = async (authOpts: { userEmail?: string; pwd?: string } = {}): Promise<void> => {
-  const { userEmail, pwd } = authOpts;
-  const loginFn = async (page) => {
-    !!userEmail && !!pwd ? await signIn(page, userEmail, pwd) : await signInWithAccessToken(page);
-  };
-  await Promise.all(
-      fp.flow(
-      fp.flow(withBrowser, withPage, loginFn)),
-  )
-  return page;
-};
-*/
 
 const getPageTitle = async (page: Page) => {
   return await page
