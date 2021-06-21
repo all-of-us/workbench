@@ -1,6 +1,6 @@
 import HomePage from 'app/page/home-page';
 import { Page } from 'puppeteer';
-import { withPage } from 'libs/page-manager';
+import { withPage } from 'libs/page-init';
 import { signIn } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 

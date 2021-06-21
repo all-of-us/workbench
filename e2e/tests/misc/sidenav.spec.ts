@@ -2,7 +2,7 @@ import ProfilePage from 'app/page/profile-page';
 import { signInWithAccessToken, signOut } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { waitForDocumentTitle } from 'utils/waits-utils';
-import { withPage } from 'libs/page-manager';
+import { withPage } from 'libs/page-init';
 
 describe('Sidebar Navigation', () => {
   test('SideNav menu', async () => {
