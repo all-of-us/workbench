@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -20,6 +21,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodConfigACL;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodConfigACLInner;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodID;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodIO;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodQuery;
@@ -179,6 +182,18 @@ public class CreateTerraMethodSnapshot {
                       methodName,
                       Integer.toString(latestSnapshotId),
                       false);
+
+          FirecloudMethodConfigACL acl = apiClientFactory.methodRepositoryApi().setMethodACL(
+              Collections.singletonList(new FirecloudMethodConfigACLInner().user("eric.song@pmi-ops.org").role("READER")),
+              methodResponse.getNamespace(),
+              methodResponse.getName(),
+              methodResponse.getSnapshotId().toString()
+          );
+
+          for (FirecloudMethodConfigACLInner aclInner : acl) {
+            System.out.println(aclInner);
+          }
+
         } catch (ApiException e) {
           log.warning(e.getResponseBody());
           throw e;

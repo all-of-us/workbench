@@ -31,6 +31,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
@@ -134,11 +135,39 @@ public class GenomicExtractionService {
                               cohortExtractionConfig.operationalTerraWorkspaceName,
                               dbSubmission.getSubmissionId());
 
+                  firecloudSubmission.getWorkflows().get(0).getWorkflowId();
+
+
                   TerraJobStatus status =
                       genomicExtractionMapper.convertWorkflowStatus(
                           // Extraction submissions should only have one workflow.
                           firecloudSubmission.getWorkflows().get(0).getStatus());
                   dbSubmission.setTerraStatusEnum(status);
+
+                  final FirecloudWorkflowOutputsResponse outputsResponse2 = submissionApiProvider.get().getWorkflowOutputs(
+                      cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                      cohortExtractionConfig.operationalTerraWorkspaceName,
+                      firecloudSubmission.getSubmissionId(),
+                      firecloudSubmission.getWorkflows().get(0).getWorkflowId());
+
+                  if (TerraJobStatus.SUCCEEDED.equals(status)) {
+                    final FirecloudWorkflowOutputsResponse outputsResponse = submissionApiProvider.get().getWorkflowOutputs(
+                        cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                        cohortExtractionConfig.operationalTerraWorkspaceName,
+                        firecloudSubmission.getSubmissionId(),
+                        firecloudSubmission.getWorkflows().get(0).getWorkflowId());
+
+                    final Optional<String> vcfSizeOutput = Optional.of(outputsResponse
+                            .getTasks()
+                            .get(EXTRACT_WORKFLOW_NAME)
+                            .getOutputs()
+                            .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+
+                    if (vcfSizeOutput.isPresent()) {
+                      Double.parseDouble(vcfSizeOutput.get());
+                    }
+                  }
+
                   if (isTerminal(status)) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
@@ -213,9 +242,6 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
                             .put(
-                                EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_cohorts_dataset",
-                                "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
-                            .put(
                                 EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
                                 "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
                             .put(
@@ -242,7 +268,7 @@ public class GenomicExtractionService {
                             .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar\"")
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-344-g7325330-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
@@ -254,18 +280,22 @@ public class GenomicExtractionService {
                 cohortExtractionConfig.operationalTerraWorkspaceName)
             .getMethodConfiguration();
 
-    FirecloudSubmissionResponse submissionResponse =
-        submissionApiProvider
-            .get()
-            .createSubmission(
-                new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(false)
-                    .methodConfigurationNamespace(methodConfig.getNamespace())
-                    .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false),
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName);
-
+    FirecloudSubmissionResponse submissionResponse = null;
+    try {
+      submissionResponse =
+          submissionApiProvider
+              .get()
+              .createSubmission(
+                  new FirecloudSubmissionRequest()
+                      .deleteIntermediateOutputFiles(false)
+                      .methodConfigurationNamespace(methodConfig.getNamespace())
+                      .methodConfigurationName(methodConfig.getName())
+                      .useCallCache(false),
+                  cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                  cohortExtractionConfig.operationalTerraWorkspaceName);
+    } catch (ApiException e) {
+      System.out.println(e.getResponseBody());
+    }
     // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
     // check for such jobs.
     DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
