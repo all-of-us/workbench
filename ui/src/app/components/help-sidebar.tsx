@@ -332,7 +332,7 @@ export const HelpSidebar = fp.flow(
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: 'Compute Configuration'
+          tooltip: 'Cloud Analysis Environment'
         },
         'genomicExtractions': {
           id: 'genomicExtractions',
