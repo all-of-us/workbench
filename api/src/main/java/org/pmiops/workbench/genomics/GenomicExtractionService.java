@@ -135,20 +135,11 @@ public class GenomicExtractionService {
                               cohortExtractionConfig.operationalTerraWorkspaceName,
                               dbSubmission.getSubmissionId());
 
-                  firecloudSubmission.getWorkflows().get(0).getWorkflowId();
-
-
                   TerraJobStatus status =
                       genomicExtractionMapper.convertWorkflowStatus(
                           // Extraction submissions should only have one workflow.
                           firecloudSubmission.getWorkflows().get(0).getStatus());
                   dbSubmission.setTerraStatusEnum(status);
-
-                  final FirecloudWorkflowOutputsResponse outputsResponse2 = submissionApiProvider.get().getWorkflowOutputs(
-                      cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                      cohortExtractionConfig.operationalTerraWorkspaceName,
-                      firecloudSubmission.getSubmissionId(),
-                      firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
                   if (TerraJobStatus.SUCCEEDED.equals(status)) {
                     final FirecloudWorkflowOutputsResponse outputsResponse = submissionApiProvider.get().getWorkflowOutputs(
@@ -280,22 +271,18 @@ public class GenomicExtractionService {
                 cohortExtractionConfig.operationalTerraWorkspaceName)
             .getMethodConfiguration();
 
-    FirecloudSubmissionResponse submissionResponse = null;
-    try {
-      submissionResponse =
-          submissionApiProvider
-              .get()
-              .createSubmission(
-                  new FirecloudSubmissionRequest()
-                      .deleteIntermediateOutputFiles(false)
-                      .methodConfigurationNamespace(methodConfig.getNamespace())
-                      .methodConfigurationName(methodConfig.getName())
-                      .useCallCache(false),
-                  cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                  cohortExtractionConfig.operationalTerraWorkspaceName);
-    } catch (ApiException e) {
-      System.out.println(e.getResponseBody());
-    }
+    FirecloudSubmissionResponse submissionResponse =
+        submissionApiProvider
+            .get()
+            .createSubmission(
+                new FirecloudSubmissionRequest()
+                    .deleteIntermediateOutputFiles(false)
+                    .methodConfigurationNamespace(methodConfig.getNamespace())
+                    .methodConfigurationName(methodConfig.getName())
+                    .useCallCache(false),
+                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                cohortExtractionConfig.operationalTerraWorkspaceName);
+
     // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
     // check for such jobs.
     DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
