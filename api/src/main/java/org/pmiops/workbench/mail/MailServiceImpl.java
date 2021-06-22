@@ -7,9 +7,6 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
@@ -87,6 +84,7 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user));
+
     sendWithRetries(
         contactEmail,
         "Your new All of Us Researcher Workbench Account",
@@ -104,6 +102,7 @@ public class MailServiceImpl implements MailService {
     String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
     final String htmlMessage =
         buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions));
+
     sendWithRetries(
         contactEmail,
         "Instructions from your institution on using the Researcher Workbench",
@@ -348,14 +347,6 @@ public class MailServiceImpl implements MailService {
 
   private String getRegistrationImage() {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
-  }
-
-  // TODO choose desired date format
-  // currently will display '07/14/2020'
-  private String formatDate(final LocalDate expirationDate) {
-    return DateTimeFormatter.ofPattern("MM/dd/yyyy")
-        .withZone(ZoneId.systemDefault())
-        .format(expirationDate);
   }
 
   private String formatPercentage(double threshold) {
