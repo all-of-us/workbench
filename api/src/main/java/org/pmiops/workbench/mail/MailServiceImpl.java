@@ -160,36 +160,35 @@ public class MailServiceImpl implements MailService {
       final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
-    // TODO: feature flag?
-    final boolean emailSent = true;
+    if (workbenchConfig.accessRenewal.sendEmails) {
+      final String msgHtml =
+          buildHtml(
+              REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
+              registeredTierAccessThresholdSubstitutionMap(expirationTime));
+      final String subject =
+          "Your access to All of Us Registered Tier Data will expire "
+              + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining));
 
-    final String logMsg =
-        String.format(
-                "Registered Tier access expiration will occur for user %s at %s (in %d days). ",
-                user.getUsername(), formatCentralTime(expirationTime), daysRemaining)
-            + (emailSent ? "Email sent." : "Email NOT sent.");
-    log.info(logMsg);
+      final MandrillMessage msg =
+          new MandrillMessage()
+              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
+              .html(msgHtml)
+              .subject(subject)
+              .fromEmail(workbenchConfig.mandrill.fromEmail);
 
-    final String msgHtml =
-        buildHtml(
-            REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessThresholdSubstitutionMap(expirationTime));
-    final String subject =
-        "Your access to All of Us Registered Tier Data will expire "
-            + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining));
-
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-            .html(msgHtml)
-            .subject(subject)
-            .fromEmail(workbenchConfig.mandrill.fromEmail);
-
-    sendWithRetries(
-        msg,
-        String.format(
-            "User %s will lose registered tier access in %d days",
-            user.getUsername(), daysRemaining));
+      sendWithRetries(
+          msg,
+          String.format(
+              "User %s will lose registered tier access in %d days",
+              user.getUsername(), daysRemaining));
+    } else {
+      final String logMsg =
+          String.format(
+              "Registered Tier access expiration will occur for user %s at %s (in %d days). "
+                  + "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.",
+              user.getUsername(), formatCentralTime(expirationTime), daysRemaining);
+      log.info(logMsg);
+    }
   }
 
   @Override
