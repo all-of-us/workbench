@@ -1632,6 +1632,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorReport'
+  /api/methods/{namespace}/permissions:
+    post:
+      tags:
+        - methodRepository
+      summary: set ACL permissions on a Method Repository Method Namespace
+      operationId: setMethodNamespaceACL
+      parameters:
+        - name: namespace
+          in: path
+          description: Method Namespace
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: the ACLs to upsert
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfigACL'
+        required: true
+      responses:
+        200:
+          description: the indicated method namespace ACL permissions once the posted
+            changes have been applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodConfigACL'
+        400:
+          description: Invalid content format
+          content: {}
+        403:
+          description: User does not have correct permissions to manage namespace
+            permissions or the indicated namespace was not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+  /api/methods/{namespace}/{name}/{snapshotId}/permissions:
+    post:
+      tags:
+        - methodRepository
+      summary: set ACL permissions on a Method Repository method
+      operationId: setMethodACL
+      parameters:
+        - name: namespace
+          in: path
+          description: Method Namespace
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          description: Method Name
+          required: true
+          schema:
+            type: string
+        - name: snapshotId
+          in: path
+          description: Method snapshot ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: the ACLs to upsert
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfigACL'
+        required: true
+      responses:
+        200:
+          description: the indicated method ACL once the posted changes have been
+            applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodConfigACL'
+        400:
+          description: Bad Request
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
   /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/workflows/{workflowId}/outputs:
     get:
       tags:
@@ -2476,6 +2560,20 @@ components:
           type: boolean
           description: Is this config marked as deleted?
           default: false
+    MethodConfigACL:
+      type: array
+      items:
+        required:
+          - role
+          - user
+        type: object
+        properties:
+          user:
+            type: string
+            description: a user's ID or "public"
+          role:
+            type: string
+            description: one of "NO ACCESS", "READER", or "OWNER"
     ValidatedMethodConfiguration:
       required:
         - extraInputs
