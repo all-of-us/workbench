@@ -2681,7 +2681,7 @@ paths:
       - cloudTaskUser
       - cloudTask
       security: []
-      description: 'Audits the provided user\'s access to GCP resources'
+      description: "Audits the provided user's access to GCP resources"
       operationId: auditProjectAccess
       consumes:
       - application/json

@@ -3,18 +3,15 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -29,12 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
-  private static final List<String> WHITELISTED_ORG_IDS =
-      Arrays.asList(
-          "400176686919", // test.firecloud.org
-          "386193000800", // firecloud.org
-          "394551486437" // pmi-ops.org
-          );
   private static final Map<AccessModule, String> accessModuleLogText =
       ImmutableMap.of(
           AccessModule.COMPLIANCE_TRAINING, "Compliance training",
@@ -44,7 +35,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private final AccessTierService accessTierService;
   private final UserService userService;
   private final DirectoryService directoryService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
 
   @Autowired
@@ -52,13 +42,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       AccessTierService accessTierService,
       UserService userService,
       DirectoryService directoryService,
-      TaskQueueService taskQueueService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      TaskQueueService taskQueueService) {
     this.accessTierService = accessTierService;
     this.userService = userService;
     this.directoryService = directoryService;
     this.taskQueueService = taskQueueService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
