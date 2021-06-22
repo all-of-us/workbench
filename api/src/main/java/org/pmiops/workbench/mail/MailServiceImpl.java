@@ -121,7 +121,7 @@ public class MailServiceImpl implements MailService {
             user.getUsername(), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
-    final String msgHtml =
+    final String htmlMessage =
         buildHtml(
             FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
             freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
@@ -132,24 +132,24 @@ public class MailServiceImpl implements MailService {
             "Reminder - %s Free credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
         String.format("User %s passed a free tier dollar threshold", user.getUsername()),
-        msgHtml);
+        htmlMessage);
   }
 
   @Override
   public void alertUserFreeTierExpiration(final DbUser user) throws MessagingException {
 
-    final String logMsg =
+    final String expirationMsg =
         String.format("Free credits have expired for User %s", user.getUsername());
-    log.info(logMsg);
+    log.info(expirationMsg);
 
-    final String msgHtml =
+    final String htmlMessage =
         buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
     sendWithRetries(
         user.getContactEmail(),
         "Alert - Free credit expiration in All of Us Researcher Workbench",
-        String.format("Free tier credits have expired for user %s", user.getUsername()),
-        msgHtml);
+        expirationMsg,
+        htmlMessage);
   }
 
   @Override
