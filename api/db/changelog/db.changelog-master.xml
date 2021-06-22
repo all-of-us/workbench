@@ -175,6 +175,7 @@
   <include file="changelog/db.changelog-163-delete-institutional-affiliation.xml"/>
   <include file="changelog/db.changelog-164-genomic-extraction-store-output-dir.xml"/>
   <include file="changelog/db.changelog-165-set-default-publications-confirmed-time.xml"/>
+  <include file="changelog/db.changelog-166-extraction-submission-add-size.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

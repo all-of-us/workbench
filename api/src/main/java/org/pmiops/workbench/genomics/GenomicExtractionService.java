@@ -164,7 +164,7 @@ public class GenomicExtractionService {
                             .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
 
                     if (vcfSizeOutput.isPresent()) {
-                      Double.parseDouble(vcfSizeOutput.get());
+                      dbSubmission.setVcfSizeMb(Math.round(Double.parseDouble(vcfSizeOutput.get())));
                     }
                   }
 

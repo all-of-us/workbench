@@ -132,8 +132,13 @@ const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) =
     duration: durationMoment && durationMoment.asSeconds(),
     durationDisplay: !!durationMoment ? formatDuration(durationMoment) : <MissingCell/>,
     cost: job.cost,
-    costDisplay: job.cost === null ? // !!job.cost doesn't work here because 0 is a valid value
-      <MissingCell/> : formatUsd(job.cost),
+    costDisplay: job.cost === null // !!job.cost doesn't work here because 0 is a valid value
+      ? <MissingCell/>
+      : formatUsd(job.cost),
+    size: job.vcfSizeMb,
+    sizeDisplay: job.vcfSizeMb === null
+      ? <MissingCell/>
+      : (job.vcfSizeMb / 1000).toFixed(1) + 'GB',
     menuJsx: <GenomicsExtractionMenu job={job} workspace={workspace}/>,
   };
 };
@@ -228,6 +233,9 @@ export const GenomicsExtractionTable = fp.flow(
                     <Column header='Cost'
                             field='costDisplay'
                             sortable sortField='cost'/>
+                    <Column header='Size'
+                        field='sizeDisplay'
+                        sortable sortField='size'/>
                     <Column header='Duration'
                             field='durationDisplay'
                             sortable sortField='duration'/>
