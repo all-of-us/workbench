@@ -12,8 +12,7 @@
   <app-workspace-share *ngIf="sharing" [onClose]="closeShare"
                        [workspace]="workspace"
                        [accessLevel]="accessLevel"
-                       [userRoles]="userRoles"
-                       [userEmail]="username"></app-workspace-share>
+                       [userRoles]="userRoles"></app-workspace-share>
   <app-confirm-delete-modal *ngIf="confirmDeleting"
                             [resourceType]="resourceType"
                             [resourceName]="workspace.name"

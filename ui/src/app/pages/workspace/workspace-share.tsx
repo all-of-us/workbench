@@ -3,7 +3,13 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {isBlank, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {
+  isBlank,
+  reactStyles,
+  ReactWrapperBase,
+  withCurrentWorkspace,
+  withUserProfile
+} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -12,7 +18,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  BillingAccountType,
+  BillingAccountType, Profile,
   User,
   UserRole,
   Workspace,
@@ -157,14 +163,14 @@ export interface State {
 export interface Props {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
-  userEmail: string;
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
   onClose: Function;
   // The userRoles to pre-populate the share dialog. Must be filled with all
   // pre-existing roles on the workspace for this dialog to work correctly.
   userRoles: UserRole[];
 }
 
-export const WorkspaceShare = withCurrentWorkspace()(class extends React.Component<Props, State> {
+export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())(class extends React.Component<Props, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
@@ -416,7 +422,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
                     <Select value={user.role}
                             styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
                             menuPortalTarget={document.getElementById('popup-root')}
-                            isDisabled={user.email === this.props.userEmail}
+                            isDisabled={user.email === this.props.profileState.profile.username}
                             classNamePrefix={this.cleanClassNameForSelect(user.email)}
                             data-test-id={user.email + '-user-role'}
                             onChange={e => this.setRole(e, user)}
@@ -424,7 +430,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
                   </div>
                 <div style={styles.box}>
                   <div style={styles.collaboratorIcon}>
-                    {(this.hasPermission && (user.email !== this.props.userEmail)) &&
+                    {(this.hasPermission && (user.email !== this.props.profileState.profile.username)) &&
                     <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
                              style={{height: '21px', width: '21px'}}
                              onClick={() => this.removeCollaborator(user)}/>}
@@ -471,12 +477,11 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
 export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit {
   @Input('workspace') workspace: Workspace;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
-  @Input('userEmail') userEmail: Props['userEmail'];
   @Input('onClose') onClose: Props['onClose'];
   @Input('userRoles') userRoles: Props['userRoles'];
 
   constructor() {
-    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail', 'userRoles']);
+    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userRoles']);
   }
 
 }
