@@ -182,18 +182,6 @@ public class CreateTerraMethodSnapshot {
                       methodName,
                       Integer.toString(latestSnapshotId),
                       false);
-
-          FirecloudMethodConfigACL acl = apiClientFactory.methodRepositoryApi().setMethodACL(
-              Collections.singletonList(new FirecloudMethodConfigACLInner().user("eric.song@pmi-ops.org").role("READER")),
-              methodResponse.getNamespace(),
-              methodResponse.getName(),
-              methodResponse.getSnapshotId().toString()
-          );
-
-          for (FirecloudMethodConfigACLInner aclInner : acl) {
-            System.out.println(aclInner);
-          }
-
         } catch (ApiException e) {
           log.warning(e.getResponseBody());
           throw e;
