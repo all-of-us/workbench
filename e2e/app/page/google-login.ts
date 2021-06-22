@@ -1,7 +1,6 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { config } from 'resources/workbench-config';
 import Button from 'app/element/button';
-import { savePageToFile, takeScreenshot } from 'utils/save-file-utils';
 
 export enum FieldSelector {
   LoginButton = '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
@@ -77,16 +76,10 @@ export default class GoogleLoginPage {
    * @param pwd
    */
   async enterPassword(pwd: string): Promise<void> {
-    try {
-      const input = await this.password();
-      await input.focus();
-      await input.type(pwd, { delay: 15 });
-      await input.dispose();
-    } catch (error) {
-      await takeScreenshot(this.page);
-      await savePageToFile(this.page);
-      throw error;
-    }
+    const input = await this.password();
+    await input.focus();
+    await input.type(pwd, { delay: 15 });
+    await input.dispose();
   }
 
   /**

@@ -1,5 +1,5 @@
 import { ElementHandle, Frame, Page } from 'puppeteer';
-import { savePageToFile, takeScreenshot } from 'utils/save-file-utils';
+import Modal from './modal';
 
 enum Xpath {
   modal = '//*[@role="dialog"]',
@@ -10,22 +10,14 @@ enum Xpath {
 // Note: this does not extended the standard e2e Modal component because it
 // assumes the Jupyter UI is running in an iframe. It therefore needs to operate
 // on a frame, rather than on the global page.
-export default class NotebookDownloadModal {
-  constructor(private page: Page, private frame: Frame) {}
-
-  async waitUntilVisible(): Promise<ElementHandle> {
-    return await this.frame.waitForXPath(Xpath.modal, { visible: true });
+export default class NotebookDownloadModal extends Modal {
+  constructor(page: Page, private frame: Frame) {
+    super(page, Xpath.modal);
   }
 
-  async waitForLoad(): Promise<this> {
-    try {
-      await this.waitUntilVisible();
-    } catch (err) {
-      await savePageToFile(this.page);
-      await takeScreenshot(this.page);
-      throw err;
-    }
-    return this;
+  async isLoaded(): Promise<boolean> {
+    await this.frame.waitForXPath(Xpath.modal, { visible: true });
+    return true;
   }
 
   async waitUntilClose(): Promise<void> {
