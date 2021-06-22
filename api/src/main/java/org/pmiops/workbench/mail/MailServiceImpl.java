@@ -162,7 +162,7 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            "Registered Tier access expiration will occur for user %s in %d days (at %s).",
+            "Registered Tier access expiration will occur for user %s in %d days (on %s).",
             user.getUsername(), daysRemaining, formatCentralTime(expirationTime));
     log.info(logMsg);
 
