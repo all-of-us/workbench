@@ -139,6 +139,7 @@
   },
   "accessRenewal": {
     "expiryDays": 365,
+    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {

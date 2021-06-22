@@ -160,6 +160,12 @@ public class MailServiceImpl implements MailService {
       final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
+    final String logMsg =
+        String.format(
+            "Registered Tier access expiration will occur for user %s in %d days (at %s).",
+            user.getUsername(), daysRemaining, formatCentralTime(expirationTime));
+    log.info(logMsg);
+
     if (workbenchConfig.accessRenewal.sendEmails) {
       final String msgHtml =
           buildHtml(
@@ -182,12 +188,8 @@ public class MailServiceImpl implements MailService {
               "User %s will lose registered tier access in %d days",
               user.getUsername(), daysRemaining));
     } else {
-      final String logMsg =
-          String.format(
-              "Registered Tier access expiration will occur for user %s at %s (in %d days). "
-                  + "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.",
-              user.getUsername(), formatCentralTime(expirationTime), daysRemaining);
-      log.info(logMsg);
+      log.info(
+          "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
     }
   }
 
