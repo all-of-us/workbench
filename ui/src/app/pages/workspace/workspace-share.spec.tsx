@@ -1,10 +1,9 @@
+import {profileStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as Lolex from 'lolex';
 import * as React from 'react';
 import Select from 'react-select';
-import {ProfileApiStub} from '../../../testing/stubs/profile-api-stub';
-import {profileStore} from '../../utils/stores';
 
 import {Props, WorkspaceShare} from './workspace-share';
 
@@ -54,7 +53,6 @@ describe('WorkspaceShareComponent', () => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
     registerApiClient(WorkspacesApi,
       new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
-
     props = {
       onClose: () => {},
       accessLevel: WorkspaceAccessLevel.OWNER,
