@@ -245,7 +245,6 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = f
 };
 
 export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
-  const childProps = props.propagateDataTestId ? fp.omit(['propagateDataTestId'], props) : fp.omit(['propagateDataTestId', 'data-test-id'], props);
   return <TooltipTrigger side='left' content={tooltip}>
     <LocalInteractive tagName='div'
                  style={{
@@ -255,7 +254,7 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
                  }}
                  hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
                  disabled={disabled}
-                 {...childProps}>
+                 {...props}>
         <Icon disabled={disabled} style={style}/>
     </LocalInteractive>
   </TooltipTrigger>;
