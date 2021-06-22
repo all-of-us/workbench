@@ -24,28 +24,6 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   await homePage.waitForLoad();
 }
 
-/**
- * Login in new Incognito page.
- * @param {string} userId
- * @param {string} passwd
- *
- * @deprecated use signInWithAccessToken, rm with RW-5580
- */
-export async function signInAs(userId: string, passwd: string, opts: { reset?: boolean } = {}): Promise<Page> {
-  const { reset = true } = opts;
-  if (reset) {
-    await jestPuppeteer.resetBrowser();
-  }
-  const newPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-    'Chrome/81.0.4044.138 Safari/537.36';
-  await newPage.setUserAgent(userAgent);
-  newPage.setDefaultNavigationTimeout(90000);
-  await signIn(newPage, userId, passwd);
-  return newPage;
-}
-
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(async () => {
     return 'window.setTestAccessTokenOverride(null)';
