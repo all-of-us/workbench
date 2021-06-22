@@ -3,13 +3,16 @@ import * as fp from 'lodash/fp';
 import * as Lolex from 'lolex';
 import * as React from 'react';
 import Select from 'react-select';
+import {ProfileApiStub} from '../../../testing/stubs/profile-api-stub';
+import {profileStore} from '../../utils/stores';
 
 import {Props, WorkspaceShare} from './workspace-share';
 
-import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
+  ProfileApi,
   User,
   UserApi,
   UserRole,
@@ -51,13 +54,22 @@ describe('WorkspaceShareComponent', () => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
     registerApiClient(WorkspacesApi,
       new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
+
     props = {
       onClose: () => {},
-      workspace: tomRiddleDiary,
       accessLevel: WorkspaceAccessLevel.OWNER,
-      userEmail: 'harry.potter@hogwarts.edu',
       userRoles: tomRiddleDiaryUserRoles
     };
+
+    profileStore.set({
+      profile: {
+        username: 'harry.potter@hogwarts.edu'
+      },
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn()
+    });
+
     currentWorkspaceStore.next(tomRiddleDiary);
   });
 

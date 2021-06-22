@@ -18,7 +18,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  BillingAccountType, Profile,
+  BillingAccountType,
+  Profile,
   User,
   UserRole,
   Workspace,
@@ -161,20 +162,23 @@ export interface State {
 }
 
 export interface Props {
-  workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
-  profileState: {profile: Profile, reload: Function, updateCache: Function};
   onClose: Function;
   // The userRoles to pre-populate the share dialog. Must be filled with all
   // pre-existing roles on the workspace for this dialog to work correctly.
   userRoles: UserRole[];
 }
 
-export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())(class extends React.Component<Props, State> {
+interface HocProps extends Props {
+  workspace: Workspace;
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+}
+
+export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())(class extends React.Component<HocProps, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
-  constructor(props: Props) {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       autocompleteLoading: false,
