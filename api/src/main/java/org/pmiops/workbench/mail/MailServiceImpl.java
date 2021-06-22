@@ -50,6 +50,8 @@ public class MailServiceImpl implements MailService {
       "emails/freecreditsexpirationemail/content.html";
   private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
       "emails/rt_access_threshold_email/content.html";
+  private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
+      "emails/rt_access_expired_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -170,7 +172,7 @@ public class MailServiceImpl implements MailService {
       final String msgHtml =
           buildHtml(
               REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-              registeredTierAccessThresholdSubstitutionMap(expirationTime));
+              registeredTierAccessSubstitutionMap(expirationTime));
       final String subject =
           "Your access to All of Us Registered Tier Data will expire "
               + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining));
@@ -196,15 +198,34 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
       throws MessagingException {
-    // not implemented
-    final boolean emailSent = false;
+    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String logMsg =
         String.format(
-                "Registered Tier access expired for user %s at %s. ",
-                user.getUsername(), formatCentralTime(expirationTime))
-            + (emailSent ? "Email sent." : "Email NOT sent.");
+            "Registered Tier access expired for user %s (on %s).",
+            user.getUsername(), formatCentralTime(expirationTime));
     log.info(logMsg);
+
+    if (workbenchConfig.accessRenewal.sendEmails) {
+      final String msgHtml =
+          buildHtml(
+              REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
+              registeredTierAccessSubstitutionMap(expirationTime));
+      final String subject = "Your access to All of Us Registered Tier Data has expired";
+
+      final MandrillMessage msg =
+          new MandrillMessage()
+              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
+              .html(msgHtml)
+              .subject(subject)
+              .fromEmail(workbenchConfig.mandrill.fromEmail);
+
+      sendWithRetries(
+          msg, String.format("Registered Tier access expired for user %s", user.getUsername()));
+    } else {
+      log.info(
+          "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
+    }
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
@@ -264,7 +285,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessThresholdSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
       Instant expirationTime) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
