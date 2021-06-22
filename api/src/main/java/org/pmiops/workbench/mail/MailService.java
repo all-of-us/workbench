@@ -14,9 +14,6 @@ public interface MailService {
   void sendInstitutionUserInstructions(final String contactEmail, final String userInstructions)
       throws MessagingException;
 
-  void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
-      throws MessagingException;
-
   void alertUserFreeTierDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException;
