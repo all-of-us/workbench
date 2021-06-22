@@ -31,6 +31,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -148,14 +149,19 @@ public class GenomicExtractionService {
                         firecloudSubmission.getSubmissionId(),
                         firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
-                    final Optional<String> vcfSizeOutput = Optional.of(outputsResponse
+                    final Optional<FirecloudWorkflowOutputs> workflowOutputs = Optional.ofNullable(outputsResponse
                             .getTasks()
-                            .get(EXTRACT_WORKFLOW_NAME)
-                            .getOutputs()
-                            .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+                            .get(EXTRACT_WORKFLOW_NAME));
 
-                    if (vcfSizeOutput.isPresent()) {
-                      dbSubmission.setVcfSizeMb(Math.round(Double.parseDouble(vcfSizeOutput.get())));
+                    if (workflowOutputs.isPresent()) {
+                      final Optional<Object> vcfSizeOutput = Optional.ofNullable(
+                          workflowOutputs.get()
+                              .getOutputs()
+                              .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+
+                      if (vcfSizeOutput.isPresent()) {
+                        dbSubmission.setVcfSizeMb(Math.round(Double.parseDouble((String) vcfSizeOutput.get())));
+                      }
                     }
                   }
 

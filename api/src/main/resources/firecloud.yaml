@@ -2351,9 +2351,9 @@ components:
       properties:
         outputs:
           type: object
-          description: Map[String, String]
+          description: Map[String, Object]
           additionalProperties:
-            type: string
+            type: object
     WorkflowStatus:
       type: string
       description: workflow status
