@@ -173,22 +173,14 @@ public class MailServiceImpl implements MailService {
           buildHtml(
               REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
               registeredTierAccessSubstitutionMap(expirationTime));
-      final String subject =
-          "Your access to All of Us Registered Tier Data will expire "
-              + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining));
-
-      final MandrillMessage msg =
-          new MandrillMessage()
-              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-              .html(msgHtml)
-              .subject(subject)
-              .fromEmail(workbenchConfig.mandrill.fromEmail);
-
       sendWithRetries(
-          msg,
+          user.getContactEmail(),
+          "Your access to All of Us Registered Tier Data will expire "
+              + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
           String.format(
               "User %s will lose registered tier access in %d days",
-              user.getUsername(), daysRemaining));
+              user.getUsername(), daysRemaining),
+          msgHtml);
     } else {
       log.info(
           "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
@@ -211,17 +203,11 @@ public class MailServiceImpl implements MailService {
           buildHtml(
               REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
               registeredTierAccessSubstitutionMap(expirationTime));
-      final String subject = "Your access to All of Us Registered Tier Data has expired";
-
-      final MandrillMessage msg =
-          new MandrillMessage()
-              .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-              .html(msgHtml)
-              .subject(subject)
-              .fromEmail(workbenchConfig.mandrill.fromEmail);
-
       sendWithRetries(
-          msg, String.format("Registered Tier access expired for user %s", user.getUsername()));
+          user.getContactEmail(),
+          "Your access to All of Us Registered Tier Data has expired",
+          String.format("Registered Tier access expired for user %s", user.getUsername()),
+          msgHtml);
     } else {
       log.info(
           "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
