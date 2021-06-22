@@ -198,7 +198,7 @@ const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) 
 
 export const Clickable = ({as = 'div', disabled = false, onClick = null, propagateDataTestId = false, ...props}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
+  const childProps = propagateDataTestId ? fp.omit(['propagateDataTestId'], props) : fp.omit(['propagateDataTestId', 'data-test-id'], props);
   return <Interactive
     as={as} {...childProps}
     onClick={(...args) => onClick && !disabled && onClick(...args)}
@@ -245,6 +245,7 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = f
 };
 
 export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
+  const childProps = props.propagateDataTestId ? fp.omit(['propagateDataTestId'], props) : fp.omit(['propagateDataTestId', 'data-test-id'], props);
   return <TooltipTrigger side='left' content={tooltip}>
     <LocalInteractive tagName='div'
                  style={{
@@ -254,7 +255,7 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
                  }}
                  hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
                  disabled={disabled}
-                 {...props}>
+                 {...childProps}>
         <Icon disabled={disabled} style={style}/>
     </LocalInteractive>
   </TooltipTrigger>;
