@@ -65,7 +65,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -269,7 +268,6 @@ public class ConceptSetsControllerTest extends SpringTest {
     user.setUsername(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
 

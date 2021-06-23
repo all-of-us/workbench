@@ -27,7 +27,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
@@ -112,7 +111,6 @@ public class DbUser {
   @Deprecated private Timestamp idVerificationCompletionTime;
   @Deprecated private Timestamp idVerificationBypassTime;
 
-  @Deprecated private Short emailVerificationStatus;
   @Deprecated private Timestamp emailVerificationCompletionTime;
   @Deprecated private Timestamp emailVerificationBypassTime;
 
@@ -363,29 +361,6 @@ public class DbUser {
 
   public void setDisabled(boolean disabled) {
     this.disabled = disabled;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_status")
-  public Short getEmailVerificationStatus() {
-    return emailVerificationStatus;
-  }
-
-  @Deprecated
-  public void setEmailVerificationStatus(Short emailVerificationStatus) {
-    this.emailVerificationStatus = emailVerificationStatus;
-  }
-
-  @Deprecated
-  @Transient
-  public EmailVerificationStatus getEmailVerificationStatusEnum() {
-    return DbStorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
-  }
-
-  @Deprecated
-  public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
-    setEmailVerificationStatus(
-        DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
   @Deprecated

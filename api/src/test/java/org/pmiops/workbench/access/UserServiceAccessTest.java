@@ -33,7 +33,6 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
@@ -340,27 +339,6 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           user.setDisabled(true);
-          return userDao.save(user);
-        });
-  }
-
-  // email verification is not subject to bypass or annual renewal.
-  // It must be SUBSCRIBED for access.
-
-  @Test
-  public void test_updateUserWithRetries_email_pending_noncompliant() {
-    testUnregistration(
-        user -> {
-          user.setEmailVerificationStatusEnum(EmailVerificationStatus.PENDING);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_email_unverified_noncompliant() {
-    testUnregistration(
-        user -> {
-          user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
           return userDao.save(user);
         });
   }
@@ -1091,10 +1069,8 @@ public class UserServiceAccessTest {
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
     //        && isProfileCompliant
-    //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
 
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user.setComplianceTrainingBypassTime(timestamp);
     user.setEraCommonsBypassTime(timestamp);
     user.setTwoFactorAuthBypassTime(timestamp);

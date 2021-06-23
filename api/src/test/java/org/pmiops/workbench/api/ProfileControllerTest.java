@@ -76,7 +76,6 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
@@ -244,9 +243,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             .state(STATE)
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
-
-    // TODO: this needs to be set in createAccountAndDbUserWithAffiliation() instead of here.  Why?
-    // profile.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
@@ -1564,9 +1560,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // initialize the global test dbUser
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
-    // TODO: why is this necessary instead of initializing in setUp() ?
-    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-
     if (grantAdminAuthority) {
       dbUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
     }
@@ -1575,7 +1568,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // match dbUser updates
 
-    result.setEmailVerificationStatus(dbUser.getEmailVerificationStatusEnum());
     result.setAuthorities(Lists.newArrayList(dbUser.getAuthoritiesEnum()));
 
     return result;

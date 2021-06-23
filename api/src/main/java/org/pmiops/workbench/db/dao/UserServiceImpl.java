@@ -53,7 +53,6 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.UserAccessExpiration;
@@ -372,8 +371,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
         && isPublicationConfirmationCompliant(user)
-        && isProfileConfirmationCompliant(user)
-        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
+        && isProfileConfirmationCompliant(user);
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -385,7 +383,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     DbUser user = new DbUser();
     user.setUsername(username);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
       user = userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -471,7 +468,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
-    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
