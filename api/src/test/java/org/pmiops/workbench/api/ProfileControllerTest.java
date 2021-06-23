@@ -509,7 +509,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    dbUser.setBetaAccessBypassTime(TIMESTAMP);
     dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
     dbUser.setEraCommonsBypassTime(TIMESTAMP);
     dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);

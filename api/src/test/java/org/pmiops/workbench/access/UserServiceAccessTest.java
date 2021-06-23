@@ -1088,7 +1088,6 @@ public class UserServiceAccessTest {
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
     //        && eraCommonsCompliant
-    //        && betaAccessGranted
     //        && twoFactorAuthComplete
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
@@ -1099,7 +1098,6 @@ public class UserServiceAccessTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user.setComplianceTrainingBypassTime(timestamp);
     user.setEraCommonsBypassTime(timestamp);
-    user.setBetaAccessBypassTime(timestamp);
     user.setTwoFactorAuthBypassTime(timestamp);
     user.setDataUseAgreementBypassTime(timestamp);
     user.setPublicationsLastConfirmedTime(timestamp);
