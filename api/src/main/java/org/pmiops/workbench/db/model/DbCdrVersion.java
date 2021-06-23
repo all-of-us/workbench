@@ -181,7 +181,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_merged_wgs_data")
   public Boolean getHasMergedWgsData() {
-    return hasMergedWgsData;
+    return hasMergedWgsData == null ? false : hasMergedWgsData;
   }
 
   public void setHasMergedWgsData(Boolean hasMergedWgsData) {
@@ -190,7 +190,7 @@ public class DbCdrVersion {
 
   @Column(name = "has_single_sample_array_data")
   public Boolean getHasSingleSampleArrayData() {
-    return hasSingleSampleArrayData;
+    return hasSingleSampleArrayData == null ? false : hasSingleSampleArrayData;
   }
 
   public void setHasSingleSampleArrayData(Boolean hasSingleSampleArrayData) {
