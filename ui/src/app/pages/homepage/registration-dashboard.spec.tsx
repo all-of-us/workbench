@@ -43,7 +43,6 @@ describe('RegistrationDashboard', () => {
       rasLoginGovLinkError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: false,
       twoFactorAuthCompleted: false,
       dataUserCodeOfConductCompleted: false
     };
@@ -81,15 +80,7 @@ describe('RegistrationDashboard', () => {
 
   });
 
-  it('should clear warning when user has been granted beta access', () => {
-    serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    props.betaAccessGranted = true;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
-  });
-
   it('should display a success message when all tasks have been completed', () => {
-    props.betaAccessGranted = true;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;
@@ -101,7 +92,6 @@ describe('RegistrationDashboard', () => {
   it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
     serverConfigStore.set({config: {...serverConfigStore.get().config, enableRasLoginGovLinking: true}});
     // When enableRasLoginGovLinking is true, show RAS linking card.
-    props.betaAccessGranted = true;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;

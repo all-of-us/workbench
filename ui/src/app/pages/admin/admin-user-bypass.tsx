@@ -45,7 +45,6 @@ interface State {
 
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
-    ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
     ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
     ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
@@ -134,17 +133,6 @@ export class AdminUserBypass extends React.Component<Props, State> {
         onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
         onOpen={() => this.setState({isPopupOpen: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
-          {<FlexRow style={{justifyContent: 'space-between'}}>
-            <Toggle name='Beta Access'
-                    checked={selectedModules.includes(AccessModule.BETAACCESS)}
-                    data-test-id='beta-access-toggle'
-                    onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); }}
-            />
-            <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
-              <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
-            </TooltipTrigger>
-          </FlexRow>}
           {<hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
           {enableComplianceTraining && <Toggle name='Compliance Training'
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
