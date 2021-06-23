@@ -7,9 +7,6 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
@@ -46,7 +43,6 @@ public class MailServiceImpl implements MailService {
 
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
-  private static final String BETA_ACCESS_RESOURCE = "emails/betaaccessemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
       "emails/dollarthresholdemail/content.html";
   private static final String FREE_TIER_EXPIRATION_RESOURCE =
@@ -86,40 +82,38 @@ public class MailServiceImpl implements MailService {
   public void sendWelcomeEmail(final String contactEmail, final String password, final User user)
       throws MessagingException {
 
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(contactEmail)))
-            .html(buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user)))
-            .subject("Your new All of Us Researcher Workbench Account")
-            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+    final String htmlMessage =
+        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user));
 
-    sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
+    sendWithRetries(
+        contactEmail,
+        "Your new All of Us Researcher Workbench Account",
+        String.format("Welcome for %s", user.getName()),
+        htmlMessage);
   }
 
   @Override
   public void sendInstitutionUserInstructions(String contactEmail, String userInstructions)
       throws MessagingException {
+
     // TODO(RW-6482): Use a templating system rather than manual oneoff escaping.
     // These institutional instructions are stored unescaped. Though they are input by admins,
     // the strings should not be trusted as HTML.
     String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(contactEmail)))
-            .html(
-                buildHtml(
-                    INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions)))
-            .subject("Instructions from your institution on using the Researcher Workbench")
-            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+    final String htmlMessage =
+        buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions));
 
-    sendWithRetries(msg, String.format("Institution user instructions for %s", contactEmail));
+    sendWithRetries(
+        contactEmail,
+        "Instructions from your institution on using the Researcher Workbench",
+        String.format("Institution user instructions for %s", contactEmail),
+        htmlMessage);
   }
 
   @Override
   public void alertUserFreeTierDollarThreshold(
       final DbUser user, double threshold, double currentUsage, double remainingBalance)
       throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String logMsg =
         String.format(
@@ -127,48 +121,35 @@ public class MailServiceImpl implements MailService {
             user.getUsername(), threshold, currentUsage, remainingBalance);
     log.info(logMsg);
 
-    final String msgHtml =
+    final String htmlMessage =
         buildHtml(
             FREE_TIER_DOLLAR_THRESHOLD_RESOURCE,
             freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
-    final String subject =
-        String.format(
-            "Reminder - %s Free credit usage in All of Us Researcher Workbench",
-            formatPercentage(threshold));
-
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-            .html(msgHtml)
-            .subject(subject)
-            .fromEmail(workbenchConfig.mandrill.fromEmail);
 
     sendWithRetries(
-        msg, String.format("User %s passed a free tier dollar threshold", user.getUsername()));
+        user.getContactEmail(),
+        String.format(
+            "Reminder - %s Free credit usage in All of Us Researcher Workbench",
+            formatPercentage(threshold)),
+        String.format("User %s passed a free tier dollar threshold", user.getUsername()),
+        htmlMessage);
   }
 
   @Override
   public void alertUserFreeTierExpiration(final DbUser user) throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
-    final String logMsg =
+    final String expirationMsg =
         String.format("Free credits have expired for User %s", user.getUsername());
-    log.info(logMsg);
+    log.info(expirationMsg);
 
-    final String msgHtml =
+    final String htmlMessage =
         buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
-    final String subject = "Alert - Free credit expiration in All of Us Researcher Workbench";
-
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(user.getContactEmail())))
-            .html(msgHtml)
-            .subject(subject)
-            .fromEmail(workbenchConfig.mandrill.fromEmail);
-
     sendWithRetries(
-        msg, String.format("Free tier credits have expired for user %s", user.getUsername()));
+        user.getContactEmail(),
+        "Alert - Free credit expiration in All of Us Researcher Workbench",
+        expirationMsg,
+        htmlMessage);
   }
 
   @Override
@@ -195,20 +176,6 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
   }
 
-  @Override
-  public void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
-      throws MessagingException {
-
-    final MandrillMessage msg =
-        new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(contactEmail)))
-            .html(buildHtml(BETA_ACCESS_RESOURCE, betaAccessSubstitutionMap(username)))
-            .subject("All of Us ID Verification Complete")
-            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
-
-    sendWithRetries(msg, String.format("BetaAccess Complete for %s", contactEmail));
-  }
-
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
       final String password, final User user) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
@@ -229,23 +196,6 @@ public class MailServiceImpl implements MailService {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
-        .build();
-  }
-
-  private Map<EmailSubstitutionField, String> betaAccessSubstitutionMap(final String username) {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final String action =
-        "login to the workbench via <a class=\"link\" href=\""
-            + workbenchConfig.admin.loginUrl
-            + "\">"
-            + workbenchConfig.admin.loginUrl
-            + "</a>";
-
-    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.ACTION, action)
-        .put(EmailSubstitutionField.BETA_ACCESS_REPORT, "approved for use")
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.USERNAME, username)
         .build();
   }
 
@@ -314,6 +264,18 @@ public class MailServiceImpl implements MailService {
     final RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     return toAddress;
+  }
+
+  private void sendWithRetries(
+      String contactEmail, String subject, String description, String htmlMessage)
+      throws MessagingException {
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(contactEmail)))
+            .html(htmlMessage)
+            .subject(subject)
+            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+    sendWithRetries(msg, description);
   }
 
   private void sendWithRetries(MandrillMessage msg, String description) throws MessagingException {
@@ -385,14 +347,6 @@ public class MailServiceImpl implements MailService {
 
   private String getRegistrationImage() {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
-  }
-
-  // TODO choose desired date format
-  // currently will display '07/14/2020'
-  private String formatDate(final LocalDate expirationDate) {
-    return DateTimeFormatter.ofPattern("MM/dd/yyyy")
-        .withZone(ZoneId.systemDefault())
-        .format(expirationDate);
   }
 
   private String formatPercentage(double threshold) {
