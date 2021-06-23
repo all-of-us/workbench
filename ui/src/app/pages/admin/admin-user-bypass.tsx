@@ -123,7 +123,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
 
   render() {
     const {selectedModules, isPopupOpen, isSaving} = this.state;
-    const {enableBetaAccess,
+    const {
       enableComplianceTraining,
       enableEraCommons,
       enableDataUseAgreement,
@@ -134,7 +134,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
         onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
         onOpen={() => this.setState({isPopupOpen: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
-          {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
+          {<FlexRow style={{justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
                     checked={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
@@ -145,7 +145,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
               <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
             </TooltipTrigger>
           </FlexRow>}
-          {enableBetaAccess && <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
+          {<hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
           {enableComplianceTraining && <Toggle name='Compliance Training'
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
