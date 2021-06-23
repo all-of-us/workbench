@@ -146,27 +146,23 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
           WORKSPACE_CDR_ENV_KEY,
-          cdrVersion.getBigqueryProject()
-              + "."
-              + cdrVersion.getBigqueryDataset());
+          cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
     }
 
     if (cdrVersion.getHasMergedWgsData()) {
       customEnvironmentVariables.put(
           MERGED_WGS_BUCKET_KEY,
           cdrVersion.getAccessTier().getDatasetsBucket()
-            + cdrVersion.getCdrVersionId()
-            + "/wgs/vcf/merged/"
-      );
+              + cdrVersion.getCdrVersionId()
+              + "/wgs/vcf/merged/");
     }
 
     if (cdrVersion.getHasSingleSampleArrayData()) {
       customEnvironmentVariables.put(
           SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
           cdrVersion.getAccessTier().getDatasetsBucket()
-            + cdrVersion.getCdrVersionId()
-            + "/microarray/vcf/single_sample/"
-      );
+              + cdrVersion.getCdrVersionId()
+              + "/microarray/vcf/single_sample/");
     }
 
     // See RW-6079

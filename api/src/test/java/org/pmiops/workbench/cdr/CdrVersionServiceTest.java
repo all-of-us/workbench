@@ -354,7 +354,8 @@ public class CdrVersionServiceTest {
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
-    makeCdrVersion(3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, true, true);
+    makeCdrVersion(
+        3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, true, true);
     final List<CdrVersion> newVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
 
