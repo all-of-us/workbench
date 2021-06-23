@@ -266,13 +266,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   allTasksCompleted(): boolean {
     const {betaAccessGranted} = this.props;
-    const {enableBetaAccess} = serverConfigStore.get().config;
 
     // Beta access is awkwardly not treated as a task in the completion list. So we manually
     // check whether (1) beta access requirement is turned off for this env, or (2) the user
     // has been granted beta access.
     return this.taskCompletionList.every(v => v) &&
-      (!enableBetaAccess || betaAccessGranted);
+      (betaAccessGranted);
   }
 
   isEnabled(i: number): boolean {
@@ -331,7 +330,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
-    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.get().config;
+    const {unsafeAllowSelfBypass} = serverConfigStore.get().config;
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -366,7 +365,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           }
         </div>
       }
-      {enableBetaAccess && !betaAccessGranted &&
+      {!betaAccessGranted &&
         <div data-test-id='beta-access-warning'
              style={{...baseStyles.card, ...styles.warningModal, margin: '1rem 0 0'}}>
           <ClrIcon shape='warning-standard' class='is-solid'

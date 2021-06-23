@@ -99,7 +99,6 @@
     "enableComplianceTraining": false,
     "enableEraCommons": false,
     "enableDataUseAgreement": true,
-    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableAccessRenewal": false

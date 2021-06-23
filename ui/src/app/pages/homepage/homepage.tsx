@@ -219,7 +219,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         reload();
       }, 10000);
     } else {
-      if (serverConfigStore.get().config.enableBetaAccess && !profile.betaAccessRequestTime) {
+      if (!profile.betaAccessRequestTime) {
         profileApi().requestBetaAccess();
       }
       if (profile.pageVisits) {

@@ -35,7 +35,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableComplianceTraining(config.access.enableComplianceTraining)
             .enableEraCommons(config.access.enableEraCommons)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
-            .enableBetaAccess(config.access.enableBetaAccess)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)

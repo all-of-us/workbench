@@ -362,16 +362,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    // beta access bypass and 2FA do not need to be checked for annual renewal
-    boolean betaAccessGranted =
-        user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && isComplianceTrainingCompliant(user)
         && isEraCommonsCompliant(user)
-        && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
         && isPublicationConfirmationCompliant(user)

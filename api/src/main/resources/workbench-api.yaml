@@ -4142,10 +4142,6 @@ definitions:
         type: boolean
         default: false
         description: Whether the Data Use Agreement access module is enabled.
-      enableBetaAccess:
-        type: boolean
-        default: false
-        description: Whether the Beta Access module is enabled.
       unsafeAllowSelfBypass:
         type: boolean
         default: false
