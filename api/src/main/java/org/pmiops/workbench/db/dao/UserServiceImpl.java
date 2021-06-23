@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
-      dbUser = userModifier.apply(dbUser);
+      dbUser = userDao.save(userModifier.apply(dbUser));
       updateUserAccessTiers(dbUser, agent);
       try {
         return userDao.save(dbUser);
