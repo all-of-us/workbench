@@ -3953,8 +3953,6 @@ definitions:
         "$ref": "#/definitions/ArchivalStatus"
       hasWgsData:
         type: boolean
-      hasMergedWgsData:
-        type: boolean
       hasFitbitData:
         type: boolean
       hasCopeSurveyData:
