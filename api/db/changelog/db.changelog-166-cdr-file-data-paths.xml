@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="als364" id="changelog-166-cdr-file-data-paths">
+    <addColumn tableName="cdr_version">
+      <column name="has_merged_wgs_data" type="tinyint"/>
+      <column name="has_single_sample_array_data" type="tinyint"/>
+    </addColumn>
+    <addColumn tableName="access_tier">
+      <column name="datasets_bucket" type="VARCHAR(80)"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>
