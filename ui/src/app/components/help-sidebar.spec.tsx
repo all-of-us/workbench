@@ -29,7 +29,7 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {
   cdrVersionStore,
-  clearCompoundRuntimeOperations, genomicExtractionStore,
+  clearCompoundRuntimeOperations, genomicExtractionStore, profileStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore
@@ -53,6 +53,8 @@ jest.mock('react-transition-group', () => {
     TransitionGroup: (props) => props.children
   };
 });
+
+jest.mock('app/pages/workspace/workspace-share', () => () => (<div>Hello World</div>));
 
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
@@ -109,6 +111,16 @@ describe('HelpSidebar', () => {
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);
 
+
+    // profileStore.set({
+    //   profile: {
+    //     username: 'harry.potter@hogwarts.edu'
+    //   },
+    //   load: jest.fn(),
+    //   reload: jest.fn(),
+    //   updateCache: jest.fn()
+    // });
+
     // mock timers
     jest.useFakeTimers();
   });
@@ -156,15 +168,6 @@ describe('HelpSidebar', () => {
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
     expect(deleteSpy).toHaveBeenCalled();
-  });
-
-  it('should call share method when clicked', async() => {
-    const shareSpy = jest.fn();
-    props = {shareFunction: shareSpy};
-    const wrapper = await component();
-    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
-    wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
-    expect(shareSpy).toHaveBeenCalled();
   });
 
   it('should hide workspace icon if on criteria search page', async() => {
