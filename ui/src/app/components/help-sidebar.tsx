@@ -58,6 +58,7 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
@@ -242,6 +243,7 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
+  showShareModal: boolean;
 }
 
 export const HelpSidebar = fp.flow(
@@ -265,7 +267,8 @@ export const HelpSidebar = fp.flow(
         participant: undefined,
         searchTerm: '',
         showCriteria: false,
-        tooltipId: undefined
+        tooltipId: undefined,
+        showShareModal: false
       };
     }
 
@@ -462,7 +465,7 @@ export const HelpSidebar = fp.flow(
     }
 
     renderWorkspaceMenu() {
-      const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const {deleteFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
       const tooltip = isNotOwner && 'Requires owner permission';
       return <PopupTrigger
@@ -495,7 +498,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenShareModal();
-                shareFunction();
+                this.setState({showShareModal: true});
               }}>
               Share
             </MenuItem>
@@ -868,6 +871,8 @@ export const HelpSidebar = fp.flow(
             </div>
           </CSSTransition>
         </TransitionGroup>
+
+        {this.state.showShareModal && <WorkspaceShare onClose={() => this.setState({showShareModal: false})}/>}
       </div>;
     }
   }

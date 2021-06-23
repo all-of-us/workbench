@@ -9,10 +9,6 @@
     </div>
   </clr-modal>
 
-  <app-workspace-share *ngIf="sharing" [onClose]="closeShare"
-                       [workspace]="workspace"
-                       [accessLevel]="accessLevel"
-                       [userRoles]="userRoles"></app-workspace-share>
   <app-confirm-delete-modal *ngIf="confirmDeleting"
                             [resourceType]="resourceType"
                             [resourceName]="workspace.name"
@@ -22,8 +18,7 @@
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
   <app-help-sidebar [deleteFunction]="openConfirmDelete"
-                    [pageKey]="pageKey"
-                    [shareFunction]="handleShareAction"></app-help-sidebar>
+                    [pageKey]="pageKey"></app-help-sidebar>
   <div [style.margin-right]="pageKey ? '45px' : 0" [style.height]="pageKey && !contentFullHeightOverride ? 'auto': '100%'">
     <router-outlet *ngIf="workspace"></router-outlet>
   </div>
