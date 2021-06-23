@@ -328,25 +328,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> requestBetaAccess() {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbUser user = userProvider.get();
-    if (user.getBetaAccessRequestTime() == null) {
-      log.log(
-          Level.INFO,
-          String.format("Sending beta access request email to %s.", user.getContactEmail()));
-      try {
-        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
-      } catch (MessagingException e) {
-        throw new EmailException("Error submitting beta access request", e);
-      }
-      user.setBetaAccessRequestTime(now);
-      user = saveUserWithConflictHandling(user);
-    }
-    return getProfileResponse(user);
-  }
-
-  @Override
   public ResponseEntity<Profile> submitDataUseAgreement(
       Integer dataUseAgreementSignedVersion, String initials) {
     DbUser user =

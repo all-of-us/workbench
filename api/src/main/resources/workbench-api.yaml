@@ -351,17 +351,6 @@ paths:
           description: Error occurred while creating account.
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/beta-access":
-    post:
-      tags:
-      - profile
-      description: Request betaAccess.
-      operationId: requestBetaAccess
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/update-nih-token":
     post:
       tags:
@@ -4709,7 +4698,6 @@ definitions:
     enum:
     - DATA_USE_AGREEMENT
     - COMPLIANCE_TRAINING
-    - BETA_ACCESS
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
@@ -5599,14 +5587,6 @@ definitions:
         format: int64
         description: Timestamp when a user was bypassed for completing compliance
           training
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for beta access
-      betaAccessRequestTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user requests beta access.
       emailVerificationCompletionTime:
         type: integer
         format: int64

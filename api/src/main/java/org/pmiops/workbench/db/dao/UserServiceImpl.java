@@ -362,16 +362,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    // beta access bypass and 2FA do not need to be checked for annual renewal
-    boolean betaAccessGranted =
-        user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
+    // 2FA does not need to be checked for annual renewal
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && isComplianceTrainingCompliant(user)
         && isEraCommonsCompliant(user)
-        && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
         && isPublicationConfirmationCompliant(user)
@@ -600,17 +597,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         newBypassTime,
         DbUser::setComplianceTrainingBypassTime,
         BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
-  }
-
-  @Override
-  public void setBetaAccessBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setBetaAccessBypassTime,
-        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
   @Override
@@ -1039,10 +1025,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       case COMPLIANCE_TRAINING:
         previousBypassTime = user.getComplianceTrainingBypassTime();
         setComplianceTrainingBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
-      case BETA_ACCESS:
-        previousBypassTime = user.getBetaAccessBypassTime();
-        setBetaAccessBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       case ERA_COMMONS:
         previousBypassTime = user.getEraCommonsBypassTime();

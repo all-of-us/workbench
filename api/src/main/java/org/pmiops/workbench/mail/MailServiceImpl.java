@@ -39,8 +39,6 @@ public class MailServiceImpl implements MailService {
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
-  private static final String BETA_ACCESS_TEXT = "A new user has requested beta access: ";
-
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructionsemail/content.html";
   private static final String FREE_TIER_DOLLAR_THRESHOLD_RESOURCE =
@@ -62,20 +60,6 @@ public class MailServiceImpl implements MailService {
     this.mandrillApiProvider = mandrillApiProvider;
     this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
-  @Override
-  public void sendBetaAccessRequestEmail(final String userName) throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    MandrillMessage msg = new MandrillMessage();
-    RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(workbenchConfig.admin.adminIdVerification);
-    msg.setTo(Collections.singletonList(toAddress));
-    msg.setSubject("[Beta Access Request: " + workbenchConfig.server.shortName + "]: " + userName);
-    msg.setHtml(BETA_ACCESS_TEXT + userName);
-    msg.setFromEmail(workbenchConfig.mandrill.fromEmail);
-
-    sendWithRetries(msg, "Beta Access submit notification");
   }
 
   @Override
@@ -275,10 +259,7 @@ public class MailServiceImpl implements MailService {
             .html(htmlMessage)
             .subject(subject)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
-    sendWithRetries(msg, description);
-  }
 
-  private void sendWithRetries(MandrillMessage msg, String description) throws MessagingException {
     String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
