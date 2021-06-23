@@ -29,7 +29,8 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {
   cdrVersionStore,
-  clearCompoundRuntimeOperations, genomicExtractionStore, profileStore,
+  clearCompoundRuntimeOperations,
+  genomicExtractionStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore
@@ -54,7 +55,17 @@ jest.mock('react-transition-group', () => {
   };
 });
 
-jest.mock('app/pages/workspace/workspace-share', () => () => (<div>Hello World</div>));
+class MockWorkspaceShare extends React.Component {
+  render() {
+    return <div>Mock Workspace Share</div>;
+  }
+}
+
+jest.mock('app/pages/workspace/workspace-share', () => {
+  return {
+    WorkspaceShare: () => <MockWorkspaceShare/>
+  };
+});
 
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
@@ -158,6 +169,14 @@ describe('HelpSidebar', () => {
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
     expect(deleteSpy).toHaveBeenCalled();
+  });
+
+  it('should show workspace share modal on clicking share workspace', async() => {
+    const wrapper = await component();
+    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
   });
 
   it('should hide workspace icon if on criteria search page', async() => {
