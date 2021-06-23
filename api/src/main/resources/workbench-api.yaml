@@ -8170,7 +8170,7 @@ definitions:
     type: object
     properties:
       userIds:
-        description: ''
+        description: 'List of users to audit'
         type: array
         items:
           type: integer

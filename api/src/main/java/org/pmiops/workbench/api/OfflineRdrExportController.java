@@ -43,7 +43,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
       throw new ServerErrorException("Error creating RDR export Cloud Tasks for users", ex);
     }
     try {
-      taskQueueService.groupAndPushRdrResearcherTasks(
+      taskQueueService.groupAndPushRdrWorkspaceTasks(
           rdrExportService.findAllWorkspacesIdsToExport());
     } catch (Exception ex) {
       throw new ServerErrorException("Error creating RDR export Cloud Tasks for workspaces", ex);

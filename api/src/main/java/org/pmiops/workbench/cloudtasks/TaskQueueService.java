@@ -19,8 +19,8 @@ public class TaskQueueService {
   private static final String BASE_PATH = "/v1/cloudTask";
   private static final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   private static final String EXPORT_WORKSPACE_PATH = BASE_PATH + "/exportWorkspaceData";
-
   private static final String AUDIT_PROJECTS_PATH = BASE_PATH + "/auditProjectAccess";
+
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
 
   private WorkbenchLocationConfigService locationConfigService;
