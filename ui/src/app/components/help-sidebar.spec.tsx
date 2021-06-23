@@ -111,16 +111,6 @@ describe('HelpSidebar', () => {
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);
 
-
-    // profileStore.set({
-    //   profile: {
-    //     username: 'harry.potter@hogwarts.edu'
-    //   },
-    //   load: jest.fn(),
-    //   reload: jest.fn(),
-    //   updateCache: jest.fn()
-    // });
-
     // mock timers
     jest.useFakeTimers();
   });
