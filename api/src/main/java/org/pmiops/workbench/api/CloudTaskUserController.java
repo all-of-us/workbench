@@ -1,10 +1,11 @@
 package org.pmiops.workbench.api;
 
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -18,12 +19,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CloudTaskUserController implements CloudTaskUserApiDelegate {
-  private static final List<String> ALLOWED_ORG_IDS =
-      ImmutableList.of(
+  private static final Set<String> ALLOWED_PARENT_IDS =
+      ImmutableSet.of(
           "400176686919", // test.firecloud.org
           "386193000800", // firecloud.org
-          "394551486437" // pmi-ops.org
-          );
+          "394551486437", // pmi-ops.org
+          // TODO(calbach): Consider moving this into cdr_config_*.json
+          "737976594150", // terra_dev_aou_test
+          "272722258246", // terra_dev_aou_test_2
+          "791559643292", // terra_perf_aou_perf
+          "851853921816", // terra_perf_aou_perf_2
+          "727685043294", // terra_prod_aou_staging
+          "730698401092", // terra_prod_aou_staging_2
+          "96867205717", // terra_prod_aou_stable
+          "973382847971", // terra_prod_aou_stable_2
+          "1030649683602", // terra_prod_aou_preprod
+          "307813759063", // terra_prod_aou_preprod_2
+          "300547813290", // terra_prod_aou_prod
+          "762320479256"); // terra_prod_aou_prod_2
   private static final Logger log = Logger.getLogger(CloudTaskUserController.class.getName());
 
   private final UserDao userDao;
@@ -48,14 +61,18 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
                 .filter(
                     project ->
                         project.getParent() == null
-                            || !(ALLOWED_ORG_IDS.contains(project.getParent().getId())))
+                            || !(ALLOWED_PARENT_IDS.contains(project.getParent().getId())))
                 .map(
                     project ->
-                        project.getName()
-                            + " in organization "
-                            + Optional.ofNullable(project.getParent())
+                        String.format(
+                            "%s in %s %s",
+                            project.getName(),
+                            Optional.ofNullable(project.getParent())
+                                .map(ResourceId::getType)
+                                .orElse("[type unknown]"),
+                            Optional.ofNullable(project.getParent())
                                 .map(ResourceId::getId)
-                                .orElse("[none]"))
+                                .orElse("[id unknown]")))
                 .collect(Collectors.toList());
         if (unauthorizedLogs.size() > 0) {
           log.warning(

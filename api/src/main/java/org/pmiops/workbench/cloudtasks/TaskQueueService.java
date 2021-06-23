@@ -11,6 +11,7 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
+import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -66,7 +67,10 @@ public class TaskQueueService {
     List<List<Long>> groups =
         CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask);
     for (List<Long> group : groups) {
-      createAndPushTask(AUDIT_PROJECTS_QUEUE_NAME, AUDIT_PROJECTS_PATH, group);
+      createAndPushTask(
+          AUDIT_PROJECTS_QUEUE_NAME,
+          AUDIT_PROJECTS_PATH,
+          new AuditProjectAccessRequest().userIds(group));
     }
   }
 
