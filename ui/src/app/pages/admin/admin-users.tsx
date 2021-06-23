@@ -97,30 +97,13 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     return profileList.sort((a, b) => {
       // put disabled accounts at the bottom
       if (a.disabled && b.disabled) {
-        return this.timeCompare(a, b);
+        return this.nameCompare(a, b);
       }
       if (a.disabled) {
         return 1;
       }
-      if (!!a.betaAccessBypassTime === !!b.betaAccessBypassTime) {
-        return this.timeCompare(a, b);
-      }
-      if (!!b.betaAccessBypassTime) {
-        return -1;
-      }
       return 1;
     });
-  }
-
-  private timeCompare(a: Profile, b: Profile): number {
-    if (a.betaAccessRequestTime === b.betaAccessRequestTime) {
-      return this.nameCompare(a, b);
-    } else if (a.betaAccessRequestTime === null) {
-      return 1;
-    } else if (b.betaAccessRequestTime === null) {
-      return -1;
-    }
-    return b.betaAccessRequestTime - a.betaAccessRequestTime;
   }
 
   private nameCompare(a: Profile, b: Profile): number {
