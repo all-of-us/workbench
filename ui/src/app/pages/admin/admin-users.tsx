@@ -90,7 +90,6 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     this.setState({loading: false});
   }
 
-  // We want to sort first by submission time (newest at the top), then alphanumerically.
   sortProfileList(profileList: Array<Profile>): Array<Profile> {
     return profileList.sort((a, b) => {
       // put disabled accounts at the bottom

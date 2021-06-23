@@ -237,6 +237,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
+      // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
