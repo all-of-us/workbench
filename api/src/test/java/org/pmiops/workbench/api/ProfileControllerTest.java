@@ -1401,7 +1401,9 @@ public class ProfileControllerTest extends BaseControllerTest {
         ImmutableList.of(
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
             // would un-bypass if a bypass had existed
-            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(false));
+            new AccessBypassRequest()
+                .moduleName(AccessModule.COMPLIANCE_TRAINING)
+                .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
         new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
@@ -1420,9 +1422,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             // un-bypass the previously bypassed
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
             // bypass
-            new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
-                .isBypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
 

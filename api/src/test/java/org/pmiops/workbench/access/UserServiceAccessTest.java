@@ -345,20 +345,6 @@ public class UserServiceAccessTest {
         });
   }
 
-  // Beta Access is entirely controlled by bypass, if enabled.
-  // It is not subject to annual renewal.
-
-  @Test
-  public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
-    providedWorkbenchConfig.access.enableBetaAccess = true;
-
-    testUnregistration(
-        user -> {
-          user.setBetaAccessBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
   // email verification is not subject to bypass or annual renewal.
   // It must be SUBSCRIBED for access.
 
