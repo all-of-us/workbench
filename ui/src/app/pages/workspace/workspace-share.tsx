@@ -184,7 +184,6 @@ export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())
       workspaceUpdateConflictError: false,
       loadingUserRoles: true,
       userRoles: [],
-//      userRoles: fp.sortBy('familyName', this.props.userRoles),
       searchTerm: '',
       dropDown: false,
     };
@@ -206,9 +205,7 @@ export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())
     try {
       const resp = await workspacesApi()
         .getFirecloudWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
-      this.setState({
-        userRoles: fp.sortBy('familyName', resp.items)
-      });
+      this.setState({userRoles: fp.sortBy('familyName', resp.items)});
     } catch (error) {
       if (error.status === 404) {
         this.setState({workspaceFound: false});
