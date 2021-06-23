@@ -22,7 +22,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-describe('WorkspaceShareComponent', () => {
+describe('WorkspaceShare', () => {
   let props: Props;
 
   const component = () => {
