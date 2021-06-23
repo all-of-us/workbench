@@ -29,6 +29,7 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
+  private Boolean hasMergedWgsData;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -176,6 +177,15 @@ public class DbCdrVersion {
     this.hasCopeSurveyData = hasCopeSurveyData;
   }
 
+  @Column(name = "has_merged_wgs_data")
+  public Boolean getHasMergedWgsData() {
+    return hasMergedWgsData;
+  }
+
+  public void setHasMergedWgsData(Boolean hasMergedWgsData) {
+    this.hasMergedWgsData = hasMergedWgsData;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -193,7 +203,8 @@ public class DbCdrVersion {
         elasticIndexBaseName,
         wgsBigqueryDataset,
         hasFitbitData,
-        hasCopeSurveyData);
+        hasCopeSurveyData,
+        hasMergedWgsData);
   }
 
   @Override
@@ -219,6 +230,7 @@ public class DbCdrVersion {
         && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
-        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData);
+        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
+        && Objects.equals(hasMergedWgsData, that.hasMergedWgsData);
   }
 }

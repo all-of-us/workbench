@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
@@ -40,6 +41,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+  private static final String MERGED_WGS_BUCKET_KEY = "MERGED_WGS_BUCKET";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -137,14 +139,24 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
           WORKSPACE_CDR_ENV_KEY,
-          workspace.getCdrVersion().getBigqueryProject()
+          cdrVersion.getBigqueryProject()
               + "."
-              + workspace.getCdrVersion().getBigqueryDataset());
+              + cdrVersion.getBigqueryDataset());
+    }
+
+    if (cdrVersion.getHasMergedWgsData()) {
+      customEnvironmentVariables.put(
+          MERGED_WGS_BUCKET_KEY,
+          cdrVersion.getAccessTier().getDatasetsBucket()
+            + cdrVersion.getCdrVersionId()
+            + "/wgs/vcf/merged/"
+      );
     }
 
     // See RW-6079

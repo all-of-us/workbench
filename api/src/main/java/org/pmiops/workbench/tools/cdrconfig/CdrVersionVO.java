@@ -23,4 +23,5 @@ public class CdrVersionVO {
   public String wgsBigqueryDataset;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
+  public Boolean hasMergedWgsData;
 }
