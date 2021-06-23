@@ -13,7 +13,7 @@ import {
   urlParamsStore,
 } from 'app/utils/navigation';
 
-import {profileStore, routeDataStore, runtimeStore} from 'app/utils/stores';
+import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
@@ -36,7 +36,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
-  username: string;
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
@@ -168,9 +167,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
       }
-    }));
-    this.subscriptions.push(profileStore.subscribe(({profile}) => {
-      this.username = profile.username;
     }));
   }
 
