@@ -42,6 +42,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String MERGED_WGS_BUCKET_KEY = "MERGED_WGS_BUCKET";
+  private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -156,6 +157,15 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           cdrVersion.getAccessTier().getDatasetsBucket()
             + cdrVersion.getCdrVersionId()
             + "/wgs/vcf/merged/"
+      );
+    }
+
+    if (cdrVersion.getHasSingleSampleArrayData()) {
+      customEnvironmentVariables.put(
+          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
+          cdrVersion.getAccessTier().getDatasetsBucket()
+            + cdrVersion.getCdrVersionId()
+            + "/microarray/vcf/single_sample/"
       );
     }
 

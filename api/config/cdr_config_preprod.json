@@ -84,7 +84,8 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "hasMergedWgsData": true
+      "hasMergedWgsData": true,
+      "hasSingleSampleArrayData": true
     }
   ]
 }

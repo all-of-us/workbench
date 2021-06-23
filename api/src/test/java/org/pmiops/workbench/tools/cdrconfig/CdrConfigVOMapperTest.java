@@ -56,6 +56,8 @@ public class CdrConfigVOMapperTest {
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
     testVersionJson.hasCopeSurveyData = true;
+    testVersionJson.hasMergedWgsData = false;
+    testVersionJson.hasSingleSampleArrayData = true;
   }
 
   @Test
@@ -155,6 +157,8 @@ public class CdrConfigVOMapperTest {
     expected.setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset);
     expected.setHasFitbitData(testVersionJson.hasFitbitData);
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);
+    expected.setHasMergedWgsData(testVersionJson.hasMergedWgsData);
+    expected.setHasSingleSampleArrayData(testVersionJson.hasSingleSampleArrayData);
 
     assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
   }

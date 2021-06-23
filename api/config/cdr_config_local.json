@@ -95,7 +95,8 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "hasMergedWgsData": true
+      "hasMergedWgsData": true,
+      "hasSingleSampleArrayData": true
     },
     {
       "cdrVersionId": 6,

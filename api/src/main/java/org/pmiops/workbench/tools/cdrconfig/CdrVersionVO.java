@@ -24,4 +24,5 @@ public class CdrVersionVO {
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
   public Boolean hasMergedWgsData;
+  public Boolean hasSingleSampleArrayData;
 }

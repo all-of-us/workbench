@@ -31,6 +31,8 @@ public class DbCdrVersion {
   private Boolean hasCopeSurveyData;
   private Boolean hasMergedWgsData;
 
+  private Boolean hasSingleSampleArrayData;
+
   @Id
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
@@ -184,6 +186,15 @@ public class DbCdrVersion {
 
   public void setHasMergedWgsData(Boolean hasMergedWgsData) {
     this.hasMergedWgsData = hasMergedWgsData;
+  }
+
+  @Column(name = "has_single_sample_array_data")
+  public Boolean getHasSingleSampleArrayData() {
+    return hasSingleSampleArrayData;
+  }
+
+  public void setHasSingleSampleArrayData(Boolean hasSingleSampleArrayData) {
+    this.hasSingleSampleArrayData = hasSingleSampleArrayData;
   }
 
   @Override
