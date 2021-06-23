@@ -345,7 +345,6 @@ public class UserServiceAccessTest {
         });
   }
 
-
   // email verification is not subject to bypass or annual renewal.
   // It must be SUBSCRIBED for access.
 
