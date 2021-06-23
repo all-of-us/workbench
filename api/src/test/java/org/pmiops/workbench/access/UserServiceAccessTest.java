@@ -74,8 +74,7 @@ public class UserServiceAccessTest {
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
-  private Function<DbUser, DbUser> registerUserNow =
-      registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
+  private Function<DbUser, DbUser> registerUserNow;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -129,13 +128,13 @@ public class UserServiceAccessTest {
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user = userDao.save(user);
-    dbUser = user;
+    dbUser = new DbUser();
+    dbUser.setUsername(USERNAME);
+    dbUser = userDao.save(dbUser);
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
+    registerUserNow = registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
   }
 
   @Test
