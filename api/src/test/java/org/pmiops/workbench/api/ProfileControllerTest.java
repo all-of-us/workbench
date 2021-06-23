@@ -1428,7 +1428,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
-    // this is now now unbypassed
+    // this is now unbypassed
     assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
     // these 3 are now bypassed
     assertThat(retrieved2.getComplianceTrainingBypassTime()).isNotNull();
