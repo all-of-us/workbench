@@ -172,10 +172,11 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     if (workbenchConfig.accessRenewal.sendEmails) {
-      final String msgHtml =
+      final String htmlMessage =
           buildHtml(
               REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
               registeredTierAccessSubstitutionMap(expirationTime));
+
       sendWithRetries(
           user.getContactEmail(),
           "Your access to All of Us Registered Tier Data will expire "
@@ -183,7 +184,7 @@ public class MailServiceImpl implements MailService {
           String.format(
               "User %s will lose registered tier access in %d days",
               user.getUsername(), daysRemaining),
-          msgHtml);
+          htmlMessage);
     } else {
       log.info(
           "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
@@ -202,15 +203,16 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     if (workbenchConfig.accessRenewal.sendEmails) {
-      final String msgHtml =
+      final String htmlMessage =
           buildHtml(
               REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
               registeredTierAccessSubstitutionMap(expirationTime));
+
       sendWithRetries(
           user.getContactEmail(),
           "Your access to All of Us Registered Tier Data has expired",
           String.format("Registered Tier access expired for user %s", user.getUsername()),
-          msgHtml);
+          htmlMessage);
     } else {
       log.info(
           "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
