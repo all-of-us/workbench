@@ -50,34 +50,6 @@ describe('WorkspaceCard', () => {
     serverConfigStore.set({config: {gsuiteDomain: 'abc'}});
   });
 
-  it('fetches user roles before opening the share dialog', async() => {
-    const wrapper = component(WorkspaceAccessLevel.OWNER);
-    await waitOneTickAndUpdate(wrapper);
-    const userRolesSpy = jest.spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles');
-
-    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
-
-    // Click the snowman menu
-    wrapper.find('[data-test-id="workspace-card-menu"]').first().simulate('click');
-
-    // Disabled tooltip should not show on hover.
-    const shareEl = wrapper.find('[data-test-id="Share-menu-item"]').first();
-    shareEl.simulate('mouseenter');
-    expect(wrapper.exists('[data-test-id="workspace-share-disabled-tooltip"]')).toBeFalsy();
-
-    // Click should open the share modal.
-    shareEl.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    // We should have called the userRoles API before opening the share modal.
-    expect(userRolesSpy).toHaveBeenCalledTimes(1);
-
-    // The share modal should have been opened w/ the correct props.
-    const shareModal = wrapper.find('[data-test-id="workspace-share-modal"]').first();
-    expect(shareModal.prop('userRoles')).toEqual(userRolesStub);
-
-  });
-
   it('disables sharing for non-owners', async() => {
     const wrapper = component(WorkspaceAccessLevel.WRITER);
     await waitOneTickAndUpdate(wrapper);

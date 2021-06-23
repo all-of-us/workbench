@@ -1,8 +1,7 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, RouterEvent} from '@angular/router';
 import * as fp from 'lodash/fp';
 
-import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   currentWorkspaceStore,
@@ -17,7 +16,7 @@ import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
-import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {ResourceType, Workspace} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
@@ -25,20 +24,14 @@ import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated
   templateUrl: './component.html',
 })
 export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
-
   workspace: Workspace;
-  accessLevel: WorkspaceAccessLevel;
   deleting = false;
-  sharing = false;
   workspaceDeletionError = false;
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
-  userRoles?: UserRole[];
   pageKey = 'data';
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
@@ -55,8 +48,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
   ) {
-    this.handleShareAction = this.handleShareAction.bind(this);
-    this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
@@ -110,7 +101,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // Clear the workspace/access level during the transition to ensure we
         // do not render the child component with a stale workspace.
         this.workspace = undefined;
-        this.accessLevel = undefined;
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
@@ -139,7 +129,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           return;
         }
         this.workspace = workspace;
-        this.accessLevel = workspace.accessLevel;
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
         this.pollAborter.abort();
@@ -165,7 +154,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.subscriptions.push(currentWorkspaceStore.subscribe((workspace) => {
       if (workspace) {
         this.workspace = workspace;
-        this.accessLevel = workspace.accessLevel;
       }
     }));
   }
@@ -210,23 +198,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   closeConfirmDelete(): void {
     this.confirmDeleting = false;
-  }
-
-  // The function called when the "share" action is called from the workspace nav bar menu dropdown
-  async handleShareAction() {
-    this.menuDataLoading = true;
-
-    const userRolesResponse = await workspacesApi().getFirecloudWorkspaceUserRoles(
-      this.workspace.namespace,
-      this.workspace.id);
-    // Trigger the sharing dialog to be shown.
-    this.menuDataLoading = false;
-    this.userRoles = userRolesResponse.items;
-    this.sharing = true;
-  }
-
-  closeShare(): void {
-    this.sharing = false;
   }
 
   submitWorkspaceDeleteBugReport(): void {
