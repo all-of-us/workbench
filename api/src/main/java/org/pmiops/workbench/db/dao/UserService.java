@@ -162,7 +162,7 @@ public interface UserService {
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
-  DbUser confirmProfile();
+  DbUser confirmProfile(DbUser u);
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   DbUser confirmPublications();

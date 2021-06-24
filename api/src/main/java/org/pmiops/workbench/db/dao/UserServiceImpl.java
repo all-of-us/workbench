@@ -1093,8 +1093,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
-  public DbUser confirmProfile() {
-    final DbUser dbUser = userProvider.get();
+  public DbUser confirmProfile(DbUser dbUser) {
     return updateUserWithRetries(
         user -> {
           user.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));

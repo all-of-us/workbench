@@ -201,7 +201,7 @@ public class ProfileService {
    * @param updatedProfile
    * @param previousProfile
    */
-  public void updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public DbUser updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -236,7 +236,8 @@ public class ProfileService {
       dbDemographicSurvey.setUser(user);
     }
     user.setDemographicSurvey(dbDemographicSurvey);
-    userService.updateUserWithConflictHandling(user);
+
+    DbUser updatedUser = userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
 
@@ -260,6 +261,7 @@ public class ProfileService {
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    return updatedUser;
   }
 
   public void cleanProfile(Profile profile) {
