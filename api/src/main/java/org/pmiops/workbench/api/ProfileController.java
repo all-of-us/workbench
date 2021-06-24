@@ -30,7 +30,6 @@ import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -325,25 +324,6 @@ public class ProfileController implements ProfileApiDelegate {
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
-  }
-
-  @Override
-  public ResponseEntity<Profile> requestBetaAccess() {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbUser user = userProvider.get();
-    if (user.getBetaAccessRequestTime() == null) {
-      log.log(
-          Level.INFO,
-          String.format("Sending beta access request email to %s.", user.getContactEmail()));
-      try {
-        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
-      } catch (MessagingException e) {
-        throw new EmailException("Error submitting beta access request", e);
-      }
-      user.setBetaAccessRequestTime(now);
-      user = saveUserWithConflictHandling(user);
-    }
-    return getProfileResponse(user);
   }
 
   @Override

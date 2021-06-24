@@ -28,7 +28,6 @@ export class ProfileStubVariables {
     currentPosition: 'some',
     organization: 'here',
     areaOfResearch: 'things',
-    betaAccessBypassTime: 1,
     complianceTrainingCompletionTime: null,
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
@@ -104,10 +103,6 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(new Response('', {status: 200}));
   }
 
-  public requestBetaAccess(options?: any) {
-    return Promise.resolve(this.profile);
-  }
-
   public updatePageVisits(pageVisit) {
     return Promise.resolve(this.profile);
   }
@@ -136,9 +131,6 @@ export class ProfileApiStub extends ProfileApi {
       switch (bypassed.moduleName) {
         case AccessModule.COMPLIANCETRAINING:
           this.profile.complianceTrainingBypassTime = valueToSet;
-          break;
-        case AccessModule.BETAACCESS:
-          this.profile.betaAccessBypassTime = valueToSet;
           break;
         case AccessModule.ERACOMMONS:
           this.profile.eraCommonsBypassTime = valueToSet;

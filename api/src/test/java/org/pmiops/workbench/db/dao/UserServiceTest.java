@@ -361,7 +361,6 @@ public class UserServiceTest extends SpringTest {
     // documentation that these fields are expected to be null by default.
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
     assertThat(dbUser.getComplianceTrainingBypassTime()).isNull();
-    assertThat(dbUser.getBetaAccessBypassTime()).isNull();
     assertThat(dbUser.getEraCommonsBypassTime()).isNull();
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
     assertThat(dbUser.getRasLinkLoginGovBypassTime()).isNull();
@@ -396,16 +395,6 @@ public class UserServiceTest extends SpringTest {
             Optional.empty(),
             nullableTimestampToOptionalInstant(complianceTrainingBypassTime));
     assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
-
-    final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
-    userService.setBetaAccessBypassTime(dbUser.getUserId(), null, betaAccessBypassTime);
-    verify(mockUserServiceAuditAdapter)
-        .fireAdministrativeBypassTime(
-            dbUser.getUserId(),
-            BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
-            Optional.empty(),
-            nullableTimestampToOptionalInstant(betaAccessBypassTime));
-    assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
 
     final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
     userService.setEraCommonsBypassTime(dbUser.getUserId(), null, eraCommonsBypassTime);

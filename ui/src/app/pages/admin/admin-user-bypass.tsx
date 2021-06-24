@@ -1,27 +1,15 @@
 import {Button, IconButton} from 'app/components/buttons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn} from 'app/components/flex';
 import {Check, ClrIcon, Times} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {PopupTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/stores';
 import {AccessModule, AdminTableUser} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
-const styles = reactStyles({
-  infoIcon: {
-    color: colors.accent,
-    cursor: 'pointer',
-    marginBottom: '0.5rem',
-    height: '16px',
-    width: '16px',
-    alignSelf: 'center'
-  }
-});
 
 interface Props {
   // The user to render the bypass panel for.
@@ -45,7 +33,6 @@ interface State {
 
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
-    ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
     ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
     ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
@@ -123,7 +110,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
 
   render() {
     const {selectedModules, isPopupOpen, isSaving} = this.state;
-    const {enableBetaAccess,
+    const {
       enableComplianceTraining,
       enableEraCommons,
       enableDataUseAgreement,
@@ -134,18 +121,6 @@ export class AdminUserBypass extends React.Component<Props, State> {
         onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
         onOpen={() => this.setState({isPopupOpen: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
-          {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
-            <Toggle name='Beta Access'
-                    checked={selectedModules.includes(AccessModule.BETAACCESS)}
-                    data-test-id='beta-access-toggle'
-                    onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); }}
-            />
-            <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
-              <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
-            </TooltipTrigger>
-          </FlexRow>}
-          {enableBetaAccess && <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
           {enableComplianceTraining && <Toggle name='Compliance Training'
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'

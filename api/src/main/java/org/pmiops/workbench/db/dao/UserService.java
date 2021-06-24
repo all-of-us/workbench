@@ -63,8 +63,6 @@ public interface UserService {
   void setComplianceTrainingBypassTime(
       Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setBetaAccessBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
   void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   void setTwoFactorAuthBypassTime(

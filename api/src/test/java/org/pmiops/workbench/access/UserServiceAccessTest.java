@@ -74,8 +74,7 @@ public class UserServiceAccessTest {
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
-  private Function<DbUser, DbUser> registerUserNow =
-      registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
+  private Function<DbUser, DbUser> registerUserNow;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -129,13 +128,13 @@ public class UserServiceAccessTest {
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user = userDao.save(user);
-    dbUser = user;
+    dbUser = new DbUser();
+    dbUser.setUsername(USERNAME);
+    dbUser = userDao.save(dbUser);
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
+    registerUserNow = registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
   }
 
   @Test
@@ -341,20 +340,6 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           user.setDisabled(true);
-          return userDao.save(user);
-        });
-  }
-
-  // Beta Access is entirely controlled by bypass, if enabled.
-  // It is not subject to annual renewal.
-
-  @Test
-  public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
-    providedWorkbenchConfig.access.enableBetaAccess = true;
-
-    testUnregistration(
-        user -> {
-          user.setBetaAccessBypassTime(null);
           return userDao.save(user);
         });
   }
@@ -1102,7 +1087,6 @@ public class UserServiceAccessTest {
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
     //        && eraCommonsCompliant
-    //        && betaAccessGranted
     //        && twoFactorAuthComplete
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
@@ -1113,7 +1097,6 @@ public class UserServiceAccessTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user.setComplianceTrainingBypassTime(timestamp);
     user.setEraCommonsBypassTime(timestamp);
-    user.setBetaAccessBypassTime(timestamp);
     user.setTwoFactorAuthBypassTime(timestamp);
     user.setDataUseAgreementBypassTime(timestamp);
     user.setPublicationsLastConfirmedTime(timestamp);

@@ -29,7 +29,6 @@ import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -267,11 +266,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         .thenReturn(googleUser);
     when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
-    try {
-      doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
-    } catch (MessagingException e) {
-      e.printStackTrace();
-    }
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
@@ -515,7 +509,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    dbUser.setBetaAccessBypassTime(TIMESTAMP);
     dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
     dbUser.setEraCommonsBypassTime(TIMESTAMP);
     dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
@@ -1400,26 +1393,25 @@ public class ProfileControllerTest extends BaseControllerTest {
     // user has no bypasses at test start
     assertThat(original.getDataUseAgreementBypassTime()).isNull();
     assertThat(original.getComplianceTrainingBypassTime()).isNull();
-    assertThat(original.getBetaAccessBypassTime()).isNull();
     assertThat(original.getEraCommonsBypassTime()).isNull();
     assertThat(original.getTwoFactorAuthBypassTime()).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             // would un-bypass if a bypass had existed
-            new AccessBypassRequest().moduleName(AccessModule.BETA_ACCESS).isBypassed(false));
+            new AccessBypassRequest()
+                .moduleName(AccessModule.COMPLIANCE_TRAINING)
+                .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
         new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
-    // these two are now bypassed
+    // this is now bypassed
     assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
-    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNotNull();
     // remains unbypassed because the flag was set to false
-    assertThat(retrieved1.getBetaAccessBypassTime()).isNull();
+    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNull();
     // unchanged: unbypassed
     assertThat(retrieved1.getEraCommonsBypassTime()).isNull();
     assertThat(retrieved1.getTwoFactorAuthBypassTime()).isNull();
@@ -1428,22 +1420,18 @@ public class ProfileControllerTest extends BaseControllerTest {
         ImmutableList.of(
             // un-bypass the previously bypassed
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
-            new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
-                .isBypassed(false),
             // bypass
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
 
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
-    // these two are now unbypassed
+    // this is now unbypassed
     assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
-    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNull();
-    // remains unbypassed
-    assertThat(retrieved2.getBetaAccessBypassTime()).isNull();
-    // the two are now bypassed
+    // these 3 are now bypassed
+    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNotNull();
     assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
     assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
 
@@ -1462,15 +1450,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
             eq(BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME),
-            any(),
-            any());
-
-    // BETA once in request 1
-
-    verify(mockUserServiceAuditor)
-        .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME),
             any(),
             any());
 
