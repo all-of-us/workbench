@@ -49,7 +49,6 @@ import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
@@ -195,10 +194,6 @@ public class ProfileController implements ProfileApiDelegate {
           dbUser.getContactEmail(), dbUser.getGivenName(), dbUser.getFamilyName());
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      // If the user is logged in, then we know that they have followed the account creation
-      // instructions sent to
-      // their initial contact email address.
-      dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(dbUser);
     }
 
@@ -262,8 +257,6 @@ public class ProfileController implements ProfileApiDelegate {
               profile.getFamilyName(),
               googleUser.getPrimaryEmail(),
               profile.getContactEmail(),
-              profile.getCurrentPosition(),
-              profile.getOrganization(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
               profile.getDegrees(),

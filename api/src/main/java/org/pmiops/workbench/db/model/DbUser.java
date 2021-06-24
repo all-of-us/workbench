@@ -27,7 +27,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
@@ -72,7 +71,6 @@ public class DbUser {
 
   // potentially obsolete profile-style fields (not used)
 
-  @Deprecated private String phoneNumber;
   @Deprecated private String currentPosition;
   @Deprecated private String organization;
   @Deprecated private String aboutYou;
@@ -112,7 +110,6 @@ public class DbUser {
   @Deprecated private Timestamp idVerificationCompletionTime;
   @Deprecated private Timestamp idVerificationBypassTime;
 
-  @Deprecated private Short emailVerificationStatus;
   @Deprecated private Timestamp emailVerificationCompletionTime;
   @Deprecated private Timestamp emailVerificationBypassTime;
 
@@ -195,18 +192,6 @@ public class DbUser {
 
   public void setFamilyName(String familyName) {
     this.familyName = familyName;
-  }
-
-  // TODO: consider dropping this (do we want researcher phone numbers?)
-  @Deprecated
-  @Column(name = "phone_number")
-  public String getPhoneNumber() {
-    return phoneNumber;
-  }
-
-  @Deprecated
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
   }
 
   @Deprecated
@@ -363,29 +348,6 @@ public class DbUser {
 
   public void setDisabled(boolean disabled) {
     this.disabled = disabled;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_status")
-  public Short getEmailVerificationStatus() {
-    return emailVerificationStatus;
-  }
-
-  @Deprecated
-  public void setEmailVerificationStatus(Short emailVerificationStatus) {
-    this.emailVerificationStatus = emailVerificationStatus;
-  }
-
-  @Deprecated
-  @Transient
-  public EmailVerificationStatus getEmailVerificationStatusEnum() {
-    return DbStorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
-  }
-
-  @Deprecated
-  public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
-    setEmailVerificationStatus(
-        DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
   @Deprecated

@@ -39,7 +39,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
@@ -160,7 +159,6 @@ public class WorkspaceServiceTest {
     currentUser.setUsername(DEFAULT_USERNAME);
     currentUser.setUserId(USER_ID);
     currentUser.setDisabled(false);
-    currentUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
   }
 
   private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(

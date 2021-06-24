@@ -131,8 +131,6 @@ export const createEmptyProfile = (): Profile => {
     givenName: '',
     familyName: '',
     contactEmail: '',
-    currentPosition: '',
-    organization: '',
     areaOfResearch: '',
     address: {
       streetAddress1: '',
