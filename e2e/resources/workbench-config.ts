@@ -8,7 +8,10 @@ const userCredential = {
   institutionContactEmail: 'aou-dev-registration@broadinstitute.org',
   // This is passed via a file to leave open the future option to allow token
   // refresh during a Puppeteer test run, and also limits logging exposure of the token.
-  userAccessTokenFilename: 'puppeteer-access-token.txt'
+  userAccessTokenFilename: 'puppeteer-access-token.txt',
+  collaboratorUserAccessTokenFilename: 'collaborator-puppeteer-access-token.txt',
+  readerUserAccessTokenFilename: 'reader-puppeteer-access-token.txt',
+  writerUserAccessTokenFilename: 'writer-puppeteer-access-token.txt'
 };
 
 const urlPath = {
@@ -25,8 +28,8 @@ const local = {
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
-  writerUserName: process.env.DEV_WRITER || 'puppetmaster@fake-research-aou.org',
-  readerUserName: process.env.DEV_READER || 'puppetcitester1@fake-research-aou.org',
+  writerUserName: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
+  readerUserName: process.env.READER_USER || 'puppetcitester1@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
@@ -36,9 +39,9 @@ const test = {
   uiBaseUrl: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
   apiBaseUrl: process.env.TEST_API_URL || 'https://api-dot-all-of-us-workbench-test.appspot.com/v1',
   userEmailDomain: '@fake-research-aou.org',
-  collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
-  writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
-  readerUserName: process.env.TEST_READER || 'puppetcitestreader1@fake-research-aou.org',
+  collaboratorUsername: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
+  writerUserName: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
+  readerUserName: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
@@ -48,9 +51,9 @@ const staging = {
   uiBaseUrl: process.env.STAGING_LOGIN_URL || 'https://all-of-us-rw-staging.appspot.com',
   apiBaseUrl: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
   userEmailDomain: '@staging.fake-research-aou.org',
-  collaboratorUsername: process.env.STAGING_COLLABORATOR || 'puppetcitester4@staging.fake-research-aou.org',
-  writerUserName: process.env.STAGING_WRITER || 'puppetmaster@staging.fake-research-aou.org',
-  readerUserName: process.env.STAGING_READER || 'puppetcistagingreader1@staging.fake-research-aou.org',
+  collaboratorUsername: process.env.COLLABORATOR_USER || 'puppetcitester4@staging.fake-research-aou.org',
+  writerUserName: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
+  readerUserName: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3'
 };
@@ -69,9 +72,9 @@ const perf = {
   uiBaseUrl: process.env.PERF_LOGIN_URL || 'https://all-of-us-rw-perf.appspot.com',
   apiBaseUrl: process.env.PERF_API_URL || 'https://api-dot-all-of-us-rw-perf.appspot.com/v1',
   userEmailDomain: '@perf.fake-research-aou.org',
-  collaboratorUsername: process.env.PERF_COLLABORATOR || 'puppetciperfreader@perf.fake-research-aou.org',
-  writerUserName: process.env.PERF_WRITER || 'puppetciperfwriter1@perf.fake-research-aou.org',
-  readerUserName: process.env.PERF_READER || 'puppetciperfreader@perf.fake-research-aou.org',
+  collaboratorUsername: process.env.COLLABORATOR_USER || 'puppetciperfreader@perf.fake-research-aou.org',
+  writerUserName: process.env.WRITER_USER || 'puppetciperfwriter1@perf.fake-research-aou.org',
+  readerUserName: process.env.READER_USER || 'puppetciperfreader@perf.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3'
 };

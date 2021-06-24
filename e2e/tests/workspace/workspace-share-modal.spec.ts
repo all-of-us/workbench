@@ -8,8 +8,8 @@ import { makeWorkspaceName } from 'utils/str-utils';
 
 describe('Workspace Share Modal', () => {
   const assignAccess = [
-    { accessRole: WorkspaceAccessLevel.Writer, userEmail: config.writerUserName },
-    { accessRole: WorkspaceAccessLevel.Reader, userEmail: config.readerUserName }
+    { accessRole: WorkspaceAccessLevel.Writer, userEmail: config.writerUserName, userAccessTokenFilename: config.writerUserAccessTokenFilename},
+    { accessRole: WorkspaceAccessLevel.Reader, userEmail: config.readerUserName, userAccessTokenFilename: config.readerUserAccessTokenFilename }
   ];
 
   // Create new workspace with default CDR version
@@ -48,7 +48,7 @@ describe('Workspace Share Modal', () => {
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
   test.each(assignAccess)('Verify WRITER and READER cannot share, edit or delete workspace', async (assign) => {
     // Log in could fail if encounters Google Captcha
-    await signIn(page, assign.userEmail, config.userPassword);
+    await signInWithAccessToken(page, assign.userAccessTokenFilename);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);

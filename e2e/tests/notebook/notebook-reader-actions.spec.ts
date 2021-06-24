@@ -51,7 +51,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
   test('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
-    await signIn(page, config.readerUserName, config.userPassword);
+    await signInWithAccessToken(page, config.readerUserAccessTokenFilename);
 
     // Create a new Workspace. This is the copy-to workspace.
     const readerWorkspaceName = await createWorkspace(page);
@@ -145,7 +145,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
   test('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
-    await signIn(page, config.readerUserName, config.userPassword);
+    await signInWithAccessToken(page, config.readerUserAccessTokenFilename);
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();

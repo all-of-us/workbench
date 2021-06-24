@@ -138,13 +138,13 @@ describe('Create Dataset', () => {
 
   test('Workspace READER cannot edit dataset', async () => {
     // READER log in in new Incognito page.
-    const newPage = await signInAs(config.readerUserName, config.userPassword);
+    await signInWithAccessToken(page, config.readerUserAccessTokenFilename);
 
     // Find workspace created by previous test. If not found, test will fail.
-    const workspaceCard = await findWorkspaceCard(newPage, workspace);
+    const workspaceCard = await findWorkspaceCard(page, workspace);
     await workspaceCard.clickWorkspaceName(true);
 
-    const readerDataPage = new WorkspaceDataPage(newPage);
+    const readerDataPage = new WorkspaceDataPage(page);
     await readerDataPage.waitForLoad();
 
     // Create Cohorts and Datasets button are disabled.
@@ -152,10 +152,10 @@ describe('Create Dataset', () => {
     expect(await readerDataPage.getAddCohortsButton().isCursorNotAllowed()).toBe(true);
 
     await readerDataPage.openDatasetsSubtab();
-    await waitWhileLoading(newPage);
+    await waitWhileLoading(page);
 
     // Verify Snowman menu: Rename, Edit Export to Notebook and Delete actions are not available for click in Dataset card.
-    const resourceCard = new DataResourceCard(newPage);
+    const resourceCard = new DataResourceCard(page);
     const dataSetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
     expect(dataSetCard).toBeTruthy();
 
@@ -167,7 +167,7 @@ describe('Create Dataset', () => {
 
     // Although Edit option is not available to click. User can click on dataset name and see the dataset details.
     await dataSetCard.clickResourceName();
-    const dataSetEditPage = new DatasetEditPage(newPage);
+    const dataSetEditPage = new DatasetEditPage(page);
     await dataSetEditPage.waitForLoad();
 
     const analyzeButton = dataSetEditPage.getAnalyzeButton();
@@ -176,7 +176,7 @@ describe('Create Dataset', () => {
     // No matter of what has changed, the Analyze button remains disabled.
     await dataSetEditPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
     await dataSetEditPage.getPreviewTableButton().click();
-    await waitWhileLoading(newPage);
+    await waitWhileLoading(page);
     expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
   });
 });
