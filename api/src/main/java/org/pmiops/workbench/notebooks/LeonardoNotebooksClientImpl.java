@@ -152,16 +152,17 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
       customEnvironmentVariables.put(
           ALL_SAMPLES_WGS_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "") + "/"
+          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+              + "/"
               + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
     }
 
     if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
       customEnvironmentVariables.put(
           SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "") + "/"
-              + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", "")
-      );
+          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+              + "/"
+              + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
     }
 
     // See RW-6079
