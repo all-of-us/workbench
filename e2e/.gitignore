@@ -6,6 +6,9 @@ tsc-out/
 out/
 
 puppeteer-access-token.txt
+reader-puppeteer-access-token.txt
+writer-puppeteer-access-token.txt
+collaborator-puppeteer-access-token.txt
 
 # logs
 screenshot/
