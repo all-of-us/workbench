@@ -1,9 +1,9 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {NavigationGuard} from './guards/navigation-guard';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 

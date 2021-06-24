@@ -1,4 +1,5 @@
 import {Component as AComponent} from '@angular/core';
+import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
@@ -15,7 +16,6 @@ import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
-import {CohortPage} from './cohort-search/cohort-page/cohort-page.component';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
 import {AdminBanner} from './pages/admin/admin-banner';

@@ -246,15 +246,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       cohortChanged={cohortChanged}
                       searchRequest={criteria}
                       updateCount={updateCount}
-                      updating={() => {
-                        this.setState({updatingCohort: true});
-                      }}/>}
+                      updating={() => this.setState({updatingCohort: true})}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>
-              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => {
-                this.setState({unsavedSelections: unsaved});
-              }}/>}
+              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => this.setState({unsavedSelections: unsaved})}/>}
             </React.Fragment>
           }
         </div>
