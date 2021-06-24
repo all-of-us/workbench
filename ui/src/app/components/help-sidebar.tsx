@@ -56,9 +56,12 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {Clickable, MenuItem, StyledAnchorTag} from 'app/components/buttons';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
 import {withErrorModal} from 'app/components/modals';
+import {Spinner} from 'app/components/spinners';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -67,13 +70,11 @@ import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
-  ParticipantCohortStatus, ResourceType,
+  ParticipantCohortStatus,
+  ResourceType,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {ConfirmDeleteModal} from './confirm-delete-modal';
-import {Spinner} from './spinners';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -279,23 +280,13 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    get sidebarStyle() {
-      return {
-        ...styles.sidebar,
-        width: `${this.sidebarWidth}.5rem`,
-      };
-    }
-
-    get sidebarWidth() {
-      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
-    }
     subscription: Subscription;
     private loadLastSavedKey: () => void;
 
     deleteWorkspace = withErrorModal({
       title: 'Error Deleting Workspace',
       message: 'Error',
-      showPromptBugReport: true
+      showBugReportLink: true
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
@@ -707,6 +698,17 @@ export const HelpSidebar = fp.flow(
       </FlexRow>;
     }
 
+    get sidebarStyle() {
+      return {
+        ...styles.sidebar,
+        width: `${this.sidebarWidth}.5rem`,
+      };
+    }
+
+    get sidebarWidth() {
+      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
+    }
+
     sidebarContent(activeIcon): {
       overflow?: string;
       headerPadding?: string;
@@ -913,9 +915,8 @@ export const HelpSidebar = fp.flow(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('pageKey') pageKey: Props['pageKey'];
-  @Input('shareFunction') shareFunction: Props['shareFunction'];
 
   constructor() {
-    super(HelpSidebar, ['pageKey', 'shareFunction']);
+    super(HelpSidebar, ['pageKey' ]);
   }
 }

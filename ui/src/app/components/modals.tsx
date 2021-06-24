@@ -84,7 +84,7 @@ export const ModalFooter = withStyle(styles.modalFooter)('div');
 export const NotificationModal = () => {
   const notification = useStore(notificationStore);
   const profile = profileStore.get().profile;
-  const {title = '', message = '', showPromptBugReport = false, onDismiss = fp.noop} = notification || {};
+  const {title = '', message = '', showBugReportLink: showBugReportLink = false, onDismiss = fp.noop} = notification || {};
 
   useEffect(() => onDismiss);
 
@@ -92,11 +92,13 @@ export const NotificationModal = () => {
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>
       <div>{message}</div>
-      {showPromptBugReport &&
-        <div>Please <a onClick={() => {
-          openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
-          notificationStore.set(null);
-        }}>submit a bug report.</a></div>
+      {showBugReportLink &&
+        <div>
+            Please <a onClick={() => {
+              openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
+              notificationStore.set(null);
+            }}> submit a bug report. </a>
+        </div>
       }
     </ModalBody>
     <ModalFooter>
