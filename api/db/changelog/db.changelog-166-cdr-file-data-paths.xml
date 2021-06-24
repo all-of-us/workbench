@@ -6,8 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="als364" id="changelog-166-cdr-file-data-paths">
     <addColumn tableName="cdr_version">
-      <column name="all_samples_wgs_data_bucket" type="tinyint"/>
-      <column name="single_sample_array_data_bucket" type="tinyint"/>
+      <column name="all_samples_wgs_data_bucket" type="VARCHAR(80)"/>
+      <column name="single_sample_array_data_bucket" type="VARCHAR(80)"/>
     </addColumn>
     <addColumn tableName="access_tier">
       <column name="datasets_bucket" type="VARCHAR(80)"/>
