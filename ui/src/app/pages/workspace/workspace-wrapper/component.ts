@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   currentWorkspaceStore,
-  navigate,
   nextWorkspaceWarmupStore,
   routeConfigDataStore,
   setSidebarActiveIconStore,
@@ -14,9 +13,8 @@ import {
 
 import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
-import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
-import {ResourceType, Workspace} from 'generated/fetch';
+import {Workspace} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
@@ -25,13 +23,8 @@ import {ResourceType, Workspace} from 'generated/fetch';
 })
 export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   workspace: Workspace;
-  deleting = false;
-  workspaceDeletionError = false;
   tabPath: string;
   displayNavBar = true;
-  confirmDeleting = false;
-  menuDataLoading = false;
-  resourceType: ResourceType = ResourceType.WORKSPACE;
   pageKey = 'data';
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
@@ -39,20 +32,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   // Setting this flag sets the container to 100% so that no content is clipped.
   contentFullHeightOverride = false;
 
-  bugReportOpen: boolean;
-  bugReportDescription = '';
-
   private subscriptions = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-  ) {
-    this.openConfirmDelete = this.openConfirmDelete.bind(this);
-    this.receiveDelete = this.receiveDelete.bind(this);
-    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
-    this.closeBugReport = this.closeBugReport.bind(this);
-  }
+  ) {}
 
   ngOnInit(): void {
 
@@ -175,40 +160,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       return path;
     }
     return path.slice(0, path.indexOf('/'));
-  }
-
-  delete(workspace: Workspace): void {
-    this.deleting = true;
-    workspacesApi().deleteWorkspace(
-      workspace.namespace, workspace.id).then(() => {
-        navigate(['/workspaces']);
-      }).catch(() => {
-        this.workspaceDeletionError = true;
-      });
-  }
-
-  receiveDelete(): void {
-    AnalyticsTracker.Workspaces.Delete();
-    this.delete(this.workspace);
-  }
-
-  openConfirmDelete(): void {
-    this.confirmDeleting = true;
-  }
-
-  closeConfirmDelete(): void {
-    this.confirmDeleting = false;
-  }
-
-  submitWorkspaceDeleteBugReport(): void {
-    this.workspaceDeletionError = false;
-    // this.bugReportComponent.reportBug();
-    this.bugReportDescription = 'Could not delete workspace.';
-    this.bugReportOpen = true;
-  }
-
-  closeBugReport(): void {
-    this.bugReportOpen = false;
   }
 
   // This function does multiple things so we don't have to have two separate'

@@ -36,6 +36,7 @@ import {
   serverConfigStore
 } from 'app/utils/stores';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
@@ -162,13 +163,12 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
-  it('should call delete method when clicked', async() => {
-    const deleteSpy = jest.fn();
-    props = {deleteFunction: deleteSpy};
+  it('should show delete workspace modal on clicking delete workspace', async() => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
-    expect(deleteSpy).toHaveBeenCalled();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
   });
 
   it('should show workspace share modal on clicking share workspace', async() => {

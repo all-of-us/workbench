@@ -56,20 +56,25 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {Clickable, MenuItem, StyledAnchorTag} from 'app/components/buttons';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {withErrorModal} from 'app/components/modals';
+import {Spinner} from 'app/components/spinners';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
+  ResourceType,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {Spinner} from './spinners';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -223,7 +228,6 @@ const pageKeyToAnalyticsLabels = {
 };
 
 interface Props {
-  deleteFunction: Function;
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -236,6 +240,12 @@ interface Props {
   genomicExtraction: GenomicExtractionStore;
 }
 
+enum CurrentModal {
+  None,
+  Share,
+  Delete
+}
+
 interface State {
   activeIcon: string;
   filteredContent: Array<any>;
@@ -243,7 +253,7 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
-  showShareModal: boolean;
+  currentModal: CurrentModal;
 }
 
 export const HelpSidebar = fp.flow(
@@ -257,8 +267,6 @@ export const HelpSidebar = fp.flow(
   withCdrVersions()
 )(
   class extends React.Component<Props, State> {
-    subscription: Subscription;
-    private loadLastSavedKey: () => void;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -268,9 +276,24 @@ export const HelpSidebar = fp.flow(
         searchTerm: '',
         showCriteria: false,
         tooltipId: undefined,
-        showShareModal: false
+        currentModal: CurrentModal.None
       };
     }
+
+    subscription: Subscription;
+    private loadLastSavedKey: () => void;
+
+    deleteWorkspace = withErrorModal({
+      title: 'Error Deleting Workspace',
+      message: `Could not delete workspace '${this.props.workspace.name}'.`,
+      showBugReportLink: true
+    }, async() => {
+      AnalyticsTracker.Workspaces.Delete();
+      await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+      navigate(['/workspaces']);
+    }, () => {
+      this.setState({currentModal: CurrentModal.None});
+    });
 
     iconConfig(iconKey): IconConfig {
       return {
@@ -465,7 +488,7 @@ export const HelpSidebar = fp.flow(
     }
 
     renderWorkspaceMenu() {
-      const {deleteFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const {workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
       const tooltip = isNotOwner && 'Requires owner permission';
       return <PopupTrigger
@@ -498,7 +521,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenShareModal();
-                this.setState({showShareModal: true});
+                this.setState({currentModal: CurrentModal.Share});
               }}>
               Share
             </MenuItem>
@@ -508,7 +531,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDeleteModal();
-                deleteFunction();
+                this.setState({currentModal: CurrentModal.Delete});
               }}>
               Delete
             </MenuItem>
@@ -872,7 +895,15 @@ export const HelpSidebar = fp.flow(
           </CSSTransition>
         </TransitionGroup>
 
-        {this.state.showShareModal && <WorkspaceShare onClose={() => this.setState({showShareModal: false})}/>}
+        {
+          switchCase(this.state.currentModal,
+            [CurrentModal.Share, () => <WorkspaceShare onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+            [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                                                            resourceType={ResourceType.WORKSPACE}
+                                                            receiveDelete={() => this.deleteWorkspace()}
+                                                            resourceName={this.props.workspace.name}/>]
+          )
+        }
       </div>;
     }
   }
@@ -883,11 +914,9 @@ export const HelpSidebar = fp.flow(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('pageKey') pageKey: Props['pageKey'];
-  @Input('shareFunction') shareFunction: Props['shareFunction'];
 
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'pageKey', 'shareFunction']);
+    super(HelpSidebar, ['pageKey' ]);
   }
 }
