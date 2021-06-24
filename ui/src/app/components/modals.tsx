@@ -3,13 +3,13 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import {Button} from 'app/components/buttons';
+import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
 import {notificationStore, NotificationStore, profileStore, useStore} from 'app/utils/stores';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import * as fp from 'lodash/fp';
 import {animated, useSpring} from 'react-spring';
-import {SpinnerOverlay} from './spinners';
-import {openZendeskWidget} from "../utils/zendesk";
 
 const { useEffect} = React;
 

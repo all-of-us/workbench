@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   currentWorkspaceStore,
-  navigate,
   nextWorkspaceWarmupStore,
   routeConfigDataStore,
   setSidebarActiveIconStore,
@@ -14,9 +13,8 @@ import {
 
 import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
-import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
-import {ResourceType, Workspace} from 'generated/fetch';
+import {Workspace} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
@@ -25,21 +23,14 @@ import {ResourceType, Workspace} from 'generated/fetch';
 })
 export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   workspace: Workspace;
-  deleting = false;
-  workspaceDeletionError = false;
   tabPath: string;
   displayNavBar = true;
-  menuDataLoading = false;
-  resourceType: ResourceType = ResourceType.WORKSPACE;
   pageKey = 'data';
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
   // to the height calculation of the container, which is normally set to auto.
   // Setting this flag sets the container to 100% so that no content is clipped.
   contentFullHeightOverride = false;
-
-  bugReportOpen: boolean;
-  bugReportDescription = '';
 
   private subscriptions = [];
 

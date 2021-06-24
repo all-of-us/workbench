@@ -58,9 +58,12 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {withErrorModal} from 'app/components/modals';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
@@ -71,9 +74,6 @@ import {
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {Spinner} from './spinners';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {withErrorModal, withSuccessModal} from 'app/components/modals';
-import {navigate} from 'app/utils/navigation';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -266,8 +266,6 @@ export const HelpSidebar = fp.flow(
   withCdrVersions()
 )(
   class extends React.Component<Props, State> {
-    subscription: Subscription;
-    private loadLastSavedKey: () => void;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -280,6 +278,31 @@ export const HelpSidebar = fp.flow(
         currentModal: CurrentModal.None
       };
     }
+
+    get sidebarStyle() {
+      return {
+        ...styles.sidebar,
+        width: `${this.sidebarWidth}.5rem`,
+      };
+    }
+
+    get sidebarWidth() {
+      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
+    }
+    subscription: Subscription;
+    private loadLastSavedKey: () => void;
+
+    deleteWorkspace = withErrorModal({
+      title: 'Error Deleting Workspace',
+      message: 'Error',
+      showPromptBugReport: true
+    }, async() => {
+      AnalyticsTracker.Workspaces.Delete();
+      await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+      navigate(['/workspaces']);
+    }, () => {
+      this.setState({currentModal: CurrentModal.None});
+    });
 
     iconConfig(iconKey): IconConfig {
       return {
@@ -389,18 +412,6 @@ export const HelpSidebar = fp.flow(
         localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
       }
     }
-
-    deleteWorkspace = withErrorModal({
-      title: 'Error Deleting Workspace',
-      message: 'Error',
-      showPromptBugReport: true
-    }, async () => {
-      AnalyticsTracker.Workspaces.Delete();
-      await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id)
-      navigate(['/workspaces']);
-    }, () => {
-      this.setState({currentModal: CurrentModal.None});
-    });
 
     async componentDidMount() {
       const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
@@ -696,17 +707,6 @@ export const HelpSidebar = fp.flow(
       </FlexRow>;
     }
 
-    get sidebarStyle() {
-      return {
-        ...styles.sidebar,
-        width: `${this.sidebarWidth}.5rem`,
-      };
-    }
-
-    get sidebarWidth() {
-      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
-    }
-
     sidebarContent(activeIcon): {
       overflow?: string;
       headerPadding?: string;
@@ -893,12 +893,15 @@ export const HelpSidebar = fp.flow(
           </CSSTransition>
         </TransitionGroup>
 
-        {this.state.currentModal === CurrentModal.Share && <WorkspaceShare onClose={() => this.setState({currentModal: CurrentModal.None})}/>}
-
-        {this.state.currentModal === CurrentModal.Delete && <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
-                                                           resourceType={ResourceType.WORKSPACE}
-                                                           receiveDelete={() => this.deleteWorkspace()}
-                                                           resourceName={this.props.workspace.name}/>}
+        {
+          switchCase(this.state.currentModal,
+            [CurrentModal.Share, () => <WorkspaceShare onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+            [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                                                            resourceType={ResourceType.WORKSPACE}
+                                                            receiveDelete={() => this.deleteWorkspace()}
+                                                            resourceName={this.props.workspace.name}/>]
+          )
+        }
       </div>;
     }
   }
