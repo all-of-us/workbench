@@ -2,7 +2,6 @@ import Checkbox from 'app/element/checkbox';
 import RadioButton from 'app/element/radiobutton';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import GoogleLoginPage from 'app/page/google-login';
 import HomePage from 'app/page/home-page';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import * as fs from 'fs';
