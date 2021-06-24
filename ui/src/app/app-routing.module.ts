@@ -1,12 +1,12 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
@@ -49,6 +49,7 @@ const routes: Routes = [
     component: SignedInComponent,
     canActivate: [SignInGuard],
     canActivateChild: [SignInGuard, DisabledGuard],
+    canDeactivate: [NavigationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       // legacy / duplicated routes go HERE
@@ -187,13 +188,8 @@ const routes: Routes = [
                             children: [
                               {
                                 path: '',
-                                component: CohortPageComponent,
-                                canDeactivate: [CanDeactivateGuard],
-                                data: {
-                                  title: 'Build Cohort Criteria',
-                                  breadcrumb: BreadcrumbType.CohortAdd,
-                                  pageKey: 'cohortBuilder'
-                                }
+                                component: AppRouting,
+                                data: {}
                               },
                             ]
                           },

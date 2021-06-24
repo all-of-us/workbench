@@ -1,3 +1,4 @@
+import {CanComponentDeactivate} from 'app/guards/can-deactivate-guard.service';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
@@ -136,6 +137,11 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
+export interface NavigationGuardStore {
+  component?: CanComponentDeactivate;
+}
+
+export const navigationGuardStore = atom<NavigationGuardStore>({});
 
 /**
  * @name useStore
