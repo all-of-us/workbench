@@ -15,6 +15,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {CohortPage} from './cohort-search/cohort-page/cohort-page.component';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
 import {AdminBanner} from './pages/admin/admin-banner';
@@ -68,6 +69,7 @@ const expiredGuard: Guard = {
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
@@ -323,6 +325,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               breadcrumb: BreadcrumbType.Dataset,
               pageKey: 'datasetBuilder'
             }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/cohorts/build'
+              component={() => <CohortPagePage routeData={{
+                title: 'Build Cohort Criteria',
+                breadcrumb: BreadcrumbType.CohortAdd,
+                pageKey: 'cohortBuilder'
+              }}/>}
           />
           <AppRoute
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'

@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -17,7 +16,6 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCurrentCohortSearchContext,
   withCurrentWorkspace
 } from 'app/utils';
@@ -26,6 +24,7 @@ import {
   currentCohortStore,
   queryParamsStore
 } from 'app/utils/navigation';
+import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 
@@ -54,10 +53,6 @@ function colStyle(percentage: string) {
 
 interface Props {
   cohortContext: any;
-  setCohortChanged: (cohortChanged: boolean) => void;
-  setUnsavedSelections: (unsavedSelections: boolean) => void;
-  setUpdatingCohort: (updatingCohort: boolean) => void;
-  setShowWarningModal: (showWarningModal: () => Promise<boolean>) => void;
   workspace: WorkspaceData;
 }
 
@@ -73,6 +68,8 @@ interface State {
   modalOpen: boolean;
   updateGroupListsCount: number;
   cohortChanged: boolean;
+  updatingCohort: boolean;
+  unsavedSelections: boolean;
   searchContext: any;
 }
 
@@ -95,6 +92,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         modalOpen: false,
         updateGroupListsCount: 0,
         cohortChanged: false,
+        updatingCohort: false,
+        unsavedSelections: false,
         searchContext: undefined
       };
       this.showWarningModal = this.showWarningModal.bind(this);
@@ -106,7 +105,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
         const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
-        this.props.setCohortChanged(cohortChanged);
         this.setState({
           criteria: searchRequest,
           overview: searchRequest.includes.length > 0 || searchRequest.excludes.length > 0,
@@ -120,12 +118,12 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         };
         localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(localStorageCohort));
       }));
-      this.props.setShowWarningModal(this.showWarningModal);
+      navigationGuardStore.set({component: this});
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
       if (prevProps.cohortContext && !this.props.cohortContext) {
-        this.props.setUnsavedSelections(false);
+        this.setState({unsavedSelections: false});
       }
     }
 
@@ -136,6 +134,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       currentCohortSearchContextStore.next(undefined);
       searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
       localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+      navigationGuardStore.set(null);
     }
 
     initCohort(cid: number) {
@@ -182,6 +181,10 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     async showWarningModal() {
       this.setState({modalOpen: true});
       return await new Promise<boolean>((resolve => this.resolve = resolve));
+    }
+
+    canDeactivate(): Promise<boolean> | boolean {
+      return !(this.state.cohortChanged || this.state.unsavedSelections) || this.state.updatingCohort || this.showWarningModal();
     }
 
     getModalResponse(res: boolean) {
@@ -243,11 +246,15 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       cohortChanged={cohortChanged}
                       searchRequest={criteria}
                       updateCount={updateCount}
-                      updating={() => this.props.setUpdatingCohort(true)}/>}
+                      updating={() => {
+                        this.setState({updatingCohort: true});
+                      }}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>
-              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => this.props.setUnsavedSelections(unsaved)}/>}
+              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => {
+                this.setState({unsavedSelections: unsaved});
+              }}/>}
             </React.Fragment>
           }
         </div>
@@ -267,43 +274,3 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
   }
 );
-
-@Component({
-  selector: 'app-cohort-page',
-  template: '<div #root></div>'
-})
-export class CohortPageComponent extends ReactWrapperBase {
-  // The functions and variables here are a temporary workaround to keep the unsaved changes warning until we can move this route to the
-  // new React router (RW-5256)
-  cohortChanged: boolean;
-  unsavedSelections: boolean;
-  updatingCohort: boolean;
-  showWarningModal: () => Promise<boolean>;
-  constructor() {
-    super(CohortPage, ['setCohortChanged', 'setUnsavedSelections', 'setUpdatingCohort', 'setShowWarningModal']);
-    this.setCohortChanged = this.setCohortChanged.bind(this);
-    this.setUnsavedSelections = this.setUnsavedSelections.bind(this);
-    this.setUpdatingCohort = this.setUpdatingCohort.bind(this);
-    this.setShowWarningModal = this.setShowWarningModal.bind(this);
-  }
-
-  setCohortChanged(cohortChanged: boolean): void {
-    this.cohortChanged = cohortChanged;
-  }
-
-  setUnsavedSelections(unsavedSelections: boolean): void {
-    this.unsavedSelections = unsavedSelections;
-  }
-
-  setUpdatingCohort(updatingCohort: boolean): void {
-    this.updatingCohort = updatingCohort;
-  }
-
-  setShowWarningModal(showWarningModal: () => Promise<boolean>): void {
-    this.showWarningModal = showWarningModal;
-  }
-
-  canDeactivate(): Promise<boolean> | boolean {
-    return !(this.cohortChanged || this.unsavedSelections) || this.updatingCohort || this.showWarningModal();
-  }
-}
