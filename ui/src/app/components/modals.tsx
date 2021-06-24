@@ -10,6 +10,7 @@ import {notificationStore, NotificationStore, profileStore, useStore} from 'app/
 import {openZendeskWidget} from 'app/utils/zendesk';
 import * as fp from 'lodash/fp';
 import {animated, useSpring} from 'react-spring';
+import {TextColumn} from './text-column';
 
 const { useEffect} = React;
 
@@ -91,15 +92,16 @@ export const NotificationModal = () => {
   return notification && <Modal>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>
-      <div>{message}</div>
-      {showBugReportLink &&
-        <div>
-            Please <a onClick={() => {
-              openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
-              notificationStore.set(null);
-            }}> submit a bug report. </a>
-        </div>
-      }
+        <TextColumn>
+          <div>{message}</div>
+          {showBugReportLink &&
+            <div style={{marginTop: '0.5rem'}}>
+                Please <a onClick={() => {
+                  openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
+                  notificationStore.set(null);
+                }}> submit a bug report. </a>
+            </div>}
+        </TextColumn>
     </ModalBody>
     <ModalFooter>
       <Button onClick={() => notificationStore.set(null)}>OK</Button>

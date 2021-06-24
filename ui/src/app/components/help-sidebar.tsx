@@ -285,7 +285,7 @@ export const HelpSidebar = fp.flow(
 
     deleteWorkspace = withErrorModal({
       title: 'Error Deleting Workspace',
-      message: 'Error',
+      message: `Could not delete workspace '${this.props.workspace.name}'.`,
       showBugReportLink: true
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
