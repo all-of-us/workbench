@@ -64,11 +64,12 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
-  ParticipantCohortStatus,
+  ParticipantCohortStatus, ResourceType,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
+import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {Spinner} from './spinners';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
@@ -236,6 +237,12 @@ interface Props {
   genomicExtraction: GenomicExtractionStore;
 }
 
+enum CurrentModal {
+  None,
+  Share,
+  Delete
+}
+
 interface State {
   activeIcon: string;
   filteredContent: Array<any>;
@@ -244,6 +251,7 @@ interface State {
   showCriteria: boolean;
   tooltipId: number;
   showShareModal: boolean;
+  currentModal: CurrentModal;
 }
 
 export const HelpSidebar = fp.flow(
@@ -268,7 +276,7 @@ export const HelpSidebar = fp.flow(
         searchTerm: '',
         showCriteria: false,
         tooltipId: undefined,
-        showShareModal: false
+        currentModal: CurrentModal.None
       };
     }
 
@@ -498,7 +506,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenShareModal();
-                this.setState({showShareModal: true});
+                this.setState({currentModal: CurrentModal.Share});
               }}>
               Share
             </MenuItem>
@@ -508,7 +516,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDeleteModal();
-                deleteFunction();
+                this.setState({currentModal: CurrentModal.Delete});
               }}>
               Delete
             </MenuItem>
@@ -872,7 +880,12 @@ export const HelpSidebar = fp.flow(
           </CSSTransition>
         </TransitionGroup>
 
-        {this.state.showShareModal && <WorkspaceShare onClose={() => this.setState({showShareModal: false})}/>}
+        {this.state.currentModal === CurrentModal.Share && <WorkspaceShare onClose={() => this.setState({currentModal: CurrentModal.None})}/>}
+
+        {this.state.currentModal === CurrentModal.Delete && <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                                                           resourceType={ResourceType.WORKSPACE}
+                                                           receiveDelete={() => {console.log('hello !')}}
+                                                           resourceName={this.props.workspace.name}/>}
       </div>;
     }
   }
