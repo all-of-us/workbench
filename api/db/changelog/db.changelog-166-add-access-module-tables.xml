@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-166-add-access-module-tables">
+    <createTable tableName="access_module">
+      <column name="access_module_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="access_module_enum" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="expirable" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createTable tableName="access_module_user">
+      <column name="access_module_user_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="access_module_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_acu_access_module_id" references="access_module(access_module_id)"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_acu_user_id" references="user(user_id)"/>
+      </column>
+      <column name="completion_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="bypass_time" type="datetime">
+        <constraints nullable="true"/>
+      </column>
+      <column name="expire_time" type="datetime">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+    <createIndex tableName="access_module_user" indexName="access_module_user_idx" unique="false">
+      <column name="user_id"/>
+    </createIndex>
+    <sql>
+      INSERT INTO access_module
+        (access_module_enum, expirable)
+      VALUES
+        ("ERA_COMMONS", "false"),
+        ("TWO_FACTOR_AUTH", "false"),
+        ("RAS_LOGIN_GOV", "false"),
+        ("RT_COMPLIANCE_TRAINING", "true"),
+        ("DATA_USER_CODE_OF_CONDUCT", "true")
+        ("PROFILE_CONFIRMATION", "true")
+        ("PUBLICATION_CONFIRMATION", "true")
+    </sql>
+  </changeSet>
+</databaseChangeLog>
