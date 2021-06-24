@@ -76,6 +76,7 @@ export const profileStore = atom<ProfileStore>({
 export interface NotificationStore {
   title: string;
   message: string;
+  showPromptBugReport?: boolean;
   onDismiss?: () => void;
 }
 

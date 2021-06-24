@@ -227,7 +227,6 @@ const pageKeyToAnalyticsLabels = {
 };
 
 interface Props {
-  deleteFunction: Function;
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -393,11 +392,15 @@ export const HelpSidebar = fp.flow(
 
     deleteWorkspace = withErrorModal({
       title: 'Error Deleting Workspace',
-      message: 'Error'
+      message: 'Error',
+      showPromptBugReport: true
     }, async () => {
+      AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id)
       navigate(['/workspaces']);
-    })
+    }, () => {
+      this.setState({currentModal: CurrentModal.None});
+    });
 
     async componentDidMount() {
       const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
@@ -483,7 +486,7 @@ export const HelpSidebar = fp.flow(
     }
 
     renderWorkspaceMenu() {
-      const {deleteFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const {workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
       const tooltip = isNotOwner && 'Requires owner permission';
       return <PopupTrigger
@@ -906,11 +909,10 @@ export const HelpSidebar = fp.flow(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('pageKey') pageKey: Props['pageKey'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
 
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'pageKey', 'shareFunction']);
+    super(HelpSidebar, ['pageKey', 'shareFunction']);
   }
 }

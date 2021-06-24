@@ -29,7 +29,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   workspaceDeletionError = false;
   tabPath: string;
   displayNavBar = true;
-  confirmDeleting = false;
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   pageKey = 'data';
@@ -47,12 +46,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-  ) {
-    this.openConfirmDelete = this.openConfirmDelete.bind(this);
-    this.receiveDelete = this.receiveDelete.bind(this);
-    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
-    this.closeBugReport = this.closeBugReport.bind(this);
-  }
+  ) {}
 
   ngOnInit(): void {
 
@@ -175,40 +169,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       return path;
     }
     return path.slice(0, path.indexOf('/'));
-  }
-
-  delete(workspace: Workspace): void {
-    this.deleting = true;
-    workspacesApi().deleteWorkspace(
-      workspace.namespace, workspace.id).then(() => {
-        navigate(['/workspaces']);
-      }).catch(() => {
-        this.workspaceDeletionError = true;
-      });
-  }
-
-  receiveDelete(): void {
-    AnalyticsTracker.Workspaces.Delete();
-    this.delete(this.workspace);
-  }
-
-  openConfirmDelete(): void {
-    this.confirmDeleting = true;
-  }
-
-  closeConfirmDelete(): void {
-    this.confirmDeleting = false;
-  }
-
-  submitWorkspaceDeleteBugReport(): void {
-    this.workspaceDeletionError = false;
-    // this.bugReportComponent.reportBug();
-    this.bugReportDescription = 'Could not delete workspace.';
-    this.bugReportOpen = true;
-  }
-
-  closeBugReport(): void {
-    this.bugReportOpen = false;
   }
 
   // This function does multiple things so we don't have to have two separate'
