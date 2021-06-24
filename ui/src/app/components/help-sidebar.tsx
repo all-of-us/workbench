@@ -71,6 +71,9 @@ import {
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {Spinner} from './spinners';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {withErrorModal, withSuccessModal} from 'app/components/modals';
+import {navigate} from 'app/utils/navigation';
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -250,7 +253,6 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
-  showShareModal: boolean;
   currentModal: CurrentModal;
 }
 
@@ -388,6 +390,14 @@ export const HelpSidebar = fp.flow(
         localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
       }
     }
+
+    deleteWorkspace = withErrorModal({
+      title: 'Error Deleting Workspace',
+      message: 'Error'
+    }, async () => {
+      await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id)
+      navigate(['/workspaces']);
+    })
 
     async componentDidMount() {
       const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
@@ -884,7 +894,7 @@ export const HelpSidebar = fp.flow(
 
         {this.state.currentModal === CurrentModal.Delete && <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
                                                            resourceType={ResourceType.WORKSPACE}
-                                                           receiveDelete={() => {console.log('hello !')}}
+                                                           receiveDelete={() => this.deleteWorkspace()}
                                                            resourceName={this.props.workspace.name}/>}
       </div>;
     }
