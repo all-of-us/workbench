@@ -481,7 +481,7 @@ public class UserServiceTest extends SpringTest {
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
-    userService.confirmProfile();
+    userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
 
@@ -489,7 +489,7 @@ public class UserServiceTest extends SpringTest {
 
     tick();
 
-    userService.confirmProfile();
+    userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
