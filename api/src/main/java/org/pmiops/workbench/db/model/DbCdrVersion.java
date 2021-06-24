@@ -29,9 +29,8 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
-  private Boolean hasMergedWgsData;
-
-  private Boolean hasSingleSampleArrayData;
+  private String allSamplesWgsDataBucket;
+  private String singleSampleArrayDataBucket;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -179,22 +178,22 @@ public class DbCdrVersion {
     this.hasCopeSurveyData = hasCopeSurveyData;
   }
 
-  @Column(name = "has_merged_wgs_data")
-  public Boolean getHasMergedWgsData() {
-    return hasMergedWgsData == null ? false : hasMergedWgsData;
+  @Column(name = "all_samples_wgs_data_bucket")
+  public String getAllSamplesWgsDataBucket() {
+    return allSamplesWgsDataBucket;
   }
 
-  public void setHasMergedWgsData(Boolean hasMergedWgsData) {
-    this.hasMergedWgsData = hasMergedWgsData;
+  public void setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
+    this.allSamplesWgsDataBucket = allSamplesWgsDataBucket;
   }
 
-  @Column(name = "has_single_sample_array_data")
-  public Boolean getHasSingleSampleArrayData() {
-    return hasSingleSampleArrayData == null ? false : hasSingleSampleArrayData;
+  @Column(name = "single_sample_array_data_bucket")
+  public String getSingleSampleArrayDataBucket() {
+    return singleSampleArrayDataBucket;
   }
 
-  public void setHasSingleSampleArrayData(Boolean hasSingleSampleArrayData) {
-    this.hasSingleSampleArrayData = hasSingleSampleArrayData;
+  public void setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
+    this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
   }
 
   @Override
@@ -215,7 +214,7 @@ public class DbCdrVersion {
         wgsBigqueryDataset,
         hasFitbitData,
         hasCopeSurveyData,
-        hasMergedWgsData);
+        allSamplesWgsDataBucket);
   }
 
   @Override
@@ -242,6 +241,6 @@ public class DbCdrVersion {
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
-        && Objects.equals(hasMergedWgsData, that.hasMergedWgsData);
+        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket);
   }
 }

@@ -117,8 +117,8 @@ public class CdrVersionServiceTest {
             null,
             null,
             null,
-            false,
-            false);
+            "",
+            "");
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
@@ -132,8 +132,8 @@ public class CdrVersionServiceTest {
             null,
             null,
             null,
-            true,
-            true);
+            "gs://lol",
+            "gs://lol");
   }
 
   @Test
@@ -355,7 +355,7 @@ public class CdrVersionServiceTest {
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
-        3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, true, true);
+        3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
     final List<CdrVersion> newVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
 
@@ -385,8 +385,8 @@ public class CdrVersionServiceTest {
       String wgsDataset,
       Boolean hasFitbit,
       Boolean hasCopeSurveyData,
-      Boolean hasMergedWgsData,
-      Boolean hasSingleSampleArrayData) {
+      String allSamplesWgsDataBucket,
+      String singleSampleArrayDataBucket) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -401,8 +401,8 @@ public class CdrVersionServiceTest {
     cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
-    cdrVersion.setHasMergedWgsData(hasMergedWgsData);
-    cdrVersion.setHasSingleSampleArrayData(hasSingleSampleArrayData);
+    cdrVersion.setAllSamplesWgsDataBucket(allSamplesWgsDataBucket);
+    cdrVersion.setSingleSampleArrayDataBucket(singleSampleArrayDataBucket);
     return cdrVersionDao.save(cdrVersion);
   }
 

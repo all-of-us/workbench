@@ -84,8 +84,8 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "hasMergedWgsData": true,
-      "hasSingleSampleArrayData": true
+      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
+      "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/"
     }
   ]
 }
