@@ -1,7 +1,7 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signInAs, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';

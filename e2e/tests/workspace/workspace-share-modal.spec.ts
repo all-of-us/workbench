@@ -1,5 +1,5 @@
 import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signIn, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
