@@ -27,7 +27,7 @@ const local = {
   uiBaseUrl: process.env.DEV_LOGIN_URL || 'http://localhost:4200',
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
-  collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
+  collaboratorUsername: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   readerUserName: process.env.READER_USER || 'puppetcitester1@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
