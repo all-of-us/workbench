@@ -102,7 +102,7 @@
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableAccessRenewal": false,
+    "enableAccessRenewal": true,
     "enableRasLoginGovLinking": false
   },
   "featureFlags": {
@@ -133,8 +133,8 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365,
-    "sendEmails": false,
+    "expiryDays": 3650,
+    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {
