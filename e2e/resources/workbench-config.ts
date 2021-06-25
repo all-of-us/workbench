@@ -8,10 +8,10 @@ const userCredential = {
   institutionContactEmail: 'aou-dev-registration@broadinstitute.org',
   // This is passed via a file to leave open the future option to allow token
   // refresh during a Puppeteer test run, and also limits logging exposure of the token.
-  userAccessTokenFilename: 'puppeteer-access-token.txt',
-  collaboratorUserAccessTokenFilename: 'collaborator-puppeteer-access-token.txt',
-  readerUserAccessTokenFilename: 'reader-puppeteer-access-token.txt',
-  writerUserAccessTokenFilename: 'writer-puppeteer-access-token.txt'
+  userAccessTokenFilename: 'signin-tokens/puppeteer-access-token.txt',
+  collaboratorUserAccessTokenFilename: 'signin-tokens/collaborator-puppeteer-access-token.txt',
+  readerUserAccessTokenFilename: 'signin-tokens/reader-puppeteer-access-token.txt',
+  writerUserAccessTokenFilename: 'signin-tokens/writer-puppeteer-access-token.txt'
 };
 
 const urlPath = {
