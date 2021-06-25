@@ -103,16 +103,6 @@ public class DbUser {
   private Timestamp publicationsLastConfirmedTime;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
-
-  @Deprecated private Timestamp betaAccessRequestTime;
-  @Deprecated private Timestamp betaAccessBypassTime;
-
-  @Deprecated private Timestamp idVerificationCompletionTime;
-  @Deprecated private Timestamp idVerificationBypassTime;
-
-  @Deprecated private Timestamp emailVerificationCompletionTime;
-  @Deprecated private Timestamp emailVerificationBypassTime;
-
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
   @Deprecated private Integer moodleId;
 
@@ -371,17 +361,6 @@ public class DbUser {
   }
 
   @Deprecated
-  @Column(name = "beta_access_request_time")
-  public Timestamp getBetaAccessRequestTime() {
-    return betaAccessRequestTime;
-  }
-
-  @Deprecated
-  public void setBetaAccessRequestTime(Timestamp betaAccessRequestTime) {
-    this.betaAccessRequestTime = betaAccessRequestTime;
-  }
-
-  @Deprecated
   @Column(name = "moodle_id")
   public Integer getMoodleId() {
     return moodleId;
@@ -508,39 +487,6 @@ public class DbUser {
     this.complianceTrainingExpirationTime = null;
   }
 
-  @Deprecated
-  @Column(name = "beta_access_bypass_time")
-  public Timestamp getBetaAccessBypassTime() {
-    return betaAccessBypassTime;
-  }
-
-  @Deprecated
-  public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
-    this.betaAccessBypassTime = betaAccessBypassTime;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_completion_time")
-  public Timestamp getEmailVerificationCompletionTime() {
-    return emailVerificationCompletionTime;
-  }
-
-  @Deprecated
-  public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
-    this.emailVerificationCompletionTime = emailVerificationCompletionTime;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_bypass_time")
-  public Timestamp getEmailVerificationBypassTime() {
-    return emailVerificationBypassTime;
-  }
-
-  @Deprecated
-  public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
-    this.emailVerificationBypassTime = emailVerificationBypassTime;
-  }
-
   @Column(name = "era_commons_bypass_time")
   public Timestamp getEraCommonsBypassTime() {
     return eraCommonsBypassTime;
@@ -548,32 +494,6 @@ public class DbUser {
 
   public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
     this.eraCommonsBypassTime = eraCommonsBypassTime;
-  }
-
-  /*
-   * This column and attribute appear to be disused. We should drop the column and the code here
-   * together.
-   */
-  @Deprecated
-  @Column(name = "id_verification_completion_time")
-  public Timestamp getIdVerificationCompletionTime() {
-    return idVerificationCompletionTime;
-  }
-
-  @Deprecated
-  public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
-    this.idVerificationCompletionTime = idVerificationCompletionTime;
-  }
-
-  @Column(name = "id_verification_bypass_time")
-  @Deprecated
-  public Timestamp getIdVerificationBypassTime() {
-    return idVerificationBypassTime;
-  }
-
-  @Deprecated
-  public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
-    this.idVerificationBypassTime = idVerificationBypassTime;
   }
 
   @Column(name = "two_factor_auth_completion_time")
