@@ -6,11 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="yonghao" id="changelog-166-add-access-module-tables">
     <createTable tableName="access_module">
-      <column name="access_module_id" type="bigint" autoIncrement="true">
+      <column name="name" type="ENUM('ERA_COMMONS', 'TWO_FACTOR_AUTH', 'RAS_LOGIN_GOV', 'RT_COMPLIANCE_TRAINING', 'DATA_USER_CODE_OF_CONDUCT', 'PROFILE_CONFIRMATION', 'PUBLICATION_CONFIRMATION')">
         <constraints primaryKey="true" nullable="false"/>
-      </column>
-      <column name="access_module_enum" type="VARCHAR(80)">
-        <constraints unique="true" nullable="false"/>
       </column>
       <column name="expirable" type="boolean">
         <constraints nullable="false"/>
@@ -20,8 +17,8 @@
       <column name="access_module_user_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="access_module_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_acu_access_module_id" references="access_module(access_module_id)"/>
+      <column name="access_module_name" type="ENUM('ERA_COMMONS', 'TWO_FACTOR_AUTH', 'RAS_LOGIN_GOV', 'RT_COMPLIANCE_TRAINING', 'DATA_USER_CODE_OF_CONDUCT', 'PROFILE_CONFIRMATION', 'PUBLICATION_CONFIRMATION')">
+        <constraints nullable="false" foreignKeyName="fk_acu_access_module_name" references="access_module(name)"/>
       </column>
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="fk_acu_user_id" references="user(user_id)"/>
@@ -38,7 +35,7 @@
     </createIndex>
     <sql>
       INSERT INTO access_module
-        (access_module_enum, expirable)
+        (name, expirable)
       VALUES
         ("ERA_COMMONS", false),
         ("TWO_FACTOR_AUTH", false),
