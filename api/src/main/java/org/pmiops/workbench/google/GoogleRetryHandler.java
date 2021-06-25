@@ -1,5 +1,6 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -31,6 +32,10 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
       }
       if (lastException instanceof SocketTimeoutException) {
         return HttpServletResponse.SC_GATEWAY_TIMEOUT;
+      }
+      if (lastException instanceof TokenResponseException) {
+        throw ExceptionUtils.codeToException(
+            ((TokenResponseException) lastException).getStatusCode());
       }
       return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
