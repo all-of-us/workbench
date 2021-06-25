@@ -10,7 +10,7 @@
     "impersonate-test-reader-user": "env-cmd -x ../api/project.rb generate-impersonated-user-token --impersonated-user=\\$READER_USER --output-token-filename=../e2e/reader-puppeteer-access-token.txt",
     "impersonate-test-writer-user": "env-cmd -x ../api/project.rb generate-impersonated-user-token --impersonated-user=\\$WRITER_USER --output-token-filename=../e2e/writer-puppeteer-access-token.txt",
     "impersonate-test-collaborator-user": "env-cmd -x ../api/project.rb generate-impersonated-user-token --impersonated-user=\\$COLLABORATOR_USER --output-token-filename=../e2e/collaborator-puppeteer-access-token.txt",
-    "impersonate-test-user": "yarn impersonate-test-user-owner && yarn impersonate-test-collaborator-user && yarn impersonate-test-reader-user && yarn impersonate-test-writer-user",
+    "impersonate-test-user": "yarn impersonate-test-user-owner && yarn impersonate-test-reader-user && yarn impersonate-test-writer-user && yarn impersonate-test-collaborator-user",
     "_test": "yarn impersonate-test-user && yarn impersonate-test-user && yarn impersonate-test-user && jest --no-color",
     "_test:debugTest": "yarn impersonate-test-user && node --inspect-brk node_modules/.bin/jest --no-color",
     "test": "cross-env WORKBENCH_ENV=test yarn _test --maxWorkers=5",
