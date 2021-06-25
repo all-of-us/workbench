@@ -5,7 +5,7 @@ import { getPropValue } from 'utils/element-utils';
 import Table from 'app/component/table';
 import AdminTable from 'app/component/admin-table';
 import Textbox from 'app/element/textbox';
-import BypassLink from 'app/component/bypass-modules';
+import BypassPopup from 'app/component/bypass-modules';
 import UserAuditPage from './admin-user-audit-page';
 import UserProfileInfo from './admin-user-profile-info';
 
@@ -17,7 +17,7 @@ export default class UserAdminPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([waitForDocumentTitle(this.page, PageTitle)]);
     await this.getUserAdminTable().exists();
     return true;
   }
@@ -45,14 +45,14 @@ export default class UserAdminPage extends AuthenticatedPage {
    */
 
   // click on the Bypass link to access the bypass modal
-  async clickBypassLink(rowIndex = 1, colIndex = 1): Promise<BypassLink> {
+  async clickBypassLink(rowIndex = 1, colIndex = 1): Promise<BypassPopup> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     await getPropValue<string>(cell, 'textContent');
     await cell.click();
-    const bypassModal = new BypassLink(this.page);
-    return bypassModal;
+    const bypassPopup = new BypassPopup(this.page);
+    return bypassPopup;
   }
 
   // click on the name link in the frozen column to navigate to the user info page
@@ -63,19 +63,22 @@ export default class UserAdminPage extends AuthenticatedPage {
     console.log(`cell: ${cell}`);
     const textContent = await getPropValue<string>(cell, 'textContent');
     console.log(`textContent : ${textContent}`);
-
-    browser.on('targetcreated', function (target) {
-      console.log(target.type + 'was created');
-    });
-
     await cell.click();
-    // const userProfileInfo = new UserProfileInfo(this.page);
-    // await userProfileInfo.waitForLoad();
-    // return userProfileInfo;
-    return new UserProfileInfo(this.page).waitForLoad();
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target()); 
+    const newPage = await newTarget.page();
+    return new UserProfileInfo(newPage).waitForLoad();
   }
 
-  // extract only the UserLockout text to verify the user status
+ //extract only the User name text to verify the search box result
+  async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
+    const dataTable = this.getUserAdminTable();
+    const bodyTable = dataTable.getBodyTable();
+    const cell = await bodyTable.getCell(rowIndex, colIndex);
+    const textContent = await getPropValue<string>(cell, 'textContent');
+    return textContent;
+  }
+
+  // extract only the User Lockout text 
   async getUserLockoutText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
@@ -98,12 +101,10 @@ export default class UserAdminPage extends AuthenticatedPage {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
-    const nameText = await getPropValue<string>(cell, 'textContent');
-    console.log(nameText);
+    await getPropValue<string>(cell, 'textContent');
     await cell.click();
-    browser.on('targetcreated', function (target) {
-      console.log(target.type() + ' was created');
-    });
-    return new UserAuditPage(this.page).waitForLoad();
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target()); 
+    const newPage = await newTarget.page();
+    return new UserAuditPage(newPage).waitForLoad();
   }
 }
