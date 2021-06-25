@@ -16,6 +16,7 @@ public class DbAccessTier {
   private String servicePerimeter;
   private String authDomainName;
   private String authDomainGroupEmail;
+  private String datasetsBucket;
 
   public DbAccessTier() {}
 
@@ -80,6 +81,16 @@ public class DbAccessTier {
     return this;
   }
 
+  @Column(name = "datasets_bucket")
+  public String getDatasetsBucket() {
+    return datasetsBucket;
+  }
+
+  public DbAccessTier setDatasetsBucket(String datasetsBucket) {
+    this.datasetsBucket = datasetsBucket;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -93,12 +104,18 @@ public class DbAccessTier {
         && Objects.equal(displayName, that.displayName)
         && Objects.equal(servicePerimeter, that.servicePerimeter)
         && Objects.equal(authDomainName, that.authDomainName)
-        && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail);
+        && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail)
+        && Objects.equal(datasetsBucket, that.datasetsBucket);
   }
 
   @Override
   public int hashCode() {
     return Objects.hashCode(
-        shortName, displayName, servicePerimeter, authDomainName, authDomainGroupEmail);
+        shortName,
+        displayName,
+        servicePerimeter,
+        authDomainName,
+        authDomainGroupEmail,
+        datasetsBucket);
   }
 }

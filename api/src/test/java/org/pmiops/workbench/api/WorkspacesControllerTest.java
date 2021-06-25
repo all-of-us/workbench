@@ -145,7 +145,6 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
@@ -427,7 +426,6 @@ public class WorkspacesControllerTest extends SpringTest {
     DbUser user = new DbUser();
     user.setUsername(email);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     return userDao.save(user);
   }
 

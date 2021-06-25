@@ -26,7 +26,6 @@ describe('RegistrationDashboard', () => {
       updateCache: jest.fn()
     });
     serverConfigStore.set({config: {
-      enableBetaAccess: true,
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
@@ -44,7 +43,6 @@ describe('RegistrationDashboard', () => {
       rasLoginGovLinkError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: false,
       twoFactorAuthCompleted: false,
       dataUserCodeOfConductCompleted: false
     };
@@ -82,41 +80,7 @@ describe('RegistrationDashboard', () => {
 
   });
 
-  it('should display a warning when beta access has not been granted', () => {
-    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: true}});
-    props.betaAccessGranted = false;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
-  });
-
-  it('should clear warning when user has been granted beta access', () => {
-    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: true}});
-    props.betaAccessGranted = true;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
-  });
-
-  it('should not display a warning when enableBetaAccess is false', () => {
-    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: false}});
-    props.betaAccessGranted = false;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
-  });
-
   it('should display a success message when all tasks have been completed', () => {
-    props.betaAccessGranted = true;
-    props.eraCommonsLinked = true;
-    props.trainingCompleted = true;
-    props.twoFactorAuthCompleted = true;
-    props.dataUserCodeOfConductCompleted = true;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
-  });
-
-  it('should display a success message when complete and enableBetaAccess is false', () => {
-    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: false}});
-    // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
-    props.betaAccessGranted = false;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;
@@ -128,7 +92,6 @@ describe('RegistrationDashboard', () => {
   it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
     serverConfigStore.set({config: {...serverConfigStore.get().config, enableRasLoginGovLinking: true}});
     // When enableRasLoginGovLinking is true, show RAS linking card.
-    props.betaAccessGranted = true;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;

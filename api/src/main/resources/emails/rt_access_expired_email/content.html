@@ -1,0 +1,48 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <style>
+    body {
+      background-color: #F1F1F1;
+      padding-left: 1rem;
+      padding-top: 1rem;
+      width: 600px;
+    }
+    * {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+    }
+    div {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #302C71;
+      font-size: 24px;
+      font-weight: 300;
+      line-height: 36px;
+    }
+    * {
+      margin-bottom: 6px;
+    }
+    .text {
+        color: rgba(0,0,0,0.87);
+        font-size: 16px;
+        font-weight: 300;
+        line-height: 22px;
+        margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+<img src="${HEADER_IMG}">
+<div class="text">Hello, and thank you for using the All of Us Researcher Workbench. Your access to All of Us
+Registered Tier data requires annual renewal, and your renewal was due by
+  <b>${EXPIRATION_DATE}</b>.</div>
+<div class="text">Because your renewal was not completed in time, you have lost access to the data and to any
+  workspaces in the Workbench. Any code or data you’ve created will remain as-is, but will be
+  inaccessible until you complete renewal.</div>
+<div class="text">Renewal consists of a few steps similar to those you completed in order to initially gain
+  access to the data. To see what you need to do, log in to your account at ${URL}.</div>
+<div class="text">If you have questions, contact our support team by replying to this email or clicking the
+  Help button on ${URL}.</div>
+</body>

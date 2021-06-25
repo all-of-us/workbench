@@ -60,7 +60,6 @@ import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.FilterList;
@@ -193,7 +192,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     dbUser.setUsername("bob@gmail.com");
     dbUser.setUserId(123L);
     dbUser.setDisabled(false);
-    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     dbUser = userDao.save(dbUser);
     currentUser = dbUser;
 

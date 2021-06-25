@@ -324,6 +324,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
+    let mounted = true;
     const aborter = new AbortController();
     const runAction = async() => {
       // Only delete if the runtime already exists.
@@ -369,7 +370,9 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
         }
       } finally {
         markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
-        setRequestedRuntime(undefined);
+        if (mounted) {
+          setRequestedRuntime(undefined);
+        }
       }
     };
 
@@ -380,6 +383,11 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       });
       runAction();
     }
+
+    // After dismount, we still want the above store modifications to occur.
+    // However, we should not continue to mutate the now unmounted hook state -
+    // this will result in React warnings.
+    return () => { mounted = false; };
   }, [requestedRuntime]);
 
   return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];

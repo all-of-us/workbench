@@ -351,17 +351,6 @@ paths:
           description: Error occurred while creating account.
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/beta-access":
-    post:
-      tags:
-      - profile
-      description: Request betaAccess.
-      operationId: requestBetaAccess
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/update-nih-token":
     post:
       tags:
@@ -4255,13 +4244,6 @@ definitions:
     - pending
     - ready
     - error
-  EmailVerificationStatus:
-    type: string
-    description: stage of email verification
-    enum:
-    - unverified
-    - pending
-    - subscribed
   EmptyResponse:
     type: object
     properties:
@@ -4709,7 +4691,6 @@ definitions:
     enum:
     - DATA_USE_AGREEMENT
     - COMPLIANCE_TRAINING
-    - BETA_ACCESS
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
@@ -5489,11 +5470,6 @@ definitions:
       contactEmail:
         description: email address that can be used to contact the user
         type: string
-      contactEmailFailure:
-        description: >
-          DEPRECATED. Whether or not contact email could be added to verification list. No longer in use.
-        type: boolean
-        default: false
       firstSignInTime:
         type: integer
         format: int64
@@ -5512,17 +5488,8 @@ definitions:
       familyName:
         description: the user's family  name (e.g. Jones)
         type: string
-      phoneNumber:
-        description: the user's phone number
-        type: string
       professionalUrl:
         description: the link to the user's professional url
-        type: string
-      currentPosition:
-        description: the user's curent position (job title)
-        type: string
-      organization:
-        description: the user's current organization
         type: string
       authorities:
         description: authorities granted to this user
@@ -5542,10 +5509,6 @@ definitions:
       disabled:
         type: boolean
         default: false
-      emailVerificationStatus:
-        "$ref": "#/definitions/EmailVerificationStatus"
-      aboutYou:
-        type: string
       areaOfResearch:
         type: string
       verifiedInstitutionalAffiliation:
@@ -5555,14 +5518,6 @@ definitions:
         "$ref": "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         "$ref": "#/definitions/DemographicSurvey"
-      idVerificationCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completes identity verification.
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user is bypassed for completing identity verification
       twoFactorAuthCompletionTime:
         type: integer
         format: int64
@@ -5599,22 +5554,6 @@ definitions:
         format: int64
         description: Timestamp when a user was bypassed for completing compliance
           training
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for beta access
-      betaAccessRequestTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user requests beta access.
-      emailVerificationCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed email verification
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing email verification
       dataUseAgreementCompletionTime:
         type: integer
         format: int64

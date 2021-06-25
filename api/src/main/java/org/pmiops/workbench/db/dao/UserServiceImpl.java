@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -53,7 +54,6 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.UserAccessExpiration;
@@ -362,21 +362,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    // beta access bypass and 2FA do not need to be checked for annual renewal
-    boolean betaAccessGranted =
-        user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
+    // 2FA does not need to be checked for annual renewal
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && isComplianceTrainingCompliant(user)
         && isEraCommonsCompliant(user)
-        && betaAccessGranted
         && twoFactorAuthComplete
         && isDataUseAgreementCompliant(user)
         && isPublicationConfirmationCompliant(user)
-        && isProfileConfirmationCompliant(user)
-        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
+        && isProfileConfirmationCompliant(user);
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -388,7 +384,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     DbUser user = new DbUser();
     user.setUsername(username);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
       user = userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -441,8 +436,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
-        null,
-        null,
         dbVerifiedAffiliation);
   }
 
@@ -453,8 +446,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String familyName,
       String username,
       String contactEmail,
-      String currentPosition,
-      String organization,
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
@@ -466,15 +457,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
-    dbUser.setCurrentPosition(currentPosition);
-    dbUser.setOrganization(organization);
     dbUser.setAreaOfResearch(areaOfResearch);
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);
     dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
-    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
@@ -600,17 +588,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         newBypassTime,
         DbUser::setComplianceTrainingBypassTime,
         BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
-  }
-
-  @Override
-  public void setBetaAccessBypassTime(
-      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        previousBypassTime,
-        newBypassTime,
-        DbUser::setBetaAccessBypassTime,
-        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
   @Override
@@ -1040,10 +1017,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         previousBypassTime = user.getComplianceTrainingBypassTime();
         setComplianceTrainingBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
-      case BETA_ACCESS:
-        previousBypassTime = user.getBetaAccessBypassTime();
-        setBetaAccessBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
-        break;
       case ERA_COMMONS:
         previousBypassTime = user.getEraCommonsBypassTime();
         setEraCommonsBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
@@ -1093,8 +1066,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
-  public DbUser confirmProfile() {
-    final DbUser dbUser = userProvider.get();
+  public DbUser confirmProfile(DbUser dbUser) {
     return updateUserWithRetries(
         user -> {
           user.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -1196,21 +1168,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
-    // we only want to send the expiration email on the day of the actual expiration
-    if (millisRemaining < 0 && daysRemaining == 0) {
-      sendRegisteredTierExpirationEmail(user);
-    } else {
-      if (configProvider.get().accessRenewal.expiryDaysWarningThresholds.contains(daysRemaining)) {
-        sendRegisteredTierWarningEmail(user, daysRemaining);
+    final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
+    try {
+      // we only want to send the expiration email on the day of the actual expiration
+      if (millisRemaining < 0 && daysRemaining == 0) {
+        mailService.alertUserRegisteredTierExpiration(user, expiration.toInstant());
+      } else {
+        if (thresholds.contains(daysRemaining)) {
+          mailService.alertUserRegisteredTierWarningThreshold(
+              user, daysRemaining, expiration.toInstant());
+        }
       }
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
     }
-  }
-
-  private void sendRegisteredTierExpirationEmail(DbUser user) {
-    mailService.alertUserRegisteredTierExpiration(user);
-  }
-
-  private void sendRegisteredTierWarningEmail(DbUser user, long daysRemaining) {
-    mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
   }
 }

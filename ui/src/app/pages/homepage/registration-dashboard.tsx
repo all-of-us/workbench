@@ -218,7 +218,6 @@ export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc,
 }, {});
 
 export interface RegistrationDashboardProps {
-  betaAccessGranted: boolean;
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
@@ -265,14 +264,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   allTasksCompleted(): boolean {
-    const {betaAccessGranted} = this.props;
-    const {enableBetaAccess} = serverConfigStore.get().config;
-
-    // Beta access is awkwardly not treated as a task in the completion list. So we manually
-    // check whether (1) beta access requirement is turned off for this env, or (2) the user
-    // has been granted beta access.
-    return this.taskCompletionList.every(v => v) &&
-      (!enableBetaAccess || betaAccessGranted);
+    return this.taskCompletionList.every(v => v);
   }
 
   isEnabled(i: number): boolean {
@@ -314,7 +306,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       AccessModule.ERACOMMONS,
       AccessModule.TWOFACTORAUTH,
       AccessModule.DATAUSEAGREEMENT,
-      AccessModule.BETAACCESS,
       AccessModule.RASLINKLOGINGOV,
     ];
 
@@ -330,10 +321,10 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
-    const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
-    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.get().config;
+    const {eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
+    const {unsafeAllowSelfBypass} = serverConfigStore.get().config;
 
-    const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
+    const anyBypassActionsRemaining = !this.allTasksCompleted();
 
     // Override on click for the two factor auth access task. This is important because we want to affect the DOM
     // for this specific task.
@@ -366,13 +357,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           }
         </div>
       }
-      {enableBetaAccess && !betaAccessGranted &&
-        <div data-test-id='beta-access-warning'
-             style={{...baseStyles.card, ...styles.warningModal, margin: '1rem 0 0'}}>
-          <ClrIcon shape='warning-standard' class='is-solid'
-                   style={styles.warningIcon}/>
-          You have not been granted beta access. Please contact support@researchallofus.org.
-        </div>}
       <FlexRow style={{marginTop: '0.85rem'}}>
         {registrationTasksToRender.map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + card.key}

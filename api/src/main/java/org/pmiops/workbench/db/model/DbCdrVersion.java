@@ -29,6 +29,8 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
+  private String allSamplesWgsDataBucket;
+  private String singleSampleArrayDataBucket;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -176,6 +178,24 @@ public class DbCdrVersion {
     this.hasCopeSurveyData = hasCopeSurveyData;
   }
 
+  @Column(name = "all_samples_wgs_data_bucket")
+  public String getAllSamplesWgsDataBucket() {
+    return allSamplesWgsDataBucket;
+  }
+
+  public void setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
+    this.allSamplesWgsDataBucket = allSamplesWgsDataBucket;
+  }
+
+  @Column(name = "single_sample_array_data_bucket")
+  public String getSingleSampleArrayDataBucket() {
+    return singleSampleArrayDataBucket;
+  }
+
+  public void setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
+    this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -193,7 +213,8 @@ public class DbCdrVersion {
         elasticIndexBaseName,
         wgsBigqueryDataset,
         hasFitbitData,
-        hasCopeSurveyData);
+        hasCopeSurveyData,
+        allSamplesWgsDataBucket);
   }
 
   @Override
@@ -219,6 +240,7 @@ public class DbCdrVersion {
         && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
-        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData);
+        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
+        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket);
   }
 }

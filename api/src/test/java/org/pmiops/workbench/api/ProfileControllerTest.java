@@ -29,7 +29,6 @@ import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -77,7 +76,6 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
@@ -148,12 +146,10 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String CITY = "Exampletown";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String COUNTRY = "Example";
-  private static final String CURRENT_POSITION = "Tester";
   private static final String FAMILY_NAME = "Bobberson";
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String ORGANIZATION = "Test";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
@@ -235,8 +231,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setFamilyName(FAMILY_NAME);
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USER_PREFIX);
-    profile.setCurrentPosition(CURRENT_POSITION);
-    profile.setOrganization(ORGANIZATION);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
     profile.setAddress(
         new Address()
@@ -245,9 +239,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             .state(STATE)
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
-
-    // TODO: this needs to be set in createAccountAndDbUserWithAffiliation() instead of here.  Why?
-    // profile.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
@@ -267,11 +258,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         .thenReturn(googleUser);
     when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
-    try {
-      doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
-    } catch (MessagingException e) {
-      e.printStackTrace();
-    }
     try {
       when(mockCaptchaVerificationService.verifyCaptcha(CAPTCHA_TOKEN)).thenReturn(true);
       when(mockCaptchaVerificationService.verifyCaptcha(WRONG_CAPTCHA_TOKEN)).thenReturn(false);
@@ -515,7 +501,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    dbUser.setBetaAccessBypassTime(TIMESTAMP);
     dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
     dbUser.setEraCommonsBypassTime(TIMESTAMP);
     dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
@@ -1091,7 +1076,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // we make an arbitrary change
 
-    profile.setAboutYou("I'm a changed person.");
+    profile.setProfessionalUrl("http://google.com/");
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
@@ -1400,26 +1385,25 @@ public class ProfileControllerTest extends BaseControllerTest {
     // user has no bypasses at test start
     assertThat(original.getDataUseAgreementBypassTime()).isNull();
     assertThat(original.getComplianceTrainingBypassTime()).isNull();
-    assertThat(original.getBetaAccessBypassTime()).isNull();
     assertThat(original.getEraCommonsBypassTime()).isNull();
     assertThat(original.getTwoFactorAuthBypassTime()).isNull();
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             // would un-bypass if a bypass had existed
-            new AccessBypassRequest().moduleName(AccessModule.BETA_ACCESS).isBypassed(false));
+            new AccessBypassRequest()
+                .moduleName(AccessModule.COMPLIANCE_TRAINING)
+                .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
         new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
-    // these two are now bypassed
+    // this is now bypassed
     assertThat(retrieved1.getDataUseAgreementBypassTime()).isNotNull();
-    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNotNull();
     // remains unbypassed because the flag was set to false
-    assertThat(retrieved1.getBetaAccessBypassTime()).isNull();
+    assertThat(retrieved1.getComplianceTrainingBypassTime()).isNull();
     // unchanged: unbypassed
     assertThat(retrieved1.getEraCommonsBypassTime()).isNull();
     assertThat(retrieved1.getTwoFactorAuthBypassTime()).isNull();
@@ -1428,22 +1412,18 @@ public class ProfileControllerTest extends BaseControllerTest {
         ImmutableList.of(
             // un-bypass the previously bypassed
             new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
-            new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
-                .isBypassed(false),
             // bypass
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
 
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
     final Profile retrieved2 = profileService.updateAccountProperties(request2);
 
-    // these two are now unbypassed
+    // this is now unbypassed
     assertThat(retrieved2.getDataUseAgreementBypassTime()).isNull();
-    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNull();
-    // remains unbypassed
-    assertThat(retrieved2.getBetaAccessBypassTime()).isNull();
-    // the two are now bypassed
+    // these 3 are now bypassed
+    assertThat(retrieved2.getComplianceTrainingBypassTime()).isNotNull();
     assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
     assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
 
@@ -1462,15 +1442,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
             eq(BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME),
-            any(),
-            any());
-
-    // BETA once in request 1
-
-    verify(mockUserServiceAuditor)
-        .fireAdministrativeBypassTime(
-            eq(dbUser.getUserId()),
-            eq(BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME),
             any(),
             any());
 
@@ -1585,9 +1556,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     // initialize the global test dbUser
     dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
 
-    // TODO: why is this necessary instead of initializing in setUp() ?
-    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-
     if (grantAdminAuthority) {
       dbUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
     }
@@ -1596,7 +1564,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // match dbUser updates
 
-    result.setEmailVerificationStatus(dbUser.getEmailVerificationStatusEnum());
     result.setAuthorities(Lists.newArrayList(dbUser.getAuthoritiesEnum()));
 
     return result;
@@ -1624,7 +1591,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
-    assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 
     DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(user).isNotNull();

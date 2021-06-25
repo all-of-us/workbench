@@ -30,7 +30,6 @@ import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -50,7 +49,6 @@ import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
@@ -196,10 +194,6 @@ public class ProfileController implements ProfileApiDelegate {
           dbUser.getContactEmail(), dbUser.getGivenName(), dbUser.getFamilyName());
 
       dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      // If the user is logged in, then we know that they have followed the account creation
-      // instructions sent to
-      // their initial contact email address.
-      dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(dbUser);
     }
 
@@ -263,8 +257,6 @@ public class ProfileController implements ProfileApiDelegate {
               profile.getFamilyName(),
               googleUser.getPrimaryEmail(),
               profile.getContactEmail(),
-              profile.getCurrentPosition(),
-              profile.getOrganization(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
               profile.getDegrees(),
@@ -325,25 +317,6 @@ public class ProfileController implements ProfileApiDelegate {
     final Profile createdProfile = profileService.getProfile(user);
     profileAuditor.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
-  }
-
-  @Override
-  public ResponseEntity<Profile> requestBetaAccess() {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbUser user = userProvider.get();
-    if (user.getBetaAccessRequestTime() == null) {
-      log.log(
-          Level.INFO,
-          String.format("Sending beta access request email to %s.", user.getContactEmail()));
-      try {
-        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
-      } catch (MessagingException e) {
-        throw new EmailException("Error submitting beta access request", e);
-      }
-      user.setBetaAccessRequestTime(now);
-      user = saveUserWithConflictHandling(user);
-    }
-    return getProfileResponse(user);
   }
 
   @Override
@@ -496,8 +469,8 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
 
-    profileService.updateProfile(user, updatedProfile, previousProfile);
-    confirmProfile();
+    DbUser updatedUser = profileService.updateProfile(user, updatedProfile, previousProfile);
+    userService.confirmProfile(updatedUser);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -627,7 +600,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> confirmProfile() {
-    userService.confirmProfile();
+    userService.confirmProfile(userProvider.get());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 

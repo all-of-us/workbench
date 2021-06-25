@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -33,7 +34,6 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
@@ -67,6 +67,10 @@ public class UserServiceAccessTest {
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final long EXPIRATION_DAYS = 365L;
 
+  private static final String INITIAL_ENFORCEMENT_DATE_STRING = "2021-07-01T00:00:00Z";
+  private static final Instant INITIAL_ENFORCEMENT_DATE =
+      Instant.parse(INITIAL_ENFORCEMENT_DATE_STRING);
+
   private static DbUser dbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
@@ -74,8 +78,7 @@ public class UserServiceAccessTest {
 
   private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
       t -> dbu -> registerUser(t, dbu);
-  private Function<DbUser, DbUser> registerUserNow =
-      registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
+  private Function<DbUser, DbUser> registerUserNow;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -129,13 +132,13 @@ public class UserServiceAccessTest {
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    DbUser user = new DbUser();
-    user.setUsername(USERNAME);
-    user = userDao.save(user);
-    dbUser = user;
+    dbUser = new DbUser();
+    dbUser.setUsername(USERNAME);
+    dbUser = userDao.save(dbUser);
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
+    registerUserNow = registerUserWithTime.apply(new Timestamp(PROVIDED_CLOCK.millis()));
   }
 
   @Test
@@ -341,41 +344,6 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           user.setDisabled(true);
-          return userDao.save(user);
-        });
-  }
-
-  // Beta Access is entirely controlled by bypass, if enabled.
-  // It is not subject to annual renewal.
-
-  @Test
-  public void test_updateUserWithRetries_beta_unbypassed_noncompliant() {
-    providedWorkbenchConfig.access.enableBetaAccess = true;
-
-    testUnregistration(
-        user -> {
-          user.setBetaAccessBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
-  // email verification is not subject to bypass or annual renewal.
-  // It must be SUBSCRIBED for access.
-
-  @Test
-  public void test_updateUserWithRetries_email_pending_noncompliant() {
-    testUnregistration(
-        user -> {
-          user.setEmailVerificationStatusEnum(EmailVerificationStatus.PENDING);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_email_unverified_noncompliant() {
-    testUnregistration(
-        user -> {
-          user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
           return userDao.save(user);
         });
   }
@@ -641,7 +609,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_1() {
+  public void test_maybeSendAccessExpirationEmail_expiring_1() throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -655,11 +623,12 @@ public class UserServiceAccessTest {
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
     dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1, expirationTime);
   }
 
   @Test
@@ -713,7 +682,8 @@ public class UserServiceAccessTest {
   // we consider only the unbypassed
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_1_with_bypass() {
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_bypass()
+      throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -727,17 +697,19 @@ public class UserServiceAccessTest {
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
     dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1, expirationTime);
   }
 
   // bypass times are not relevant to expiration emails
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_1_with_older_bypass() {
+  public void test_maybeSendAccessExpirationEmail_expiring_1_with_older_bypass()
+      throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -748,6 +720,7 @@ public class UserServiceAccessTest {
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
     dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
 
     // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
@@ -755,7 +728,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1);
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1, expirationTime);
   }
 
   // we do not send an email if the expiration time is within the day.
@@ -784,7 +757,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_30() {
+  public void test_maybeSendAccessExpirationEmail_expiring_30() throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -797,11 +770,13 @@ public class UserServiceAccessTest {
 
     // expiring in 30 days (plus) will trigger the 30-day warning
 
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
+    final Duration thirtyPlus = daysPlusSome(30);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().plus(thirtyPlus);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyPlus));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30, expirationTime);
   }
 
   @Test
@@ -827,7 +802,7 @@ public class UserServiceAccessTest {
   // 15 days is sooner, so that's the email we send rather than 30
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_15_and_30() {
+  public void test_maybeSendAccessExpirationEmail_expiring_15_and_30() throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -839,15 +814,20 @@ public class UserServiceAccessTest {
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
     // expiring in 30 days (plus) would trigger the 30-day warning...
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(daysPlusSome(30)));
+    final Duration thirtyPlus = daysPlusSome(30);
+    final Instant expirationTime30 = PROVIDED_CLOCK.instant().plus(thirtyPlus);
+    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(thirtyPlus));
 
     // but 15 days (plus) is sooner, so trigger 15 instead
-    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(daysPlusSome(15)));
+    final Duration fifteenPlus = daysPlusSome(15);
+    final Instant expirationTime15 = PROVIDED_CLOCK.instant().plus(fifteenPlus);
+    dbUser.setDataUseAgreementCompletionTime(willExpireAfter(fifteenPlus));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 15);
-    verify(mailService, never()).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 15, expirationTime15);
+    verify(mailService, never())
+        .alertUserRegisteredTierWarningThreshold(dbUser, 30, expirationTime30);
   }
 
   // 14 days is sooner than 15, but 14 days is not one of our email warning thresholds
@@ -877,7 +857,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expired() {
+  public void test_maybeSendAccessExpirationEmail_expired() throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // these are up to date
@@ -889,18 +869,20 @@ public class UserServiceAccessTest {
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
     // but this is expired
-    dbUser.setComplianceTrainingCompletionTime(expired());
+    final Duration oneHour = Duration.ofHours(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().minus(oneHour);
+    dbUser.setComplianceTrainingCompletionTime(expiredBy(oneHour));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
-    verify(mailService).alertUserRegisteredTierExpiration(dbUser);
+    verify(mailService).alertUserRegisteredTierExpiration(dbUser, expirationTime);
   }
 
   // don't send an email if we are in the initial-launch grace period
   // before 30 June 2021
 
   @Test
-  public void test_maybeSendAccessExpirationEmail_expired_grace_period() {
+  public void test_maybeSendAccessExpirationEmail_expired_grace_period() throws MessagingException {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
 
     // set "today" to be June 1
@@ -914,7 +896,7 @@ public class UserServiceAccessTest {
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
     // this would be expired...
-    dbUser.setComplianceTrainingCompletionTime(expired());
+    dbUser.setComplianceTrainingCompletionTime(expiredBy(Duration.ofHours(1)));
 
     // ... and this would expire in 1 day ...
     final Duration oneDayPlusSome = daysPlusSome(1);
@@ -923,7 +905,8 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     // ... but the grace period means that no one expires until 30 days from now
-    verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 30);
+    verify(mailService)
+        .alertUserRegisteredTierWarningThreshold(dbUser, 30, INITIAL_ENFORCEMENT_DATE);
   }
 
   @Test
@@ -939,7 +922,7 @@ public class UserServiceAccessTest {
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
     // this would be expired...
-    dbUser.setComplianceTrainingCompletionTime(expired());
+    dbUser.setComplianceTrainingCompletionTime(expiredBy(Duration.ofHours(1)));
 
     // but the feature flag is off
     providedWorkbenchConfig.access.enableAccessRenewal = false;
@@ -1019,11 +1002,6 @@ public class UserServiceAccessTest {
     dbUser = updateUserWithRetries(registerUserWithTime.apply(Timestamp.from(mayFirst)));
     assertRegisteredTierEnabled(dbUser);
 
-    // the 2 unbypassable modules would expire in a year (5/1/2021)
-    // but this is before the initial enforcement date, so we use that value instead
-    // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
-    final String initialEnforcementDate = "2021-07-01T00:00:00Z";
-
     final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
     assertThat(expirations.size()).isEqualTo(1);
     assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
@@ -1031,7 +1009,10 @@ public class UserServiceAccessTest {
     assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
     assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
 
-    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(initialEnforcementDate);
+    // the 2 unbypassable modules would expire in a year (5/1/2021)
+    // but this is before the initial enforcement date, so we use that value instead
+    // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
+    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(INITIAL_ENFORCEMENT_DATE_STRING);
   }
 
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
@@ -1051,8 +1032,8 @@ public class UserServiceAccessTest {
 
   // set a completion timestamp which is expired
   // by choosing a timestamp of (expirationBoundary() - a small duration)
-  private Timestamp expired() {
-    return Timestamp.from(expirationBoundary().minus(Duration.ofHours(1)));
+  private Timestamp expiredBy(Duration duration) {
+    return Timestamp.from(expirationBoundary().minus(duration));
   }
 
   private void advanceClockDays(long days) {
@@ -1102,18 +1083,14 @@ public class UserServiceAccessTest {
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
     //        && eraCommonsCompliant
-    //        && betaAccessGranted
     //        && twoFactorAuthComplete
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
     //        && isProfileCompliant
-    //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
 
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user.setComplianceTrainingBypassTime(timestamp);
     user.setEraCommonsBypassTime(timestamp);
-    user.setBetaAccessBypassTime(timestamp);
     user.setTwoFactorAuthBypassTime(timestamp);
     user.setDataUseAgreementBypassTime(timestamp);
     user.setPublicationsLastConfirmedTime(timestamp);

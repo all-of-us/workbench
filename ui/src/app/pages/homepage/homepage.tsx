@@ -80,7 +80,6 @@ interface Props {
 interface State {
   accessTasksLoaded: boolean;
   accessTasksRemaining: boolean;
-  betaAccessGranted: boolean;
   dataUserCodeOfConductCompleted: boolean;
   eraCommonsError: string;
   eraCommonsLinked: boolean;
@@ -109,7 +108,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     this.state = {
       accessTasksLoaded: false,
       accessTasksRemaining: undefined,
-      betaAccessGranted: undefined,
       dataUserCodeOfConductCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -219,9 +217,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         reload();
       }, 10000);
     } else {
-      if (serverConfigStore.get().config.enableBetaAccess && !profile.betaAccessRequestTime) {
-        profileApi().requestBetaAccess();
-      }
       if (profile.pageVisits) {
         if (!profile.pageVisits.some(v => v.page === this.pageId)) {
           this.setFirstVisit();
@@ -243,7 +238,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
             .completionTimestamp(profile)))() : true)
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
-      this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
@@ -283,7 +277,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   render() {
     const {
-      betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+      videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse,
@@ -353,7 +347,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                             rasLoginGovLoading={rasLoginGovLoading}
                                             trainingCompleted={trainingCompleted}
                                             firstVisitTraining={firstVisitTraining}
-                                            betaAccessGranted={betaAccessGranted}
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (

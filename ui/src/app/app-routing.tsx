@@ -1,4 +1,5 @@
 import {Component as AComponent} from '@angular/core';
+import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
@@ -68,6 +69,7 @@ const expiredGuard: Guard = {
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
@@ -323,6 +325,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               breadcrumb: BreadcrumbType.Dataset,
               pageKey: 'datasetBuilder'
             }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/cohorts/build'
+              component={() => <CohortPagePage routeData={{
+                title: 'Build Cohort Criteria',
+                breadcrumb: BreadcrumbType.CohortAdd,
+                pageKey: 'cohortBuilder'
+              }}/>}
           />
           <AppRoute
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
