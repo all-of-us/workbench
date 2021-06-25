@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -19,7 +18,6 @@ import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -33,6 +31,7 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
@@ -102,9 +101,6 @@ function sortAndStringify(concepts) {
 interface Props {
   cohortContext: any;
   concept: Array<Criteria>;
-  setConceptSetUpdating: (conceptSetUpdating: boolean) => void;
-  setShowUnsavedModal: (showUnsavedModal: () => Promise<boolean>) => void;
-  setUnsavedConceptChanges: (unsavedConceptChanges: boolean) => void;
   workspace: WorkspaceData;
   urlParams: any;
 }
@@ -125,6 +121,7 @@ interface State {
   // Show if trying to navigate away with unsaved changes
   showUnsavedModal: boolean;
   unsavedChanges: boolean;
+  conceptSetUpdating: boolean;
 }
 
 export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withUrlParams())
@@ -147,9 +144,9 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
         loading: this.isDetailPage,
         showMoreDescription: false,
         showUnsavedModal: false,
-        unsavedChanges: false
+        unsavedChanges: false,
+        conceptSetUpdating: false
       };
-      this.showUnsavedModal = this.showUnsavedModal.bind(this);
     }
 
     componentDidMount() {
@@ -163,8 +160,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
           this.checkUnsavedConceptChanges(currentConcepts);
         }
       });
-      this.subscription.add(conceptSetUpdating.subscribe(updating => this.props.setConceptSetUpdating(updating)));
-      this.props.setShowUnsavedModal(this.showUnsavedModal);
+      this.subscription.add(conceptSetUpdating.subscribe(updating => this.setState({conceptSetUpdating: updating})));
+      navigationGuardStore.set({component: this});
     }
 
     componentWillUnmount() {
@@ -172,6 +169,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       currentConceptStore.next(undefined);
       currentConceptSetStore.next(undefined);
       this.subscription.unsubscribe();
+      navigationGuardStore.set(null);
     }
 
     checkUnsavedConceptChanges(currentConcepts) {
@@ -183,7 +181,6 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0) ||
         (!!currentConceptSet && sortAndStringify(currentConceptSet.criteriums) !== sortAndStringify(currentConceptsMap));
       this.setState({unsavedChanges});
-      this.props.setUnsavedConceptChanges(unsavedChanges);
     }
 
     async getConceptSet() {
@@ -249,6 +246,10 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
     async showUnsavedModal() {
       this.setState({showUnsavedModal: true});
       return await new Promise<boolean>((resolve => this.resolveUnsavedModal = resolve));
+    }
+
+    canDeactivate(): Promise<boolean> | boolean {
+      return !this.state.unsavedChanges || this.state.conceptSetUpdating || this.showUnsavedModal();
     }
 
     getModalResponse(res: boolean) {
@@ -416,35 +417,3 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       </React.Fragment>;
     }
   });
-
-@Component({
-  template: '<div #root></div>'
-})
-
-export class ConceptSearchComponent extends ReactWrapperBase {
-  conceptSetUpdating: boolean;
-  showUnsavedModal: () => Promise<boolean>;
-  unsavedConceptChanges: boolean;
-  constructor() {
-    super(ConceptSearch, ['setConceptSetUpdating', 'setShowUnsavedModal', 'setUnsavedConceptChanges']);
-    this.setConceptSetUpdating = this.setConceptSetUpdating.bind(this);
-    this.setShowUnsavedModal = this.setShowUnsavedModal.bind(this);
-    this.setUnsavedConceptChanges = this.setUnsavedConceptChanges.bind(this);
-  }
-
-  setShowUnsavedModal(showUnsavedModal: () => Promise<boolean>): void {
-    this.showUnsavedModal = showUnsavedModal;
-  }
-
-  setConceptSetUpdating(csUpdating: boolean): void {
-    this.conceptSetUpdating = csUpdating;
-  }
-
-  setUnsavedConceptChanges(unsavedConceptChanges: boolean): void {
-    this.unsavedConceptChanges = unsavedConceptChanges;
-  }
-
-  canDeactivate(): Promise<boolean> | boolean {
-    return !this.unsavedConceptChanges || this.conceptSetUpdating || this.showUnsavedModal();
-  }
-}

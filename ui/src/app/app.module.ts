@@ -20,7 +20,6 @@ import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
-import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
@@ -55,7 +54,6 @@ import {FooterComponent} from './components/footer';
     AppComponent,
     AppRouting,
     BugReportComponent,
-    ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     FooterComponent,
     HelpSidebarComponent,
