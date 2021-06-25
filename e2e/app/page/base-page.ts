@@ -26,7 +26,7 @@ export default abstract class BasePage {
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
-    await this.page.goto(url, { waitUntil: ['networkidle0', 'load'] });
+    await this.page.goto(url, { waitUntil: ['load'] });
   }
 
   /**

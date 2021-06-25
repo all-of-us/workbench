@@ -20,7 +20,7 @@ beforeEach(async () => {
   await page.deleteCookie(...(await page.cookies()));
   await page.setUserAgent(userAgent);
   await page.setViewport({ width: 1300, height: 0 });
-  page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
+  page.setDefaultNavigationTimeout(90000); // Puppeteer default timeout is 30 seconds.
   await page.setRequestInterception(true);
 
   /**
