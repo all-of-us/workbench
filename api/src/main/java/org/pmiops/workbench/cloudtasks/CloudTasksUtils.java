@@ -9,10 +9,10 @@ public class CloudTasksUtils {
 
   /** Partition the given list into sub-lists of batchSize or smaller. */
   public static <T> List<List<T>> partitionList(List<T> list, int batchSize) {
-    final List<List<T>> out = new ArrayList<>();
+    final List<List<T>> subLists = new ArrayList<>();
     for (int i = 0; i < list.size(); i += batchSize) {
-      out.add(list.subList(i, Math.min(list.size(), i + batchSize)));
+      subLists.add(list.subList(i, Math.min(list.size(), i + batchSize)));
     }
-    return out;
+    return subLists;
   }
 }
