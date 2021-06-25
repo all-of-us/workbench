@@ -1,7 +1,4 @@
 
-import {
-  Profile
-} from 'generated/fetch';
 
 import {AlertDanger} from 'app/components/alert';
 import {FadeBox} from 'app/components/containers';
@@ -13,8 +10,7 @@ import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
-  reactStyles,
-  withUserProfile
+  reactStyles
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
@@ -30,14 +26,15 @@ const styles = reactStyles({
   }
 });
 
-export const WorkspaceList = withUserProfile()
-(class extends React.Component<
-  { profileState: { profile: Profile, reload: Function } },
-  { workspacesLoading: boolean,
-    workspaceList: WorkspacePermissions[],
-    errorText: string,
-    firstSignIn: Date,
-  }> {
+interface State {
+  workspacesLoading: boolean;
+  workspaceList: WorkspacePermissions[];
+  errorText: string;
+  firstSignIn: Date;
+}
+
+export class WorkspaceList extends React.Component<{}, State> {
+
   private timer: NodeJS.Timer;
 
   constructor(props) {
@@ -67,7 +64,7 @@ export const WorkspaceList = withUserProfile()
       workspacesReceived.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
       this.setState({workspaceList: workspacesReceived
-          .map(w => new WorkspacePermissions(w))});
+        .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
       const response = await convertAPIError(e);
@@ -76,7 +73,6 @@ export const WorkspaceList = withUserProfile()
   }
 
   render() {
-    const {profileState: {profile}} = this.props;
     const {
       errorText,
       workspaceList,
@@ -118,7 +114,6 @@ export const WorkspaceList = withUserProfile()
                     key={wp.workspace.namespace}
                     workspace={wp.workspace}
                     accessLevel={wp.accessLevel}
-                    userEmail={profile.username}
                     reload={() => this.reloadWorkspaces(null)}
                   />;
                 })}
@@ -128,4 +123,4 @@ export const WorkspaceList = withUserProfile()
       </FadeBox>
     </React.Fragment>;
   }
-});
+}

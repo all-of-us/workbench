@@ -897,7 +897,8 @@ export const HelpSidebar = fp.flow(
 
         {
           switchCase(this.state.currentModal,
-            [CurrentModal.Share, () => <WorkspaceShare onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+            [CurrentModal.Share, () => <WorkspaceShare workspace={this.props.workspace}
+                                                             onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
             [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
                                                             resourceType={ResourceType.WORKSPACE}
                                                             receiveDelete={() => this.deleteWorkspace()}

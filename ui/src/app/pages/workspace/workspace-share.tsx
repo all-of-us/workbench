@@ -5,7 +5,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   isBlank,
   reactStyles,
-  withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -161,14 +160,14 @@ export interface State {
 
 export interface Props {
   onClose: Function;
+  workspace: WorkspaceData;
 }
 
 interface HocProps extends Props {
-  workspace: WorkspaceData;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
-export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())(class extends React.Component<HocProps, State> {
+export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Component<HocProps, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
@@ -323,6 +322,7 @@ export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())
   }
 
   get hasPermission(): boolean {
+    console.log(this.props.workspace);
     return this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
