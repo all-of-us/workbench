@@ -322,7 +322,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
   }
 
   get hasPermission(): boolean {
-    console.log(this.props.workspace);
     return this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
