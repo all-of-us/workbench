@@ -106,7 +106,7 @@ export class WorkspaceList extends React.Component<{}, State> {
           </AlertDanger>}
           <div style={styles.cardArea}>
             {workspacesLoading ?
-              (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
+              (<Spinner style={{margin: '1.5rem auto'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
                 <NewWorkspaceButton />
                 {workspaceList.map(wp => {
