@@ -160,7 +160,7 @@ public class UserController implements UserApiDelegate {
         .anyMatch(
             tier ->
                 tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-                    && fireCloudService.isUserMemberOfGroup(
+                    && fireCloudService.isUserMemberOfGroupWithCache(
                         userProvider.get().getUsername(), tier.getAuthDomainName()));
   }
 
@@ -213,7 +213,8 @@ public class UserController implements UserApiDelegate {
       throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
     }
 
-    return Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())
+    return Optional.ofNullable(response.getBillingAccounts())
+        .orElse(Collections.emptyList())
         .stream()
         .map(
             googleBillingAccount ->

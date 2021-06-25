@@ -128,7 +128,7 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Test
   public void testIsUserMemberOfGroup_none() throws Exception {
     when(groupsApi.getGroup("group")).thenReturn(new FirecloudManagedGroupWithMembers());
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
@@ -136,7 +136,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     FirecloudManagedGroupWithMembers group = new FirecloudManagedGroupWithMembers();
     group.setMembersEmails(Arrays.asList("asdf@fake-research-aou.org"));
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
@@ -145,7 +145,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     group.setAdminsEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test
@@ -154,7 +154,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     group.setMembersEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test

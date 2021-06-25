@@ -126,7 +126,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUnregistered() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(false);
     assertThrows(
         ForbiddenException.class,
         () -> userController.user("Robinson", null, null, null).getBody());
@@ -134,7 +134,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserSearch() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     DbUser john = userDao.findUserByUsername("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
@@ -145,7 +145,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserPartialStringSearch() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     List<DbUser> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response = userController.user("obin", null, null, null).getBody();
@@ -157,14 +157,14 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserEmptyResponse() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     UserResponse response = userController.user("", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserNoUsersResponse() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     UserResponse response = userController.user("Smith", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
@@ -195,7 +195,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserPageSize() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     int size = 1;
     UserResponse robinsons_0 =
         userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
@@ -222,7 +222,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserPagedResponses() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     UserResponse robinsons_0_1 =
         userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
     UserResponse robinsons_2_3 =
@@ -243,7 +243,7 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserSort() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     UserResponse robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
     UserResponse robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
 
