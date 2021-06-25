@@ -36,6 +36,7 @@ import {QueryReport} from './pages/data/cohort-review/query-report.component';
 import {ParticipantsTable} from './pages/data/cohort-review/table-page';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
+import {ConceptSearch} from './pages/data/concept/concept-search';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {DataComponent} from './pages/data/data-component';
 import {DatasetPage} from './pages/data/data-set/dataset-page';
@@ -73,6 +74,7 @@ const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
+const ConceptSearchPage = withRouteData(ConceptSearch);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataComponentPage = withRouteData(DataComponent);
@@ -381,6 +383,22 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               breadcrumb: BreadcrumbType.SearchConcepts,
               pageKey: 'searchConceptSets'
             }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'
+              component={() => <ConceptSearchPage routeData={{
+                title: 'Concept Set',
+                breadcrumb: BreadcrumbType.ConceptSet,
+                pageKey: 'conceptSets'
+              }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/concepts/:domain'
+              component={() => <ConceptSearchPage routeData={{
+                title: 'Search Concepts',
+                breadcrumb: BreadcrumbType.SearchConcepts,
+                pageKey: 'conceptSets'
+              }}/>}
           />
           <AppRoute
             path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
