@@ -4,7 +4,7 @@ import Checkbox from 'app/element/checkbox';
 
 const defaultXpath = '//*[@id="popup-root"]';
 
-export default class BypassLink extends BaseMenu {
+export default class BypassPopup extends BaseMenu {
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
   }
@@ -21,60 +21,37 @@ export default class BypassLink extends BaseMenu {
     return `//*[@role="switch" and normalize-space()="${toggleAccessText}"]`;
   }
 
-  async verifyAllModulesBypassed(): Promise<Page> {
-    await this.verifyTrainingBypass();
-    await this.verifyEraCommBypass();
-    await this.verifyTwoFABypass();
-    await this.verifyDUCCBypass();
-    await this.clickCancelBypass();
-    return page;
-  }
-
-  /**
-   * Toggle checkbox state.
-   * @param {boolean} checked
-   */
-
-  async verifyTrainingBypass(): Promise<boolean> {
+  getTrainingBypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='Compliance Training']/preceding-sibling::div/input[@type='checkbox']`;
-    const checkbox = new Checkbox(this.page, xpath);
-    expect(await checkbox.isChecked()).toBe(true);
-    return true;
+    return new Checkbox(this.page, xpath);
   }
 
-  async verifyEraCommBypass(): Promise<boolean> {
+  getEraCommBypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='eRA Commons Linking']/preceding-sibling::div/input[@type='checkbox']`;
-    const checkbox = new Checkbox(this.page, xpath);
-    expect(await checkbox.isChecked()).toBe(true);
-    return true;
+    return  new Checkbox(this.page, xpath);
   }
 
-  async verifyTwoFABypass(): Promise<boolean> {
+  getTwoFABypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='Two Factor Auth']/preceding-sibling::div/input[@type='checkbox']`;
-    const checkbox = new Checkbox(this.page, xpath);
-    expect(await checkbox.isChecked()).toBe(true);
-    return true;
+    return new Checkbox(this.page, xpath);
   }
 
-  async verifyDUCCBypass(): Promise<boolean> {
+  getDUCCBypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='Data Use Agreement']/preceding-sibling::div/input[@type='checkbox']`;
-    const checkbox = new Checkbox(this.page, xpath);
-    expect(await checkbox.isChecked()).toBe(true);
-    return true;
+    return  new Checkbox(this.page, xpath);
   }
 
-  // click the checkmark on the bypass module to save the bypass access
+
+  // click the checkmark on the bypass-popup to save the bypass access
   async clickCheckmarkBypass(): Promise<void> {
     const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='check']`;
-    const button = new Checkbox(this.page, xpath);
-    await button.click();
+    await new Checkbox(this.page, xpath).click();
   }
 
-  // click the cancel icon to close the bypass module
+  // click the cancel icon to close the bypass-popup
   async clickCancelBypass(): Promise<void> {
     const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='times']`;
-    const button = new Checkbox(this.page, xpath);
-    await button.click();
+    await new Checkbox(this.page, xpath).click();
   }
 
   async waitUntilGone(page: Page, timeout = 60000): Promise<void> {
