@@ -7,11 +7,9 @@ import Select from 'react-select';
 
 import {Props, WorkspaceShare} from './workspace-share';
 
-import {profileApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  ProfileApi,
   User,
   UserApi,
   UserRole,
@@ -54,6 +52,7 @@ describe('WorkspaceShare', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
 
     props = {
+      workspace: tomRiddleDiary,
       onClose: () => {}
     };
 
@@ -65,8 +64,6 @@ describe('WorkspaceShare', () => {
       reload: jest.fn(),
       updateCache: jest.fn()
     });
-
-    currentWorkspaceStore.next(tomRiddleDiary);
   });
 
   it('display correct users', async() => {
