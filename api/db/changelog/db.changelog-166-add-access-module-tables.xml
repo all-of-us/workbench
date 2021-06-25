@@ -44,8 +44,8 @@
         ("TWO_FACTOR_AUTH", false),
         ("RAS_LOGIN_GOV", false),
         ("RT_COMPLIANCE_TRAINING", true),
-        ("DATA_USER_CODE_OF_CONDUCT", true)
-        ("PROFILE_CONFIRMATION", true)
+        ("DATA_USER_CODE_OF_CONDUCT", true),
+        ("PROFILE_CONFIRMATION", true),
         ("PUBLICATION_CONFIRMATION", true)
     </sql>
   </changeSet>
