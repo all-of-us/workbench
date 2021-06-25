@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
@@ -1167,21 +1168,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
-    // we only want to send the expiration email on the day of the actual expiration
-    if (millisRemaining < 0 && daysRemaining == 0) {
-      sendRegisteredTierExpirationEmail(user);
-    } else {
-      if (configProvider.get().accessRenewal.expiryDaysWarningThresholds.contains(daysRemaining)) {
-        sendRegisteredTierWarningEmail(user, daysRemaining);
+    final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
+    try {
+      // we only want to send the expiration email on the day of the actual expiration
+      if (millisRemaining < 0 && daysRemaining == 0) {
+        mailService.alertUserRegisteredTierExpiration(user, expiration.toInstant());
+      } else {
+        if (thresholds.contains(daysRemaining)) {
+          mailService.alertUserRegisteredTierWarningThreshold(
+              user, daysRemaining, expiration.toInstant());
+        }
       }
+    } catch (final MessagingException e) {
+      log.log(Level.WARNING, e.getMessage());
     }
-  }
-
-  private void sendRegisteredTierExpirationEmail(DbUser user) {
-    mailService.alertUserRegisteredTierExpiration(user);
-  }
-
-  private void sendRegisteredTierWarningEmail(DbUser user, long daysRemaining) {
-    mailService.alertUserRegisteredTierWarningThreshold(user, daysRemaining);
   }
 }

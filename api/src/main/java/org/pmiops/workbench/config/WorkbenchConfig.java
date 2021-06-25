@@ -194,10 +194,6 @@ public class WorkbenchConfig {
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
     public String appEngineLocationId;
-
-    public boolean isProductionEnv() {
-      return projectId.equals("all-of-us-rw-prod") || projectId.equals("all-of-us-rw-preprod");
-    }
   }
 
   public static class AdminConfig {
@@ -328,7 +324,11 @@ public class WorkbenchConfig {
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
-    // Thresholds for email alerting based on approaching module expiration, in days
+    // Do we send expiration emails when users have expired due to Access Renewal
+    // as well as warning emails when users will expire soon?
+    // true = send emails.  false = log only.
+    public boolean sendEmails;
+    // Thresholds for sending warning emails based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
   }
 
