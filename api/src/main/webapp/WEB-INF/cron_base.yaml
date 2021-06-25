@@ -28,7 +28,7 @@ cron:
   target: api
 - description: 'Daily audit of gcp resources that users have access to'
   url: /v1/cron/bulkAuditProjectAccess
-  schedule: every 1 hours
+  schedule: every 24 hours
   timezone: UTC
   target: api
 - description: 'If the AoU Billing Project buffer is not full, refill with one or more projects.'
