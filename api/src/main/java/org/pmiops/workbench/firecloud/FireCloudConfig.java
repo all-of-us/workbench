@@ -68,8 +68,8 @@ public class FireCloudConfig {
           .build();
 
   /**
-   * @return a request scoped cache of firecloud groups, by group name, consumers should expect this
-   *     map to either be empty, or to have been populated within the span of this request
+   * @return a request scoped cache of firecloud groups, by group name. Groups are lazily populated
+   *     as requested in the cache, and will expire after a duration
    */
   @Bean(name = SERVICE_ACCOUNT_GROUP_CACHE)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -77,6 +77,8 @@ public class FireCloudConfig {
       final @Qualifier(SERVICE_ACCOUNT_GROUPS_API) GroupsApi groupsApi) {
     return CacheBuilder.newBuilder()
         .expireAfterWrite(30, TimeUnit.SECONDS)
+        // Set a small limit, as groups are large, and our system doesn't use many. If we start
+        // using groups more broadly, this limit could be reconsidered.
         .maximumSize(10)
         .build(
             new CacheLoader<String, FirecloudManagedGroupWithMembers>() {
