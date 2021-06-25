@@ -333,6 +333,12 @@ public class WorkbenchConfig {
   }
 
   public static class OfflineBatchConfig {
+    // If specified, registers an alternate Cloud Tasks handler which immediately dispatches tasks
+    // against the provided host. Intended for local development only.
     public String unsafeCloudTasksForwardingHost;
+    // Number of users to process within a single access audit task. This should be tuned in concert
+    // with the task queue configuration to affect the overall concurrency of the offline batch
+    // process.
+    public Integer usersPerAuditTask;
   }
 }

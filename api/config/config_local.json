@@ -143,6 +143,7 @@
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {
-    "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081"
+    "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081",
+    "usersPerAuditTask": 20
   }
 }
