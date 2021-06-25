@@ -156,7 +156,6 @@ const routes: Routes = [
                   },
                   {
                     path: 'data',
-                    component: AppRouting,
                     children: [
                       {
                         path: '',
