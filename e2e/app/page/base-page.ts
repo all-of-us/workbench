@@ -1,4 +1,5 @@
 import { Page, Response } from 'puppeteer';
+import { logger } from 'libs/logger';
 
 /**
  * All Page Object classes will extends the BasePage.
@@ -26,7 +27,10 @@ export default abstract class BasePage {
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
-    await this.page.goto(url, { waitUntil: ['networkidle0', 'load'] });
+    const response = await this.page.goto(url, { waitUntil: ['load'] });
+    if (response) {
+      logger.info(`Goto URL: ${url} Response: ${response.status()} ${await response.text()}`);
+    }
   }
 
   /**
