@@ -25,6 +25,24 @@ export default abstract class BaseMenu extends Container {
   async select(menuSelections: string | MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
     const { waitForNav = false } = opt;
 
+    let maxAttempts = 3;
+    const click = async (menuItem: string, xpath: string) => {
+      const menuItemLink = await this.findMenuItemLink(menuItem, xpath);
+      const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
+      if (hasPopup && hasPopup === 'false') {
+        await menuItemLink.click();
+        return;
+      }
+      if (maxAttempts === 0) {
+        throw new Error(`submenu not found when clicking menu item: ${menuItem}`);
+      }
+      // Is submenu open?
+      if (await this.isOpen(`${rootXpath}/ul/li`)) {
+        return;
+      }
+      maxAttempts--;
+    };
+
     let selections = [];
     // Handle case when menuSelections is not array.
     if (typeof menuSelections === 'string') {
@@ -41,28 +59,19 @@ export default abstract class BaseMenu extends Container {
     let rootXpath = this.getXpath();
     const len = selections.length;
     for (let i = 0; i < len; i++) {
-      // Find and hover over menuitem.
-      const menuItemLink = await this.findMenuItemLink(selections[i], rootXpath);
-      const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
-      if (hasPopup) {
-        // If submenu is not open, hover over again.
-        const opened = await this.isOpen(`${rootXpath}/ul/li`);
-        if (!opened) {
-          // Find and hover over last menuitem.
-          await this.findMenuItemLink(selections[i - 1], rootXpath).then((element) => element.click());
-        }
-      }
-
       if (i === len - 1) {
-        // When it's the last menu item, click it.
+        const menuItem = await this.findMenuItemLink(selections[i], rootXpath);
+        // It's the last menu item.
         if (waitForNav) {
           const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
-          await menuItemLink.click();
+          await menuItem.click();
           await navigationPromise;
         } else {
-          await menuItemLink.click();
+          await menuItem.click();
         }
+        break;
       }
+      await click(selections[i], rootXpath);
       rootXpath = `${rootXpath}/ul`; // submenu xpath
     }
 
