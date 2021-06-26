@@ -41,14 +41,24 @@ export default abstract class BaseMenu extends Container {
     let rootXpath = this.getXpath();
     const len = selections.length;
     for (let i = 0; i < len; i++) {
+      // Find and hover over menuitem.
       const menuItemLink = await this.findMenuItemLink(selections[i], rootXpath);
+      const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
+      if (hasPopup) {
+        // If submenu is not open, hover over again.
+        const opened = await this.isOpen(`${rootXpath}/ul/li`);
+        if (!opened) {
+          // Find and hover over last menuitem.
+          await this.findMenuItemLink(selections[i - 1], rootXpath).then((element) => element.click());
+        }
+      }
+
       if (i === len - 1) {
-        // If it is the last menu item, click on it.
+        // When it's the last menu item, click it.
         if (waitForNav) {
-          await Promise.all([
-            this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] }),
-            menuItemLink.click()
-          ]);
+          const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
+          await menuItemLink.click();
+          await navigationPromise;
         } else {
           await menuItemLink.click();
         }
@@ -74,20 +84,21 @@ export default abstract class BaseMenu extends Container {
     return actionTextsArray;
   }
 
-  protected async isOpen(): Promise<boolean> {
+  protected async isOpen(xpath?: string): Promise<boolean> {
+    xpath = xpath || this.getXpath();
     try {
-      await this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 2000 });
+      await this.page.waitForXPath(xpath, { visible: true, timeout: 2000 });
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  // Find and hover over menu item
+  // Find and hover over menuitem
   protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<Link> {
     const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
     const link = new Link(this.page, menuItemSelector);
-    await link.focus(60000);
+    await link.focus(10000);
     await this.page.waitForTimeout(500);
     return link;
   }
