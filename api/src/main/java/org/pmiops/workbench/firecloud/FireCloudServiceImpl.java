@@ -129,7 +129,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
+      @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,

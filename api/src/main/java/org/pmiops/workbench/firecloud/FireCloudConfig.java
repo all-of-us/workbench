@@ -3,9 +3,6 @@ package org.pmiops.workbench.firecloud;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import java.io.IOException;
@@ -26,7 +23,6 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -54,8 +50,6 @@ public class FireCloudConfig {
       "serviceAccountStaticNotebooksApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
 
-  public static final String SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE = "firecloudGroupCache";
-
   public static final List<String> TERRA_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -66,30 +60,6 @@ public class FireCloudConfig {
           .addAll(TERRA_SCOPES)
           .add("https://www.googleapis.com/auth/cloud-billing")
           .build();
-
-  /**
-   * @return a request scoped cache of firecloud groups, by group name. Groups are lazily populated
-   *     as requested in the cache, and will expire after a duration. Lazy fetch is authenticated as
-   *     the service, so this should only be used for trusted internal checks (not on arbitrary user
-   *     inputs).
-   */
-  @Bean(name = SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public LoadingCache<String, FirecloudManagedGroupWithMembers> firecloudGroupCache(
-      final @Qualifier(SERVICE_ACCOUNT_GROUPS_API) GroupsApi groupsApi) {
-    return CacheBuilder.newBuilder()
-        .expireAfterWrite(30, TimeUnit.SECONDS)
-        // Set a small limit, as groups are large, and our system doesn't use many. If we start
-        // using groups more broadly, this limit could be reconsidered.
-        .maximumSize(10)
-        .build(
-            new CacheLoader<String, FirecloudManagedGroupWithMembers>() {
-              @Override
-              public FirecloudManagedGroupWithMembers load(String groupName) throws Exception {
-                return groupsApi.getGroup(groupName);
-              }
-            });
-  }
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
