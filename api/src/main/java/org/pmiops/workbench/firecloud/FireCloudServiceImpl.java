@@ -64,7 +64,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>> groupCacheProvider;
+  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+      requestScopedGroupCacheProvider;
 
   // We call some of the endpoints in these APIs with the user's credentials
   // and others with the app's Service Account credentials
@@ -128,8 +129,9 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUP_CACHE)
-          Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>> groupCacheProvider,
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
+          Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+              requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport) {
@@ -145,7 +147,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
-    this.groupCacheProvider = groupCacheProvider;
+    this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.iamCredentialsClient = iamCredentialsClient;
     this.httpTransport = httpTransport;
   }
@@ -490,7 +492,7 @@ public class FireCloudServiceImpl implements FireCloudService {
         (context) -> {
           FirecloudManagedGroupWithMembers group = null;
           try {
-            group = groupCacheProvider.get().get(groupName);
+            group = requestScopedGroupCacheProvider.get().get(groupName);
           } catch (ExecutionException e) {
             // This is not expected, but might be possible if we access an entry at the exact time
             // at which is is expiring from the cache. Just retry.

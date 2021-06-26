@@ -54,7 +54,7 @@ public class FireCloudConfig {
       "serviceAccountStaticNotebooksApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
 
-  public static final String SERVICE_ACCOUNT_GROUP_CACHE = "firecloudGroupCache";
+  public static final String SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE = "firecloudGroupCache";
 
   public static final List<String> TERRA_SCOPES =
       ImmutableList.of(
@@ -69,9 +69,11 @@ public class FireCloudConfig {
 
   /**
    * @return a request scoped cache of firecloud groups, by group name. Groups are lazily populated
-   *     as requested in the cache, and will expire after a duration
+   *     as requested in the cache, and will expire after a duration. Lazy fetch is authenticated as
+   *     the service, so this should only be used for trusted internal checks (not on arbitrary user
+   *     inputs).
    */
-  @Bean(name = SERVICE_ACCOUNT_GROUP_CACHE)
+  @Bean(name = SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public LoadingCache<String, FirecloudManagedGroupWithMembers> firecloudGroupCache(
       final @Qualifier(SERVICE_ACCOUNT_GROUPS_API) GroupsApi groupsApi) {
