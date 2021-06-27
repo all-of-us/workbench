@@ -76,7 +76,7 @@
       "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod-ct",
       "bigqueryDataset": "C2021Q2R1",
-      "wgsBigqueryDataset": "alpha1_1000",
+      "wgsBigqueryDataset": "alpha2_prelim2",
       "creationTime": "2020-04-21 00:00:00Z",
       "releaseNumber": 6,
       "numParticipants": 318483,
@@ -84,7 +84,7 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled",
-      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/",
+      "allSamplesWgsDataBucket": "5/wgs/vcf/merged/alpha2",
       "singleSampleArrayDataBucket": "5/microarray/vcf/single_sample/"
     }
   ]
