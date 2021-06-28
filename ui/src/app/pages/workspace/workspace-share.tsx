@@ -172,7 +172,6 @@ interface State {
   loadingUserRoles: boolean;
   userRoles: UserRole[];
   userRolesToChange: UserRole[];
-  searchTerm: string;
   dropDown: boolean;
 }
 
@@ -203,7 +202,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         loadingUserRoles: true,
         userRoles: [],
         userRolesToChange: [],
-        searchTerm: '',
         dropDown: false,
       };
       this.searchTermChangedEvent = fp.debounce(300, this.userSearch);
@@ -327,7 +325,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         .concat(userRole);
 
       this.setState({
-        searchTerm: '',
         autocompleteLoading: false,
         autocompleteUsers: [],
         dropDown: false,
@@ -336,24 +333,19 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       });
     }
 
-    userSearch(value: string): void {
+    userSearch(searchTerm: string): void {
       const { accessTierShortName } = this.props.workspace;
       this.setState({
         autocompleteLoading: true,
         autocompleteUsers: [],
-        searchTerm: value,
       });
-      if (!value.trim()) {
+      if (!searchTerm.trim()) {
         this.setState({ autocompleteLoading: false, dropDown: false });
         return;
       }
-      const searchTerm = this.state.searchTerm;
       userApi()
-        .userSearch(accessTierShortName, this.state.searchTerm)
+        .userSearch(accessTierShortName, searchTerm)
         .then((response) => {
-          if (this.state.searchTerm !== searchTerm) {
-            return;
-          }
           response.users = fp.differenceWith(
             (a, b) => {
               return a.email === b.email;
@@ -414,7 +406,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       return (
         !this.state.autocompleteLoading &&
         this.state.autocompleteUsers.length > 0 &&
-        !isBlank(this.state.searchTerm) &&
         this.state.dropDown
       );
     }
@@ -423,7 +414,6 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       return (
         !this.state.autocompleteLoading &&
         this.state.autocompleteUsers.length === 0 &&
-        !isBlank(this.state.searchTerm) &&
         this.state.dropDown
       );
     }
