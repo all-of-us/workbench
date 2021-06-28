@@ -29,7 +29,7 @@ export default abstract class BaseMenu extends Container {
     const click = async (menuItem: string, xpath: string, waitForNav = false): Promise<void> => {
       const menuItemLink = await this.findMenuItemLink(menuItem, xpath);
       const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
-      if (hasPopup && hasPopup === 'false') {
+      if (!hasPopup || hasPopup === 'false') {
         if (waitForNav) {
           const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
           await menuItemLink.click();
