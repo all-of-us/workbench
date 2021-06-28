@@ -26,11 +26,17 @@ export default abstract class BaseMenu extends Container {
     const { waitForNav = false } = opt;
 
     let maxAttempts = 3;
-    const click = async (menuItem: string, xpath: string) => {
+    const click = async (menuItem: string, xpath: string, waitForNav = false): Promise<void> => {
       const menuItemLink = await this.findMenuItemLink(menuItem, xpath);
       const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
       if (hasPopup && hasPopup === 'false') {
-        await menuItemLink.click();
+        if (waitForNav) {
+          const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
+          await menuItemLink.click();
+          await navigationPromise;
+        } else {
+          await menuItemLink.click();
+        }
         return;
       }
       if (maxAttempts === 0) {
@@ -41,6 +47,7 @@ export default abstract class BaseMenu extends Container {
         return;
       }
       maxAttempts--;
+      await click(menuItem, xpath);
     };
 
     let selections = [];
@@ -59,19 +66,7 @@ export default abstract class BaseMenu extends Container {
     let rootXpath = this.getXpath();
     const len = selections.length;
     for (let i = 0; i < len; i++) {
-      if (i === len - 1) {
-        const menuItem = await this.findMenuItemLink(selections[i], rootXpath);
-        // It's the last menu item.
-        if (waitForNav) {
-          const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
-          await menuItem.click();
-          await navigationPromise;
-        } else {
-          await menuItem.click();
-        }
-        break;
-      }
-      await click(selections[i], rootXpath);
+      await click(selections[i], rootXpath, i === len - 1 ? waitForNav : false);
       rootXpath = `${rootXpath}/ul`; // submenu xpath
     }
 

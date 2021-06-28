@@ -322,18 +322,19 @@ export default class BaseElement {
    * Click on element then wait for page navigation to finish.
    */
   async clickAndWait(timeout: number = 2 * 60 * 1000): Promise<void> {
-    await Promise.all([
-      this.page.waitForNavigation({
+    try {
+      const navigationPromise = this.page.waitForNavigation({
         waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
         timeout
-      }),
-      this.click({ delay: 10 })
-    ]).catch((err) => {
+      });
+      await this.click({ delay: 10 });
+      await navigationPromise;
+    } catch (err) {
       logger.error('clickAndWait() failed.');
       logger.error(err);
       logger.error(err.stack);
       throw new Error(err);
-    });
+    }
   }
 
   /**
