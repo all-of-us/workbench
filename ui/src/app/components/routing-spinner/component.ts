@@ -45,9 +45,7 @@ export class RoutingSpinnerComponent implements OnInit {
     this.router.events.subscribe((event: RouterEvent) => {
       if (this.isStart(event)) {
         this.showSpinner();
-        debugger;
       } else if (this.isEnd(event)) {
-        debugger;
         this.hideSpinner();
       }
     });

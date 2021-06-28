@@ -1,12 +1,12 @@
 import {BoldHeader, Header} from 'app/components/headers';
 import {TextArea, TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
 import * as validate from 'validate.js';
-import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 const styles = {
   smallHeaderStyles: {
@@ -37,7 +37,7 @@ const validators = {
 export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminBannerState> {
   constructor(props) {
     super(props);
-    this.props.hideSpinner();
+    // this.props.hideSpinner();
     this.state = {
       bannerDescription: '',
       bannerEnabled: false,

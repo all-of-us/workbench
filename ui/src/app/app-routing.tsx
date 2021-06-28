@@ -18,6 +18,7 @@ import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
+import {withSpinnerOverlay} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -47,11 +48,10 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
+import colors from './styles/colors';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {withSpinnerOverlay} from "./components/with-spinner-overlay";
-import colors from "./styles/colors";
 
 
 const signInGuard: Guard = {
@@ -70,7 +70,7 @@ const expiredGuard: Guard = {
 };
 
 const withRoutingSpinner = withSpinnerOverlay(
-    true,
+  true,
     {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
 
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
