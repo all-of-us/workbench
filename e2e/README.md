@@ -25,19 +25,17 @@ use these users for local development.
 
 All users bypassed access modules. Free credits: $800.
 See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167yrhMf4KMA/edit?usp=sharing).
-  * Master branch (after merge)
+* Master branch (after merge)
     - `puppeteer-tester-1@fake-research-aou.org`
     - `puppeteer-collaborator-1@fake-research-aou.org`
     - `puppeteer-reader-1@fake-research-aou.org`
     - `puppeteer-writer-1@fake-research-aou.org`
-
-  * Presubmit (PR testing on local ui server connected to test api server)
+* Presubmit (PR testing on local ui server connected to test api server)
     - `puppeteer-pr-tester-1@fake-research-aou.org`
     - `puppeteer-pr-collaborator-1@fake-research-aou.org`
     - `puppeteer-pr-reader-1@fake-research-aou.org`
     - `puppeteer-pr-writer-1@fake-research-aou.org`
-  
-  * Staging env (releases)
+* Staging env (releases)
     - `puppeteer-tester-1@staging.fake-research-aou.org`
     - `puppeteer-collaborator-1@staging.fake-research-aou.org`
     - `puppeteer-reader-1@staging.fake-research-aou.org`
