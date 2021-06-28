@@ -2,8 +2,6 @@ import UserAdminPage from 'app/page/admin-user-list-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
-import UserProfileInfo from 'app/page/admin-user-profile-info';
-import UserAuditPage from 'app/page/admin-user-audit-page';
 
 
 describe('Admin', () => {
@@ -16,7 +14,7 @@ describe('Admin', () => {
     await navigation.navMenu(page, NavLink.USER_ADMIN);
   });
 
-  test('verify user bypassed and status is active', async () => {
+  test('verify user(admin_test) displays  bypassed modules and active status', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -111,24 +109,17 @@ describe('Admin', () => {
     const nameColIndex = await adminTable.getNameColindex(); 
 
     //click on the name link to navigate to the user profile page
-    await userAdminPage.clickNameLink(1, nameColIndex);
-
-    //opens User Admin Profile Info page in a new tab
-    const userProfileInfo = new UserProfileInfo(page);
+    const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
     await userProfileInfo.waitForLoad();
-
-    //makes the previous tab active tab
     await page.bringToFront();
 
     // click the audit link of the user
     const auditColIndex = await adminTable.getColumnIndex('Audit');
     console.log(`auditColIndex: ${auditColIndex}`);
 
-    await userAdminPage.clickAuditLink(1, auditColIndex);
-    const userAuditPage = new UserAuditPage (page);
-    await userAuditPage.waitForLoad();
-
-    await page.bringToFront();
+    const userAuditPage = await userAdminPage.clickAuditLink(1, auditColIndex);
+     await userAuditPage.waitForLoad();
+   
   
   });
 
