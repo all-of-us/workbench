@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -113,14 +114,10 @@ public class UserController implements UserApiDelegate {
       throw new ForbiddenException("user search requires registered data access");
     }
 
-    Sort.Direction direction =
-        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
-    Sort sort = Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
-
     // What we are really looking for here are users who have a FC account.
     // This should exist if they have signed in at least once
     List<DbUser> users =
-        userService.findUsersBySearchString(term, sort).stream()
+        userService.findUsersBySearchString(term, getSort(sortOrder)).stream()
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
@@ -180,14 +177,10 @@ public class UserController implements UserApiDelegate {
       throw new ForbiddenException("Requester is not a member of " + authorizationDomain);
     }
 
-    Sort.Direction direction =
-        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
-    Sort sort = Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
-
     // What we are really looking for here are users who have a FC account.
     // This should exist if they have signed in at least once
     List<DbUser> users =
-        userService.findUsersBySearchString(term, sort, accessTierShortName).stream()
+        userService.findUsersBySearchString(term, getSort(sortOrder), accessTierShortName).stream()
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
@@ -199,6 +192,13 @@ public class UserController implements UserApiDelegate {
     response.setUsers(Collections.emptyList());
     response.setNextPageToken("");
     return response;
+  }
+
+  @NotNull
+  private Sort getSort(String sortOrder) {
+    Sort.Direction direction =
+        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
+    return Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
   }
 
   private ResponseEntity<UserResponse> processSearchResults(
