@@ -24,6 +24,7 @@ so we must supply their credentials using an environment property file `.env`.  
 use these users for local development.
 
 All users bypassed access modules. Free credits: $800.
+See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167yrhMf4KMA/edit?usp=sharing).
   * Master branch (after merge)
     - `puppeteer-tester-1@fake-research-aou.org`
     - `puppeteer-collaborator-1@fake-research-aou.org`
