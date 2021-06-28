@@ -50,6 +50,8 @@ import {WorkspaceList} from './pages/workspace/workspace-list';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {withSpinnerOverlay} from "./components/with-spinner-overlay";
+import colors from "./styles/colors";
 
 
 const signInGuard: Guard = {
@@ -67,7 +69,11 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-const AdminBannerPage = withRouteData(AdminBanner);
+const withRoutingSpinner = withSpinnerOverlay(
+    true,
+    {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
+
+const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortPagePage = withRouteData(CohortPage);

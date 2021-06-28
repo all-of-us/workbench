@@ -6,6 +6,7 @@ import colors from 'app/styles/colors';
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
 import * as validate from 'validate.js';
+import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 const styles = {
   smallHeaderStyles: {
@@ -33,9 +34,10 @@ const validators = {
   bannerHeadline: {...required, ...notTooLong(200)},
   readMoreLink: {...notTooLong(200)},
 };
-export class AdminBanner extends React.Component<{}, AdminBannerState> {
+export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminBannerState> {
   constructor(props) {
     super(props);
+    this.props.hideSpinner();
     this.state = {
       bannerDescription: '',
       bannerEnabled: false,
