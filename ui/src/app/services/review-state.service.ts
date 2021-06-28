@@ -1,6 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import {CohortReview, CohortStatus, FilterColumns, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 export const initialFilterState = {
@@ -102,7 +103,6 @@ const initialPaginationState = {
   sortOrder: SortOrder.Asc
 };
 
-export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore = new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
@@ -131,12 +131,12 @@ export function getVocabOptions(workspaceNamespace: string, workspaceId: string,
 }
 
 export function updateParticipant(participant: ParticipantCohortStatus) {
-  const review = cohortReviewStore.getValue();
+  const review = currentCohortReviewStore.getValue();
   if (participant && review) {
     const index = review.participantCohortStatuses.findIndex(p => p.participantId === participant.participantId);
     if (index !== -1) {
       review.participantCohortStatuses[index] = participant;
-      cohortReviewStore.next(review);
+      currentCohortReviewStore.next(review);
     }
   }
 }
