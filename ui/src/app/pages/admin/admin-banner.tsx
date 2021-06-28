@@ -37,7 +37,7 @@ const validators = {
 export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminBannerState> {
   constructor(props) {
     super(props);
-    // this.props.hideSpinner();
+    this.props.hideSpinner();
     this.state = {
       bannerDescription: '',
       bannerEnabled: false,
