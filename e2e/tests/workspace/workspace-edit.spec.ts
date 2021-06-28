@@ -4,13 +4,14 @@ import * as testData from 'resources/data/workspace-data';
 import { findOrCreateWorkspaceCard, performActions, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import { makeWorkspaceName } from 'utils/str-utils';
 
 describe('Editing workspace via workspace card snowman menu', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eEditWorkspaceTest';
+  const workspaceName = makeWorkspaceName();
 
   /**
    * Test:
