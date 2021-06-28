@@ -262,20 +262,20 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
 
   userSearch(value: string): void {
     const {accessTierShortName} = this.props.workspace;
-    const {searchTerm, userRoles} = this.state;
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
     if (!value.trim()) {
       this.setState({autocompleteLoading: false, dropDown: false});
       return;
     }
-    userApi().userSearch(accessTierShortName, searchTerm)
+    const searchTerm = this.state.searchTerm;
+    userApi().userSearch(accessTierShortName, this.state.searchTerm)
       .then((response) => {
         if (this.state.searchTerm !== searchTerm) {
           return;
         }
         response.users = fp.differenceWith((a, b) => {
           return a.email === b.email;
-        }, response.users, userRoles);
+        }, response.users, this.state.userRoles);
         this.setState({
           autocompleteUsers: response.users.splice(0, 4),
           autocompleteLoading: false,
