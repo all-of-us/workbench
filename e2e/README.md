@@ -40,9 +40,6 @@ See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167
     - `puppeteer-collaborator-1@staging.fake-research-aou.org`
     - `puppeteer-reader-1@staging.fake-research-aou.org`
     - `puppeteer-writer-1@staging.fake-research-aou.org`
-  
-  `puppetcilocaltester1@fake-research-aou.org` to run the e2e tests on every PR and 
-`puppetcitester6@fake-research-aou.org` for running tests on master after every merge.  
 
 ### Local Test Users
 Developers' Local environments share a Google Suite domain with the Test environment,
