@@ -34,8 +34,7 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
         return HttpServletResponse.SC_GATEWAY_TIMEOUT;
       }
       if (lastException instanceof TokenResponseException) {
-        throw ExceptionUtils.codeToException(
-            ((TokenResponseException) lastException).getStatusCode());
+        return ((TokenResponseException) lastException).getStatusCode();
       }
       return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
