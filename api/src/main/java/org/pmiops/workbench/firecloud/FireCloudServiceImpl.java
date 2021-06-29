@@ -312,7 +312,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void updateBillingAccount(String billingProject, String billingAccount) {
     retryHandler.run(
         (context) -> {
-          serviceAccountBillingV2ApiProvider
+          endUserBillingV2ApiProvider
               .get()
               .updateBillingProjectBillingAccount(
                   new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
