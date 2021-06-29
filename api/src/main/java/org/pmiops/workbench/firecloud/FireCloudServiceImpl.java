@@ -6,10 +6,12 @@ import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.RetryException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,6 +66,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+      requestScopedGroupCacheProvider;
 
   // We call some of the endpoints in these APIs with the user's credentials
   // and others with the app's Service Account credentials
@@ -129,6 +134,9 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
+      @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
+          Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+              requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport) {
@@ -145,6 +153,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
+    this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.iamCredentialsClient = iamCredentialsClient;
     this.httpTransport = httpTransport;
   }
@@ -510,10 +519,17 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public boolean isUserMemberOfGroup(String email, String groupName) {
+  public boolean isUserMemberOfGroupWithCache(String email, String groupName) {
     return retryHandler.run(
         (context) -> {
-          FirecloudManagedGroupWithMembers group = groupsApiProvider.get().getGroup(groupName);
+          FirecloudManagedGroupWithMembers group = null;
+          try {
+            group = requestScopedGroupCacheProvider.get().get(groupName);
+          } catch (ExecutionException e) {
+            // This is not expected, but might be possible if we access an entry at the exact time
+            // at which is is expiring from the cache. Just retry.
+            throw new RetryException("cache concurrent access failure", e);
+          }
           return group.getMembersEmails().contains(email)
               || group.getAdminsEmails().contains(email);
         });

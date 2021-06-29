@@ -61,7 +61,8 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.billing.GoogleApisConfig;
+import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.google.GoogleApisConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -256,6 +257,7 @@ public class WorkspacesControllerTest extends SpringTest {
   @Autowired FakeClock fakeClock;
 
   @MockBean FreeTierBillingService mockFreeTierBillingService;
+  @MockBean CloudBillingClient mockCloudBillingClient;
 
   @Qualifier(GoogleApisConfig.END_USER_CLOUD_BILLING)
   @Autowired
@@ -384,7 +386,7 @@ public class WorkspacesControllerTest extends SpringTest {
   private TestMockFactory testMockFactory;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.billing.accountId = "free-tier";
@@ -420,6 +422,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     // required to enable the use of default method blobToFileDetail()
     when(cloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+
+    doReturn(new BillingAccount().setOpen(true)).when(mockCloudBillingClient).getBillingAccount(anyString());
   }
 
   private DbUser createUser(String email) {
@@ -629,11 +633,7 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(retrievedWorkspace.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
     assertThat(retrievedWorkspace.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
-    verify(endUserCloudbillingProvider.get().projects())
-        .updateBillingInfo(
-            "projects/" + workspace.getGoogleProject(),
-            new ProjectBillingInfo()
-                .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
+    verify(fireCloudService).updateBillingAccount(workspace.getNamespace(), TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME);
     verify(fireCloudService, never())
         .createAllOfUsBillingProject(workspace.getNamespace(), accessTier.getServicePerimeter());
     assertThat(retrievedWorkspace.getBillingAccountName())
@@ -652,28 +652,16 @@ public class WorkspacesControllerTest extends SpringTest {
   @Test
   public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
     doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
-
     Workspace workspace = createWorkspace();
+    testMockFactory.stubBufferBillingProject(billingProjectBufferService, workspace.getNamespace());
 
     try {
       workspacesController.createWorkspace(workspace).getBody();
     } catch (Exception e) {
-      verify(endUserCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(workspace.getBillingAccountName())));
-      verify(serviceAccountCloudbillingProvider.get().projects())
-          .updateBillingInfo(
-              any(),
-              eq(
-                  new ProjectBillingInfo()
-                      .setBillingAccountName(
-                          workbenchConfig.billing.freeTierBillingAccountName())));
+      verify(fireCloudService).updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
+      verify(fireCloudService).updateBillingAccountAsService(workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
       return;
     }
-
     fail();
   }
 
@@ -684,10 +672,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
     workspacesController.createWorkspace(workspace);
 
-    verify(endUserCloudbillingProvider.get().projects())
-        .updateBillingInfo(
-            any(),
-            eq(new ProjectBillingInfo().setBillingAccountName(workspace.getBillingAccountName())));
+    verify(fireCloudService).updateBillingAccountAsService(workspace.getNamespace(), workspace.getBillingAccountName());
   }
 
   @Test
@@ -700,8 +685,8 @@ public class WorkspacesControllerTest extends SpringTest {
     workspacesController.createWorkspace(workspace);
 
     // the billing account was not set
-    verifyZeroInteractions(endUserCloudbillingProvider.get());
-    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+    verify(fireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
+    verify(fireCloudService, never()).updateBillingAccount(anyString(), anyString());
   }
 
   @Test
@@ -711,8 +696,8 @@ public class WorkspacesControllerTest extends SpringTest {
 
     workspacesController.createWorkspace(workspace);
 
-    verifyZeroInteractions(endUserCloudbillingProvider.get());
-    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+    verify(fireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
+    verify(fireCloudService, never()).updateBillingAccount(anyString(), anyString());
   }
 
   @Test
@@ -826,6 +811,7 @@ public class WorkspacesControllerTest extends SpringTest {
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
+    verify(fireCloudService, times(1)).updateBillingAccount(ws.getNamespace(), ws.getBillingAccountName());
 
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -839,11 +825,7 @@ public class WorkspacesControllerTest extends SpringTest {
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
-    verify(endUserCloudbillingProvider.get().projects(), times(2))
-        .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-    assertThat("projects/" + ws.getGoogleProject()).isEqualTo(projectCaptor.getAllValues().get(1));
-    assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
-        .isEqualTo(billingCaptor.getAllValues().get(1));
+    verify(fireCloudService, times(1)).updateBillingAccount(ws.getNamespace(),"update-billing-account");
 
     ws.setName("updated-name2");
     updated =
@@ -853,28 +835,6 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace got =
         workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
-  }
-
-  @Test
-  public void testUpdateWorkspace_freeTierBilling_usesCorrectProvider() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    doReturn(false)
-        .when(mockFreeTierBillingService)
-        .userHasRemainingFreeTierCredits(
-            argThat(dbUser -> dbUser.getUserId() == currentUser.getUserId()));
-    // Creating the workspace with a user provided billing account
-    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
-    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
-
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
-    request.setWorkspace(workspace);
-    workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
-
-    verifyZeroInteractions(endUserCloudbillingProvider.get());
-    verify(serviceAccountCloudbillingProvider.get()).projects();
   }
 
   @Test
@@ -955,34 +915,7 @@ public class WorkspacesControllerTest extends SpringTest {
         .contains("Provided billing account is closed. Please provide an open account.");
   }
 
-  @Test
-  public void testUpdateWorkspace_userProvidedBillingAccountName_closedBillingAccount_nullIsOpen()
-      throws Exception {
-    final String closedBillingAccountName = "closed-billing-account";
 
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-    final String namespace = workspace.getNamespace();
-    final String firecloudName = workspace.getId();
-
-    Cloudbilling.BillingAccounts.Get getRequest = mock(Cloudbilling.BillingAccounts.Get.class);
-    doReturn(new BillingAccount().setName(closedBillingAccountName).setOpen(null))
-        .when(getRequest)
-        .execute();
-    when(endUserCloudbillingProvider.get().billingAccounts().get(closedBillingAccountName))
-        .thenReturn(getRequest);
-
-    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    workspace.setBillingAccountName(closedBillingAccountName);
-    request.setWorkspace(workspace);
-
-    BadRequestException exception =
-        assertThrows(
-            BadRequestException.class,
-            () -> workspacesController.updateWorkspace(namespace, firecloudName, request));
-    assertThat(exception.getErrorResponse().getMessage())
-        .contains("Provided billing account is closed. Please provide an open account.");
-  }
 
   @Test
   public void testUpdateWorkspace_userProvidedBillingAccountName_openBillingAccount()

@@ -102,7 +102,7 @@ public interface FireCloudService {
 
   void removeUserFromGroup(String email, String groupName);
 
-  boolean isUserMemberOfGroup(String email, String groupName);
+  boolean isUserMemberOfGroupWithCache(String email, String groupName);
 
   String staticNotebooksConvert(byte[] notebook);
 

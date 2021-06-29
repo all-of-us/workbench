@@ -177,7 +177,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, registeredTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), registeredTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(defaultCdrVersion);
@@ -190,7 +190,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, registeredTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), registeredTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
@@ -238,7 +238,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, controlledTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), controlledTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(controlledCdrVersion);
@@ -251,7 +251,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, controlledTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), controlledTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
@@ -409,7 +409,8 @@ public class CdrVersionServiceTest {
   private void addMembershipForTest(DbAccessTier tier) {
     accessTierService.addUserToTier(user, tier);
 
-    when(fireCloudService.isUserMemberOfGroup(user.getUsername(), tier.getAuthDomainName()))
+    when(fireCloudService.isUserMemberOfGroupWithCache(
+            user.getUsername(), tier.getAuthDomainName()))
         .thenReturn(true);
   }
 }

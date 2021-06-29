@@ -62,7 +62,7 @@ public class CdrVersionService {
     }
 
     String authorizationDomain = version.getAccessTier().getAuthDomainName();
-    if (!fireCloudService.isUserMemberOfGroup(
+    if (!fireCloudService.isUserMemberOfGroupWithCache(
         userProvider.get().getUsername(), authorizationDomain)) {
       throw new ForbiddenException(
           "Requester is not a member of " + authorizationDomain + ", cannot access CDR");

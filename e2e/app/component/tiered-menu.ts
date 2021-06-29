@@ -3,7 +3,7 @@ import BaseMenu from './base-menu';
 
 const menuXpath =
   '//*[contains(concat(" ", normalize-space(@class), " "), " p-tieredmenu ")' +
-  'or contains(concat(" ", normalize-space(@class), " "), " p-menu ")]' +
+  ' or contains(concat(" ", normalize-space(@class), " "), " p-menu ")]' +
   '[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")]';
 
 export default class TieredMenu extends BaseMenu {
@@ -14,7 +14,7 @@ export default class TieredMenu extends BaseMenu {
   getMenuItemXpath(menuItemText: string): string {
     return (
       '//*[not(contains(concat(" ", normalize-space(@class), " "), " menuitem-header "))]' +
-      `[./*[@role="menuitem" and normalize-space()="${menuItemText}"]]`
+      `/*[@role="menuitem" and normalize-space()="${menuItemText}"]`
     );
   }
 

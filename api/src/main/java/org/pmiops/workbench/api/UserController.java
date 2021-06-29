@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.google.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
@@ -160,7 +160,7 @@ public class UserController implements UserApiDelegate {
         .anyMatch(
             tier ->
                 tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-                    && fireCloudService.isUserMemberOfGroup(
+                    && fireCloudService.isUserMemberOfGroupWithCache(
                         userProvider.get().getUsername(), tier.getAuthDomainName()));
   }
 

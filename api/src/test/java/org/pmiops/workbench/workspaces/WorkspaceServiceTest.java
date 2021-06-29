@@ -9,6 +9,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.billing.CloudBillingClient;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -493,5 +494,6 @@ public class WorkspaceServiceTest {
         () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
     verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
     verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
+    verifyZeroInteractions();
   }
 }

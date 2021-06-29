@@ -1,4 +1,4 @@
-package org.pmiops.workbench.billing;
+package org.pmiops.workbench.google;
 
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import java.io.IOException;

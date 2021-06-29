@@ -129,7 +129,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   private void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
-    if (!fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+    if (!fireCloudService.isUserMemberOfGroupWithCache(username, authDomainName)) {
       fireCloudService.addUserToGroup(username, authDomainName);
       log.info(
           String.format(
@@ -140,7 +140,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   private void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
-    if (fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+    if (fireCloudService.isUserMemberOfGroupWithCache(username, authDomainName)) {
       fireCloudService.removeUserFromGroup(username, authDomainName);
       log.info(
           String.format(

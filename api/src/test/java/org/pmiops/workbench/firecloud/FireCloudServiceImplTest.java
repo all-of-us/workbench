@@ -7,8 +7,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,38 +37,56 @@ import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.web.context.WebApplicationContext;
 
 public class FireCloudServiceImplTest extends SpringTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
+
+  @Autowired
+  @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
+  private LoadingCache<String, FirecloudManagedGroupWithMembers> firecloudGroupCache;
 
   @Autowired private FireCloudService service;
 
   private static WorkbenchConfig workbenchConfig;
 
   @MockBean private BillingApi billingApi;
-
   @MockBean
   @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_v2_API)
   private BillingV2Api billingV2Api;
 
-  @MockBean private GroupsApi groupsApi;
   @MockBean private HttpTransport httpTransport;
   @MockBean private IamCredentialsClient iamCredentialsClient;
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
+  @MockBean
+  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API)
+  private GroupsApi groupsApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @TestConfiguration
-  @Import({FireCloudServiceImpl.class, RetryConfig.class})
+  @Import({FireCloudCacheConfig.class, FireCloudServiceImpl.class, RetryConfig.class})
   static class Configuration {
+    @Bean
+    public CustomScopeConfigurer customScopeConfigurer() {
+      // Configure the request scope so we can reuse the cache config; this is not available by
+      // default in Spring unit tests.
+      CustomScopeConfigurer scopeConfigurer = new CustomScopeConfigurer();
+      scopeConfigurer.setScopes(
+          ImmutableMap.of(WebApplicationContext.SCOPE_REQUEST, new SimpleThreadScope()));
+      return scopeConfigurer;
+    }
+
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig getWorkbenchConfig() {
@@ -80,6 +101,11 @@ public class FireCloudServiceImplTest extends SpringTest {
     workbenchConfig.firecloud.debugEndpoints = true;
     workbenchConfig.firecloud.timeoutInSeconds = 20;
     workbenchConfig.billing.accountId = "test-billing-account";
+  }
+
+  @AfterEach
+  public void tearDown() {
+    firecloudGroupCache.invalidateAll();
   }
 
   @Test
@@ -133,7 +159,7 @@ public class FireCloudServiceImplTest extends SpringTest {
   @Test
   public void testIsUserMemberOfGroup_none() throws Exception {
     when(groupsApi.getGroup("group")).thenReturn(new FirecloudManagedGroupWithMembers());
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
@@ -141,7 +167,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     FirecloudManagedGroupWithMembers group = new FirecloudManagedGroupWithMembers();
     group.setMembersEmails(Arrays.asList("asdf@fake-research-aou.org"));
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
@@ -150,7 +176,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     group.setAdminsEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test
@@ -159,7 +185,7 @@ public class FireCloudServiceImplTest extends SpringTest {
     group.setMembersEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
-    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
+    assertThat(service.isUserMemberOfGroupWithCache(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test
