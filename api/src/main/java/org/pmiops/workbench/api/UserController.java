@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.google.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;

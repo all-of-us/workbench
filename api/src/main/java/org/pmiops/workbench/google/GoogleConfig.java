@@ -22,6 +22,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class GoogleConfig {
+
   public static final String END_USER_CLOUD_BILLING = "END_USER_CLOUD_BILLING";
   public static final String SERVICE_ACCOUNT_CLOUD_BILLING = "SERVICE_ACCOUNT_CLOUD_BILLING";
 
@@ -47,9 +48,9 @@ public class GoogleConfig {
         new GoogleCredentials(new AccessToken(userAuthentication.getCredentials(), null));
 
     return new Cloudbilling.Builder(
-        GoogleNetHttpTransport.newTrustedTransport(),
-        jsonFactory,
-        new HttpCredentialsAdapter(credentials))
+            GoogleNetHttpTransport.newTrustedTransport(),
+            jsonFactory,
+            new HttpCredentialsAdapter(credentials))
         .setApplicationName(workbenchConfigProvider.get().server.projectId)
         .build();
   }
@@ -64,9 +65,9 @@ public class GoogleConfig {
             Collections.singletonList("https://www.googleapis.com/auth/cloud-billing"));
 
     return new Cloudbilling.Builder(
-        GoogleNetHttpTransport.newTrustedTransport(),
-        jsonFactory,
-        new HttpCredentialsAdapter(credentials))
+            GoogleNetHttpTransport.newTrustedTransport(),
+            jsonFactory,
+            new HttpCredentialsAdapter(credentials))
         .setApplicationName(workbenchConfigProvider.get().server.projectId)
         .build();
   }

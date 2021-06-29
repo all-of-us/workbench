@@ -12,8 +12,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.google.GoogleApisConfig.END_USER_CLOUD_BILLING;
-import static org.pmiops.workbench.google.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;

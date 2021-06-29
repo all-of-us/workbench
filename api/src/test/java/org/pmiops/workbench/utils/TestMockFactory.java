@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.BillingAccountType;
@@ -142,13 +141,14 @@ public class TestMockFactory {
     stubBufferBillingProject(billingProjectBufferService, UUID.randomUUID().toString());
   }
 
-  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService, String billingProjectId) {
+  public void stubBufferBillingProject(
+      BillingProjectBufferService billingProjectBufferService, String billingProjectId) {
     doAnswer(
-        invocation -> {
-          DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-          doReturn(billingProjectId).when(entry).getFireCloudProjectName();
-          return entry;
-        })
+            invocation -> {
+              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
+              doReturn(billingProjectId).when(entry).getFireCloudProjectName();
+              return entry;
+            })
         .when(billingProjectBufferService)
         .assignBillingProject(any(), any());
   }
