@@ -776,6 +776,40 @@ Common.register_command({
   :fn => ->(*args) { make_prep_tables_bucket("make-prep-tables-bucket", *args) }
 })
 
+def make_bq_prep_tables(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+  op.add_option(
+      "--date [date]",
+      ->(opts, v) { opts.date = v},
+      "Redcap file date"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr/prep-tables') do
+      common.run_inline %W{python make-prep-survey.py --project #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} --dataset #{op.opts.dataset} --date #{op.opts.date}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "make-bq-prep-tables",
+  :description => "Make all big query prep tables.",
+  :fn => ->(*args) { make_bq_prep_tables("make-bq-prep-tables", *args) }
+})
+
 def make_prep_tables_from_csv(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.cdr_version = "!_prep_tables_!"
