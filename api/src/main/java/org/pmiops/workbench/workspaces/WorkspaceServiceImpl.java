@@ -3,15 +3,7 @@ package org.pmiops.workbench.workspaces;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
-import com.github.rholder.retry.RetryException;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
-import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -26,13 +18,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
+import org.pmiops.workbench.billing.CloudBillingClient;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -93,8 +84,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
-  private final Provider<Cloudbilling> endUserCloudbillingProvider;
-  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
+  private final CloudBillingClient cloudBillingClient;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
@@ -116,6 +106,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
+      CloudBillingClient cloudBillingClient,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
@@ -124,8 +115,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
       WorkspaceAuthService workspaceAuthService) {
-    this.endUserCloudbillingProvider = endUserCloudbillingProvider;
-    this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
+    this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
@@ -417,19 +407,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
   }
 
-  // this is necessary because the grant ownership call in create/clone
-  // may not have propagated. Adding a few retries drastically reduces
-  // the likely of failing due to slow propagation
-  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
-      RetryerBuilder.<ProjectBillingInfo>newBuilder()
-          .retryIfException(
-              e ->
-                  e instanceof GoogleJsonResponseException
-                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
-          .withWaitStrategy(WaitStrategies.exponentialWait())
-          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
-          .build();
-
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingUpgrade
@@ -437,51 +414,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       return;
     }
 
-    Cloudbilling cloudbilling;
     if (newBillingAccountName.equals(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
-      cloudbilling = serviceAccountCloudbillingProvider.get();
+      fireCloudService.updateBillingAccountAsService(
+          workspace.getWorkspaceNamespace(), newBillingAccountName);
     } else {
-      cloudbilling = endUserCloudbillingProvider.get();
       try {
         Optional<Boolean> isOpenMaybe =
             Optional.ofNullable(
-                cloudbilling.billingAccounts().get(newBillingAccountName).execute().getOpen());
+                cloudBillingClient.getBillingAccount(newBillingAccountName).getOpen());
         boolean isOpen = isOpenMaybe.orElse(false);
         if (!isOpen) {
           throw new BadRequestException(
               "Provided billing account is closed. Please provide an open account.");
         }
+        fireCloudService.updateBillingAccount(
+            workspace.getWorkspaceNamespace(), newBillingAccountName);
       } catch (IOException e) {
         throw new ServerErrorException("Could not fetch user provided billing account.", e);
       }
     }
 
-    UpdateBillingInfo request;
-    try {
-      request =
-          cloudbilling
-              .projects()
-              .updateBillingInfo(
-                  "projects/" + workspace.getGoogleProject(),
-                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
-    } catch (IOException e) {
-      throw new ServerErrorException("Could not create Google Cloud updateBillingInfo request", e);
-    }
-
-    ProjectBillingInfo response;
-    try {
-      response = cloudBillingRetryer.call(request::execute);
-    } catch (RetryException | ExecutionException e) {
-      throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
-    }
-
-    if (!newBillingAccountName.equals(response.getBillingAccountName())) {
-      throw new ServerErrorException(
-          "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
-    }
-
-    workspace.setBillingAccountName(response.getBillingAccountName());
+    // TODO(RW-6955): After Terra PPW, updateBillingAccount will be async API. Poll account info
+    // to verify billing account is update in GCP.
+    workspace.setBillingAccountName(newBillingAccountName);
 
     if (newBillingAccountName.equals(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {

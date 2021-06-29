@@ -32,6 +32,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,7 +49,11 @@ public class FireCloudServiceImplTest extends SpringTest {
   private static WorkbenchConfig workbenchConfig;
 
   @MockBean private BillingApi billingApi;
-  @MockBean private BillingV2Api billingV2Api;
+
+  @MockBean
+  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_v2_API)
+  private BillingV2Api billingV2Api;
+
   @MockBean private GroupsApi groupsApi;
   @MockBean private HttpTransport httpTransport;
   @MockBean private IamCredentialsClient iamCredentialsClient;

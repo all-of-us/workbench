@@ -81,6 +81,7 @@ public class DeleteWorkspaces {
         null,
         fireCloudService,
         null,
+        cloudBillingClient,
         dbUserProvider,
         null,
         null,
