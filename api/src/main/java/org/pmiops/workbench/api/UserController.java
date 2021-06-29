@@ -172,7 +172,7 @@ public class UserController implements UserApiDelegate {
                         "Requester does not have access to tier " + accessTierShortName));
 
     String authorizationDomain = searchTier.getAuthDomainName();
-    if (!fireCloudService.isUserMemberOfGroup(
+    if (!fireCloudService.isUserMemberOfGroupWithCache(
         userProvider.get().getUsername(), authorizationDomain)) {
       throw new ForbiddenException("Requester is not a member of " + authorizationDomain);
     }
@@ -207,25 +207,24 @@ public class UserController implements UserApiDelegate {
       UserResponse response,
       PaginationToken paginationToken,
       List<DbUser> users) {
+
     List<List<DbUser>> pagedUsers =
         Lists.partition(users, Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE));
-
-    int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
 
     if (pagedUsers.size() == 0) {
       return ResponseEntity.ok(response);
     }
 
+    int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
     if (pageOffset < pagedUsers.size()) {
       boolean hasNext = pageOffset < pagedUsers.size() - 1;
       if (hasNext) {
         response.setNextPageToken(PaginationToken.of(pageOffset + 1).toBase64());
       }
-      List<org.pmiops.workbench.model.User> modelUsers =
+      response.setUsers(
           pagedUsers.get(pageOffset).stream()
               .map(TO_USER_RESPONSE_USER)
-              .collect(Collectors.toList());
-      response.setUsers(modelUsers);
+              .collect(Collectors.toList()));
     } else {
       log.warning(
           String.format(
@@ -233,6 +232,7 @@ public class UserController implements UserApiDelegate {
               term, pageOffset));
       return ResponseEntity.badRequest().body(response);
     }
+
     return ResponseEntity.ok(response);
   }
 
