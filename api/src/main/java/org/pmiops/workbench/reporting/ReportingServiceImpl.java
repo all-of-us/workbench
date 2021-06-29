@@ -76,7 +76,7 @@ public class ReportingServiceImpl implements ReportingService {
     } else {
       logger.warning(
           String.format(
-              "Failed to verified upload result, snapshotUploadSuccess: %s, batchUploadSuccess :%s",
+              "Failed to verify upload result, snapshotUploadSuccess: %s, batchUploadSuccess :%s",
               snapshotUploadSuccess, batchUploadSuccess));
     }
   }
