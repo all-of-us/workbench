@@ -211,6 +211,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.PASSWORD, password)
         .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
         .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
         .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
@@ -222,6 +223,7 @@ public class MailServiceImpl implements MailService {
       final String instructions) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
         .build();
   }
@@ -265,6 +267,7 @@ public class MailServiceImpl implements MailService {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
         .put(EmailSubstitutionField.URL, getURLAsHref())
         .build();
@@ -377,6 +380,10 @@ public class MailServiceImpl implements MailService {
 
   private String getAllOfUsLogo() {
     return cloudStorageClientProvider.get().getImageUrl("all_of_us_logo.png");
+  }
+
+  private String getAllOfUsItalicsText() {
+    return "<i>All of Us</i>";
   }
 
   private String getRegistrationImage() {
