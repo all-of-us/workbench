@@ -89,8 +89,12 @@ export class AppComponent implements OnInit {
       }
       if (e instanceof NavigationEnd) {
         const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+        console.log('This is where the params are coming from');
+        console.log(params);
         urlParamsStore.next(params);
+        console.log(queryParams);
         queryParamsStore.next(queryParams);
+        console.log(routeConfig.data);
         routeConfigDataStore.next(routeConfig.data);
       }
     });

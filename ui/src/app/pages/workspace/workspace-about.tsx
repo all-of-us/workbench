@@ -25,6 +25,7 @@ import {
   UserRole,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {withRouter} from 'react-router';
 
 interface WorkspaceProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -94,7 +95,7 @@ const WorkspaceInfoTooltipText = () => {
   </div>;
 };
 
-export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
+export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions(), withRouter)
 (class extends React.Component<WorkspaceProps, WorkspaceState> {
 
   constructor(props) {
@@ -198,6 +199,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   render() {
+    console.log("rendering about page");
     const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>

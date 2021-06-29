@@ -10,6 +10,7 @@ import * as StackTrace from 'stacktrace-js';
 
 import {NavigationGuard} from 'app/guards/navigation-guard';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
+import {ReactWorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper';
 import {SignInService} from './services/sign-in.service';
 import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
@@ -64,6 +65,7 @@ import {FooterComponent} from './components/footer';
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceWrapperComponent,
+//    ReactWorkspaceWrapperComponent
   ],
   providers: [
     SignInService,

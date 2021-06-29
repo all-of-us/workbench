@@ -81,7 +81,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       }));
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
-      .distinctUntilChanged(fp.isEqual)
+      .distinctUntilChanged((x,y) => {
+        console.log(fp.isEqual(x)(y));
+        return fp.isEqual(x)(y);
+      })
       .switchMap(({ns, wsid}) => {
         // Clear the workspace/access level during the transition to ensure we
         // do not render the child component with a stale workspace.
@@ -114,6 +117,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           return;
         }
         this.workspace = workspace;
+        console.log('setting store through url params');
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
         this.pollAborter.abort();

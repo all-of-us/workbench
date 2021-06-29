@@ -814,6 +814,8 @@ export const HelpSidebar = fp.flow(
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
+      console.log('rendering help bar');
+
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}

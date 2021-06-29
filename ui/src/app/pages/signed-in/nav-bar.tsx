@@ -187,6 +187,8 @@ export const NavBar = withUserProfile()(
     }
 
     render() {
+      console.log("rendering app nav bar");
+
       return <div
         style={styles.headerContainer}
         ref={this.state.wrapperRef}

@@ -7,6 +7,7 @@ import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {SignedInComponent} from './pages/signed-in/component';
+import {ReactWorkspaceWrapperComponent, WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -114,9 +115,13 @@ const routes: Routes = [
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
                  */
+//                path: '**',
                 path: ':ns/:wsid',
-                component: WorkspaceWrapperComponent,
-                runGuardsAndResolvers: 'always',
+//                pathMatch: 'prefix',
+//                component: ReactWorkspaceWrapperComponent,
+//                component: AppRouting,
+//                data: {}
+ //               runGuardsAndResolvers: 'always',
                 children: [
                   // legacy / duplicated routes go HERE
                   {
@@ -376,9 +381,19 @@ const routes: Routes = [
 export class AppRoutingModule {
 
   constructor(public router: Router) {
-    NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
-    NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
+    // TODO eric: test admin preview egress
+    NavStore.navigate = (commands, extras) => {
+      console.log(this.router.serializeUrl(this.router.createUrlTree(commands, extras)));
+      this.router.navigate(commands, extras);
+    }
+
+    // TODO eric: navigateByUrl is never called with `extra`
+    NavStore.navigateByUrl = (url, extras) => {
+      console.log(url);
+      this.router.navigateByUrl(url, extras);
+    }
     this.router.events.subscribe(event => {
+      console.log(event);
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
       }

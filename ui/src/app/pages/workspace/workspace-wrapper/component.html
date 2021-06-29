@@ -1,5 +1,6 @@
 <app-workspace-nav-bar *ngIf="displayNavBar" [tabPath]="tabPath"></app-workspace-nav-bar>
 <ng-container *ngIf="workspace">
+  <h1>hHLLELEO</h1>
   <app-help-sidebar [pageKey]="pageKey"></app-help-sidebar>
   <div [style.margin-right]="pageKey ? '45px' : 0" [style.height]="pageKey && !contentFullHeightOverride ? 'auto': '100%'">
     <router-outlet></router-outlet>
