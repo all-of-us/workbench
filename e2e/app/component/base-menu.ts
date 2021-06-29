@@ -25,6 +25,31 @@ export default abstract class BaseMenu extends Container {
   async select(menuSelections: string | MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
     const { waitForNav = false } = opt;
 
+    let maxAttempts = 3;
+    const click = async (menuItem: string, xpath: string, waitForNav = false): Promise<void> => {
+      const menuItemLink = await this.findMenuItemLink(menuItem, xpath);
+      const hasPopup = await getPropValue<string>(await menuItemLink.asElementHandle(), 'ariaHasPopup');
+      if (!hasPopup || hasPopup === 'false') {
+        if (waitForNav) {
+          const navigationPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
+          await menuItemLink.click();
+          await navigationPromise;
+        } else {
+          await menuItemLink.click();
+        }
+        return;
+      }
+      if (maxAttempts === 0) {
+        throw new Error(`submenu not found when clicking menu item: ${menuItem}`);
+      }
+      // Is submenu open?
+      if (await this.isOpen(`${rootXpath}/ul/li`)) {
+        return;
+      }
+      maxAttempts--;
+      await click(menuItem, xpath);
+    };
+
     let selections = [];
     // Handle case when menuSelections is not array.
     if (typeof menuSelections === 'string') {
@@ -41,18 +66,7 @@ export default abstract class BaseMenu extends Container {
     let rootXpath = this.getXpath();
     const len = selections.length;
     for (let i = 0; i < len; i++) {
-      const menuItemLink = await this.findMenuItemLink(selections[i], rootXpath);
-      if (i === len - 1) {
-        // If it is the last menu item, click on it.
-        if (waitForNav) {
-          await Promise.all([
-            this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] }),
-            menuItemLink.click()
-          ]);
-        } else {
-          await menuItemLink.click();
-        }
-      }
+      await click(selections[i], rootXpath, i === len - 1 ? waitForNav : false);
       rootXpath = `${rootXpath}/ul`; // submenu xpath
     }
 
@@ -74,20 +88,21 @@ export default abstract class BaseMenu extends Container {
     return actionTextsArray;
   }
 
-  protected async isOpen(): Promise<boolean> {
+  protected async isOpen(xpath?: string): Promise<boolean> {
+    xpath = xpath || this.getXpath();
     try {
-      await this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 2000 });
+      await this.page.waitForXPath(xpath, { visible: true, timeout: 2000 });
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  // Find and hover over menu item
+  // Find and hover over menuitem
   protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<Link> {
     const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
     const link = new Link(this.page, menuItemSelector);
-    await link.focus(60000);
+    await link.focus(10000);
     await this.page.waitForTimeout(500);
     return link;
   }

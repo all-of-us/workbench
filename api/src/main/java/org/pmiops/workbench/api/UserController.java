@@ -160,7 +160,7 @@ public class UserController implements UserApiDelegate {
         .anyMatch(
             tier ->
                 tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-                    && fireCloudService.isUserMemberOfGroup(
+                    && fireCloudService.isUserMemberOfGroupWithCache(
                         userProvider.get().getUsername(), tier.getAuthDomainName()));
   }
 
