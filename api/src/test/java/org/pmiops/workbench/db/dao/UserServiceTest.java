@@ -29,12 +29,14 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
@@ -435,6 +437,18 @@ public class UserServiceTest extends SpringTest {
 
   @Test
   public void testSubmitTermsOfService() {
+    assertThrows(
+            BadRequestException.class,
+            () -> {
+              userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
+            });
+
+    assertThrows(
+            BadRequestException.class,
+            () -> {
+              userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
+            });
+
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
 
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));

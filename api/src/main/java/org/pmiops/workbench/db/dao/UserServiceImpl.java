@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
@@ -553,18 +554,29 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userDataUseAgreementDao.saveAll(dataUseAgreements);
   }
 
-  @Override
-  @Transactional
-  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+  /**
+   * Validates a given tosVersion, by running all validation checks.
+   * 
+   * @param tosVersion
+   * @throws BadRequestException
+   */
+  private void validateTermsOfServiceVersion(Integer tosVersion) {
+    if (tosVersion == null) {
+      throw new BadRequestException("Terms of Service version is NULL");
+    }
     if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
       throw new BadRequestException("Terms of Service version is not up to date");
     }
-
+  }
+  
+  @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    validateTermsOfServiceVersion(tosVersion);
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(tosVersion);
     userTermsOfService.setUserId(dbUser.getUserId());
     userTermsOfServiceDao.save(userTermsOfService);
-
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
