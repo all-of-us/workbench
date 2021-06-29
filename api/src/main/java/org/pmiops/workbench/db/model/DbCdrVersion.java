@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,13 +10,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import org.pmiops.workbench.model.ArchivalStatus;
 
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
   private long cdrVersionId;
-  private boolean isDefault;
+  private Boolean isDefault;
   private String name;
   private DbAccessTier accessTier;
   private short releaseNumber;
@@ -42,13 +44,22 @@ public class DbCdrVersion {
     this.cdrVersionId = cdrVersionId;
   }
 
+  // I changed the type to object Boolean because Hibernate started complaining about assigning
+  // nulls to primitive boolean.  TODO why now / what changed?
+
   @Column(name = "is_default")
-  public boolean getIsDefault() {
+  public Boolean getIsDefault() {
     return isDefault;
   }
 
-  public void setIsDefault(boolean isDefault) {
+  public void setIsDefault(Boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  @Transient
+  @NotNull
+  public boolean getIsDefaultNotNull() {
+    return Optional.ofNullable(isDefault).orElse(false);
   }
 
   @Column(name = "name")
