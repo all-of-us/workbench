@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-168-rename-access-module-user-table">
+    <dropTable tableName="access_module_user"/>
+    <createTable tableName="user_access_module">
+      <column name="user_access_module_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="access_module_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_acu_access_module_name" references="access_module(access_module_id)"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_acu_user_id" references="user(user_id)"/>
+      </column>
+      <column name="completion_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="bypass_time" type="datetime">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+    <createIndex tableName="user_access_module" indexName="user_access_module_idx" unique="false">
+      <column name="user_id"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-169-add-institution-tier-requirement-tables">
+    <createTable tableName="institution_tier_requirement">
+      <column name="institution_tier_requirement_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="requirement_enum" type="ENUM('DOMAIN', 'ACL', 'NONE')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="era_required" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+      <column name="institution_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_institution_tier_requirement_institution" references="institution(institution_id)"/>
+      </column>
+      <column name="access_tier_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_institution_tier_requirement_tier" references="access_tier(access_tier_id)"/>
+      </column>
+    </createTable>
+    <addColumn tableName="user">
+      <column name="era_commons_linked_nih_username" type="varchar(255)"/>
+      <column name="era_commons_link_expire_time" type="datetime"/>
+      <column name="era_commons_completion_time" type="datetime"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>
