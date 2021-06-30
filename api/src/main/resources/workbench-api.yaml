@@ -8479,9 +8479,6 @@ definitions:
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
-      aboutYou:
-        type: string
-        description: User's description of themselves.
       accessTierShortNames:
         description: |-
           Short names of access tiers available to the user, comma-delimited if multiple.
@@ -8511,9 +8508,6 @@ definitions:
         type: string
         format: date-time
         description: Timestamp of account creation.
-      currentPosition:
-        type: string
-        description: User's current role/position.
       dataUseAgreementBypassTime:
         type: string
         format: date-time
@@ -8556,10 +8550,6 @@ definitions:
         type: string
         format: date-time
         description: Time user first signed into the Workbench with a GSuite account.
-      freeTierCreditsLimitDaysOverride:
-        type: integer
-        format: int32
-        description: Override value for the default free tier time limit (days).
       freeTierCreditsLimitDollarsOverride:
         type: number
         format: double
