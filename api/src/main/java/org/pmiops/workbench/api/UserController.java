@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -196,7 +196,7 @@ public class UserController implements UserApiDelegate {
     return response;
   }
 
-  @NotNull
+  @Nonnull
   private Sort getSort(String sortOrder) {
     Sort.Direction direction =
         Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
