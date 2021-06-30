@@ -160,6 +160,7 @@ public class UserController implements UserApiDelegate {
     try {
       paginationToken = getPaginationTokenFromPageToken(pageToken);
     } catch (IllegalArgumentException | BadRequestException e) {
+      log.warning(e.getMessage());
       return ResponseEntity.badRequest().body(response);
     }
 
