@@ -548,10 +548,6 @@ jobs:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
-            - run:
-                name: Change WORKBENCH_ENV to "test" if needed
-                command: bash .circleci/choose-e2e-env.sh
-            # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
       - run:
           name: "echo WORKBENCH_ENV & TEST_MODE"
