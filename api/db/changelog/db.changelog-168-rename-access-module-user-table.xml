@@ -11,7 +11,7 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="access_module_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_acu_access_module_id" references="access_module(access_module_id)"/>
+        <constraints nullable="false"/>
       </column>
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="fk_acu_user_id" references="user(user_id)"/>
