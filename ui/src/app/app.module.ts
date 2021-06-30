@@ -15,8 +15,6 @@ import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
-import {BugReportComponent} from './components/bug-report';
-import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
@@ -53,8 +51,6 @@ import {FooterComponent} from './components/footer';
   declarations: [
     AppComponent,
     AppRouting,
-    BugReportComponent,
-    ConfirmDeleteModalComponent,
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
