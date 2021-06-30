@@ -463,7 +463,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setGivenName(givenName);
     dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
-    dbUser.setAboutYou(null);
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);

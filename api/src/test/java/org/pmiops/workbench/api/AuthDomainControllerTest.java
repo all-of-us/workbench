@@ -154,8 +154,6 @@ public class AuthDomainControllerTest extends SpringTest {
     user.setFamilyName(FAMILY_NAME);
     user.setUsername(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
-    user.setOrganization(ORGANIZATION);
-    user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
     return userDao.save(user);
