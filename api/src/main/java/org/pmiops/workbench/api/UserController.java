@@ -26,6 +26,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingAccount;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -41,9 +42,9 @@ public class UserController implements UserApiDelegate {
   private static final Logger log = Logger.getLogger(UserController.class.getName());
   private static final int DEFAULT_PAGE_SIZE = 10;
   private static final String DEFAULT_SORT_FIELD = "username";
-  private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
+  private static final Function<DbUser, User> TO_USER_RESPONSE_USER =
       user -> {
-        org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
+        User modelUser = new User();
         modelUser.setEmail(user.getUsername()); // deprecated, but kept for compatibility
         modelUser.setUserName(user.getUsername());
         modelUser.setGivenName(user.getGivenName());
@@ -88,6 +89,7 @@ public class UserController implements UserApiDelegate {
    * @return
    */
   @Override
+  @Deprecated
   public ResponseEntity<UserResponse> user(
       String term, String pageToken, Integer pageSize, String sortOrder) {
     UserResponse response = initializeUserResponse();
