@@ -103,7 +103,10 @@ const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 const WorkspaceListPage = withRouteData(WorkspaceList);
 const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
-export const WorkspaceRoutes = () => {
+// TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
+// rendering over and over again on page load, rendering (hah) the app unusable.
+// We should be able to refactor this once we are driving the entire app through React router.
+export const WorkspaceRoutes = React.memo(() => {
   return <React.Fragment>
     <AppRoute
       path='/workspaces/:ns/:wsid/about'
@@ -289,4 +292,4 @@ export const WorkspaceRoutes = () => {
       }}/>}
     />
   </React.Fragment>;
-}
+});

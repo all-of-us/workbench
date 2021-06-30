@@ -27,17 +27,15 @@ const NavBar = fp.flow(
   withStore(routeDataStore, 'routeData')
 )(({routeConfigData}) => {
   console.log("ASDJASOIDJSAOJDASOIDJAOSIDJOIASJDOAISJDOIAJDOISAJDOIASJDOIAJDOIASDJOIASJDOAISD");
-  console.log(routeConfigData);
-  const location = useLocation();
-
-  console.log(location);
 
   return <React.Fragment>
     {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
   </React.Fragment>;
 });
 
-export const WorkspaceWrapper = fp.flow()(({routeConfigData}) => {
+export const WorkspaceWrapper = fp.flow(
+  withRouteConfigData()
+)(({routeConfigData}) => {
   const params = useParams();
   const {ns, wsid} = useParams();
   const [workspace, setWorkspace] = useState(currentWorkspaceStore.getValue());
@@ -75,8 +73,8 @@ export const WorkspaceWrapper = fp.flow()(({routeConfigData}) => {
     <NavBar/>
     {!!workspace &&
     <React.Fragment>
-        <HelpSidebar pageKey={'about'}/>
-        <div style={{marginRight: '45px', height: 'auto'}}>
+        <HelpSidebar pageKey={routeConfigData.pageKey}/>
+        <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
             <WorkspaceRoutes/>
         </div>
     </React.Fragment>}

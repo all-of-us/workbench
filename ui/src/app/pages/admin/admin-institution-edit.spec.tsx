@@ -1,5 +1,4 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import {DuaType, InstitutionApi} from 'generated/fetch';
@@ -9,6 +8,7 @@ import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+import {urlParamsStore} from '../../utils/url-params-store';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 
 describe('AdminInstitutionEditSpec', () => {

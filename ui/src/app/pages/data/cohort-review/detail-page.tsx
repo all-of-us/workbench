@@ -8,9 +8,9 @@ import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {cohortReviewStore, getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentWorkspace} from 'app/utils';
-import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {urlParamsStore} from '../../../utils/url-params-store';
 
 interface Props {
   workspace: WorkspaceData;

@@ -166,6 +166,9 @@ export class LeoRuntimeInitializer {
    * @param options
    */
   public static initialize(options: LeoRuntimeInitializerOptions): Promise<Runtime> {
+    console.log("Initializing LeoRuntime");
+    console.log(options);
+    console.trace();
     return new LeoRuntimeInitializer(options).run();
   }
 

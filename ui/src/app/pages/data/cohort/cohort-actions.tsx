@@ -6,10 +6,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
+import {urlParamsStore} from '../../../utils/url-params-store';
 
 const styles = reactStyles({
   cohortsHeader: {

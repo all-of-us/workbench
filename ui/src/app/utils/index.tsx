@@ -9,8 +9,7 @@ import {
   currentWorkspaceStore,
   globalErrorStore,
   queryParamsStore,
-  routeConfigDataStore,
-  urlParamsStore
+  routeConfigDataStore
 } from 'app/utils/navigation';
 import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -19,6 +18,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, profileStore, withStore} from './stores';
+import {urlParamsStore} from './url-params-store';
 
 const {useEffect, useState} = React;
 

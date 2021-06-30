@@ -213,14 +213,24 @@ const useRuntime = (currentWorkspaceNamespace) => {
   // No cleanup is being handled at the moment.
   // When the user initiates a runtime change we want that change to take place even if they navigate away
   useEffect(() => {
+    if (!currentWorkspaceNamespace) {
+      return;
+    }
+
     const getRuntime = withAsyncErrorHandling(
-      () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
+      () => {
+        console.log("runtime being set to null")
+        runtimeStore.set({workspaceNamespace: null, runtime: null});
+      },
       async() => {
         let leoRuntime;
         try {
+          console.log("runtime workspace");
+          console.log(currentWorkspaceNamespace);
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
+            console.error(e);
             throw e;
           }
           // null on the runtime store indicates no existing runtime
@@ -263,6 +273,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   const {runtime} = useStore(runtimeStore);
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
+  console.log("Runtime workspacenamespace : " + currentWorkspaceNamespace)
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
@@ -316,11 +327,13 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
 export const useCustomRuntime = (currentWorkspaceNamespace):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
+  console.log(workspaceNamespace);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
+  console.log("Runtime workspacenamespace : " + currentWorkspaceNamespace)
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
@@ -398,6 +411,7 @@ export const withRuntimeStore = () => WrappedComponent => {
     const value = useStore(runtimeStore);
 
     // Ensure that a runtime gets initialized, if it hasn't already been.
+    console.log("Runtime workspacenamespace : " + value.workspaceNamespace)
     useRuntime(value.workspaceNamespace);
 
     return <WrappedComponent {...props} runtimeStore={value} />;

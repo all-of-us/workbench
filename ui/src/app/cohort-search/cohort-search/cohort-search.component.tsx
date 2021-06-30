@@ -19,9 +19,10 @@ import {
   currentCohortSearchContextStore,
   currentCohortStore,
   setSidebarActiveIconStore,
-  urlParamsStore,
+
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
+import {urlParamsStore} from '../../utils/url-params-store';
 
 const styles = reactStyles({
   arrowIcon: {

@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {navigate, urlParamsStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -27,6 +27,7 @@ import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils'
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import {urlParamsStore} from '../../utils/url-params-store';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum Progress {
