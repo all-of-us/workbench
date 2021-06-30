@@ -103,6 +103,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -242,6 +243,7 @@ public class DataSetControllerTest extends SpringTest {
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
+    CloudBillingClient.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
