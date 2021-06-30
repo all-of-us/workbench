@@ -17,6 +17,8 @@ export const usePath = () => {
 };
 
 export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
+  console.log('running withRouteData')
+  console.log(routeData)
   const params = useParams();
   urlParamsStore.next(params);
   routeConfigDataStore.next(routeData);

@@ -1,11 +1,12 @@
 import {Component as AComponent, Component} from '@angular/core';
 import {faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import * as fp from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {useParams} from 'react-router-dom';
-import {AppRoutingComponent, WorkspaceRoutes} from '../../app-routing';
+import {AppRoutingComponent} from '../../app-routing';
 import {AppRoute, withRouteData} from '../../components/app-router';
 import {FlexRow} from '../../components/flex';
 import {HelpSidebar} from '../../components/help-sidebar';
@@ -13,17 +14,32 @@ import {TextColumn} from '../../components/text-column';
 import {SignInService} from '../../services/sign-in.service';
 import {workspacesApi} from '../../services/swagger-fetch-clients';
 import colors from '../../styles/colors';
-import {ReactWrapperBase} from '../../utils';
+import {ReactWrapperBase, withRouteConfigData} from '../../utils';
 import {AnalyticsTracker} from '../../utils/analytics';
 import {BreadcrumbType, currentWorkspaceStore} from '../../utils/navigation';
+import {routeDataStore, withStore} from '../../utils/stores';
+import {WorkspaceRoutes} from '../../workspace-app-routing';
 import {WorkspaceAbout} from './workspace-about';
 import {WorkspaceNavBarReact} from './workspace-nav-bar';
 
-export const WorkspaceWrapper = () => {
+const NavBar = fp.flow(
+  withRouteConfigData(),
+  withStore(routeDataStore, 'routeData')
+)(({routeConfigData}) => {
+  console.log("ASDJASOIDJSAOJDASOIDJAOSIDJOIASJDOAISJDOIAJDOISAJDOIASJDOIAJDOIASDJOIASJDOAISD");
+  console.log(routeConfigData);
+
+  return <React.Fragment>
+    {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact/>}
+  </React.Fragment>;
+});
+
+export const WorkspaceWrapper = fp.flow()(({routeConfigData}) => {
   const params = useParams();
-  console.log(params);
   const {ns, wsid} = useParams();
   const [workspace, setWorkspace] = useState(currentWorkspaceStore.getValue());
+
+  console.log(routeConfigData);
 
   useEffect(() => {
     if (!workspace || workspace.namespace !== ns || workspace.id !== wsid) {
@@ -50,9 +66,10 @@ export const WorkspaceWrapper = () => {
 
   console.log("rendering wrapper");
   console.log(workspace);
+
 // should nav bar actually load before workspace is ready?
   return <React.Fragment>
-    <WorkspaceNavBarReact/>
+    <NavBar/>
     {!!workspace &&
     <React.Fragment>
         <HelpSidebar pageKey={'about'}/>
@@ -61,7 +78,7 @@ export const WorkspaceWrapper = () => {
         </div>
     </React.Fragment>}
   </React.Fragment>
-};
+});
 
 // @AComponent({
 //   template: '<div #root style="display: inline;"></div>'

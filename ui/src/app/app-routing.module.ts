@@ -7,7 +7,7 @@ import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {SignedInComponent} from './pages/signed-in/component';
-import {ReactWorkspaceWrapperComponent, WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
+import { WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
