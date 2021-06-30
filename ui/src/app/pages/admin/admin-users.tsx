@@ -232,7 +232,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
           />
           <Column field='username'
                   bodyStyle={{...styles.colStyle}}
-                  header='User name'
+                  header='User Name'
                   headerStyle={{...styles.colStyle, width: '200px'}}
                   sortable={true}
           />
