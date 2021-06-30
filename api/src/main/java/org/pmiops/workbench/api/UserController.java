@@ -202,7 +202,10 @@ public class UserController implements UserApiDelegate {
 
   @Nonnull
   private static Sort getSort(String sortOrder) {
-    return Sort.by(new Sort.Order(Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC), DEFAULT_SORT_FIELD));
+    return Sort.by(
+        new Sort.Order(
+            Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC),
+            DEFAULT_SORT_FIELD));
   }
 
   private ResponseEntity<UserResponse> processSearchResults(
