@@ -192,7 +192,7 @@ public class UserController implements UserApiDelegate {
     return processSearchResults(term, pageSize, response, paginationToken, users);
   }
 
-  private UserResponse initializeUserResponse() {
+  private static UserResponse initializeUserResponse() {
     UserResponse response = new UserResponse();
     response.setUsers(Collections.emptyList());
     response.setNextPageToken("");
@@ -200,10 +200,8 @@ public class UserController implements UserApiDelegate {
   }
 
   @Nonnull
-  private Sort getSort(String sortOrder) {
-    Sort.Direction direction =
-        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
-    return Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
+  private static Sort getSort(String sortOrder) {
+    return Sort.by(new Sort.Order(Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC), DEFAULT_SORT_FIELD));
   }
 
   private ResponseEntity<UserResponse> processSearchResults(
