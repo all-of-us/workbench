@@ -11,7 +11,6 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
-import {WorkspaceGuard} from './guards/workspace-guard.service';
 import {NavStore} from './utils/navigation';
 
 
@@ -96,7 +95,6 @@ const routes: Routes = [
           // non-migrated routes go HERE
           {
             path: 'workspaces',
-            canActivateChild: [WorkspaceGuard],
             children: [
               // legacy / duplicated routes go HERE
               {
@@ -369,8 +367,7 @@ const routes: Routes = [
   providers: [
     DisabledGuard,
     RegistrationGuard,
-    SignInGuard,
-    WorkspaceGuard
+    SignInGuard
   ]
 })
 export class AppRoutingModule {
