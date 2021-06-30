@@ -9,16 +9,16 @@
       <column name="institution_tier_requirement_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="requirement_enum" type="ENUM('DOMAIN', 'ACL', 'NONE')">
-        <constraints nullable="false"/>
-      </column>
-      <column name="era_required" type="boolean">
-        <constraints nullable="false"/>
-      </column>
       <column name="institution_id" type="bigint">
         <constraints nullable="false"/>
       </column>
       <column name="access_tier_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="requirement_enum" type="ENUM('DOMAINS', 'ADDRESSES', 'NO_ACCESS')">
+        <constraints nullable="false"/>
+      </column>
+      <column name="era_required" type="boolean">
         <constraints nullable="false"/>
       </column>
     </createTable>
