@@ -179,6 +179,7 @@
   <include file="changelog/db.changelog-167-add-access-module-tables.xml"/>
   <include file="changelog/db.changelog-168-rename-access-module-user-table.xml"/>
   <include file="changelog/db.changelog-169-add-institution-tier-requirement-tables.xml"/>
+  <include file="changelog/db.changelog-170-add-access-tier-id-into-institution-tables.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
