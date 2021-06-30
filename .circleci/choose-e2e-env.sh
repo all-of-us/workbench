@@ -11,7 +11,7 @@ if [[ ! -z $CIRCLE_PULL_REQUEST ]]; then
   # If e2e files are the only files that have changed, update WORKBENCH_ENV to "test"
   if [ $E2E_CHANGED_COUNT -gt 0 ] && [ $E2E_CHANGED_COUNT -eq $CHANGED_COUNT ]; then
     echo "export WORKBENCH_ENV=test" >> $BASH_ENV
-    echo "export USER_NAME=${PUPPETEER_USER_TEST}@fake-research-aou.org" >> $BASH_ENV
+    echo "export USER_NAME=${PUPPETEER_USER_TEST}" >> $BASH_ENV
     source $BASH_ENV
   fi
 fi
