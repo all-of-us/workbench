@@ -1190,9 +1190,9 @@ public class WorkspacesControllerTest extends SpringTest {
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
     verify(fireCloudService, never())
-        .updateBillingAccountAsService(modWorkspace.getNamespace(), anyString());
+        .updateBillingAccountAsService(eq(modWorkspace.getNamespace()), anyString());
     verify(fireCloudService, never())
-        .updateBillingAccount(modWorkspace.getNamespace(), anyString());
+        .updateBillingAccount(eq(modWorkspace.getNamespace()), anyString());
   }
 
   @Test
