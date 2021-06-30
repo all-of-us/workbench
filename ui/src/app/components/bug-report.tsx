@@ -1,7 +1,6 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
-import {ReactWrapperBase, withUserProfile} from 'app/utils';
+import {withUserProfile} from 'app/utils';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -45,17 +44,3 @@ export const BugReportModal = withUserProfile()
   }
 
 });
-
-
-@Component({
-  selector: 'app-bug-report',
-  template: '<div #root></div>'
-})
-export class BugReportComponent extends ReactWrapperBase {
-  @Input('bugReportDescription') bugReportDescription: string;
-  @Input('onClose') onClose: Function;
-  constructor() {
-    super(BugReportModal, ['bugReportDescription', 'onClose']);
-  }
-
-}
