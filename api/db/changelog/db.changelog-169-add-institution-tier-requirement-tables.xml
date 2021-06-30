@@ -16,12 +16,24 @@
         <constraints nullable="false"/>
       </column>
       <column name="institution_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_institution_tier_requirement_institution" references="institution(institution_id)"/>
+        <constraints nullable="false"/>
       </column>
       <column name="access_tier_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_institution_tier_requirement_tier" references="access_tier(access_tier_id)"/>
+        <constraints nullable="false"/>
       </column>
     </createTable>
+    <addForeignKeyConstraint baseColumnNames="institution_id"
+      baseTableName="institution_tier_requirement"
+      constraintName="fk_institution_tier_requirement_institution"
+      onDelete="CASCADE"
+      referencedColumnNames="institution_id"
+      referencedTableName="institution"/>
+    <addForeignKeyConstraint baseColumnNames="access_tier_id"
+      baseTableName="institution_tier_requirement"
+      constraintName="fk_institution_tier_requirement_tier"
+      onDelete="CASCADE"
+      referencedColumnNames="access_tier_id"
+      referencedTableName="access_tier"/>
     <addColumn tableName="user">
       <column name="era_commons_linked_nih_username" type="varchar(255)"/>
       <column name="era_commons_link_expire_time" type="datetime"/>

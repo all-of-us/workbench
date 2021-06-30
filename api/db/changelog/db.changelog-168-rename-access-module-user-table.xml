@@ -11,7 +11,7 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="access_module_id" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_acu_access_module_name" references="access_module(access_module_id)"/>
+        <constraints nullable="false" foreignKeyName="fk_acu_access_module_id" references="access_module(access_module_id)"/>
       </column>
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="fk_acu_user_id" references="user(user_id)"/>
@@ -26,5 +26,11 @@
     <createIndex tableName="user_access_module" indexName="user_access_module_idx" unique="false">
       <column name="user_id"/>
     </createIndex>
+    <addForeignKeyConstraint baseColumnNames="access_module_id"
+      baseTableName="user_access_module"
+      constraintName="fk_acu_access_module_id"
+      onDelete="CASCADE"
+      referencedColumnNames="access_module_id"
+      referencedTableName="access_module"/>
   </changeSet>
 </databaseChangeLog>
