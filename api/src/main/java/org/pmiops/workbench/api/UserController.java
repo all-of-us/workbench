@@ -4,6 +4,7 @@ import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLI
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Collections;
@@ -96,7 +97,7 @@ public class UserController implements UserApiDelegate {
       String term, String pageToken, Integer pageSize, String sortOrder) {
     UserResponse response = initializeUserResponse();
 
-    if (null == term || term.isEmpty()) {
+    if (Strings.isNullOrEmpty(term)) {
       return ResponseEntity.ok(response);
     }
 
@@ -151,7 +152,7 @@ public class UserController implements UserApiDelegate {
       String sortOrder) {
     UserResponse response = initializeUserResponse();
 
-    if (null == term || term.isEmpty()) {
+    if (Strings.isNullOrEmpty(term)) {
       return ResponseEntity.ok(response);
     }
 
