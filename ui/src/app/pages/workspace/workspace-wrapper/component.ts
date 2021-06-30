@@ -54,32 +54,33 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
     // this.tabPath = this.getTabPath();
     // this.setPageKey();
-    this.subscriptions.push(
-      this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe((e: RouterEvent) => {
-          // this.tabPath = this.getTabPath();
-          // this.setPageKey();
-          // Close sidebar on route change unless navigating between participants in cohort review
-          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
-          // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
-          // We can probably clean this up after we fully migrate to React router
-          if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
-            setSidebarActiveIconStore.next(null);
-          }
-        }));
+    // this.subscriptions.push(
+    //   this.router.events.filter(event => event instanceof NavigationEnd)
+    //     .subscribe((e: RouterEvent) => {
+    //       // this.tabPath = this.getTabPath();
+    //       // this.setPageKey();
+    //       // Close sidebar on route change unless navigating between participants in cohort review
+    //       // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
+    //       // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
+    //       // We can probably clean this up after we fully migrate to React router
+    //       if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
+    //         setSidebarActiveIconStore.next(null);
+    //       }
+    //     }));
     // this.subscriptions.push(routeConfigDataStore.subscribe((data) => {
     //   // ROUTER MIGRATION: Prevent dueling route configs during react transition - only apply minimizeChrome if there is route data
     //   if (!fp.isEqual(data, {})) {
     //     this.displayNavBar = !data.minimizeChrome;
     //   }
     // }));
-    this.subscriptions.push(urlParamsStore
-      .map(({ns, wsid}) => ({ns, wsid}))
-      .subscribe(({ns, wsid}) => {
-        if (ns !== null && wsid !== null) {
-          workspacesApi().updateRecentWorkspaces(ns, wsid);
-        }
-      }));
+    // this.subscriptions.push(urlParamsStore
+    //   .map(({ns, wsid}) => ({ns, wsid}))
+    //   .debounceTime(1000)
+    //   .subscribe(({ns, wsid}) => {
+    //     if (ns !== null && wsid !== null) {
+    //       workspacesApi().updateRecentWorkspaces(ns, wsid);
+    //     }
+    //   }));
 
     // this.subscriptions.push(urlParamsStore
     //   .map(({ns, wsid}) => ({ns, wsid}))

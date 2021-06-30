@@ -22,6 +22,7 @@ export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
   console.log(routeData)
   const params = useParams();
   urlParamsStore.next(params);
+  console.log(params);
   routeConfigDataStore.next(routeData);
   routeDataStore.set(routeData);
   return <WrappedComponent {...props}/>;

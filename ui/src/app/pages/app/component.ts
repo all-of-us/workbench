@@ -18,7 +18,7 @@ import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   queryParamsStore,
-  routeConfigDataStore
+  routeConfigDataStore, setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
@@ -40,6 +40,8 @@ export class AppComponent implements OnInit {
   cookiesEnabled = true;
   overriddenUrl: string = null;
   pollAborter = new AbortController();
+
+  private subscriptions = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -86,7 +88,7 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(buildPageTitleForEnvironment());
     }
 
-    this.router.events.subscribe((e: RouterEvent) => {
+    this.subscriptions.push(this.router.events.subscribe((e: RouterEvent) => {
       this.setTitleFromRoute(e);
       if (e instanceof NavigationEnd || e instanceof NavigationError) {
         // Terminal navigation events.
@@ -102,28 +104,65 @@ export class AppComponent implements OnInit {
         console.log(routeConfig.data);
         routeConfigDataStore.next(routeConfig.data);
       }
-    });
+    }));
 
-    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+    this.subscriptions.push(routeDataStore.subscribe(({title, pathElementForTitle}) => {
       this.zone.run(() => {
         this.setTitleFromReactRoute({title, pathElementForTitle});
         this.initialSpinner = false;
       });
-    });
+    }));
 
-    urlParamsStore
+    this.subscriptions.push(
+      this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe((e: RouterEvent) => {
+          console.log(e);
+          // this.tabPath = this.getTabPath();
+          // this.setPageKey();
+          // Close sidebar on route change unless navigating between participants in cohort review
+          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
+          // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
+          // We can probably clean this up after we fully migrate to React router
+          if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
+            setSidebarActiveIconStore.next(null);
+          }
+        }));
+
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
+      // due to urlParamsStore being updates multiple times while rendering a route.
+      // What we really want to subscribe to here is an event that triggers on navigation start or end
+      // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
+      // since multiple update recent workspace requests (from the same page) within the span of 1 second should
+      // almost always be for the same workspace and extremely rarely for different workspaces
+      .subscribe(({ns, wsid}) => {
+        console.log('Update Recent Workspace sub');
+        console.log(ns + ', ' + wsid);
+        if (ns && wsid) {
+          workspacesApi().updateRecentWorkspaces(ns, wsid);
+        }
+      }));
+
+    this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged((x,y) => {
+        console.log('distinctUntilChanged');
+        console.log(x);
+        console.log(y);
         console.log(fp.isEqual(x)(y));
         return fp.isEqual(x)(y);
       })
       .switchMap(({ns, wsid}) => {
+        console.log('In switchMap: ' + ns + " " + wsid);
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
         if (ns === undefined || wsid === undefined) {
           return Promise.resolve(null);
         }
+
+//        workspacesApi().updateRecentWorkspaces(ns, wsid);
 
         // In a handful of situations - namely on workspace creation/clone,
         // the application will preload the next workspace to avoid a redundant
@@ -175,7 +214,9 @@ export class AppComponent implements OnInit {
             throw e;
           }
         }
-      });
+      })
+    );
+
 
     initializeAnalytics();
   }
@@ -251,6 +292,12 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  ngOnDestroy() {
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   private async loadConfig() {
