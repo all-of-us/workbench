@@ -155,11 +155,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   private getTabPath(): string {
+    console.log(this.route);
     const child = this.route.firstChild;
     if (!child) {
       return '';
     }
     const path = child.routeConfig.path;
+    console.log(this.route.firstChild.routeConfig);
     if (!path.includes('/')) {
       return path;
     }

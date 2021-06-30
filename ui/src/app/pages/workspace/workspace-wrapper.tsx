@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
-import {useParams} from 'react-router-dom';
+import {useLocation, useParams} from 'react-router-dom';
 import {AppRoutingComponent} from '../../app-routing';
 import {AppRoute, withRouteData} from '../../components/app-router';
 import {FlexRow} from '../../components/flex';
@@ -28,9 +28,12 @@ const NavBar = fp.flow(
 )(({routeConfigData}) => {
   console.log("ASDJASOIDJSAOJDASOIDJAOSIDJOIASJDOAISJDOIAJDOISAJDOIASJDOIAJDOIASDJOIASJDOAISD");
   console.log(routeConfigData);
+  const location = useLocation();
+
+  console.log(location);
 
   return <React.Fragment>
-    {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact/>}
+    {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
   </React.Fragment>;
 });
 

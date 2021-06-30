@@ -111,6 +111,7 @@ export const WorkspaceRoutes = () => {
         routeData={{
           title: 'View Workspace Details',
           breadcrumb: BreadcrumbType.Workspace,
+          workspaceNavBarTab: 'about',
           pageKey: 'about'
         }}
       />}
@@ -142,6 +143,7 @@ export const WorkspaceRoutes = () => {
       component={() => <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
+        workspaceNavBarTab: 'notebooks',
         breadcrumb: BreadcrumbType.Workspace
       }}/>}
     />
@@ -151,6 +153,7 @@ export const WorkspaceRoutes = () => {
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
         pageKey: NOTEBOOK_PAGE_KEY,
+        workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>}
     />
@@ -164,6 +167,7 @@ export const WorkspaceRoutes = () => {
         // Setting this flag sets the container to 100% so that no content is clipped.
         contentFullHeightOverride: true,
         pageKey: NOTEBOOK_PAGE_KEY,
+        workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>}
     />
@@ -172,6 +176,7 @@ export const WorkspaceRoutes = () => {
       component={() => <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
+        workspaceNavBarTab: 'data',
         pageKey: 'data'
       }}/>}
     />
@@ -180,6 +185,7 @@ export const WorkspaceRoutes = () => {
       component={() => <DataSetComponentPage routeData={{
         title: 'Dataset Page',
         breadcrumb: BreadcrumbType.Dataset,
+        workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>}
     />
@@ -188,6 +194,7 @@ export const WorkspaceRoutes = () => {
       component={() => <DataSetComponentPage routeData={{
         title: 'Edit Dataset',
         breadcrumb: BreadcrumbType.Dataset,
+        workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>}
     />
@@ -196,6 +203,7 @@ export const WorkspaceRoutes = () => {
       component={() => <CohortPagePage routeData={{
         title: 'Build Cohort Criteria',
         breadcrumb: BreadcrumbType.CohortAdd,
+        workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>}
     />
@@ -204,6 +212,7 @@ export const WorkspaceRoutes = () => {
       component={() => <CohortActionsPage routeData={{
         title: 'Cohort Actions',
         breadcrumb: BreadcrumbType.Cohort,
+        workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>}
     />
@@ -212,6 +221,7 @@ export const WorkspaceRoutes = () => {
       component={() => <ParticipantsTablePage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
+        workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>}
     />
@@ -220,6 +230,7 @@ export const WorkspaceRoutes = () => {
       component={() => <DetailPagePage routeData={{
         title: 'Participant Detail',
         breadcrumb: BreadcrumbType.Participant,
+        workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipantDetail'
       }}/>}
     />
@@ -228,6 +239,7 @@ export const WorkspaceRoutes = () => {
       component={() => <QueryReportPage routeData={{
         title: 'Review Cohort Description',
         breadcrumb: BreadcrumbType.Cohort,
+        workspaceNavBarTab: 'data',
         pageKey: 'cohortDescription'
       }}/>}
     />
@@ -236,6 +248,7 @@ export const WorkspaceRoutes = () => {
       component={() => <CohortReviewPage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
+        workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>}
     />
@@ -244,6 +257,7 @@ export const WorkspaceRoutes = () => {
       component={() => <ConceptHomepagePage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
+        workspaceNavBarTab: 'data',
         pageKey: 'searchConceptSets'
       }}/>}
     />
@@ -252,6 +266,7 @@ export const WorkspaceRoutes = () => {
       component={() => <ConceptSearchPage routeData={{
         title: 'Concept Set',
         breadcrumb: BreadcrumbType.ConceptSet,
+        workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>}
     />
@@ -260,6 +275,7 @@ export const WorkspaceRoutes = () => {
       component={() => <ConceptSearchPage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
+        workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>}
     />
@@ -268,6 +284,7 @@ export const WorkspaceRoutes = () => {
       component={() => <ConceptSetActionsPage routeData={{
         title: 'Concept Set Actions',
         breadcrumb: BreadcrumbType.ConceptSet,
+        workspaceNavBarTab: 'data',
         pageKey: 'conceptSetActions'
       }}/>}
     />
