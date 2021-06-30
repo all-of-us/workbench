@@ -87,6 +87,8 @@ public class UserController implements UserApiDelegate {
    * @param pageSize
    * @param sortOrder
    * @return
+   * @deprecated use {@link #userSearch(String, String, String, Integer, String)} with an access
+   *     tier short name argument instead.
    */
   @Override
   @Deprecated
