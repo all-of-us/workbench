@@ -2,6 +2,7 @@ package org.pmiops.workbench.mail;
 
 // used by MailServiceImpl to make template substitutions
 public enum EmailSubstitutionField {
+  ALL_OF_US("ALL_OF_US"),
   USERNAME("USERNAME"),
   PASSWORD("PASSWORD"),
   URL("URL"),
