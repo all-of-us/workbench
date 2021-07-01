@@ -1,11 +1,11 @@
-import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
+  RouterEvent,
   NavigationEnd,
   NavigationError,
   Router,
-  RouterEvent,
 } from '@angular/router';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
@@ -25,10 +25,10 @@ import {
 import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
-import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from 'app/components/help-sidebar';
 import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import outdatedBrowserRework from 'outdated-browser-rework';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from "app/components/help-sidebar";
 
 @Component({
   selector: 'app-aou',
@@ -36,7 +36,7 @@ import outdatedBrowserRework from 'outdated-browser-rework';
     '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   isSignedIn = false;
   initialSpinner = true;
   cookiesEnabled = true;

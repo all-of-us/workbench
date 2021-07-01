@@ -14,6 +14,7 @@ import * as moment from 'moment';
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
+import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
@@ -280,6 +281,7 @@ export const HelpSidebar = fp.flow(
     }
 
     subscriptions = [];
+    private loadLastSavedKey: () => void;
 
     deleteWorkspace = withErrorModal({
       title: 'Error Deleting Workspace',

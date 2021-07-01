@@ -11,7 +11,7 @@ import {
   withRouteConfigData,
   withUrlParams
 } from 'app/utils';
-import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed, routeConfigDataStore} from 'app/utils/navigation';
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, ConceptSet} from 'generated/fetch';
