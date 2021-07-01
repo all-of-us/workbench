@@ -8,6 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {Profile, Workspace} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   tableStyle: {
@@ -20,7 +21,15 @@ const styles = reactStyles({
   }
 });
 
-export interface State {
+interface Props extends WithSpinnerOverlayProps {
+  profileState: {
+    profile: Profile,
+    reload: Function,
+    updateCache: Function
+  }
+}
+
+interface State {
   contentLoaded: boolean;
   fetchingWorkspaceError: boolean;
   reviewError: boolean;
@@ -32,8 +41,7 @@ export interface State {
  * Review Workspaces. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
-export const AdminReviewWorkspace = withUserProfile()(class extends React.Component<
-  {profileState: {profile: Profile, reload: Function, updateCache: Function}}, State> {
+export const AdminReviewWorkspace = withUserProfile()(class extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
@@ -48,6 +56,7 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     try {
       const resp = await workspacesApi().getWorkspacesForReview();
       this.setState({workspaces: resp.items, contentLoaded: true});

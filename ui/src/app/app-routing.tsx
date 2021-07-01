@@ -75,7 +75,7 @@ const withRoutingSpinner = withSpinnerOverlay(
 
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
-const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
 const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);

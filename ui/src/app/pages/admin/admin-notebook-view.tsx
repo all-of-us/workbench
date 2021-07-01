@@ -6,7 +6,7 @@ import {reactRouterUrlSearchParams} from 'app/utils/navigation';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router';
-import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   heading: {
