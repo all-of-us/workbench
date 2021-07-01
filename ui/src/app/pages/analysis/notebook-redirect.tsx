@@ -28,6 +28,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export enum Progress {
   Unknown,
@@ -211,7 +212,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -296,6 +297,9 @@ export const NotebookRedirect = fp.flow(
       }));
     }
 
+    componentDidMount() {
+      this.props.hideSpinner();
+    }
 
     componentDidUpdate(prevProps: Props) {
       const {runtimeStore: {runtime}, workspace} = this.props;
