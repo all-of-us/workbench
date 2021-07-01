@@ -400,8 +400,9 @@ export async function waitWhileLoading(
     logger.error(`Failed wait for spinner stop: xpath="${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
-      // Puppeteer can throw following exception when polling for mutation status if object has disappeared in DOM.
-      //   Error: Protocol error (Runtime.callFunctionOn): Target closed.
+      // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
+      //   or page navigation happened.
+      // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
       throw err;
