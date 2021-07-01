@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -282,6 +283,56 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     ProxyApi proxyApi = proxyApiProvider.get();
     return notebooksRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
+  }
+
+  @Override
+  public void createPersistentDisk(Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) throws WorkbenchException {
+    RuntimesApi runtimesApi = runtimesApiProvider.get();
+
+    DbUser user = userProvider.get();
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
+    Map<String, String> customEnvironmentVariables = new HashMap<>();
+    // i.e. is NEW or MIGRATED
+    if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
+      customEnvironmentVariables.put(
+              WORKSPACE_CDR_ENV_KEY,
+              cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
+    }
+
+    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
+      customEnvironmentVariables.put(
+              ALL_SAMPLES_WGS_KEY,
+              cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+                      + "/"
+                      + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
+    }
+
+    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
+      customEnvironmentVariables.put(
+              SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
+              cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+                      + "/"
+                      + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
+    }
+
+    // See RW-6079
+    customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
+
+    leonardoRetryHandler.run(
+            (context) -> {
+              runtimesApi.createRuntime(
+                      runtime.getGoogleProject(),
+                      runtime.getRuntimeName(),
+                      buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
+              return null;
+            });
+
+  }
+
+  @Override
+  public LeonardoGetRuntimeResponse getPersistentDisk(String googleProject, String runtimeName) throws WorkbenchException {
+    return null;
   }
 
   @Override

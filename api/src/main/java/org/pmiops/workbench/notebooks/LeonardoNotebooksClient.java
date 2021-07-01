@@ -50,6 +50,12 @@ public interface LeonardoNotebooksClient {
   /** Create a new data synchronization Welder storage link on a runtime. */
   StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
 
+  void createPersistentDisk(Runtime runtime, String workspaceNamespace, String workspaceFirecloudName)
+          throws WorkbenchException;
+
+  LeonardoGetRuntimeResponse getPersistentDisk(String googleProject, String runtimeName)
+          throws WorkbenchException;
+
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
 }
