@@ -27,6 +27,7 @@ import {
 import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 
@@ -51,7 +52,7 @@ function colStyle(percentage: string) {
   } as React.CSSProperties;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortContext: any;
   workspace: WorkspaceData;
 }
@@ -100,7 +101,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentDidMount() {
-      const {workspace: {id}} = this.props;
+      const {workspace: {id}, hideSpinner} = this.props;
+      hideSpinner();
       this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
