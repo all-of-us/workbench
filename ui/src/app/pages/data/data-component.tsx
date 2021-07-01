@@ -14,6 +14,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = {
   cardButtonArea: {
@@ -78,8 +79,12 @@ const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
+interface Props extends WithSpinnerOverlayProps {
+  workspace: WorkspaceData
+}
+
 export const DataComponent = withCurrentWorkspace()(class extends React.Component<
-  {workspace: WorkspaceData},
+  Props,
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
     creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
     existingCohortReviewName: string[], existingConceptSetName: string[]}> {
@@ -99,6 +104,7 @@ export const DataComponent = withCurrentWorkspace()(class extends React.Componen
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.loadResources();
   }
 
