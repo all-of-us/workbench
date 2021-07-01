@@ -3,6 +3,8 @@ import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceAuditLogQueryResponse} from 'generated/fetch';
 import * as React from 'react';
 import {useParams} from 'react-router';
+import {useEffect} from "react";
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const getAuditLog = (subject: string) => {
   // Workspace actions take up many rows because of the Research Purpose fields
@@ -30,7 +32,11 @@ const getAdminPageUrl = (subject: string) => {
   return [`/admin/workspaces/${subject}`];
 };
 
-export const WorkspaceAudit = () => {
+export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => {
+    spinnerProps.hideSpinner();
+  }, [spinnerProps.spinnerVisible]);
+
   const {workspaceNamespace = ''} = useParams<{workspaceNamespace: string}>();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
