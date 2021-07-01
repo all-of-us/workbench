@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {withRouteData} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -128,8 +127,7 @@ const getControlledTierContent = fp.flow(
   getCompleteOrBypassContent
 );
 
-export const ProfilePage = fp.flow(
-  withRouteData,
+export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal
   )(class extends React.Component<

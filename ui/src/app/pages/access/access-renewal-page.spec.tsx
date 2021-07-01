@@ -9,7 +9,7 @@ import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
+import {AccessRenewal} from 'app/pages/access/access-renewal-page';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 const EXPIRY_DAYS = 365
@@ -65,7 +65,7 @@ describe('Access Renewal Page', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = () => {
-    return mount(<AccessRenewalPage/>);
+    return mount(<AccessRenewal/>);
   };
 
   const load = jest.fn();

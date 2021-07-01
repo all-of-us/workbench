@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {withRouteData} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -209,8 +208,7 @@ const RenewalCard = withStyle(renewalStyle.card)(
 
 
 // Page to render
-export const AccessRenewalPage = fp.flow(
-  withRouteData,
+export const AccessRenewal = fp.flow(
   withProfileErrorModal
 )(() => {
   // State

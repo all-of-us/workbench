@@ -1,6 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
+import {AccessRenewal} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -27,7 +27,7 @@ import {AdminWorkspace} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
-import {ProfilePage} from './pages/profile/profile-page';
+import {ProfileComponent} from './pages/profile/profile-page';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
@@ -52,6 +52,8 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
+const AccessRenewalPage = withRouteData(AccessRenewal);
+const ProfilePage = withRouteData(ProfileComponent);
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);

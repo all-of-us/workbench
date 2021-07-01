@@ -20,6 +20,7 @@ export const usePath = () => {
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
+  console.log('using params');
 
   if (!intermediaryRoute) {
     urlParamsStore.next(params);
