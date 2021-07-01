@@ -106,7 +106,7 @@ const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceA
 const WorkspaceAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspace);
 const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAudit);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
-const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
+const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
 const WorkspaceListPage = withRouteData(WorkspaceList);
 const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 

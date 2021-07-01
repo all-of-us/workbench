@@ -14,6 +14,7 @@ import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
 import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   navPanel: {
@@ -119,11 +120,11 @@ interface CurrentTab {
   title: string;
 }
 
-class Props {
+interface Props extends WithSpinnerOverlayProps {
   enablePublishedWorkspaces: boolean;
 }
 
-class State {
+interface State {
   currentTab: CurrentTab;
   errorText: string;
   workspaceList: WorkspacePermissions[];
@@ -162,6 +163,7 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
     ];
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.updateWorkspaces();
   }
 
