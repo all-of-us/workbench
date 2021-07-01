@@ -167,12 +167,6 @@ export const Breadcrumb = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      console.log(prevProps.urlParams);
-      console.log(this.props.urlParams);
-      console.log(prevProps.urlParams === this.props.urlParams);
-
-      console.log(this.props.routeConfigData === prevProps.routeConfigData);
-      console.log(this.props.reactRouteData === prevProps.reactRouteData);
       if (!prevProps.workspace && this.props.workspace &&
         this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
         this.setState({showInvalidBillingBanner: true});
@@ -205,8 +199,6 @@ export const Breadcrumb = fp.flow(
     }
 
     render() {
-      console.log("Rendering Breadcrumb");
-
       return <React.Fragment>
         {this.state.showInvalidBillingBanner &&
         <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}

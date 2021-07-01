@@ -249,8 +249,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               exact={false}
               component={() => <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>}
           />
-
-
         </ProtectedRoutes>
       </ProtectedRoutes>
     </AppRouter>

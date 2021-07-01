@@ -18,15 +18,17 @@ import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   queryParamsStore,
-  routeConfigDataStore, setSidebarActiveIconStore, urlParamsStore
+  routeConfigDataStore,
+  setSidebarActiveIconStore,
+  urlParamsStore
 } from 'app/utils/navigation';
 import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {ExceededActionCountError, LeoRuntimeInitializer} from '../../utils/leo-runtime-initializer';
-import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from "../../components/help-sidebar";
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from "app/components/help-sidebar";
 
 @Component({
   selector: 'app-aou',
@@ -56,8 +58,6 @@ export class AppComponent implements OnInit {
     this.checkBrowserSupport();
     await this.loadConfig();
     this.loadErrorReporter();
-
-    setSidebarActiveIconStore.next(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -98,12 +98,8 @@ export class AppComponent implements OnInit {
       }
       if (e instanceof NavigationEnd) {
         const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
-        console.log('This is where the params are coming from');
-        console.log(params);
         urlParamsStore.next(params);
-        console.log(queryParams);
         queryParamsStore.next(queryParams);
-        console.log(routeConfig.data);
         routeConfigDataStore.next(routeConfig.data);
       }
     }));
@@ -115,26 +111,16 @@ export class AppComponent implements OnInit {
       });
     }));
 
+
+    // TODO angular2react: this active icon stuff can move into help-sidebar once it reaches a state where it
+    // doesn't remount on every navigation event
+    setSidebarActiveIconStore.next(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+
     this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
       if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
         setSidebarActiveIconStore.next(null);
       }
     }));
-
-    // this.subscriptions.push(
-    //   this.router.events.filter(event => event instanceof NavigationEnd)
-    //     .subscribe((e: RouterEvent) => {
-    //       console.log(e);
-    //       // this.tabPath = this.getTabPath();
-    //       // this.setPageKey();
-    //       // Close sidebar on route change unless navigating between participants in cohort review
-    //       // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
-    //       // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
-    //       // We can probably clean this up after we fully migrate to React router
-    //       if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
-    //         setSidebarActiveIconStore.next(null);
-    //       }
-    //     }));
 
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
@@ -145,8 +131,6 @@ export class AppComponent implements OnInit {
       // since multiple update recent workspace requests (from the same page) within the span of 1 second should
       // almost always be for the same workspace and extremely rarely for different workspaces
       .subscribe(({ns, wsid}) => {
-        console.log('Update Recent Workspace sub');
-        console.log(ns + ', ' + wsid);
         if (ns && wsid) {
           workspacesApi().updateRecentWorkspaces(ns, wsid);
         }
@@ -154,15 +138,8 @@ export class AppComponent implements OnInit {
 
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
-      .distinctUntilChanged((x,y) => {
-        console.log('distinctUntilChanged');
-        console.log(x);
-        console.log(y);
-        console.log(fp.isEqual(x)(y));
-        return fp.isEqual(x)(y);
-      })
+      .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid}) => {
-        console.log('In switchMap: ' + ns + " " + wsid);
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
@@ -170,15 +147,12 @@ export class AppComponent implements OnInit {
           return Promise.resolve(null);
         }
 
-//        workspacesApi().updateRecentWorkspaces(ns, wsid);
-
         // In a handful of situations - namely on workspace creation/clone,
         // the application will preload the next workspace to avoid a redundant
         // refetch here.
         const nextWs = nextWorkspaceWarmupStore.getValue();
         nextWorkspaceWarmupStore.next(undefined);
         if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-          console.log("Resolving from the next workspace store");
           return Promise.resolve(nextWs);
         }
         return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
@@ -189,22 +163,15 @@ export class AppComponent implements OnInit {
         });
       })
       .subscribe(async(workspace) => {
-        console.log(workspace);
         if (workspace === null) {
           // This handles the empty urlParamsStore story.
           return;
         }
-        console.log('setting store through url params');
         currentWorkspaceStore.next(workspace);
-        console.log('setting store through url params - 1');
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-        console.log('setting store through url params - 2');
         this.pollAborter.abort();
-        console.log('setting store through url params - 3');
         this.pollAborter = new AbortController();
-        console.log('setting store through url params - 4');
         try {
-          console.log('setting store through url params - 5');
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: workspace.namespace,
             pollAbortSignal: this.pollAborter.signal,
@@ -212,9 +179,7 @@ export class AppComponent implements OnInit {
             maxDeleteCount: 0,
             maxResumeCount: 0
           });
-          console.log('setting store through url params - 6');
         } catch (e) {
-          console.log('setting store through url params - 7');
           // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
           // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
           // initialization here.

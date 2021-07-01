@@ -10,7 +10,7 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
-import {urlParamsStore} from "../../../utils/navigation";
+import {urlParamsStore} from "app/utils/navigation";
 
 interface Props {
   workspace: WorkspaceData;

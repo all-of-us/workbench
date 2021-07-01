@@ -16,6 +16,8 @@ export const usePath = () => {
   return path;
 };
 
+// TODO angular2react: I don't think this is really the right place to be making the store updates but it's the
+// best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
 
@@ -50,8 +52,7 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
   const routeParams = useParams();
   const routeHistory = useHistory();
 
-  console.log("Rendering AppRoute: " + path);
-  return <Route exact={exact} path={path} component={
+  return <Route exact={exact} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
       return redirectPath

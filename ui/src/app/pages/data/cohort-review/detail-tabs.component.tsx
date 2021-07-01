@@ -14,7 +14,7 @@ import {Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-import {urlParamsStore} from "../../../utils/navigation";
+import {urlParamsStore} from "app/utils/navigation";
 
 const styles = reactStyles({
   container: {

@@ -401,26 +401,6 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
-      // const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-      //
-      // // This is a little hacky but it's necessary because
-      // // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
-      // // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
-      // //    and overwrite the value stored in localStorage key so we need to "save" it here
-      // // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
-      // this.loadLastSavedKey = (() => {
-      //   let loadedLastSavedKey = false;
-      //   return () => {
-      //     if (!loadedLastSavedKey && this.props.pageKey) {
-      //       const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
-      //       setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
-      //       loadedLastSavedKey = true;
-      //     }
-      //   };
-      // })();
-      //
-      // this.loadLastSavedKey();
-
       // This is being set here instead of in the constructor since I like showing the opening animation of the side
       // panel to show the user that it's something they can close.
       this.setActiveIcon(setSidebarActiveIconStore.getValue());
@@ -433,11 +413,7 @@ export const HelpSidebar = fp.flow(
           localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
         }
       }));
-      console.log("Creating route data store sub")
       this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
-        console.log("Should route close?")
-        console.log(newRoute);
-        console.log(oldRoute);
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -453,16 +429,13 @@ export const HelpSidebar = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      // this.loadLastSavedKey();
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.setActiveIcon(null);
       }
     }
 
     componentWillUnmount(): void {
-      console.log("subscriber is unsubbing");
       this.subscriptions.forEach(sub => sub.unsubscribe());
-//      this.subscription.unsubscribe();
     }
 
     onIconClick(icon: IconConfig) {
@@ -826,8 +799,6 @@ export const HelpSidebar = fp.flow(
       const {activeIcon} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
-
-      console.log('rendering help bar');
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>

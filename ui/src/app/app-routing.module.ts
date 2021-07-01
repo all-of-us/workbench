@@ -7,8 +7,6 @@ import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {SignedInComponent} from './pages/signed-in/component';
-import { WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
-import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
@@ -379,7 +377,6 @@ export class AppRoutingModule {
 
   constructor(public router: Router) {
     NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
-
     NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
