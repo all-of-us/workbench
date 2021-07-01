@@ -22,6 +22,7 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const css = `
   .stats-left-padding {
@@ -184,7 +185,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportProps {
+export interface QueryReportProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
 }
@@ -214,7 +215,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     async componentDidMount() {
-      const {cdrVersionTiersResponse, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionTiersResponse, workspace: {cdrVersionId}, hideSpinner} = this.props;
+      hideSpinner();
       const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       let request: SearchRequest;
