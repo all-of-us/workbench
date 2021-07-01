@@ -71,7 +71,7 @@ export const WorkspaceWrapper = fp.flow(
   console.log(workspace);
 
   return <React.Fragment>
-    {workspace
+    {workspace && routeConfigData
         ? <React.Fragment>
           {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
           <HelpSidebar pageKey={routeConfigData.pageKey}/>
