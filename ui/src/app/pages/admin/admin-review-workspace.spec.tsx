@@ -11,7 +11,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('AdminReviewWorkspace', () => {
-  let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}, spinnerVisible: false};
+  let props: {profile: Profile, hideSpinner: Function, showSpinner: Function, spinnerVisible: boolean};
 
   const component = () => {
     return mount(<AdminReviewWorkspace {...props}/>);
@@ -26,8 +26,10 @@ describe('AdminReviewWorkspace', () => {
       enableEraCommons: true,
     }});
     props = {
-      ...props,
-      profile: ProfileStubVariables.PROFILE_STUB
+      profile: ProfileStubVariables.PROFILE_STUB,
+      hideSpinner: () => {},
+      showSpinner: () => {},
+      spinnerVisible: false
     };
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());

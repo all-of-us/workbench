@@ -33,16 +33,22 @@ describe('DataPage', () => {
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
   });
+  
+  const component = () => {
+    return mount(<DataComponent hideSpinner={() => {}}
+                                showSpinner={() => {}}
+                                spinnerVisible={false}/>);
+  }
 
   it('should render', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it('should show all datasets, cohorts, and concept sets', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     const resourceCardsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
@@ -54,7 +60,7 @@ describe('DataPage', () => {
   });
 
   it('should show only cohorts when selected', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     const resourceCardsExpected = exampleCohortStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -64,7 +70,7 @@ describe('DataPage', () => {
   });
 
   it('should show only cohort reviews when selected', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     const resourceCardsExpected = cohortReviewStubs.length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -74,7 +80,7 @@ describe('DataPage', () => {
   });
 
   it('should show only conceptSets when selected', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     const resourceCardsExpected = ConceptSetsApiStub.stubConceptSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -84,7 +90,7 @@ describe('DataPage', () => {
   });
 
   it('should show only dataSets when selected', async() => {
-    const wrapper = mount(<DataComponent />);
+    const wrapper = component();
     const resourceCardsExpected = DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);

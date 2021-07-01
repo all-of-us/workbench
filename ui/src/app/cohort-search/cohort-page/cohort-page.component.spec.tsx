@@ -20,15 +20,26 @@ describe('CohortPage', () => {
     registerApiClient(CohortsApi, new CohortsApiStub());
   });
 
+  const component = () => {
+    return mount(<CohortPage
+        setCohortChanged={() => {}}
+        setShowWarningModal={() => {}}
+        setUpdatingCohort={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+        spinnerVisible={false}
+    />);
+  }
+
   it('should render', () => {
-    const wrapper = mount(<CohortPage setCohortChanged={() => {}} setShowWarningModal={() => {}} setUpdatingCohort={() => {}}/>);
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should render one search group for each includes/excludes item', async() => {
     const mockGetCohort = jest.spyOn(cohortsApi(), 'getCohort');
     const {id, namespace} = workspaceDataStub;
-    const wrapper = mount(<CohortPage setCohortChanged={() => {}} setShowWarningModal={() => {}} setUpdatingCohort={() => {}}/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(mockGetCohort).toHaveBeenCalledTimes(0);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(0);
