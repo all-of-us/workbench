@@ -10,7 +10,7 @@ import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
 describe('AdminUser', () => {
-  let props: {profile: Profile};
+  let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}, spinnerVisible: false};
 
   const component = () => {
     return mount(<AdminUsers {...props}/>);
@@ -25,6 +25,7 @@ describe('AdminUser', () => {
       enableEraCommons: true,
     }});
     props = {
+      ...props,
       profile: ProfileStubVariables.PROFILE_STUB
     };
     registerApiClient(ProfileApi, new ProfileApiStub());

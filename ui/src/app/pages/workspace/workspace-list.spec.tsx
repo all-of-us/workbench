@@ -27,8 +27,14 @@ describe('WorkspaceList', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
+  const props = {
+    hideSpinner: () => {},
+    showSpinner: () => {},
+    spinnerVisible: false
+  };
+
   const component = () => {
-    return mount(<WorkspaceList/>, {attachTo: document.getElementById('root')});
+    return mount(<WorkspaceList {...props}/>, {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {

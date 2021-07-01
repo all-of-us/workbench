@@ -25,6 +25,15 @@ function searchTable(searchTerm: string, wrapper) {
 
 const defaultSearchTerm = 'test';
 
+const component = () => {
+  return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                setShowUnsavedModal={() => {}}
+                                setUnsavedConceptChanges={() => {}}
+                                hideSpinner={() => {}}
+                                showSpinner={() => {}}
+                                spinnerVisible={false}/>);
+}
+
 describe('ConceptHomepage', () => {
 
   beforeEach(() => {
@@ -35,25 +44,19 @@ describe('ConceptHomepage', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                           setShowUnsavedModal={() => {}}
-                                           setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should have one card per domain.', async() => {
-    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                           setShowUnsavedModal={() => {}}
-                                           setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
   });
 
   it('should have one card per survey.', async() => {
-    const wrapper = mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                           setShowUnsavedModal={() => {}}
-                                           setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="survey-box-name"]').length)
       .toBe(SurveyStubVariables.STUB_SURVEYS.length);

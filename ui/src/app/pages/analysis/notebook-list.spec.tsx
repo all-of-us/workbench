@@ -18,7 +18,7 @@ describe('NotebookList', () => {
 
   it('should render notebooks', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
-    const wrapper = mount(<NotebookList />);
+    const wrapper = mount(<NotebookList hideSpinner={() => {}} />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.text()).toMatch('mockFile');
   });

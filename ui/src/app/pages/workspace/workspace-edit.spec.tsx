@@ -52,7 +52,7 @@ describe('WorkspaceEdit', () => {
   let workspaceEditMode: WorkspaceEditMode;
 
   const component = () => {
-    return mount(<WorkspaceEdit cancel={() => {}} workspaceEditMode={workspaceEditMode}/>);
+    return mount(<WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false} workspaceEditMode={workspaceEditMode}/>);
   };
 
   beforeEach(async () => {

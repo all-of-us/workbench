@@ -22,7 +22,7 @@ describe('CohortReview', () => {
   });
 
   it('should render CohortReview', () => {
-    const wrapper = shallow(<CohortReview />);
+    const wrapper = shallow(<CohortReview hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false}/>);
     expect(wrapper.exists()).toBeTruthy();
   });
 });

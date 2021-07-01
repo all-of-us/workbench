@@ -31,7 +31,10 @@ describe('SignInReact', () => {
     props = {
       onSignIn: () => {},
       signIn: signIn,
-      windowSize: {width: 1700, height: 0}
+      windowSize: {width: 1700, height: 0},
+      hideSpinner: () => {},
+      showSpinner: () => {},
+      spinnerVisible: false
     };
   });
 
