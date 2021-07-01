@@ -60,7 +60,6 @@ import {FooterComponent} from './components/footer';
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceWrapperComponent,
-//    ReactWorkspaceWrapperComponent
   ],
   providers: [
     SignInService,

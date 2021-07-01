@@ -112,14 +112,14 @@ const routes: Routes = [
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
+                 *
+                 * TODO angular2react: ideally, we should be able to just render the AppComponent here and let
+                 *  React drive the rest of the routing but the BrowserRouter isn't able to pick up changes to the
+                 *  route when it's embedded in Angular this way.. Until angular router is removed, we still need to
+                 *  declare all of our routes in Angular which has the side effect of forcing a rerender of the
+                 *  AppRouting component on every route change.
                  */
-//                path: '**',
                 path: ':ns/:wsid',
-//                pathMatch: 'prefix',
-//                component: ReactWorkspaceWrapperComponent,
-//                component: AppRouting,
-//                data: {}
- //               runGuardsAndResolvers: 'always',
                 children: [
                   // legacy / duplicated routes go HERE
                   {
@@ -378,19 +378,10 @@ const routes: Routes = [
 export class AppRoutingModule {
 
   constructor(public router: Router) {
-    // TODO eric: test admin preview egress
-    NavStore.navigate = (commands, extras) => {
-      console.log(this.router.serializeUrl(this.router.createUrlTree(commands, extras)));
-      this.router.navigate(commands, extras);
-    }
+    NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
 
-    // TODO eric: navigateByUrl is never called with `extra`
-    NavStore.navigateByUrl = (url, extras) => {
-      console.log(url);
-      this.router.navigateByUrl(url, extras);
-    }
+    NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {
-      console.log(event);
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
       }

@@ -17,14 +17,11 @@ export const usePath = () => {
   return path;
 };
 
-export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
-  console.log('running withRouteData')
-  console.log(routeData)
+export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
-  urlParamsStore.next(params);
-  console.log(params);
 
-  if (!routeData.skipStore) {
+  if (!intermediaryRoute) {
+    urlParamsStore.next(params);
     routeConfigDataStore.next(routeData);
     routeDataStore.set(routeData);
   }

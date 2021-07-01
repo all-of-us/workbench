@@ -19,7 +19,6 @@ import {
   currentCohortSearchContextStore,
   currentCohortStore,
   setSidebarActiveIconStore,
-
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 import {urlParamsStore} from '../../utils/url-params-store';
