@@ -27,6 +27,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   infoRow: {
@@ -204,6 +205,8 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   </FlexColumn>;
 };
 
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+
 interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
@@ -214,7 +217,7 @@ interface State {
   files?: Array<FileDetail>;
 }
 
-class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
+class AdminWorkspaceImpl extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
@@ -225,6 +228,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.getFederatedWorkspaceInformation();
   }
 
