@@ -5,47 +5,46 @@ import colors from 'app/styles/colors';
 import {UrlParamsProps, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
+import {useEffect, useState} from "react";
+
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
 interface State {
   workspaceNamespace: string;
 }
 
-class AdminWorkspaceSearchImpl extends React.Component<UrlParamsProps, State> {
-  constructor(props) {
-    super(props);
+const navigateToWorkspace = (workspaceNamespace) => {
+  navigate(['/admin/workspaces/' + workspaceNamespace]);
+}
 
-    this.state = {
-      workspaceNamespace: '',
-    };
-  }
+const AdminWorkspaceSearchImpl = (props: Props) => {
+  const [workspaceNamespace, setWorkspaceNamespace] = useState();
+  useEffect(() => {
+    props.hideSpinner();
+  }, [props.spinnerVisible]);
 
-  navigateToWorkspace() {
-    navigate(['/admin/workspaces/' + this.state.workspaceNamespace]);
-  }
-
-  render() {
-    return <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
-        <label style={{color: colors.primary, marginRight: '1rem'}}>Workspace namespace</label>
-        <TextInput
-            style={{
-              width: '10rem',
-              marginRight: '1rem'
-            }}
-            onChange={value => this.setState({workspaceNamespace: value})}
-            onKeyDown={(event: KeyboardEvent) => {
-              if (event.key === 'Enter') {
-                this.navigateToWorkspace();
-              }
-            }}
-        />
-        <Button
-            style={{height: '1.5rem'}}
-            onClick={() => this.navigateToWorkspace()}
-        >
-          Load Workspace
-        </Button>
-      </FlexRow>;
-  }
+  return <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
+    <label style={{color: colors.primary, marginRight: '1rem'}}>Workspace namespace</label>
+    <TextInput
+        style={{
+          width: '10rem',
+          marginRight: '1rem'
+        }}
+        onChange={value => setWorkspaceNamespace(value)}
+        onKeyDown={(event: KeyboardEvent) => {
+          if (event.key === 'Enter') {
+            navigateToWorkspace(workspaceNamespace);
+          }
+        }}
+    />
+    <Button
+        style={{height: '1.5rem'}}
+        onClick={() => navigateToWorkspace(workspaceNamespace)}
+    >
+      Load Workspace
+    </Button>
+  </FlexRow>;
 }
 
 export const AdminWorkspaceSearch = withUrlParams()(AdminWorkspaceSearchImpl);

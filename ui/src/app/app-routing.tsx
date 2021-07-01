@@ -108,7 +108,7 @@ const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceA
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
 const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
+const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
