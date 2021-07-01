@@ -81,10 +81,6 @@ export const DataComponent = withCurrentWorkspace()(({workspace}) => {
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [existingCohortName, setExistingCohortName] = useState([]);
-  const [existingCohortReviewName, setExistingCohortReviewName] = useState([]);
-  const [existingConceptSetName, setExistingConceptSetName] = useState([]);
-  const [existingDataSetName, setExistingDataSetName] = useState([]);
 
   if (!workspace) {
     return;
@@ -93,20 +89,14 @@ export const DataComponent = withCurrentWorkspace()(({workspace}) => {
   const loadResources = async() => {
     try {
       setIsLoading(true);
-      const results = await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id,
-          {typesToFetch: resourceTypesToFetch});
-
-      // TODO (RW-4682): Fix this nonsense
-      results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
-      setExistingCohortName(results.filter(resource => resource.cohort !== null && resource.cohort !== undefined)
-          .map(resource => resource.cohort.name));
-      setExistingCohortReviewName(results.filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
-          .map(resource => resource.cohortReview.cohortName));
-      setExistingConceptSetName(results.filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
-          .map(resource => resource.conceptSet.name));
-      setExistingDataSetName(results.filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
-          .map(resource => resource.dataSet.name));
-      setResourceList(results);
+      setResourceList(
+        (await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id, {typesToFetch: resourceTypesToFetch}))
+          .map(result => {
+            return {
+              ...result,
+            // TODO (RW-4682): Fix this nonsense
+              modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
+            }; }));
     } catch (error) {
       console.log(error);
     } finally {
@@ -116,21 +106,29 @@ export const DataComponent = withCurrentWorkspace()(({workspace}) => {
 
   useEffect(() => {
     loadResources();
-  }, [workspace.namespace, workspace.id])
+  }, [workspace.namespace, workspace.id]);
 
-  const getExistingNameList = (resource) => {
-    if (resource.dataSet) {
-      return existingDataSetName;
-    } else if (resource.conceptSet) {
-      return existingConceptSetName;
-    } else if (resource.cohort) {
-      return existingCohortName;
-    } else if (resource.cohortReview) {
-      return existingCohortReviewName;
+  const getExistingNameList = (resourceType) => {
+    if (resourceType.dataSet) {
+      return resourceList
+        .filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
+        .map(resource => resource.dataSet.name);
+    } else if (resourceType.conceptSet) {
+      return resourceList
+        .filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
+        .map(resource => resource.conceptSet.name);
+    } else if (resourceType.cohort) {
+      return resourceList
+        .filter(resource => resource.cohort !== null && resource.cohort !== undefined)
+        .map(resource => resource.cohort.name);
+    } else if (resourceType.cohortReview) {
+      return resourceList
+        .filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
+        .map(resource => resource.cohortReview.cohortName);
     } else {
       return [];
     }
-  }
+  };
 
   const writePermission = workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
       workspace.accessLevel === WorkspaceAccessLevel.WRITER;
