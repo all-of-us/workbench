@@ -10,6 +10,7 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   title: {
@@ -25,7 +26,7 @@ interface State {
   readonly: boolean;
 }
 
-export class CohortReview extends React.Component<{}, State> {
+export class CohortReview extends React.Component<WithSpinnerOverlayProps, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -36,6 +37,7 @@ export class CohortReview extends React.Component<{}, State> {
   }
 
   componentDidMount(): void {
+    this.props.hideSpinner();
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
