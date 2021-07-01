@@ -1,14 +1,14 @@
+import {HelpSidebar} from 'app/components/help-sidebar';
+import {Spinner} from 'app/components/spinners';
+import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {withRouteConfigData} from 'app/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceRoutes} from 'app/workspace-app-routing';
 import * as fp from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {useParams} from 'react-router-dom';
-import {HelpSidebar} from '../../components/help-sidebar';
-import {workspacesApi} from '../../services/swagger-fetch-clients';
-import {withRouteConfigData} from '../../utils';
-import {currentWorkspaceStore} from '../../utils/navigation';
-import {WorkspaceRoutes} from '../../workspace-app-routing';
-import {WorkspaceNavBarReact} from './workspace-nav-bar';
-import {Spinner} from "../../components/spinners";
 
 export const WorkspaceWrapper = fp.flow(
   withRouteConfigData()
@@ -33,7 +33,7 @@ export const WorkspaceWrapper = fp.flow(
       setWorkspace(storeWorkspace);
     });
 
-//    return sub.unsubscribe;
+    return sub.unsubscribe;
   }, []);
 
   return <React.Fragment>
@@ -49,5 +49,5 @@ export const WorkspaceWrapper = fp.flow(
           <Spinner />
         </div>
     }
-  </React.Fragment>
+  </React.Fragment>;
 });
