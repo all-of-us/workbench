@@ -2,7 +2,7 @@ import {Component, NgZone, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
-  Event as RouterEvent,
+  RouterEvent,
   NavigationEnd,
   NavigationError,
   Router,
@@ -27,6 +27,7 @@ import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {ExceededActionCountError, LeoRuntimeInitializer} from '../../utils/leo-runtime-initializer';
 import {urlParamsStore} from '../../utils/url-params-store';
+import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from "../../components/help-sidebar";
 
 @Component({
   selector: 'app-aou',
@@ -56,6 +57,8 @@ export class AppComponent implements OnInit {
     this.checkBrowserSupport();
     await this.loadConfig();
     this.loadErrorReporter();
+
+    setSidebarActiveIconStore.next(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -113,20 +116,26 @@ export class AppComponent implements OnInit {
       });
     }));
 
-    this.subscriptions.push(
-      this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe((e: RouterEvent) => {
-          console.log(e);
-          // this.tabPath = this.getTabPath();
-          // this.setPageKey();
-          // Close sidebar on route change unless navigating between participants in cohort review
-          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
-          // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
-          // We can probably clean this up after we fully migrate to React router
-          if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
-            setSidebarActiveIconStore.next(null);
-          }
-        }));
+    this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
+      if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
+        setSidebarActiveIconStore.next(null);
+      }
+    }));
+
+    // this.subscriptions.push(
+    //   this.router.events.filter(event => event instanceof NavigationEnd)
+    //     .subscribe((e: RouterEvent) => {
+    //       console.log(e);
+    //       // this.tabPath = this.getTabPath();
+    //       // this.setPageKey();
+    //       // Close sidebar on route change unless navigating between participants in cohort review
+    //       // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
+    //       // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
+    //       // We can probably clean this up after we fully migrate to React router
+    //       if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
+    //         setSidebarActiveIconStore.next(null);
+    //       }
+    //     }));
 
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))

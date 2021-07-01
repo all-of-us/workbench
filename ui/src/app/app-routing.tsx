@@ -252,7 +252,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           <AppRoute
               path='/workspaces/:ns/:wsid'
               exact={false}
-              component={({urlParams}) => <WorkspaceWrapperPage routeData={{}} urlParams={urlParams} myProp={123}/>}
+              component={({urlParams}) => <WorkspaceWrapperPage routeData={{skipStore: true}} urlParams={urlParams} myProp={123}/>}
           />
 
 

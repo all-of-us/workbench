@@ -35,6 +35,7 @@ export function subscribable<T>(): Subscribable<T> {
 
   return {
     subscribe: fn => {
+      console.log("adding subscriber " + fn);
       subscribers = fp.concat(subscribers, [fn]);
       return {
         unsubscribe: () => {
@@ -46,6 +47,10 @@ export function subscribable<T>(): Subscribable<T> {
       fp.forEach((fn: subscriber) => setTimeout(
         () => {
           try {
+            console.log(`calling subscriber`)
+            console.log(newValue);
+            console.log(oldValue);
+            console.log(fn);
             fn(newValue, oldValue);
           } catch (e) {
             // Ignore the error - ideally the supplied fn should

@@ -76,7 +76,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
-const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -270,7 +270,7 @@ export const HelpSidebar = fp.flow(
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeIcon: null,
+        activeIcon: undefined,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -280,7 +280,7 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    subscription: Subscription;
+    subscriptions = [];
     private loadLastSavedKey: () => void;
 
     deleteWorkspace = withErrorModal({
@@ -397,37 +397,47 @@ export const HelpSidebar = fp.flow(
     }
 
     setActiveIcon(activeIcon: string) {
-      this.setState({activeIcon});
-      if (activeIcon) {
-        localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-      } else {
-        localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-      }
+      setSidebarActiveIconStore.next(activeIcon);
     }
 
     async componentDidMount() {
-      const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+      // const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+      //
+      // // This is a little hacky but it's necessary because
+      // // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
+      // // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
+      // //    and overwrite the value stored in localStorage key so we need to "save" it here
+      // // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
+      // this.loadLastSavedKey = (() => {
+      //   let loadedLastSavedKey = false;
+      //   return () => {
+      //     if (!loadedLastSavedKey && this.props.pageKey) {
+      //       const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
+      //       setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
+      //       loadedLastSavedKey = true;
+      //     }
+      //   };
+      // })();
+      //
+      // this.loadLastSavedKey();
 
-      // This is a little hacky but it's necessary because
-      // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
-      // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
-      //    and overwrite the value stored in localStorage key so we need to "save" it here
-      // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
-      this.loadLastSavedKey = (() => {
-        let loadedLastSavedKey = false;
-        return () => {
-          if (!loadedLastSavedKey && this.props.pageKey) {
-            const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
-            setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
-            loadedLastSavedKey = true;
-          }
-        };
-      })();
-
-      this.loadLastSavedKey();
-      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
-      this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
+      // This is being set here instead of in the constructor since I like showing the opening animation of the side
+      // panel to show the user that it's something they can close.
+      this.setActiveIcon(setSidebarActiveIconStore.getValue());
+      this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
+      this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
+        this.setState({activeIcon});
+        if (activeIcon) {
+          localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+        }
+      }));
+      console.log("Creating route data store sub")
+      this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
+        console.log("Should route close?")
+        console.log(newRoute);
+        console.log(oldRoute);
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -443,14 +453,16 @@ export const HelpSidebar = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      this.loadLastSavedKey();
+      // this.loadLastSavedKey();
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.setActiveIcon(null);
       }
     }
 
     componentWillUnmount(): void {
-      this.subscription.unsubscribe();
+      console.log("subscriber is unsubbing");
+      this.subscriptions.forEach(sub => sub.unsubscribe());
+//      this.subscription.unsubscribe();
     }
 
     onIconClick(icon: IconConfig) {
