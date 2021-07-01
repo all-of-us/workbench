@@ -6,6 +6,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
@@ -16,7 +17,6 @@ import {
   Profile,
 } from 'generated/fetch';
 import * as moment from 'moment';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   colStyle: {

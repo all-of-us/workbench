@@ -1,4 +1,5 @@
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -6,7 +7,6 @@ import {reactRouterUrlSearchParams} from 'app/utils/navigation';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   heading: {
@@ -101,7 +101,7 @@ const AdminNotebookViewComponent = (props: Props) => {
 const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => {
     spinnerProps.hideSpinner();
-  }, [spinnerProps.spinnerVisible])
+  }, [spinnerProps.spinnerVisible]);
 
   const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');

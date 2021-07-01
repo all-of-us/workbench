@@ -2,11 +2,11 @@ import {StyledAnchorTag} from 'app/components/buttons';
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
-import {useEffect} from "react";
+import {useEffect} from 'react';
 
 const styles = reactStyles({
   button: {
@@ -28,7 +28,7 @@ const styles = reactStyles({
 const supportUrl = 'support@researchallofus.org';
 
 interface Props extends WithSpinnerOverlayProps {
-  signIn: Function
+  signIn: Function;
 }
 
 export const SignInAgain = (props: Props) => {
@@ -50,4 +50,4 @@ export const SignInAgain = (props: Props) => {
       assistance.
     </section>
   </PublicLayout>;
-}
+};

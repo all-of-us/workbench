@@ -14,6 +14,7 @@ import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
@@ -29,7 +30,6 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export const styles = reactStyles({
   bottomBanner: {

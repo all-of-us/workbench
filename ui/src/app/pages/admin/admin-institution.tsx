@@ -2,6 +2,7 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -13,7 +14,6 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {OrganizationTypeOptions} from './admin-institution-options';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 
 const styles = reactStyles({

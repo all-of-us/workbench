@@ -1,22 +1,18 @@
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {UrlParamsProps, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
-import {useEffect, useState} from "react";
+import {useEffect, useState} from 'react';
 
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
-interface State {
-  workspaceNamespace: string;
-}
-
 const navigateToWorkspace = (workspaceNamespace) => {
   navigate(['/admin/workspaces/' + workspaceNamespace]);
-}
+};
 
 const AdminWorkspaceSearchImpl = (props: Props) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
@@ -45,7 +41,7 @@ const AdminWorkspaceSearchImpl = (props: Props) => {
       Load Workspace
     </Button>
   </FlexRow>;
-}
+};
 
 export const AdminWorkspaceSearch = withUrlParams()(AdminWorkspaceSearchImpl);
 

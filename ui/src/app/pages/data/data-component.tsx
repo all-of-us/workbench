@@ -7,6 +7,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
@@ -14,7 +15,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = {
   cardButtonArea: {
@@ -80,7 +80,7 @@ const dataSetImg = '/assets/images/dataset-diagram.svg';
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
 interface Props extends WithSpinnerOverlayProps {
-  workspace: WorkspaceData
+  workspace: WorkspaceData;
 }
 
 export const DataComponent = withCurrentWorkspace()(class extends React.Component<

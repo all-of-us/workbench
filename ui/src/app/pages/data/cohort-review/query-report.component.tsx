@@ -1,5 +1,6 @@
 import {ComboChart} from 'app/components/combo-chart.component';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
 import {cohortReviewStore} from 'app/services/review-state.service';
@@ -22,7 +23,6 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const css = `
   .stats-left-padding {

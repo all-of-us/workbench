@@ -4,6 +4,7 @@ import {HtmlViewer} from 'app/components/html-viewer';
 import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
 import {getDataUseAgreementWidgetV2} from 'app/pages/profile/data-use-agreement-panel';
 import {
@@ -23,7 +24,6 @@ import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 
 const styles = reactStyles({

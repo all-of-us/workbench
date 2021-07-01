@@ -8,6 +8,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -32,7 +33,6 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},

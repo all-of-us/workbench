@@ -18,10 +18,10 @@ import {Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {environment} from 'environments/environment';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 // A template function which returns the appropriate style config based on window size and
 // background images.

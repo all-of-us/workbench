@@ -13,6 +13,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU, AouTitle} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -72,7 +73,6 @@ import {
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export const styles = reactStyles({
   categoryRow: {

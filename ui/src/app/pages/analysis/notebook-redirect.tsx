@@ -11,6 +11,7 @@ import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
 import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients';
@@ -28,7 +29,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export enum Progress {
   Unknown,

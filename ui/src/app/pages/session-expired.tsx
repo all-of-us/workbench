@@ -1,11 +1,11 @@
 import {GoogleSignInButton} from 'app/components/google-sign-in';
 import {BoldHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
-import {useEffect} from "react";
+import {useEffect} from 'react';
 
 const styles = reactStyles({
   button: {
@@ -20,7 +20,7 @@ const styles = reactStyles({
 });
 
 interface Props extends WithSpinnerOverlayProps {
-  signIn: Function
+  signIn: Function;
 }
 
 export const SessionExpired = (props: Props) => {
@@ -35,4 +35,4 @@ export const SessionExpired = (props: Props) => {
     </section>
     <GoogleSignInButton signIn={() => props.signIn()}/>
   </PublicLayout>;
-}
+};
