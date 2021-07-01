@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -238,6 +241,19 @@ public class TestMockFactory {
             .setAuthDomainName("Controlled Tier Auth Domain")
             .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
             .setServicePerimeter("controlled/tier/perimeter"));
+  }
+
+  public static List<DbAccessModule> createAccessModule(AccessModuleDao accessModuleDao) {
+    new DbAccessModule().setName(AccessModuleName.ERA_COMMONS);
+    final DbAccessTier accessTier =
+        new DbAccessTier()
+            .setAccessTierId(1)
+            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+            .setDisplayName("Registered Tier")
+            .setAuthDomainName("Registered Tier Auth Domain")
+            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+            .setServicePerimeter("registered/tier/perimeter");
+    return accessTierDao.save(accessTier);
   }
 
   public static DbCdrVersion createDefaultCdrVersion(
