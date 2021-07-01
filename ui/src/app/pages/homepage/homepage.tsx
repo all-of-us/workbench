@@ -29,6 +29,7 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -70,7 +71,7 @@ export const styles = reactStyles({
   },
 });
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -128,6 +129,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.checkWorkspaces();
     this.validateNihToken();
     this.validateRasLoginGovLink();
