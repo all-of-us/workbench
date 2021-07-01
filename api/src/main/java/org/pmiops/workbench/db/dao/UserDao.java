@@ -21,6 +21,9 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   DbUser findUserByUserId(long userId);
 
+  @Query("SELECT user.id FROM DbUser user")
+  List<Long> findUserIds();
+
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
 

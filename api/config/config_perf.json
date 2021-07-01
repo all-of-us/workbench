@@ -102,13 +102,13 @@
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableAccessRenewal": false,
+    "enableAccessRenewal": true,
     "enableRasLoginGovLinking": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": true,
+    "enableBillingUpgrade": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
@@ -138,9 +138,11 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 365,
+    "expiryDays": 3650,
+    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {
+    "usersPerAuditTask": 20
   }
 }

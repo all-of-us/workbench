@@ -194,10 +194,6 @@ public class WorkbenchConfig {
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
     public String appEngineLocationId;
-
-    public boolean isProductionEnv() {
-      return projectId.equals("all-of-us-rw-prod") || projectId.equals("all-of-us-rw-preprod");
-    }
   }
 
   public static class AdminConfig {
@@ -328,11 +324,21 @@ public class WorkbenchConfig {
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
-    // Thresholds for email alerting based on approaching module expiration, in days
+    // Do we send expiration emails when users have expired due to Access Renewal
+    // as well as warning emails when users will expire soon?
+    // true = send emails.  false = log only.
+    public boolean sendEmails;
+    // Thresholds for sending warning emails based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
   }
 
   public static class OfflineBatchConfig {
+    // If specified, registers an alternate Cloud Tasks handler which immediately dispatches tasks
+    // against the provided host. Intended for local development only.
     public String unsafeCloudTasksForwardingHost;
+    // Number of users to process within a single access audit task. This should be tuned in concert
+    // with the task queue configuration to affect the overall concurrency of the offline batch
+    // process.
+    public Integer usersPerAuditTask;
   }
 }

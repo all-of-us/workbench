@@ -560,6 +560,7 @@ paths:
       tags:
       - user
       description: >
+        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
         Return a page of users matching a search term.
         Used by autocomplete for workspace sharing.
       operationId: user
@@ -593,6 +594,50 @@ paths:
           user's email.
         type: string
         required: false
+  "/v1/userSearch/{accessTierShortName}/{term}":
+    get:
+      tags:
+        - user
+      description: >
+        Return a page of users matching a search term and an access tier.
+        Used by autocomplete for workspace sharing.
+      operationId: userSearch
+      responses:
+        200:
+          description: The user information matching supplied search terms
+          schema:
+            "$ref": "#/definitions/UserResponse"
+      parameters:
+        - in: path
+          name: accessTierShortName
+          description: The shortName corresponding to an access tier to search in. Requesting user
+            must also be a member of this tier.
+          required: true
+          type: string
+        - in: path
+          name: term
+          description: String to find in user's name or email address. Search is a case-insensitive
+            substring match.
+          required: true
+          type: string
+        - in: query
+          name: pageToken
+          description: 'Pagination token retrieved from a previous call to user; used
+         for retrieving additional pages of results.'
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: 'Maximum number of results to return in a response. Defaults
+         to 10.'
+          type: integer
+          required: false
+        - in: query
+          name: sortOrder
+          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
+            user's email.
+          type: string
+          required: false
   "/v1/user/billingAccounts":
     get:
       tags:
@@ -2664,6 +2709,26 @@ paths:
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
+  "/v1/cloudTask/auditProjectAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: "Audits the provided user's access to GCP resources"
+      operationId: auditProjectAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Audit configuration to run.
+        schema:
+          "$ref": "#/definitions/AuditProjectAccessRequest"
+      responses:
+        200:
+          description: 'Audit ran successfully (possibly with audit findings)'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -8084,6 +8149,17 @@ definitions:
         format: int64
       conceptName:
         type: string
+
+  AuditProjectAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: 'List of users to audit'
+        type: array
+        items:
+          type: integer
+          format: int64
+
   WorkspaceAuditLogQueryResponse:
     type: object
     description: >
@@ -8448,9 +8524,6 @@ definitions:
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
-      aboutYou:
-        type: string
-        description: User's description of themselves.
       accessTierShortNames:
         description: |-
           Short names of access tiers available to the user, comma-delimited if multiple.
@@ -8480,9 +8553,6 @@ definitions:
         type: string
         format: date-time
         description: Timestamp of account creation.
-      currentPosition:
-        type: string
-        description: User's current role/position.
       dataUseAgreementBypassTime:
         type: string
         format: date-time
@@ -8525,10 +8595,6 @@ definitions:
         type: string
         format: date-time
         description: Time user first signed into the Workbench with a GSuite account.
-      freeTierCreditsLimitDaysOverride:
-        type: integer
-        format: int32
-        description: Override value for the default free tier time limit (days).
       freeTierCreditsLimitDollarsOverride:
         type: number
         format: double

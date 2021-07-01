@@ -1,4 +1,5 @@
 import {Component as AComponent} from '@angular/core';
+import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
@@ -35,6 +36,7 @@ import {QueryReport} from './pages/data/cohort-review/query-report.component';
 import {ParticipantsTable} from './pages/data/cohort-review/table-page';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
+import {ConceptSearch} from './pages/data/concept/concept-search';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {DataComponent} from './pages/data/data-component';
 import {DatasetPage} from './pages/data/data-set/dataset-page';
@@ -68,9 +70,11 @@ const expiredGuard: Guard = {
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
+const ConceptSearchPage = withRouteData(ConceptSearch);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataComponentPage = withRouteData(DataComponent);
@@ -325,6 +329,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             }}/>}
           />
           <AppRoute
+              path='/workspaces/:ns/:wsid/data/cohorts/build'
+              component={() => <CohortPagePage routeData={{
+                title: 'Build Cohort Criteria',
+                breadcrumb: BreadcrumbType.CohortAdd,
+                pageKey: 'cohortBuilder'
+              }}/>}
+          />
+          <AppRoute
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
             component={() => <CohortActionsPage routeData={{
               title: 'Cohort Actions',
@@ -371,6 +383,22 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               breadcrumb: BreadcrumbType.SearchConcepts,
               pageKey: 'searchConceptSets'
             }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'
+              component={() => <ConceptSearchPage routeData={{
+                title: 'Concept Set',
+                breadcrumb: BreadcrumbType.ConceptSet,
+                pageKey: 'conceptSets'
+              }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/concepts/:domain'
+              component={() => <ConceptSearchPage routeData={{
+                title: 'Search Concepts',
+                breadcrumb: BreadcrumbType.SearchConcepts,
+                pageKey: 'conceptSets'
+              }}/>}
           />
           <AppRoute
             path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'

@@ -108,10 +108,10 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": true,
+    "enableBillingUpgrade": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
-    "enableResearchPurposePrompt": true,
+    "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false
   },
@@ -139,8 +139,10 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
+    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {
+    "usersPerAuditTask": 20
   }
 }

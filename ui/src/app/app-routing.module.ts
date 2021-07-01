@@ -1,20 +1,17 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
-import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
-import {WorkspaceGuard} from './guards/workspace-guard.service';
-import {BreadcrumbType, NavStore} from './utils/navigation';
+import {NavStore} from './utils/navigation';
 
 
 declare let gtag: Function;
@@ -49,6 +46,7 @@ const routes: Routes = [
     component: SignedInComponent,
     canActivate: [SignInGuard],
     canActivateChild: [SignInGuard, DisabledGuard],
+    canDeactivate: [NavigationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       // legacy / duplicated routes go HERE
@@ -97,7 +95,6 @@ const routes: Routes = [
           // non-migrated routes go HERE
           {
             path: 'workspaces',
-            canActivateChild: [WorkspaceGuard],
             children: [
               // legacy / duplicated routes go HERE
               {
@@ -187,13 +184,8 @@ const routes: Routes = [
                             children: [
                               {
                                 path: '',
-                                component: CohortPageComponent,
-                                canDeactivate: [CanDeactivateGuard],
-                                data: {
-                                  title: 'Build Cohort Criteria',
-                                  breadcrumb: BreadcrumbType.CohortAdd,
-                                  pageKey: 'cohortBuilder'
-                                }
+                                component: AppRouting,
+                                data: {}
                               },
                             ]
                           },
@@ -229,31 +221,24 @@ const routes: Routes = [
                           data: {}
                         }, {
                           path: ':domain',
-                          component: ConceptSearchComponent,
-                          canDeactivate: [CanDeactivateGuard],
-                          data: {
-                            title: 'Search Concepts',
-                            breadcrumb: BreadcrumbType.SearchConcepts,
-                            pageKey: 'conceptSets'
-                          }
+                          component: AppRouting,
+                          data: {}
                         }]
                       },
                       {
                         path: 'concepts/sets',
-                        children: [{
-                          path: ':csid',
-                          component: ConceptSearchComponent,
-                          canDeactivate: [CanDeactivateGuard],
-                          data: {
-                            title: 'Concept Set',
-                            breadcrumb: BreadcrumbType.ConceptSet,
-                            pageKey: 'conceptSets'
+                        children: [
+                          {
+                            path: ':csid',
+                            component: AppRouting,
+                            data: {}
                           },
-                        }, {
-                          path: ':csid/actions',
-                          component: AppRouting,
-                          data: {},
-                        }, ]
+                          {
+                            path: ':csid/actions',
+                            component: AppRouting,
+                            data: {},
+                          },
+                        ]
                       }
                     ]
                   }]
@@ -382,8 +367,7 @@ const routes: Routes = [
   providers: [
     DisabledGuard,
     RegistrationGuard,
-    SignInGuard,
-    WorkspaceGuard
+    SignInGuard
   ]
 })
 export class AppRoutingModule {

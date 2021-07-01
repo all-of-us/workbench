@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
@@ -40,6 +41,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+  private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
+  private static final String SINGLE_SAMPLE_ARRAY_BUCKET_KEY = "SINGLE_SAMPLE_ARRAY_BUCKET";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -137,14 +140,29 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
           WORKSPACE_CDR_ENV_KEY,
-          workspace.getCdrVersion().getBigqueryProject()
-              + "."
-              + workspace.getCdrVersion().getBigqueryDataset());
+          cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
+    }
+
+    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
+      customEnvironmentVariables.put(
+          ALL_SAMPLES_WGS_KEY,
+          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+              + "/"
+              + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
+    }
+
+    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
+      customEnvironmentVariables.put(
+          SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
+          cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
+              + "/"
+              + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
     }
 
     // See RW-6079

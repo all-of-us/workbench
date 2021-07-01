@@ -116,7 +116,9 @@ public class CdrVersionServiceTest {
             registeredTier,
             null,
             null,
-            null);
+            null,
+            "",
+            "");
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
@@ -129,7 +131,9 @@ public class CdrVersionServiceTest {
             controlledTier,
             null,
             null,
-            null);
+            null,
+            "gs://lol",
+            "gs://lol");
   }
 
   @Test
@@ -173,7 +177,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, registeredTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), registeredTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(defaultCdrVersion);
@@ -186,7 +190,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, registeredTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), registeredTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
@@ -234,7 +238,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, controlledTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), controlledTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(controlledCdrVersion);
@@ -247,7 +251,7 @@ public class CdrVersionServiceTest {
         ForbiddenException.class,
         () -> {
           accessTierService.addUserToTier(user, controlledTier);
-          when(fireCloudService.isUserMemberOfGroup(
+          when(fireCloudService.isUserMemberOfGroupWithCache(
                   user.getUsername(), controlledTier.getAuthDomainName()))
               .thenReturn(false);
           cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
@@ -350,7 +354,8 @@ public class CdrVersionServiceTest {
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
-    makeCdrVersion(3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true);
+    makeCdrVersion(
+        3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true, "", "");
     final List<CdrVersion> newVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
 
@@ -379,7 +384,9 @@ public class CdrVersionServiceTest {
       DbAccessTier accessTier,
       String wgsDataset,
       Boolean hasFitbit,
-      Boolean hasCopeSurveyData) {
+      Boolean hasCopeSurveyData,
+      String allSamplesWgsDataBucket,
+      String singleSampleArrayDataBucket) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
@@ -394,13 +401,16 @@ public class CdrVersionServiceTest {
     cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
+    cdrVersion.setAllSamplesWgsDataBucket(allSamplesWgsDataBucket);
+    cdrVersion.setSingleSampleArrayDataBucket(singleSampleArrayDataBucket);
     return cdrVersionDao.save(cdrVersion);
   }
 
   private void addMembershipForTest(DbAccessTier tier) {
     accessTierService.addUserToTier(user, tier);
 
-    when(fireCloudService.isUserMemberOfGroup(user.getUsername(), tier.getAuthDomainName()))
+    when(fireCloudService.isUserMemberOfGroupWithCache(
+            user.getUsername(), tier.getAuthDomainName()))
         .thenReturn(true);
   }
 }

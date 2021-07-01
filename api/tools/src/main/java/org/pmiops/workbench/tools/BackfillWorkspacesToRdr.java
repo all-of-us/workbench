@@ -10,10 +10,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.db.dao.RdrExportDao;
-import org.pmiops.workbench.rdr.RdrTaskQueue;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -61,15 +61,15 @@ public class BackfillWorkspacesToRdr {
   }
 
   @Bean
-  private RdrTaskQueue rdrTaskQueue(
+  private TaskQueueService rdrTaskQueue(
       WorkbenchLocationConfigService locationConfigService,
       Provider<CloudTasksClient> cloudTasksClientProvider,
       Provider<WorkbenchConfig> configProvider) {
-    return new RdrTaskQueue(locationConfigService, cloudTasksClientProvider, configProvider);
+    return new TaskQueueService(locationConfigService, cloudTasksClientProvider, configProvider);
   }
 
   @Bean
-  public CommandLineRunner run(RdrExportDao rdrExportDao, RdrTaskQueue rdrTaskQueue) {
+  public CommandLineRunner run(RdrExportDao rdrExportDao, TaskQueueService taskQueueService) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
       Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
@@ -91,8 +91,7 @@ public class BackfillWorkspacesToRdr {
             "\nThis is a dry run. %d workspaces will be exported when running this command.\n\n",
             workspaceListToExport.size());
       } else {
-        rdrTaskQueue.groupIdsAndPushTask(
-            workspaceListToExport, RdrTaskQueue.EXPORT_USER_PATH + "?backfill=true");
+        taskQueueService.groupAndPushRdrWorkspaceTasks(workspaceListToExport, /* backfill */ true);
         System.out.printf("\n\n%d workspaces queued for export\n\n", workspaceListToExport.size());
       }
     };

@@ -5,7 +5,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   isBlank,
   reactStyles,
-  withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -161,14 +160,14 @@ export interface State {
 
 export interface Props {
   onClose: Function;
+  workspace: WorkspaceData;
 }
 
 interface HocProps extends Props {
-  workspace: WorkspaceData;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
-export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())(class extends React.Component<HocProps, State> {
+export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Component<HocProps, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
@@ -262,13 +261,14 @@ export const WorkspaceShare = fp.flow(withCurrentWorkspace(), withUserProfile())
   }
 
   userSearch(value: string): void {
+    const {accessTierShortName} = this.props.workspace;
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
     if (!value.trim()) {
       this.setState({autocompleteLoading: false, dropDown: false});
       return;
     }
     const searchTerm = this.state.searchTerm;
-    userApi().user(this.state.searchTerm)
+    userApi().userSearch(accessTierShortName, this.state.searchTerm)
       .then((response) => {
         if (this.state.searchTerm !== searchTerm) {
           return;

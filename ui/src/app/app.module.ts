@@ -8,19 +8,16 @@ import {ClarityModule} from '@clr/angular';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 import * as StackTrace from 'stacktrace-js';
 
+import {NavigationGuard} from 'app/guards/navigation-guard';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {SignInService} from './services/sign-in.service';
 import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {BugReportComponent} from './components/bug-report';
-import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
-import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
@@ -54,10 +51,6 @@ import {FooterComponent} from './components/footer';
   declarations: [
     AppComponent,
     AppRouting,
-    BugReportComponent,
-    CohortPageComponent,
-    ConceptSearchComponent,
-    ConfirmDeleteModalComponent,
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
@@ -76,7 +69,8 @@ import {FooterComponent} from './components/footer';
     },
     WorkbenchRouteReuseStrategy,
     {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy},
-    CanDeactivateGuard
+    CanDeactivateGuard,
+    NavigationGuard
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, InitialErrorComponent]
