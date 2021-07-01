@@ -74,7 +74,7 @@ const withRoutingSpinner = withSpinnerOverlay(
     {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
 
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
-const AdminNotebookViewPage = withRouteData(AdminNotebookView);
+const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);

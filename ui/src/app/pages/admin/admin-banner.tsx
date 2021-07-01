@@ -37,7 +37,6 @@ const validators = {
 export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminBannerState> {
   constructor(props) {
     super(props);
-    this.props.hideSpinner();
     this.state = {
       bannerDescription: '',
       bannerEnabled: false,
@@ -47,6 +46,7 @@ export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminB
   }
 
   componentDidMount(): void {
+    this.props.hideSpinner();
     statusAlertApi().getStatusAlert()
       .then(statusAlert => this.setState({
         bannerDescription: statusAlert.message,

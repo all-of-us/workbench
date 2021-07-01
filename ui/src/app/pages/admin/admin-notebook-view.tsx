@@ -6,6 +6,7 @@ import {reactRouterUrlSearchParams} from 'app/utils/navigation';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router';
+import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 const styles = reactStyles({
   heading: {
@@ -97,7 +98,11 @@ const AdminNotebookViewComponent = (props: Props) => {
   </React.Fragment>;
 };
 
-const AdminNotebookView = () => {
+const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => {
+    spinnerProps.hideSpinner();
+  }, [spinnerProps.spinnerVisible])
+
   const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 
