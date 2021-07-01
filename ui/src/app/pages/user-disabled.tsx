@@ -10,9 +10,7 @@ import {useEffect} from 'react';
 const supportUrl = 'support@researchallofus.org';
 
 export const UserDisabled = (spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => {
-    spinnerProps.hideSpinner();
-  }, [spinnerProps.spinnerVisible]);
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   return <PublicLayout>
     <BoldHeader>Your account has been disabled</BoldHeader>

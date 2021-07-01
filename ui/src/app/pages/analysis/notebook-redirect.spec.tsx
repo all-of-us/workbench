@@ -34,8 +34,7 @@ describe('NotebookRedirect', () => {
 
   const component = async() => {
     const c = mount(<NotebookRedirect hideSpinner={() => {}}
-                                      showSpinner={() => {}}
-                                      spinnerVisible={false}/>);
+                                      showSpinner={() => {}}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };

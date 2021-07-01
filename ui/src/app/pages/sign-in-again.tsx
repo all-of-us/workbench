@@ -32,9 +32,7 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const SignInAgain = (props: Props) => {
-  useEffect(() => {
-    props.hideSpinner();
-  }, [props.spinnerVisible]);
+  useEffect(() => props.hideSpinner(), []);
 
   return <PublicLayout contentStyle={{width: '500px'}}>
     <BoldHeader>You have been signed out</BoldHeader>

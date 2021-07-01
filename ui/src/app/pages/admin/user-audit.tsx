@@ -30,9 +30,7 @@ const getAdminPageUrl = (subject: string) => {
 };
 
 export const UserAudit = (spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => {
-    spinnerProps.hideSpinner();
-  }, [spinnerProps.spinnerVisible]);
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   const {username = ''} = useParams<{username: string}>();
   return <AuditPageComponent auditSubjectType='User'

@@ -29,8 +29,7 @@ describe('WorkspaceList', () => {
 
   const props = {
     hideSpinner: () => {},
-    showSpinner: () => {},
-    spinnerVisible: false
+    showSpinner: () => {}
   };
 
   const component = () => {

@@ -15,8 +15,7 @@ describe('WorkspaceLibrary', () => {
   const props = {
     enablePublishedWorkspaces: true,
     hideSpinner: () => {},
-    showSpinner: () => {},
-    spinnerVisible: false
+    showSpinner: () => {}
   };
 
   const component = () => {

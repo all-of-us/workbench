@@ -10,7 +10,7 @@ import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
 describe('AdminUser', () => {
-  let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}, spinnerVisible: false};
+  let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}};
 
   const component = () => {
     return mount(<AdminUsers {...props}/>);

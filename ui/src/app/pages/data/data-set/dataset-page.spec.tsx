@@ -44,7 +44,7 @@ describe('DataSetPage', () => {
   });
 
   const component = () => {
-    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false} />);
+    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} />);
   }
 
   it('should render', async() => {

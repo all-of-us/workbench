@@ -8,7 +8,6 @@ interface State {
 export interface WithSpinnerOverlayProps {
   showSpinner: () => void;
   hideSpinner: () => void;
-  spinnerVisible: boolean;
 }
 
 export const withSpinnerOverlay = (
@@ -38,7 +37,6 @@ export const withSpinnerOverlay = (
           {this.state.show && <SpinnerOverlay {...spinnerOverlayProps}/>}
           <WrappedComponent showSpinner={() => this.show()}
                             hideSpinner={() => this.hide()}
-                            spinnerVisible={this.state.show}
                             {...this.props} />
         </React.Fragment>;
       }

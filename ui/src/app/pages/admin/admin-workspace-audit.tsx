@@ -33,9 +33,7 @@ const getAdminPageUrl = (subject: string) => {
 };
 
 export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => {
-    spinnerProps.hideSpinner();
-  }, [spinnerProps.spinnerVisible]);
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   const {workspaceNamespace = ''} = useParams<{workspaceNamespace: string}>();
   return <AuditPageComponent auditSubjectType='Workspace'

@@ -36,8 +36,7 @@ describe('DataPage', () => {
   
   const component = () => {
     return mount(<DataComponent hideSpinner={() => {}}
-                                showSpinner={() => {}}
-                                spinnerVisible={false}/>);
+                                showSpinner={() => {}}/>);
   }
 
   it('should render', async() => {

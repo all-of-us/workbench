@@ -30,8 +30,7 @@ const component = () => {
                                 setShowUnsavedModal={() => {}}
                                 setUnsavedConceptChanges={() => {}}
                                 hideSpinner={() => {}}
-                                showSpinner={() => {}}
-                                spinnerVisible={false}/>);
+                                showSpinner={() => {}}/>);
 }
 
 describe('ConceptHomepage', () => {

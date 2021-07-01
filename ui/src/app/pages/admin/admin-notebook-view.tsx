@@ -99,9 +99,7 @@ const AdminNotebookViewComponent = (props: Props) => {
 };
 
 const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => {
-    spinnerProps.hideSpinner();
-  }, [spinnerProps.spinnerVisible]);
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');

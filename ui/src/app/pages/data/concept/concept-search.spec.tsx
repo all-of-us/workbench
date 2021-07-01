@@ -31,8 +31,7 @@ describe('ConceptSearch', () => {
                                 setShowUnsavedModal={() => {}}
                                 setUnsavedConceptChanges={() => {}}
                                 hideSpinner={() => {}}
-                                showSpinner={() => {}}
-                                spinnerVisible={false}/>);
+                                showSpinner={() => {}}/>);
   }
 
   it('should render', () => {

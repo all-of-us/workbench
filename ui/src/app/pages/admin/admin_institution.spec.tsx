@@ -13,7 +13,7 @@ import {AdminInstitution} from './admin-institution';
 describe('AdminInstitutionSpec', () => {
 
   const component = () => {
-    return mount(<AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false} />);
+    return mount(<AdminInstitution hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {

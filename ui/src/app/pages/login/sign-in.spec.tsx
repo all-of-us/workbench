@@ -33,8 +33,7 @@ describe('SignInReact', () => {
       signIn: signIn,
       windowSize: {width: 1700, height: 0},
       hideSpinner: () => {},
-      showSpinner: () => {},
-      spinnerVisible: false
+      showSpinner: () => {}
     };
   });
 

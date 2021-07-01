@@ -25,8 +25,7 @@ describe('DataUserCodeOfConduct', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
 
   const component = () => mount(<DataUserCodeOfConduct hideSpinner={() => {}}
-                                                       showSpinner={() => {}}
-                                                       spinnerVisible={false}/>);
+                                                       showSpinner={() => {}}/>);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());

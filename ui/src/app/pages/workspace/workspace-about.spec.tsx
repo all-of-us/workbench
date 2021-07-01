@@ -29,7 +29,7 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false} />);
+    return mount(<WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {

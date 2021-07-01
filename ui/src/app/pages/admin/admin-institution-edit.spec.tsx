@@ -14,7 +14,7 @@ import {AdminInstitutionEdit} from './admin-institution-edit';
 describe('AdminInstitutionEditSpec', () => {
 
   const component = () => {
-    return mount(<AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} spinnerVisible={false} />);
+    return mount(<AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {

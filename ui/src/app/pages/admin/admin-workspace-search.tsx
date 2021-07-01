@@ -16,9 +16,7 @@ const navigateToWorkspace = (workspaceNamespace) => {
 
 const AdminWorkspaceSearchImpl = (props: Props) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
-  useEffect(() => {
-    props.hideSpinner();
-  }, [props.spinnerVisible]);
+  useEffect(() => props.hideSpinner(), []);
 
   return <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
     <label style={{color: colors.primary, marginRight: '1rem'}}>Workspace namespace</label>

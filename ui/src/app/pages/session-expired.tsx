@@ -24,9 +24,7 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const SessionExpired = (props: Props) => {
-  useEffect(() => {
-    props.hideSpinner();
-  }, [props.spinnerVisible]);
+  useEffect(() => props.hideSpinner(), []);
 
   return <PublicLayout>
     <BoldHeader>You have been signed out</BoldHeader>

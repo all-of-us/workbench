@@ -27,7 +27,6 @@ describe('CohortPage', () => {
         setUpdatingCohort={() => {}}
         hideSpinner={() => {}}
         showSpinner={() => {}}
-        spinnerVisible={false}
     />);
   }
 
