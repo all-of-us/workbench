@@ -72,6 +72,7 @@ import {
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export const styles = reactStyles({
   categoryRow: {
@@ -254,7 +255,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   </div>;
 };
 
-export interface WorkspaceEditProps {
+export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -369,6 +370,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async componentDidMount() {
+      this.props.hideSpinner();
       await this.fetchBillingAccounts();
     }
 
