@@ -36,8 +36,7 @@ public class UserAccessModuleDaoTest extends SpringTest {
     user.setUserId(100);
     user = userDao.save(user);
 
-    registeredModule = TestMockFactory.createRegisteredModuleForTests(accessModuleDao);
-    controlledModule = TestMockFactory.createControlledModuleForTests(accessModuleDao);
+    TestMockFactory.createAccessModule(accessModuleDao);
   }
 
   @Test

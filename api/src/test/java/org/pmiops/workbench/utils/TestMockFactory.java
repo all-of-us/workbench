@@ -10,6 +10,7 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -47,6 +48,16 @@ public class TestMockFactory {
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
+
+  public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES = ImmutableList.of(
+      new DbAccessModule().setName(AccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
+      new DbAccessModule().setName(AccessModuleName.ERA_COMMONS).setExpirable(false),
+      new DbAccessModule().setName(AccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
+      new DbAccessModule().setName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).setExpirable(true),
+      new DbAccessModule().setName(AccessModuleName.RT_COMPLIANCE_TRAINING).setExpirable(true),
+      new DbAccessModule().setName(AccessModuleName.PROFILE_CONFIRMATION).setExpirable(true),
+      new DbAccessModule().setName(AccessModuleName.PUBLICATION_CONFIRMATION).setExpirable(true)
+  );
 
   // TODO there's something off about how "workspaceName" here works.  Investigate.
   // For best results, use a lowercase-only workspaceName.
@@ -244,16 +255,8 @@ public class TestMockFactory {
   }
 
   public static List<DbAccessModule> createAccessModule(AccessModuleDao accessModuleDao) {
-    new DbAccessModule().setName(AccessModuleName.ERA_COMMONS);
-    final DbAccessTier accessTier =
-        new DbAccessTier()
-            .setAccessTierId(1)
-            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .setDisplayName("Registered Tier")
-            .setAuthDomainName("Registered Tier Auth Domain")
-            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-            .setServicePerimeter("registered/tier/perimeter");
-    return accessTierDao.save(accessTier);
+    accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
+    return DEFAULT_ACCESS_MODULES;
   }
 
   public static DbCdrVersion createDefaultCdrVersion(

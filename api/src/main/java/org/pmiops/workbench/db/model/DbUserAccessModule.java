@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,7 +34,7 @@ public class DbUserAccessModule {
     return this;
   }
 
-  @ManyToOne()
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_id", nullable = false)
   public DbUser getUser() {
     return user;
@@ -44,7 +45,7 @@ public class DbUserAccessModule {
     return this;
   }
 
-  @ManyToOne()
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "access_module_id", nullable = false)
   public DbAccessModule getAccessModule() {
     return accessModule;
