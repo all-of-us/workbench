@@ -18,7 +18,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import { navigate } from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
@@ -232,6 +232,8 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   goToDestinationWorkspace() {
+    currentWorkspaceStore.next(null);
+
     navigate(
       [
         'workspaces',

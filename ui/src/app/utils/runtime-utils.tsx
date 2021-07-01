@@ -402,7 +402,6 @@ export const withRuntimeStore = () => WrappedComponent => {
     const value = useStore(runtimeStore);
 
     // Ensure that a runtime gets initialized, if it hasn't already been.
-    console.log('Runtime workspacenamespace : ' + value.workspaceNamespace);
     useRuntime(value.workspaceNamespace);
 
     return <WrappedComponent {...props} runtimeStore={value} />;

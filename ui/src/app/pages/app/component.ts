@@ -125,7 +125,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
-      // due to urlParamsStore being updates multiple times while rendering a route.
+      // due to urlParamsStore being updated multiple times while rendering a route.
       // What we really want to subscribe to here is an event that triggers on navigation start or end
       // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
       // since multiple update recent workspace requests (from the same page) within the span of 1 second should
@@ -143,7 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
-        if (ns === undefined || wsid === undefined) {
+        if (!ns || !wsid) {
           return Promise.resolve(null);
         }
 

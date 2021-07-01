@@ -269,7 +269,7 @@ export const HelpSidebar = fp.flow(
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeIcon: undefined,
+        activeIcon: null,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -399,7 +399,7 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
-      // This is being set here instead of in the constructor since I like showing the opening animation of the side
+      // This is being set here instead of the constructor since I like showing the opening animation of the side
       // panel to show the user that it's something they can close.
       this.setActiveIcon(setSidebarActiveIconStore.getValue());
       this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));

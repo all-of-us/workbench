@@ -1,5 +1,5 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from "app/utils/navigation";
+import {urlParamsStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import {DuaType, InstitutionApi} from 'generated/fetch';
