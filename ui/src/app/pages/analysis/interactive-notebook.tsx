@@ -22,6 +22,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 
 const styles = reactStyles({
@@ -99,7 +100,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   urlParams: any;
   runtimeStore: RuntimeStore;
@@ -145,7 +146,8 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidMount(): void {
-      const {ns, wsid, nbName} = this.props.urlParams;
+      const {urlParams: {ns, wsid, nbName}, hideSpinner} = this.props;
+      hideSpinner();
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
