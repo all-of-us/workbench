@@ -10,6 +10,7 @@ import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -63,7 +64,7 @@ const actionCards = [
   },
 ];
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
@@ -80,6 +81,7 @@ export const CohortActions = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
+      this.props.hideSpinner();
       const cid = urlParamsStore.getValue().cid;
       this.setState({cohortLoading: true});
       if (cid) {
