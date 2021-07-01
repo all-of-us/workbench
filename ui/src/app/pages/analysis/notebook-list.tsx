@@ -18,6 +18,7 @@ import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = {
   heading: {
@@ -26,9 +27,12 @@ const styles = {
   }
 };
 
-export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData
-}, {
+}
+
+export const NotebookList = withCurrentWorkspace()(class extends React.Component<
+  Props, {
   notebookList: FileDetail[],
   notebookNameList: string[],
   creating: boolean,
@@ -40,6 +44,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     profileApi().updatePageVisits({page: 'notebook'});
     this.loadNotebooks();
   }
