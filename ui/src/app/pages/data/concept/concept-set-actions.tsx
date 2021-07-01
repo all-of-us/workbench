@@ -10,6 +10,7 @@ import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/u
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -63,7 +64,7 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
@@ -78,6 +79,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
+      this.props.hideSpinner();
       conceptSetUpdating.next(false);
       const csid = urlParamsStore.getValue().csid;
       this.setState({conceptSetLoading: true});
