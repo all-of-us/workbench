@@ -36,7 +36,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
