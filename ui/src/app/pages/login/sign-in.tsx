@@ -21,6 +21,7 @@ import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {environment} from 'environments/environment';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -106,7 +107,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 );
 
 
-export interface SignInProps extends WindowSizeProps {
+export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
   initialStep?: SignInStep;
   onSignIn: () => void;
   signIn: () => void;
@@ -176,6 +177,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     document.body.style.backgroundColor = colors.light;
     this.props.onSignIn();
   }

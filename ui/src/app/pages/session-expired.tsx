@@ -33,6 +33,6 @@ export const SessionExpired = (props: Props) => {
     <section style={styles.textSection}>
       You were automatically signed out of your session due to inactivity
     </section>
-    <GoogleSignInButton signIn={() => this.props.signIn()}/>
+    <GoogleSignInButton signIn={() => props.signIn()}/>
   </PublicLayout>;
 }
