@@ -8,8 +8,8 @@ import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
-import {SignInGuard} from './guards/sign-in-guard.service';
 import {DisabledGuard} from './guards/disabled-guard.service';
+import {SignInGuard} from './guards/sign-in-guard.service';
 import {NavStore} from './utils/navigation';
 
 
