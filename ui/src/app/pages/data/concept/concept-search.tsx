@@ -35,6 +35,7 @@ import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -98,7 +99,7 @@ function sortAndStringify(concepts) {
   return JSON.stringify(concepts.sort((a, b) => a.id - b.id));
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortContext: any;
   concept: Array<Criteria>;
   workspace: WorkspaceData;
@@ -150,6 +151,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
     }
 
     componentDidMount() {
+      this.props.hideSpinner();
       if (this.isDetailPage) {
         this.getConceptSet();
       } else if (!currentConceptStore.getValue()) {
