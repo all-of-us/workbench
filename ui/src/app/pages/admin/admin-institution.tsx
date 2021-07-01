@@ -13,6 +13,7 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {OrganizationTypeOptions} from './admin-institution-options';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 
 const styles = reactStyles({
@@ -51,7 +52,7 @@ interface State {
   institutionLoadError: boolean;
 }
 
-export class AdminInstitution extends React.Component<{}, State> {
+export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -62,6 +63,7 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     try {
       const details = await institutionApi().getInstitutions();
       this.setState({
