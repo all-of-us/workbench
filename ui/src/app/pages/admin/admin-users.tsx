@@ -16,6 +16,7 @@ import {
   Profile,
 } from 'generated/fetch';
 import * as moment from 'moment';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   colStyle: {
@@ -42,7 +43,7 @@ const LockoutButton: React.FunctionComponent<{disabled: boolean,
     </Button>;
   };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile, reload: Function, updateCache: Function
   };
@@ -73,6 +74,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.setState({contentLoaded: false});
     await this.loadProfiles();
     this.setState({contentLoaded: true});
