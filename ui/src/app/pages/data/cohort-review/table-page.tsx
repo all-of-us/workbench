@@ -32,6 +32,7 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
@@ -220,7 +221,7 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
@@ -259,6 +260,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     async componentDidMount() {
+      this.props.hideSpinner();
       const {filters} = this.state;
       let {demoFilters} = this.state;
       const promises = [];
