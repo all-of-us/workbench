@@ -437,12 +437,14 @@ public class UserServiceTest extends SpringTest {
 
   @Test
   public void testSubmitTermsOfService() {
+    // Testing NULL input version
     assertThrows(
             BadRequestException.class,
             () -> {
               userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
             });
 
+    // Testing not current term input version
     assertThrows(
             BadRequestException.class,
             () -> {
