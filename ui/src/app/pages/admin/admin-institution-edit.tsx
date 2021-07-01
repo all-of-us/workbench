@@ -18,6 +18,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {DuaTypes, OrganizationTypeOptions} from './admin-institution-options';
+import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 const styles = reactStyles({
   label: {
@@ -52,7 +53,9 @@ interface InstitutionEditState {
 let title = 'Add new Institution';
 let institutionToEdit;
 
-export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<UrlParamsProps, InstitutionEditState> {
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+
+export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -74,6 +77,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
