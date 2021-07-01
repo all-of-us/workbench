@@ -39,6 +39,7 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   semiBold: {
@@ -143,7 +144,7 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   // From withUrlParams
   urlParams: {
     usernameWithoutGsuiteDomain: string
@@ -182,6 +183,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     try {
       Promise.all([
         this.getUser(),
