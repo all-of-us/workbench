@@ -9,8 +9,6 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {SignedInComponent} from './pages/signed-in/component';
 import { WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
-import { createBrowserHistory } from 'history';
-let history = createBrowserHistory();
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
@@ -114,141 +112,141 @@ const routes: Routes = [
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
-                 *
-                 * TODO angular2react: Ideally, we should be able to just declare "AppRouting" at this level of the
-                 *  route tree and let React handle it from here but when doing so, the inner React BrowserRouter
-                 *  will not automatically change the route when the URL changes.
                  */
-                path: '**',
-                component: AppRouting,
-                data: {}
-                // children: [
-                //   // legacy / duplicated routes go HERE
-                //   {
-                //     path: 'about',
-                //     component: AppRouting,
-                //     data: {}
-                //   },
-                //   {
-                //     path: 'edit',
-                //     component: AppRouting,
-                //     data: {}
-                //   },
-                //   {
-                //     path: 'duplicate',
-                //     component: AppRouting,
-                //     data: {}
-                //   },
-                //   {
-                //     path: 'notebooks',
-                //     children: [
-                //       {
-                //         path: '',
-                //         component: AppRouting,
-                //         data: {}
-                //       },
-                //       {
-                //         path: ':nbName',
-                //         component: AppRouting,
-                //         data: {}
-                //       },
-                //       {
-                //         path: 'preview/:nbName',
-                //         component: AppRouting,
-                //         data: {}
-                //       }
-                //     ]
-                //   },
-                //   {
-                //     path: 'data',
-                //     children: [
-                //       {
-                //         path: '',
-                //         component: AppRouting,
-                //         data: {}
-                //       },
-                //       {
-                //         path: 'data-sets',
-                //         component: AppRouting,
-                //         data: {}
-                //       },
-                //       {
-                //         path: 'data-sets/:dataSetId',
-                //         component: AppRouting,
-                //         data: {}
-                //       },
-                //       // non-migrated routes go HERE
-                //       {
-                //         path: 'cohorts',
-                //         children: [
-                //           {
-                //             path: ':cid/actions',
-                //             component: AppRouting,
-                //             data: {},
-                //           },
-                //           {
-                //             path: 'build',
-                //             children: [
-                //               {
-                //                 path: '',
-                //                 component: AppRouting,
-                //                 data: {}
-                //               },
-                //             ]
-                //           },
-                //           {
-                //             path: ':cid/review',
-                //             children: [
-                //               {
-                //                 path: '',
-                //                 component: AppRouting,
-                //                 data: {},
-                //               }, {
-                //                 path: 'participants',
-                //                 component: AppRouting,
-                //                 data: {},
-                //               }, {
-                //                 path: 'cohort-description',
-                //                 component: AppRouting,
-                //                 data: {},
-                //               }, {
-                //                 path: 'participants/:pid',
-                //                 component: AppRouting,
-                //                 data: {},
-                //               }
-                //             ],
-                //           }
-                //         ]
-                //       },
-                //       {
-                //         path: 'concepts',
-                //         children: [{
-                //           path: '',
-                //           component: AppRouting,
-                //           data: {}
-                //         }, {
-                //           path: ':domain',
-                //           component: AppRouting,
-                //           data: {}
-                //         }]
-                //       },
-                //       {
-                //         path: 'concepts/sets',
-                //         children: [
-                //           {
-                //             path: ':csid',
-                //             component: AppRouting,
-                //             data: {}
-                //           },
-                //           {
-                //             path: ':csid/actions',
-                //             component: AppRouting,
-                //             data: {},
-                //           },
-                //         ]
-                //       }
-                //     ]
-                //   }]
+//                path: '**',
+                path: ':ns/:wsid',
+//                pathMatch: 'prefix',
+//                component: ReactWorkspaceWrapperComponent,
+//                component: AppRouting,
+//                data: {}
+ //               runGuardsAndResolvers: 'always',
+                children: [
+                  // legacy / duplicated routes go HERE
+                  {
+                    path: 'about',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'edit',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'duplicate',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'notebooks',
+                    children: [
+                      {
+                        path: '',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      {
+                        path: ':nbName',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      {
+                        path: 'preview/:nbName',
+                        component: AppRouting,
+                        data: {}
+                      }
+                    ]
+                  },
+                  {
+                    path: 'data',
+                    children: [
+                      {
+                        path: '',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      {
+                        path: 'data-sets',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      {
+                        path: 'data-sets/:dataSetId',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      // non-migrated routes go HERE
+                      {
+                        path: 'cohorts',
+                        children: [
+                          {
+                            path: ':cid/actions',
+                            component: AppRouting,
+                            data: {},
+                          },
+                          {
+                            path: 'build',
+                            children: [
+                              {
+                                path: '',
+                                component: AppRouting,
+                                data: {}
+                              },
+                            ]
+                          },
+                          {
+                            path: ':cid/review',
+                            children: [
+                              {
+                                path: '',
+                                component: AppRouting,
+                                data: {},
+                              }, {
+                                path: 'participants',
+                                component: AppRouting,
+                                data: {},
+                              }, {
+                                path: 'cohort-description',
+                                component: AppRouting,
+                                data: {},
+                              }, {
+                                path: 'participants/:pid',
+                                component: AppRouting,
+                                data: {},
+                              }
+                            ],
+                          }
+                        ]
+                      },
+                      {
+                        path: 'concepts',
+                        children: [{
+                          path: '',
+                          component: AppRouting,
+                          data: {}
+                        }, {
+                          path: ':domain',
+                          component: AppRouting,
+                          data: {}
+                        }]
+                      },
+                      {
+                        path: 'concepts/sets',
+                        children: [
+                          {
+                            path: ':csid',
+                            component: AppRouting,
+                            data: {}
+                          },
+                          {
+                            path: ':csid/actions',
+                            component: AppRouting,
+                            data: {},
+                          },
+                        ]
+                      }
+                    ]
+                  }]
               }]
           }
         ]
@@ -383,9 +381,7 @@ export class AppRoutingModule {
     // TODO eric: test admin preview egress
     NavStore.navigate = (commands, extras) => {
       console.log(this.router.serializeUrl(this.router.createUrlTree(commands, extras)));
-      const url = this.router.serializeUrl(this.router.createUrlTree(commands, extras));
-      history.push(url);
-//      this.router.navigate(commands, extras);
+      this.router.navigate(commands, extras);
     }
 
     // TODO eric: navigateByUrl is never called with `extra`
