@@ -6,11 +6,10 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {conceptSetUpdating, navigate, navigateByUrl} from 'app/utils/navigation';
+import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
-import {urlParamsStore} from '../../../utils/url-params-store';
 
 const styles = reactStyles({
   conceptSetsHeader: {

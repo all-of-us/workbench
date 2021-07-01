@@ -18,7 +18,7 @@ import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   queryParamsStore,
-  routeConfigDataStore, setSidebarActiveIconStore
+  routeConfigDataStore, setSidebarActiveIconStore, urlParamsStore
 } from 'app/utils/navigation';
 import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
@@ -26,7 +26,6 @@ import {environment} from 'environments/environment';
 import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {ExceededActionCountError, LeoRuntimeInitializer} from '../../utils/leo-runtime-initializer';
-import {urlParamsStore} from '../../utils/url-params-store';
 import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from "../../components/help-sidebar";
 
 @Component({

@@ -9,7 +9,7 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   Filter,
@@ -19,7 +19,6 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
-import {urlParamsStore} from '../../../utils/url-params-store';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';

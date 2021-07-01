@@ -7,7 +7,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -22,7 +22,6 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {urlParamsStore} from '../../../utils/url-params-store';
 
 const css = `
   .stats-left-padding {

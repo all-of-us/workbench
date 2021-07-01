@@ -7,7 +7,7 @@ import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   routeConfigDataStore,
-  setSidebarActiveIconStore,
+  setSidebarActiveIconStore, urlParamsStore,
 
 } from 'app/utils/navigation';
 
@@ -15,7 +15,6 @@ import {routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {Workspace} from 'generated/fetch';
-import {urlParamsStore} from '../../../utils/url-params-store';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',

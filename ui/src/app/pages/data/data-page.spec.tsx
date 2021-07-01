@@ -7,7 +7,7 @@ import {ResourceCardBase} from 'app/components/card';
 import {DataComponent} from 'app/pages/data/data-component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewApi, CohortsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -17,7 +17,6 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {serverConfigStore} from 'app/utils/stores';
-import {urlParamsStore} from '../../utils/url-params-store';
 
 
 describe('DataPage', () => {

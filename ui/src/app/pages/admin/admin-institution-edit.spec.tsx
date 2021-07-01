@@ -8,8 +8,8 @@ import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {urlParamsStore} from '../../utils/url-params-store';
 import {AdminInstitutionEdit} from './admin-institution-edit';
+import {urlParamsStore} from "../../utils/navigation";
 
 describe('AdminInstitutionEditSpec', () => {
 

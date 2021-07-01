@@ -8,9 +8,8 @@ import {cohortReviewStore, queryResultSizeStore, visitsFilterOptions} from 'app/
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
-import {urlParamsStore} from '../../../utils/url-params-store';
 
 const styles = reactStyles({
   title: {

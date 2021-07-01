@@ -1,11 +1,4 @@
-import * as fp from 'lodash/fp';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {workspacesApi} from '../services/swagger-fetch-clients';
-import {ExceededActionCountError, LeoRuntimeInitializer} from './leo-runtime-initializer';
-import {currentWorkspaceStore, nextWorkspaceWarmupStore} from './navigation';
-import {runtimeStore} from './stores';
-
-export const urlParamsStore = new BehaviorSubject<any>({});
+import {urlParamsStore} from './navigation';
 
 let pollAborter = new AbortController();
 

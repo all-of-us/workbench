@@ -2,11 +2,10 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, NavStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
-import {urlParamsStore} from '../../utils/url-params-store';
 
 describe('WorkspaceNavBarComponent', () => {
 
