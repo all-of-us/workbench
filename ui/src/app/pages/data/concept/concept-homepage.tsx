@@ -21,6 +21,7 @@ import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'ap
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   searchBar: {
@@ -126,7 +127,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
@@ -177,6 +178,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     componentDidMount() {
+      this.props.hideSpinner();
       this.loadDomainsAndSurveys();
     }
 
