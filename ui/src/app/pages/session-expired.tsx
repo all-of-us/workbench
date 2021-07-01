@@ -4,6 +4,8 @@ import {PublicLayout} from 'app/components/public-layout';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
+import {useEffect} from "react";
 
 const styles = reactStyles({
   button: {
@@ -17,14 +19,20 @@ const styles = reactStyles({
   }
 });
 
-export class SessionExpired extends React.Component<{signIn: Function}> {
-  render() {
-    return <PublicLayout>
-      <BoldHeader>You have been signed out</BoldHeader>
-      <section style={styles.textSection}>
-        You were automatically signed out of your session due to inactivity
-      </section>
-      <GoogleSignInButton signIn={() => this.props.signIn()}/>
-    </PublicLayout>;
-  }
+interface Props extends WithSpinnerOverlayProps {
+  signIn: Function
+}
+
+export const SessionExpired = (props: Props) => {
+  useEffect(() => {
+    props.hideSpinner();
+  }, [props.spinnerVisible]);
+
+  return <PublicLayout>
+    <BoldHeader>You have been signed out</BoldHeader>
+    <section style={styles.textSection}>
+      You were automatically signed out of your session due to inactivity
+    </section>
+    <GoogleSignInButton signIn={() => this.props.signIn()}/>
+  </PublicLayout>;
 }
