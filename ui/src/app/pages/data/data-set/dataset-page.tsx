@@ -54,6 +54,7 @@ import {
   Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -422,7 +423,7 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps {
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
@@ -496,6 +497,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     async componentDidMount() {
+      this.props.hideSpinner();
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
       if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
