@@ -23,6 +23,7 @@ import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 
 const styles = reactStyles({
@@ -59,7 +60,7 @@ export enum DataUserCodeOfConductPage {
   SIGNATURE
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -115,6 +116,10 @@ export const DataUserCodeOfConduct = withUserProfile()(
         this.props.profileState.updateCache(profile);
         navigate(['/']);
       });
+    }
+
+    componentDidMount() {
+      this.props.hideSpinner();
     }
 
     render() {
