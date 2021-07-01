@@ -21,6 +21,8 @@ import {routeDataStore, withStore} from '../../utils/stores';
 import {WorkspaceRoutes} from '../../workspace-app-routing';
 import {WorkspaceAbout} from './workspace-about';
 import {WorkspaceNavBarReact} from './workspace-nav-bar';
+import {Spinner} from "../../components/spinners";
+import {SidebarContent} from "../data/cohort-review/sidebar-content.component";
 
 const NavBar = fp.flow(
   withRouteConfigData(),
@@ -68,16 +70,19 @@ export const WorkspaceWrapper = fp.flow(
   console.log("rendering wrapper");
   console.log(workspace);
 
-// should nav bar actually load before workspace is ready?
   return <React.Fragment>
-    <NavBar/>
-    {!!workspace &&
-    <React.Fragment>
-        <HelpSidebar pageKey={routeConfigData.pageKey}/>
-        <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
-            <WorkspaceRoutes/>
+    {workspace
+        ? <React.Fragment>
+          {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
+          <HelpSidebar pageKey={routeConfigData.pageKey}/>
+          <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
+              <WorkspaceRoutes/>
+          </div>
+        </React.Fragment>
+        : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+          <Spinner />
         </div>
-    </React.Fragment>}
+    }
   </React.Fragment>
 });
 
