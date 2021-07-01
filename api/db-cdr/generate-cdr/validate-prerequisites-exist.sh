@@ -5,7 +5,7 @@ set -e
 
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
-export CDR_VERSION=$3       # CDR version
+export CDR_VERSION=$3       # CDR version`
 
 PREP_TABLE_RUN="!_prep_tables_!"
 BUCKET="all-of-us-workbench-private-cloudsql"

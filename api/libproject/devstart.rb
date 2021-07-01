@@ -793,13 +793,21 @@ def make_bq_prep_tables(cmd_name, *args)
       ->(opts, v) { opts.date = v},
       "Redcap file date"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project }
+  op.add_option(
+      "--tier [tier]",
+      ->(opts, v) { opts.tier = v},
+      "CDR tier"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.date and opts.tier }
   op.parse.validate
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    Dir.chdir('db-cdr/prep-tables') do
-      common.run_inline %W{python make-prep-survey.py --project #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} --dataset #{op.opts.dataset} --date #{op.opts.date}}
+    Dir.chdir('db-cdr/prep-ppi-tables') do
+      common.run_inline %W{python make-prep-ppi-tables.py --project #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} --dataset #{op.opts.dataset} --date #{op.opts.date}}
+    end
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/make-bq-prep-ppi-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.date} #{op.opts.tier}}
     end
   end
 end
