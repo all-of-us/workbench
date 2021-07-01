@@ -1,8 +1,0 @@
-<!--<app-workspace-nav-bar *ngIf="displayNavBar" [tabPath]="tabPath"></app-workspace-nav-bar>-->
-<ng-container *ngIf="workspace">
-  <app-help-sidebar [pageKey]="pageKey"></app-help-sidebar>
-  <div [style.margin-right]="pageKey ? '45px' : 0" [style.height]="pageKey && !contentFullHeightOverride ? 'auto': '100%'">
-    <router-outlet></router-outlet>
-  </div>
-</ng-container>
-<div *ngIf="!workspace" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

@@ -1,31 +1,7 @@
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
-import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
-import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
-import {UserAudit} from 'app/pages/admin/user-audit';
-import {CookiePolicy} from 'app/pages/cookie-policy';
-import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
-import {SessionExpired} from 'app/pages/session-expired';
-import {SignInAgain} from 'app/pages/sign-in-again';
-import {UserDisabled} from 'app/pages/user-disabled';
-import {SignInService} from 'app/services/sign-in.service';
-import {ReactWrapperBase} from 'app/utils';
-import {authStore, profileStore, useStore} from 'app/utils/stores';
-import {serverConfigStore} from 'app/utils/stores';
-import * as fp from 'lodash/fp';
+import {AppRoute, withRouteData} from 'app/components/app-router';
 import * as React from 'react';
-import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
-import {NotificationModal} from './components/modals';
-import {AdminBanner} from './pages/admin/admin-banner';
-import {AdminInstitution} from './pages/admin/admin-institution';
-import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
-import {AdminNotebookView} from './pages/admin/admin-notebook-view';
-import {AdminReviewWorkspace} from './pages/admin/admin-review-workspace';
-import {AdminUser} from './pages/admin/admin-user';
-import {AdminUsers} from './pages/admin/admin-users';
-import {AdminWorkspace} from './pages/admin/admin-workspace';
-import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
@@ -39,69 +15,26 @@ import {ConceptSearch} from './pages/data/concept/concept-search';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {DataComponent} from './pages/data/data-component';
 import {DatasetPage} from './pages/data/data-set/dataset-page';
-import {Homepage} from './pages/homepage/homepage';
-import {SignIn} from './pages/login/sign-in';
-import {ProfilePage} from './pages/profile/profile-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibrary} from './pages/workspace/workspace-library';
-import {WorkspaceList} from './pages/workspace/workspace-list';
-import {hasRegisteredAccess} from './utils/access-tiers';
-import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
-
-const signInGuard: Guard = {
-  allowed: (): boolean => authStore.get().isSignedIn,
-  redirectPath: '/login'
-};
-
-const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
-  redirectPath: '/'
-};
-
-const expiredGuard: Guard = {
-  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
-  redirectPath: '/access-renewal'
-};
-
-const AdminBannerPage = withRouteData(AdminBanner);
-const AdminNotebookViewPage = withRouteData(AdminNotebookView);
-const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortPagePage = withRouteData(CohortPage);
 const CohortActionsPage = withRouteData(CohortActions);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSearchPage = withRouteData(ConceptSearch);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
-const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataComponentPage = withRouteData(DataComponent);
 const DataSetComponentPage = withRouteData(DatasetPage);
-const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const DetailPagePage = withRouteData(DetailPage);
-const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
-const InstitutionAdminPage = withRouteData(AdminInstitution);
-const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const ParticipantsTablePage = withRouteData(ParticipantsTable);
 const QueryReportPage = withRouteData(QueryReport);
-const SessionExpiredPage = withRouteData(SessionExpired);
-const SignInAgainPage = withRouteData(SignInAgain);
-const SignInPage = withRouteData(SignIn);
-const UserAdminPage = withRouteData(AdminUser);
-const UsersAdminPage = withRouteData(AdminUsers);
-const UserAuditPage = withRouteData(UserAudit);
-const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
-const WorkspaceAdminPage = withRouteData(AdminWorkspace);
-const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
-const WorkspaceListPage = withRouteData(WorkspaceList);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
 // TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
 // rendering over and over again on page load, rendering (hah) the app unusable.

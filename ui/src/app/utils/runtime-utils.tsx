@@ -218,19 +218,13 @@ const useRuntime = (currentWorkspaceNamespace) => {
     }
 
     const getRuntime = withAsyncErrorHandling(
-      () => {
-        console.log("runtime being set to null")
-        runtimeStore.set({workspaceNamespace: null, runtime: null});
-      },
+      () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
         let leoRuntime;
         try {
-          console.log("runtime workspace");
-          console.log(currentWorkspaceNamespace);
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
-            console.error(e);
             throw e;
           }
           // null on the runtime store indicates no existing runtime
@@ -273,7 +267,6 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   const {runtime} = useStore(runtimeStore);
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
-  console.log("Runtime workspacenamespace : " + currentWorkspaceNamespace)
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
@@ -327,13 +320,11 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
 export const useCustomRuntime = (currentWorkspaceNamespace):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
-  console.log(workspaceNamespace);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
-  console.log("Runtime workspacenamespace : " + currentWorkspaceNamespace)
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {

@@ -22,7 +22,6 @@ import {
 import {NavStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
-import {withRouter} from 'react-router';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({
@@ -141,13 +140,10 @@ function restrictTab(workspace, tab) {
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
-  withCdrVersions(),
-  withRouter
+  withCdrVersions()
 )(props => {
-  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse, history} = props;
+  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
-
-  console.log("Rendering workspace-nav-bar");
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
@@ -160,9 +156,7 @@ export const WorkspaceNavBarReact = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => {
-          NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]));
-        }}
+        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
       >
         {name}
       </Clickable>
