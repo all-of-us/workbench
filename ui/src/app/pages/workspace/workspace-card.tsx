@@ -167,7 +167,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     message: `Could not delete workspace '${this.props.workspace.id}'.`,
     showBugReportLink: true,
     onDismiss: () => {
-      this.setState({confirmDeleting: false, loadingData: true});
+      this.setState({confirmDeleting: false, loadingData: false});
     }
   }, async() => {
     AnalyticsTracker.Workspaces.Delete();
