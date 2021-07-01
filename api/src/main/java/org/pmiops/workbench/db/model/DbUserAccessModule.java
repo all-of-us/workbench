@@ -29,7 +29,7 @@ public class DbUserAccessModule {
     return userAccessModuleId;
   }
 
-  public DbUserAccessModule UserAccessModuleId(long userAccessModuleId) {
+  public DbUserAccessModule setUserAccessModuleId(long userAccessModuleId) {
     this.userAccessModuleId = userAccessModuleId;
     return this;
   }

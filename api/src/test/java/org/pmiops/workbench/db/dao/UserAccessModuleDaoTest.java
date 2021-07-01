@@ -3,14 +3,17 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -26,9 +29,10 @@ public class UserAccessModuleDaoTest extends SpringTest {
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
 
+  private static final Timestamp CURRENT_TIMESTAMP = Timestamp.from(Instant.now());
   private DbUser user;
-  private DbAccessModule registeredModule;
-  private DbAccessModule controlledModule;
+  private DbAccessModule twoFactorAuthModule;
+  private DbAccessModule rtTrainingModule;
 
   @BeforeEach
   public void setup() {
@@ -37,68 +41,16 @@ public class UserAccessModuleDaoTest extends SpringTest {
     user = userDao.save(user);
 
     TestMockFactory.createAccessModule(accessModuleDao);
+    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
   }
 
   @Test
-  public void testGetAllByUser() {
-    assertThat(userAccessModuleDao.getAllByUser(user, registeredModule)).isEmpty();
-  }
-
-  @Test
-  public void test_getByUserAndAccessModule_RT() {
-    // arbitrary nonzero time amount
-    final Instant recently = Instant.now().minusSeconds(10);
-
-    userAccessModuleDao.save(
-        new DbUserAccessModule()
-            .setUser(user)
-            .setAccessModule(registeredModule)
-            .setModuleAccessStatus(ModuleAccessStatus.ENABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
-
-    Optional<DbUserAccessModule> entryMaybe =
-        userAccessModuleDao.getByUserAndAccessModule(user, registeredModule);
-    assertThat(entryMaybe).isPresent();
-    DbUserAccessModule entry = entryMaybe.get();
-    assertThat(entry.getUser()).isEqualTo(user);
-    assertThat(entry.getAccessModule()).isEqualTo(registeredModule);
-    assertThat(entry.getModuleAccessStatusEnum()).isEqualTo(ModuleAccessStatus.ENABLED);
-    assertThat(entry.getFirstEnabled().toInstant().isAfter(recently)).isTrue();
-    assertThat(entry.getLastUpdated().toInstant().isAfter(recently)).isTrue();
-  }
-
-  @Test
-  public void test_getByUserAndAccessModule_RT_disabled() {
-    userAccessModuleDao.save(
-        new DbUserAccessModule()
-            .setUser(user)
-            .setAccessModule(registeredModule)
-            .setModuleAccessStatus(ModuleAccessStatus.DISABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
-
-    Optional<DbUserAccessModule> entryMaybe =
-        userAccessModuleDao.getByUserAndAccessModule(user, registeredModule);
-    assertThat(entryMaybe).isPresent();
-    DbUserAccessModule entry = entryMaybe.get();
-    assertThat(entry.getModuleAccessStatusEnum()).isEqualTo(ModuleAccessStatus.DISABLED);
-  }
-
-  @Test
-  public void test_getByUserAndAccessModule_CT_no_access() {
-    userAccessModuleDao.save(
-        new DbUserAccessModule()
-            .setUser(user)
-            .setAccessModule(registeredModule)
-            .setModuleAccessStatus(ModuleAccessStatus.ENABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
-
-    assertThat(userAccessModuleDao.getByUserAndAccessModule(user, controlledModule)).isEmpty();
-  }
-
-  private Timestamp now() {
-    return Timestamp.from(Instant.now());
+  public void testInsertAndGet() {
+    DbUserAccessModule twoFactorAuthUserAccess = new DbUserAccessModule().setAccessModule(twoFactorAuthModule).setCompletionTime(CURRENT_TIMESTAMP).setUser(user);
+    DbUserAccessModule trainingUserAccess = new DbUserAccessModule().setAccessModule(rtTrainingModule).setCompletionTime(CURRENT_TIMESTAMP).setBypassTime(CURRENT_TIMESTAMP).setUser(user);
+    List<DbUserAccessModule> userAccess = ImmutableList.of(twoFactorAuthUserAccess, trainingUserAccess);
+    userAccessModuleDao.saveAll(userAccess);
+    assertThat(userAccessModuleDao.getAllByUser(user)).containsExactlyElementsIn(userAccess);
   }
 }

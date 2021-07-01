@@ -9,5 +9,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface AccessModuleDao extends CrudRepository<DbAccessModule, Long> {
   List<DbAccessModule> findAll();
 
-  Optional<DbAccessModule> findOneByShortName(AccessModuleName name);
+  Optional<DbAccessModule> findOneByName(AccessModuleName name);
 }
