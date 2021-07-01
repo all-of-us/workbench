@@ -1,5 +1,3 @@
-
-
 import {AlertDanger} from 'app/components/alert';
 import {FadeBox} from 'app/components/containers';
 import {FlexRow} from 'app/components/flex';
@@ -16,6 +14,7 @@ import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const styles = reactStyles({
   fadeBox: {
@@ -33,7 +32,7 @@ interface State {
   firstSignIn: Date;
 }
 
-export class WorkspaceList extends React.Component<{}, State> {
+export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, State> {
 
   private timer: NodeJS.Timer;
 
@@ -48,6 +47,7 @@ export class WorkspaceList extends React.Component<{}, State> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.reloadWorkspaces(null);
   }
 

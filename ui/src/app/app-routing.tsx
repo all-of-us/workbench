@@ -18,7 +18,7 @@ import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
-import {withSpinnerOverlay} from './components/with-spinner-overlay';
+import {withSpinnerOverlay, WithSpinnerOverlayProps} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -107,7 +107,7 @@ const WorkspaceAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorks
 const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAudit);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
-const WorkspaceListPage = withRouteData(WorkspaceList);
+const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
 const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
 interface RoutingProps {
