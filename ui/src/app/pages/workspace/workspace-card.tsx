@@ -8,7 +8,7 @@ import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Modal, ModalBody, ModalFooter, ModalTitle, withErrorModal} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
@@ -162,19 +162,18 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     };
   }
 
-  async deleteWorkspace() {
-    const {workspace} = this.props;
-    this.setState({
-      confirmDeleting: false,
-      loadingData: true});
-    try {
-      await workspacesApi().deleteWorkspace(workspace.namespace, workspace.id);
-      this.setState({loadingData: false});
-      await this.props.reload();
-    } catch (e) {
-      this.setState({bugReportOpen: true, bugReportError: 'Could not delete workspace', loadingData: false});
+  deleteWorkspace = withErrorModal({
+    title: 'Error Deleting Workspace',
+    message: `Could not delete workspace '${this.props.workspace.id}'.`,
+    showBugReportLink: true,
+    onDismiss: () => {
+      this.setState({confirmDeleting: false, loadingData: true});
     }
-  }
+  }, async() => {
+    AnalyticsTracker.Workspaces.Delete();
+    await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+    await this.props.reload();
+  });
 
   async handleShareDialogClose() {
     // Share workspace publishes to current workspace,
