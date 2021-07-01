@@ -62,7 +62,7 @@ const renewalStyle = {
     display: 'flex',
     fontSize: '0.58rem',
     fontWeight: 500,
-    height: 345,
+    height: '15.375rem',
     lineHeight: '22px',
     margin: 0,
     padding: '0.5rem',
@@ -306,7 +306,8 @@ export const AccessRenewalPage = fp.flow(
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
              program, <a target='_blank' style={{textDecoration: 'underline'}}
-              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a>
+              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
+             please contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.PublicationConfirmation))}
