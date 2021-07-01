@@ -11,8 +11,9 @@ import {withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
@@ -29,7 +30,8 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     async componentDidMount() {
-      const {workspace: {cdrVersionId, id, namespace}} = this.props;
+      const {workspace: {cdrVersionId, id, namespace}, hideSpinner} = this.props;
+      hideSpinner();
       const {ns, wsid, cid} = urlParamsStore.getValue();
       if (!cohortReviewStore.getValue()) {
         await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
