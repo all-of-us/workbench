@@ -25,8 +25,9 @@ import {
   UserRole,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
-interface WorkspaceProps {
+interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
@@ -109,6 +110,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadFreeTierUsage();
