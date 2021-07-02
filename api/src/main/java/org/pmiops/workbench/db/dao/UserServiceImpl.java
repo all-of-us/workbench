@@ -553,7 +553,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.saveAll(dataUseAgreements);
   }
-  
+
   @Override
   @Transactional
   public void submitTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {

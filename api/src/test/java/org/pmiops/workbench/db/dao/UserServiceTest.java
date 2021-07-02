@@ -438,17 +438,19 @@ public class UserServiceTest extends SpringTest {
   public void testSubmitTermsOfService_illegalTosVersion() {
     // Testing NULL input version
     assertThrows(
-            BadRequestException.class,
-            () -> {
-              userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
-            });
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
+        });
 
     // Testing not current term input version
     assertThrows(
-            BadRequestException.class,
-            () -> {
-              userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
-            });
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
+        });
   }
 
   @Test
