@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {ResourceType, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
-import {BugReportModal} from 'app/components/bug-report';
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
