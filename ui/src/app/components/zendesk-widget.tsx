@@ -48,7 +48,7 @@ export const ZendeskWidget = () => {
         },
       }
     };
-    () => {
+    return () => {
       delete window[zendeskSettingsGlobal];
       s.remove();
     };
