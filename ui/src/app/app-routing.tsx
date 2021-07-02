@@ -27,7 +27,7 @@ import {AdminWorkspace} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
-import {ProfileComponent} from './pages/profile/profile';
+import {ProfileComponent} from './pages/profile/profile-component';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';

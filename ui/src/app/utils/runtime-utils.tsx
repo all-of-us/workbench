@@ -238,7 +238,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
         }
       });
     getRuntime();
-  }, []);
+  }, [currentWorkspaceNamespace]);
 };
 
 export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {

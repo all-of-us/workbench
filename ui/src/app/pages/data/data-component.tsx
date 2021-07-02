@@ -94,7 +94,7 @@ export const DataComponent = withCurrentWorkspace()(({workspace}) => {
           .map(result => {
             return {
               ...result,
-            // TODO (RW-4682): Fix this nonsense
+              // TODO (RW-4682): Fix this nonsense
               modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
             }; }));
     } catch (error) {

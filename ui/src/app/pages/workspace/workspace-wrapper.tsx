@@ -16,7 +16,7 @@ export const WorkspaceWrapper = fp.flow(
           {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
           <HelpSidebar pageKey={routeConfigData.pageKey}/>
           <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
-              <WorkspaceRoutes/>
+            <WorkspaceRoutes/>
           </div>
         </React.Fragment>
         : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>

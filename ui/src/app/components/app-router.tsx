@@ -2,8 +2,8 @@ import {navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigati
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect} from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
-import {useEffect} from "react";
 
 const {Fragment} = React;
 
@@ -27,13 +27,13 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
       routeConfigDataStore.next(routeData);
       routeDataStore.set(routeData);
     }
-  }, [routeData])
+  }, [routeData]);
 
   useEffect(() => {
     if (!intermediaryRoute) {
       urlParamsStore.next(params);
     }
-  }, [params])
+  }, [params]);
 
   return <WrappedComponent {...props}/>;
 };
