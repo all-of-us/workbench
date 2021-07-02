@@ -260,18 +260,18 @@ export const AccessRenewalPage = fp.flow(
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
       {cond(
-          // Completed - no icon or button
-          [allModulesCompleteOrBypassed, () => null],
-          // Access expired icon
-          [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
-            <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
-            <div style={styles.h1}>Researcher workbench access has expired.</div>
-          </React.Fragment>],
-          // Default - back button
-          () => <React.Fragment>
-            <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
-            <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
-          </React.Fragment>
+        // Completed - no icon or button
+        [allModulesCompleteOrBypassed, () => null],
+        // Access expired icon
+        [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
+          <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
+          <div style={styles.h1}>Researcher workbench access has expired.</div>
+        </React.Fragment>],
+        // Default - back button
+        () => <React.Fragment>
+          <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
+          <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
+        </React.Fragment>
         )
       }
       <div style={allModulesCompleteOrBypassed ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
