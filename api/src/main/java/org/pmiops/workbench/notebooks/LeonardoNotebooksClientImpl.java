@@ -18,14 +18,11 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.*;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRegistryEnum;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
@@ -53,6 +50,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
+  private final Provider<DisksApi> diskApiProvider;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
@@ -67,6 +65,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
+      Provider<DisksApi> diskApiProvider,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
@@ -77,6 +76,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
+    this.diskApiProvider = diskApiProvider;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
@@ -125,6 +125,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     return request;
   }
+
+//  private LeonardoCreateDiskRequest buildCreateDiskRequest(String userEmail, Integer diskSize, LeonardoDiskType diskType, Integer blockSize) {
+//    Map<String, String> runtimeLabels = new HashMap<>();
+//    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
+//    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
+////    runtimeLabels.putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()));
+//    LeonardoCreateDiskRequest request =
+//            new LeonardoCreateDiskRequest()
+//                    .labels(runtimeLabels)
+//                    .blockSize(blockSize)
+//                    .diskType(diskType)
+//                    .size(diskSize);
+//    return request;
+//  }
 
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
@@ -286,54 +300,61 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void createPersistentDisk(Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) throws WorkbenchException {
-    RuntimesApi runtimesApi = runtimesApiProvider.get();
-
-    DbUser user = userProvider.get();
-    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
-    DbCdrVersion cdrVersion = workspace.getCdrVersion();
-    Map<String, String> customEnvironmentVariables = new HashMap<>();
-    // i.e. is NEW or MIGRATED
-    if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
-      customEnvironmentVariables.put(
-              WORKSPACE_CDR_ENV_KEY,
-              cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-    }
-
-    if (cdrVersion.getAllSamplesWgsDataBucket() != null) {
-      customEnvironmentVariables.put(
-              ALL_SAMPLES_WGS_KEY,
-              cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-                      + "/"
-                      + cdrVersion.getAllSamplesWgsDataBucket().replaceFirst("^/", ""));
-    }
-
-    if (cdrVersion.getSingleSampleArrayDataBucket() != null) {
-      customEnvironmentVariables.put(
-              SINGLE_SAMPLE_ARRAY_BUCKET_KEY,
-              cdrVersion.getAccessTier().getDatasetsBucket().replaceFirst("/$", "")
-                      + "/"
-                      + cdrVersion.getSingleSampleArrayDataBucket().replaceFirst("^/", ""));
-    }
-
-    // See RW-6079
-    customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
-
+  public void createPersistentDisk(String googleProject, String diskName, Integer diskSize, LeonardoDiskType diskType, Integer blockSize) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    LeonardoCreateDiskRequest request =
+            new LeonardoCreateDiskRequest()
+                    .labels(null)
+                    .blockSize(blockSize)
+                    .diskType(diskType)
+                    .size(diskSize);
     leonardoRetryHandler.run(
             (context) -> {
-              runtimesApi.createRuntime(
-                      runtime.getGoogleProject(),
-                      runtime.getRuntimeName(),
-                      buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
+              disksApi.createDisk(
+                      googleProject,
+                      diskName,
+                      request);
               return null;
             });
-
   }
 
   @Override
-  public LeonardoGetRuntimeResponse getPersistentDisk(String googleProject, String runtimeName) throws WorkbenchException {
-    return null;
+  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    try {
+      return leonardoRetryHandler.runAndThrowChecked(
+              (context) -> disksApi.getDisk(googleProject, diskName));
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertLeonardoException(e);
+    }
   }
+
+  @Override
+  public void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    leonardoRetryHandler.run(
+            (context) -> {
+              disksApi.deleteDisk(googleProject, diskName);
+              return null;
+            });
+  }
+
+  @Override
+  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize, LeonardoDiskType diskType, Integer blockSize) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    LeonardoUpdateDiskRequest request =
+            new LeonardoUpdateDiskRequest()
+                    .labels(null)
+                    .blockSize(blockSize)
+                    .diskType(diskType)
+                    .size(diskSize);
+    leonardoRetryHandler.run(
+            (context) -> {
+              disksApi.updateDisk(googleProject, diskName, request);
+              return null;
+            });
+  }
+
 
   @Override
   public boolean getLeonardoStatus() {
