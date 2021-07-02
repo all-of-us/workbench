@@ -195,8 +195,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final List<ListRuntimeResponse> workbenchListRuntimeResponses =
-        leonardoNotebooksClient
-            .listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
+        leonardoNotebooksClient.listRuntimesByProjectAsService(dbWorkspace.getGoogleProject())
             .stream()
             .map(leonardoMapper::toApiListRuntimeResponse)
             .collect(Collectors.toList());

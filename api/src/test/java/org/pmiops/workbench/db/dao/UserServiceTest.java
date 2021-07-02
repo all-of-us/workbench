@@ -435,7 +435,7 @@ public class UserServiceTest extends SpringTest {
   }
 
   @Test
-  public void testSubmitTermsOfService() {
+  public void testSubmitTermsOfService_illegalTosVersion() {
     // Testing NULL input version
     assertThrows(
             BadRequestException.class,
@@ -449,9 +449,11 @@ public class UserServiceTest extends SpringTest {
             () -> {
               userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
             });
+  }
 
+  @Test
+  public void testSubmitTermsOfService() {
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }
