@@ -198,7 +198,7 @@ const RenewalCard = withStyle(renewalStyle.card)(
       <div style={renewalStyle.h3}><TitleComponent/></div>
       <div style={{ color: colors.primary, margin: '0.5rem 0', display: 'grid', columnGap: '1rem', gridTemplateColumns: 'auto 1fr'}}>
         <div>Last Updated On:</div>
-        <div>Next Review: </div>
+        <div>Next Review:</div>
         <div>{lastConfirmedDate}</div>
         <div>{nextReviewDate}</div>
       </div>
