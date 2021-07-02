@@ -12,7 +12,7 @@ export class UserApiStub extends UserApi {
     }
   }
 
-  user(searchTerm: string): Promise<UserResponse> {
+  userSearch(accessTierShortName: string, searchTerm: string): Promise<UserResponse> {
     return new Promise<UserResponse>(resolve => {
       let usersToReturn: User[] = [];
       if (this.existingUsers) {

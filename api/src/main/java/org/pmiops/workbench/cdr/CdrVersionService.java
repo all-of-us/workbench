@@ -151,7 +151,7 @@ public class CdrVersionService {
 
     List<Long> defaultVersions =
         cdrVersions.stream()
-            .filter(DbCdrVersion::getIsDefault)
+            .filter(DbCdrVersion::getIsDefaultNotNull)
             .map(DbCdrVersion::getCdrVersionId)
             .collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {

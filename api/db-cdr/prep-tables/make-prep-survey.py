@@ -16,11 +16,11 @@ id_all = 1
 home_dir = "../csv"
 
 # key = csv prefix, value = csv output file name
-surveys = {"ENGLISHBasics_DataDictionary": "Basics",
-           "ENGLISHHealthCareAccessUtiliza_DataDictionary": "HealthCareAccessUtiliza",
-           "ENGLISHLifestyle_DataDictionary": "Lifestyle",
-           "ENGLISHOverallHealth_DataDictionary": "OverallHealth",
-           "ENGLISHPersonalMedicalHistory_DataDictionary": "PersonalMedicalHistory"}
+surveys = {"ENGLISHBasics_DataDictionary": "prep_ppi_basics",
+           "ENGLISHHealthCareAccessUtiliza_DataDictionary": "prep_ppi_health_care_access",
+           "ENGLISHLifestyle_DataDictionary": "prep_ppi_lifestyle",
+           "ENGLISHOverallHealth_DataDictionary": "prep_ppi_overall_health",
+           "ENGLISHPersonalMedicalHistory_DataDictionary": "prep_ppi_personal_medical_history"}
 
 # field annotation flags
 annotation_flags = {"REGISTERED_TOPIC_SUPPRESSED": "0",
@@ -63,7 +63,7 @@ def main():
 
         # open your file writers for this survey and write headers
         controlled_writer, registered_writer, all_writer, controlled_file, registered_file, all_file \
-            = open_writers_with_headers(name, date)
+            = open_writers_with_headers(name)
 
         # made these global in order to add rows in selected output files
         global id_controlled
@@ -273,7 +273,7 @@ def main():
     bucket = storage_client.get_bucket('all-of-us-workbench-private-cloudsql')
     files = [f for f in listdir(home_dir) if isfile(join(home_dir, f))]
     for f in files:
-        blob = bucket.blob('cb_prep_tables/redcap/output/' + f)
+        blob = bucket.blob('cb_prep_tables/redcap/' + date +'/' + f)
         blob.upload_from_filename(home_dir + "/" + f)
 
     # when done remove directory and all files
@@ -357,13 +357,13 @@ def query_topic_code(project, dataset, concept_name):
     return query_job.result()
 
 
-def open_writers_with_headers(name, date):
+def open_writers_with_headers(name):
     file_prefix = home_dir + "/" + surveys.get(name)
-    controlled_file = open(file_prefix + "_controlled" + '_' + date + ".csv",
+    controlled_file = open(file_prefix + "_controlled" + ".csv",
                            'w')
-    registered_file = open(file_prefix + "_registered" + '_' + date + ".csv",
+    registered_file = open(file_prefix + "_registered" +  ".csv",
                            'w')
-    all_file = open(file_prefix + "_all" + '_' + date + ".csv", 'w')
+    all_file = open(file_prefix + "_all" + ".csv", 'w')
     controlled_writer = csv.DictWriter(controlled_file, fieldnames=headers)
     controlled_writer.writeheader()
     registered_writer = csv.DictWriter(registered_file, fieldnames=headers)

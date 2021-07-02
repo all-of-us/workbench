@@ -62,7 +62,7 @@ interactions visible to you.
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run tests against a local UI and API server (RW-6132 will eliminate this distinction):
   * Stop your local API server
-  * `e2e$ yarn impersonate-test-user`
+  * `e2e$ yarn impersonate-test-users`
   * Restart your local API server: `api$ ./project.rb run-api`
   * `e2e$ yarn test-local-devup`
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>

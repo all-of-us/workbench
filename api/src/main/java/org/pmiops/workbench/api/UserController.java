@@ -4,6 +4,7 @@ import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.Collections;
@@ -13,17 +14,20 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingAccount;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -39,9 +43,9 @@ public class UserController implements UserApiDelegate {
   private static final Logger log = Logger.getLogger(UserController.class.getName());
   private static final int DEFAULT_PAGE_SIZE = 10;
   private static final String DEFAULT_SORT_FIELD = "username";
-  private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
+  private static final Function<DbUser, User> TO_USER_RESPONSE_USER =
       user -> {
-        org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
+        User modelUser = new User();
         modelUser.setEmail(user.getUsername()); // deprecated, but kept for compatibility
         modelUser.setUserName(user.getUsername());
         modelUser.setGivenName(user.getGivenName());
@@ -84,15 +88,16 @@ public class UserController implements UserApiDelegate {
    * @param pageSize
    * @param sortOrder
    * @return
+   * @deprecated use {@link #userSearch(String, String, String, Integer, String)} with an access
+   *     tier short name argument instead.
    */
   @Override
+  @Deprecated
   public ResponseEntity<UserResponse> user(
       String term, String pageToken, Integer pageSize, String sortOrder) {
-    UserResponse response = new UserResponse();
-    response.setUsers(Collections.emptyList());
-    response.setNextPageToken("");
+    UserResponse response = initializeUserResponse();
 
-    if (null == term || term.isEmpty()) {
+    if (Strings.isNullOrEmpty(term)) {
       return ResponseEntity.ok(response);
     }
 
@@ -114,36 +119,119 @@ public class UserController implements UserApiDelegate {
       throw new ForbiddenException("user search requires registered data access");
     }
 
-    Sort.Direction direction =
-        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
-    Sort sort = Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
+    // What we are really looking for here are users who have a FC account.
+    // This should exist if they have signed in at least once
+    List<DbUser> users =
+        userService.findUsersBySearchString(term, getSort(sortOrder)).stream()
+            .filter(user -> user.getFirstSignInTime() != null)
+            .collect(Collectors.toList());
+
+    return processSearchResults(term, pageSize, response, paginationToken, users);
+  }
+
+  /**
+   * Return a page of users matching a search term and an access tier. Used by autocomplete for
+   * workspace sharing.
+   *
+   * @param accessTierShortName the shortName of the access tier to search in; the calling user must
+   *     also be a member of this tier
+   * @param term a search term to match against the user's name and username fields (case
+   *     insensitive)
+   * @param pageToken Pagination token retrieved from a previous call to user; used for retrieving
+   *     additional pages of results.
+   * @param pageSize Maximum number of results to return in a response. Defaults to 10.
+   * @param sortOrder 'asc' or 'desc', defaulting to 'asc'
+   * @return A list of users matching the provided search query and a nextPageToken if applicable.
+   */
+  @Override
+  public ResponseEntity<UserResponse> userSearch(
+      String accessTierShortName,
+      String term,
+      String pageToken,
+      Integer pageSize,
+      String sortOrder) {
+    UserResponse response = initializeUserResponse();
+
+    if (Strings.isNullOrEmpty(term)) {
+      return ResponseEntity.ok(response);
+    }
+
+    PaginationToken paginationToken;
+    try {
+      paginationToken = getPaginationTokenFromPageToken(pageToken);
+    } catch (IllegalArgumentException | BadRequestException e) {
+      log.warning(e.getMessage());
+      return ResponseEntity.badRequest().body(response);
+    }
+
+    // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
+    // details will be published publicly, but it prevents arbitrary unregistered users from seeing
+    // limited researcher profile details.
+
+    DbAccessTier searchTier =
+        accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+            .filter(tier -> tier.getShortName().equals(accessTierShortName))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new ForbiddenException(
+                        "Requester does not have access to tier " + accessTierShortName));
+
+    String authorizationDomain = searchTier.getAuthDomainName();
+    if (!fireCloudService.isUserMemberOfGroupWithCache(
+        userProvider.get().getUsername(), authorizationDomain)) {
+      throw new ForbiddenException("Requester is not a member of " + authorizationDomain);
+    }
 
     // What we are really looking for here are users who have a FC account.
     // This should exist if they have signed in at least once
     List<DbUser> users =
-        userService.findUsersBySearchString(term, sort).stream()
+        userService.findUsersBySearchString(term, getSort(sortOrder), accessTierShortName).stream()
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
+    return processSearchResults(term, pageSize, response, paginationToken, users);
+  }
+
+  private static UserResponse initializeUserResponse() {
+    UserResponse response = new UserResponse();
+    response.setUsers(Collections.emptyList());
+    response.setNextPageToken("");
+    return response;
+  }
+
+  @Nonnull
+  private static Sort getSort(String sortOrder) {
+    return Sort.by(
+        new Sort.Order(
+            Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC),
+            DEFAULT_SORT_FIELD));
+  }
+
+  private ResponseEntity<UserResponse> processSearchResults(
+      String term,
+      Integer pageSize,
+      UserResponse response,
+      PaginationToken paginationToken,
+      List<DbUser> users) {
+
     List<List<DbUser>> pagedUsers =
         Lists.partition(users, Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE));
-
-    int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
 
     if (pagedUsers.size() == 0) {
       return ResponseEntity.ok(response);
     }
 
+    int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
     if (pageOffset < pagedUsers.size()) {
       boolean hasNext = pageOffset < pagedUsers.size() - 1;
       if (hasNext) {
         response.setNextPageToken(PaginationToken.of(pageOffset + 1).toBase64());
       }
-      List<org.pmiops.workbench.model.User> modelUsers =
+      response.setUsers(
           pagedUsers.get(pageOffset).stream()
               .map(TO_USER_RESPONSE_USER)
-              .collect(Collectors.toList());
-      response.setUsers(modelUsers);
+              .collect(Collectors.toList()));
     } else {
       log.warning(
           String.format(
@@ -151,6 +239,7 @@ public class UserController implements UserApiDelegate {
               term, pageOffset));
       return ResponseEntity.badRequest().body(response);
     }
+
     return ResponseEntity.ok(response);
   }
 
