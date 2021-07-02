@@ -48,13 +48,21 @@ export const ZendeskWidget = () => {
         },
       }
     };
+<<<<<<< HEAD
     return () => {
+=======
+    () => {
+>>>>>>> 547135c1b ([risk=no] Zendesk -> React)
       delete window[zendeskSettingsGlobal];
       s.remove();
     };
   }, []);
   return <React.Fragment />;
+<<<<<<< HEAD
 };
+=======
+}
+>>>>>>> 547135c1b ([risk=no] Zendesk -> React)
 
 @Component({
   selector: 'app-zendesk-widget',

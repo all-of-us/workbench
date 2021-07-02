@@ -27,6 +27,8 @@ import {FooterComponent} from 'app/components/footer';
 import {TextModalComponent} from 'app/components/text-modal';
 import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+import {FooterComponent} from './components/footer';
+import {ZendeskWidgetComponent} from './components/zendesk-widget';
 
 
 
