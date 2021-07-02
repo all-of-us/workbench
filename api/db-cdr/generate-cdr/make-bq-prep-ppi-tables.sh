@@ -14,14 +14,16 @@ CSV_HOME_DIR="cb_prep_tables/redcap/$DATE"
 
 echo "Starting load of prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
 
-rm -rf $TEMP_FILE_DIR
-mkdir $TEMP_FILE_DIR
+TABLES=$(gsutil ls gs://$BUCKET/$CSV_HOME_DIR/*_"$TIER".csv | cut -d'/' -f7 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
 
-gsutil -m cp gs://$BUCKET/$CSV_HOME_DIR/*_"$TIER".csv $TEMP_FILE_DIR
-#schema_path=generate-cdr/bq-schemas
-#bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$tableName
-#bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName \
-#gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
+schema_path=generate-cdr/bq-schemas
 
-#rm -rf $TEMP_FILE_DIR
-echo "Finished loading prep ppi tables into $BQ_PROJECT:$BQ_DATASETe"
+for tableName in $TABLES
+do
+  echo "Processing $tableName table"
+  bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$tableName
+  bq load --skip_leading_rows=1 --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName \
+  gs://$BUCKET/$CSV_HOME_DIR/"${tableName}_$TIER.csv" $schema_path/$tableName.json
+done
+
+echo "Finished loading prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
