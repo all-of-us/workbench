@@ -3,6 +3,7 @@ import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import {useEffect} from "react";
 
 const {Fragment} = React;
 
@@ -16,17 +17,23 @@ export const usePath = () => {
   return path;
 };
 
-// TODO angular2react: I don't think this is really the right place to be making the store updates but it's the
+// TODO angular2react: This isn't really the right place to be making the store updates but it's the
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
-  console.log('using params');
 
-  if (!intermediaryRoute) {
-    urlParamsStore.next(params);
-    routeConfigDataStore.next(routeData);
-    routeDataStore.set(routeData);
-  }
+  useEffect(() => {
+    if (!intermediaryRoute) {
+      routeConfigDataStore.next(routeData);
+      routeDataStore.set(routeData);
+    }
+  }, [routeData])
+
+  useEffect(() => {
+    if (!intermediaryRoute) {
+      urlParamsStore.next(params);
+    }
+  }, [params])
 
   return <WrappedComponent {...props}/>;
 };

@@ -232,8 +232,6 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   goToDestinationWorkspace() {
-    currentWorkspaceStore.next(null);
-
     navigate(
       [
         'workspaces',

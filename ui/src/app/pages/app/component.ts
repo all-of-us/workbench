@@ -140,6 +140,8 @@ export class AppComponent implements OnInit, OnDestroy {
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid}) => {
+        currentWorkspaceStore.next(null);
+
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
