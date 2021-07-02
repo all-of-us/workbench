@@ -130,8 +130,6 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 };
 
 interface WorkspaceCardState {
-  bugReportError: string;
-  bugReportOpen: boolean;
   confirmDeleting: boolean;
   // Whether this card is busy loading data specific to the workspace.
   loadingData: boolean;
@@ -153,8 +151,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   constructor(props) {
     super(props);
     this.state = {
-      bugReportError: '',
-      bugReportOpen: false,
       confirmDeleting: false,
       loadingData: false,
       showShareModal: false,
@@ -210,7 +206,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   render() {
     const {workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
-    const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
+    const {confirmDeleting, loadingData,
       showShareModal, showResearchPurposeReviewModal} = this.state;
 
     return <React.Fragment>
@@ -294,8 +290,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       {showShareModal && <WorkspaceShare data-test-id='workspace-share-modal'
                                   workspace={{...workspace, accessLevel}}
                                   onClose={() => this.handleShareDialogClose()} />}
-      {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
-                                        onClose={() => this.setState({bugReportOpen: false})}/>}
       {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
         <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
         <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
