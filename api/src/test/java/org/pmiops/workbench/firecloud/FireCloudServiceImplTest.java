@@ -61,7 +61,7 @@ public class FireCloudServiceImplTest extends SpringTest {
   @MockBean private BillingApi billingApi;
 
   @MockBean
-  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_v2_API)
+  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
   private BillingV2Api billingV2Api;
 
   @MockBean private HttpTransport httpTransport;

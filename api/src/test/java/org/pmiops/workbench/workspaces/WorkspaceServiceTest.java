@@ -448,10 +448,10 @@ public class WorkspaceServiceTest {
   @Test
   public void updateBillingAccount_userOwnedToFreeTier() throws Exception {
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
-    String newBillingAccount = "billing-123";
+    String oldBillingAccount = "billing-123";
     DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
-    workspace.setBillingAccountName(newBillingAccount);
-    assertThat(workspace.getBillingAccountName()).isEqualTo(newBillingAccount);
+    workspace.setBillingAccountName(oldBillingAccount);
+    assertThat(workspace.getBillingAccountName()).isEqualTo(oldBillingAccount);
 
     workspaceService.updateWorkspaceBillingAccount(
         workspace, workbenchConfig.billing.freeTierBillingAccountName());

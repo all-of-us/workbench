@@ -119,9 +119,9 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_v2_API)
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
           Provider<BillingV2Api> serviceAccountBillingV2ApiProvider,
-      @Qualifier(FireCloudConfig.END_USER_STATIC_BILLING_v2_API)
+      @Qualifier(FireCloudConfig.END_USER_STATIC_BILLING_V2_API)
           Provider<BillingV2Api> endUserBillingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,

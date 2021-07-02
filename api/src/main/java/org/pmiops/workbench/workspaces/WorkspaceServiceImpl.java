@@ -1,9 +1,5 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
-import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-
-import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -61,7 +57,6 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,9 +91,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
-      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> endUserCloudbillingProvider,
-      @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
-          Provider<Cloudbilling> serviceAccountCloudbillingProvider,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
       CohortCloningService cohortCloningService,
