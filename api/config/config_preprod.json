@@ -117,8 +117,8 @@
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
-    "bigQueryDataset": "workbench_action_audit_preprop",
-    "bigQueryTable": "workbench_action_audit_preprop"
+    "bigQueryDataset": "workbench_action_audit_preprod",
+    "bigQueryTable": "workbench_action_audit_preprod"
   },
   "captcha": {
     "enableCaptcha": true,
