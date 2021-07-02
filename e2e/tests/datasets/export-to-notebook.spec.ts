@@ -17,7 +17,9 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Export to notebook tests', () => {
-  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+
+  // TODO Add back R kernel notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
+  const KernelLanguages = [{ LANGUAGE: Language.Python }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
