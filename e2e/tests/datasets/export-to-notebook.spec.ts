@@ -16,8 +16,10 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Export to notebook tests', () => {
-  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+describe('Export dataset to notebook tests', () => {
+
+  // TODO Add back R kernel notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
+  const KernelLanguages = [{ LANGUAGE: Language.Python }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
