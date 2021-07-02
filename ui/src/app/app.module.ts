@@ -13,19 +13,14 @@ import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
-import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
-import {TextModalComponent} from 'app/components/text-modal';
-import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {FooterComponent} from './components/footer';
 
 
@@ -50,13 +45,8 @@ import {FooterComponent} from './components/footer';
     AppComponent,
     AppRouting,
     FooterComponent,
-    HelpSidebarComponent,
     InitialErrorComponent,
-    RoutingSpinnerComponent,
-    SignedInComponent,
-    NavBarComponent,
-    TextModalComponent,
-    WorkspaceNavBarComponent
+    RoutingSpinnerComponent
   ],
   providers: [
     SignInService,

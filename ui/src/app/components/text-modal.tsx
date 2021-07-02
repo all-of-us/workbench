@@ -48,18 +48,3 @@ export class TextModal extends React.Component<TextModalProps> {
     );
   }
 }
-
-@Component({
-  selector: 'app-text-modal',
-  template: '<div #root></div>',
-})
-export class TextModalComponent extends ReactWrapperBase {
-  @Input('title') title: TextModalProps['title'];
-  @Input('body') body: TextModalProps['body'];
-  @Input('buttonText') buttonText: TextModalProps['buttonText'];
-  @Input('closeFunction') closeFunction: TextModalProps['closeFunction'];
-
-  constructor() {
-    super(TextModal, ['title', 'body', 'buttonText', 'closeFunction']);
-  }
-}

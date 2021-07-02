@@ -12,7 +12,7 @@ import * as fp from 'lodash/fp';
 import {animated, useSpring} from 'react-spring';
 import {TextColumn} from './text-column';
 
-const { useEffect} = React;
+const {useEffect} = React;
 
 const styles = reactStyles({
   modal: {

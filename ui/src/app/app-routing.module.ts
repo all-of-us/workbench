@@ -4,8 +4,6 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
 
-import {SignedInComponent} from './pages/signed-in/component';
-
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
@@ -41,9 +39,9 @@ const routes: Routes = [
   },
   {
     path: '',
-    component: SignedInComponent,
+    component: AppRouting,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, DisabledGuard],
+    canActivateChild: [SignInGuard],
     canDeactivate: [NavigationGuard],
     runGuardsAndResolvers: 'always',
     children: [

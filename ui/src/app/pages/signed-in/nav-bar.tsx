@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
@@ -7,10 +6,9 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {ProfileStore} from 'app/utils/stores';
-import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -65,7 +63,6 @@ const styles = reactStyles({
 });
 
 export interface Props {
-  profile: Profile;
   profileState: ProfileStore;
   bannerAdminActive: boolean;
   workspaceAdminActive: boolean;
@@ -73,7 +70,6 @@ export interface Props {
   displayTag: string;
   shouldShowDisplayTag: boolean;
   profileImage: string;
-  sidenavToggle: boolean;
   homeActive: boolean;
   workspacesActive: boolean;
   libraryActive: boolean;
@@ -96,6 +92,36 @@ export interface State {
   hovering: boolean;
   wrapperRef: React.RefObject<HTMLDivElement>;
 }
+
+
+//  get bannerAdminActive(): boolean {
+//    return this.locationService.path() === '/admin/banner';
+//  }
+//
+//  get userAdminActive(): boolean {
+//    return this.locationService.path() === '/admin/user';
+//  }
+//
+//  get workspaceAdminActive(): boolean {
+//    return this.locationService.path() === '/admin/workspaces';
+//  }
+//
+//  get homeActive(): boolean {
+//    return this.locationService.path() === '';
+//  }
+//
+//  get libraryActive(): boolean {
+//    return this.locationService.path() === '/library';
+//  }
+//
+//  get workspacesActive(): boolean {
+//    return this.locationService.path() === '/workspaces';
+//  }
+//
+//  get profileActive(): boolean {
+//    return this.locationService.path() === '/profile';
+//  }
+
 
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
@@ -260,39 +286,3 @@ export const NavBar = withUserProfile()(
     }
   }
 );
-
-@Component({
-  selector: 'app-nav-bar',
-  template: '<div #root></div>'
-})
-export class NavBarComponent extends ReactWrapperBase {
-  @Input('profile') profile: Props['profile'];
-  @Input('headerImg') headerImg: Props['headerImg'];
-  @Input('displayTag') displayTag: Props['displayTag'];
-  @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
-  @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
-  @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
-  @Input('homeActive') homeActive: Props['homeActive'];
-  @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
-  @Input('libraryActive') libraryActive: Props['libraryActive'];
-  @Input('profileActive') profileActive: Props['profileActive'];
-  @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
-  constructor() {
-    super(NavBar, [
-      'profile',
-      'headerImg',
-      'displayTag',
-      'shouldShowDisplayTag',
-      'bannerAdminActive',
-      'workspaceAdminActive',
-      'homeActive',
-      'workspacesActive',
-      'libraryActive',
-      'profileActive',
-      'userAdminActive',
-      'userAuditActive',
-      'workspaceAuditActive'
-    ]);
-  }
-}
-
