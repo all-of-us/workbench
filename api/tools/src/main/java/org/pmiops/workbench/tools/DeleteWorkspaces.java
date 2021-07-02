@@ -75,8 +75,6 @@ public class DeleteWorkspaces {
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao) {
     return new WorkspaceServiceImpl(
-        null,
-        null,
         billingProjectAuditor,
         clock,
         null,
