@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -14,10 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.DuaType;
@@ -42,6 +46,7 @@ public class UserDaoTest extends SpringTest {
   private DbAccessTier registeredTier;
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private InstitutionDao institutionDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -331,6 +336,37 @@ public class UserDaoTest extends SpringTest {
         userDao.findUsersBySearchStringAndTier(
             "q", ascendingByUsername, registeredTier.getShortName());
     assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void testInsertAndFind() {
+    DbUser user = new DbUser();
+    TestMockFactory.createAccessModule(accessModuleDao);
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    DbUserAccessModule twoFactorAuthUserAccess =
+        new DbUserAccessModule()
+            .setAccessModule(accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get())
+            .setCompletionTime(now())
+            .setUser(user);
+    DbUserAccessModule trainingUserAccess =
+        new DbUserAccessModule()
+            .setAccessModule(
+                accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
+            .setCompletionTime(now())
+            .setBypassTime(now())
+            .setUser(user);
+
+    user.setGivenName("Alice");
+    //   user.setUserAccessModules(ImmutableSet.of(twoFactorAuthUserAccess));
+    user.addUserAccessModules(ImmutableSet.of(twoFactorAuthUserAccess, trainingUserAccess));
+    user = userDao.save(user);
+
+    DbUser retrievedUser = userDao.findUserByUserId(user.getUserId());
+    assertThat(userDao.findUserByUserId(user.getUserId()).getUserAccessModules())
+        .containsExactlyElementsIn(ImmutableSet.of(twoFactorAuthUserAccess, trainingUserAccess));
   }
 
   private List<DbUser> insertTestUsers(

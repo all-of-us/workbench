@@ -49,15 +49,19 @@ public class TestMockFactory {
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
-  public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES = ImmutableList.of(
-      new DbAccessModule().setName(AccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
-      new DbAccessModule().setName(AccessModuleName.ERA_COMMONS).setExpirable(false),
-      new DbAccessModule().setName(AccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
-      new DbAccessModule().setName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).setExpirable(true),
-      new DbAccessModule().setName(AccessModuleName.RT_COMPLIANCE_TRAINING).setExpirable(true),
-      new DbAccessModule().setName(AccessModuleName.PROFILE_CONFIRMATION).setExpirable(true),
-      new DbAccessModule().setName(AccessModuleName.PUBLICATION_CONFIRMATION).setExpirable(true)
-  );
+  public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
+      ImmutableList.of(
+          new DbAccessModule().setName(AccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
+          new DbAccessModule().setName(AccessModuleName.ERA_COMMONS).setExpirable(false),
+          new DbAccessModule().setName(AccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
+          new DbAccessModule()
+              .setName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+              .setExpirable(true),
+          new DbAccessModule().setName(AccessModuleName.RT_COMPLIANCE_TRAINING).setExpirable(true),
+          new DbAccessModule().setName(AccessModuleName.PROFILE_CONFIRMATION).setExpirable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.PUBLICATION_CONFIRMATION)
+              .setExpirable(true));
 
   // TODO there's something off about how "workspaceName" here works.  Investigate.
   // For best results, use a lowercase-only workspaceName.

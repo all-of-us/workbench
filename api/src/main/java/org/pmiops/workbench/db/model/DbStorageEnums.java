@@ -2,8 +2,10 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -625,5 +627,22 @@ public final class DbStorageEnums {
 
   public static TierAccessStatus tierAccessStatusFromStorage(Short tierAccessStatus) {
     return CLIENT_TO_STORAGE_TIER_ACCESS_STATUS.inverse().get(tierAccessStatus);
+  }
+
+  // AccessModule
+  private static final BiMap<AccessModule, AccessModuleName> CLIENT_TO_STORAGE_ACCESS_MODULE =
+      ImmutableBiMap.<AccessModule, AccessModuleName>builder()
+          .put(AccessModule.ERA_COMMONS, AccessModuleName.ERA_COMMONS)
+          .put(AccessModule.COMPLIANCE_TRAINING, AccessModuleName.RT_COMPLIANCE_TRAINING)
+          .put(AccessModule.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
+          .put(AccessModule.DATA_USE_AGREEMENT, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+          .build();
+
+  public static BillingStatus billingStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.inverse().get(s);
+  }
+
+  public static Short billingStatusToStorage(BillingStatus s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
   }
 }

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -101,6 +103,7 @@ public class DbUser {
   private Timestamp profileLastConfirmedTime;
 
   private Timestamp publicationsLastConfirmedTime;
+  private Set<DbUserAccessModule> userAccessModules = new HashSet<>();
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
 
@@ -686,5 +689,30 @@ public class DbUser {
   @Transient
   public String getRuntimeName() {
     return RUNTIME_NAME_PREFIX + getUserId();
+  }
+
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public Set<DbUserAccessModule> getUserAccessModules() {
+    return userAccessModules;
+  }
+
+  /**
+   * Sets userAccessModules. Note this will replace all pending userAccessModules to be commit. To
+   * append userAccessModules, use {@link #addUserAccessModules(Set)}.
+   */
+  public void setUserAccessModules(Set<DbUserAccessModule> userAccessModules) {
+    checkArgument(
+        this.userAccessModules.isEmpty(),
+        "userAccessModules is not empty, to add additional access modules, consider to use userAccessModulesToAdd() instead");
+    this.userAccessModules = userAccessModules;
+  }
+
+  /** Adds user access modules into existing pending commits DbUser. */
+  public void addUserAccessModules(Set<DbUserAccessModule> userAccessModulesToAdd) {
+    this.userAccessModules.addAll(userAccessModulesToAdd);
   }
 }

@@ -4759,6 +4759,8 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - PROFILE_CONFIRMATION
+    - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:

@@ -1,13 +1,11 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
@@ -20,7 +18,6 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 
 @Import({CommonConfig.class})
 @DataJpaTest
@@ -47,10 +44,22 @@ public class UserAccessModuleDaoTest extends SpringTest {
 
   @Test
   public void testInsertAndGet() {
-    DbUserAccessModule twoFactorAuthUserAccess = new DbUserAccessModule().setAccessModule(twoFactorAuthModule).setCompletionTime(CURRENT_TIMESTAMP).setUser(user);
-    DbUserAccessModule trainingUserAccess = new DbUserAccessModule().setAccessModule(rtTrainingModule).setCompletionTime(CURRENT_TIMESTAMP).setBypassTime(CURRENT_TIMESTAMP).setUser(user);
-    List<DbUserAccessModule> userAccess = ImmutableList.of(twoFactorAuthUserAccess, trainingUserAccess);
+    DbUserAccessModule twoFactorAuthUserAccess =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setCompletionTime(CURRENT_TIMESTAMP)
+            .setUser(user);
+    DbUserAccessModule trainingUserAccess =
+        new DbUserAccessModule()
+            .setAccessModule(rtTrainingModule)
+            .setCompletionTime(CURRENT_TIMESTAMP)
+            .setBypassTime(CURRENT_TIMESTAMP)
+            .setUser(user);
+    List<DbUserAccessModule> userAccess =
+        ImmutableList.of(twoFactorAuthUserAccess, trainingUserAccess);
     userAccessModuleDao.saveAll(userAccess);
     assertThat(userAccessModuleDao.getAllByUser(user)).containsExactlyElementsIn(userAccess);
+    assertThat(userAccessModuleDao.getByUserAndAccessModule(user, twoFactorAuthModule).get())
+        .isEqualTo(twoFactorAuthUserAccess);
   }
 }
