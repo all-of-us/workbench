@@ -23,14 +23,6 @@ import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
-import {FooterComponent} from 'app/components/footer';
-import {TextModalComponent} from 'app/components/text-modal';
-import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
-import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {FooterComponent} from 'app/components/footer';
-import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
-
-
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:

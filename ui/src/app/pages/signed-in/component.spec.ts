@@ -23,7 +23,6 @@ import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
-import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
