@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {SignInService} from 'app/services/sign-in.service';

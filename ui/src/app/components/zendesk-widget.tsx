@@ -54,7 +54,7 @@ export const ZendeskWidget = () => {
     };
   }, []);
   return <React.Fragment />;
-}
+};
 
 @Component({
   selector: 'app-zendesk-widget',

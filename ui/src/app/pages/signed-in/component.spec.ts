@@ -17,13 +17,13 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {FooterComponent} from 'app/components/footer';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
+import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
-import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
