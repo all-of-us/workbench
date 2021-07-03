@@ -1,17 +1,5 @@
 <div class="body">
-  <app-nav-bar
-    [profile]="profile"
-    [headerImg]="headerImg"
-    [displayTag]="displayTag"
-    [shouldShowDisplayTag]="shouldShowDisplayTag"
-    [bannerAdminActive]="bannerAdminActive"
-    [homeActive]="homeActive"
-    [workspacesActive]="workspacesActive"
-    [libraryActive]="libraryActive"
-    [profileActive]="profileActive"
-    [userAdminActive]="userAdminActive"
-    [workspaceAdminActive]="workspaceAdminActive"
-  ></app-nav-bar>
+  <app-nav-bar></app-nav-bar>
 
   <div class="content-container">
     <div class="background-image"></div>
@@ -24,14 +12,9 @@
       -->
       <router-outlet></router-outlet>
     </div>
-
-    <app-text-modal *ngIf="showInactivityModal"
-                [title]="'Your session is about to expire'"
-                [body]="inactivityModalText"
-                [buttonText]="'Extend Session'"
-                [closeFunction]="closeInactivityModal"></app-text-modal>
   </div>
 
   <app-footer *ngIf="!minimizeChrome && enableSignedInFooter" [type]="footerTypeEnum.Workbench"></app-footer>
+  <app-inactivity-monitor [signOut]="signOut"></app-inactivity-monitor>
   <app-zendesk-widget></app-zendesk-widget>
 </div>
