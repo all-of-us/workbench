@@ -8,8 +8,16 @@ import { makeWorkspaceName } from 'utils/str-utils';
 
 describe('Workspace Share Modal', () => {
   const assignAccess = [
-    { accessRole: WorkspaceAccessLevel.Writer, userEmail: config.writerUserName, userAccessTokenFilename: config.writerUserAccessTokenFilename},
-    { accessRole: WorkspaceAccessLevel.Reader, userEmail: config.readerUserName, userAccessTokenFilename: config.readerUserAccessTokenFilename }
+    {
+      accessRole: WorkspaceAccessLevel.Writer,
+      userEmail: config.writerUserName,
+      userAccessTokenFilename: config.writerUserAccessTokenFilename
+    },
+    {
+      accessRole: WorkspaceAccessLevel.Reader,
+      userEmail: config.readerUserName,
+      userAccessTokenFilename: config.readerUserAccessTokenFilename
+    }
   ];
 
   // Create new workspace with default CDR version
