@@ -87,7 +87,7 @@
     "classnames": "^2.2.6",
     "color": "^3.1.1",
     "core-js": "^2.5.3",
-    "d3": "^4.12.2",
+    "d3": "^7.0.0",
     "eslint-plugin-simple-import-sort": "^5.0.2",
     "highcharts": "^9.0.0",
     "highcharts-react-official": "3.0.0",
