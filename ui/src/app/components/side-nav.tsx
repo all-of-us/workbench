@@ -9,6 +9,7 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {withRouter} from "react-router";
+import {useRef, useState} from "react";
 
 const styles = reactStyles({
   flex: {
@@ -77,6 +78,24 @@ const styles = reactStyles({
   }
 });
 
+const getSideNavItemStyles = (active, hovering, disabled) => {
+  let sideNavItemStyles = {
+    ...styles.flex,
+    ...styles.sideNavItem
+  };
+  if (disabled) {
+    // We want to short-circuit in this case.
+    return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
+  }
+  if (active) {
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
+  }
+  if (hovering) {
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
+  }
+  return sideNavItemStyles;
+}
+
 // TODO: React-router's withRouter doesn't update unless the parent component updates.
 // so we do this instead until we can turn this into a function component and use withLocation
 const bannerAdminActive = () => {
@@ -127,284 +146,229 @@ interface SideNavItemProps {
   disabled?: boolean;
 }
 
-interface SideNavItemState {
-  hovering: boolean;
-  subItemsOpen: boolean;
-}
+export const SideNavItem = (props: SideNavItemProps) => {
+  const [hovering, setHovering] = useState(false);
+  const [subItemsOpen, setSubItemsOpen] = useState(false);
 
-export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovering: false,
-      subItemsOpen: false,
-    };
-  }
+  const iconSize = 21;
 
-  iconSize = 21;
-
-  onClick() {
-    if (this.props.href && !this.props.disabled) {
-      this.props.onToggleSideNav();
-      navigate([this.props.href]);
+  const onClick = () => {
+    if (props.href && !props.disabled) {
+      props.onToggleSideNav();
+      navigate(props.href);
     }
-    if (this.props.containsSubItems) {
-      this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
+    if (props.containsSubItems) {
+      setSubItemsOpen(!subItemsOpen);
     }
   }
 
-  closeSubItems() {
-    if (this.props.containsSubItems) {
-      this.setState({subItemsOpen: false});
-    }
-  }
-
-  getStyles(active, hovering, disabled) {
-    let sideNavItemStyles = {
-      ...styles.flex,
-      ...styles.sideNavItem
-    };
-    if (disabled) {
-      // We want to short-circuit in this case.
-      return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
-    }
-    if (active) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
-    }
-    if (hovering) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
-    }
-    return sideNavItemStyles;
-  }
-
-  render() {
-    return <Clickable
+  return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
-      data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
+      data-test-id={props.content.toString().replace(/\s/g, '') + '-menu-item'}
+      style={getSideNavItemStyles(props.active, hovering, props.disabled)}
       onClick={() => {
-        if (this.props.parentOnClick && !this.props.disabled) {
-          this.props.parentOnClick();
+        if (props.parentOnClick && !props.disabled) {
+          props.parentOnClick();
         }
-        this.onClick();
+        onClick();
       }}
-      onMouseEnter={() => this.setState({hovering: true})}
-      onMouseLeave={() => this.setState({hovering: false})}
-    >
-      <div
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+  >
+    <div
         style={{...styles.flex,
           flex: '1 0 auto'
         }}
-      >
+    >
         <span
-          style={
-            this.props.icon || this.props.hasProfileImage
-              ? {...styles.flex}
-              : {...styles.noIconMargin}
-          }
+            style={
+              props.icon || props.hasProfileImage
+                  ? {...styles.flex}
+                  : {...styles.noIconMargin}
+            }
         >
           {
-            this.props.icon && <ClrIcon
-              shape={this.props.icon}
-              className={'is-solid'}
-              style={styles.navIcon}
-              size={this.iconSize}
+            props.icon && <ClrIcon
+                shape={props.icon}
+                className={'is-solid'}
+                style={styles.navIcon}
+                size={iconSize}
             />
           }
           {
-            this.props.hasProfileImage && <img
-              src={signInStore.getValue().profileImage}
-              style={styles.profileImage}
+            props.hasProfileImage && <img
+                src={signInStore.getValue().profileImage}
+                style={styles.profileImage}
             />
           }
-          {this.props.content}
+          {props.content}
         </span>
-        {
-          this.props.containsSubItems
-          && <ClrIcon
+      {
+        props.containsSubItems
+        && <ClrIcon
             shape='angle'
             style={
-              this.state.subItemsOpen
-                ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                : styles.dropdownIcon
+              subItemsOpen
+                  ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                  : styles.dropdownIcon
             }
-            size={this.iconSize}
-          />
-        }
-      </div>
-    </Clickable>;
-  }
+            size={iconSize}
+        />
+      }
+    </div>
+  </Clickable>;
 }
 
-export interface SideNavProps {
-  profile: Profile;
-  onToggleSideNav: Function;
+const redirectToZendesk = () => {
+  window.open(supportUrls.helpCenter, '_blank');
 }
 
-export interface SideNavState {
-  showAdminOptions: boolean;
-  showUserOptions: boolean;
-  adminRef: React.RefObject<SideNavItem>;
-  userRef: React.RefObject<SideNavItem>;
+const signOut = () => {
+  signInStore.getValue().signOut();
+  navigateSignOut();
 }
 
-export class SideNav extends React.Component<SideNavProps, SideNavState> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showAdminOptions: false,
-      showUserOptions: false,
-      adminRef: React.createRef(),
-      userRef: React.createRef(),
-    };
+interface SideNavProps {
+  profile: Profile,
+  onToggleSideNav: Function
+}
+
+export const SideNav = (props: SideNavProps) => {
+  const [showAdminOptions, setShowAdminOptions] = useState();
+  const [showUserOptions, setShowUserOptions] = useState();
+
+  const onToggleAdmin = () => {
+    setShowAdminOptions(!showAdminOptions);
   }
 
-  onToggleUser() {
-    this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
+  const onToggleUser = () => {
+    setShowUserOptions(!showUserOptions);
   }
 
-  onToggleAdmin() {
-    this.setState(previousState => ({showAdminOptions: !previousState.showAdminOptions}));
-  }
-
-  redirectToZendesk() {
-    window.open(supportUrls.helpCenter, '_blank');
-  }
-
-  openContactWidget() {
+  const openContactWidget = () => {
     openZendeskWidget(
-      this.props.profile.givenName,
-      this.props.profile.familyName,
-      this.props.profile.username,
-      this.props.profile.contactEmail,
+        props.profile.givenName,
+        props.profile.familyName,
+        props.profile.username,
+        props.profile.contactEmail
     );
   }
 
-  signOut() {
-    signInStore.getValue().signOut();
-    navigateSignOut();
-  }
-
-  render() {
-    const {profile} = this.props;
-    return <div style={styles.sideNav}>
-      <SideNavItem
-        hasProfileImage={true}
-        content={`${profile.givenName} ${profile.familyName}`}
-        parentOnClick={() => this.onToggleUser()}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
+  return <div style={styles.sideNav}>
+    <SideNavItem
+        content={`${props.profile.givenName} ${props.profile.familyName}`}
+        onToggleSideNav={() => props.onToggleSideNav()}
+        parentOnClick={() => onToggleUser()}
         containsSubItems={true}
-        ref={this.state.userRef}
-      />
-      {
-        this.state.showUserOptions && <SideNavItem
+        hasProfileImage={true}
+    />
+    {
+      showUserOptions && <SideNavItem
           content={'Profile'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
+          onToggleSideNav={() => props.onToggleSideNav()}
           href='/profile'
           active={profileActive()}
-        />
-      }
-      {
-        this.state.showUserOptions && <SideNavItem
+      />
+    }
+    {
+      showUserOptions && <SideNavItem
           content={'Sign Out'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.signOut()}
-        />
-      }
-      <SideNavItem
+          onToggleSideNav={() => props.onToggleSideNav()}
+          parentOnClick={() => signOut()}
+      />
+    }
+    <SideNavItem
         icon='home'
         content='Home'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
+        onToggleSideNav={() => props.onToggleSideNav()}
         href='/'
         active={homeActive()}
-      />
-      <SideNavItem
+    />
+    <SideNavItem
         icon='applications'
         content='Your Workspaces'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
+        onToggleSideNav={() => props.onToggleSideNav()}
         href={'/workspaces'}
         active={workspacesActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-      />
-      <SideNavItem
+        disabled={!hasRegisteredAccess(props.profile.accessTierShortNames)}
+    />
+    <SideNavItem
         icon='star'
         content='Featured Workspaces'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
+        onToggleSideNav={() => props.onToggleSideNav()}
         href={'/library'}
         active={libraryActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-      />
-      <SideNavItem
+        disabled={!hasRegisteredAccess(props.profile.accessTierShortNames)}
+    />
+    <SideNavItem
         icon='help'
         content={'User Support Hub'}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        parentOnClick={() => this.redirectToZendesk()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-      />
-      <SideNavItem
+        onToggleSideNav={() => props.onToggleSideNav()}
+        parentOnClick={() => redirectToZendesk()}
+        disabled={!hasRegisteredAccess(props.profile.accessTierShortNames)}
+    />
+    <SideNavItem
         icon='envelope'
         content={'Contact Us'}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        parentOnClick={() => this.openContactWidget()}
-      />
-      {hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
-                icon='user'
-                content='Admin'
-                parentOnClick={() => this.onToggleAdmin()}
-                onToggleSideNav={() => this.props.onToggleSideNav()}
-                containsSubItems={true}
-                ref={this.state.adminRef}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && this.state.showAdminOptions && <SideNavItem
+        onToggleSideNav={() => props.onToggleSideNav()}
+        parentOnClick={() => openContactWidget()}
+    />
+    {hasAuthorityForAction(props.profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
+        icon='user'
+        content='Admin'
+        parentOnClick={() => onToggleAdmin()}
+        onToggleSideNav={() => props.onToggleSideNav()}
+        containsSubItems={true}
+    />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.USER_ADMIN) && showAdminOptions && <SideNavItem
           content={'User Admin'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
+          onToggleSideNav={() => props.onToggleSideNav()}
           href={'/admin/user'}
           active={userAdminActive()}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && this.state.showAdminOptions && <SideNavItem
-            content={'User Audit'}
-            onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'/admin/user-audit/'}
-            active={userAuditActive()}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && this.state.showAdminOptions && <SideNavItem
-            content={'Service Banners'}
-            onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'/admin/banner'}
-            active={bannerAdminActive()}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && this.state.showAdminOptions && <SideNavItem
-            content={'Workspaces'}
-            onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'admin/workspaces'}
-            active={workspaceAdminActive()}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && this.state.showAdminOptions && <SideNavItem
-            content={'Workspace Audit'}
-            onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'/admin/workspace-audit/'}
-            active={workspaceAuditActive()}
-        />
-      }
-      {
-        hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && this.state.showAdminOptions && <SideNavItem
-            content={'Institution Admin'}
-            onToggleSideNav={() => this.props.onToggleSideNav()}
-            href={'admin/institution'}
-            active={workspaceAdminActive()}
-        />
-      }
-    </div>;
-  }
-};
+      />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.USER_AUDIT) && showAdminOptions && <SideNavItem
+          content={'User Audit'}
+          onToggleSideNav={() => props.onToggleSideNav()}
+          href={'/admin/user-audit/'}
+          active={userAuditActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.SERVICE_BANNER) && showAdminOptions && <SideNavItem
+          content={'Service Banners'}
+          onToggleSideNav={() => props.onToggleSideNav()}
+          href={'/admin/banner'}
+          active={bannerAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && showAdminOptions && <SideNavItem
+          content={'Workspaces'}
+          onToggleSideNav={() => props.onToggleSideNav()}
+          href={'admin/workspaces'}
+          active={workspaceAdminActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && showAdminOptions && <SideNavItem
+          content={'Workspace Audit'}
+          onToggleSideNav={() => props.onToggleSideNav()}
+          href={'/admin/workspace-audit/'}
+          active={workspaceAuditActive()}
+      />
+    }
+    {
+      hasAuthorityForAction(props.profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && showAdminOptions && <SideNavItem
+          content={'Institution Admin'}
+          onToggleSideNav={() => props.onToggleSideNav()}
+          href={'admin/institution'}
+          active={workspaceAdminActive()}
+      />
+    }
+  </div>;
+}

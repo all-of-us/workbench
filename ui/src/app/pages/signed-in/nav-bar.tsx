@@ -13,7 +13,6 @@ import {profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {useLocation} from "react-router-dom";
 
 const styles = reactStyles({
   headerContainer: {
