@@ -236,21 +236,13 @@ public class DbUser {
       return null;
     }
     return this.degrees.stream()
-        .map(
-            (degreeObject) -> {
-              return DbStorageEnums.degreeFromStorage(degreeObject);
-            })
+        .map(DbStorageEnums::degreeFromStorage)
         .collect(Collectors.toList());
   }
 
   public void setDegreesEnum(List<Degree> degreeList) {
     this.degrees =
-        degreeList.stream()
-            .map(
-                (degree) -> {
-                  return DbStorageEnums.degreeToStorage(degree);
-                })
-            .collect(Collectors.toList());
+        degreeList.stream().map(DbStorageEnums::degreeToStorage).collect(Collectors.toList());
   }
 
   @OneToMany(
