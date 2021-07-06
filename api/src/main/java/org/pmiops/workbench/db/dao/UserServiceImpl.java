@@ -1158,7 +1158,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // Here we do need to know if any are EMPTY, for the next step.
     final Set<Optional<Timestamp>> expirations =
         getRenewableAccessModules(user).entrySet().stream()
-            .filter(entry -> moduleIsEnabledInEnvironment(entry.getKey()))
+            .filter(entry -> isModuleEnabledInEnvironment(entry.getKey()))
             .filter(entry -> !entry.getValue().isBypassed())
             .map(entry -> entry.getValue().getExpiration())
             .collect(Collectors.toSet());
@@ -1179,7 +1179,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private boolean moduleIsEnabledInEnvironment(ModuleNameEnum moduleName) {
+  private boolean isModuleEnabledInEnvironment(ModuleNameEnum moduleName) {
     final AccessConfig accessConfig = configProvider.get().access;
 
     switch (moduleName) {
