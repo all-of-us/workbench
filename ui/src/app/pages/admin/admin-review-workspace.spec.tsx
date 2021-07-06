@@ -28,8 +28,7 @@ describe('AdminReviewWorkspace', () => {
     props = {
       profile: ProfileStubVariables.PROFILE_STUB,
       hideSpinner: () => {},
-      showSpinner: () => {},
-      spinnerVisible: false
+      showSpinner: () => {}
     };
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
