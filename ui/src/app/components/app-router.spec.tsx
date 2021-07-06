@@ -1,8 +1,8 @@
 import * as React from "react";
-import {AppRoute, AppRouter, Guard, NavRedirect, ProtectedRoutes} from "./components/app-router";
+import {AppRoute, AppRouter, Guard, NavRedirect, ProtectedRoutes} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
-import {NavStore} from "./utils/navigation";
+import {NavStore} from "app/utils/navigation";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');

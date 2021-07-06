@@ -167,8 +167,6 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
       eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
       rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
-      firstRegistrationCompletionTime: this.formattedTimestampOrEmptyString(user.firstRegistrationCompletionTime),
-      firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
       firstSignInTime: this.formattedTimestampOrEmptyString(user.firstSignInTime),
       firstSignInTimestamp: user.firstSignInTime,
       institutionName: user.institutionName,
@@ -210,7 +208,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                    paginator={true}
                    rows={50}
                    scrollable
-                   sortField={'firstRegistrationCompletionTimestamp'}
+                   sortField={'firstSignInTimestamp'}
                    style={styles.tableStyle}>
           <Column field='name'
                   bodyStyle={{...styles.colStyle}}
@@ -234,17 +232,9 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   headerStyle={{...styles.colStyle, width: '180px'}}
                   sortable={true}
           />
-          <Column field='firstRegistrationCompletionTime'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='Registration date'
-                  headerStyle={{...styles.colStyle, width: '180px'}}
-                  sortable={true}
-                  sortField={'firstRegistrationCompletionTimestamp'}
-          />
           <Column field='username'
                   bodyStyle={{...styles.colStyle}}
-                  header='User name'
+                  header='User Name'
                   headerStyle={{...styles.colStyle, width: '200px'}}
                   sortable={true}
           />

@@ -3,14 +3,13 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
 import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
-import {RegistrationGuard} from './guards/registration-guard.service';
-import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
+import {SignInGuard} from './guards/sign-in-guard.service';
 import {NavStore} from './utils/navigation';
 
 
@@ -83,7 +82,6 @@ const routes: Routes = [
       // non-migrated routes go HERE
       {
         path: '',
-        canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
           // legacy / duplicated routes go HERE
@@ -366,7 +364,6 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     DisabledGuard,
-    RegistrationGuard,
     SignInGuard
   ]
 })

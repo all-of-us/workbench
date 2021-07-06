@@ -10,7 +10,6 @@ import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
-  cohortReviewStore,
   filterStateStore,
   getVocabOptions,
   queryResultSizeStore,
@@ -20,11 +19,12 @@ import {
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
+  CohortReview,
   CohortStatus,
   Filter,
   FilterColumns as Columns,
@@ -222,6 +222,7 @@ const reverseColumnEnum = {
 const EVENT_CATEGORY = 'Review Participant List';
 
 interface Props extends WithSpinnerOverlayProps {
+  cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
 
@@ -237,7 +238,7 @@ interface State {
   demoFilters: any;
 }
 
-export const ParticipantsTable = withCurrentWorkspace()(
+export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
@@ -260,22 +261,22 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     async componentDidMount() {
-      this.props.hideSpinner();
+      const {cohortReview, hideSpinner} = this.props;
+      hideSpinner();
       const {filters} = this.state;
       let {demoFilters} = this.state;
       const promises = [];
       const {ns, wsid} = urlParamsStore.getValue();
-      const review = cohortReviewStore.getValue();
-      if (!review) {
+      if (!cohortReview) {
         promises.push(
           this.getParticipantStatuses().then(response => {
-            const {cohortReview, queryResultSize} = response;
-            cohortReviewStore.next(cohortReview);
+            const {cohortReview: review, queryResultSize} = response;
+            currentCohortReviewStore.next(review);
             queryResultSizeStore.next(queryResultSize);
             if (!vocabOptions.getValue()) {
-              getVocabOptions(ns, wsid, cohortReview.cohortReviewId);
+              getVocabOptions(ns, wsid, review.cohortReviewId);
             }
-            this.setState({data: cohortReview.participantCohortStatuses.map(this.mapData), total: queryResultSize});
+            this.setState({data: review.participantCohortStatuses.map(this.mapData), total: queryResultSize});
           }, (error) => {
             console.error(error);
             this.setState({loading: false, error: true});
@@ -285,7 +286,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         const {page} = reviewPaginationStore.getValue();
         const total = queryResultSizeStore.getValue();
         this.setState({
-          data: review.participantCohortStatuses.map(this.mapData),
+          data: cohortReview.participantCohortStatuses.map(this.mapData),
           page: page,
           total: total
         });
@@ -336,7 +337,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     getTableData(): void {
       this.getParticipantStatuses().then(response => {
         const {cohortReview, queryResultSize} = response;
-        cohortReviewStore.next(cohortReview);
+        currentCohortReviewStore.next(cohortReview);
         this.setState({data: cohortReview.participantCohortStatuses.map(this.mapData), loading: false, total: queryResultSize});
       }, (error) => {
         console.error(error);
@@ -580,9 +581,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     render() {
+      const {cohortReview} = this.props;
       const {loading, page, sortField, sortOrder, total} = this.state;
       const data = loading ? null : this.state.data;
-      const review = cohortReviewStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
       if (data !== null) {
@@ -619,7 +620,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       });
       return <div style={styles.review}>
         <style>{datatableStyles}</style>
-        {!!review && <React.Fragment>
+        {!!cohortReview && <React.Fragment>
           <button
             style={styles.backBtn}
             type='button'
@@ -627,7 +628,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             Back to cohort
           </button>
           <h4 style={styles.title}>
-            Review Sets for {review.cohortName}
+            Review Sets for {cohortReview.cohortName}
             <Button
               style={{float: 'right', height: '1.3rem'}}
               disabled={!data}
@@ -636,7 +637,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             </Button>
           </h4>
           <div style={styles.description}>
-            {review.description}
+            {cohortReview.description}
           </div>
           <DataTable
             style={styles.table}

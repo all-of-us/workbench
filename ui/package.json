@@ -11,7 +11,7 @@
     "test-react": "yarn jest",
     "lint": "yarn eslint src --ext .ts,.tsx && ng lint --type-check=true",
     "e2e": "ng e2e",
-    "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
+    "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",

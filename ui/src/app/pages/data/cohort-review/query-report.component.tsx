@@ -3,12 +3,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -187,6 +186,7 @@ const domains = [Domain[Domain.CONDITION],
 
 export interface QueryReportProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
+  cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
 export interface QueryReportState {
@@ -195,11 +195,10 @@ export interface QueryReportState {
   data: any;
   groupedData: any;
   chartsLoading: boolean;
-  review: CohortReview;
   reviewLoading: boolean;
 }
 
-export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
+export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<QueryReportProps, QueryReportState> {
     constructor(props: any) {
       super(props);
@@ -209,29 +208,27 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
         data: null,
         groupedData: null,
         chartsLoading: true,
-        review: cohortReviewStore.getValue(),
         reviewLoading: true
       };
     }
 
     async componentDidMount() {
-      const {cdrVersionTiersResponse, workspace: {cdrVersionId}, hideSpinner} = this.props;
+      const {cdrVersionTiersResponse, cohortReview, workspace: {cdrVersionId}, hideSpinner} = this.props;
       hideSpinner();
-      const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       let request: SearchRequest;
-      if (review) {
+      if (cohortReview) {
         this.setState({reviewLoading: false});
-        request = (JSON.parse(review.cohortDefinition));
+        request = (JSON.parse(cohortReview.cohortDefinition));
       } else {
         await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
           page: 0,
           pageSize: 25,
           sortOrder: SortOrder.Asc
-        }).then(({cohortReview}) => {
-          request = (JSON.parse(cohortReview.cohortDefinition));
-          this.setState({review: cohortReview, reviewLoading: false});
-          cohortReviewStore.next(cohortReview);
+        }).then(({cohortReview: review}) => {
+          request = (JSON.parse(review.cohortDefinition));
+          this.setState({reviewLoading: false});
+          currentCohortReviewStore.next(review);
         });
       }
       cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
@@ -278,7 +275,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     render() {
-      const {cdrName, cohort, data, groupedData, chartsLoading, review, reviewLoading} = this.state;
+      const {cohortReview} = this.props;
+      const {cdrName, cohort, data, groupedData, chartsLoading, reviewLoading} = this.state;
       // TODO can we use the creation time from the review instead of the cohort here?
       const created = !!cohort ? moment(cohort.creationTime).format('YYYY-MM-DD') : null;
       return <React.Fragment>
@@ -289,7 +287,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
           onClick={() => this.goBack()}>
           Back to review set
         </button>
-        {reviewLoading ? <SpinnerOverlay/> : <div style={styles.reportBackground}>
+        {reviewLoading && <SpinnerOverlay/>}
+        {cohortReview && <div style={styles.reportBackground}>
           <div style={styles.container}>
             <div style={styles.row}>
               <div style={columns.col6}>
@@ -300,7 +299,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                         Cohort Name
                       </div>
                       <div style={styles.queryContent}>
-                        {review.cohortName}
+                        {cohortReview.cohortName}
                       </div>
                       <div style={styles.queryTitle}>
                         Created By
@@ -324,7 +323,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                       </div>
                     </div>
                     <div style={columns.col12}>
-                      <CohortDefinition review={review}/>
+                      <CohortDefinition review={cohortReview}/>
                     </div>
                   </div>
                 </div>
@@ -372,7 +371,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                           {groupedData[group][row].count.toLocaleString()}
                         </div>
                         <div style={columns.col3}>
-                          {Math.round(groupedData[group][row].count / review.matchedParticipantCount * 100)}%
+                          {Math.round(groupedData[group][row].count / cohortReview.matchedParticipantCount * 100)}%
                         </div>
                       </div>
                     </div>
@@ -407,7 +406,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
                     <div style={{...styles.col, flex: '0 0 83.33333%', maxWidth: '83.33333%'}}>
                       {domains.map((domain, i) => (
                         <div key={i} style={{minHeight: '10rem', position: 'relative'}}>
-                          <ParticipantsCharts domain={domain} review={review}/>
+                          <ParticipantsCharts domain={domain} review={cohortReview}/>
                         </div>
                       ))}
                     </div>

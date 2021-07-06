@@ -87,7 +87,7 @@ const DataComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DataCompone
 const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetPage);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
 const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
-const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage); // this name is bad i am sorry
+const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
@@ -354,7 +354,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
             component={() => <ParticipantsTablePage routeData={{
               title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'reviewParticipants'
             }}/>}
           />
@@ -370,7 +370,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
             component={() => <QueryReportPage routeData={{
               title: 'Review Cohort Description',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'cohortDescription'
             }}/>}
           />
@@ -378,7 +378,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
             component={() => <CohortReviewPage routeData={{
               title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'reviewParticipants'
             }}/>}
           />
