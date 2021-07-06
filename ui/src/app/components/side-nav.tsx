@@ -8,6 +8,7 @@ import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
+import {withRouter} from "react-router";
 
 const styles = reactStyles({
   flex: {
@@ -75,6 +76,44 @@ const styles = reactStyles({
     transform: 'rotate(0deg)',
   }
 });
+
+// TODO: React-router's withRouter doesn't update unless the parent component updates.
+// so we do this instead until we can turn this into a function component and use withLocation
+const bannerAdminActive = () => {
+  return window.location.pathname === '/admin/banner';
+}
+
+const userAdminActive = () => {
+  return window.location.pathname === '/admin/user';
+}
+
+const userAuditActive = () => {
+  return window.location.pathname.startsWith('/admin/user-audit');
+}
+
+const workspaceAdminActive = () => {
+  return window.location.pathname.startsWith('/admin/workspaces');
+}
+
+const workspaceAuditActive = () => {
+  return window.location.pathname.startsWith('/admin/workspace-audit');
+}
+
+const homeActive = () => {
+  return window.location.pathname === '';
+}
+
+const libraryActive = () => {
+  return window.location.pathname === '/library';
+}
+
+const workspacesActive = () => {
+  return window.location.pathname === '/workspaces';
+}
+
+const profileActive = () => {
+  return window.location.pathname === '/profile';
+}
 
 interface SideNavItemProps {
   icon?: string;
@@ -200,16 +239,7 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
 
 export interface SideNavProps {
   profile: Profile;
-  bannerAdminActive: boolean;
-  workspaceAdminActive: boolean;
-  homeActive: boolean;
-  libraryActive: boolean;
   onToggleSideNav: Function;
-  profileActive: boolean;
-  userAdminActive: boolean;
-  userAuditActive: boolean;
-  workspaceAuditActive: boolean;
-  workspacesActive: boolean;
 }
 
 export interface SideNavState {
@@ -272,7 +302,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={'Profile'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
-          active={this.props.profileActive}
+          active={profileActive()}
         />
       }
       {
@@ -287,14 +317,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         content='Home'
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href='/'
-        active={this.props.homeActive}
+        active={homeActive()}
       />
       <SideNavItem
         icon='applications'
         content='Your Workspaces'
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/workspaces'}
-        active={this.props.workspacesActive}
+        active={workspacesActive()}
         disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
@@ -302,7 +332,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         content='Featured Workspaces'
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/library'}
-        active={this.props.libraryActive}
+        active={libraryActive()}
         disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
@@ -332,7 +362,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={'User Admin'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href={'/admin/user'}
-          active={this.props.userAdminActive}
+          active={userAdminActive()}
         />
       }
       {
@@ -340,7 +370,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             content={'User Audit'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/user-audit/'}
-            active={this.props.userAuditActive}
+            active={userAuditActive()}
         />
       }
       {
@@ -348,7 +378,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             content={'Service Banners'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/banner'}
-            active={this.props.bannerAdminActive}
+            active={bannerAdminActive()}
         />
       }
       {
@@ -356,7 +386,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             content={'Workspaces'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/workspaces'}
-            active={this.props.workspaceAdminActive}
+            active={workspaceAdminActive()}
         />
       }
       {
@@ -364,7 +394,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             content={'Workspace Audit'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/workspace-audit/'}
-            active={this.props.workspaceAuditActive}
+            active={workspaceAuditActive()}
         />
       }
       {
@@ -372,9 +402,9 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
             content={'Institution Admin'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/institution'}
-            active={this.props.workspaceAdminActive}
+            active={workspaceAdminActive()}
         />
       }
     </div>;
   }
-}
+};

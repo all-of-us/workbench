@@ -13,6 +13,7 @@ import {profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
+import {useLocation} from "react-router-dom";
 
 const styles = reactStyles({
   headerContainer: {
@@ -79,17 +80,7 @@ const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
   }
 };
 
-export const NavBar = (
-   bannerAdminActive: boolean,
-   workspaceAdminActive: boolean,
-   homeActive: boolean,
-   workspacesActive: boolean,
-   libraryActive: boolean,
-   profileActive: boolean,
-   userAdminActive: boolean,
-   userAuditActive: boolean,
-   workspaceAuditActive: boolean
-) => {
+export const NavBar = () => {
   const [showSideNav, setShowSideNav] = useState(false);
   const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [statusAlertDetails, setStatusAlertDetails] = useState({
@@ -208,18 +199,9 @@ export const NavBar = (
       showSideNav
       && <SideNav
           profile={profile}
-          bannerAdminActive={bannerAdminActive}
-          homeActive={homeActive}
-          libraryActive={libraryActive}
           // Passing the function itself deliberately, we want to be able to
           // toggle the nav whenever we click anything in it
           onToggleSideNav={onToggleSideNav}
-          profileActive={profileActive}
-          userAdminActive={userAdminActive}
-          userAuditActive={userAuditActive}
-          workspaceAuditActive={workspaceAuditActive}
-          workspaceAdminActive={workspaceAdminActive}
-          workspacesActive={workspacesActive}
       />
     }
   </div>;
@@ -230,25 +212,8 @@ export const NavBar = (
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
-  @Input('bannerAdminActive') bannerAdminActive;
-  @Input('workspaceAdminActive') workspaceAdminActive;
-  @Input('homeActive') homeActive;
-  @Input('workspacesActive') workspacesActive;
-  @Input('libraryActive') libraryActive;
-  @Input('profileActive') profileActive;
-  @Input('userAdminActive') userAdminActive;
   constructor() {
-    super(NavBar, [
-      'bannerAdminActive',
-      'workspaceAdminActive',
-      'homeActive',
-      'workspacesActive',
-      'libraryActive',
-      'profileActive',
-      'userAdminActive',
-      'userAuditActive',
-      'workspaceAuditActive'
-    ]);
+    super(NavBar, []);
   }
 }
 
