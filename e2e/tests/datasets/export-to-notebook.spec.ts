@@ -17,7 +17,6 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Export dataset to notebook tests', () => {
-
   const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
 
   beforeEach(async () => {

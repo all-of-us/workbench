@@ -6,11 +6,7 @@ import { logger } from 'libs/logger';
  * Contains common functions/actions that help with tests creation.
  */
 export default abstract class BasePage {
-  page: Page;
-
-  protected constructor(page: Page) {
-    this.page = page;
-  }
+  protected constructor(protected readonly page: Page) {}
 
   async getPageTitle(): Promise<string> {
     return this.page.title();

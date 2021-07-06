@@ -1,5 +1,6 @@
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
+import NotebookFrame from './notebook-frame';
 
 export enum CellType {
   // To append to css selector
@@ -11,8 +12,10 @@ export enum CellType {
 /**
  * Notebook Cell represents the root element that contains both the code input and output cells.
  */
-export default class NotebookCell {
-  private iframe: Frame; // Jupyter notebook iframe
+export default class NotebookCell extends NotebookFrame {
+  isLoaded(): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
 
   /**
    *
@@ -20,11 +23,9 @@ export default class NotebookCell {
    * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
    * @param {number} cellIndex Cell index. (first index is 1)
    */
-  constructor(
-    private readonly page: Page,
-    private readonly cellType: CellType = CellType.Code,
-    private cellIndex: number = 1
-  ) {}
+  constructor(page: Page, private readonly cellType: CellType = CellType.Code, private cellIndex: number = 1) {
+    super(page);
+  }
 
   async getLastCell(): Promise<NotebookCell | null> {
     const elements = await this.findAllCells();
@@ -125,14 +126,6 @@ export default class NotebookCell {
     const selector = `${this.outputSelector(this.getCellIndex())}.output_error`;
     const iframe = await this.getIFrame();
     return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
-  }
-
-  private async getIFrame(): Promise<Frame> {
-    if (this.iframe === undefined) {
-      const frame = await this.page.waitForSelector('iframe[src*="notebooks"]');
-      this.iframe = await frame.contentFrame();
-    }
-    return this.iframe;
   }
 
   private async findAllCells(): Promise<ElementHandle[]> {
