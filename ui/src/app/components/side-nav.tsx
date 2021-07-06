@@ -155,7 +155,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
   const onClick = () => {
     if (props.href && !props.disabled) {
       props.onToggleSideNav();
-      navigate(props.href);
+      navigate([props.href]);
     }
     if (props.containsSubItems) {
       setSubItemsOpen(!subItemsOpen);
