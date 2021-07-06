@@ -12,7 +12,6 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  displayDateWithoutHours,
   formatFreeCreditsUSD,
   isBlank,
   reactStyles,
@@ -522,18 +521,6 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                   (updatedProfile.accessTierShortNames)
                 }
                 inputId={'accessTiers'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
-            />
-            <TextInputWithLabel
-                labelText={'Registration date'}
-                placeholder={
-                  updatedProfile.firstRegistrationCompletionTime
-                      ? displayDateWithoutHours(updatedProfile.firstRegistrationCompletionTime)
-                      : ''
-                }
-                inputId={'firstRegistrationCompletionTime'}
                 disabled={true}
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
