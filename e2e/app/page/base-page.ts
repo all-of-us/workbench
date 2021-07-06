@@ -6,11 +6,7 @@ import { logger } from 'libs/logger';
  * Contains common functions/actions that help with tests creation.
  */
 export default abstract class BasePage {
-  page: Page;
-
-  protected constructor(page: Page) {
-    this.page = page;
-  }
+  protected constructor(protected readonly page: Page) {}
 
   async getPageTitle(): Promise<string> {
     return this.page.title();
@@ -29,7 +25,7 @@ export default abstract class BasePage {
   async gotoUrl(url: string): Promise<void> {
     const response = await this.page.goto(url, { waitUntil: ['load'] });
     if (response) {
-      logger.info(`Goto URL: ${url} Response: ${response.status()} ${await response.text()}`);
+      logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
     }
   }
 
