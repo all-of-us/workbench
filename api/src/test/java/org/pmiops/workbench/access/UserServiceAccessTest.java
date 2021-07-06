@@ -233,6 +233,7 @@ public class UserServiceAccessTest {
   // This should be removed after June 30 2021
   @Test
   public void testGracePeriod() {
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
     Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
     Instant julyFirst = Instant.parse("2021-07-01T01:00:00.00Z");
     PROVIDED_CLOCK.setInstant(mayFirst);
