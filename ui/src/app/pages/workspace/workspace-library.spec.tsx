@@ -12,10 +12,14 @@ import {WorkspaceLibrary} from './workspace-library';
 describe('WorkspaceLibrary', () => {
   const suffixes = [" Phenotype Library", " Tutorial Workspace", " Published Workspace"];
 
+  const props = {
+    enablePublishedWorkspaces: true,
+    hideSpinner: () => {},
+    showSpinner: () => {}
+  };
+
   const component = () => {
-    return mount(<WorkspaceLibrary
-      enablePublishedWorkspaces={true}
-    />);
+    return mount(<WorkspaceLibrary {...props} />);
   };
 
   beforeEach(() => {

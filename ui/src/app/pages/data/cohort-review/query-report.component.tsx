@@ -1,5 +1,6 @@
 import {ComboChart} from 'app/components/combo-chart.component';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
@@ -183,7 +184,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportProps {
+export interface QueryReportProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   cohortReview: CohortReview;
   workspace: WorkspaceData;
@@ -212,7 +213,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     }
 
     async componentDidMount() {
-      const {cdrVersionTiersResponse, cohortReview, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionTiersResponse, cohortReview, workspace: {cdrVersionId}, hideSpinner} = this.props;
+      hideSpinner();
       const {ns, wsid, cid} = urlParamsStore.getValue();
       let request: SearchRequest;
       if (cohortReview) {

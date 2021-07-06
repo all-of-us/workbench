@@ -6,6 +6,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
@@ -42,7 +43,7 @@ const LockoutButton: React.FunctionComponent<{disabled: boolean,
     </Button>;
   };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile, reload: Function, updateCache: Function
   };
@@ -73,6 +74,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.setState({contentLoaded: false});
     await this.loadProfiles();
     this.setState({contentLoaded: true});

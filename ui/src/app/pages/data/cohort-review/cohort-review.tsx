@@ -3,6 +3,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
@@ -25,7 +26,7 @@ interface State {
   readonly: boolean;
 }
 
-export class CohortReview extends React.Component<{}, State> {
+export class CohortReview extends React.Component<WithSpinnerOverlayProps, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -36,6 +37,7 @@ export class CohortReview extends React.Component<{}, State> {
   }
 
   componentDidMount(): void {
+    this.props.hideSpinner();
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});

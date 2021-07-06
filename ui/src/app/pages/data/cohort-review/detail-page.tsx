@@ -3,6 +3,7 @@ import * as React from 'react';
 import {from} from 'rxjs/observable/from';
 
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
@@ -12,7 +13,7 @@ import {currentCohortReviewStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -30,7 +31,8 @@ export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     }
 
     async componentDidMount() {
-      const {workspace: {cdrVersionId, id, namespace}} = this.props;
+      const {workspace: {cdrVersionId, id, namespace}, hideSpinner} = this.props;
+      hideSpinner();
       let {cohortReview} = this.props;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       if (!cohortReview) {

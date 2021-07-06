@@ -8,6 +8,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
   filterStateStore,
   getVocabOptions,
@@ -220,7 +221,7 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -260,7 +261,8 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
     }
 
     async componentDidMount() {
-      const {cohortReview} = this.props;
+      const {cohortReview, hideSpinner} = this.props;
+      hideSpinner();
       const {filters} = this.state;
       let {demoFilters} = this.state;
       const promises = [];

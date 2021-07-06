@@ -20,6 +20,7 @@ import {
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
@@ -142,7 +143,7 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   // From withUrlParams
   urlParams: {
     usernameWithoutGsuiteDomain: string
@@ -181,6 +182,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     try {
       Promise.all([
         this.getUser(),
