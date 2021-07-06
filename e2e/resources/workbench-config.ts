@@ -1,6 +1,5 @@
 import * as fp from 'lodash/fp';
-import { IConfig } from '../types';
-require("dotenv").config();
+import { IConfig } from 'types';
 
 const env = process.env.WORKBENCH_ENV || 'test';
 
