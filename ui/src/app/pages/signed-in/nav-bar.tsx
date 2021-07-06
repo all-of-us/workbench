@@ -223,7 +223,7 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
-        <AccessRenewalNotificationMaybe/>
+        {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
         {
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}
