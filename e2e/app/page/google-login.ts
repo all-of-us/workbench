@@ -107,7 +107,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   async load(): Promise<void> {
-    const url = `${config.uiBaseUrl}${config.loginUrlPath}`;
+    const url = `${config.LOGIN_URL}${config.loginUrlPath}`;
     const response = await this.page.goto(url, {
       waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
       timeout: 2 * 60 * 1000
@@ -127,8 +127,8 @@ export default class GoogleLoginPage {
    * @param paswd
    */
   async login(email?: string, paswd?: string): Promise<void> {
-    const user = email || config.userEmail;
-    const pwd = paswd || config.userPassword;
+    const user = email || config.USER_NAME;
+    const pwd = paswd || config.PASSWORD;
 
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!');

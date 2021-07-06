@@ -45,7 +45,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Share Workspace to a READER.
     const shareModal = await aboutPage.openShareModal();
-    await shareModal.shareWithUser(config.readerUserName, WorkspaceAccessLevel.Reader);
+    await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
   });
 

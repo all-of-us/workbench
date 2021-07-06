@@ -16,7 +16,7 @@ describe('Updating runtime compute type', () => {
   });
 
   test('Switch from GCE to dataproc', async () => {
-    await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
+    await createWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION });
 
     // Open the runtime panel
     const runtimePanel = new RuntimePanel(page);

@@ -118,7 +118,7 @@ export async function createWorkspace(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName = makeWorkspaceName() } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersion);
@@ -144,7 +144,7 @@ export async function findOrCreateWorkspace(
   page: Page,
   opts: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName } = opts;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
@@ -195,7 +195,7 @@ export async function findOrCreateWorkspaceCard(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<WorkspaceCard> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName = makeWorkspaceName() } = options;
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {

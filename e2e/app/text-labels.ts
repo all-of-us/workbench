@@ -1,11 +1,13 @@
 import { config } from 'resources/workbench-config';
 
-export enum PageUrl {
-  Home = config.uiBaseUrl,
-  Workspaces = config.uiBaseUrl + config.workspacesUrlPath,
-  Admin = config.uiBaseUrl + config.adminUrlPath,
-  Profile = config.uiBaseUrl + config.profileUrlPath
-}
+export const PageUrl = {
+  Home: { value: config.LOGIN_URL },
+  Workspaces: { value: config.LOGIN_URL + config.workspacesUrlPath },
+  Admin: { value: config.LOGIN_URL + config.adminUrlPath },
+  Profile: { value: config.LOGIN_URL + config.profileUrlPath }
+} as const;
+
+export type PageUrl = keyof typeof PageUrl;
 
 export enum WorkspaceAccessLevel {
   Owner = 'OWNER',

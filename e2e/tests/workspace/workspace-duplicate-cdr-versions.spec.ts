@@ -26,7 +26,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
-    await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
+    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION);
 
     // wait for the warning modal and consent to the required restrictions
     const modal = new OldCdrVersionModal(page);
@@ -58,7 +58,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
   test('OWNER can duplicate workspace to a newer CDR Version via Workspace card', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, {
       workspaceName: originalWorkspaceName2,
-      cdrVersion: config.altCdrVersionName
+      cdrVersion: config.ALTERNATIVE_CDR_VERSION
     });
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
@@ -69,11 +69,11 @@ describe('Duplicate workspace, changing CDR versions', () => {
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
-    await workspaceEditPage.selectCdrVersion(config.defaultCdrVersionName);
+    await workspaceEditPage.selectCdrVersion(config.DEFAULT_CDR_VERSION);
 
     const upgradeMessage = await workspaceEditPage.getCdrVersionUpgradeMessage();
     expect(upgradeMessage).toContain(originalWorkspaceName2);
-    expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
+    expect(upgradeMessage).toContain(`${config.ALTERNATIVE_CDR_VERSION} to ${config.DEFAULT_CDR_VERSION}.`);
 
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
