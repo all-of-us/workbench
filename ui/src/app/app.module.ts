@@ -16,7 +16,6 @@ import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
 import {HelpSidebarComponent} from './components/help-sidebar';
-import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -54,7 +53,6 @@ import {FooterComponent} from './components/footer';
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
     TextModalComponent,
