@@ -7,13 +7,12 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
-import {Profile} from 'generated/fetch';
+import {profileStore, useStore} from 'app/utils/stores';
+import {environment} from 'environments/environment';
 import * as React from 'react';
-import {environment} from "../../../environments/environment";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from 'react';
 
 const styles = reactStyles({
   headerContainer: {
@@ -78,7 +77,7 @@ const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
   } else {
     return !!statusAlertMessage;
   }
-}
+};
 
 export const NavBar = (
    bannerAdminActive: boolean,
@@ -116,7 +115,7 @@ export const NavBar = (
           link: statusAlert.link
         });
       }
-    }
+    };
 
     getAlert();
   }, []);
@@ -127,7 +126,7 @@ export const NavBar = (
         ? barsTransformRotated
         : barsTransformNotRotated
     );
-  }
+  };
 
   const handleClickOutside = (event) => {
     if (
@@ -137,14 +136,14 @@ export const NavBar = (
     ) {
       onToggleSideNav();
     }
-  }
+  };
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
-    }
+    };
   });
 
   const handleStatusAlertBannerUnmount = () => {
@@ -152,7 +151,7 @@ export const NavBar = (
       localStorage.setItem(cookieKey, `${statusAlertDetails.statusAlertId}`);
     }
     setShowStatusAlert(false);
-  }
+  };
 
   return <div
       style={styles.headerContainer}
@@ -224,7 +223,7 @@ export const NavBar = (
       />
     }
   </div>;
-}
+};
 
 @Component({
   selector: 'app-nav-bar',
