@@ -3,14 +3,14 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {ReviewDomainChartsComponent} from 'app/pages/data/cohort-review/review-domain-charts';
-import {cohortReviewStore, vocabOptions} from 'app/services/review-state.service';
+import {vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -227,6 +227,7 @@ class NameContainer extends React.Component<{data: any, vocab: string}, {showMor
 
 interface Props {
   tabName: string;
+  cohortReview: CohortReview;
   columns: Array<any>;
   domain: Domain;
   participantId: number;
@@ -256,7 +257,7 @@ interface State {
   tabFilterState: any;
 }
 
-export const DetailTabTable = withCurrentWorkspace()(
+export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
     private countAborter = new AbortController();
@@ -438,8 +439,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     async callDataApi(request: PageFilterRequest) {
-      const {domain, participantId, workspace: {id, namespace}} = this.props;
-      const {cohortReviewId} = cohortReviewStore.getValue();
+      const {cohortReview: {cohortReviewId}, domain, participantId, workspace: {id, namespace}} = this.props;
       let data = [];
       await cohortReviewApi()
         .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
@@ -456,8 +456,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     async callCountApi(request: PageFilterRequest) {
-      const {participantId, workspace: {id, namespace}} = this.props;
-      const {cohortReviewId} = cohortReviewStore.getValue();
+      const {cohortReview: {cohortReviewId}, participantId, workspace: {id, namespace}} = this.props;
       let count = null;
       await cohortReviewApi()
         .getParticipantCount(namespace, id, cohortReviewId, participantId, request, {signal: this.countAborter.signal})

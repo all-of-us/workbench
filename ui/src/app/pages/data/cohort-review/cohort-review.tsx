@@ -4,11 +4,11 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
-import {cohortReviewStore, queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
+import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -46,7 +46,7 @@ export class CohortReview extends React.Component<{}, State> {
       filters: {items: []}
     }).then(resp => {
       const {cohortReview, queryResultSize} = resp;
-      cohortReviewStore.next(cohortReview);
+      currentCohortReviewStore.next(cohortReview);
       queryResultSizeStore.next(queryResultSize);
       const reviewPresent = cohortReview.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});

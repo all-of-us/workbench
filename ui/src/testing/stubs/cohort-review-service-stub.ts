@@ -40,7 +40,7 @@ export const cohortReviewStubs = [{
   cdrVersionId: 1,
   creationTime: 1,
   cohortDefinition: JSON.stringify(criteriaStub),
-  cohortName: '',
+  cohortName: 'Cohort Name',
   matchedParticipantCount: 1,
   reviewSize: 1,
   reviewedCount: 1,

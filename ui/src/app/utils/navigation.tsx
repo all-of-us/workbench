@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
+import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -21,6 +21,7 @@ export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(undef
 
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
+export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
@@ -118,6 +119,7 @@ export enum BreadcrumbType {
   Notebook = 'Notebook',
   ConceptSet = 'ConceptSet',
   Cohort = 'Cohort',
+  CohortReview = 'CohortReview',
   Participant = 'Participant',
   CohortAdd = 'CohortAdd',
   SearchConcepts = 'SearchConcepts',

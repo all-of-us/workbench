@@ -5,14 +5,15 @@ import {from} from 'rxjs/observable/from';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
-import {cohortReviewStore, getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
+import {getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {withCurrentWorkspace} from 'app/utils';
-import {urlParamsStore} from 'app/utils/navigation';
+import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
+import {currentCohortReviewStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 interface Props {
+  cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
 
@@ -20,7 +21,7 @@ interface State {
   participant: ParticipantCohortStatus;
 }
 
-export const DetailPage = withCurrentWorkspace()(
+export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private subscription;
     constructor(props: any) {
@@ -30,26 +31,29 @@ export const DetailPage = withCurrentWorkspace()(
 
     async componentDidMount() {
       const {workspace: {cdrVersionId, id, namespace}} = this.props;
+      let {cohortReview} = this.props;
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      if (!cohortReviewStore.getValue()) {
+      if (!cohortReview) {
         await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
           page: 0,
           pageSize: 25,
           sortOrder: SortOrder.Asc,
           filters: {items: []}
-        }).then(response => cohortReviewStore.next(response.cohortReview));
+        }).then(response => {
+          cohortReview = response.cohortReview;
+          currentCohortReviewStore.next(cohortReview);
+        });
       }
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
         .switchMap(({pid}) => {
           return from(cohortReviewApi()
-            .getParticipantCohortStatus(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid))
+            .getParticipantCohortStatus(ns, wsid, cohortReview.cohortReviewId, +pid))
             .do(ps => participantStore.next(ps));
         })
         .subscribe();
       if (!vocabOptions.getValue()) {
-        const {cohortReviewId} = cohortReviewStore.getValue();
-        getVocabOptions(namespace, id, cohortReviewId);
+        getVocabOptions(namespace, id, cohortReview.cohortReviewId);
       }
       this.subscription.add(participantStore.subscribe(participant => this.setState({participant})));
     }
