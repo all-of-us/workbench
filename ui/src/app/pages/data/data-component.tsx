@@ -12,6 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
 
