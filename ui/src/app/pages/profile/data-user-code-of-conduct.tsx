@@ -4,6 +4,7 @@ import {HtmlViewer} from 'app/components/html-viewer';
 import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
 import {getDataUseAgreementWidgetV2} from 'app/pages/profile/data-use-agreement-panel';
 import {
@@ -59,7 +60,7 @@ export enum DataUserCodeOfConductPage {
   SIGNATURE
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -115,6 +116,10 @@ export const DataUserCodeOfConduct = withUserProfile()(
         this.props.profileState.updateCache(profile);
         navigate(['/']);
       });
+    }
+
+    componentDidMount() {
+      this.props.hideSpinner();
     }
 
     render() {

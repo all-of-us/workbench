@@ -1,11 +1,10 @@
-
-
 import {AlertDanger} from 'app/components/alert';
 import {FadeBox} from 'app/components/containers';
 import {FlexRow} from 'app/components/flex';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -33,7 +32,7 @@ interface State {
   firstSignIn: Date;
 }
 
-export class WorkspaceList extends React.Component<{}, State> {
+export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, State> {
 
   private timer: NodeJS.Timer;
 
@@ -48,6 +47,7 @@ export class WorkspaceList extends React.Component<{}, State> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.reloadWorkspaces(null);
   }
 

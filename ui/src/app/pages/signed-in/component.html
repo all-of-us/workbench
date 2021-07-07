@@ -1,17 +1,5 @@
 <div class="body">
-  <app-nav-bar
-    [profile]="profile"
-    [headerImg]="headerImg"
-    [displayTag]="displayTag"
-    [shouldShowDisplayTag]="shouldShowDisplayTag"
-    [bannerAdminActive]="bannerAdminActive"
-    [homeActive]="homeActive"
-    [workspacesActive]="workspacesActive"
-    [libraryActive]="libraryActive"
-    [profileActive]="profileActive"
-    [userAdminActive]="userAdminActive"
-    [workspaceAdminActive]="workspaceAdminActive"
-  ></app-nav-bar>
+  <app-nav-bar></app-nav-bar>
 
   <div class="content-container">
     <div class="background-image"></div>
@@ -23,7 +11,6 @@
         based on clicking routerLink elements (above) or router.navigate calls.
       -->
       <router-outlet></router-outlet>
-      <app-routing-spinner></app-routing-spinner>
     </div>
 
     <app-text-modal *ngIf="showInactivityModal"

@@ -12,6 +12,7 @@ import {TextAreaWithLengthValidationMessage, TextInput} from 'app/components/inp
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {EditComponentReact} from 'app/icons/edit';
 import {CriteriaSearch, LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-search';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
@@ -98,7 +99,7 @@ function sortAndStringify(concepts) {
   return JSON.stringify(concepts.sort((a, b) => a.id - b.id));
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortContext: any;
   concept: Array<Criteria>;
   workspace: WorkspaceData;
@@ -150,6 +151,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
     }
 
     componentDidMount() {
+      this.props.hideSpinner();
       if (this.isDetailPage) {
         this.getConceptSet();
       } else if (!currentConceptStore.getValue()) {

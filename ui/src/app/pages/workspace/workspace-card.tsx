@@ -9,7 +9,6 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle, withErrorModal} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -130,12 +129,8 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 
 interface WorkspaceCardState {
   confirmDeleting: boolean;
-  // Whether this card is busy loading data specific to the workspace.
-  loadingData: boolean;
   showShareModal: boolean;
   showResearchPurposeReviewModal: boolean;
-  // The list of user roles associated with this workspace. Lazily populated
-  // only when the workspace share dialog is opened.
 }
 
 interface WorkspaceCardProps {
@@ -151,7 +146,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     super(props);
     this.state = {
       confirmDeleting: false,
-      loadingData: false,
       showShareModal: false,
       showResearchPurposeReviewModal: false,
     };
@@ -162,7 +156,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     message: `Could not delete workspace '${this.props.workspace.id}'.`,
     showBugReportLink: true,
     onDismiss: () => {
-      this.setState({confirmDeleting: false, loadingData: false});
+      this.setState({confirmDeleting: false});
     }
   }, async() => {
     AnalyticsTracker.Workspaces.Delete();
@@ -205,8 +199,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   render() {
     const {workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
-    const {confirmDeleting, loadingData,
-      showShareModal, showResearchPurposeReviewModal} = this.state;
+    const {confirmDeleting, showShareModal, showResearchPurposeReviewModal} = this.state;
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -234,7 +227,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
             }}
             data-test-id='workspace-card'
           >
-            {loadingData && <SpinnerOverlay/>}
             <FlexColumn style={{marginBottom: 'auto'}}>
               <FlexRow style={{ alignItems: 'flex-start' }}>
                 <Clickable>

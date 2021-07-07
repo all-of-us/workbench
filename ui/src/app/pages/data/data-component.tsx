@@ -7,6 +7,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
@@ -78,8 +79,12 @@ const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
+interface Props extends WithSpinnerOverlayProps {
+  workspace: WorkspaceData;
+}
+
 export const DataComponent = withCurrentWorkspace()(class extends React.Component<
-  {workspace: WorkspaceData},
+  Props,
   {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
     creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
     existingCohortReviewName: string[], existingConceptSetName: string[]}> {
@@ -99,6 +104,7 @@ export const DataComponent = withCurrentWorkspace()(class extends React.Componen
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.loadResources();
   }
 

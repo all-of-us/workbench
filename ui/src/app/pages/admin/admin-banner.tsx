@@ -1,6 +1,7 @@
 import {BoldHeader, Header} from 'app/components/headers';
 import {TextArea, TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import * as React from 'react';
@@ -33,7 +34,7 @@ const validators = {
   bannerHeadline: {...required, ...notTooLong(200)},
   readMoreLink: {...notTooLong(200)},
 };
-export class AdminBanner extends React.Component<{}, AdminBannerState> {
+export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminBannerState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -45,6 +46,7 @@ export class AdminBanner extends React.Component<{}, AdminBannerState> {
   }
 
   componentDidMount(): void {
+    this.props.hideSpinner();
     statusAlertApi().getStatusAlert()
       .then(statusAlert => this.setState({
         bannerDescription: statusAlert.message,
