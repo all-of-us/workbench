@@ -1,17 +1,5 @@
 <div class="body">
-  <app-nav-bar
-    [profile]="profile"
-    [headerImg]="headerImg"
-    [displayTag]="displayTag"
-    [shouldShowDisplayTag]="shouldShowDisplayTag"
-    [bannerAdminActive]="bannerAdminActive"
-    [homeActive]="homeActive"
-    [workspacesActive]="workspacesActive"
-    [libraryActive]="libraryActive"
-    [profileActive]="profileActive"
-    [userAdminActive]="userAdminActive"
-    [workspaceAdminActive]="workspaceAdminActive"
-  ></app-nav-bar>
+  <app-nav-bar></app-nav-bar>
 
   <clr-alert
       *ngIf="zendeskLoadError"

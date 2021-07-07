@@ -1,4 +1,3 @@
-import {Location} from '@angular/common';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -56,9 +55,6 @@ const checkOpsBeforeUnload = (e) => {
 })
 export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   profile: Profile;
-  headerImg = '/assets/images/all-of-us-logo.svg';
-  displayTag = environment.displayTag;
-  shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
   cdrVersionsInitialized = false;
@@ -86,7 +82,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     /* Ours */
     private signInService: SignInService,
     /* Angular's */
-    private locationService: Location,
     private elementRef: ElementRef
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
@@ -280,33 +275,5 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     return `You have been idle for over ${this.secondsToText(secondsBeforeDisplayingModal)}. ` +
       `You can choose to extend your session by clicking the button below. You will be automatically logged ` +
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
-  }
-
-  get bannerAdminActive(): boolean {
-    return this.locationService.path() === '/admin/banner';
-  }
-
-  get userAdminActive(): boolean {
-    return this.locationService.path() === '/admin/user';
-  }
-
-  get workspaceAdminActive(): boolean {
-    return this.locationService.path() === '/admin/workspaces';
-  }
-
-  get homeActive(): boolean {
-    return this.locationService.path() === '';
-  }
-
-  get libraryActive(): boolean {
-    return this.locationService.path() === '/library';
-  }
-
-  get workspacesActive(): boolean {
-    return this.locationService.path() === '/workspaces';
-  }
-
-  get profileActive(): boolean {
-    return this.locationService.path() === '/profile';
   }
 }
