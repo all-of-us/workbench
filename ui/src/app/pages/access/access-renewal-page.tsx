@@ -24,7 +24,7 @@ import {
 } from 'app/utils';
 import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
 import {navigateByUrl} from 'app/utils/navigation';
-import {profileStore, useStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {RenewableAccessModuleStatus} from 'generated/fetch';
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
@@ -224,6 +224,10 @@ export const AccessRenewalPage = fp.flow(
     renewableAccessModules: {modules}},
     profile
   } = useStore(profileStore);
+  const {config: {
+    enableComplianceTraining,
+    enableDataUseAgreement,
+  }} = useStore(serverConfigStore);
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
@@ -335,7 +339,7 @@ export const AccessRenewalPage = fp.flow(
         </div>
       </RenewalCard>
       {/* Compliance Training */}
-      <RenewalCard step={3}
+      {enableComplianceTraining && <RenewalCard step={3}
         TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
         lastCompletionTime={complianceTrainingCompletionTime}
         nextReviewTime={getExpirationTimeFor(ModuleNameEnum.ComplianceTraining)}
@@ -365,9 +369,9 @@ export const AccessRenewalPage = fp.flow(
             }}
             style={{height: '1.6rem', marginLeft: '0.75rem', width: 'max-content'}}>Refresh</Button>}
         </FlexRow>
-      </RenewalCard>
+      </RenewalCard>}
       {/* DUCC */}
-      <RenewalCard step={4}
+      {enableDataUseAgreement && <RenewalCard step={enableComplianceTraining ? 4 : 3}
         TitleComponent={() => 'Sign Data User Code of Conduct'}
         lastCompletionTime={dataUseAgreementCompletionTime}
         nextReviewTime={getExpirationTimeFor(ModuleNameEnum.DataUseAgreement)}
@@ -378,7 +382,7 @@ export const AccessRenewalPage = fp.flow(
           completedButtonText='Completed'
           onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
           wasBypassed={wasBypassed(ModuleNameEnum.DataUseAgreement)}/>
-      </RenewalCard>
+      </RenewalCard>}
     </div>
     {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}
   </FadeBox>;

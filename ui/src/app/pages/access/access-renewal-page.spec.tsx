@@ -18,6 +18,9 @@ const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('Access Renewal Page', () => {
+  const load = jest.fn();
+  const reload = jest.fn();
+  const updateCache = jest.fn();
 
   function expireAllModules() {
     const expiredTime = oneHourAgo();
@@ -37,6 +40,17 @@ describe('Access Renewal Page', () => {
       moduleName,
       expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
     }), oldProfile.renewableAccessModules.modules);
+    const newProfile = fp.set(['renewableAccessModules', 'modules'], newModules, oldProfile)
+    profileStore.set({profile: newProfile, load, reload, updateCache});
+  }
+
+  function removeOneModule(updateModuleName) {
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(({moduleName, expirationEpochMillis}) =>
+        (moduleName === updateModuleName ? {} : {
+          moduleName,
+          expirationEpochMillis}),
+        oldProfile.renewableAccessModules.modules);
     const newProfile = fp.set(['renewableAccessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -68,10 +82,6 @@ describe('Access Renewal Page', () => {
   const component = () => {
     return mount(<AccessRenewalPage/>);
   };
-
-  const load = jest.fn();
-  const reload = jest.fn();
-  const updateCache = jest.fn();
 
   beforeEach(() => {
     const profileApi = new ProfileApiStub();
@@ -228,33 +238,37 @@ describe('Access Renewal Page', () => {
   });
 
   it('should show the correct state when modules are disabled', async () => {
-    expireAllModules()
-
     serverConfigStore.set({config: {
       ...defaultServerConfig,
         enableDataUseAgreement: false,
         enableComplianceTraining: false
       }});
-    expireAllModules()
 
     const wrapper = component();
+
+    setCompletionTimes(() => Date.now());
 
     updateOneModule('profileConfirmation', oneYearFromNow());
     updateOneModule('publicationConfirmation', oneYearFromNow());
 
-    setCompletionTimes(() => Date.now());
+    // these modules will not be returned in RenewableAccessModules because they are disabled
+
+    removeOneModule('complianceTraining');
+    removeOneModule('dataUseAgreement');
 
     await waitOneTickAndUpdate(wrapper);
 
     // profileConfirmation and publicationConfirmation are complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
-    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
 
     // complianceTraining and dataUseAgreement are not shown because these modules are disabled
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(0);
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(0)
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
+
+    // all of the necessary steps = 2 rather than the usual 4
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
   });
 
 });
