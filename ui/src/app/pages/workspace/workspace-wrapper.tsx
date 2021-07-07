@@ -5,8 +5,7 @@ import {withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {WorkspaceRoutes} from 'app/workspace-app-routing';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
-import {useEffect} from "react";
+import {useEffect} from 'react';
 
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace(),
