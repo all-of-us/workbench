@@ -262,6 +262,7 @@ export const SideNav = (props: SideNavProps) => {
         parentOnClick={() => onToggleUser()}
         containsSubItems={true}
         hasProfileImage={true}
+        data-test-id='user-options'
     />
     {
       showUserOptions && <SideNavItem
