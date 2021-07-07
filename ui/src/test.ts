@@ -12,14 +12,14 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import {
   currentWorkspaceStore,
   currentCohortStore,
+  currentCohortReviewStore,
   currentConceptSetStore,
   queryParamsStore,
   routeConfigDataStore,
-  urlParamsStore
+  urlParamsStore,
 } from 'app/utils/navigation';
 import {serverConfigStore} from "./app/utils/stores";
 
@@ -36,7 +36,7 @@ getTestBed().initTestEnvironment(
   platformBrowserDynamicTesting()
 );
 beforeEach(() => {
-  cohortReviewStore.next(undefined);
+  currentCohortReviewStore.next(undefined);
   currentWorkspaceStore.next(undefined);
   currentCohortStore.next(undefined);
   currentConceptSetStore.next(undefined);

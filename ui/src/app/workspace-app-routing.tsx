@@ -1,5 +1,7 @@
+import {withRoutingSpinner} from 'app/app-routing';
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, withRouteData} from 'app/components/app-router';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
@@ -19,22 +21,22 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
 
-const CohortPagePage = withRouteData(CohortPage);
-const CohortActionsPage = withRouteData(CohortActions);
-const CohortReviewPage = withRouteData(CohortReview);
-const ConceptHomepagePage = withRouteData(ConceptHomepage);
-const ConceptSearchPage = withRouteData(ConceptSearch);
-const ConceptSetActionsPage = withRouteData(ConceptSetActions);
-const DataComponentPage = withRouteData(DataComponent);
-const DataSetComponentPage = withRouteData(DatasetPage);
-const DetailPagePage = withRouteData(DetailPage);
-const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
-const NotebookListPage = withRouteData(NotebookList);
-const NotebookRedirectPage = withRouteData(NotebookRedirect);
-const ParticipantsTablePage = withRouteData(ParticipantsTable);
-const QueryReportPage = withRouteData(QueryReport);
-const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
-const WorkspaceEditPage = withRouteData(WorkspaceEdit);
+const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
+const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
+const CohortReviewPage = fp.flow(withRouteData, withRoutingSpinner)(CohortReview);
+const ConceptHomepagePage = fp.flow(withRouteData, withRoutingSpinner)(ConceptHomepage);
+const ConceptSearchPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSearch);
+const ConceptSetActionsPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSetActions);
+const DataComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DataComponent);
+const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetPage);
+const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
+const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
+const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
+const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
+const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
+const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
+const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 
 // TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
 // rendering over and over again on page load, rendering (hah) the app unusable.

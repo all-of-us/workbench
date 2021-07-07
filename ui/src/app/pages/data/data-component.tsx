@@ -83,11 +83,11 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
-  
+
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const {workspace} = props;
 
   if (!workspace) {

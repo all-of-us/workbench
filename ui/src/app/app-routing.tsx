@@ -54,7 +54,7 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-const withRoutingSpinner = withSpinnerOverlay(
+export const withRoutingSpinner = withSpinnerOverlay(
   true,
     {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
 
