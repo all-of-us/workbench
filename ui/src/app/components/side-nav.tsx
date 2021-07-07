@@ -97,7 +97,7 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
   return sideNavItemStyles;
 }
 
-// TODO RW-6726: Ideally, we would use useLocation to get the path and pass it in to these functions.
+// TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
 const bannerAdminActive = () => {
   return window.location.pathname === '/admin/banner';
