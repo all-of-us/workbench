@@ -244,10 +244,10 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
 
   openContactWidget() {
     openZendeskWidget(
-        this.props.profile.givenName,
-        this.props.profile.familyName,
-        this.props.profile.username,
-        this.props.profile.contactEmail,
+      this.props.profile.givenName,
+      this.props.profile.familyName,
+      this.props.profile.username,
+      this.props.profile.contactEmail,
     );
   }
 
