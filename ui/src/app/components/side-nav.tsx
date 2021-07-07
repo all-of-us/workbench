@@ -8,9 +8,7 @@ import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {withRouter} from "react-router";
-import {useRef, useState} from "react";
-import {useLocation} from "react-router-dom";
+import {useState} from 'react';
 
 const styles = reactStyles({
   flex: {
@@ -95,45 +93,45 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
     sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
   }
   return sideNavItemStyles;
-}
+};
 
 // TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
 const bannerAdminActive = () => {
   return window.location.pathname === '/admin/banner';
-}
+};
 
 const userAdminActive = () => {
   return window.location.pathname === '/admin/user';
-}
+};
 
 const userAuditActive = () => {
   return window.location.pathname.startsWith('/admin/user-audit');
-}
+};
 
 const workspaceAdminActive = () => {
   return window.location.pathname.startsWith('/admin/workspaces');
-}
+};
 
 const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
-}
+};
 
 const homeActive = () => {
   return window.location.pathname === '';
-}
+};
 
 const libraryActive = () => {
   return window.location.pathname === '/library';
-}
+};
 
 const workspacesActive = () => {
   return window.location.pathname === '/workspaces';
-}
+};
 
 const profileActive = () => {
   return window.location.pathname === '/profile';
-}
+};
 
 interface SideNavItemProps {
   icon?: string;
@@ -161,7 +159,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
     if (props.containsSubItems) {
       setSubItemsOpen(!subItemsOpen);
     }
-  }
+  };
 
   return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
@@ -219,20 +217,20 @@ export const SideNavItem = (props: SideNavItemProps) => {
       }
     </div>
   </Clickable>;
-}
+};
 
 const redirectToZendesk = () => {
   window.open(supportUrls.helpCenter, '_blank');
-}
+};
 
 const signOut = () => {
   signInStore.getValue().signOut();
   navigateSignOut();
-}
+};
 
 interface SideNavProps {
-  profile: Profile,
-  onToggleSideNav: Function
+  profile: Profile;
+  onToggleSideNav: Function;
 }
 
 export const SideNav = (props: SideNavProps) => {
@@ -241,20 +239,20 @@ export const SideNav = (props: SideNavProps) => {
 
   const onToggleAdmin = () => {
     setShowAdminOptions(!showAdminOptions);
-  }
+  };
 
   const onToggleUser = () => {
     setShowUserOptions(!showUserOptions);
-  }
+  };
 
   const openContactWidget = () => {
     openZendeskWidget(
-        props.profile.givenName,
-        props.profile.familyName,
-        props.profile.username,
-        props.profile.contactEmail
+      props.profile.givenName,
+      props.profile.familyName,
+      props.profile.username,
+      props.profile.contactEmail
     );
-  }
+  };
 
   return <div style={styles.sideNav}>
     <SideNavItem
@@ -372,4 +370,4 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
   </div>;
-}
+};

@@ -83,7 +83,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     /* Ours */
     private signInService: SignInService,
     /* Angular's */
-    private locationService: Location,
     private elementRef: ElementRef
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
