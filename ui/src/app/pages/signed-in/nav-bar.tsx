@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
@@ -7,12 +7,11 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import {profileStore, useStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
+import {ProfileStore} from 'app/utils/stores';
+import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
 
 const styles = reactStyles({
   headerContainer: {
@@ -65,154 +64,234 @@ const styles = reactStyles({
   }
 });
 
+export interface Props {
+  profile: Profile;
+  profileState: ProfileStore;
+  bannerAdminActive: boolean;
+  workspaceAdminActive: boolean;
+  headerImg: string;
+  displayTag: string;
+  shouldShowDisplayTag: boolean;
+  profileImage: string;
+  sidenavToggle: boolean;
+  homeActive: boolean;
+  workspacesActive: boolean;
+  libraryActive: boolean;
+  profileActive: boolean;
+  userAdminActive: boolean;
+  userAuditActive: boolean;
+  workspaceAuditActive: boolean;
+}
+
+export interface State {
+  sideNavVisible: boolean;
+  statusAlertVisible: boolean;
+  statusAlertDetails: {
+    statusAlertId: number;
+    title: string;
+    message: string;
+    link: string;
+  };
+  barsTransform: string;
+  hovering: boolean;
+  wrapperRef: React.RefObject<HTMLDivElement>;
+}
+
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
 const cookieKey = 'status-alert-banner-dismissed';
 
-const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
-  if (cookiesEnabled()) {
-    const cookie = localStorage.getItem(cookieKey);
-    return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!statusAlertMessage;
-  } else {
-    return !!statusAlertMessage;
-  }
-};
-
-export const NavBar = () => {
-  const [showSideNav, setShowSideNav] = useState(false);
-  const [showStatusAlert, setShowStatusAlert] = useState(false);
-  const [statusAlertDetails, setStatusAlertDetails] = useState({
-    statusAlertId: 0,
-    title: '',
-    message: '',
-    link: ''
-  });
-  const [barsTransform, setBarsTransform] = useState(barsTransformNotRotated);
-  const [hovering, setHovering] = useState(false);
-  const wrapperRef = useRef(null);
-  const {profile} = useStore(profileStore);
-
-  useEffect(() => {
-    const getAlert = async() => {
-      const statusAlert = await statusAlertApi().getStatusAlert();
-      if (!!statusAlert) {
-        setShowStatusAlert(shouldShowStatusAlert(statusAlert.statusAlertId, statusAlert.message));
-        setStatusAlertDetails({
-          statusAlertId: statusAlert.statusAlertId,
-          title: statusAlert.title,
-          message: statusAlert.message,
-          link: statusAlert.link
-        });
+export const NavBar = withUserProfile()(
+    class extends React.Component<Props, State> {
+      constructor(props) {
+        super(props);
+        // Bind the this context - this will be passed down into the actual
+        // sidenav / alert banner so clicks on it can close the modal
+        this.onToggleSideNav = this.onToggleSideNav.bind(this);
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.handleStatusAlertBannerUnmount = this.handleStatusAlertBannerUnmount.bind(this);
+        this.state = {
+          sideNavVisible: false,
+          statusAlertVisible: false,
+          statusAlertDetails: {
+            statusAlertId: 0,
+            title: '',
+            message: '',
+            link: '',
+          },
+          barsTransform: barsTransformNotRotated,
+          hovering: false,
+          wrapperRef: React.createRef(),
+        };
       }
-    };
 
-    getAlert();
-  }, []);
-
-  const onToggleSideNav = () => {
-    setShowSideNav(!showSideNav);
-    setBarsTransform(barsTransform === barsTransformNotRotated
-        ? barsTransformRotated
-        : barsTransformNotRotated
-    );
-  };
-
-  const handleClickOutside = (event) => {
-    if (
-        wrapperRef
-        && !wrapperRef.current.contains(event.target)
-        && showSideNav
-    ) {
-      onToggleSideNav();
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  });
-
-  const handleStatusAlertBannerUnmount = () => {
-    if (cookiesEnabled()) {
-      localStorage.setItem(cookieKey, `${statusAlertDetails.statusAlertId}`);
-    }
-    setShowStatusAlert(false);
-  };
-
-  return <div
-      style={styles.headerContainer}
-      ref={wrapperRef}
-  >
-    <div style={{
-      transform: barsTransform,
-      display: 'inline-block',
-      marginLeft: '1rem',
-      transition: 'transform 0.5s',
-    }}>
-      <ClrIcon
-          shape='bars'
-          onClick={() => onToggleSideNav()}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-          style={hovering
-              ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
-              : {...styles.sidenavIcon}}
-      >
-      </ClrIcon>
-    </div>
-    <div>
-      <a href={'/'}>
-        <img
-            src='/assets/images/all-of-us-logo.svg'
-            style={styles.headerImage}
-        />
-      </a>
-      {
-        environment.shouldShowDisplayTag
-        && <div style={styles.displayTag}>
-          {environment.displayTag}
-        </div>
+      async componentDidMount() {
+        document.addEventListener('click', this.handleClickOutside);
+        const statusAlert = await statusAlertApi().getStatusAlert();
+        const statusAlertVisible = this.statusAlertVisible(statusAlert.statusAlertId, statusAlert.message);
+        if (!!statusAlert) {
+          this.setState({
+            statusAlertVisible: statusAlertVisible,
+            statusAlertDetails: {
+              statusAlertId: statusAlert.statusAlertId,
+              title: statusAlert.title,
+              message: statusAlert.message,
+              link: statusAlert.link
+            }
+          });
+        }
       }
-    </div>
-    <Breadcrumb/>
-    {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
-    {
-      showStatusAlert && <StatusAlertBanner
-          title={statusAlertDetails.title}
-          message={statusAlertDetails.message}
-          footer={
-            statusAlertDetails.link &&
-            <Button data-test-id='status-banner-read-more-button'
-                    onClick={() => window.open(statusAlertDetails.link, '_blank')}>
-              READ MORE
-            </Button>
+
+      componentWillUnmount() {
+        document.removeEventListener('click', this.handleClickOutside);
+      }
+
+      onToggleSideNav() {
+        this.setState(previousState => ({sideNavVisible: !previousState.sideNavVisible}));
+        this.setState(previousState => ({
+          barsTransform: previousState.barsTransform === barsTransformNotRotated
+              ? barsTransformRotated
+              : barsTransformNotRotated
+        }));
+      }
+
+      handleClickOutside(event) {
+        if (
+            this.state.wrapperRef
+            && !this.state.wrapperRef.current.contains(event.target)
+            && this.state.sideNavVisible
+        ) {
+          this.onToggleSideNav();
+        }
+      }
+
+      statusAlertVisible(statusAlertId, statusAlertMessage) {
+        if (cookiesEnabled()) {
+          const cookie = localStorage.getItem(cookieKey);
+          return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!statusAlertMessage;
+        } else {
+          return !!statusAlertMessage;
+        }
+      }
+
+      navigateToLink(link) {
+        window.open(link, '_blank');
+      }
+
+      handleStatusAlertBannerUnmount() {
+        if (cookiesEnabled()) {
+          localStorage.setItem(cookieKey, `${this.state.statusAlertDetails.statusAlertId}`);
+        }
+        this.setState({statusAlertVisible: false});
+      }
+
+      render() {
+        return <div
+            style={styles.headerContainer}
+            ref={this.state.wrapperRef}
+        >
+          <div style={{
+            transform: this.state.barsTransform,
+            display: 'inline-block',
+            marginLeft: '1rem',
+            transition: 'transform 0.5s',
+          }}>
+            <ClrIcon
+                shape='bars'
+                onClick={() => this.onToggleSideNav()}
+                onMouseEnter={() => this.setState({hovering: true})}
+                onMouseLeave={() => this.setState({hovering: false})}
+                style={this.state.hovering
+                    ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
+                    : {...styles.sidenavIcon}}
+            >
+            </ClrIcon>
+          </div>
+          <div>
+            <a href={'/'}>
+              <img
+                  src={this.props.headerImg}
+                  style={styles.headerImage}
+              />
+            </a>
+            {
+              this.props.shouldShowDisplayTag
+              && <div style={styles.displayTag}>
+                {this.props.displayTag}
+              </div>
+            }
+          </div>
+          <Breadcrumb/>
+          {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
+          {
+            this.state.statusAlertVisible && <StatusAlertBanner
+                title={this.state.statusAlertDetails.title}
+                message={this.state.statusAlertDetails.message}
+                footer={
+                  this.state.statusAlertDetails.link &&
+                  <Button data-test-id='status-banner-read-more-button'
+                          onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
+                    READ MORE
+                  </Button>
+                }
+                onClose={this.handleStatusAlertBannerUnmount}
+            />
           }
-          onClose={handleStatusAlertBannerUnmount}
-      />
+          {
+            this.state.sideNavVisible
+            && <SideNav
+                profile={this.props.profileState.profile}
+                bannerAdminActive={this.props.bannerAdminActive}
+                homeActive={this.props.homeActive}
+                libraryActive={this.props.libraryActive}
+                // Passing the function itself deliberately, we want to be able to
+                // toggle the nav whenever we click anything in it
+                onToggleSideNav={this.onToggleSideNav}
+                profileActive={this.props.profileActive}
+                userAdminActive={this.props.userAdminActive}
+                userAuditActive={this.props.userAuditActive}
+                workspaceAuditActive={this.props.workspaceAuditActive}
+                workspaceAdminActive={this.props.workspaceAdminActive}
+                workspacesActive={this.props.workspacesActive}
+            />
+          }
+        </div>;
+      }
     }
-    {
-      showSideNav
-      && <SideNav
-          profile={profile}
-          // Passing the function itself deliberately, we want to be able to
-          // toggle the nav whenever we click anything in it
-          onToggleSideNav={onToggleSideNav}
-      />
-    }
-  </div>;
-};
+);
 
 @Component({
   selector: 'app-nav-bar',
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
+  @Input('profile') profile: Props['profile'];
+  @Input('headerImg') headerImg: Props['headerImg'];
+  @Input('displayTag') displayTag: Props['displayTag'];
+  @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
+  @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
+  @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
+  @Input('homeActive') homeActive: Props['homeActive'];
+  @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
+  @Input('libraryActive') libraryActive: Props['libraryActive'];
+  @Input('profileActive') profileActive: Props['profileActive'];
+  @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
-    super(NavBar, []);
+    super(NavBar, [
+      'profile',
+      'headerImg',
+      'displayTag',
+      'shouldShowDisplayTag',
+      'bannerAdminActive',
+      'workspaceAdminActive',
+      'homeActive',
+      'workspacesActive',
+      'libraryActive',
+      'profileActive',
+      'userAdminActive',
+      'userAuditActive',
+      'workspaceAuditActive'
+    ]);
   }
 }
-
