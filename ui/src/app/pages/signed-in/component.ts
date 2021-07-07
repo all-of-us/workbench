@@ -76,10 +76,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav: ElementRef;
 
   constructor(
-    /* Ours */
-    private signInService: SignInService,
-    /* Angular's */
-    private locationService: Location
+    private signInService: SignInService
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
   }
