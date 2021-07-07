@@ -44,10 +44,10 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
-  function removeOneModule(updateModuleName) {
+  function removeOneModule(toBeRemoved) {
     const oldProfile = profileStore.get().profile;
     const newModules = fp.map(({moduleName, expirationEpochMillis}) =>
-        (moduleName === updateModuleName ? {} : {
+        (moduleName === toBeRemoved ? {} : {
           moduleName,
           expirationEpochMillis}),
         oldProfile.renewableAccessModules.modules);
