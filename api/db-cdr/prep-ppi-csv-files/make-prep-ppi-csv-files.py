@@ -274,11 +274,24 @@ def main():
     bucket = storage_client.get_bucket('all-of-us-workbench-private-cloudsql')
     files = [f for f in listdir(home_dir) if isfile(join(home_dir, f))]
     for f in files:
-        blob = bucket.blob('cb_prep_tables/redcap/' + date +'/' + f)
+        blob = bucket.blob('cb_prep_tables/redcap/' + date + '/' + f)
         blob.upload_from_filename(home_dir + "/" + f)
 
     # when done remove directory and all files
     shutil.rmtree(home_dir)
+
+    # copy static_prep_tables(Cope and Family History) to redcap date folder
+    # Family History survey is static right now until curation fixes it in 2022
+    # We need to potentially automate the cope survey if possible
+    blobs = bucket.list_blobs(
+        prefix='cb_prep_tables/redcap/static_prep_tables/',
+        delimiter='/')
+
+    for blob in blobs:
+        if blob.name.split('/')[3] != '':
+            new_name = 'cb_prep_tables/redcap/' + date + '/' + \
+                       blob.name.split('/')[3]
+            bucket.copy_blob(blob, bucket, new_name=new_name)
 
 
 def parse_args():
@@ -362,7 +375,7 @@ def open_writers_with_headers(name):
     file_prefix = home_dir + "/" + surveys.get(name)
     controlled_file = open(file_prefix + "_controlled" + ".csv",
                            'w')
-    registered_file = open(file_prefix + "_registered" +  ".csv",
+    registered_file = open(file_prefix + "_registered" + ".csv",
                            'w')
     all_file = open(file_prefix + "_all" + ".csv", 'w')
     controlled_writer = csv.DictWriter(controlled_file, fieldnames=headers)
