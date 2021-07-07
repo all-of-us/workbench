@@ -11,6 +11,7 @@ import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import defaultServerConfig from 'testing/default-server-config';
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
@@ -84,14 +85,7 @@ describe('Access Renewal Page', () => {
 
     profileStore.set({profile, load, reload, updateCache});
 
-    serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
-      gsuiteDomain: 'fake-research-aou.org',
-      projectId: 'aaa',
-      publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-      enableComplianceTraining: true
-    }});
+    serverConfigStore.set({config: defaultServerConfig});
 
     const institutionApi = new InstitutionApiStub();
     registerApiClient(InstitutionApi, institutionApi);
@@ -201,7 +195,7 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
 
-    // Complete
+    // Bypassed
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
     expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
 
@@ -232,4 +226,35 @@ describe('Access Renewal Page', () => {
 
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
   });
+
+  it('should show the correct state when modules are disabled', async () => {
+    expireAllModules()
+
+    serverConfigStore.set({config: {
+      ...defaultServerConfig,
+        enableDataUseAgreement: false,
+        enableComplianceTraining: false
+      }});
+    expireAllModules()
+
+    const wrapper = component();
+
+    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule('publicationConfirmation', oneYearFromNow());
+
+    setCompletionTimes(() => Date.now());
+
+    await waitOneTickAndUpdate(wrapper);
+
+    // profileConfirmation and publicationConfirmation are complete
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
+    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
+
+    // complianceTraining and dataUseAgreement are not shown because these modules are disabled
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(0);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(0)
+    expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
+  });
+
 });
