@@ -1,5 +1,4 @@
-import {Location} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -18,7 +17,6 @@ import {
   routeDataStore,
   serverConfigStore
 } from 'app/utils/stores';
-import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 
@@ -54,18 +52,12 @@ const checkOpsBeforeUnload = (e) => {
     '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SignedInComponent implements OnInit, OnDestroy {
   profile: Profile;
-  headerImg = '/assets/images/all-of-us-logo.svg';
-  displayTag = environment.displayTag;
-  shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
   cdrVersionsInitialized = false;
   serverConfigInitialized = false;
-  // True if the user tried to open the Zendesk support widget and an error
-  // occurred.
-  zendeskLoadError = false;
   showInactivityModal = false;
   private profileLoadingSub: Subscription;
   private signOutNavigateSub: Subscription;
@@ -83,11 +75,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('sidenav') sidenav: ElementRef;
 
   constructor(
-    /* Ours */
-    private signInService: SignInService,
-    /* Angular's */
-    private locationService: Location,
-    private elementRef: ElementRef
+    private signInService: SignInService
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
   }
@@ -245,10 +233,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    initializeZendeskWidget(this.elementRef);
-  }
-
   ngOnDestroy() {
     clearInterval(this.getUserActivityTimer());
     clearInterval(this.inactivityInterval);
@@ -280,33 +264,5 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     return `You have been idle for over ${this.secondsToText(secondsBeforeDisplayingModal)}. ` +
       `You can choose to extend your session by clicking the button below. You will be automatically logged ` +
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
-  }
-
-  get bannerAdminActive(): boolean {
-    return this.locationService.path() === '/admin/banner';
-  }
-
-  get userAdminActive(): boolean {
-    return this.locationService.path() === '/admin/user';
-  }
-
-  get workspaceAdminActive(): boolean {
-    return this.locationService.path() === '/admin/workspaces';
-  }
-
-  get homeActive(): boolean {
-    return this.locationService.path() === '';
-  }
-
-  get libraryActive(): boolean {
-    return this.locationService.path() === '/library';
-  }
-
-  get workspacesActive(): boolean {
-    return this.locationService.path() === '/workspaces';
-  }
-
-  get profileActive(): boolean {
-    return this.locationService.path() === '/profile';
   }
 }

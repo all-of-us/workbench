@@ -16,6 +16,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {FooterComponent} from 'app/components/footer';
 import {TextModalComponent} from 'app/components/text-modal';
+import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
@@ -36,7 +37,8 @@ describe('SignedInComponent', () => {
         SignedInComponent,
         TextModalComponent,
         NavBarComponent,
-        FooterComponent
+        FooterComponent,
+        ZendeskWidgetComponent
       ],
       providers: [
         {provide: SignInService, useValue: new SignInServiceStub()},
