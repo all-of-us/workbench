@@ -2,11 +2,11 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {act} from 'react-dom/test-utils';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {
   currentCohortCriteriaStore,
+  currentCohortReviewStore,
   currentWorkspaceStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
@@ -118,7 +118,7 @@ describe('HelpSidebar', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    cohortReviewStore.next(cohortReviewStubs[0]);
+    currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({config: {...defaultServerConfig, enableGenomicExtraction: true}});
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);

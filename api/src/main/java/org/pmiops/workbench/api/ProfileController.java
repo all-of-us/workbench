@@ -289,9 +289,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw e;
     }
 
-    if (request.getTermsOfServiceVersion() != null) {
-      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
-    }
+    userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
 
     final MailService mail = mailServiceProvider.get();
 

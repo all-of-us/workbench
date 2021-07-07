@@ -159,6 +159,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ZIP_CODE = "12345";
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;
@@ -241,6 +242,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
+    createAccountRequest.setTermsOfServiceVersion(CURRENT_TERMS_OF_SERVICE_VERSION);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 

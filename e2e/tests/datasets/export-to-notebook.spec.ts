@@ -16,8 +16,8 @@ import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Export to notebook tests', () => {
-  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+describe('Export dataset to notebook tests', () => {
+  const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -79,7 +79,8 @@ describe('Export to notebook tests', () => {
    * Test:
    * - Create dataset and export to notebook. Start the notebook and run the dataset code.
    */
-  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
+  // TODO Enable notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
+  xtest.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button

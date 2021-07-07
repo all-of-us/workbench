@@ -6,6 +6,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -119,11 +120,11 @@ interface CurrentTab {
   title: string;
 }
 
-class Props {
+interface Props extends WithSpinnerOverlayProps {
   enablePublishedWorkspaces: boolean;
 }
 
-class State {
+interface State {
   currentTab: CurrentTab;
   errorText: string;
   workspaceList: WorkspacePermissions[];
@@ -162,6 +163,7 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
     ];
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.updateWorkspaces();
   }
 

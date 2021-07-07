@@ -15,7 +15,6 @@ import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {FooterComponent} from 'app/components/footer';
-import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
@@ -35,7 +34,6 @@ describe('SignedInComponent', () => {
       ],
       declarations: [
         SignedInComponent,
-        RoutingSpinnerComponent,
         TextModalComponent,
         NavBarComponent,
         FooterComponent

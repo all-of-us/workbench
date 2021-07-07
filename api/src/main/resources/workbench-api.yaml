@@ -5458,19 +5458,10 @@ definitions:
       institutionName:
         description: Verified institution name
         type: string
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
       firstSignInTime:
         type: integer
         format: int64
       creationTime:
-        type: integer
-        format: int64
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-      idVerificationCompletionTime:
         type: integer
         format: int64
       twoFactorAuthBypassTime:
@@ -5495,15 +5486,6 @@ definitions:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-      emailVerificationCompletionTime:
         type: integer
         format: int64
       dataUseAgreementBypassTime:
@@ -5650,11 +5632,6 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user first changed from Unregistered to Registered
-          data access level. May be null if the user has never done so.'
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.

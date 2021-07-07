@@ -63,7 +63,7 @@ export default class Container {
       fp.flow(
         fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
         fp.map((item) => item.waitFn()),
-        fp.concat([button.click({ delay: 10 })])
+        fp.concat([button.click({ delay: 10 }), waitWhileLoading(this.page)])
       )([
         {
           shouldWait: waitForNav,

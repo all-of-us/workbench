@@ -16,6 +16,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NotificationModal} from './components/modals';
+import {withSpinnerOverlay} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -32,6 +33,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
 import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
+import colors from './styles/colors';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
@@ -52,30 +54,34 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-const AccessRenewalPage = withRouteData(AccessRenewal);
-const ProfilePage = withRouteData(ProfileComponent);
-const AdminBannerPage = withRouteData(AdminBanner);
-const AdminNotebookViewPage = withRouteData(AdminNotebookView);
-const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
-const CookiePolicyPage = withRouteData(CookiePolicy);
-const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
-const HomepagePage = withRouteData(Homepage);
-const InstitutionAdminPage = withRouteData(AdminInstitution);
-const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
-const SessionExpiredPage = withRouteData(SessionExpired);
-const SignInAgainPage = withRouteData(SignInAgain);
-const SignInPage = withRouteData(SignIn);
-const UserAdminPage = withRouteData(AdminUser);
-const UsersAdminPage = withRouteData(AdminUsers);
-const UserAuditPage = withRouteData(UserAudit);
-const UserDisabledPage = withRouteData(UserDisabled);
-const WorkspaceWrapperPage = withRouteData(WorkspaceWrapper);
-const WorkspaceAdminPage = withRouteData(AdminWorkspace);
-const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
-const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
-const WorkspaceListPage = withRouteData(WorkspaceList);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
+const withRoutingSpinner = withSpinnerOverlay(
+  true,
+    {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
+
+const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
+const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
+const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
+const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
+const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
+const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
+const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
+const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
+const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
+const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
+const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
+const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
+const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
+const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
+const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
+const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
+const WorkspaceWrapperPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceWrapper);
+const WorkspaceAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspace);
+const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAudit);
+const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
+const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
+const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
+const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
