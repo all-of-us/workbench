@@ -60,12 +60,6 @@ public class UpdateCdrConfig {
 
       preCheck(cdrConfig);
 
-      System.out.println("~~~~~~~~~~~~~");
-      System.out.println("~~~~~~~~~~~~~");
-      System.out.println("~~~~~~~~~~~~~");
-      System.out.println("~~~~~~~~~~~~~");
-      System.out.println(cdrConfig);
-
       updateDB(dryRun, cdrConfig, gson, accessTierDao, cdrVersionDao, cdrConfigMapper);
     };
   }
