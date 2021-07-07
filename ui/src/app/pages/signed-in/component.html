@@ -1,18 +1,6 @@
 <div class="body">
   <app-nav-bar></app-nav-bar>
 
-  <clr-alert
-      *ngIf="zendeskLoadError"
-      [clrAlertType]="'alert-danger'"
-      [clrAlertAppLevel]="true"
-      [clrAlertClosable]="true">
-    <div clr-alert-item class="alert-item">
-      An error occurred loading the help desk submission form. Please reload the page, or email
-      &nbsp;<a href="mailto:support@researchallofus.org">support@researchallofus.org</a>
-      &nbsp;directly with your support request.
-    </div>
-  </clr-alert>
-
   <div class="content-container">
     <div class="background-image"></div>
     <div *ngIf="cdrVersionsInitialized && serverConfigInitialized"
@@ -33,4 +21,5 @@
   </div>
 
   <app-footer *ngIf="!minimizeChrome && enableSignedInFooter" [type]="footerTypeEnum.Workbench"></app-footer>
+  <app-zendesk-widget></app-zendesk-widget>
 </div>

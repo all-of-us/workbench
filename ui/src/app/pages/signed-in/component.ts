@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -17,7 +17,6 @@ import {
   routeDataStore,
   serverConfigStore
 } from 'app/utils/stores';
-import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 
@@ -53,15 +52,12 @@ const checkOpsBeforeUnload = (e) => {
     '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SignedInComponent implements OnInit, OnDestroy {
   profile: Profile;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
   cdrVersionsInitialized = false;
   serverConfigInitialized = false;
-  // True if the user tried to open the Zendesk support widget and an error
-  // occurred.
-  zendeskLoadError = false;
   showInactivityModal = false;
   private profileLoadingSub: Subscription;
   private signOutNavigateSub: Subscription;
@@ -79,10 +75,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('sidenav') sidenav: ElementRef;
 
   constructor(
-    /* Ours */
-    private signInService: SignInService,
-    /* Angular's */
-    private elementRef: ElementRef
+    private signInService: SignInService
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
   }
@@ -238,10 +231,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         resetTimers();
       }
     });
-  }
-
-  ngAfterViewInit() {
-    initializeZendeskWidget(this.elementRef);
   }
 
   ngOnDestroy() {

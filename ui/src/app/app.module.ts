@@ -24,9 +24,10 @@ import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
+import {FooterComponent} from 'app/components/footer';
 import {TextModalComponent} from 'app/components/text-modal';
+import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {FooterComponent} from './components/footer';
 
 
 
@@ -57,6 +58,7 @@ import {FooterComponent} from './components/footer';
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceWrapperComponent,
+    ZendeskWidgetComponent
   ],
   providers: [
     SignInService,
