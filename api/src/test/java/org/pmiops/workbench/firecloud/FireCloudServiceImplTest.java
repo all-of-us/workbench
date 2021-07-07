@@ -59,7 +59,11 @@ public class FireCloudServiceImplTest extends SpringTest {
   private static WorkbenchConfig workbenchConfig;
 
   @MockBean private BillingApi billingApi;
-  @MockBean private BillingV2Api billingV2Api;
+
+  @MockBean
+  @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
+  private BillingV2Api billingV2Api;
+
   @MockBean private HttpTransport httpTransport;
   @MockBean private IamCredentialsClient iamCredentialsClient;
   @MockBean private NihApi nihApi;

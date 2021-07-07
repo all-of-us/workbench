@@ -138,10 +138,15 @@ public class TestMockFactory {
   }
 
   public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
+    stubBufferBillingProject(billingProjectBufferService, UUID.randomUUID().toString());
+  }
+
+  public void stubBufferBillingProject(
+      BillingProjectBufferService billingProjectBufferService, String billingProjectId) {
     doAnswer(
             invocation -> {
               DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+              doReturn(billingProjectId).when(entry).getFireCloudProjectName();
               return entry;
             })
         .when(billingProjectBufferService)
