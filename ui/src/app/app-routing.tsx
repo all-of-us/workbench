@@ -1,5 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
+import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {AccessRenewal} from 'app/pages/access/access-renewal';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
@@ -16,7 +17,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NotificationModal} from './components/modals';
-import {withSpinnerOverlay} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -33,7 +33,6 @@ import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
 import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
-import colors from './styles/colors';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
@@ -53,10 +52,6 @@ const expiredGuard: Guard = {
   allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
   redirectPath: '/access-renewal'
 };
-
-export const withRoutingSpinner = withSpinnerOverlay(
-  true,
-    {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);

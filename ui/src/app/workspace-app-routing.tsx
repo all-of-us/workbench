@@ -1,6 +1,6 @@
-import {withRoutingSpinner} from 'app/app-routing';
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, withRouteData} from 'app/components/app-router';
+import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
