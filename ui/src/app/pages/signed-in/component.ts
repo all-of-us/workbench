@@ -1,4 +1,3 @@
-import {Location} from '@angular/common';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
