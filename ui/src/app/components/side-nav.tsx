@@ -10,6 +10,7 @@ import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {withRouter} from "react-router";
 import {useRef, useState} from "react";
+import {useLocation} from "react-router-dom";
 
 const styles = reactStyles({
   flex: {
@@ -96,8 +97,8 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
   return sideNavItemStyles;
 }
 
-// TODO: React-router's withRouter doesn't update unless the parent component updates.
-// so we do this instead until we can turn this into a function component and use withLocation
+// TODO RW-6726: Ideally, we would use useLocation to get the path and pass it in to these functions.
+// However, this component is currently rendered outside of the React router, so useLocation won't work.
 const bannerAdminActive = () => {
   return window.location.pathname === '/admin/banner';
 }
