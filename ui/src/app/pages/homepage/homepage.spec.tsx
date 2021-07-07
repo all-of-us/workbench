@@ -20,7 +20,7 @@ describe('HomepageComponent', () => {
   let profileApi: ProfileApiStub;
 
   const component = () => {
-    return mount(<Homepage/>);
+    return mount(<Homepage hideSpinner={() => {}} />);
   };
 
   const load = jest.fn();

@@ -33,7 +33,7 @@ export default class WorkspaceCard extends CardBase {
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
-    await WorkspaceCard.waitUntilGone(page, workspaceName);
+    await WorkspaceCard.waitUntilGone(page, workspaceName, 120000);
     return modalText;
   }
 

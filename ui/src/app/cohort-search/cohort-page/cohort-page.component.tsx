@@ -11,6 +11,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -51,7 +52,7 @@ function colStyle(percentage: string) {
   } as React.CSSProperties;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   cohortContext: any;
   workspace: WorkspaceData;
 }
@@ -100,7 +101,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentDidMount() {
-      const {workspace: {id}} = this.props;
+      const {workspace: {id}, hideSpinner} = this.props;
+      hideSpinner();
       this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;

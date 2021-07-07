@@ -140,43 +140,43 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
 
   render() {
     return <Clickable
-      // data-test-id is the text within the SideNavItem, with whitespace removed
-      // and appended with '-menu-item'
-      data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
-      onClick={() => {
-        if (this.props.parentOnClick && !this.props.disabled) {
-          this.props.parentOnClick();
-        }
-        this.onClick();
-      }}
-      onMouseEnter={() => this.setState({hovering: true})}
-      onMouseLeave={() => this.setState({hovering: false})}
+        // data-test-id is the text within the SideNavItem, with whitespace removed
+        // and appended with '-menu-item'
+        data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
+        style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
+        onClick={() => {
+          if (this.props.parentOnClick && !this.props.disabled) {
+            this.props.parentOnClick();
+          }
+          this.onClick();
+        }}
+        onMouseEnter={() => this.setState({hovering: true})}
+        onMouseLeave={() => this.setState({hovering: false})}
     >
       <div
-        style={{...styles.flex,
-          flex: '1 0 auto'
-        }}
+          style={{...styles.flex,
+            flex: '1 0 auto'
+          }}
       >
         <span
-          style={
-            this.props.icon || this.props.hasProfileImage
-              ? {...styles.flex}
-              : {...styles.noIconMargin}
-          }
+            style={
+              this.props.icon || this.props.hasProfileImage
+                  ? {...styles.flex}
+                  : {...styles.noIconMargin}
+            }
         >
           {
             this.props.icon && <ClrIcon
-              shape={this.props.icon}
-              className={'is-solid'}
-              style={styles.navIcon}
-              size={this.iconSize}
+                shape={this.props.icon}
+                className={'is-solid'}
+                style={styles.navIcon}
+                size={this.iconSize}
             />
           }
           {
             this.props.hasProfileImage && <img
-              src={signInStore.getValue().profileImage}
-              style={styles.profileImage}
+                src={signInStore.getValue().profileImage}
+                style={styles.profileImage}
             />
           }
           {this.props.content}
@@ -184,13 +184,13 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
         {
           this.props.containsSubItems
           && <ClrIcon
-            shape='angle'
-            style={
-              this.state.subItemsOpen
-                ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                : styles.dropdownIcon
-            }
-            size={this.iconSize}
+              shape='angle'
+              style={
+                this.state.subItemsOpen
+                    ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                    : styles.dropdownIcon
+              }
+              size={this.iconSize}
           />
         }
       </div>
@@ -260,79 +260,79 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     const {profile} = this.props;
     return <div style={styles.sideNav}>
       <SideNavItem
-        hasProfileImage={true}
-        content={`${profile.givenName} ${profile.familyName}`}
-        parentOnClick={() => this.onToggleUser()}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        containsSubItems={true}
-        ref={this.state.userRef}
+          hasProfileImage={true}
+          content={`${profile.givenName} ${profile.familyName}`}
+          parentOnClick={() => this.onToggleUser()}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          containsSubItems={true}
+          ref={this.state.userRef}
       />
       {
         this.state.showUserOptions && <SideNavItem
-          content={'Profile'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          href='/profile'
-          active={this.props.profileActive}
+            content={'Profile'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href='/profile'
+            active={this.props.profileActive}
         />
       }
       {
         this.state.showUserOptions && <SideNavItem
-          content={'Sign Out'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          parentOnClick={() => this.signOut()}
+            content={'Sign Out'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            parentOnClick={() => this.signOut()}
         />
       }
       <SideNavItem
-        icon='home'
-        content='Home'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        href='/'
-        active={this.props.homeActive}
+          icon='home'
+          content='Home'
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          href='/'
+          active={this.props.homeActive}
       />
       <SideNavItem
-        icon='applications'
-        content='Your Workspaces'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        href={'/workspaces'}
-        active={this.props.workspacesActive}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+          icon='applications'
+          content='Your Workspaces'
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          href={'/workspaces'}
+          active={this.props.workspacesActive}
+          disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
-        icon='star'
-        content='Featured Workspaces'
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        href={'/library'}
-        active={this.props.libraryActive}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+          icon='star'
+          content='Featured Workspaces'
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          href={'/library'}
+          active={this.props.libraryActive}
+          disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
-        icon='help'
-        content={'User Support Hub'}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        parentOnClick={() => this.redirectToZendesk()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+          icon='help'
+          content={'User Support Hub'}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          parentOnClick={() => this.redirectToZendesk()}
+          disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
-        icon='envelope'
-        content={'Contact Us'}
-        onToggleSideNav={() => this.props.onToggleSideNav()}
-        parentOnClick={() => this.openContactWidget()}
+          icon='envelope'
+          content={'Contact Us'}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          parentOnClick={() => this.openContactWidget()}
       />
       {hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
-                icon='user'
-                content='Admin'
-                parentOnClick={() => this.onToggleAdmin()}
-                onToggleSideNav={() => this.props.onToggleSideNav()}
-                containsSubItems={true}
-                ref={this.state.adminRef}
-        />
+          icon='user'
+          content='Admin'
+          parentOnClick={() => this.onToggleAdmin()}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          containsSubItems={true}
+          ref={this.state.adminRef}
+      />
       }
       {
         hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && this.state.showAdminOptions && <SideNavItem
-          content={'User Admin'}
-          onToggleSideNav={() => this.props.onToggleSideNav()}
-          href={'/admin/user'}
-          active={this.props.userAdminActive}
+            content={'User Admin'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'/admin/user'}
+            active={this.props.userAdminActive}
         />
       }
       {

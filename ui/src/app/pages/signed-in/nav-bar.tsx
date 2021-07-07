@@ -158,9 +158,9 @@ export const NavBar = withUserProfile()(
 
     handleClickOutside(event) {
       if (
-        this.state.wrapperRef
-        && !this.state.wrapperRef.current.contains(event.target)
-        && this.state.sideNavVisible
+          this.state.wrapperRef
+          && !this.state.wrapperRef.current.contains(event.target)
+          && this.state.sideNavVisible
       ) {
         this.onToggleSideNav();
       }
@@ -188,8 +188,8 @@ export const NavBar = withUserProfile()(
 
     render() {
       return <div
-        style={styles.headerContainer}
-        ref={this.state.wrapperRef}
+          style={styles.headerContainer}
+          ref={this.state.wrapperRef}
       >
         <div style={{
           transform: this.state.barsTransform,
@@ -198,21 +198,21 @@ export const NavBar = withUserProfile()(
           transition: 'transform 0.5s',
         }}>
           <ClrIcon
-            shape='bars'
-            onClick={() => this.onToggleSideNav()}
-            onMouseEnter={() => this.setState({hovering: true})}
-            onMouseLeave={() => this.setState({hovering: false})}
-            style={this.state.hovering
-              ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
-              : {...styles.sidenavIcon}}
+              shape='bars'
+              onClick={() => this.onToggleSideNav()}
+              onMouseEnter={() => this.setState({hovering: true})}
+              onMouseLeave={() => this.setState({hovering: false})}
+              style={this.state.hovering
+                  ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
+                  : {...styles.sidenavIcon}}
           >
           </ClrIcon>
         </div>
         <div>
           <a href={'/'}>
             <img
-              src={this.props.headerImg}
-              style={styles.headerImage}
+                src={this.props.headerImg}
+                style={styles.headerImage}
             />
           </a>
           {
@@ -223,17 +223,17 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
-        <AccessRenewalNotificationMaybe/>
+        {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
         {
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}
               message={this.state.statusAlertDetails.message}
               footer={
-                  this.state.statusAlertDetails.link &&
-                  <Button data-test-id='status-banner-read-more-button'
-                          onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
-                    READ MORE
-                  </Button>
+                this.state.statusAlertDetails.link &&
+                <Button data-test-id='status-banner-read-more-button'
+                        onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
+                  READ MORE
+                </Button>
               }
               onClose={this.handleStatusAlertBannerUnmount}
           />
@@ -241,19 +241,19 @@ export const NavBar = withUserProfile()(
         {
           this.state.sideNavVisible
           && <SideNav
-            profile={this.props.profileState.profile}
-            bannerAdminActive={this.props.bannerAdminActive}
-            homeActive={this.props.homeActive}
-            libraryActive={this.props.libraryActive}
-            // Passing the function itself deliberately, we want to be able to
-            // toggle the nav whenever we click anything in it
-            onToggleSideNav={this.onToggleSideNav}
-            profileActive={this.props.profileActive}
-            userAdminActive={this.props.userAdminActive}
-            userAuditActive={this.props.userAuditActive}
-            workspaceAuditActive={this.props.workspaceAuditActive}
-            workspaceAdminActive={this.props.workspaceAdminActive}
-            workspacesActive={this.props.workspacesActive}
+              profile={this.props.profileState.profile}
+              bannerAdminActive={this.props.bannerAdminActive}
+              homeActive={this.props.homeActive}
+              libraryActive={this.props.libraryActive}
+              // Passing the function itself deliberately, we want to be able to
+              // toggle the nav whenever we click anything in it
+              onToggleSideNav={this.onToggleSideNav}
+              profileActive={this.props.profileActive}
+              userAdminActive={this.props.userAdminActive}
+              userAuditActive={this.props.userAuditActive}
+              workspaceAuditActive={this.props.workspaceAuditActive}
+              workspaceAdminActive={this.props.workspaceAdminActive}
+              workspacesActive={this.props.workspacesActive}
           />
         }
       </div>;
@@ -295,4 +295,3 @@ export class NavBarComponent extends ReactWrapperBase {
     ]);
   }
 }
-

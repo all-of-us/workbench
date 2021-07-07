@@ -9,14 +9,12 @@ import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/c
 import * as StackTrace from 'stacktrace-js';
 
 import {NavigationGuard} from 'app/guards/navigation-guard';
-import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {SignInService} from './services/sign-in.service';
 import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
 import {HelpSidebarComponent} from './components/help-sidebar';
-import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -26,9 +24,10 @@ import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
+import {FooterComponent} from 'app/components/footer';
 import {TextModalComponent} from 'app/components/text-modal';
+import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {FooterComponent} from './components/footer';
 
 
 
@@ -54,12 +53,12 @@ import {FooterComponent} from './components/footer';
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceWrapperComponent,
+    ZendeskWidgetComponent
   ],
   providers: [
     SignInService,
@@ -69,7 +68,6 @@ import {FooterComponent} from './components/footer';
     },
     WorkbenchRouteReuseStrategy,
     {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy},
-    CanDeactivateGuard,
     NavigationGuard
   ],
   // This specifies the top-level components, to load first.

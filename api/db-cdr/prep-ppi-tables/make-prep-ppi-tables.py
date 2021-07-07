@@ -2,11 +2,12 @@ import argparse
 import csv
 import os
 import shutil
-from google.cloud import bigquery
-from google.cloud import storage
 from io import StringIO
 from os import listdir
 from os.path import isfile, join
+
+from google.cloud import bigquery
+from google.cloud import storage
 
 # we will increment this as the row number as we write each row in each output file
 id_controlled = 1
@@ -428,7 +429,7 @@ def write_row(writer, parent_id, code, name, item_type, min_value, max_value,
     if item_type == 'QUESTION':
         dict_row_register['code'] = get_short_code(code,
                                                    long_code_to_short_code)
-   else:
+    else:
         dict_row_register['answers_bucketed'] = 0
 
     if file_type == 'controlled':

@@ -18,6 +18,7 @@ import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
+import {withSpinnerOverlay} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -47,6 +48,7 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
+import colors from './styles/colors';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
@@ -67,42 +69,46 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-const AdminBannerPage = withRouteData(AdminBanner);
-const AdminNotebookViewPage = withRouteData(AdminNotebookView);
-const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
-const CohortPagePage = withRouteData(CohortPage);
-const CohortActionsPage = withRouteData(CohortActions);
-const CohortReviewPage = withRouteData(CohortReview);
-const ConceptHomepagePage = withRouteData(ConceptHomepage);
-const ConceptSearchPage = withRouteData(ConceptSearch);
-const ConceptSetActionsPage = withRouteData(ConceptSetActions);
-const CookiePolicyPage = withRouteData(CookiePolicy);
-const DataComponentPage = withRouteData(DataComponent);
-const DataSetComponentPage = withRouteData(DatasetPage);
-const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
-const DetailPagePage = withRouteData(DetailPage);
-const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
-const InstitutionAdminPage = withRouteData(AdminInstitution);
-const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
-const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
-const NotebookListPage = withRouteData(NotebookList);
-const NotebookRedirectPage = withRouteData(NotebookRedirect);
-const ParticipantsTablePage = withRouteData(ParticipantsTable);
-const QueryReportPage = withRouteData(QueryReport);
-const SessionExpiredPage = withRouteData(SessionExpired);
-const SignInAgainPage = withRouteData(SignInAgain);
-const SignInPage = withRouteData(SignIn);
-const UserAdminPage = withRouteData(AdminUser);
-const UsersAdminPage = withRouteData(AdminUsers);
-const UserAuditPage = withRouteData(UserAudit);
-const UserDisabledPage = withRouteData(UserDisabled);
-const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
-const WorkspaceAdminPage = withRouteData(AdminWorkspace);
-const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
-const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
-const WorkspaceListPage = withRouteData(WorkspaceList);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
+const withRoutingSpinner = withSpinnerOverlay(
+  true,
+    {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
+
+const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
+const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
+const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
+const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
+const CohortReviewPage = fp.flow(withRouteData, withRoutingSpinner)(CohortReview);
+const ConceptHomepagePage = fp.flow(withRouteData, withRoutingSpinner)(ConceptHomepage);
+const ConceptSearchPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSearch);
+const ConceptSetActionsPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSetActions);
+const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
+const DataComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DataComponent);
+const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetPage);
+const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
+const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
+const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
+const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
+const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
+const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
+const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
+const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
+const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
+const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
+const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
+const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
+const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
+const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
+const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
+const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
+const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
+const WorkspaceAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspace);
+const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAudit);
+const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
+const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
+const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
+const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -348,7 +354,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
             component={() => <ParticipantsTablePage routeData={{
               title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'reviewParticipants'
             }}/>}
           />
@@ -364,7 +370,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
             component={() => <QueryReportPage routeData={{
               title: 'Review Cohort Description',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'cohortDescription'
             }}/>}
           />
@@ -372,7 +378,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
             component={() => <CohortReviewPage routeData={{
               title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.Cohort,
+              breadcrumb: BreadcrumbType.CohortReview,
               pageKey: 'reviewParticipants'
             }}/>}
           />

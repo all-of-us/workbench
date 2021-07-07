@@ -12,6 +12,7 @@ import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
@@ -422,7 +423,7 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps {
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
@@ -496,6 +497,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     async componentDidMount() {
+      this.props.hideSpinner();
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
       if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {

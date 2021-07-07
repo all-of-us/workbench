@@ -7,6 +7,7 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {DataComponent} from "../data/data-component";
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -23,7 +24,8 @@ describe('DataUserCodeOfConduct', () => {
   const updateCache = jest.fn();
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
 
-  const component = () => mount(<DataUserCodeOfConduct/>);
+  const component = () => mount(<DataUserCodeOfConduct hideSpinner={() => {}}
+                                                       showSpinner={() => {}}/>);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());

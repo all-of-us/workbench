@@ -396,11 +396,17 @@ export async function waitWhileLoading(
       spinElementsSelector
     ),
     page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
-  ]).catch((err) => {
-    logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
-    logger.error(err);
-    logger.error(err.stack);
-    throw new Error(err);
+  ]).catch((err: Error) => {
+    logger.error(`Failed wait for spinner stop: xpath="${spinElementsSelector}"`);
+    if (err.message.includes('Target closed')) {
+      // Leave blank. Ignore error and continue test.
+      // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
+      //   or page navigation happened.
+      // Error: Protocol error (Runtime.callFunctionOn): Target closed.
+    } else {
+      logger.error(err.stack);
+      throw err;
+    }
   });
 
   await page.waitForTimeout(500);

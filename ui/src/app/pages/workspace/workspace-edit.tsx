@@ -13,6 +13,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU, AouTitle} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -254,7 +255,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   </div>;
 };
 
-export interface WorkspaceEditProps {
+export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -369,6 +370,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async componentDidMount() {
+      this.props.hideSpinner();
       await this.fetchBillingAccounts();
     }
 
