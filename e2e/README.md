@@ -41,6 +41,7 @@ See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167
     - `puppeteer-reader-1@staging.fake-research-aou.org`
     - `puppeteer-writer-1@staging.fake-research-aou.org`
 
+## Running Tests on Localhost
 ### Local Test Users
 Developers' Local environments share a Google Suite domain with the Test environment,
 so users with matching emails share the same Terra and Google cloud resources between these
@@ -48,13 +49,16 @@ environments. To avoid contention, it's necessary to create a test user unique t
 environment.  This is the same process as creating any other local user.  Ensure that this 
 user is 2FA-Bypassed and populate the environment property file `.env` with this user's credentials.
 
-## Running tests
-Command line tests are run using the [Yarn](https://classic.yarnpkg.com/en/) build tool. Tests can be run in 
-**headless mode** (with invisible browser execution) or "headful" mode, with the browser
-interactions visible to you.
+Save test user credentials
+  - Copy `.env.sample`, save as `.env`. Update test user emails accordingly.
 
-**To see the list of available Yarn commands**
-- `yarn run`
+Command line tests are run using the [Yarn](https://classic.yarnpkg.com/en/) build tool. 
+  - Run **headless mode** (with invisible browser execution)
+    
+    `yarn test [test_name_here]`
+  - Run **headful mode** (with the browser interactions visible to you)
+    
+    `yarn test:debug [test_name_here]`
 
 ### Examples
 * Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
