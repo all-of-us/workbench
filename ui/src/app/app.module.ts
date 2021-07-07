@@ -56,7 +56,6 @@ import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
     NavBarComponent,
     TextModalComponent,
     WorkspaceNavBarComponent,
-    WorkspaceWrapperComponent,
     ZendeskWidgetComponent
   ],
   providers: [
