@@ -35,6 +35,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -1139,11 +1140,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.
    *
-   * <p>First: ignore any bypassed modules. These are in compliance and do not need to be renewed.
+   * <p>First: ignore any modules which have been disabled in this environment.
    *
-   * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
-   * If no, either the feature flag is not set or the user does not have access for reasons other
-   * than access renewal compliance. In either negative case, we should not send an email.
+   * <p>Next: ignore any bypassed modules. These are in compliance and do not need to be renewed.
+   *
+   * <p>Finally: do all enabled un-bypassed modules have expiration times? If yes, return the min
+   * (earliest). If no, either the AAR feature flag is not set or the user does not have access for
+   * reasons other than access renewal compliance. In either negative case, we should not send an
+   * email.
    *
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
@@ -1152,9 +1156,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     final Set<Optional<Timestamp>> expirations =
-        getRenewableAccessModules(user).values().stream()
-            .filter(times -> !times.isBypassed())
-            .map(ModuleTimes::getExpiration)
+        getRenewableAccessModules(user).entrySet().stream()
+            .filter(entry -> isModuleEnabledInEnvironment(entry.getKey()))
+            .filter(entry -> !entry.getValue().isBypassed())
+            .map(entry -> entry.getValue().getExpiration())
             .collect(Collectors.toSet());
 
     // if any un-bypassed modules are incomplete, we know:
@@ -1170,6 +1175,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // note: min() returns EMPTY if the stream is empty at this point,
           // which is also an indicator that we should not send an email
           .min(Timestamp::compareTo);
+    }
+  }
+
+  private boolean isModuleEnabledInEnvironment(ModuleNameEnum moduleName) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    switch (moduleName) {
+      case COMPLIANCETRAINING:
+        return accessConfig.enableComplianceTraining;
+      case DATAUSEAGREEMENT:
+        return accessConfig.enableDataUseAgreement;
+      default:
+        return true;
     }
   }
 
