@@ -28,7 +28,7 @@ export default class BypassPopup extends BaseMenu {
 
   getEraCommBypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='eRA Commons Linking']/preceding-sibling::div/input[@type='checkbox']`;
-    return  new Checkbox(this.page, xpath);
+    return new Checkbox(this.page, xpath);
   }
 
   getTwoFABypassToggle(): Checkbox {
@@ -38,9 +38,8 @@ export default class BypassPopup extends BaseMenu {
 
   getDUCCBypassToggle(): Checkbox {
     const xpath = `${this.getXpath()}//label/span[text()='Data Use Agreement']/preceding-sibling::div/input[@type='checkbox']`;
-    return  new Checkbox(this.page, xpath);
+    return new Checkbox(this.page, xpath);
   }
-
 
   // click the checkmark on the bypass-popup to save the bypass access
   async clickCheckmarkBypass(): Promise<void> {

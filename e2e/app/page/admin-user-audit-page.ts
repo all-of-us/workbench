@@ -13,5 +13,4 @@ export default class UserAuditPage extends AuthenticatedPage {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle)]);
     return true;
   }
-
 }

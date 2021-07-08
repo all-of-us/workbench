@@ -60,17 +60,14 @@ export default class UserAdminPage extends AuthenticatedPage {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getFrozenBody();
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
-    console.log(`cell: ${cell}`);
-    const textContent = await getPropValue<string>(cell, 'textContent');
-    console.log(`textContent : ${textContent}`);
     await cell.click();
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target()); 
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
     const newPage = await newTarget.page();
     return new UserProfileInfo(newPage).waitForLoad();
   }
 
- //extract only the User name text to verify the search box result
-  async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
+  // get the username email 
+  async getUserNameEmail(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
@@ -78,7 +75,17 @@ export default class UserAdminPage extends AuthenticatedPage {
     return textContent;
   }
 
-  // extract only the User Lockout text 
+  //extract only the User name text to verify the search box result
+  async getUserNameText(rowIndex = 1, colIndex = 1): Promise<string> {
+    const dataTable = this.getUserAdminTable();
+    const bodyTable = dataTable.getBodyTable();
+    const cell = await bodyTable.getCell(rowIndex, colIndex);
+    const textContent = await getPropValue<string>(cell, 'textContent');
+    const regex = new RegExp(/.+?(?=@)/);
+    return regex.exec(textContent)[0];
+  }
+
+  // extract only the User Lockout text
   async getUserLockoutText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
     const bodyTable = dataTable.getBodyTable();
@@ -103,7 +110,7 @@ export default class UserAdminPage extends AuthenticatedPage {
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
     await getPropValue<string>(cell, 'textContent');
     await cell.click();
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target()); 
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
     const newPage = await newTarget.page();
     return new UserAuditPage(newPage).waitForLoad();
   }
