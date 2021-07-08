@@ -36,7 +36,7 @@ describe('ProfilePageComponent', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = (controlledTierProfile = {}) => {
-    return mount(<ProfileComponent controlledTierProfile={controlledTierProfile}/>);
+    return mount(<ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/>);
   };
 
   const load = jest.fn();

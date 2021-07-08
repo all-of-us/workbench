@@ -25,6 +25,7 @@ describe('Access Renewal Page', () => {
   function expireAllModules() {
     const expiredTime = oneHourAgo();
     const {profile} = profileStore.get();
+
     const newProfile = fp.set('renewableAccessModules', {modules: [
       {moduleName: 'dataUseAgreement', expirationEpochMillis: expiredTime},
       {moduleName: 'complianceTraining', expirationEpochMillis: expiredTime},
@@ -80,7 +81,7 @@ describe('Access Renewal Page', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = () => {
-    return mount(<AccessRenewal/>);
+    return mount(<AccessRenewal hideSpinner={() => {}}/>);
   };
 
   beforeEach(() => {

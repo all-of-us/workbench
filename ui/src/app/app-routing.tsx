@@ -54,7 +54,6 @@ const expiredGuard: Guard = {
 };
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
-const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
@@ -63,6 +62,7 @@ const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRou
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
+const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
