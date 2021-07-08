@@ -65,7 +65,6 @@ const styles = reactStyles({
 });
 
 export interface Props {
-  profile: Profile;
   profileState: ProfileStore;
   bannerAdminActive: boolean;
   workspaceAdminActive: boolean;
@@ -266,7 +265,6 @@ export const NavBar = withUserProfile()(
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
-  @Input('profile') profile: Props['profile'];
   @Input('headerImg') headerImg: Props['headerImg'];
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
@@ -279,7 +277,6 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
     super(NavBar, [
-      'profile',
       'headerImg',
       'displayTag',
       'shouldShowDisplayTag',
