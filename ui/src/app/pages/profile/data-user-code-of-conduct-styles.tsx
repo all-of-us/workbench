@@ -1,6 +1,5 @@
 import {styles as headerStyles} from 'app/components/headers';
 import {TextInput} from 'app/components/inputs';
-import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -11,27 +10,7 @@ export const indentedListStyles = {
 };
 
 export const dataUserCodeOfConductStyles = reactStyles({
-  dataUserCodeOfConductPage: {
-    paddingTop: '2rem',
-    paddingLeft: '3rem',
-    paddingBottom: '2rem',
-    maxWidth: '48rem',
-    height: '100%',
-    color: colors.primary,
-  },
   h2: {...headerStyles.h2, lineHeight: '1rem', fontWeight: 600, fontSize: '0.67rem'},
-  sanctionModalTitle: {
-    fontFamily: 'Montserrat',
-    fontSize: '0.67rem',
-    fontWeight: 600,
-    lineHeight: '0.8rem'
-  },
-  modalLabel: {
-    fontFamily: 'Montserrat',
-    fontSize: '0.5rem',
-    lineHeight: '1rem',
-    color: colors.primary
-  },
   textInput: {
     padding: '0 1ex',
     width: '12rem',
@@ -46,14 +25,6 @@ export const SecondHeader = (props) => {
 
 export const IndentedUnorderedList = (props) => {
   return <ul style={{...indentedListStyles, ...props.style}}>{props.children}</ul>;
-};
-
-export const IndentedOrderedList = (props) => {
-  return <ol style={{...indentedListStyles, ...props.style}}>{props.children}</ol>;
-};
-
-export const IndentedListItem = (props) => {
-  return <li style={{marginTop: '0.5rem', ...props.style}}>{props.children}</li>;
 };
 
 export const DuaTextInput = (props) => {
