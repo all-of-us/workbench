@@ -10,6 +10,7 @@ import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -26,7 +27,6 @@ import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {RenewableAccessModuleStatus} from 'generated/fetch';
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const {useState, useEffect} = React;
 

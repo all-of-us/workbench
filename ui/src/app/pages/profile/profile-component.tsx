@@ -14,6 +14,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
@@ -36,7 +37,6 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 
 // validators for validate.js
