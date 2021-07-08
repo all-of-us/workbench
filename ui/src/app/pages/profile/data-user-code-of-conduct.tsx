@@ -1,3 +1,7 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {validate} from 'validate.js';
+
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
@@ -5,10 +9,7 @@ import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {DataUseAgreementContentV2} from 'app/pages/profile/data-use-agreement-content-v2';
-import {getDataUseAgreementWidgetV2} from 'app/pages/profile/data-use-agreement-panel';
 import {
-  dataUserCodeOfConductStyles,
   DuaTextInput,
   InitialsAgreement
 } from 'app/pages/profile/data-user-code-of-conduct-styles';
@@ -21,9 +22,6 @@ import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {validate} from 'validate.js';
 
 
 const styles = reactStyles({
@@ -70,9 +68,6 @@ interface Props extends WithSpinnerOverlayProps {
 
 interface State {
   name: string;
-  initialNameV2: string;
-  initialWorkV2: string;
-  initialSanctionsV2: string;
   initialMonitoring: string;
   initialPublic: string;
   page: DataUserCodeOfConductPage;
@@ -86,9 +81,6 @@ export const DataUserCodeOfConduct = withUserProfile()(
       super(props);
       this.state = {
         name: '',
-        initialNameV2: '',
-        initialWorkV2: '',
-        initialSanctionsV2: '',
         initialMonitoring: '',
         initialPublic: '',
         page: DataUserCodeOfConductPage.CONTENT,
@@ -124,24 +116,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     render() {
       const {profileState: {profile}} = this.props;
-      const {proceedDisabled, initialNameV2, initialWorkV2, initialSanctionsV2, initialMonitoring, initialPublic,
-        page, submitting} = this.state;
-      const errorsV2 = validate({initialNameV2, initialWorkV2, initialSanctionsV2}, {
-        initialNameV2: {
-          presence: {allowEmpty: false},
-          length: {maximum: 6}
-        },
-        initialWorkV2: {
-          presence: {allowEmpty: false},
-          equality: {attribute: 'initialNameV2'},
-          length: {maximum: 6}
-        },
-        initialSanctionsV2: {
-          presence: {allowEmpty: false},
-          equality: {attribute: 'initialNameV2'},
-          length: {maximum: 6}
-        }
-      });
+      const {proceedDisabled, initialMonitoring, initialPublic, page, submitting} = this.state;
       const errors = validate({initialMonitoring, initialPublic}, {
         initialMonitoring: {
           presence: {allowEmpty: false},
@@ -152,8 +127,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
           equality: {attribute: 'initialMonitoring'}
         }
       });
-      if (serverConfigStore.get().config.enableV3DataUserCodeOfConduct) {
-        return <FlexColumn style={styles.dataUserCodeOfConductPage}>
+      return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>
               <HtmlViewer
@@ -279,18 +253,5 @@ export const DataUserCodeOfConduct = withUserProfile()(
             </React.Fragment>
           }
         </FlexColumn>;
-      } else {
-        return <div style={dataUserCodeOfConductStyles.dataUserCodeOfConductPage}>
-          <DataUseAgreementContentV2/>
-          <div style={{height: '1rem'}}/>
-          {getDataUseAgreementWidgetV2.call(this,
-            submitting,
-            initialWorkV2,
-            initialNameV2,
-            initialSanctionsV2,
-            errorsV2,
-            this.props.profileState.profile)}
-        </div>;
-      }
     }
   });
