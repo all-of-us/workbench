@@ -450,13 +450,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private String getFreeCreditsResolutionText() {
-    return "you can request additional free credits by contacting support "
-        + "or provide a new billing account in the Workbench to continue with your analyses. "
-        + "Instructions for providing a new billing account are provided in the Workbench.";
-  }
-
-  private ImmutableMap<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
+  private Map<EmailSubstitutionField, String> freeTierDollarThresholdSubstitutionMap(
       final DbUser user, double currentUsage, double remainingBalance) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -470,8 +464,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> freeTierExpirationSubstitutionMap(
-      DbUser user) {
+  private Map<EmailSubstitutionField, String> freeTierExpirationSubstitutionMap(DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
@@ -482,7 +475,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
+  private Map<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
       Instant expirationTime, String username) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -494,7 +487,17 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> setupBillingAccountEmailMap(
+  private String getFreeCreditsResolutionText() {
+    if (workbenchConfigProvider.get().featureFlags.enableBillingUpgrade) {
+      return "you can request additional free credits by contacting support "
+          + "or provide a new billing account in the Workbench to continue with your analyses. "
+          + "Instructions for providing a new billing account are provided in the Workbench.";
+    } else {
+      return "you can request for an extension of free credits by contacting support.";
+    }
+  }
+
+  private Map<EmailSubstitutionField, String> setupBillingAccountEmailMap(
       DbUser user, SendBillingSetupEmailRequest request) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
@@ -673,7 +676,7 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl("all_of_us_logo.png");
   }
 
-  private String getAllOfUsItalicsText() {
+  private static String getAllOfUsItalicsText() {
     return "<i>All of Us</i>";
   }
 
@@ -681,11 +684,11 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
   }
 
-  private String formatPercentage(double threshold) {
+  private static String formatPercentage(double threshold) {
     return NumberFormat.getPercentInstance().format(threshold);
   }
 
-  private String formatCurrency(double currentUsage) {
+  private static String formatCurrency(double currentUsage) {
     return NumberFormat.getCurrencyInstance().format(currentUsage);
   }
 
@@ -697,7 +700,7 @@ public class MailServiceImpl implements MailService {
         .format(date);
   }
 
-  private String formatCentralTime(Instant date) {
+  private static String formatCentralTime(Instant date) {
     // e.g. April 5, 2021 at 1:23PM Central Time
     return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
         .withLocale(Locale.US)
