@@ -776,7 +776,7 @@ Common.register_command({
   :fn => ->(*args) { make_prep_tables_bucket("make-prep-tables-bucket", *args) }
 })
 
-def make_bq_prep_tables(cmd_name, *args)
+def make_bq_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--project [project]",
@@ -803,19 +803,50 @@ def make_bq_prep_tables(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    Dir.chdir('db-cdr/prep-ppi-tables') do
-      common.run_inline %W{python make-prep-ppi-tables.py --project #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} --dataset #{op.opts.dataset} --date #{op.opts.date}}
-    end
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/make-bq-prep-ppi-tables.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.date} #{op.opts.tier}}
+      common.run_inline %W{./generate-cdr/make-bq-prep-survey.sh #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} #{op.opts.dataset} #{op.opts.date} #{op.opts.tier}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-prep-tables",
-  :description => "Make all big query prep tables.",
-  :fn => ->(*args) { make_bq_prep_tables("make-bq-prep-tables", *args) }
+  :invocation => "make-bq-prep-survey",
+  :description => "Make the prep_survey table.",
+  :fn => ->(*args) { make_bq_prep_survey("make-bq-prep-survey", *args) }
+})
+
+def make_prep_ppi_csv_files(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project name"
+  )
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name"
+  )
+  op.add_option(
+      "--date [date]",
+      ->(opts, v) { opts.date = v},
+      "Redcap file date"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset and opts.date }
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr/prep-ppi-csv-files') do
+      common.run_inline %W{python make-prep-ppi-csv-files.py --project #{ENVIRONMENTS[op.opts.project][:source_cdr_project]} --dataset #{op.opts.dataset} --date #{op.opts.date}}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "make-prep-ppi-csv-files",
+  :description => "Make prep ppi csv files for each survey type.",
+  :fn => ->(*args) { make_prep_ppi_csv_files("make-prep-ppi-csv-files", *args) }
 })
 
 def make_prep_tables_from_csv(cmd_name, *args)
