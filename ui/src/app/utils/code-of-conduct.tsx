@@ -1,13 +1,12 @@
-
 /**
- * Returns the currently live DUA version. This version should be displayed when
- * completing the DUA and this exact version must be signed in order to receive
+ * Returns the currently live DUCC version. This version should be displayed when
+ * completing the DUCC and this exact version must be signed in order to receive
  * registered data access.
  *
- * Note: If we instead returned a live DUA version in the server config, we
+ * Note: If we instead returned a live DUCC version in the server config, we
  * could likely eliminate this helper function. This needs further design
- * thinking though. For now just consolidate DUA logic through this package.
+ * thinking though. For now just consolidate DUCC logic through this package.
  */
-export function getLiveDataUseAgreementVersion(): number {
+export function getLiveDUCCVersion(): number {
   return 3;
 }

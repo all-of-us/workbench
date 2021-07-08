@@ -15,7 +15,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
+import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 
@@ -120,14 +120,14 @@ export const DataUserCodeOfConduct = withUserProfile()(
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async(initials) => {
-      const dataUseAgreementVersion = getLiveDataUseAgreementVersion();
-      const profile = await profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials);
+      const duccVersion = getLiveDUCCVersion();
+      const profile = await profileApi().submitDataUseAgreement(duccVersion, initials);
       this.props.profileState.updateCache(profile);
     });
 
     submitDataUserCodeOfConduct(initials) {
-      const dataUseAgreementVersion = getLiveDataUseAgreementVersion();
-      profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
+      const duccVersion = getLiveDUCCVersion();
+      profileApi().submitDataUseAgreement(duccVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         navigate(['/']);
       });
