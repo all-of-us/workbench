@@ -78,39 +78,39 @@ const styles = reactStyles({
 
 const bannerAdminActive = () =>  {
   return window.location.pathname === '/admin/banner';
-}
+};
 
 const userAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/user');
-}
+};
 
 const userAuditActive = () =>  {
   return window.location.pathname.startsWith('/admin/user-audit');
-}
+};
 
 const workspaceAdminActive = () =>  {
   return window.location.pathname.startsWith('/admin/workspaces');
-}
+};
 
 const workspaceAuditActive = () =>  {
   return window.location.pathname.startsWith('/admin/workspace-audit');
-}
+};
 
 const homeActive = () =>  {
   return window.location.pathname === '';
-}
+};
 
 const libraryActive = () =>  {
   return window.location.pathname === '/library';
-}
+};
 
 const workspacesActive = () =>  {
   return window.location.pathname === '/workspaces';
-}
+};
 
 const profileActive = () =>  {
   return window.location.pathname === '/profile';
-}
+};
 
 interface SideNavItemProps {
   icon?: string;
