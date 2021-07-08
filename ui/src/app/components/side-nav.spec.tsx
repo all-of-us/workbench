@@ -7,16 +7,7 @@ import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 describe('SideNav', () => {
   const props: SideNavProps = {
     profile: ProfileStubVariables.PROFILE_STUB,
-    bannerAdminActive: false,
-    workspaceAdminActive: false,
-    homeActive: false,
-    libraryActive: false,
     onToggleSideNav: () => {},
-    profileActive: false,
-    userAdminActive: false,
-    workspacesActive: false,
-    userAuditActive: false,
-    workspaceAuditActive: false
   };
   const component = () => mount(<SideNav {...props}/>);
   it('should render', () => {

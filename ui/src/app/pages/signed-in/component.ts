@@ -76,10 +76,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav: ElementRef;
 
   constructor(
-    /* Ours */
-    private signInService: SignInService,
-    /* Angular's */
-    private locationService: Location
+    private signInService: SignInService
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
   }
@@ -268,33 +265,5 @@ export class SignedInComponent implements OnInit, OnDestroy {
     return `You have been idle for over ${this.secondsToText(secondsBeforeDisplayingModal)}. ` +
       `You can choose to extend your session by clicking the button below. You will be automatically logged ` +
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
-  }
-
-  get bannerAdminActive(): boolean {
-    return this.locationService.path() === '/admin/banner';
-  }
-
-  get userAdminActive(): boolean {
-    return this.locationService.path() === '/admin/user';
-  }
-
-  get workspaceAdminActive(): boolean {
-    return this.locationService.path() === '/admin/workspaces';
-  }
-
-  get homeActive(): boolean {
-    return this.locationService.path() === '';
-  }
-
-  get libraryActive(): boolean {
-    return this.locationService.path() === '/library';
-  }
-
-  get workspacesActive(): boolean {
-    return this.locationService.path() === '/workspaces';
-  }
-
-  get profileActive(): boolean {
-    return this.locationService.path() === '/profile';
   }
 }

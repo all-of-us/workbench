@@ -239,18 +239,9 @@ export const NavBar = withUserProfile()(
           this.state.sideNavVisible
           && <SideNav
               profile={this.props.profileState.profile}
-              bannerAdminActive={this.props.bannerAdminActive}
-              homeActive={this.props.homeActive}
-              libraryActive={this.props.libraryActive}
               // Passing the function itself deliberately, we want to be able to
               // toggle the nav whenever we click anything in it
               onToggleSideNav={this.onToggleSideNav}
-              profileActive={this.props.profileActive}
-              userAdminActive={this.props.userAdminActive}
-              userAuditActive={this.props.userAuditActive}
-              workspaceAuditActive={this.props.workspaceAuditActive}
-              workspaceAdminActive={this.props.workspaceAdminActive}
-              workspacesActive={this.props.workspacesActive}
           />
         }
       </div>;
@@ -263,24 +254,7 @@ export const NavBar = withUserProfile()(
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
-  @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
-  @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
-  @Input('homeActive') homeActive: Props['homeActive'];
-  @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
-  @Input('libraryActive') libraryActive: Props['libraryActive'];
-  @Input('profileActive') profileActive: Props['profileActive'];
-  @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
-    super(NavBar, [
-      'bannerAdminActive',
-      'workspaceAdminActive',
-      'homeActive',
-      'workspacesActive',
-      'libraryActive',
-      'profileActive',
-      'userAdminActive',
-      'userAuditActive',
-      'workspaceAuditActive'
-    ]);
+    super(NavBar, []);
   }
 }
