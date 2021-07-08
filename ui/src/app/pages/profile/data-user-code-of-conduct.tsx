@@ -60,7 +60,7 @@ export enum DataUserCodeOfConductPage {
   SIGNATURE
 }
 
-const DuaTextInput = (props) => {
+const DuccTextInput = (props) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return <TextInput {...fp.omit(['data-test-id'], props)}
                     style={{
@@ -71,9 +71,12 @@ const DuaTextInput = (props) => {
 
 const InitialsAgreement = (props) => {
   return <div style={{display: 'flex', marginTop: '0.5rem'}}>
-    <DuaTextInput onChange={props.onChange} value={props.value}
-                  placeholder='INITIALS' data-test-id='dua-initials-input'
-                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
+    <DuccTextInput
+        onChange={props.onChange}
+        value={props.value}
+        placeholder='INITIALS'
+        data-test-id='dua-initials-input'
+        style={{width: '4ex', textAlign: 'center', padding: 0}}/>
     <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
   </div>;
 };
@@ -182,7 +185,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 <h1>Accept Data User Code of Conduct</h1>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I
-                  <DuaTextInput style={{margin: '0 1ex'}}
+                  <DuccTextInput style={{margin: '0 1ex'}}
                      disabled
                      value={profile.givenName + ' ' + profile.familyName}
                      data-test-id='ducc-name-input'/>
@@ -225,19 +228,19 @@ export const DataUserCodeOfConduct = withUserProfile()(
                   sanctions may be sought.
                 </div>
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Authorized Data User Name</label>
-                <DuaTextInput
+                <DuccTextInput
                     disabled
                     data-test-id='ducc-username-input'
                     value={profile.givenName + ' ' + profile.familyName}
                 />
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>User ID</label>
-                <DuaTextInput
+                <DuccTextInput
                     disabled
                     data-test-id='ducc-user-id-input'
                     value={profile.username}
                 />
                 <label style={{...styles.bold, ...styles.largeTopMargin}}>Date</label>
-                <DuaTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
+                <DuccTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
               </FlexColumn>
               <FlexRow style={styles.dataUserCodeOfConductFooter}>
                 <Button
