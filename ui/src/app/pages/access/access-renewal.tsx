@@ -26,6 +26,7 @@ import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {RenewableAccessModuleStatus} from 'generated/fetch';
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
+import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
 
 const {useState, useEffect} = React;
 
@@ -210,7 +211,8 @@ const RenewalCard = withStyle(renewalStyle.card)(
 // Page to render
 export const AccessRenewal = fp.flow(
   withProfileErrorModal
-)(() => {
+)((spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
   // State
   const {profile: {
     complianceTrainingCompletionTime,

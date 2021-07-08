@@ -36,6 +36,7 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {WithSpinnerOverlayProps} from "../../components/with-spinner-overlay";
 
 
 // validators for validate.js
@@ -65,7 +66,7 @@ enum RegistrationStepStatus {
   UNCOMPLETE
 }
 
-interface ProfilePageProps extends WithProfileErrorModalProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -167,6 +168,7 @@ export const ProfileComponent = fp.flow(
     });
 
     async componentDidMount() {
+      this.props.hideSpinner();
       try {
         const details = await institutionApi().getPublicInstitutionDetails();
         this.setState({
