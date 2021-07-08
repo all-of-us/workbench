@@ -30,7 +30,7 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
     // show the number of full remaining days, e.g. 30 if 30.7 remain or 0 if only a partial day remains
     const daysRemaining = Math.floor((earliestExpiration - Date.now()) / MILLIS_PER_DAY);
     if (daysRemaining <= NOTIFICATION_THRESHOLD_DAYS) {
-      return Math.floor(daysRemaining);
+      return daysRemaining;
     }
   }
 };
