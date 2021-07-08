@@ -28,6 +28,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -41,7 +43,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
-@Import({FireCloudServiceImpl.class, FireCloudConfig.class})
+@Import({FireCloudServiceImpl.class, FireCloudConfig.class, CloudBillingClientImpl.class})
 public class DeleteWorkspaces {
 
   private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
@@ -69,11 +71,10 @@ public class DeleteWorkspaces {
       Clock clock,
       FireCloudService fireCloudService,
       Provider<DbUser> dbUserProvider,
+      CloudBillingClient cloudBillingClient,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao) {
     return new WorkspaceServiceImpl(
-        null,
-        null,
         billingProjectAuditor,
         clock,
         null,
@@ -81,6 +82,7 @@ public class DeleteWorkspaces {
         null,
         fireCloudService,
         null,
+        cloudBillingClient,
         dbUserProvider,
         null,
         null,

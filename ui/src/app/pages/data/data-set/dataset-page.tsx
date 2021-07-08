@@ -252,6 +252,24 @@ const ImmutableListItem: React.FunctionComponent <{
     </div>;
   };
 
+const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
+  name: string, onChange: Function, checked: boolean, cohortId: number, namespace: string, wid: string}>
+    = ({name, onChange, checked, cohortId, namespace, wid}) => {
+      return <div style={styles.listItem}>
+        <input type='checkbox' value={name} onChange={() => onChange()}
+               style={styles.listItemCheckbox} checked={checked}/>
+        <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%'}}>
+          <div>{name}</div>
+          <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
+            <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
+            target='_blank'>
+              <ClrIcon size='20' shape='bar-chart'/>
+            </a>
+          </div>
+    </FlexRow>
+  </div>;
+    };
+
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
@@ -1163,9 +1181,12 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                                        () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
-                    <ImmutableListItem key={cohort.id} name={cohort.name}
+                    <ImmutableWorkspaceCohortListItem key={cohort.id} name={cohort.name}
                                       data-test-id='cohort-list-item'
                                       checked={selectedCohortIds.includes(cohort.id)}
+                                      cohortId={cohort.id}
+                                      namespace={namespace}
+                                      wid={id}
                                       onChange={
                                         () => this.selectCohort(cohort)}/>
                     )

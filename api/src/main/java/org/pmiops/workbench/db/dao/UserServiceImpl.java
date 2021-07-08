@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -282,17 +283,29 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   // TODO split into registered tier and controlled tier versions, when available
   private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
-    return ImmutableMap.of(
-        ModuleNameEnum.COMPLIANCETRAINING,
-            new ModuleTimes(
-                user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()),
-        ModuleNameEnum.DATAUSEAGREEMENT,
-            new ModuleTimes(
-                user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()),
-        ModuleNameEnum.PROFILECONFIRMATION,
-            new ModuleTimes(user.getProfileLastConfirmedTime(), null),
-        ModuleNameEnum.PUBLICATIONCONFIRMATION,
-            new ModuleTimes(user.getPublicationsLastConfirmedTime(), null));
+    final Map<ModuleNameEnum, ModuleTimes> moduleMap =
+        new HashMap<>(
+            ImmutableMap.of(
+                ModuleNameEnum.PROFILECONFIRMATION,
+                new ModuleTimes(user.getProfileLastConfirmedTime(), null),
+                ModuleNameEnum.PUBLICATIONCONFIRMATION,
+                new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
+
+    if (isModuleEnabledInEnvironment(ModuleNameEnum.COMPLIANCETRAINING)) {
+      moduleMap.put(
+          ModuleNameEnum.COMPLIANCETRAINING,
+          new ModuleTimes(
+              user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()));
+    }
+
+    if (isModuleEnabledInEnvironment(ModuleNameEnum.DATAUSEAGREEMENT)) {
+      moduleMap.put(
+          ModuleNameEnum.DATAUSEAGREEMENT,
+          new ModuleTimes(
+              user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()));
+    }
+
+    return moduleMap;
   }
 
   private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
@@ -1140,14 +1153,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.
    *
-   * <p>First: ignore any modules which have been disabled in this environment.
+   * <p>First: ignore any bypassed modules. These are in compliance and do not need to be renewed.
    *
-   * <p>Next: ignore any bypassed modules. These are in compliance and do not need to be renewed.
-   *
-   * <p>Finally: do all enabled un-bypassed modules have expiration times? If yes, return the min
-   * (earliest). If no, either the AAR feature flag is not set or the user does not have access for
-   * reasons other than access renewal compliance. In either negative case, we should not send an
-   * email.
+   * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
+   * If no, either the AAR feature flag is not set or the user does not have access for reasons
+   * other than access renewal compliance. In either negative case, we should not send an email.
    *
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
@@ -1156,10 +1166,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     final Set<Optional<Timestamp>> expirations =
-        getRenewableAccessModules(user).entrySet().stream()
-            .filter(entry -> isModuleEnabledInEnvironment(entry.getKey()))
-            .filter(entry -> !entry.getValue().isBypassed())
-            .map(entry -> entry.getValue().getExpiration())
+        getRenewableAccessModules(user).values().stream()
+            .filter(times -> !times.isBypassed())
+            .map(ModuleTimes::getExpiration)
             .collect(Collectors.toSet());
 
     // if any un-bypassed modules are incomplete, we know:
