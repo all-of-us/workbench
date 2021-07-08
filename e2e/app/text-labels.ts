@@ -1,14 +1,20 @@
 import { config } from 'resources/workbench-config';
 const { LOGIN_URL_DOMAIN_NAME, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
 
-export const PageUrl = {
-  Home: { value: LOGIN_URL_DOMAIN_NAME },
-  Workspaces: { value: LOGIN_URL_DOMAIN_NAME + WORKSPACES_URL_PATH },
-  Admin: { value: LOGIN_URL_DOMAIN_NAME + ADMIN_URL_PATH },
-  Profile: { value: LOGIN_URL_DOMAIN_NAME + PROFILE_URL_PATH }
-} as const;
+interface IPageUrl {
+  Home: string,
+  Workspaces: string,
+  Admin: string,
+  Profile: string
+}
 
-export type PageUrl = keyof typeof PageUrl;
+export const PageUrl: IPageUrl = {
+  Home: LOGIN_URL_DOMAIN_NAME,
+  Workspaces: LOGIN_URL_DOMAIN_NAME + WORKSPACES_URL_PATH,
+  Admin: LOGIN_URL_DOMAIN_NAME + ADMIN_URL_PATH,
+  Profile: LOGIN_URL_DOMAIN_NAME + PROFILE_URL_PATH
+};
+
 
 export enum WorkspaceAccessLevel {
   Owner = 'OWNER',
