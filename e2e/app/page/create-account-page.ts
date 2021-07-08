@@ -199,7 +199,7 @@ export default class CreateAccountPage extends BasePage {
     await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();
     const emailAddressTextbox = Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
-    await emailAddressTextbox.type(config.institutionContactEmail);
+    await emailAddressTextbox.type(config.INSTITUTION_CONTACT_EMAIL);
     await emailAddressTextbox.pressTab(); // tab out to start email validation
     await ClrIconLink.findByName(this.page, {
       containsText: LabelAlias.InstitutionEmail,

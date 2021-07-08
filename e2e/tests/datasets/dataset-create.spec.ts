@@ -130,7 +130,7 @@ describe('Create Dataset', () => {
     await aboutPage.waitForLoad();
 
     const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(config.readerUserName, WorkspaceAccessLevel.Reader);
+    await shareWorkspaceModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
 
     // Don't delete dataset because it's needed in next test.
@@ -138,7 +138,7 @@ describe('Create Dataset', () => {
 
   test('Workspace READER cannot edit dataset', async () => {
     // READER log in in new Incognito page.
-    await signInWithAccessToken(page, config.readerUserAccessTokenFilename);
+    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);

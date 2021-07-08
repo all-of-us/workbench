@@ -10,13 +10,13 @@ describe('Workspace Share Modal', () => {
   const assignAccess = [
     {
       accessRole: WorkspaceAccessLevel.Writer,
-      userEmail: config.writerUserName,
-      userAccessTokenFilename: config.writerUserAccessTokenFilename
+      userEmail: config.WRITER_USER,
+      userAccessTokenFilename: config.WRITER_ACCESS_TOKEN_FILE
     },
     {
       accessRole: WorkspaceAccessLevel.Reader,
-      userEmail: config.readerUserName,
-      userAccessTokenFilename: config.readerUserAccessTokenFilename
+      userEmail: config.READER_USER,
+      userAccessTokenFilename: config.READER_ACCESS_TOKEN_FILE
     }
   ];
 

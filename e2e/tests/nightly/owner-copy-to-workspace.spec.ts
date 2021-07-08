@@ -39,8 +39,8 @@ describe('Workspace owner copy notebook tests', () => {
   test(
     'Copy notebook to another Workspace when CDR versions match',
     async () => {
-      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
-      await copyNotebookTest(defaultCdrWorkspace, config.defaultCdrVersionName);
+      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
+      await copyNotebookTest(defaultCdrWorkspace, config.DEFAULT_CDR_VERSION_NAME);
     },
     30 * 60 * 1000
   );
@@ -50,9 +50,9 @@ describe('Workspace owner copy notebook tests', () => {
     async () => {
       // reuse same source workspace for all tests, but always create new destination workspace.
       if (defaultCdrWorkspace === undefined) {
-        defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+        defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
       }
-      await copyNotebookTest(defaultCdrWorkspace, config.altCdrVersionName);
+      await copyNotebookTest(defaultCdrWorkspace, config.ALTERNATIVE_CDR_VERSION_NAME);
     },
     30 * 60 * 1000
   );

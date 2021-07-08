@@ -33,7 +33,7 @@ describe('Creating new workspaces', () => {
     await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
 
     // Verify the CDR version displays in the workspace navigation bar
-    expect(await dataPage.getCdrVersion()).toBe(config.defaultCdrVersionName);
+    expect(await dataPage.getCdrVersion()).toBe(config.DEFAULT_CDR_VERSION_NAME);
 
     // cleanup
     await dataPage.deleteWorkspace();
@@ -95,13 +95,13 @@ describe('Creating new workspaces', () => {
     const createPage = await workspacesPage.fillOutRequiredCreationFields(name);
 
     const cdrVersionSelect = createPage.getCdrVersionSelect();
-    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
 
     await createPage.selectAccessTier(AccessTierDisplayNames.Controlled);
 
     // observe that the CDR Version default has changed
     const selectedCdrVersion = await cdrVersionSelect.getSelectedValue();
-    expect(selectedCdrVersion).not.toBe(config.defaultCdrVersionName);
+    expect(selectedCdrVersion).not.toBe(config.DEFAULT_CDR_VERSION_NAME);
 
     // click CREATE WORKSPACE button
     const createButton = createPage.getCreateWorkspaceButton();
