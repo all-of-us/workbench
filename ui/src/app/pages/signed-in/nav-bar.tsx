@@ -12,6 +12,7 @@ import {cookiesEnabled} from 'app/utils/cookies';
 import {ProfileStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
+import {environment} from "../../../environments/environment";
 
 const styles = reactStyles({
   headerContainer: {
@@ -68,9 +69,6 @@ export interface Props {
   profileState: ProfileStore;
   bannerAdminActive: boolean;
   workspaceAdminActive: boolean;
-  headerImg: string;
-  displayTag: string;
-  shouldShowDisplayTag: boolean;
   profileImage: string;
   sidenavToggle: boolean;
   homeActive: boolean;
@@ -210,14 +208,14 @@ export const NavBar = withUserProfile()(
         <div>
           <a href={'/'}>
             <img
-                src={this.props.headerImg}
+                src='/assets/images/all-of-us-logo.svg'
                 style={styles.headerImage}
             />
           </a>
           {
-            this.props.shouldShowDisplayTag
+            environment.shouldShowDisplayTag
             && <div style={styles.displayTag}>
-              {this.props.displayTag}
+              {environment.displayTag}
             </div>
           }
         </div>
@@ -265,9 +263,6 @@ export const NavBar = withUserProfile()(
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
-  @Input('headerImg') headerImg: Props['headerImg'];
-  @Input('displayTag') displayTag: Props['displayTag'];
-  @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
   @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
   @Input('workspaceAdminActive') workspaceAdminActive: Props['workspaceAdminActive'];
   @Input('homeActive') homeActive: Props['homeActive'];
@@ -277,9 +272,6 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
     super(NavBar, [
-      'headerImg',
-      'displayTag',
-      'shouldShowDisplayTag',
       'bannerAdminActive',
       'workspaceAdminActive',
       'homeActive',

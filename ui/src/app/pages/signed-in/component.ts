@@ -55,9 +55,6 @@ const checkOpsBeforeUnload = (e) => {
 })
 export class SignedInComponent implements OnInit, OnDestroy {
   profile: Profile;
-  headerImg = '/assets/images/all-of-us-logo.svg';
-  displayTag = environment.displayTag;
-  shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
   cdrVersionsInitialized = false;
