@@ -196,7 +196,7 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
       }
       // The DUA completion time field tracks the most recent DUA completion
       // timestamp, but doesn't specify whether that DUA is currently active.
-      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
+      const requiredDuaVersion = getLiveDataUseAgreementVersion();
       if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
         return profile.dataUseAgreementCompletionTime;
       }
