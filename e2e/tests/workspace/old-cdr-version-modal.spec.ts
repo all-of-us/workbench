@@ -18,7 +18,7 @@ describe('OldCdrVersion Modal restrictions', () => {
     const editPage = await workspacesPage.fillOutRequiredCreationFields(makeWorkspaceName());
 
     // select an old CDR Version
-    await editPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION);
+    await editPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
 
     const createButton = editPage.getCreateWorkspaceButton();
     expect(await createButton.isCursorNotAllowed()).toBe(true);
@@ -45,7 +45,7 @@ describe('OldCdrVersion Modal restrictions', () => {
     await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
-    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION);
+    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
 
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     expect(await finishButton.isCursorNotAllowed()).toBe(true);
@@ -64,7 +64,7 @@ describe('OldCdrVersion Modal restrictions', () => {
     await duplicateButton.waitUntilEnabled();
 
     // change CDR Version
-    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION);
+    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
     expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
 
     const modal = new OldCdrVersionModal(page);
@@ -73,6 +73,6 @@ describe('OldCdrVersion Modal restrictions', () => {
 
     // the CDR version is forcibly reverted back to the default
     const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
-    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION);
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
   });
 });

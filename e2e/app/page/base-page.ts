@@ -22,12 +22,12 @@ export default abstract class BasePage {
   /**
    * Load a URL.
    */
-  async gotoUrl(url: string): Promise<void> {
-    logger.info(`goto url: ${url}`);
-    const response = await this.page.goto(url, { waitUntil: ['load'] });
+  async gotoUrl(url: { value: string }): Promise<void> {
+    logger.info(`goto url: ${url.value}`);
+    const response = await this.page.goto(url.value, { waitUntil: ['load'] });
     if (response && !response.ok()) {
       // Log response if status is not OK
-        logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
+      logger.info(`Goto URL: ${url.value}. Response status: ${response.status()}\n${await response.text()}`);
     }
   }
 

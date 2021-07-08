@@ -14,11 +14,11 @@ describe('Workspace CDR Version Upgrade modal', () => {
   const workspace = 'e2eUpgradeWorkspaceCDRVersionTest';
 
   test('Clicking Cancel and Upgrade buttons', async () => {
-    await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION, workspaceName: workspace });
+    await findOrCreateWorkspace(page, { cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME, workspaceName: workspace });
 
     const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
     const cdrVersion = await workspacePage.getCdrVersion();
-    expect(cdrVersion).toBe(config.ALTERNATIVE_CDR_VERSION);
+    expect(cdrVersion).toBe(config.ALTERNATIVE_CDR_VERSION_NAME);
 
     let modal = await launchCdrUpgradeModal(page);
 
@@ -37,7 +37,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
     const duplicationPage = new WorkspaceEditPage(page);
     const upgradeMessage = await duplicationPage.getCdrVersionUpgradeMessage();
     expect(upgradeMessage).toContain(workspace);
-    expect(upgradeMessage).toContain(`${config.ALTERNATIVE_CDR_VERSION} to ${config.DEFAULT_CDR_VERSION}.`);
+    expect(upgradeMessage).toContain(`${config.ALTERNATIVE_CDR_VERSION_NAME} to ${config.DEFAULT_CDR_VERSION_NAME}.`);
 
     const editCancelButton = duplicationPage.getCancelButton();
     await editCancelButton.clickAndWait();

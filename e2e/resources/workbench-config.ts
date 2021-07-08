@@ -6,21 +6,21 @@ const env = process.env.WORKBENCH_ENV || 'test';
 const userCredential = {
   USER_NAME: process.env.USER_NAME,
   PASSWORD: process.env.PASSWORD,
-  institutionContactEmail: 'aou-dev-registration@broadinstitute.org',
+  INSTITUTION_CONTACT_EMAIL: 'aou-dev-registration@broadinstitute.org',
   // This is passed via a file to leave open the future option to allow token
   // refresh during a Puppeteer test run, and also limits logging exposure of the token.
-  userAccessTokenFilename: 'signin-tokens/puppeteer-access-token.txt',
-  collaboratorUserAccessTokenFilename: 'signin-tokens/collaborator-puppeteer-access-token.txt',
-  readerUserAccessTokenFilename: 'signin-tokens/reader-puppeteer-access-token.txt',
-  writerUserAccessTokenFilename: 'signin-tokens/writer-puppeteer-access-token.txt'
+  USER_ACCESS_TOKEN_FILE: 'signin-tokens/puppeteer-access-token.txt',
+  COLLABORATOR_ACCESS_TOKEN_FILE: 'signin-tokens/collaborator-puppeteer-access-token.txt',
+  READER_ACCESS_TOKEN_FILE: 'signin-tokens/reader-puppeteer-access-token.txt',
+  WRITER_ACCESS_TOKEN_FILE: 'signin-tokens/writer-puppeteer-access-token.txt'
 };
 
 const urlPath = {
-  loginUrlPath: '/login',
-  workspacesUrlPath: '/workspaces',
-  profileUrlPath: '/profile',
-  libraryUrlPath: '/library',
-  adminUrlPath: '/admin/user'
+  LOGIN_URL_PATH: '/login',
+  WORKSPACES_URL_PATH: '/workspaces',
+  PROFILE_URL_PATH: '/profile',
+  LIBRARY_URL_PATH: '/library',
+  ADMIN_URL_PATH: '/admin/user'
 };
 
 // localhost development server
@@ -31,8 +31,8 @@ const local = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitester1@fake-research-aou.org',
-  DEFAULT_CDR_VERSION: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION: 'Synthetic Dataset v3 with WGS'
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench test environment
@@ -43,8 +43,8 @@ const test = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',
-  DEFAULT_CDR_VERSION: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION: 'Synthetic Dataset v3 with WGS'
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench staging environment
@@ -55,8 +55,8 @@ const staging = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetcitester4@staging.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
-  DEFAULT_CDR_VERSION: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION: 'Synthetic Dataset v3'
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
 
 // NOT WORKING: workbench stable environment
@@ -64,8 +64,8 @@ const stable = {
   LOGIN_URL: process.env.STABLE_LOGIN_URL,
   API_URL: process.env.STABLE_API_URL,
   DOMAIN: '@stable.fake-research-aou.org',
-  DEFAULT_CDR_VERSION: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION: 'Synthetic Dataset v3'
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
 
 // workbench perf environment
@@ -76,8 +76,8 @@ const perf = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetciperfreader@perf.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetciperfwriter1@perf.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetciperfreader@perf.fake-research-aou.org',
-  DEFAULT_CDR_VERSION: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION: 'Synthetic Dataset v3'
+  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
 
 const environment = {

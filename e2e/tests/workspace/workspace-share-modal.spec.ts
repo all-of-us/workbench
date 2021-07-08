@@ -11,12 +11,12 @@ describe('Workspace Share Modal', () => {
     {
       accessRole: WorkspaceAccessLevel.Writer,
       userEmail: config.WRITER_USER,
-      userAccessTokenFilename: config.writerUserAccessTokenFilename
+      userAccessTokenFilename: config.WRITER_ACCESS_TOKEN_FILE
     },
     {
       accessRole: WorkspaceAccessLevel.Reader,
       userEmail: config.READER_USER,
-      userAccessTokenFilename: config.readerUserAccessTokenFilename
+      userAccessTokenFilename: config.READER_ACCESS_TOKEN_FILE
     }
   ];
 

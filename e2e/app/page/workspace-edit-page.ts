@@ -396,7 +396,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select CDR Version by name.
    * @param {string} value
    */
-  async selectCdrVersion(value: string = config.DEFAULT_CDR_VERSION): Promise<string> {
+  async selectCdrVersion(value: string = config.DEFAULT_CDR_VERSION_NAME): Promise<string> {
     const select = this.getCdrVersionSelect();
     return select.selectOption(value);
   }

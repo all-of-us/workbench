@@ -24,15 +24,15 @@ export async function signOut(page: Page): Promise<void> {
   await page.waitForTimeout(1000);
 }
 
-export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
+export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
-  await homePage.gotoUrl(PageUrl.Home.value);
+  await homePage.gotoUrl(PageUrl.Home);
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
-  const navigationPromise = page.waitForNavigation({waitUntil: ['load','networkidle0']});
+  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
   await navigationPromise;
@@ -43,7 +43,7 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  await homePage.gotoUrl(PageUrl.Home.value);
+  await homePage.gotoUrl(PageUrl.Home);
   await homePage.waitForLoad();
 }
 
@@ -120,7 +120,7 @@ export async function createWorkspace(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersion);
@@ -146,7 +146,7 @@ export async function findOrCreateWorkspace(
   page: Page,
   opts: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName } = opts;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
@@ -197,7 +197,7 @@ export async function findOrCreateWorkspaceCard(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<WorkspaceCard> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {

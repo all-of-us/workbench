@@ -45,24 +45,28 @@ See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167
 ### Local Test Users
 Developers' Local environments share a Google Suite domain with the Test environment,
 so users with matching emails share the same Terra and Google cloud resources between these
-environments. To avoid contention, it's necessary to create a test user unique to the local 
-environment.  This is the same process as creating any other local user.  Ensure that this 
-user is 2FA-Bypassed and populate the environment property file `.env` with this user's credentials.
+environments. To avoid contention, it's necessary to create some test users unique to the local 
+environment.  This is the same process as creating other local test users.  Ensure that local test 
+users are 2FA-Bypassed. Fill out the environment property file `.env` with local test users credentials.
 
-Save test user credentials
-  - Copy `.env.sample`, save as `.env`. Update test user emails accordingly.
+e2e tests require 4 test users:
+- USER_NAME: Default test user
+- WRITER_USER: Share workspace to this test user with WRITER role
+- READER_USER: Share workspace to this test user with READER role
+- COLLABORATOR_USER: Share workspace to this test user with OWNER role
 
-Command line tests are run using the [Yarn](https://classic.yarnpkg.com/en/) build tool. 
-  - Run **headless mode** (with invisible browser execution)
+Fill out local test user credentials
+  - Copy `.env.sample`, save as `.env`.
+  - Update `.env` with your local user emails.
     
-    `yarn test [test_name_here]`
-  - Run **headful mode** (with the browser interactions visible to you)
     
-    `yarn test:debug [test_name_here]`
 
-### Examples
-* Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
-* Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
+## Command line tests are run using [Yarn](https://classic.yarnpkg.com/en/)
+**To see the list of available Yarn commands** <div class="text-blue">`yarn run`</div>
+### Examples  
+* Run one test in **headless mode** (with invisible browser execution) <div class="text-blue">`yarn test [TEST_FILE]` </div>
+* Run one test in **headful mode** (with the browser interactions visible to you) <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
+* Run all tests in parallel in **headless mode** on "test" environment <div class="text-blue">`yarn test`</div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run tests against a local UI and API server (RW-6132 will eliminate this distinction):
   * Stop your local API server

@@ -53,7 +53,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.Workspaces.value);
+    await this.loadPageUrl(PageUrl.Workspaces);
     await waitWhileLoading(this.page);
     return this;
   }
@@ -81,7 +81,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async createWorkspace(
     workspaceName: string,
-    cdrVersionName: string = config.DEFAULT_CDR_VERSION,
+    cdrVersionName: string = config.DEFAULT_CDR_VERSION_NAME,
     billingAccount: string = UseFreeCredits,
     reviewRequest = false
   ): Promise<string[]> {
@@ -91,7 +91,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await editPage.selectCdrVersion(cdrVersionName);
 
     // if the CDR Version is not the default, consent to the necessary restrictions
-    if (cdrVersionName !== config.DEFAULT_CDR_VERSION) {
+    if (cdrVersionName !== config.DEFAULT_CDR_VERSION_NAME) {
       const modal = new OldCdrVersionModal(this.page);
       await modal.waitForLoad();
       await modal.consentToOldCdrRestrictions();
