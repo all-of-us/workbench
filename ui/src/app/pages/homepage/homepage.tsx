@@ -235,9 +235,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
-        dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
+        dataUserCodeOfConductCompleted:
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
-            .completionTimestamp(profile)))() : true)
+            .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 

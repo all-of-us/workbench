@@ -18,7 +18,6 @@ describe('AdminUser', () => {
 
   beforeEach(() => {
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
