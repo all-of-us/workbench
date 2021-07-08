@@ -8,6 +8,7 @@ import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
+import {useState} from "react";
 
 const styles = reactStyles({
   flex: {
@@ -76,6 +77,26 @@ const styles = reactStyles({
   }
 });
 
+const getSideNavItemStyles = (active, hovering, disabled) => {
+  let sideNavItemStyles = {
+    ...styles.flex,
+    ...styles.sideNavItem
+  };
+  if (disabled) {
+    // We want to short-circuit in this case.
+    return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
+  }
+  if (active) {
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
+  }
+  if (hovering) {
+    sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
+  }
+  return sideNavItemStyles;
+}
+
+// TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
+// However, this component is currently rendered outside of the React router, so useLocation won't work.
 const bannerAdminActive = () =>  {
   return window.location.pathname === '/admin/banner';
 };
@@ -124,115 +145,184 @@ interface SideNavItemProps {
   disabled?: boolean;
 }
 
-interface SideNavItemState {
-  hovering: boolean;
-  subItemsOpen: boolean;
-}
+export const SideNavItem = (props: SideNavItemProps) => {
+  const [hovering, setHovering] = useState(false);
+  const [subItemsOpen, setSubItemsOpen] = useState(false);
 
-export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovering: false,
-      subItemsOpen: false,
-    };
-  }
+  const iconSize = 21;
 
-  iconSize = 21;
-
-  onClick() {
-    if (this.props.href && !this.props.disabled) {
-      this.props.onToggleSideNav();
-      navigate([this.props.href]);
+  const onClick = () => {
+    if (props.href && !props.disabled) {
+      props.onToggleSideNav();
+      navigate([props.href]);
     }
-    if (this.props.containsSubItems) {
-      this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
+    if (props.containsSubItems) {
+      setSubItemsOpen(!subItemsOpen);
     }
   }
 
-  closeSubItems() {
-    if (this.props.containsSubItems) {
-      this.setState({subItemsOpen: false});
-    }
-  }
-
-  getStyles(active, hovering, disabled) {
-    let sideNavItemStyles = {
-      ...styles.flex,
-      ...styles.sideNavItem
-    };
-    if (disabled) {
-      // We want to short-circuit in this case.
-      return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
-    }
-    if (active) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
-    }
-    if (hovering) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
-    }
-    return sideNavItemStyles;
-  }
-
-  render() {
-    return <Clickable
-        // data-test-id is the text within the SideNavItem, with whitespace removed
-        // and appended with '-menu-item'
-        data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-        style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
-        onClick={() => {
-          if (this.props.parentOnClick && !this.props.disabled) {
-            this.props.parentOnClick();
-          }
-          this.onClick();
+  return <Clickable
+      // data-test-id is the text within the SideNavItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={props.content.toString().replace(/\s/g, '') + '-menu-item'}
+      style={getSideNavItemStyles(props.active, hovering, props.disabled)}
+      onClick={() => {
+        if (props.parentOnClick && !props.disabled) {
+          props.parentOnClick();
+        }
+        onClick();
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+  >
+    <div
+        style={{...styles.flex,
+          flex: '1 0 auto'
         }}
-        onMouseEnter={() => this.setState({hovering: true})}
-        onMouseLeave={() => this.setState({hovering: false})}
     >
-      <div
-          style={{...styles.flex,
-            flex: '1 0 auto'
-          }}
-      >
         <span
             style={
-              this.props.icon || this.props.hasProfileImage
+              props.icon || props.hasProfileImage
                   ? {...styles.flex}
                   : {...styles.noIconMargin}
             }
         >
           {
-            this.props.icon && <ClrIcon
-                shape={this.props.icon}
+            props.icon && <ClrIcon
+                shape={props.icon}
                 className={'is-solid'}
                 style={styles.navIcon}
-                size={this.iconSize}
+                size={iconSize}
             />
           }
           {
-            this.props.hasProfileImage && <img
+            props.hasProfileImage && <img
                 src={signInStore.getValue().profileImage}
                 style={styles.profileImage}
             />
           }
-          {this.props.content}
+          {props.content}
         </span>
-        {
-          this.props.containsSubItems
-          && <ClrIcon
-              shape='angle'
-              style={
-                this.state.subItemsOpen
-                    ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                    : styles.dropdownIcon
-              }
-              size={this.iconSize}
-          />
-        }
-      </div>
-    </Clickable>;
-  }
+      {
+        props.containsSubItems
+        && <ClrIcon
+            shape='angle'
+            style={
+              subItemsOpen
+                  ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                  : styles.dropdownIcon
+            }
+            size={iconSize}
+        />
+      }
+    </div>
+  </Clickable>;
 }
+
+// export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       hovering: false,
+//       subItemsOpen: false,
+//     };
+//   }
+//
+//   iconSize = 21;
+//
+//   onClick() {
+//     if (this.props.href && !this.props.disabled) {
+//       this.props.onToggleSideNav();
+//       navigate([this.props.href]);
+//     }
+//     if (this.props.containsSubItems) {
+//       this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
+//     }
+//   }
+//
+//   closeSubItems() {
+//     if (this.props.containsSubItems) {
+//       this.setState({subItemsOpen: false});
+//     }
+//   }
+//
+//   getStyles(active, hovering, disabled) {
+//     let sideNavItemStyles = {
+//       ...styles.flex,
+//       ...styles.sideNavItem
+//     };
+//     if (disabled) {
+//       // We want to short-circuit in this case.
+//       return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
+//     }
+//     if (active) {
+//       sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
+//     }
+//     if (hovering) {
+//       sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
+//     }
+//     return sideNavItemStyles;
+//   }
+//
+//   render() {
+//     return <Clickable
+//         // data-test-id is the text within the SideNavItem, with whitespace removed
+//         // and appended with '-menu-item'
+//         data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
+//         style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
+//         onClick={() => {
+//           if (this.props.parentOnClick && !this.props.disabled) {
+//             this.props.parentOnClick();
+//           }
+//           this.onClick();
+//         }}
+//         onMouseEnter={() => this.setState({hovering: true})}
+//         onMouseLeave={() => this.setState({hovering: false})}
+//     >
+//       <div
+//           style={{...styles.flex,
+//             flex: '1 0 auto'
+//           }}
+//       >
+//         <span
+//             style={
+//               this.props.icon || this.props.hasProfileImage
+//                   ? {...styles.flex}
+//                   : {...styles.noIconMargin}
+//             }
+//         >
+//           {
+//             this.props.icon && <ClrIcon
+//                 shape={this.props.icon}
+//                 className={'is-solid'}
+//                 style={styles.navIcon}
+//                 size={this.iconSize}
+//             />
+//           }
+//           {
+//             this.props.hasProfileImage && <img
+//                 src={signInStore.getValue().profileImage}
+//                 style={styles.profileImage}
+//             />
+//           }
+//           {this.props.content}
+//         </span>
+//         {
+//           this.props.containsSubItems
+//           && <ClrIcon
+//               shape='angle'
+//               style={
+//                 this.state.subItemsOpen
+//                     ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+//                     : styles.dropdownIcon
+//               }
+//               size={this.iconSize}
+//           />
+//         }
+//       </div>
+//     </Clickable>;
+//   }
+// }
 
 export interface SideNavProps {
   profile: Profile;
@@ -242,8 +332,6 @@ export interface SideNavProps {
 export interface SideNavState {
   showAdminOptions: boolean;
   showUserOptions: boolean;
-  adminRef: React.RefObject<SideNavItem>;
-  userRef: React.RefObject<SideNavItem>;
 }
 
 export class SideNav extends React.Component<SideNavProps, SideNavState> {
@@ -252,8 +340,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     this.state = {
       showAdminOptions: false,
       showUserOptions: false,
-      adminRef: React.createRef(),
-      userRef: React.createRef(),
     };
   }
 
@@ -292,7 +378,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           parentOnClick={() => this.onToggleUser()}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           containsSubItems={true}
-          ref={this.state.userRef}
       />
       {
         this.state.showUserOptions && <SideNavItem
@@ -351,7 +436,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           parentOnClick={() => this.onToggleAdmin()}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           containsSubItems={true}
-          ref={this.state.adminRef}
       />
       }
       {
