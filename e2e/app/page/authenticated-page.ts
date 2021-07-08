@@ -39,7 +39,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Load AoU page URL.
    */
-  async loadPageUrl(url: { value: string }): Promise<void> {
+  async loadPageUrl(url: string): Promise<void> {
     await this.gotoUrl(url);
     await this.waitForLoad();
   }
