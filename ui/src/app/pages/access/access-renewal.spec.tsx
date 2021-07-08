@@ -9,7 +9,7 @@ import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
+import {AccessRenewal} from 'app/pages/access/access-renewal';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import defaultServerConfig from 'testing/default-server-config';
 
@@ -25,6 +25,7 @@ describe('Access Renewal Page', () => {
   function expireAllModules() {
     const expiredTime = oneHourAgo();
     const {profile} = profileStore.get();
+
     const newProfile = fp.set('renewableAccessModules', {modules: [
       {moduleName: 'dataUseAgreement', expirationEpochMillis: expiredTime},
       {moduleName: 'complianceTraining', expirationEpochMillis: expiredTime},
@@ -80,7 +81,7 @@ describe('Access Renewal Page', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = () => {
-    return mount(<AccessRenewalPage/>);
+    return mount(<AccessRenewal hideSpinner={() => {}}/>);
   };
 
   beforeEach(() => {

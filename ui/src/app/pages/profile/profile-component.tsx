@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {withRouteData} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -15,6 +14,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
@@ -66,7 +66,7 @@ enum RegistrationStepStatus {
   UNCOMPLETE
 }
 
-interface ProfilePageProps extends WithProfileErrorModalProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -128,8 +128,7 @@ const getControlledTierContent = fp.flow(
   getCompleteOrBypassContent
 );
 
-export const ProfilePage = fp.flow(
-  withRouteData,
+export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal
   )(class extends React.Component<
@@ -169,6 +168,7 @@ export const ProfilePage = fp.flow(
     });
 
     async componentDidMount() {
+      this.props.hideSpinner();
       try {
         const details = await institutionApi().getPublicInstitutionDetails();
         this.setState({

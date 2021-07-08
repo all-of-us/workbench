@@ -5,7 +5,6 @@ import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
 
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
@@ -109,10 +108,14 @@ const routes: Routes = [
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
+                 *
+                 * TODO angular2react: ideally, we should be able to just render the AppComponent here and let
+                 *  React drive the rest of the routing but the BrowserRouter isn't able to pick up changes to the
+                 *  route when it's embedded in Angular this way.. Until angular router is removed, we still need to
+                 *  declare all of our routes in Angular which has the side effect of forcing a rerender of the
+                 *  AppRouting component on every route change.
                  */
                 path: ':ns/:wsid',
-                component: WorkspaceWrapperComponent,
-                runGuardsAndResolvers: 'always',
                 children: [
                   // legacy / duplicated routes go HERE
                   {
