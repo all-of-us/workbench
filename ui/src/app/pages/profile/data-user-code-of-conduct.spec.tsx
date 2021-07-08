@@ -13,10 +13,6 @@ jest.mock('app/utils/navigation', () => ({
   navigate: jest.fn()
 }));
 
-const defaultConfig = {
-  gsuiteDomain: 'researchallofus.org',
-};
-
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();
   const reload = jest.fn();
@@ -52,7 +48,7 @@ describe('DataUserCodeOfConduct', () => {
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
 
     // fill required fields
-    wrapper.find('[data-test-id="dua-initials-input"]').forEach((node, index) => {
+    wrapper.find('[data-test-id="ducc-initials-input"]').forEach((node, index) => {
       node.simulate('change', {target: {value: 'X' + index.toString()}});
     });
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
@@ -71,7 +67,7 @@ describe('DataUserCodeOfConduct', () => {
     // fill required fields
     wrapper.find('[data-test-id="ducc-name-input"]').simulate('change', {target: {value: 'Fake Name'}});
     // add initials to just one initials input field.
-    wrapper.find('[data-test-id="dua-initials-input"]').first().simulate('change', {target: {value: 'XX'}});
+    wrapper.find('[data-test-id="ducc-initials-input"]').first().simulate('change', {target: {value: 'XX'}});
 
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
   });
@@ -105,7 +101,7 @@ describe('DataUserCodeOfConduct', () => {
     // fill required fields
     wrapper.find('[data-test-id="ducc-name-input"]').simulate('change', {target: {value: 'Fake Name'}});
     // add initials to each initials input field.
-    wrapper.find('[data-test-id="dua-initials-input"]').forEach((node) => {
+    wrapper.find('[data-test-id="ducc-initials-input"]').forEach((node) => {
       node.simulate('change', {target: {value: 'XX'}});
     });
 

@@ -75,7 +75,7 @@ const InitialsAgreement = (props) => {
         onChange={props.onChange}
         value={props.value}
         placeholder='INITIALS'
-        data-test-id='dua-initials-input'
+        data-test-id='ducc-initials-input'
         style={{width: '4ex', textAlign: 'center', padding: 0}}/>
     <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
   </div>;
