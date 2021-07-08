@@ -68,11 +68,11 @@ const thirtyDaysPlusExpiration: Profile = {
             hasExpired: false,
             expirationEpochMillis: todayPlusDays(30),
         },
-            {
-                moduleName: ModuleNameEnum.DataUseAgreement,
-                hasExpired: false,
-                expirationEpochMillis: todayPlusDays(31),
-            }]
+        {
+            moduleName: ModuleNameEnum.DataUseAgreement,
+            hasExpired: false,
+            expirationEpochMillis: todayPlusDays(31),
+        }]
     }
 }
 
