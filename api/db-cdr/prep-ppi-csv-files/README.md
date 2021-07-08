@@ -8,15 +8,24 @@ will be merged into a final prep_survey table used by the CDR indices build.
 
 ##Install pyenv
 `brew install pyenv`
-### Install the latest version of python
+
+Install the latest version of python
+
 `pyenv install x.x.x`
-### Set the global default
+
+Set the global default
+
 `pyenv global x.x.x`
-### Verify it worked
+
+Verify it worked
+
 `pyenv version`
-### In order for it to work correctly, we need to add the following to our configuration file (.zshrc for me, possibly .bash_profile for you)
+
+In order for it to work correctly, we need to add the following to our configuration file (.zshrc for me, possibly .bash_profile for you)
+
 `echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.zshrc`
-### After that command, our dotfile (.zshrc for zsh or .bash_profile for Bash) should include these lines
+
+After that command, our dotfile (.zshrc for zsh or .bash_profile for Bash) should include these lines
  ```shell script
    if command -v pyenv 1>/dev/null 2>&1; then
       eval "$(pyenv init -)"
