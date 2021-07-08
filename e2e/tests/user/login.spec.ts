@@ -18,7 +18,7 @@ describe('Login tests:', () => {
   });
 
   test('Open AoU Workspaces page before login redirects to login page', async () => {
-    const url = `${config.LOGIN_URL}${config.WORKSPACES_URL_PATH}`;
+    const url = `${config.LOGIN_URL_DOMAIN_NAME}${config.WORKSPACES_URL_PATH}`;
     await page.goto(url, { waitUntil: 'networkidle0' });
     const loginPage = new GoogleLoginPage(page);
     expect(await loginPage.loginButton()).toBeTruthy();

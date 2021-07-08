@@ -25,9 +25,9 @@ const urlPath = {
 
 // localhost development server
 const local = {
-  LOGIN_URL: process.env.DEV_LOGIN_URL || 'http://localhost:4200',
+  LOGIN_URL_DOMAIN_NAME: process.env.DEV_LOGIN_URL || 'http://localhost:4200',
   API_URL: process.env.DEV_API_URL || 'http://localhost/v1',
-  DOMAIN: '@fake-research-aou.org',
+  EMAIL_DOMAIN_NAME: '@fake-research-aou.org',
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitester1@fake-research-aou.org',
@@ -37,9 +37,9 @@ const local = {
 
 // workbench test environment
 const test = {
-  LOGIN_URL: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
+  LOGIN_URL_DOMAIN_NAME: process.env.TEST_LOGIN_URL || 'https://all-of-us-workbench-test.appspot.com',
   API_URL: process.env.TEST_API_URL || 'https://api-dot-all-of-us-workbench-test.appspot.com/v1',
-  DOMAIN: '@fake-research-aou.org',
+  EMAIL_DOMAIN_NAME: '@fake-research-aou.org',
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',
@@ -49,9 +49,9 @@ const test = {
 
 // workbench staging environment
 const staging = {
-  LOGIN_URL: process.env.STAGING_LOGIN_URL || 'https://all-of-us-rw-staging.appspot.com',
+  LOGIN_URL_DOMAIN_NAME: process.env.STAGING_LOGIN_URL || 'https://all-of-us-rw-staging.appspot.com',
   API_URL: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
-  DOMAIN: '@staging.fake-research-aou.org',
+  EMAIL_DOMAIN_NAME: '@staging.fake-research-aou.org',
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetcitester4@staging.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
@@ -61,18 +61,18 @@ const staging = {
 
 // NOT WORKING: workbench stable environment
 const stable = {
-  LOGIN_URL: process.env.STABLE_LOGIN_URL,
+  LOGIN_URL_DOMAIN_NAME: process.env.STABLE_LOGIN_URL,
   API_URL: process.env.STABLE_API_URL,
-  DOMAIN: '@stable.fake-research-aou.org',
+  EMAIL_DOMAIN_NAME: '@stable.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
 
 // workbench perf environment
 const perf = {
-  LOGIN_URL: process.env.PERF_LOGIN_URL || 'https://all-of-us-rw-perf.appspot.com',
+  LOGIN_URL_DOMAIN_NAME: process.env.PERF_LOGIN_URL || 'https://all-of-us-rw-perf.appspot.com',
   API_URL: process.env.PERF_API_URL || 'https://api-dot-all-of-us-rw-perf.appspot.com/v1',
-  DOMAIN: '@perf.fake-research-aou.org',
+  EMAIL_DOMAIN_NAME: '@perf.fake-research-aou.org',
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetciperfreader@perf.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetciperfwriter1@perf.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetciperfreader@perf.fake-research-aou.org',

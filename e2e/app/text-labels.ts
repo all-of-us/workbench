@@ -1,11 +1,11 @@
 import { config } from 'resources/workbench-config';
-const { LOGIN_URL, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
+const { LOGIN_URL_DOMAIN_NAME, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
 
 export const PageUrl = {
-  Home: { value: LOGIN_URL },
-  Workspaces: { value: LOGIN_URL + WORKSPACES_URL_PATH },
-  Admin: { value: LOGIN_URL + ADMIN_URL_PATH },
-  Profile: { value: LOGIN_URL + PROFILE_URL_PATH }
+  Home: { value: LOGIN_URL_DOMAIN_NAME },
+  Workspaces: { value: LOGIN_URL_DOMAIN_NAME + WORKSPACES_URL_PATH },
+  Admin: { value: LOGIN_URL_DOMAIN_NAME + ADMIN_URL_PATH },
+  Profile: { value: LOGIN_URL_DOMAIN_NAME + PROFILE_URL_PATH }
 } as const;
 
 export type PageUrl = keyof typeof PageUrl;

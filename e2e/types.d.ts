@@ -1,9 +1,9 @@
 export interface IConfig {
   USER_NAME: string;
   PASSWORD: string;
-  LOGIN_URL: string;
+  LOGIN_URL_DOMAIN_NAME: string;
   API_URL: string;
-  DOMAIN: string;
+  EMAIL_DOMAIN_NAME: string;
   COLLABORATOR_USER: string;
   WRITER_USER: string;
   READER_USER: string;

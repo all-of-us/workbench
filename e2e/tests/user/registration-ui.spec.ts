@@ -69,7 +69,7 @@ describe('User registration UI tests:', () => {
     expect(await waitForText(page, 'Create your account')).toBeTruthy();
 
     // verify username domain
-    expect(await createAccountPage.getUsernameDomain()).toBe(config.DOMAIN);
+    expect(await createAccountPage.getUsernameDomain()).toBe(config.EMAIL_DOMAIN_NAME);
 
     // verify all input fields are visible and editable on this page
     const allInputs = await page.$$('input');

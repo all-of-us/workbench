@@ -107,7 +107,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   async load(): Promise<void> {
-    const url = `${config.LOGIN_URL}${config.LOGIN_URL_PATH}`;
+    const url = `${config.LOGIN_URL_DOMAIN_NAME}${config.LOGIN_URL_PATH}`;
     const response = await this.page.goto(url, {
       waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
       timeout: 2 * 60 * 1000
