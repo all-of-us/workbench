@@ -241,9 +241,8 @@ describe('Access Renewal Page', () => {
   it('should show the correct state when modules are disabled', async () => {
     serverConfigStore.set({config: {
       ...defaultServerConfig,
-        enableDataUseAgreement: false,
         enableComplianceTraining: false
-      }});
+    }});
 
     const wrapper = component();
 
@@ -251,24 +250,22 @@ describe('Access Renewal Page', () => {
 
     updateOneModule('profileConfirmation', oneYearFromNow());
     updateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule('dataUseAgreement', oneYearFromNow());
 
     // these modules will not be returned in RenewableAccessModules because they are disabled
-
     removeOneModule('complianceTraining');
-    removeOneModule('dataUseAgreement');
 
     await waitOneTickAndUpdate(wrapper);
 
-    // profileConfirmation and publicationConfirmation are complete
+    // profileConfirmation, publicationConfirmation, and dataUseAgreement are complete
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(1);
+    expect(findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length).toBe(3);
 
-    // complianceTraining and dataUseAgreement are not shown because these modules are disabled
-    expect(findNodesByExactText(wrapper, 'Completed').length).toBe(0);
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(0)
+    // complianceTraining is not shown because it is disabled
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
 
-    // all of the necessary steps = 2 rather than the usual 4
+    // all of the necessary steps = 3 rather than the usual 4
     expect(findNodesByExactText(wrapper, 'Thank you for completing all the necessary steps').length).toBe(1);
   });
 
