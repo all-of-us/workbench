@@ -48,8 +48,7 @@ describe('HomepageComponent', () => {
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true
+      enableEraCommons: true
     }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });

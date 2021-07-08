@@ -31,7 +31,6 @@ describe('RegistrationDashboard', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true,
       enableRasLoginGovLinking: false,
     }});
     props = {
