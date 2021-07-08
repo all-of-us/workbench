@@ -5,14 +5,11 @@ import {validate} from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
+import {TextInput} from 'app/components/inputs';
 import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {
-  DuaTextInput,
-  InitialsAgreement
-} from 'app/pages/profile/data-user-code-of-conduct-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
@@ -49,13 +46,37 @@ const styles = reactStyles({
   },
   bold: {
     fontWeight: 600
-  }
+  },
+  textInput: {
+    padding: '0 1ex',
+    width: '12rem',
+    fontSize: 10,
+    borderRadius: 6
+  },
 });
 
 export enum DataUserCodeOfConductPage {
   CONTENT,
   SIGNATURE
 }
+
+const DuaTextInput = (props) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  return <TextInput {...fp.omit(['data-test-id'], props)}
+                    style={{
+                      ...styles.textInput,
+                      ...props.style
+                    }}/>;
+};
+
+const InitialsAgreement = (props) => {
+  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
+    <DuaTextInput onChange={props.onChange} value={props.value}
+                  placeholder='INITIALS' data-test-id='dua-initials-input'
+                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
+    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
+  </div>;
+};
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
