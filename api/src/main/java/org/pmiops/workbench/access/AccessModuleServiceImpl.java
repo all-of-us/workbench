@@ -81,13 +81,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
     DbAccessModule accessModule =
-        dbAccessModulesProvider.get().stream()
-            .filter(a -> a.getName() == clientAccessModuleToStorage(accessModuleName))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new BadRequestException(
-                        "There is no access module named: " + accessModuleName.toString()));
+        getDbAccessModuleFromApi(dbAccessModulesProvider.get(), accessModuleName);
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
@@ -121,6 +115,17 @@ public class AccessModuleServiceImpl implements AccessModuleService {
           Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
           Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
     }
+  }
+
+  private static DbAccessModule getDbAccessModuleFromApi(
+      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
+    return dbAccessModules.stream()
+        .filter(a -> a.getName() == clientAccessModuleToStorage(apiAccessModule))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    "There is no access module named: " + apiAccessModule.toString()));
   }
 
   private static AccessModuleName clientAccessModuleToStorage(AccessModule s) {
