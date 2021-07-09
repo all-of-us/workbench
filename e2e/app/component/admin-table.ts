@@ -71,7 +71,6 @@ export default class adminTable extends Table {
     const dataTable = this.getFrozenHeader();
     const columnName = await dataTable.getColumnNames();
     const colIndexNum = columnName.indexOf('Name');
-    console.log(columnName);
     return colIndexNum + 1;
   }
 }
