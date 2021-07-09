@@ -30,6 +30,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
@@ -44,12 +46,14 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -130,6 +134,8 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
+  @Autowired private AccessModuleService accessModuleService;
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
@@ -163,12 +169,14 @@ public class ProfileControllerTest extends BaseControllerTest {
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;
+  private static List<DbAccessModule> accessModules;
 
   private int DUA_VERSION;
   private DbAccessTier registeredTier;
 
   @TestConfiguration
   @Import({
+    AccessModuleServiceImpl.class,
     ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
     AuditLogEntryMapperImpl.class,
@@ -214,6 +222,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
       return config;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public List<DbAccessModule> getDbAccessModules() {
+      return accessModules;
     }
   }
 
@@ -266,6 +280,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     } catch (ApiException e) {
       e.printStackTrace();
     }
+
+    accessModules = TestMockFactory.createAccessModule(accessModuleDao);
   }
 
   @Test
@@ -1028,17 +1044,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testBypassAccessModule() {
-    Profile profile = createAccountAndDbUserWithAffiliation();
-    profileController.bypassAccessRequirement(
-        profile.getUserId(),
-        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-
-    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
-  }
-
-  @Test
   public void testUpdateProfile_updateDemographicSurvey() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
@@ -1429,11 +1434,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
     assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
 
+    // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
     verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
 
     // DUA and COMPLIANCE x2, one for each request
-
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
@@ -1448,7 +1453,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             any());
 
     // ERA and 2FA once in request 2
-
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
