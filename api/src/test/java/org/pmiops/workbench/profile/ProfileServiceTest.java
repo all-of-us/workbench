@@ -93,7 +93,6 @@ public class ProfileServiceTest extends SpringTest {
 
   private static final Profile VALID_PROFILE = createValidProfile();
 
-  @MockBean private AccessModuleService mockAccessModuleService;
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
@@ -122,6 +121,7 @@ public class ProfileServiceTest extends SpringTest {
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({
+    AccessModuleService.class,
     AccessTierService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,

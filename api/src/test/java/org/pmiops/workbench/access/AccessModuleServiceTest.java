@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -37,10 +36,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.test.annotation.DirtiesContext;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AccessModuleServiceTest extends SpringTest {
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
@@ -75,11 +72,10 @@ public class AccessModuleServiceTest extends SpringTest {
     user = new DbUser();
     user.setUsername("user");
     user = userDao.save(user);
-    when(mockUserService.getByDatabaseId(user.getUserId())).thenReturn(Optional.of(user));
-
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
-    accessModules = TestMockFactory.createAccessModule(accessModuleDao);
+    TestMockFactory.createAccessModule(accessModuleDao);
+    accessModules = accessModuleDao.findAll();
   }
 
   @Test

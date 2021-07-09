@@ -280,9 +280,10 @@ public class TestMockFactory {
             .setServicePerimeter("controlled/tier/perimeter"));
   }
 
+  /** Prepare AccessModules inmemory cache. */
   public static List<DbAccessModule> createAccessModule(AccessModuleDao accessModuleDao) {
     accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
-    return DEFAULT_ACCESS_MODULES;
+    return accessModuleDao.findAll();
   }
 
   public static DbCdrVersion createDefaultCdrVersion(

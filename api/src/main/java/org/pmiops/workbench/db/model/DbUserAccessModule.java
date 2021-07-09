@@ -19,8 +19,6 @@ public class DbUserAccessModule {
   private Timestamp completionTime;
   private Timestamp bypassTime;
 
-  public DbUserAccessModule() {}
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_access_module_id")

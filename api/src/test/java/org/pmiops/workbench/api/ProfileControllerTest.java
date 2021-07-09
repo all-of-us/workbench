@@ -30,7 +30,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -134,7 +133,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
-  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
