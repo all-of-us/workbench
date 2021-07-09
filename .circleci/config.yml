@@ -635,14 +635,14 @@ workflows:
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 5
+          parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
-          parallel_num: 5
+          parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
           requires:
