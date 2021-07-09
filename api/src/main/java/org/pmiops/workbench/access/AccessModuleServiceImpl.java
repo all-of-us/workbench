@@ -12,14 +12,13 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final Clock clock;
 
   private final UserAccessModuleDao userAccessModuleDao;
-  private final UserService userService;
+  private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
   private final Provider<WorkbenchConfig> configProvider;
 
@@ -69,26 +68,20 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       Provider<List<DbAccessModule>> dbAccessModulesProvider,
       Clock clock,
       UserAccessModuleDao userAccessModuleDao,
-      UserService userService,
+      UserDao userDao,
       UserServiceAuditor userServiceAuditor,
       Provider<WorkbenchConfig> configProvider) {
     this.dbAccessModulesProvider = dbAccessModulesProvider;
     this.clock = clock;
     this.userAccessModuleDao = userAccessModuleDao;
-    this.userService = userService;
+    this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
     this.configProvider = configProvider;
   }
 
   @Override
   public void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest) {
-    final DbUser user =
-        userService
-            .getByDatabaseId(userId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("User with database ID %d not found", userId)));
+    final DbUser user = userDao.findUserByUserId(userId);
     final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
     DbAccessModule accessModule =
         dbAccessModulesProvider.get().stream()

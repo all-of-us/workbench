@@ -21,7 +21,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
@@ -49,7 +48,6 @@ public class AccessModuleServiceTest extends SpringTest {
   @Autowired private UserDao userDao;
 
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-  @MockBean private UserService mockUserService;
   private static DbUser user;
   private static WorkbenchConfig config;
   private static List<DbAccessModule> accessModules;
