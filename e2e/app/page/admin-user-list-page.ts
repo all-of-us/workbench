@@ -9,6 +9,7 @@ import BypassPopup from 'app/component/bypass-modules';
 import UserAuditPage from './admin-user-audit-page';
 import UserProfileInfo from './admin-user-profile-info';
 
+
 const PageTitle = 'User Admin Table';
 
 export default class UserAdminPage extends AuthenticatedPage {
@@ -25,7 +26,7 @@ export default class UserAdminPage extends AuthenticatedPage {
   getUserAdminTable(): AdminTable {
     return new AdminTable(this.page);
   }
-
+ 
   waitForSearchBox(): Textbox {
     return Textbox.findByName(this.page, { name: 'Search' });
   }
@@ -112,6 +113,8 @@ export default class UserAdminPage extends AuthenticatedPage {
     await cell.click();
     const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
     const newPage = await newTarget.page();
+    await waitWhileLoading(this.page);
     return new UserAuditPage(newPage).waitForLoad();
   }
+
 }

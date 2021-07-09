@@ -42,16 +42,6 @@ export const FreeCreditSelectValue = {
   800: '$800.00'
 };
 
-export const InstitutionSelectValue = {
-  Vanderbilt: 'Vanderbilt University Medical Center',
-  Broad: 'Broad Institute',
-  Verily: 'Verily LLC',
-  NationalInstituteHealth: 'National Institute of Health',
-  Wondros: 'Wondros',
-  AdminTesting: 'Admin Testing',
-  DummyMaster: 'Dummy Master'
-}; 
-
 export const InstitutionRoleSelectValue = {
   ProjectPersonnel:
     'Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research Coordinator, or other roles)',
@@ -84,7 +74,6 @@ export const FieldSelector = {
     }
   }
 };
-
 
 export default class UserProfileInfo extends AuthenticatedPage {
   constructor(page: Page) {
@@ -128,9 +117,9 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Username });
   }
 
-  async getUserNamePlaceHolder(): Promise<string> {
-    const userName = this.getUsernameInput() ;
-    const userProfileEmail =  userName.getProperty<string>('placeholder');
+  getUserNamePlaceHolder(): Promise<string> {
+    const userName = this.getUsernameInput();
+    const userProfileEmail = userName.getProperty<string>('placeholder');
     return userProfileEmail;
   }
 
@@ -179,6 +168,5 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const dropdown = SelectMenu.findByName(this.page, FieldSelector.VerifiedInstitutionSelect.textOption);
     return dropdown.select(selectTextValue);
   }
-
   
 }

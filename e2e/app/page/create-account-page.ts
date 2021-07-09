@@ -11,18 +11,11 @@ import { Frame, Page } from 'puppeteer';
 import { defaultFieldValues } from 'resources/data/user-registration-data';
 import { config } from 'resources/workbench-config';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText } from 'app/text-labels';
+import { LinkText, InstitutionSelectValue } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const InstitutionSelectValue = {
-  Vanderbilt: 'Vanderbilt University Medical Center',
-  Broad: 'Broad Institute',
-  Verily: 'Verily LLC',
-  NationalInstituteHealth: 'National Institute of Health',
-  Wondros: 'Wondros'
-};
 
 export const InstitutionRoleSelectValue = {
   EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
