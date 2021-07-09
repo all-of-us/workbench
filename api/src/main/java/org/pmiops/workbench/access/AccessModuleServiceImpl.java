@@ -80,8 +80,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
-    final DbUser user = userDao.findUserByUserId(userId);
-    final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
     DbAccessModule accessModule =
         dbAccessModulesProvider.get().stream()
             .filter(a -> a.getName() == clientAccessModuleToStorage(accessModuleName))
@@ -93,20 +91,22 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
+    final DbUser user = userDao.findUserByUserId(userId);
+    final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
     Optional<DbUserAccessModule> retrievedAccessModule =
         dbUserAccessModules.stream()
             .filter(m -> m.getAccessModule().getName().equals(accessModule.getName()))
             .findFirst();
-    final Timestamp newBypassTime;
-    final Timestamp previousBypassTime;
+    final Timestamp newBypassTime =
+        isBypassed ? new Timestamp(clock.instant().toEpochMilli()) : null;
+    final Timestamp previousBypassTime =
+        retrievedAccessModule.map(DbUserAccessModule::getBypassTime).orElse(null);
     final DbUserAccessModule userAccessModuleToUpdate;
 
     logger.info(
         String.format(
             "Bypassing %s(uid: %d) for module %s",
             user.getContactEmail(), userId, accessModule.getName()));
-    previousBypassTime = retrievedAccessModule.map(DbUserAccessModule::getBypassTime).orElse(null);
-    newBypassTime = isBypassed ? new Timestamp(clock.instant().toEpochMilli()) : null;
     userAccessModuleToUpdate =
         retrievedAccessModule
             .orElseGet(() -> new DbUserAccessModule().setUser(user).setAccessModule(accessModule))

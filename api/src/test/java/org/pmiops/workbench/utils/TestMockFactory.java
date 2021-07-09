@@ -281,7 +281,7 @@ public class TestMockFactory {
   }
 
   /** Prepare AccessModules inmemory cache. */
-  public static List<DbAccessModule> createAccessModule(AccessModuleDao accessModuleDao) {
+  public static List<DbAccessModule> createAccessModules(AccessModuleDao accessModuleDao) {
     accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
     return accessModuleDao.findAll();
   }

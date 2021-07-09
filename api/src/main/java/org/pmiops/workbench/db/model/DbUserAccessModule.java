@@ -32,7 +32,7 @@ public class DbUserAccessModule {
   }
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   public DbUser getUser() {
     return user;
   }

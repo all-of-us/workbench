@@ -73,7 +73,7 @@ public class AccessModuleServiceTest extends SpringTest {
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
-    TestMockFactory.createAccessModule(accessModuleDao);
+    TestMockFactory.createAccessModules(accessModuleDao);
     accessModules = accessModuleDao.findAll();
   }
 
@@ -124,7 +124,25 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
-  public void testUnBypassSuccess() {
+  public void testUnBypassSuccess_insertNewEntity() {
+    assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+
+    List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
+    assertThat(userAccessModule.size()).isEqualTo(1);
+    assertThat(userAccessModule.get(0).getAccessModule().getName())
+        .isEqualTo(AccessModuleName.TWO_FACTOR_AUTH);
+    assertThat(userAccessModule.get(0).getBypassTime()).isNull();
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            user.getUserId(),
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            Optional.empty(),
+            Optional.empty());
+  }
+
+  @Test
+  public void testUnBypassSuccess_updateExistingEntity() {
     // A TWO_FACTOR_AUTH module exists in DbUserAccessModule
     DbAccessModule twoFactorAuthModule =
         accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();

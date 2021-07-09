@@ -14,10 +14,10 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class CacheAccessModuleConfiguration {
-  private static final String CAHCE_ACCESS_MODULE_BEAN_NAME = "accessModuleCache";
+  private static final String CACHE_ACCESS_MODULE_BEAN_NAME = "accessModuleCache";
 
   @Bean
-  @Qualifier(CAHCE_ACCESS_MODULE_BEAN_NAME)
+  @Qualifier(CACHE_ACCESS_MODULE_BEAN_NAME)
   Supplier<List<DbAccessModule>> getCacheAccessModule(AccessModuleDao accessModuleDao) {
     // Cache configuration in memory for ten minutes.
     return Suppliers.memoizeWithExpiration(accessModuleDao::findAll, 10, TimeUnit.MINUTES);
@@ -26,7 +26,7 @@ public class CacheAccessModuleConfiguration {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   List<DbAccessModule> getDbAccessModules(
-      @Qualifier(CAHCE_ACCESS_MODULE_BEAN_NAME)
+      @Qualifier(CACHE_ACCESS_MODULE_BEAN_NAME)
           Supplier<List<DbAccessModule>> cachedAccessModules) {
     return cachedAccessModules.get();
   }

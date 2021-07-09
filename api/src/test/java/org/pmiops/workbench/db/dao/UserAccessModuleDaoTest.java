@@ -37,7 +37,7 @@ public class UserAccessModuleDaoTest extends SpringTest {
     user.setUserId(100);
     user = userDao.save(user);
 
-    TestMockFactory.createAccessModule(accessModuleDao);
+    TestMockFactory.createAccessModules(accessModuleDao);
     twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
     rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
   }

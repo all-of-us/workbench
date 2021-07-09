@@ -279,7 +279,7 @@ public class ProfileControllerTest extends BaseControllerTest {
       e.printStackTrace();
     }
 
-    accessModules = TestMockFactory.createAccessModule(accessModuleDao);
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
