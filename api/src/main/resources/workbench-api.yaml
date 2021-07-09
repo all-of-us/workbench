@@ -4237,6 +4237,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
+      enableAccessModuleRewrite:
+        type: boolean
+        default: false
+        description: Whether to use the new rewrite access module.
       rasHost:
         type: string
         description: The RAS base host name.

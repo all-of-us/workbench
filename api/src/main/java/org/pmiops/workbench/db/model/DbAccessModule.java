@@ -14,6 +14,7 @@ import javax.persistence.Table;
 public class DbAccessModule {
   private long accessModuleId;
   private boolean expirable;
+  private boolean bypassable;
   private AccessModuleName name;
 
   public DbAccessModule() {}
@@ -37,6 +38,16 @@ public class DbAccessModule {
 
   public DbAccessModule setExpirable(boolean expirable) {
     this.expirable = expirable;
+    return this;
+  }
+
+  @Column(name = "bypassable", nullable = false)
+  public boolean getBypassable() {
+    return bypassable;
+  }
+
+  public DbAccessModule setBypassable(boolean bypassable) {
+    this.bypassable = bypassable;
     return this;
   }
 
