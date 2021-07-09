@@ -50,14 +50,13 @@ export default class Select extends BaseElement {
    */
   async getSelectedValue(): Promise<string> {
     const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
-    const selectedOption = await this.page.evaluate((select) => {
+    return (await this.page.evaluate((select) => {
       for (const option of select.options) {
         if (option.selected) {
           return option.textContent;
         }
       }
-    }, selectElement);
-    return selectedOption;
+    }, selectElement)) as string;
   }
 
   /**
