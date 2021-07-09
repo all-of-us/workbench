@@ -224,10 +224,7 @@ export const AccessRenewal = fp.flow(
     renewableAccessModules: {modules}},
     profile
   } = useStore(profileStore);
-  const {config: {
-    enableComplianceTraining,
-    enableDataUseAgreement,
-  }} = useStore(serverConfigStore);
+  const {config: {enableComplianceTraining}} = useStore(serverConfigStore);
   const [publications, setPublications] = useState<boolean>(null);
   const noReportId = useId();
   const reportId = useId();
@@ -371,7 +368,7 @@ export const AccessRenewal = fp.flow(
         </FlexRow>
       </RenewalCard>}
       {/* DUCC */}
-      {enableDataUseAgreement && <RenewalCard step={enableComplianceTraining ? 4 : 3}
+      <RenewalCard step={enableComplianceTraining ? 4 : 3}
         TitleComponent={() => 'Sign Data User Code of Conduct'}
         lastCompletionTime={dataUseAgreementCompletionTime}
         nextReviewTime={getExpirationTimeFor(ModuleNameEnum.DataUseAgreement)}
@@ -382,7 +379,7 @@ export const AccessRenewal = fp.flow(
           completedButtonText='Completed'
           onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
           wasBypassed={wasBypassed(ModuleNameEnum.DataUseAgreement)}/>
-      </RenewalCard>}
+      </RenewalCard>
     </div>
     {loading && <SpinnerOverlay dark={true} opacity={0.6}/>}
   </FadeBox>;

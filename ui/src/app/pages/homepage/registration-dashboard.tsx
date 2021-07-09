@@ -188,7 +188,6 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     title: 'Data User Code of Conduct',
     description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
-    featureFlag: serverConfigStore.get().config.enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
       if (profile.dataUseAgreementBypassTime) {

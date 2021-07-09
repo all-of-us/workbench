@@ -14,17 +14,10 @@ import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 
 describe('ProfilePageComponent', () => {
-  function getSubmitButton(wrapper: ReactWrapper): ReactWrapper {
-    return wrapper.find('[data-test-id="submit-button"]');
-  }
-
-  function getDemographicSurveyButton(wrapper: ReactWrapper): ReactWrapper {
-    return wrapper.find('[data-test-id="demographics-survey-button"]');
-  }
-
   function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
     return wrapper.find('[data-test-id="save_profile"]');
   }
+
   function clickSaveProfileButton(wrapper: ReactWrapper) {
     const saveProfileButton = getSaveProfileButton(wrapper);
     saveProfileButton.first().simulate('click');
@@ -58,7 +51,6 @@ describe('ProfilePageComponent', () => {
     profileStore.set({profile, load, reload, updateCache});
 
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
