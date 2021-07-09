@@ -17,8 +17,6 @@ public class DbAccessModule {
   private boolean bypassable;
   private AccessModuleName name;
 
-  public DbAccessModule() {}
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "access_module_id")
