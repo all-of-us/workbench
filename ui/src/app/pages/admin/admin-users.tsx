@@ -187,7 +187,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
 
   render() {
     const {contentLoaded, filter, loading, users} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, enableRasLoginGovLinking} = serverConfigStore.get().config;
+    const {enableComplianceTraining, enableEraCommons, enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
       {loading &&
@@ -276,12 +276,12 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   header='eRA Commons'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />}
-          {enableDataUseAgreement && <Column field='dataUseAgreement'
+          <Column field='dataUseAgreement'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}
                   header='DUCC'
                   headerStyle={{...styles.colStyle, width: '80px'}}
-          />}
+          />
           {enableRasLoginGovLinking && <Column field='rasLinkLoginGov'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}

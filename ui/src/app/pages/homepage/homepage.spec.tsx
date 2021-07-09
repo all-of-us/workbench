@@ -44,7 +44,6 @@ describe('HomepageComponent', () => {
 
     profileStore.set({profile, load, reload, updateCache: () => {}});
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',

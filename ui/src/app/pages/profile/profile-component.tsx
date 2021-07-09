@@ -337,7 +337,7 @@ export const ProfileComponent = fp.flow(
         } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
-      const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
+      const {enableComplianceTraining, enableEraCommons} =
       serverConfigStore.get().config;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
@@ -623,7 +623,7 @@ export const ProfileComponent = fp.flow(
                   content={this.getComplianceTrainingText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
-              {enableDataUseAgreement && <ProfileRegistrationStepStatus
+              <ProfileRegistrationStepStatus
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
@@ -633,7 +633,7 @@ export const ProfileComponent = fp.flow(
                   childrenStyle={{marginLeft: 0}}
                   content={this.getDataUseAgreementText(profile)}
                 >
-              </ProfileRegistrationStepStatus>}
+              </ProfileRegistrationStepStatus>
             </div>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
