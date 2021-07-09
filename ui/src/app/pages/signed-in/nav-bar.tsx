@@ -7,12 +7,12 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from 'react';
 
 const styles = reactStyles({
   headerContainer: {
@@ -95,7 +95,7 @@ const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
   } else {
     return !!statusAlertMessage;
   }
-}
+};
 
 export const NavBar = () => {
   const [showSideNav, setShowSideNav] = useState(false);
@@ -112,7 +112,7 @@ export const NavBar = () => {
   const {profile} = useStore(profileStore);
 
   useEffect(() => {
-    const getAlert = async () => {
+    const getAlert = async() => {
       const statusAlert = await statusAlertApi().getStatusAlert();
       if (!!statusAlert) {
         setShowStatusAlert(shouldShowStatusAlert(statusAlert.statusAlertId, statusAlert.message));
@@ -134,7 +134,7 @@ export const NavBar = () => {
         ? barsTransformRotated
         : barsTransformNotRotated
     );
-  }
+  };
 
   const onClickOutside = (event) => {
     if (
@@ -144,7 +144,7 @@ export const NavBar = () => {
     ) {
       onToggleSideNav();
     }
-  }
+  };
 
   useEffect(() => {
     document.addEventListener('click', onClickOutside);
@@ -159,7 +159,7 @@ export const NavBar = () => {
       localStorage.setItem(cookieKey, `${statusAlertDetails.statusAlertId}`);
     }
     setShowStatusAlert(false);
-  }
+  };
 
   return <div
       style={styles.headerContainer}
@@ -222,7 +222,7 @@ export const NavBar = () => {
       />
     }
   </div>;
-}
+};
 
 @Component({
   selector: 'app-nav-bar',

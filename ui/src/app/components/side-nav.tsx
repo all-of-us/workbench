@@ -8,7 +8,7 @@ import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {useState} from "react";
+import {useState} from 'react';
 
 const styles = reactStyles({
   flex: {
@@ -93,7 +93,7 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
     sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
   }
   return sideNavItemStyles;
-}
+};
 
 // TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
@@ -159,7 +159,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
     if (props.containsSubItems) {
       setSubItemsOpen(!subItemsOpen);
     }
-  }
+  };
 
   return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
@@ -217,7 +217,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
       }
     </div>
   </Clickable>;
-}
+};
 
 export interface SideNavProps {
   profile: Profile;
@@ -231,22 +231,22 @@ export const SideNav = (props: SideNavProps) => {
   const onToggleAdmin = () => setShowAdminOptions(!showAdminOptions);
 
   const onToggleUser = () => setShowUserOptions(!showUserOptions);
-  
+
   const {profile, onToggleSideNav} = props;
 
   const openContactWidget = () => {
     openZendeskWidget(
-        profile.givenName,
-        profile.familyName,
-        profile.username,
-        profile.contactEmail
+      profile.givenName,
+      profile.familyName,
+      profile.username,
+      profile.contactEmail
     );
-  }
+  };
 
   const signOut = () => {
     signInStore.getValue().signOut();
     navigateSignOut();
-  }
+  };
 
   return <div style={styles.sideNav}>
     <SideNavItem
@@ -364,4 +364,4 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
   </div>;
-}
+};
