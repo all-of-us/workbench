@@ -3,6 +3,7 @@ import UserAdminPage from 'app/page/admin-user-list-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
+import UserProfileInfo from 'app/page/admin-user-profile-info';
 
 describe('Admin', () => {
   const userEmail = 'admin_test';
@@ -12,7 +13,7 @@ describe('Admin', () => {
     await navigation.navMenu(page, NavLink.USER_ADMIN);
   });
 
-  test('verify user on admin-table and admin-user-profile page reflect the same modules and active status', async () => {
+  test('verify admin-table and admin-user-profile page reflect the same modules and active status', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -154,7 +155,7 @@ describe('Admin', () => {
   });
 
 
-  test('verify the user audit link on admin-table page and user-audit page ', async () => {
+  test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -164,10 +165,25 @@ describe('Admin', () => {
 
     const adminTable = new AdminTable(page);
 
+    const usernameColIndex = await adminTable.getColumnIndex('User Name');
+    //get the User Name to verify the search result matches
+    const userNameValue = await userAdminPage.getUserNameText(1, usernameColIndex);
+
     // click the audit link of the user
     const auditColIndex = await adminTable.getColumnIndex('Audit');
 
     const userAuditPage = await userAdminPage.clickAuditLink(1, auditColIndex);
     await userAuditPage.waitForLoad();
+
+    userAuditPage.getAuditButton();
+    userAuditPage.getDownloadSqlButton();
+
+    const userNameAuditPage = await userAuditPage.getUsernameValue();
+    expect(userNameAuditPage).toEqual(userNameValue);
+    
+    await userAuditPage.clickUserAdminLink();
+    const userProfileInfo = new UserProfileInfo(page);
+    await userProfileInfo.waitForLoad();
+
   });
 });
