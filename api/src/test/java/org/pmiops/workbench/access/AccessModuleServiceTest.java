@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,9 +80,7 @@ public class AccessModuleServiceTest extends SpringTest {
   @Test
   public void testBypassSuccess_insertNewEntity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(
-        user.getUserId(),
-        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.TWO_FACTOR_AUTH));
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
     assertThat(userAccessModule.get(0).getAccessModule().getName())
@@ -111,9 +108,7 @@ public class AccessModuleServiceTest extends SpringTest {
             .setBypassTime(existingBypasstime);
     userAccessModuleDao.save(existingDbUserAccessModule);
     assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
-    accessModuleService.updateBypassTime(
-        user.getUserId(),
-        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.TWO_FACTOR_AUTH));
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -129,15 +124,40 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
+  public void testUnBypassSuccess() {
+    // A TWO_FACTOR_AUTH module exists in DbUserAccessModule
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    Timestamp existingBypasstime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+    DbUserAccessModule existingDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setUser(user)
+            .setBypassTime(existingBypasstime);
+    userAccessModuleDao.save(existingDbUserAccessModule);
+    assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
+    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+
+    List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
+    assertThat(userAccessModule.size()).isEqualTo(1);
+    assertThat(userAccessModule.get(0).getAccessModule().getName())
+        .isEqualTo(AccessModuleName.TWO_FACTOR_AUTH);
+    assertThat(userAccessModule.get(0).getBypassTime()).isNull();
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            user.getUserId(),
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(existingBypasstime),
+            Optional.empty());
+  }
+
+  @Test
   public void testBypassFail_moduleNotBypassable() {
     assertThrows(
         ForbiddenException.class,
         () ->
             accessModuleService.updateBypassTime(
-                user.getUserId(),
-                new AccessBypassRequest()
-                    .isBypassed(true)
-                    .moduleName(AccessModule.PROFILE_CONFIRMATION)));
+                user.getUserId(), AccessModule.PROFILE_CONFIRMATION, true));
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(

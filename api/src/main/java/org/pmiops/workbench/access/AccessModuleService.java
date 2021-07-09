@@ -1,8 +1,8 @@
 package org.pmiops.workbench.access;
 
-import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
 
 public interface AccessModuleService {
   /** Updates bypass time for a module. */
-  void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
+  void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed);
 }

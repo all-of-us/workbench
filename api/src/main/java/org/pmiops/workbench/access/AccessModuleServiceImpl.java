@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,23 +79,19 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public void updateBypassTime(long userId, AccessBypassRequest accessBypassRequest) {
+  public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
     final DbUser user = userDao.findUserByUserId(userId);
     final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
     DbAccessModule accessModule =
         dbAccessModulesProvider.get().stream()
-            .filter(
-                a ->
-                    a.getName() == clientAccessModuleToStorage(accessBypassRequest.getModuleName()))
+            .filter(a -> a.getName() == clientAccessModuleToStorage(accessModuleName))
             .findFirst()
             .orElseThrow(
                 () ->
                     new BadRequestException(
-                        "There is no access module named: "
-                            + accessBypassRequest.getModuleName().toString()));
+                        "There is no access module named: " + accessModuleName.toString()));
     if (!accessModule.getBypassable()) {
-      throw new ForbiddenException(
-          "Bypass: " + accessBypassRequest.getModuleName().toString() + " is not allowed.");
+      throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
     Optional<DbUserAccessModule> retrievedAccessModule =
         dbUserAccessModules.stream()
@@ -111,8 +106,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             "Bypassing %s(uid: %d) for module %s",
             user.getContactEmail(), userId, accessModule.getName()));
     previousBypassTime = retrievedAccessModule.map(DbUserAccessModule::getBypassTime).orElse(null);
-    newBypassTime =
-        accessBypassRequest.getIsBypassed() ? new Timestamp(clock.instant().toEpochMilli()) : null;
+    newBypassTime = isBypassed ? new Timestamp(clock.instant().toEpochMilli()) : null;
     userAccessModuleToUpdate =
         retrievedAccessModule
             .orElseGet(() -> new DbUserAccessModule().setUser(user).setAccessModule(accessModule))
