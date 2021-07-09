@@ -66,17 +66,6 @@ const styles = reactStyles({
 
 export interface Props {
   profileState: ProfileStore;
-  bannerAdminActive: boolean;
-  workspaceAdminActive: boolean;
-  profileImage: string;
-  sidenavToggle: boolean;
-  homeActive: boolean;
-  workspacesActive: boolean;
-  libraryActive: boolean;
-  profileActive: boolean;
-  userAdminActive: boolean;
-  userAuditActive: boolean;
-  workspaceAuditActive: boolean;
 }
 
 export interface State {
