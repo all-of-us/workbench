@@ -180,7 +180,7 @@
   <include file="changelog/db.changelog-168-rename-access-module-user-table.xml"/>
   <include file="changelog/db.changelog-169-add-institution-tier-requirement-tables.xml"/>
   <include file="changelog/db.changelog-170-add-access-tier-id-into-institution-tables.xml"/>
-  <include file="changelog/db.changelog-171-user-access-module-user-drop-null-constraint-and-add-bypasable"/>
+  <include file="changelog/db.changelog-171-user-access-module-user-drop-null-constraint-and-add-bypassable"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
