@@ -118,7 +118,7 @@ const workspaceAuditActive = () =>  {
 };
 
 const homeActive = () =>  {
-  return window.location.pathname === '';
+  return window.location.pathname === '/';
 };
 
 const libraryActive = () =>  {
