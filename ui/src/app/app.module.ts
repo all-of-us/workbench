@@ -5,7 +5,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 import * as StackTrace from 'stacktrace-js';
 
 import {NavigationGuard} from 'app/guards/navigation-guard';
@@ -57,7 +56,6 @@ import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
     NavBarComponent,
     TextModalComponent,
     WorkspaceNavBarComponent,
-    WorkspaceWrapperComponent,
     ZendeskWidgetComponent
   ],
   providers: [

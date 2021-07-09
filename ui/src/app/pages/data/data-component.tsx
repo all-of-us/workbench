@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
@@ -15,6 +14,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import {useEffect, useState} from 'react';
 
 const styles = {
   cardButtonArea: {
@@ -83,203 +83,179 @@ interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
-export const DataComponent = withCurrentWorkspace()(class extends React.Component<
-  Props,
-  {activeTab: Tabs, resourceList: WorkspaceResource[], isLoading: boolean,
-    creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
-    existingCohortReviewName: string[], existingConceptSetName: string[]}> {
+export const DataComponent = withCurrentWorkspace()((props: Props) => {
+  useEffect(() => props.hideSpinner(), []);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeTab: Tabs.SHOWALL,
-      resourceList: [],
-      isLoading: true,
-      creatingConceptSet: false,
-      existingCohortName: [],
-      existingCohortReviewName: [],
-      existingConceptSetName: [],
-      existingDataSetName: []
-    };
+  const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
+  const [resourceList, setResourceList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const {workspace} = props;
+
+  if (!workspace) {
+    return;
   }
 
-  componentDidMount() {
-    this.props.hideSpinner();
-    this.loadResources();
-  }
-
-  async loadResources() {
+  const loadResources = async() => {
     try {
-      const {namespace, id} = this.props.workspace;
-
-      this.setState({
-        isLoading: true
-      });
-      const results = await workspacesApi().getWorkspaceResources(namespace, id,
-        {typesToFetch: resourceTypesToFetch});
-
-      // TODO (RW-4682): Fix this nonsense
-      results.map(result => result.modifiedTime ? result.modifiedTime = new Date(Number(result.modifiedTime)).toDateString() : null);
-      this.setState({
-        existingCohortName: results.filter(resource => resource.cohort !== null && resource.cohort !== undefined)
-          .map(resource => resource.cohort.name),
-        existingCohortReviewName: results.filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
-          .map(resource => resource.cohortReview.cohortName),
-        existingConceptSetName: results.filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
-          .map(resource => resource.conceptSet.name),
-        existingDataSetName: results.filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
-          .map(resource => resource.dataSet.name),
-        resourceList: results
-      });
+      setIsLoading(true);
+      setResourceList(
+        (await workspacesApi().getWorkspaceResources(workspace.namespace, workspace.id, {typesToFetch: resourceTypesToFetch}))
+          .map(result => {
+            return {
+              ...result,
+              // TODO (RW-4682): Fix this nonsense
+              modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
+            }; }));
     } catch (error) {
       console.log(error);
     } finally {
-      this.setState({
-        isLoading: false
-      });
+      setIsLoading(false);
     }
-  }
+  };
 
-  getExistingNameList(resource) {
-    if (resource.dataSet) {
-      return this.state.existingDataSetName;
-    } else if (resource.conceptSet) {
-      return this.state.existingConceptSetName;
-    } else if (resource.cohort) {
-      return this.state.existingCohortName;
-    } else if (resource.cohortReview) {
-      return this.state.existingCohortReviewName;
+  useEffect(() => {
+    loadResources();
+  }, [workspace.namespace, workspace.id]);
+
+  const getExistingNameList = (resourceType) => {
+    if (resourceType.dataSet) {
+      return resourceList
+        .filter(resource => resource.dataSet !== null && resource.dataSet !== undefined)
+        .map(resource => resource.dataSet.name);
+    } else if (resourceType.conceptSet) {
+      return resourceList
+        .filter(resource => resource.conceptSet !== null && resource.conceptSet !== undefined)
+        .map(resource => resource.conceptSet.name);
+    } else if (resourceType.cohort) {
+      return resourceList
+        .filter(resource => resource.cohort !== null && resource.cohort !== undefined)
+        .map(resource => resource.cohort.name);
+    } else if (resourceType.cohortReview) {
+      return resourceList
+        .filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
+        .map(resource => resource.cohortReview.cohortName);
     } else {
       return [];
     }
-  }
+  };
 
-  render() {
-    const {accessLevel, namespace, id} = this.props.workspace;
-    const {activeTab, isLoading, resourceList} = this.state;
+  const writePermission = workspace.accessLevel === WorkspaceAccessLevel.OWNER ||
+      workspace.accessLevel === WorkspaceAccessLevel.WRITER;
 
-    const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
-      accessLevel === WorkspaceAccessLevel.WRITER;
+  const filteredList = resourceList.filter((resource) => {
+    if (activeTab === Tabs.SHOWALL) {
+      return true;
+    } else if (activeTab === Tabs.COHORTS) {
+      return resource.cohort;
+    } else if (activeTab === Tabs.COHORTREVIEWS) {
+      return resource.cohortReview;
+    } else if (activeTab === Tabs.CONCEPTSETS) {
+      return resource.conceptSet;
+    } else if (activeTab === Tabs.DATASETS) {
+      return resource.dataSet;
+    }
+  });
 
-    const filteredList = resourceList.filter((resource) => {
-      if (activeTab === Tabs.SHOWALL) {
-        return true;
-      } else if (activeTab === Tabs.COHORTS) {
-        return resource.cohort;
-      } else if (activeTab === Tabs.COHORTREVIEWS) {
-        return resource.cohortReview;
-      } else if (activeTab === Tabs.CONCEPTSETS) {
-        return resource.conceptSet;
-      } else if (activeTab === Tabs.DATASETS) {
-        return resource.dataSet;
-      }
-    });
-    return <React.Fragment>
-      <div style={{paddingLeft: '1.5rem'}}>
-        <div style={styles.cardButtonArea}>
-          <TooltipTrigger content={!writePermission &&
-          `Write permission required to create cohorts`} side='top'>
-            <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
-                        onClick={() => {
-                          navigate(['workspaces', namespace, id, 'data', 'cohorts', 'build']);
-                        }}>
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
-                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-              </div>
-              <div style={styles.cardText}>
-                {descriptions.cohorts}
-              </div>
-              {/*Because the container can stretch based on window size, but the height
+  return <React.Fragment>
+    <div style={{paddingLeft: '1.5rem'}}>
+      <div style={styles.cardButtonArea}>
+        <TooltipTrigger content={!writePermission &&
+        `Write permission required to create cohorts`} side='top'>
+          <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
+                      onClick={() => {
+                        navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'cohorts', 'build']);
+                      }}>
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+            </div>
+            <div style={styles.cardText}>
+              {descriptions.cohorts}
+            </div>
+            {/*Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
-              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
-                <img src={cohortImg}/>
-              </div>
-            </CardButton>
-          </TooltipTrigger>
-          <TooltipTrigger content={!writePermission &&
-          `Write permission required to create datasets`} side='top'>
-            <CardButton
+            <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
+              <img src={cohortImg}/>
+            </div>
+          </CardButton>
+        </TooltipTrigger>
+        <TooltipTrigger content={!writePermission &&
+        `Write permission required to create datasets`} side='top'>
+          <CardButton
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
               onClick={() => {
                 AnalyticsTracker.DatasetBuilder.OpenCreatePage();
-                navigate(['workspaces', namespace, id, 'data', 'data-sets']);
+                navigate(['workspaces', workspace.namespace, workspace.id, 'data', 'data-sets']);
               }}>
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
-                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-              </div>
-              <div style={styles.cardText}>
-                {descriptions.datasets}
-              </div>
-              {/*Because the container can stretch based on window size, but the height
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+            </div>
+            <div style={styles.cardText}>
+              {descriptions.datasets}
+            </div>
+            {/*Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
-              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
-                <img src={dataSetImg}/>
-              </div>
-            </CardButton>
-          </TooltipTrigger>
-        </div>
+            <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
+              <img src={dataSetImg}/>
+            </div>
+          </CardButton>
+        </TooltipTrigger>
       </div>
-      <FadeBox style={{marginTop: '1rem'}}>
-        <div style={styles.tabContainer}>
-          <h2 style={{margin: 0,
-            color: colors.primary,
-            fontSize: '16px',
-            fontWeight: 600}}>Show:</h2>
-          <TabButton active={activeTab === Tabs.SHOWALL} onClick={() => {
-            this.setState({
-              activeTab: Tabs.SHOWALL
-            });
-          }}>Show All</TabButton>
-          <TabButton active={activeTab === Tabs.COHORTS} onClick={() => {
-            this.setState({
-              activeTab: Tabs.COHORTS
-            });
-          }} data-test-id='view-only-cohorts'>Cohorts</TabButton>
-          <TabButton active={activeTab === Tabs.COHORTREVIEWS} onClick={() => {
-            this.setState({
-              activeTab: Tabs.COHORTREVIEWS
-            });
-          }} data-test-id='view-only-cohort-reviews'>Cohort Reviews</TabButton>
-          <TabButton active={activeTab === Tabs.CONCEPTSETS} onClick={() => {
-            this.setState({
-              activeTab: Tabs.CONCEPTSETS
-            });
-          }} data-test-id='view-only-concept-sets'>Concept Sets</TabButton>
-          <TabButton active={activeTab === Tabs.DATASETS} onClick={() => {
-            this.setState({
-              activeTab: Tabs.DATASETS
-            });
-          }} data-test-id='view-only-data-sets'>Datasets</TabButton>
-        </div>
-        <div style={{
-          borderBottom: `1px solid ${colors.dark}`,
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          opacity: 0.24
-        }}>
-        </div>
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          position: 'relative',
-          minHeight: 247,
-          padding: '0 0.5rem 1rem'
-        }}>
-          {filteredList.map((resource: WorkspaceResource, index: number) => {
-            return <div key={index}> {renderResourceCard({
-              resource: resource,
-              existingNameList: this.getExistingNameList(resource),
-              onUpdate: () => this.loadResources(),
-              menuOnly: false,
-            })} </div>;
-          })}
+    </div>
+    <FadeBox style={{marginTop: '1rem'}}>
+      <div style={styles.tabContainer}>
+        <h2 style={{margin: 0,
+          color: colors.primary,
+          fontSize: '16px',
+          fontWeight: 600}}>Show:</h2>
+        <TabButton active={activeTab === Tabs.SHOWALL} onClick={() => setActiveTab(Tabs.SHOWALL)}>
+          Show All
+        </TabButton>
+        <TabButton active={activeTab === Tabs.COHORTS} onClick={() => setActiveTab(Tabs.COHORTS)}
+                   data-test-id='view-only-cohorts'>
+          Cohorts
+        </TabButton>
+        <TabButton active={activeTab === Tabs.COHORTREVIEWS} onClick={() => setActiveTab(Tabs.COHORTREVIEWS)}
+                   data-test-id='view-only-cohort-reviews'>
+          Cohort Reviews
+        </TabButton>
+        <TabButton active={activeTab === Tabs.CONCEPTSETS} onClick={() => setActiveTab(Tabs.CONCEPTSETS)}
+                   data-test-id='view-only-concept-sets'>
+          Concept Sets
+        </TabButton>
+        <TabButton active={activeTab === Tabs.DATASETS} onClick={() => setActiveTab(Tabs.DATASETS)}
+                   data-test-id='view-only-data-sets'>
+          Datasets
+        </TabButton>
+      </div>
+      <div style={{
+        borderBottom: `1px solid ${colors.dark}`,
+        marginLeft: '-1rem',
+        marginRight: '-1rem',
+        opacity: 0.24
+      }}>
+      </div>
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        position: 'relative',
+        minHeight: 247,
+        padding: '0 0.5rem 1rem'
+      }}>
+        {filteredList.map((resource: WorkspaceResource, index: number) => {
+          return <div key={index}> {renderResourceCard({
+            resource: resource,
+            existingNameList: getExistingNameList(resource),
+            onUpdate: () => loadResources(),
+            menuOnly: false,
+          })} </div>;
+        })}
 
-          {isLoading && <SpinnerOverlay/>}
-        </div>
-      </FadeBox>
-    </React.Fragment>;
-  }
+        {isLoading && <SpinnerOverlay/>}
+      </div>
+    </FadeBox>
+  </React.Fragment>;
 });

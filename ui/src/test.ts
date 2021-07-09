@@ -12,7 +12,15 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
-import {currentWorkspaceStore, currentCohortStore, currentCohortReviewStore, currentConceptSetStore, urlParamsStore, queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  currentCohortStore,
+  currentCohortReviewStore,
+  currentConceptSetStore,
+  queryParamsStore,
+  routeConfigDataStore,
+  urlParamsStore,
+} from 'app/utils/navigation';
 import {serverConfigStore} from "./app/utils/stores";
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.

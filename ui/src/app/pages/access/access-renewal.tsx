@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {withRouteData} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -11,6 +10,7 @@ import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -209,10 +209,10 @@ const RenewalCard = withStyle(renewalStyle.card)(
 
 
 // Page to render
-export const AccessRenewalPage = fp.flow(
-  withRouteData,
+export const AccessRenewal = fp.flow(
   withProfileErrorModal
-)(() => {
+)((spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
   // State
   const {profile: {
     complianceTrainingCompletionTime,

@@ -2,7 +2,7 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {TextInput} from 'app/components/inputs';
-import {ProfilePage} from 'app/pages/profile/profile-page';
+import {ProfileComponent} from 'app/pages/profile/profile-component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
@@ -36,7 +36,7 @@ describe('ProfilePageComponent', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = (controlledTierProfile = {}) => {
-    return mount(<ProfilePage controlledTierProfile={controlledTierProfile}/>);
+    return mount(<ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/>);
   };
 
   const load = jest.fn();

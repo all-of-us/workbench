@@ -1,7 +1,7 @@
 import {Component as AComponent} from '@angular/core';
-import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
-import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
+import {withRoutingSpinner} from 'app/components/with-routing-spinner';
+import {AccessRenewal} from 'app/pages/access/access-renewal';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {UserAudit} from 'app/pages/admin/user-audit';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -16,9 +16,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
-import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
-import {withSpinnerOverlay} from './components/with-spinner-overlay';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -28,27 +26,13 @@ import {AdminUser} from './pages/admin/admin-user';
 import {AdminUsers} from './pages/admin/admin-users';
 import {AdminWorkspace} from './pages/admin/admin-workspace';
 import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
-import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
-import {NotebookList} from './pages/analysis/notebook-list';
-import {NotebookRedirect} from './pages/analysis/notebook-redirect';
-import {CohortReview} from './pages/data/cohort-review/cohort-review';
-import {DetailPage} from './pages/data/cohort-review/detail-page';
-import {QueryReport} from './pages/data/cohort-review/query-report.component';
-import {ParticipantsTable} from './pages/data/cohort-review/table-page';
-import {CohortActions} from './pages/data/cohort/cohort-actions';
-import {ConceptHomepage} from './pages/data/concept/concept-homepage';
-import {ConceptSearch} from './pages/data/concept/concept-search';
-import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
-import {DataComponent} from './pages/data/data-component';
-import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
-import {ProfilePage} from './pages/profile/profile-page';
-import {WorkspaceAbout} from './pages/workspace/workspace-about';
+import {ProfileComponent} from './pages/profile/profile-component';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
-import colors from './styles/colors';
+import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
@@ -69,32 +53,16 @@ const expiredGuard: Guard = {
   redirectPath: '/access-renewal'
 };
 
-const withRoutingSpinner = withSpinnerOverlay(
-  true,
-    {dark: true, opacity: 0.8, overrideStylesOverlay: {backgroundColor: colors.black}});
-
+const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
-const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
-const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
-const CohortReviewPage = fp.flow(withRouteData, withRoutingSpinner)(CohortReview);
-const ConceptHomepagePage = fp.flow(withRouteData, withRoutingSpinner)(ConceptHomepage);
-const ConceptSearchPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSearch);
-const ConceptSetActionsPage = fp.flow(withRouteData, withRoutingSpinner)(ConceptSetActions);
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
-const DataComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DataComponent);
-const DataSetComponentPage = fp.flow(withRouteData, withRoutingSpinner)(DatasetPage);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
-const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
-const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
-const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
-const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
-const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
-const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
+const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
@@ -102,7 +70,7 @@ const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
 const UserAuditPage = fp.flow(withRouteData, withRoutingSpinner)(UserAudit);
 const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
-const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
+const WorkspaceWrapperPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceWrapper);
 const WorkspaceAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspace);
 const WorkspaceAuditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAudit);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
@@ -249,170 +217,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               />}
           />
           <AppRoute
-              path='/workspaces/:ns/:wsid/about'
-              component={() => <WorkspaceAboutPage
-                  routeData={{
-                    title: 'View Workspace Details',
-                    breadcrumb: BreadcrumbType.Workspace,
-                    pageKey: 'about'
-                  }}
-              />}
-          />
-          <AppRoute
-              path='/workspaces/:ns/:wsid/duplicate'
-              component={() => <WorkspaceEditPage
-                  routeData={{
-                    title: 'Duplicate Workspace',
-                    breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                    pageKey: 'duplicate'
-                  }}
-                  workspaceEditMode={WorkspaceEditMode.Duplicate}
-              />}
-          />
-          <AppRoute
-              path='/workspaces/:ns/:wsid/edit'
-              component={() => <WorkspaceEditPage
-                  routeData={{
-                    title: 'Edit Workspace',
-                    breadcrumb: BreadcrumbType.WorkspaceEdit,
-                    pageKey: 'edit'
-                  }}
-                  workspaceEditMode={WorkspaceEditMode.Edit}
-              />}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/notebooks'
-            component={() => <NotebookListPage routeData={{
-              title: 'View Notebooks',
-              pageKey: 'notebooks',
-              breadcrumb: BreadcrumbType.Workspace
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
-            component={() => <InteractiveNotebookPage routeData={{
-              pathElementForTitle: 'nbName',
-              breadcrumb: BreadcrumbType.Notebook,
-              pageKey: NOTEBOOK_PAGE_KEY,
-              minimizeChrome: true
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/notebooks/:nbName'
-            component={() => <NotebookRedirectPage routeData={{
-              pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
-              breadcrumb: BreadcrumbType.Notebook,
-              // The iframe we use to display the Jupyter notebook does something strange
-              // to the height calculation of the container, which is normally set to auto.
-              // Setting this flag sets the container to 100% so that no content is clipped.
-              contentFullHeightOverride: true,
-              pageKey: NOTEBOOK_PAGE_KEY,
-              minimizeChrome: true
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data'
-            component={() => <DataComponentPage routeData={{
-              title: 'Data Page',
-              breadcrumb: BreadcrumbType.Workspace,
-              pageKey: 'data'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/data-sets'
-            component={() => <DataSetComponentPage routeData={{
-              title: 'Dataset Page',
-              breadcrumb: BreadcrumbType.Dataset,
-              pageKey: 'datasetBuilder'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
-            component={() => <DataSetComponentPage routeData={{
-              title: 'Edit Dataset',
-              breadcrumb: BreadcrumbType.Dataset,
-              pageKey: 'datasetBuilder'
-            }}/>}
-          />
-          <AppRoute
-              path='/workspaces/:ns/:wsid/data/cohorts/build'
-              component={() => <CohortPagePage routeData={{
-                title: 'Build Cohort Criteria',
-                breadcrumb: BreadcrumbType.CohortAdd,
-                pageKey: 'cohortBuilder'
-              }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
-            component={() => <CohortActionsPage routeData={{
-              title: 'Cohort Actions',
-              breadcrumb: BreadcrumbType.Cohort,
-              pageKey: 'cohortBuilder'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
-            component={() => <ParticipantsTablePage routeData={{
-              title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.CohortReview,
-              pageKey: 'reviewParticipants'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
-            component={() => <DetailPagePage routeData={{
-              title: 'Participant Detail',
-              breadcrumb: BreadcrumbType.Participant,
-              pageKey: 'reviewParticipantDetail'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
-            component={() => <QueryReportPage routeData={{
-              title: 'Review Cohort Description',
-              breadcrumb: BreadcrumbType.CohortReview,
-              pageKey: 'cohortDescription'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
-            component={() => <CohortReviewPage routeData={{
-              title: 'Review Cohort Participants',
-              breadcrumb: BreadcrumbType.CohortReview,
-              pageKey: 'reviewParticipants'
-            }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/concepts'
-            component={() => <ConceptHomepagePage routeData={{
-              title: 'Search Concepts',
-              breadcrumb: BreadcrumbType.SearchConcepts,
-              pageKey: 'searchConceptSets'
-            }}/>}
-          />
-          <AppRoute
-              path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'
-              component={() => <ConceptSearchPage routeData={{
-                title: 'Concept Set',
-                breadcrumb: BreadcrumbType.ConceptSet,
-                pageKey: 'conceptSets'
-              }}/>}
-          />
-          <AppRoute
-              path='/workspaces/:ns/:wsid/data/concepts/:domain'
-              component={() => <ConceptSearchPage routeData={{
-                title: 'Search Concepts',
-                breadcrumb: BreadcrumbType.SearchConcepts,
-                pageKey: 'conceptSets'
-              }}/>}
-          />
-          <AppRoute
-            path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
-            component={() => <ConceptSetActionsPage routeData={{
-              title: 'Concept Set Actions',
-              breadcrumb: BreadcrumbType.ConceptSet,
-              pageKey: 'conceptSetActions'
-            }}/>}
+              path='/workspaces/:ns/:wsid'
+              exact={false}
+              component={() => <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>}
           />
         </ProtectedRoutes>
       </ProtectedRoutes>

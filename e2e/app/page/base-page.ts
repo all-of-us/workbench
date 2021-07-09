@@ -23,8 +23,10 @@ export default abstract class BasePage {
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
+    logger.info(`goto url: ${url}`);
     const response = await this.page.goto(url, { waitUntil: ['load'] });
-    if (response) {
+    if (response && !response.ok()) {
+      // Log response if status is not OK
       logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);
     }
   }

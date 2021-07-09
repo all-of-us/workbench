@@ -213,6 +213,10 @@ const useRuntime = (currentWorkspaceNamespace) => {
   // No cleanup is being handled at the moment.
   // When the user initiates a runtime change we want that change to take place even if they navigate away
   useEffect(() => {
+    if (!currentWorkspaceNamespace) {
+      return;
+    }
+
     const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
@@ -234,7 +238,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
         }
       });
     getRuntime();
-  }, []);
+  }, [currentWorkspaceNamespace]);
 };
 
 export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
