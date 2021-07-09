@@ -20,3 +20,10 @@ export interface IConfig {
   ADMIN_URL_PATH: string;
   INSTITUTION_CONTACT_EMAIL: string;
 }
+
+export interface IPageUrl {
+  Home: string;
+  Workspaces: string;
+  Admin: string;
+  Profile: string;
+}
