@@ -224,11 +224,6 @@ export interface SideNavProps {
   onToggleSideNav: Function;
 }
 
-export interface SideNavState {
-  showAdminOptions: boolean;
-  showUserOptions: boolean;
-}
-
 export const SideNav = (props: SideNavProps) => {
   const [showAdminOptions, setShowAdminOptions] = useState(false);
   const [showUserOptions, setShowUserOptions] = useState(false);
@@ -321,7 +316,7 @@ export const SideNav = (props: SideNavProps) => {
     />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && showAdminOptions && <SideNavItem
           content={'User Admin'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'/admin/user'}
@@ -329,7 +324,7 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && showAdminOptions && <SideNavItem
           content={'User Audit'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'/admin/user-audit/'}
@@ -337,7 +332,7 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && showAdminOptions && <SideNavItem
           content={'Service Banners'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'/admin/banner'}
@@ -345,7 +340,7 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && showAdminOptions && <SideNavItem
           content={'Workspaces'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'admin/workspaces'}
@@ -353,7 +348,7 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && showAdminOptions && <SideNavItem
           content={'Workspace Audit'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'/admin/workspace-audit/'}
@@ -361,7 +356,7 @@ export const SideNav = (props: SideNavProps) => {
       />
     }
     {
-      hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && this.state.showAdminOptions && <SideNavItem
+      hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && showAdminOptions && <SideNavItem
           content={'Institution Admin'}
           onToggleSideNav={() => onToggleSideNav()}
           href={'admin/institution'}
@@ -370,159 +365,3 @@ export const SideNav = (props: SideNavProps) => {
     }
   </div>;
 }
-
-// export class SideNav extends React.Component<SideNavProps, SideNavState> {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       showAdminOptions: false,
-//       showUserOptions: false,
-//     };
-//   }
-//
-//   onToggleUser() {
-//     this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
-//   }
-//
-//   onToggleAdmin() {
-//     this.setState(previousState => ({showAdminOptions: !previousState.showAdminOptions}));
-//   }
-//
-//   redirectToZendesk() {
-//     window.open(supportUrls.helpCenter, '_blank');
-//   }
-//
-//   openContactWidget() {
-//     openZendeskWidget(
-//       this.props.profile.givenName,
-//       this.props.profile.familyName,
-//       this.props.profile.username,
-//       this.props.profile.contactEmail,
-//     );
-//   }
-//
-//   signOut() {
-//     signInStore.getValue().signOut();
-//     navigateSignOut();
-//   }
-//
-//   render() {
-//     const {profile} = this.props;
-//     return <div style={styles.sideNav}>
-//       <SideNavItem
-//           hasProfileImage={true}
-//           content={`${profile.givenName} ${profile.familyName}`}
-//           parentOnClick={() => this.onToggleUser()}
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           containsSubItems={true}
-//       />
-//       {
-//         this.state.showUserOptions && <SideNavItem
-//             content={'Profile'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href='/profile'
-//             active={profileActive()}
-//         />
-//       }
-//       {
-//         this.state.showUserOptions && <SideNavItem
-//             content={'Sign Out'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             parentOnClick={() => this.signOut()}
-//         />
-//       }
-//       <SideNavItem
-//           icon='home'
-//           content='Home'
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           href='/'
-//           active={homeActive()}
-//       />
-//       <SideNavItem
-//           icon='applications'
-//           content='Your Workspaces'
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           href={'/workspaces'}
-//           active={workspacesActive()}
-//           disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-//       />
-//       <SideNavItem
-//           icon='star'
-//           content='Featured Workspaces'
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           href={'/library'}
-//           active={libraryActive()}
-//           disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-//       />
-//       <SideNavItem
-//           icon='help'
-//           content={'User Support Hub'}
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           parentOnClick={() => this.redirectToZendesk()}
-//           disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
-//       />
-//       <SideNavItem
-//           icon='envelope'
-//           content={'Contact Us'}
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           parentOnClick={() => this.openContactWidget()}
-//       />
-//       {hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
-//           icon='user'
-//           content='Admin'
-//           parentOnClick={() => this.onToggleAdmin()}
-//           onToggleSideNav={() => this.props.onToggleSideNav()}
-//           containsSubItems={true}
-//       />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && this.state.showAdminOptions && <SideNavItem
-//             content={'User Admin'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'/admin/user'}
-//             active={userAdminActive()}
-//         />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && this.state.showAdminOptions && <SideNavItem
-//             content={'User Audit'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'/admin/user-audit/'}
-//             active={userAuditActive()}
-//         />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && this.state.showAdminOptions && <SideNavItem
-//             content={'Service Banners'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'/admin/banner'}
-//             active={bannerAdminActive()}
-//         />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && this.state.showAdminOptions && <SideNavItem
-//             content={'Workspaces'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'admin/workspaces'}
-//             active={workspaceAdminActive()}
-//         />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && this.state.showAdminOptions && <SideNavItem
-//             content={'Workspace Audit'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'/admin/workspace-audit/'}
-//             active={workspaceAuditActive()}
-//         />
-//       }
-//       {
-//         hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && this.state.showAdminOptions && <SideNavItem
-//             content={'Institution Admin'}
-//             onToggleSideNav={() => this.props.onToggleSideNav()}
-//             href={'admin/institution'}
-//             active={workspaceAdminActive()}
-//         />
-//       }
-//     </div>;
-//   }
-// }
