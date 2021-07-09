@@ -42,7 +42,6 @@ public class UserDaoTest extends SpringTest {
   private DbAccessTier registeredTier;
 
   @Autowired private AccessTierDao accessTierDao;
-  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private InstitutionDao institutionDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
