@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import * as fp from 'lodash/fp';
 import { LinkText } from 'app/text-labels';
@@ -79,5 +79,9 @@ export default class Container {
         }
       ])
     );
+  }
+
+  async asElement(): Promise<ElementHandle | null> {
+    return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
   }
 }
