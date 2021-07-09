@@ -153,3 +153,13 @@ export enum SideBarLink {
   WorkspaceMenu,
   EditAnnotations
 }
+
+export const InstitutionSelectValue = {
+  Vanderbilt: 'Vanderbilt University Medical Center',
+  Broad: 'Broad Institute',
+  Verily: 'Verily LLC',
+  NationalInstituteHealth: 'National Institute of Health',
+  Wondros: 'Wondros',
+  AdminTesting: 'Admin Testing',
+  DummyMaster: 'Dummy Master'
+};
