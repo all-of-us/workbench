@@ -113,7 +113,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : false
+    "enableFireCloudV2Billing" : false,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
