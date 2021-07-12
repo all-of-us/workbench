@@ -6321,6 +6321,9 @@ definitions:
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
+      tierRequirement:
+        "$ref": "#/definitions/InstitutionTierRequirement"
+        description: 'The requirement on how members can get accss to each tier.'
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6437,6 +6440,19 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
+  InstitutionTierRequirement:
+    type: object
+    description: Institution-specific access tier enrollement requirement.
+    required:
+      - institutionShortName
+      - instructions
+    properties:
+      institutionShortName:
+        type: string
+        description: The short unique name for the Institution used as an identifier, such as 'VUMC'.
+      instructions:
+        type: string
+        description: Text to include in an email sent to this Institution's users after they are registered.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
