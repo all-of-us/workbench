@@ -334,6 +334,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   private void validateInstitution(Institution institutionRequest) {
+    // TODO(RW-7027): Figure out what validations we need for tier requirement change.
     if (Strings.isNullOrEmpty(institutionRequest.getDisplayName())) {
       throw new BadRequestException("Display Name cannot be empty");
     }

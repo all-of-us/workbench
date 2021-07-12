@@ -6401,6 +6401,14 @@ definitions:
       - MASTER
       - RESTRICTED
 
+  InstitutionRequirementEnum:
+    type: string
+    description: 'Type of Institution requirement for member to access a tier.'
+    enum:
+      - DOMAINS
+      - ADDRESSES
+      - NO_ACCESS
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all
@@ -6448,15 +6456,18 @@ definitions:
     type: object
     description: Institution-specific access tier enrollement requirement.
     required:
-      - institutionShortName
-      - instructions
+      - accessTierShortName
+      - requirementEnum
     properties:
       accessTierShortName:
         type: string
         description: The short unique name for the access tier.
-      instructions:
-        type: string
-        description: Text to include in an email sent to this Institution's users after they are registered.
+      requirementEnum:
+        "$ref": "#/definitions/InstitutionRequirementEnum"
+        description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
+      eraRequired:
+        type: boolean
+        description: Whether eRA commons is required for memebers in the instutiion.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
