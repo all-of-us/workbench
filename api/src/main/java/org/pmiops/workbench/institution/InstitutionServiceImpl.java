@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
+import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
@@ -42,9 +44,11 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   private final InstitutionDao institutionDao;
+  private final InstitutionDao institutionDao;
   private final InstitutionEmailDomainDao institutionEmailDomainDao;
   private final InstitutionEmailAddressDao institutionEmailAddressDao;
   private final InstitutionUserInstructionsDao institutionUserInstructionsDao;
+  private final InstitutionTierRequirementDao institutionTierRequirementDao;
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
@@ -59,6 +63,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionEmailDomainDao institutionEmailDomainDao,
       InstitutionEmailAddressDao institutionEmailAddressDao,
       InstitutionUserInstructionsDao institutionUserInstructionsDao,
+      InstitutionTierRequirementDao institutionTierRequirementDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
       InstitutionEmailDomainMapper institutionEmailDomainMapper,
@@ -69,6 +74,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     this.institutionEmailDomainDao = institutionEmailDomainDao;
     this.institutionEmailAddressDao = institutionEmailAddressDao;
     this.institutionUserInstructionsDao = institutionUserInstructionsDao;
+    this.institutionTierRequirementDao = institutionTierRequirementDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
     this.institutionEmailDomainMapper = institutionEmailDomainMapper;
@@ -229,6 +235,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     return new ArrayList<>(
         institutionEmailAddressMapper.dbAddressesToStrings(
             institutionEmailAddressDao.getByInstitution(
+                getDbInstitutionOrThrow(institutionShortName))));
+  }
+
+  @Override
+  public List<InstitutionTierRequirement> getTierRequirements(String institutionShortName) {
+    return new ArrayList<>(
+        institutionEmailAddressMapper.dbAddressesToStrings(
+            institutionTierRequirementDao.getByInstitution(
                 getDbInstitutionOrThrow(institutionShortName))));
   }
 

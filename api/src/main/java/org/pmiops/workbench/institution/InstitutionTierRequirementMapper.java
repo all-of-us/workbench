@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValueMappingStrategy;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.model.Institution;
@@ -18,8 +19,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface InstitutionTierRequirementMapper {
 
   default Set<DbInstitutionTierRequirement> modelToDb(
-      Institution modelInstitution, @Context DbInstitution dbInstitution) {
-    return tierRequirementesToDb(modelInstitution.getTierRequirement(), dbInstitution);
+      Institution modelInstitution, @Context DbInstitution dbInstitution, @Context WorkbenchConfig workbenchConfig) {
+    workbenchConfig.cdr.
+    return tierRequirementesToDb(modelInstitution.getTierRequirements(), dbInstitution, workbenchConfig);
   }
 
   Set<DbInstitutionTierRequirement> tierRequirementesToDb(

@@ -6325,9 +6325,11 @@ definitions:
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
-      tierRequirement:
-        "$ref": "#/definitions/InstitutionTierRequirement"
-        description: 'The requirement on how members can get accss to each tier.'
+      tierRequirements:
+        type: array
+        description: List of requirement on how members can get accss for each tier.
+        items:
+          "$ref": "#/definitions/InstitutionTierRequirement"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
