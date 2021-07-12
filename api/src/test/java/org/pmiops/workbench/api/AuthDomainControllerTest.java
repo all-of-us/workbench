@@ -77,7 +77,6 @@ public class AuthDomainControllerTest extends SpringTest {
     when(fireCloudService.createGroup(any())).thenReturn(testGroup);
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.access.enableDataUseAgreement = true;
     config.accessRenewal.expiryDays = (long) 365;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
