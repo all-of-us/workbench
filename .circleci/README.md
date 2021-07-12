@@ -1,5 +1,5 @@
 ## CircleCI
-https://circleci.com/docs/reference-2-1/#circleci-2-1-reference
+We use the latest version (2.1) of the CircleCI continuous integration tool.  Here is a [documentation overview](https://circleci.com/docs/2.0/?section=getting-started) and a [config reference](https://circleci.com/docs/2.0/configuration-reference).
     
 #### Skipping CI build:
     
