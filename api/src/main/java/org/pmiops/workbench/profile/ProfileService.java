@@ -498,6 +498,8 @@ public class ProfileService {
         .ifPresent(
             newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
+    // dual bypass time to DbUser and UserAccessModule. And eventually we want to deprecate DbUser
+    // update.
     request
         .getAccessBypassRequests()
         .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
