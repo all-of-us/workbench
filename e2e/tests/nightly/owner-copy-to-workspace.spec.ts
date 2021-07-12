@@ -79,7 +79,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   const modal = new Modal(page);
   await modal.waitForLoad();
   const modalText = await modal.getTextContent();
-  console.log(`modal text: ${modalText}`);
   expect(
     modalText.some((text) => {
       return text.includes('Notebooks can only be copied to workspaces in the same access tier.');
