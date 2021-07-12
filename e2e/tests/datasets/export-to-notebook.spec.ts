@@ -71,7 +71,7 @@ describe('Export dataset to notebook tests', () => {
     // Delete the cohort.
     await deleteCohort(cohortName, datasetName);
 
-    // Associated dataset is not gone after delete cohort.
+    // Associated dataset is gone after delete cohort.
     await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
     expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
   });
