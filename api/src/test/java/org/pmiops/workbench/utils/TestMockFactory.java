@@ -10,6 +10,7 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,8 +20,11 @@ import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -44,6 +48,37 @@ public class TestMockFactory {
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
+
+  public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
+      ImmutableList.of(
+          new DbAccessModule()
+              .setName(AccessModuleName.TWO_FACTOR_AUTH)
+              .setExpirable(false)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.ERA_COMMONS)
+              .setExpirable(false)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.RAS_LOGIN_GOV)
+              .setExpirable(false)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+              .setExpirable(true)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.RT_COMPLIANCE_TRAINING)
+              .setExpirable(true)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.PROFILE_CONFIRMATION)
+              .setExpirable(true)
+              .setBypassable(false),
+          new DbAccessModule()
+              .setName(AccessModuleName.PUBLICATION_CONFIRMATION)
+              .setExpirable(true)
+              .setBypassable(false));
 
   // TODO there's something off about how "workspaceName" here works.  Investigate.
   // For best results, use a lowercase-only workspaceName.
@@ -243,6 +278,12 @@ public class TestMockFactory {
             .setAuthDomainName("Controlled Tier Auth Domain")
             .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
             .setServicePerimeter("controlled/tier/perimeter"));
+  }
+
+  /** Prepare AccessModules inmemory cache. */
+  public static List<DbAccessModule> createAccessModules(AccessModuleDao accessModuleDao) {
+    accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
+    return accessModuleDao.findAll();
   }
 
   public static DbCdrVersion createDefaultCdrVersion(

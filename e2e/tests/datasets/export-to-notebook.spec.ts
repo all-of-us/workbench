@@ -12,6 +12,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
+import {TabLabels} from "app/page/workspace-base";
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
@@ -70,8 +71,8 @@ describe('Export dataset to notebook tests', () => {
     // Delete the cohort.
     await deleteCohort(cohortName, datasetName);
 
-    // Dataset automatically is no longer exists after delete cohort.
-    await dataPage.openDatasetsSubtab();
+    // Associated dataset is gone after delete cohort.
+    await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
     expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
   });
 

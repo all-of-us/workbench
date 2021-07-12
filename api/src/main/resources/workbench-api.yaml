@@ -4237,6 +4237,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
+      enableAccessModuleRewrite:
+        type: boolean
+        default: false
+        description: Whether to use the new rewrite access module.
       enableStandardSourceDomains:
         type: boolean
         default: false
@@ -4763,6 +4767,8 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - PROFILE_CONFIRMATION
+    - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
