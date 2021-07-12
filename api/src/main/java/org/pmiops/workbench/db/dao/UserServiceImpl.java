@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @VisibleForTesting
   @Override
   public int getCurrentDuccVersion() {
-    return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
+    return 3;
   }
 
   /**
