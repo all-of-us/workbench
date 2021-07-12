@@ -4241,6 +4241,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the new rewrite access module.
+      enableStandardSourceDomains:
+        type: boolean
+        default: false
+        description: Whether to show separate source and standard domains
       rasHost:
         type: string
         description: The RAS base host name.

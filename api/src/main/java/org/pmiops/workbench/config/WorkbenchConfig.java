@@ -272,6 +272,8 @@ public class WorkbenchConfig {
     public boolean enableFireCloudV2Billing;
     // If true, use the new rewrite version of access module.
     public boolean enableAccessModuleRewrite;
+    // If true, cohort and concept set will show source domains and standard domains options
+    public boolean enableStandardSourceDomains;
   }
 
   public static class ActionAuditConfig {

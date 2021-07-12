@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessException;
 
@@ -60,7 +61,8 @@ public final class DbRetryUtils {
    */
   public static boolean shouldRetryQuery(DataAccessException dataAccessException) {
     return ExceptionUtils.hasCause(dataAccessException, RecoverableDataAccessException.class)
-        || ExceptionUtils.hasCause(dataAccessException, TransientDataAccessException.class);
+        || ExceptionUtils.hasCause(dataAccessException, TransientDataAccessException.class)
+        || ExceptionUtils.hasCause(dataAccessException, DataRetrievalFailureException.class);
   }
 
   /** How to execute this database operation. */
