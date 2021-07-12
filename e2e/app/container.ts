@@ -63,18 +63,18 @@ export default class Container {
       fp.flow(
         fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
         fp.map((item) => item.waitFn()),
-        fp.concat([button.click({ delay: 10 }), waitWhileLoading(this.page)])
+        fp.concat([button.click({ delay: 10 })])
       )([
         {
           shouldWait: waitForNav,
-          waitFn: async () => {
-            await this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
+          waitFn: () => {
+            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
           }
         },
         {
           shouldWait: waitForClose,
-          waitFn: async () => {
-            await this.waitUntilClose(timeout);
+          waitFn: () => {
+            this.waitUntilClose(timeout);
           }
         }
       ])

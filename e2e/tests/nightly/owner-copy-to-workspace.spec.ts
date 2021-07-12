@@ -6,9 +6,6 @@ import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils
 import { config } from 'resources/workbench-config';
 import Modal from 'app/modal/modal';
 
-// re-run one more time if test has failed
-jest.retryTimes(1);
-
 // Reuse same source workspace for all tests in this file, in order to reduce test playback time.
 // Workspace to be created in first test. If create failed in first test, next test will try create it.
 let defaultCdrWorkspace: string;
@@ -81,10 +78,23 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   // Verify Copy Success modal.
   const modal = new Modal(page);
   await modal.waitForLoad();
-  const textContent = await modal.getTextContent();
-  const successMsg =
-    `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . ` + 'Do you want to view the copied Notebook?';
-  expect(textContent).toContain(successMsg);
+  const modalText = await modal.getTextContent();
+  expect(
+    modalText.some((text) => {
+      return text.includes('Notebooks can only be copied to workspaces in the same access tier.');
+    })
+  ).toBeTruthy();
+  expect(
+    modalText.some((text) => {
+      return text.includes(`Successfully copied ${sourceNotebookName} to ${destWorkspace}`);
+    })
+  ).toBeTruthy();
+  expect(
+    modalText.some((text) => {
+      return text.includes('Do you want to view the copied Notebook?');
+    })
+  ).toBeTruthy();
+
   // Dismiss modal.
   await modal.clickButton(LinkText.StayHere, { waitForClose: true });
 
