@@ -1,9 +1,9 @@
 package org.pmiops.workbench.config;
 
-import java.util.function.Supplier;
 import com.google.common.base.Suppliers;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.springframework.beans.factory.annotation.Qualifier;
