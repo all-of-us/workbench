@@ -8,8 +8,8 @@ We use the latest version (2.1) of the CircleCI continuous integration tool.  He
     
 
 #### Short-circuit evaluation: 
-    * API/UI tests will not run if file has not changed inside `ui, api or api/src/main/resources` directories.
-    * Puppeteer tests will not run if file has not changed inside `e2e, ui, api or api/src/main/resources` directories.
+    * API/UI tests will not run if file has not changed inside `ui, api, or api/src/main/resources` directories.
+    * Puppeteer tests will not run if file has not changed inside `e2e, ui, or .circleci` directories.
     * Puppeteer tests will not run if changed files match patterns specified in `e2e-job-ignore-patterns.txt` file.
      
 #### Running tests in parallel:
