@@ -1,6 +1,6 @@
 package org.pmiops.workbench.config;
 
-import com.google.common.base.Supplier;
+import java.util.function.Supplier;
 import com.google.common.base.Suppliers;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
