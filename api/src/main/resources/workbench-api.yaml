@@ -6451,9 +6451,9 @@ definitions:
       - institutionShortName
       - instructions
     properties:
-      institutionShortName:
+      accessTierShortName:
         type: string
-        description: The short unique name for the Institution used as an identifier, such as 'VUMC'.
+        description: The short unique name for the access tier.
       instructions:
         type: string
         description: Text to include in an email sent to this Institution's users after they are registered.
