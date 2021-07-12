@@ -114,8 +114,8 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
+    "enableAccessModuleRewrite" : false,
     "enableStandardSourceDomains": false
-
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

@@ -114,6 +114,7 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
+    "enableAccessModuleRewrite" : false,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {

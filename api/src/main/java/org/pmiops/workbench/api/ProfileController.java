@@ -16,6 +16,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -105,6 +106,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
+  private final AccessModuleService accessModuleService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
@@ -128,6 +130,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
+      AccessModuleService accessModuleService,
       ActionAuditQueryService actionAuditQueryService,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
@@ -148,6 +151,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
       RasLinkService rasLinkService) {
+    this.accessModuleService = accessModuleService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -523,7 +527,9 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
+    // Dual write then deprecate the one in userService
     userService.updateBypassTime(userId, request);
+    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -534,7 +540,9 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
+    // Dual write then deprecate the one in userService
     userService.updateBypassTime(userId, request);
+    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     return ResponseEntity.ok(new EmptyResponse());
   }
 

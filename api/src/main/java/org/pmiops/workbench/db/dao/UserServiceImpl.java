@@ -678,11 +678,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asAdmin(userProvider.get()));
-    userServiceAuditor.fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        targetProperty,
-        Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
+
+    if (!configProvider.get().featureFlags.enableAccessModuleRewrite) {
+      // After launch access module rewrite, we will start firing this audit event from
+      // AccessModuleService.
+      userServiceAuditor.fireAdministrativeBypassTime(
+          dbUser.getUserId(),
+          targetProperty,
+          Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
+          Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
+    }
   }
 
   @Override
