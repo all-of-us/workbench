@@ -10,13 +10,28 @@ export TIER=$4              # Ex: registered or controlled
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 CSV_HOME_DIR="cb_prep_tables/redcap/$DATE"
+CDR_CSV_DIR="cdr_csv_files"
+EXPECTED_TABLES=("prep_ppi_basics"
+"prep_ppi_cope"
+"prep_ppi_family_health"
+"prep_ppi_health_care_access"
+"prep_ppi_lifestyle"
+"prep_ppi_overall_health"
+"prep_ppi_personal_medical_history")
 
 echo "Starting load of prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
 
 TABLES=$(gsutil ls gs://"$BUCKET"/"$CSV_HOME_DIR"/*_"$TIER".csv | cut -d'/' -f7 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
 
-schema_path=generate-cdr/bq-schemas
+# Validate that all expected files are in bucket
+DIFF_OUTPUT=(`echo ${EXPECTED_TABLES[@]} ${TABLES[@]} | tr ' ' '\n' | sort | uniq -u`)
+if [[ ${#DIFF_OUTPUT[@]} > 0 ]];
+  then
+  echo "Missing following files: ${DIFF_OUTPUT[@]}"
+  exit 1
+fi
 
+schema_path=generate-cdr/bq-schemas
 
 echo "Starting creation of prep ppi tables"
 for tableName in $TABLES
@@ -346,5 +361,20 @@ where lower(display) not like '%please specify%') b on (a.parent_pmi_code = b.co
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on lower(b.concept_code) = lower(c.concept_code)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.concept_code) = lower(d.concept_code)
 order by 1"
+
+echo "Extracting prep_survey to the proper bucket"
+bq extract --project_id=$BQ_PROJECT --destination_format CSV --print_header=false \
+"$BQ_DATASET.prep_survey" gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv
+echo "Completed extract into bucket(gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv)"
+
+echo "Cleaning up prep tables"
+for tableName in $TABLES
+do
+  echo "Deleting $tableName table"
+  bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$tableName"
+done
+echo "Deleting prep_survey table"
+bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+echo "Completed clean up of prep tables"
 
 echo "Completed creation of the prep_survey table"
