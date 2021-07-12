@@ -252,8 +252,9 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
-      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    // need to modify the following logic
+    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null && runtime.getGceWithPdConfig() == null) {
+      throw new BadRequestException("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {

@@ -122,28 +122,17 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .customEnvironmentVariables(customEnvironmentVariables);
 
     request.setRuntimeConfig(buildRuntimeConfig(runtime));
+    log.info("buildCreateRuntimeRequest: "+request.toString());
 
     return request;
   }
 
-//  private LeonardoCreateDiskRequest buildCreateDiskRequest(String userEmail, Integer diskSize, LeonardoDiskType diskType, Integer blockSize) {
-//    Map<String, String> runtimeLabels = new HashMap<>();
-//    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
-//    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
-////    runtimeLabels.putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()));
-//    LeonardoCreateDiskRequest request =
-//            new LeonardoCreateDiskRequest()
-//                    .labels(runtimeLabels)
-//                    .blockSize(blockSize)
-//                    .diskType(diskType)
-//                    .size(diskSize);
-//    return request;
-//  }
-
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
-    } else {
+    } else if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
+    }else {
       return leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
     }
   }

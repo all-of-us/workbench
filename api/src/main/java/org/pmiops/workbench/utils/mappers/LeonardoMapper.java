@@ -9,20 +9,10 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.*;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.DataprocConfig;
-import org.pmiops.workbench.model.GceConfig;
-import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
-import org.pmiops.workbench.model.RuntimeStatus;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
@@ -58,6 +48,18 @@ public interface LeonardoMapper {
     leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
   }
 
+  GceWithPdConfig toGceWithPdConfig(LeonardoGceWithPdConfig leonardoGceWithPdConfig);
+
+  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "bootDiskSize", ignore = true)
+//  @Mapping(target = "persistentDisk", ignore = true)
+  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
+
+  @AfterMapping
+  default void addPdCloudServiceEnum(@MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
+    leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
+  }
+
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
@@ -70,6 +72,7 @@ public interface LeonardoMapper {
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
   @Mapping(target = "configurationType", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
@@ -78,6 +81,7 @@ public interface LeonardoMapper {
   @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(target = "configurationType", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
@@ -124,8 +128,13 @@ public interface LeonardoMapper {
           toDataprocConfig(
               gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoMachineConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
-      runtime.gceConfig(
-          toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
+      if (runtime.getGceWithPdConfig() != null){
+        runtime.gceWithPdConfig(
+                toGceWithPdConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceWithPdConfig.class)));
+      }else{
+        runtime.gceConfig(
+                toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
+      }
     } else {
       throw new IllegalArgumentException(
           "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
