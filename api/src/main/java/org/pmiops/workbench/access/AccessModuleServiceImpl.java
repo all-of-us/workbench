@@ -99,8 +99,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     logger.info(
         String.format(
-            "Bypassing %s(uid: %d) for module %s",
-            user.getContactEmail(), userId, accessModule.getName()));
+            "Setting %s(uid: %d) for module %s bypass status to %s",
+            user.getUsername(), userId, accessModule.getName(), isBypassed));
     userAccessModuleToUpdate =
         retrievedAccessModule
             .orElseGet(() -> new DbUserAccessModule().setUser(user).setAccessModule(accessModule))
