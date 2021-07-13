@@ -1,16 +1,21 @@
 package org.pmiops.workbench.access;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -20,12 +25,15 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccessModuleServiceImpl implements AccessModuleService {
   private static final Logger logger = Logger.getLogger(AccessModuleServiceImpl.class.getName());
+  private static final long MIN_ACCESS_EXPIRATION_EPOCH_MS =
+      Instant.parse("2021-07-01T00:00:00.00Z").toEpochMilli();
 
   private final Provider<List<DbAccessModule>> dbAccessModulesProvider;
   private final Clock clock;
@@ -34,6 +42,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
   private final Provider<WorkbenchConfig> configProvider;
+  private final UserAccessModuleMapper userAccessModuleMapper;
 
   private static final BiMap<AccessModule, AccessModuleName> CLIENT_TO_STORAGE_ACCESS_MODULE =
       ImmutableBiMap.<AccessModule, AccessModuleName>builder()
@@ -69,13 +78,15 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       UserAccessModuleDao userAccessModuleDao,
       UserDao userDao,
       UserServiceAuditor userServiceAuditor,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      UserAccessModuleMapper userAccessModuleMapper) {
     this.dbAccessModulesProvider = dbAccessModulesProvider;
     this.clock = clock;
     this.userAccessModuleDao = userAccessModuleDao;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
     this.configProvider = configProvider;
+    this.userAccessModuleMapper = userAccessModuleMapper;
   }
 
   @Override
@@ -117,6 +128,12 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     }
   }
 
+  @Override
+  public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
+   return  userAccessModuleDao.getAllByUser(user).stream().map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).get()))
+    .collect(Collectors.toList());
+  }
+
   private static DbAccessModule getDbAccessModuleFromApi(
       List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
     return dbAccessModules.stream()
@@ -126,6 +143,21 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             () ->
                 new BadRequestException(
                     "There is no access module named: " + apiAccessModule.toString()));
+  }
+
+  private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
+    // Don't set expiration time if CompletionTime is null OR BypassTime is NOT null OR
+    // enableAccessRenewal not enabled.
+    if(dbUserAccessModule.getCompletionTime() == null || dbUserAccessModule.getBypassTime() != null && !configProvider.get().access.enableAccessRenewal) {
+      return Optional.empty();
+    }
+    Long expiryDays = configProvider.get().accessRenewal.expiryDays;
+    Preconditions.checkNotNull(
+        expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
+    long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
+
+    return Optional.of(new Timestamp(
+        Math.max(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs, MIN_ACCESS_EXPIRATION_EPOCH_MS)));
   }
 
   private static AccessModuleName clientAccessModuleToStorage(AccessModule s) {

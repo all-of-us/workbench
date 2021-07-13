@@ -33,6 +33,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -40,6 +41,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -128,14 +130,21 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
-    final List<RenewableAccessModuleStatus> modulesStatus =
+    final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
         userService.getRenewableAccessModuleStatus(userLite);
-
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
-            .modules(modulesStatus)
+            .modules(renewableAccessModuleStatus)
             .anyModuleHasExpired(
-                modulesStatus.stream().anyMatch(RenewableAccessModuleStatus::getHasExpired));
+                renewableAccessModuleStatus.stream().anyMatch(RenewableAccessModuleStatus::getHasExpired));
+
+    final List<AccessModuleStatus> accessModuleStatuses =
+        accessModuleService.getClientAccessModuleStatus(userLite);
+    final ProfileAccessModules accessModules =
+        new ProfileAccessModules()
+            .modules(accessModuleStatuses)
+            .anyModuleHasExpired(
+                accessModuleStatuses.stream().anyMatch(a -> a.getExpirationEpochMillis()));
 
     return profileMapper.toModel(
         user,
