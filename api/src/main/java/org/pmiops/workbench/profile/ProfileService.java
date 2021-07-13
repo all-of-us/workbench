@@ -132,6 +132,7 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
+    // renewableAccessModuleStatus is deprecated and will be replaced by accessModules.
     final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
         userService.getRenewableAccessModuleStatus(userLite);
     final ProfileRenewableAccessModules renewableAccessModules =
@@ -155,7 +156,8 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        renewableAccessModules);
+        renewableAccessModules,
+        accessModules);
   }
 
   public void validateAffiliation(Profile profile) {

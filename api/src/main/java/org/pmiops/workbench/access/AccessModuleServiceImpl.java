@@ -32,8 +32,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccessModuleServiceImpl implements AccessModuleService {
   private static final Logger logger = Logger.getLogger(AccessModuleServiceImpl.class.getName());
-  private static final long MIN_ACCESS_EXPIRATION_EPOCH_MS =
-      Instant.parse("2021-07-01T00:00:00.00Z").toEpochMilli();
 
   private final Provider<List<DbAccessModule>> dbAccessModulesProvider;
   private final Clock clock;
@@ -156,8 +154,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
 
-    return Optional.of(new Timestamp(
-        Math.max(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs, MIN_ACCESS_EXPIRATION_EPOCH_MS)));
+    return Optional.of(new Timestamp(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs));
   }
 
   private static AccessModuleName clientAccessModuleToStorage(AccessModule s) {

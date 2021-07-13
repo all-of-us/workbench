@@ -20,6 +20,7 @@ public interface UserAccessModuleMapper {
   @Mapping(target = "moduleName", source = "accessModule.name")
   @Mapping(target = "completionEpochMillis", source = "completionTime")
   @Mapping(target = "bypassEpochMillis", source = "bypassTime")
+  // expirationEpochMillis is derived value, will calculate & set it later.
   @Mapping(target = "expirationEpochMillis", ignore = true)
   AccessModuleStatus dbToModule(DbUserAccessModule source, @Context Timestamp expirationTime);
 
