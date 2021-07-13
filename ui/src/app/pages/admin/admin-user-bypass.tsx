@@ -140,7 +140,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
           />
           <Toggle name='Data User Code of Conduct'
                   checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
-                  data-test-id='data-use-agreement-toggle'
+                  data-test-id='ducc-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
           />
