@@ -23,6 +23,7 @@ import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
+import {InactivityMonitorComponent} from "./inactivity-monitor";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
@@ -38,7 +39,8 @@ describe('SignedInComponent', () => {
         TextModalComponent,
         NavBarComponent,
         FooterComponent,
-        ZendeskWidgetComponent
+        ZendeskWidgetComponent,
+        InactivityMonitorComponent
       ],
       providers: [
         {provide: SignInService, useValue: new SignInServiceStub()},

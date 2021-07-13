@@ -26,6 +26,19 @@ export const INACTIVITY_CONFIG = {
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
 };
 
+function getInactivityElapsedMs(): number {
+  const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+  if (!lastActive) {
+    return null;
+  }
+  return Date.now() - parseInt(lastActive, 10);
+}
+
+function secondsToText(seconds: number) {
+  return seconds % 60 === 0 && seconds > 60 ?
+      `${seconds / 60} minutes` : `${seconds} seconds`;
+}
+
 export interface Props {
   signOut: (continuePath?: string) => void;
 }
@@ -33,27 +46,19 @@ export interface Props {
 export const InactivityMonitor = ({signOut}: Props) => {
   const [showModal, setShowModal] = useState(false);
 
+  function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
+    const elapsedMs = getInactivityElapsedMs();
+    if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
+      signOut(continuePath);
+    }
+  }
+
   // Signal user activity.
   useEffect(() => {
     let getUserActivityTimer: () => Timeout;
     let inactivityInterval: Timeout;
     let logoutTimer: Timeout;
     let inactivityModalTimer: Timeout;
-
-    function getInactivityElapsedMs(): number {
-      const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
-      if (!lastActive) {
-        return null;
-      }
-      return Date.now() - parseInt(lastActive, 10);
-    }
-
-    function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
-      const elapsedMs = getInactivityElapsedMs();
-      if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
-        signOut(continuePath);
-      }
-    }
 
     function startUserActivityTracker() {
       const signalUserActivity = debouncer(() => {
@@ -147,11 +152,6 @@ export const InactivityMonitor = ({signOut}: Props) => {
      />}
   </React.Fragment>;
 };
-
-function secondsToText(seconds: number) {
-  return seconds % 60 === 0 && seconds > 60 ?
-      `${seconds / 60} minutes` : `${seconds} seconds`;
-}
 
 @Component({
   selector: 'app-inactivity-monitor',
