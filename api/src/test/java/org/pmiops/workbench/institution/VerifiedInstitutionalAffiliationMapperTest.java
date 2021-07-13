@@ -27,6 +27,7 @@ import org.springframework.test.annotation.DirtiesContext;
   InstitutionUserInstructionsMapperImpl.class,
   InstitutionEmailDomainMapperImpl.class,
   InstitutionEmailAddressMapperImpl.class,
+  InstitutionTierRequirementMapperImpl.class,
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
