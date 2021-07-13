@@ -23,7 +23,7 @@ import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
-import {InactivityMonitorComponent} from "./inactivity-monitor";
+import {InactivityMonitorComponent} from "app/pages/signed-in/inactivity-monitor";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
