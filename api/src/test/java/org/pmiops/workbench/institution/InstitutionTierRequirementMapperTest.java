@@ -46,7 +46,7 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
           .accessTierShortName(CT_ACCESS_TIER_SHORT_NAME);
 
   @Test
-  public void tesModelToDbSuccess() {
+  public void testModelToDbSuccess() {
     final Institution modelInst =
         new Institution()
             .shortName("Broad")
@@ -74,7 +74,7 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
   }
 
   @Test
-  public void tesModelToDb_null() {
+  public void testModelToDb_null() {
     final Institution modelInst =
         new Institution()
             .shortName("Broad")
@@ -85,7 +85,9 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
   }
 
   @Test
-  public void tesModelToDbError_accessTierNotFound() {
+  public void testModelToDbError_accessTierNotFound() {
+    // Expect throws NotFoundException if the tier specified in Institution model not found in
+    // all tiers passed to the mapper(in API, it happened when that tier not found in DB).
     final Institution modelInst =
         new Institution()
             .shortName("Broad")
@@ -101,7 +103,7 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
   }
 
   @Test
-  public void tesDbToModelSuccess() {
+  public void testDbToModelSuccess() {
     // does not need to match the modelInst; it is simply attached to the
     // DbInstitutionTierRequirement
     final DbInstitution dbInst = new DbInstitution();

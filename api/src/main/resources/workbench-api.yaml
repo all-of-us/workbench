@@ -6333,7 +6333,7 @@ definitions:
         type: string
       tierRequirements:
         type: array
-        description: List of requirement on how members can get accss for each tier.
+        description: List of requirements on how members can get access for each tier.
         items:
           "$ref": "#/definitions/InstitutionTierRequirement"
   PublicInstitutionDetails:
@@ -6411,7 +6411,8 @@ definitions:
 
   InstitutionRequirementEnum:
     type: string
-    description: 'Type of Institution requirement for member to access a tier.'
+    description: 'Type of Institution requirement for member to access a tier.
+      It can be matting email address, email domains or no access'
     enum:
       - DOMAINS
       - ADDRESSES
@@ -6462,7 +6463,7 @@ definitions:
           as text, if its enumerated type is OTHER'
   InstitutionTierRequirement:
     type: object
-    description: Institution-specific access tier enrollement requirement.
+    description: Institution-specific access tier membership requirement.
     required:
       - accessTierShortName
       - requirementEnum
@@ -6475,7 +6476,7 @@ definitions:
         description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
       eraRequired:
         type: boolean
-        description: Whether eRA commons is required for memebers in the instutiion.
+        description: Whether eRA commons is required for members in the institution.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
