@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -58,7 +57,6 @@ import org.springframework.context.annotation.Import;
 public class InstitutionServiceTest extends SpringTest {
 
   @Autowired private InstitutionService service;
-  @Autowired private InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -181,6 +179,7 @@ public class InstitutionServiceTest extends SpringTest {
             .duaTypeEnum(DuaType.MASTER)
             .emailDomains(Collections.emptyList())
             .emailAddresses(Collections.emptyList())
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     service.createInstitution(otherInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
@@ -221,6 +220,7 @@ public class InstitutionServiceTest extends SpringTest {
             .duaTypeEnum(DuaType.MASTER)
             .emailAddresses(Collections.emptyList())
             .emailDomains(Collections.emptyList())
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
@@ -255,6 +255,7 @@ public class InstitutionServiceTest extends SpringTest {
             .displayName("another test")
             .emailDomains(ImmutableList.of("broad.org", "google.com"))
             .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"))
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
     assertThat(instWithEmailsRoundTrip).isEqualTo(instWithEmails);
@@ -296,7 +297,10 @@ public class InstitutionServiceTest extends SpringTest {
         existingInst.tierRequirements(
             ImmutableList.of(
                 institutionTierRequirement.requirementEnum(InstitutionRequirementEnum.NO_ACCESS)));
-    assertThat(service.updateInstitution(existingInst.getShortName(), instWithNewTierRequirement))
+    assertThat(
+            service
+                .updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)
+                .get())
         .isEqualTo(instWithNewTierRequirement);
 
     // clear
@@ -682,6 +686,7 @@ public class InstitutionServiceTest extends SpringTest {
                   .displayName("No Organization")
                   .duaTypeEnum(DuaType.MASTER)
                   .emailAddresses(Arrays.asList("testDomain.com"))
+                  .tierRequirements(Collections.emptyList())
                   .userInstructions("Should throw exception");
           service.createInstitution(institution_NoOrgType);
         });
@@ -694,6 +699,7 @@ public class InstitutionServiceTest extends SpringTest {
             .displayName("No Organization")
             .emailAddresses(Collections.emptyList())
             .emailDomains(Collections.emptyList())
+            .tierRequirements(Collections.emptyList())
             .userInstructions("Should Add dua Type As Master")
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     Institution createdInstitution = service.createInstitution(institution_NoDUA);
@@ -712,6 +718,7 @@ public class InstitutionServiceTest extends SpringTest {
                   .duaTypeEnum(DuaType.RESTRICTED)
                   .emailAddresses(
                       Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .tierRequirements(Collections.emptyList())
                   .organizationTypeEnum(OrganizationType.INDUSTRY);
           service.createInstitution(institution_EmailAddress);
         });
@@ -728,6 +735,7 @@ public class InstitutionServiceTest extends SpringTest {
                   .duaTypeEnum(DuaType.RESTRICTED)
                   .emailAddresses(
                       Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .tierRequirements(Collections.emptyList())
                   .organizationTypeEnum(OrganizationType.INDUSTRY);
           service.createInstitution(institution_EmailAddress);
         });
@@ -744,6 +752,7 @@ public class InstitutionServiceTest extends SpringTest {
                   .duaTypeEnum(DuaType.RESTRICTED)
                   .emailAddresses(
                       Arrays.asList("CorrectEmailAddress@domain.com, incorrectEmail.com"))
+                  .tierRequirements(Collections.emptyList())
                   .organizationTypeEnum(OrganizationType.OTHER);
           service.createInstitution(institution_withOtherOrganizationType);
         });
@@ -757,6 +766,7 @@ public class InstitutionServiceTest extends SpringTest {
             .duaTypeEnum(DuaType.RESTRICTED)
             .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com"))
             .emailDomains(Collections.EMPTY_LIST)
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.OTHER)
             .organizationTypeOtherText("Some text");
     assertThat(service.createInstitution(institution_withOtherOrganizationType))
@@ -771,6 +781,7 @@ public class InstitutionServiceTest extends SpringTest {
             .duaTypeEnum(DuaType.RESTRICTED)
             .emailAddresses(Arrays.asList("CorrectEmailAddress@domain.com"))
             .emailDomains(Collections.EMPTY_LIST)
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .userInstructions("Some user instructions");
     Institution createdInstitution = service.createInstitution(institution_WithUserInstructions);
