@@ -53,7 +53,7 @@ import org.springframework.context.annotation.Import;
   InstitutionTierRequirementMapperImpl.class,
 })
 @MockBean({
-    FireCloudService.class,
+  FireCloudService.class,
 })
 public class InstitutionServiceTest extends SpringTest {
 
@@ -88,8 +88,11 @@ public class InstitutionServiceTest extends SpringTest {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    institutionTierRequirement = new InstitutionTierRequirement().requirementEnum(
-        InstitutionRequirementEnum.DOMAINS).eraRequired(false).accessTierShortName(registeredTier.getShortName());
+    institutionTierRequirement =
+        new InstitutionTierRequirement()
+            .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+            .eraRequired(false)
+            .accessTierShortName(registeredTier.getShortName());
   }
 
   @Test
@@ -107,8 +110,7 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
-    Comparator<Institution> comparator =
-        Comparator.comparing(Institution::getDisplayName);
+    Comparator<Institution> comparator = Comparator.comparing(Institution::getDisplayName);
     assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
   }
 
@@ -120,15 +122,18 @@ public class InstitutionServiceTest extends SpringTest {
             .displayName("An Institution for Testing")
             .emailDomains(Collections.emptyList())
             .emailAddresses(Collections.emptyList())
-            .tierRequirements(ImmutableList.of(new InstitutionTierRequirement().requirementEnum(
-                InstitutionRequirementEnum.DOMAINS).eraRequired(false).accessTierShortName(registeredTier.getShortName())))
+            .tierRequirements(
+                ImmutableList.of(
+                    new InstitutionTierRequirement()
+                        .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
-    Comparator<Institution> comparator =
-        Comparator.comparing(Institution::getDisplayName);
+    Comparator<Institution> comparator = Comparator.comparing(Institution::getDisplayName);
     assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
   }
 
@@ -288,13 +293,21 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
 
     final Institution instWithNewTierRequirement =
-        existingInst.tierRequirements(ImmutableList.of(institutionTierRequirement.requirementEnum(InstitutionRequirementEnum.NO_ACCESS)));
-    assertThat(service.updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)).isEqualTo(instWithNewTierRequirement);
+        existingInst.tierRequirements(
+            ImmutableList.of(
+                institutionTierRequirement.requirementEnum(InstitutionRequirementEnum.NO_ACCESS)));
+    assertThat(service.updateInstitution(existingInst.getShortName(), instWithNewTierRequirement))
+        .isEqualTo(instWithNewTierRequirement);
 
     // clear
     final Institution instWithoutTierRequirements =
         instWithNewTierRequirement.tierRequirements(Collections.emptyList());
-    assertThat(service.updateInstitution(existingInst.getShortName(), instWithoutTierRequirements).get().getTierRequirements()).isEmpty();
+    assertThat(
+            service
+                .updateInstitution(existingInst.getShortName(), instWithoutTierRequirements)
+                .get()
+                .getTierRequirements())
+        .isEmpty();
   }
 
   // we uniquify Email Addresses and Domains in the DB per-institution

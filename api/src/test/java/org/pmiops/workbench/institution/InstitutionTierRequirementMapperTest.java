@@ -4,13 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -33,15 +27,23 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
   @Autowired InstitutionTierRequirementMapper mapper;
   private static final String RT_ACCESS_TIER_SHORT_NAME = "registered";
   private static final String CT_ACCESS_TIER_SHORT_NAME = "controlled";
-  private static final DbAccessTier RT_ACCESS_TIER = new DbAccessTier().setShortName(RT_ACCESS_TIER_SHORT_NAME).setAccessTierId(111);
-  private static final DbAccessTier CT_ACCESS_TIER = new DbAccessTier().setShortName(CT_ACCESS_TIER_SHORT_NAME).setAccessTierId(222);
-  private static final List<DbAccessTier> ACCESS_TIERS = ImmutableList.of(
-      new DbAccessTier().setShortName(RT_ACCESS_TIER_SHORT_NAME).setAccessTierId(111),
-      new DbAccessTier().setShortName(CT_ACCESS_TIER_SHORT_NAME).setAccessTierId(222));
-  private static final InstitutionTierRequirement RT_REQUIREMENT = new InstitutionTierRequirement().requirementEnum(
-      InstitutionRequirementEnum.DOMAINS).eraRequired(true).accessTierShortName(RT_ACCESS_TIER_SHORT_NAME);
-  private static final InstitutionTierRequirement CT_REQUIREMENT = new InstitutionTierRequirement().requirementEnum(
-      InstitutionRequirementEnum.NO_ACCESS).accessTierShortName(CT_ACCESS_TIER_SHORT_NAME);
+  private static final DbAccessTier RT_ACCESS_TIER =
+      new DbAccessTier().setShortName(RT_ACCESS_TIER_SHORT_NAME).setAccessTierId(111);
+  private static final DbAccessTier CT_ACCESS_TIER =
+      new DbAccessTier().setShortName(CT_ACCESS_TIER_SHORT_NAME).setAccessTierId(222);
+  private static final List<DbAccessTier> ACCESS_TIERS =
+      ImmutableList.of(
+          new DbAccessTier().setShortName(RT_ACCESS_TIER_SHORT_NAME).setAccessTierId(111),
+          new DbAccessTier().setShortName(CT_ACCESS_TIER_SHORT_NAME).setAccessTierId(222));
+  private static final InstitutionTierRequirement RT_REQUIREMENT =
+      new InstitutionTierRequirement()
+          .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+          .eraRequired(true)
+          .accessTierShortName(RT_ACCESS_TIER_SHORT_NAME);
+  private static final InstitutionTierRequirement CT_REQUIREMENT =
+      new InstitutionTierRequirement()
+          .requirementEnum(InstitutionRequirementEnum.NO_ACCESS)
+          .accessTierShortName(CT_ACCESS_TIER_SHORT_NAME);
 
   @Test
   public void tesModelToDbSuccess() {
@@ -51,15 +53,22 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
             .displayName("The Broad Institute")
             .tierRequirements(ImmutableList.of(RT_REQUIREMENT, CT_REQUIREMENT));
 
-    // does not need to match the modelInst; it is simply attached to the DbInstitutionTierRequirement
+    // does not need to match the modelInst; it is simply attached to the
+    // DbInstitutionTierRequirement
     final DbInstitution dbInst = new DbInstitution();
 
-    final List<DbInstitutionTierRequirement> expectedResult = ImmutableList.of(
-        new DbInstitutionTierRequirement().setAccessTier(RT_ACCESS_TIER).setInstitution(dbInst).setRequirementEnum(
-            RequirementEnum.DOMAINS).setEraRequired(true),
-        new DbInstitutionTierRequirement().setAccessTier(CT_ACCESS_TIER).setInstitution(dbInst).setRequirementEnum(
-            RequirementEnum.NO_ACCESS).setEraRequired(false)
-        );
+    final List<DbInstitutionTierRequirement> expectedResult =
+        ImmutableList.of(
+            new DbInstitutionTierRequirement()
+                .setAccessTier(RT_ACCESS_TIER)
+                .setInstitution(dbInst)
+                .setRequirementEnum(RequirementEnum.DOMAINS)
+                .setEraRequired(true),
+            new DbInstitutionTierRequirement()
+                .setAccessTier(CT_ACCESS_TIER)
+                .setInstitution(dbInst)
+                .setRequirementEnum(RequirementEnum.NO_ACCESS)
+                .setEraRequired(false));
 
     assertThat(mapper.modelToDb(modelInst, dbInst, ACCESS_TIERS)).isEqualTo(expectedResult);
   }
@@ -83,20 +92,34 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
             .displayName("The Broad Institute")
             .tierRequirements(ImmutableList.of(RT_REQUIREMENT, CT_REQUIREMENT));
 
-    assertThrows(NotFoundException.class, () -> assertThat(mapper.modelToDb(modelInst, new DbInstitution(), ImmutableList.of(CT_ACCESS_TIER))));
+    assertThrows(
+        NotFoundException.class,
+        () ->
+            assertThat(
+                mapper.modelToDb(
+                    modelInst, new DbInstitution(), ImmutableList.of(CT_ACCESS_TIER))));
   }
 
   @Test
   public void tesDbToModelSuccess() {
-    // does not need to match the modelInst; it is simply attached to the DbInstitutionTierRequirement
+    // does not need to match the modelInst; it is simply attached to the
+    // DbInstitutionTierRequirement
     final DbInstitution dbInst = new DbInstitution();
-    final List<DbInstitutionTierRequirement> source = ImmutableList.of(
-        new DbInstitutionTierRequirement().setAccessTier(RT_ACCESS_TIER).setInstitution(dbInst).setRequirementEnum(
-            RequirementEnum.DOMAINS).setEraRequired(true),
-        new DbInstitutionTierRequirement().setAccessTier(CT_ACCESS_TIER).setInstitution(dbInst).setRequirementEnum(
-            RequirementEnum.NO_ACCESS).setEraRequired(false)
-    );
+    final List<DbInstitutionTierRequirement> source =
+        ImmutableList.of(
+            new DbInstitutionTierRequirement()
+                .setAccessTier(RT_ACCESS_TIER)
+                .setInstitution(dbInst)
+                .setRequirementEnum(RequirementEnum.DOMAINS)
+                .setEraRequired(true),
+            new DbInstitutionTierRequirement()
+                .setAccessTier(CT_ACCESS_TIER)
+                .setInstitution(dbInst)
+                .setRequirementEnum(RequirementEnum.NO_ACCESS)
+                .setEraRequired(false));
 
-    assertThat(mapper.dbToModel(source)).isEqualTo(ImmutableList.of(RT_REQUIREMENT, CT_REQUIREMENT));
+    // Expect CT_REQUIREMENT to be false instead of null.
+    assertThat(mapper.dbToModel(source))
+        .isEqualTo(ImmutableList.of(RT_REQUIREMENT, CT_REQUIREMENT.eraRequired(false)));
   }
 }

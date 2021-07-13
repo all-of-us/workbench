@@ -35,8 +35,12 @@ public class InstitutionMapperTest extends SpringTest {
   public void setup() {
     sortedModelDomains = Lists.newArrayList("broad.org", "verily.com");
     sortedModelAddresses = Lists.newArrayList("alice@nih.gov", "joel@other-inst.org");
-    institutionTierRequirements = Lists.newArrayList(new InstitutionTierRequirement().requirementEnum(
-        InstitutionRequirementEnum.DOMAINS).eraRequired(true).accessTierShortName("tier"));
+    institutionTierRequirements =
+        Lists.newArrayList(
+            new InstitutionTierRequirement()
+                .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+                .eraRequired(true)
+                .accessTierShortName("tier"));
   }
 
   @Test

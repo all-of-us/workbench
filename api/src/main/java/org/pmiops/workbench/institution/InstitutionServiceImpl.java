@@ -43,7 +43,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final Logger log = Logger.getLogger(InstitutionServiceImpl.class.getName());
 
-  private final static String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
+  private static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
   private final AccessTierService accessTierService;
 
@@ -250,8 +250,9 @@ public class InstitutionServiceImpl implements InstitutionService {
   public List<InstitutionTierRequirement> getTierRequirements(String institutionShortName) {
     return new ArrayList<>(
         institutionTierRequirementMapper.dbToModel(
-            new ArrayList<>(institutionTierRequirementDao.getByInstitution(
-                getDbInstitutionOrThrow(institutionShortName)))));
+            new ArrayList<>(
+                institutionTierRequirementDao.getByInstitution(
+                    getDbInstitutionOrThrow(institutionShortName)))));
   }
 
   @Override

@@ -52,15 +52,18 @@ public class InstitutionTierRequirementDaoTest extends SpringTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(registeredTier)
                 .setInstitution(testInst)
-        .setRequirementEnum(RequirementEnum.ADDRESSES).setEraRequired(true));
+                .setRequirementEnum(RequirementEnum.ADDRESSES)
+                .setEraRequired(true));
     final DbInstitutionTierRequirement ctRequirement =
         institutionTierRequirementDao.save(
-        new DbInstitutionTierRequirement()
-            .setAccessTier(controlledTier)
-            .setInstitution(testInst)
-        .setRequirementEnum(RequirementEnum.ADDRESSES).setEraRequired(true));
+            new DbInstitutionTierRequirement()
+                .setAccessTier(controlledTier)
+                .setInstitution(testInst)
+                .setRequirementEnum(RequirementEnum.ADDRESSES)
+                .setEraRequired(true));
 
-    assertThat(institutionTierRequirementDao.getByInstitution(testInst)).containsExactly(rtRequirement, ctRequirement);
+    assertThat(institutionTierRequirementDao.getByInstitution(testInst))
+        .containsExactly(rtRequirement, ctRequirement);
 
     // Then delete by institution, verify empty after deletion
     institutionTierRequirementDao.deleteByInstitution(testInst);

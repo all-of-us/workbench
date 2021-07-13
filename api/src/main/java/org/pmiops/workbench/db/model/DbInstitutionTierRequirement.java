@@ -31,7 +31,8 @@ public class DbInstitutionTierRequirement {
     return institutionTierRequirementId;
   }
 
-  public DbInstitutionTierRequirement setInstitutionTierRequirementId(long institutionTierRequirementId) {
+  public DbInstitutionTierRequirement setInstitutionTierRequirementId(
+      long institutionTierRequirementId) {
     this.institutionTierRequirementId = institutionTierRequirementId;
     return this;
   }
@@ -59,7 +60,7 @@ public class DbInstitutionTierRequirement {
   }
 
   @Column(name = "era_required")
-  public boolean eraRequired() {
+  public boolean getEraRequired() {
     return eraRequired;
   }
 
