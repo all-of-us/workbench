@@ -53,8 +53,8 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    logger.error(`waitForDocumentTitle() failed: page title is ${await page.title()}. Not contains "${titleSubstr}"`);
-    logger.error(err);
+    logger.error(`Failed find document title contains "${titleSubstr}". Actual page title is "${await page.title()}"`);
+    logger.error(err.stack);
     throw new Error(err);
   }
 }
@@ -73,8 +73,13 @@ export async function waitForPropertyEquality(
   try {
     const jsHandle = await page.waitForFunction(
       (xpath, prop, value) => {
-        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
+        const element = document.evaluate(
+          xpath,
+          document.body,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
         return element[prop as string] === value;
       },
       {},
@@ -98,8 +103,13 @@ export async function waitForNumericalString(page: Page, xpath: string, timeout?
   const numbers = await page
     .waitForFunction(
       (xpathSelector) => {
-        const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
+        const node = document.evaluate(
+          xpathSelector,
+          document.body,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
         if (node !== null) {
           const txt = node.textContent.trim();
           const re = new RegExp(/\d{1,3}(,?\d{3})*/);
@@ -130,8 +140,13 @@ export async function waitForPropertyNotExists(
   try {
     await page.waitForFunction(
       (xpath, prop) => {
-        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
+        const element = document.evaluate(
+          xpath,
+          document.body,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
         return !element[prop as string];
       },
       {},
@@ -150,8 +165,13 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
   try {
     await page.waitForFunction(
       (xpath, prop) => {
-        const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
+        const element = document.evaluate(
+          xpath,
+          document.body,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
         return element[prop as string] !== null;
       },
       {},
@@ -263,8 +283,13 @@ export async function waitForAttributeEquality(
     try {
       const jsHandle = await page.waitForFunction(
         (xpath, attributeName, attributeValue) => {
-          const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
+          const element: any = document.evaluate(
+            xpath,
+            document.body,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue;
           return (
             element &&
             element.attributes[attributeName as string] &&
@@ -348,8 +373,13 @@ export async function waitForText(
       const jsHandle = await page.waitForFunction(
         (xpath, expText) => {
           const regExp = new RegExp(expText);
-          const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
+          const element = document.evaluate(
+            xpath,
+            document.body,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue;
           return element && regExp.test(element.textContent);
         },
         { timeout },
@@ -416,8 +446,13 @@ export async function waitUntilEnabled(page: Page, cssSelector: string): Promise
   const jsHandle = await page
     .waitForFunction(
       (xpathSelector) => {
-        const element = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
+        const element = document.evaluate(
+          xpathSelector,
+          document,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
         const style = window.getComputedStyle(element as Element);
         const propValue = style.getPropertyValue('cursor');
         return propValue === 'pointer';
