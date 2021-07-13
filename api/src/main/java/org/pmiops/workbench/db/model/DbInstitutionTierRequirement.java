@@ -22,8 +22,6 @@ public class DbInstitutionTierRequirement {
   private boolean eraRequired;
   private RequirementEnum requirementEnum;
 
-  public DbInstitutionTierRequirement() {}
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "institution_tier_requirement_id", nullable = false)
