@@ -15,36 +15,52 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionRequirementEnum;
+import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @Import({
+  AccessTierServiceImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   InstitutionEmailDomainMapperImpl.class,
   InstitutionEmailAddressMapperImpl.class,
+  InstitutionTierRequirementMapperImpl.class,
+})
+@MockBean({
+    FireCloudService.class,
 })
 public class InstitutionServiceTest extends SpringTest {
 
   @Autowired private InstitutionService service;
+  @Autowired private InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private UserDao userDao;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final Institution testInst =
@@ -61,12 +77,19 @@ public class InstitutionServiceTest extends SpringTest {
           .duaTypeEnum(DuaType.MASTER)
           .emailDomains(Collections.emptyList())
           .emailAddresses(Collections.emptyList())
+          .tierRequirements(Collections.emptyList())
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
+
+  private DbAccessTier registeredTier;
+  private InstitutionTierRequirement institutionTierRequirement;
 
   @BeforeEach
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    institutionTierRequirement = new InstitutionTierRequirement().requirementEnum(
+        InstitutionRequirementEnum.DOMAINS).eraRequired(false).accessTierShortName(registeredTier.getShortName());
   }
 
   @Test
@@ -79,12 +102,33 @@ public class InstitutionServiceTest extends SpringTest {
             .displayName("An Institution for Testing")
             .emailDomains(Collections.emptyList())
             .emailAddresses(Collections.emptyList())
+            .tierRequirements(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
     Comparator<Institution> comparator =
-        Comparator.comparing(institution -> institution.getDisplayName());
+        Comparator.comparing(Institution::getDisplayName);
+    assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
+  }
+
+  @Test
+  public void testCreateInstitution_withTierRequirement() {
+    final Institution anotherInst =
+        new Institution()
+            .shortName("otherInst")
+            .displayName("An Institution for Testing")
+            .emailDomains(Collections.emptyList())
+            .emailAddresses(Collections.emptyList())
+            .tierRequirements(ImmutableList.of(new InstitutionTierRequirement().requirementEnum(
+                InstitutionRequirementEnum.DOMAINS).eraRequired(false).accessTierShortName(registeredTier.getShortName())))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+
+    assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
+
+    assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, anotherInst);
+    Comparator<Institution> comparator =
+        Comparator.comparing(Institution::getDisplayName);
     assertThat(service.getInstitutions()).isStrictlyOrdered(comparator);
   }
 
@@ -229,6 +273,28 @@ public class InstitutionServiceTest extends SpringTest {
         service.updateInstitution(instWithEmails.getShortName(), instWithoutEmails).get();
     assertThat(instWithoutEmailsRoundTrip.getEmailDomains()).isEmpty();
     assertThat(instWithoutEmailsRoundTrip.getEmailAddresses()).isEmpty();
+  }
+
+  @Test
+  public void test_updateInstitution_tierRequirement() {
+    final Institution existingInst =
+        new Institution()
+            .shortName("test_updateInstitution_tierRequirement")
+            .displayName("test_updateInstitution_tierRequirement")
+            .emailAddresses(Collections.emptyList())
+            .emailDomains(Collections.emptyList())
+            .tierRequirements(ImmutableList.of(institutionTierRequirement))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+    assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
+
+    final Institution instWithNewTierRequirement =
+        existingInst.tierRequirements(ImmutableList.of(institutionTierRequirement.requirementEnum(InstitutionRequirementEnum.NO_ACCESS)));
+    assertThat(service.updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)).isEqualTo(instWithNewTierRequirement);
+
+    // clear
+    final Institution instWithoutTierRequirements =
+        instWithNewTierRequirement.tierRequirements(Collections.emptyList());
+    assertThat(service.updateInstitution(existingInst.getShortName(), instWithoutTierRequirements).get().getTierRequirements()).isEmpty();
   }
 
   // we uniquify Email Addresses and Domains in the DB per-institution

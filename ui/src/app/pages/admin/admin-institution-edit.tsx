@@ -13,7 +13,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
-import {DuaType, Institution, OrganizationType} from 'generated/fetch';
+import {DuaType, Institution, OrganizationType, InstitutionTierRequirement} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
@@ -207,9 +207,13 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
+    // TODO(RW-6933): Set tier requirement by selected changing tier instead of hard coded RT.
+    const {"registered", id, accessLevel, accessTierShortName, cdrVersionId, billingStatus} = workspace;
+
     if (institution) {
       if (institution.duaTypeEnum === DuaType.MASTER) {
         institution.emailAddresses = [];
+        institution.tierRequirements
       } else {
         institution.emailDomains = [];
       }

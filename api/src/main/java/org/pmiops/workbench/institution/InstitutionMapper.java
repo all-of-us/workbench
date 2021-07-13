@@ -18,7 +18,7 @@ public interface InstitutionMapper {
   @Mapping(target = "emailDomains", ignore = true)
   @Mapping(target = "emailAddresses", ignore = true)
   @Mapping(target = "userInstructions", ignore = true)
-  @Mapping(target = "tierRequirement", ignore = true)
+  @Mapping(target = "tierRequirements", ignore = true)
   Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
 
   @AfterMapping

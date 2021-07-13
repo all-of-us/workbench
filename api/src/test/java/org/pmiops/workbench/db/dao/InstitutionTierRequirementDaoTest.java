@@ -46,7 +46,7 @@ public class InstitutionTierRequirementDaoTest extends SpringTest {
   }
 
   @Test
-  public void test_insertAndGetByInstitution() {
+  public void test_insertGetDeleteByInstitution() {
     final DbInstitutionTierRequirement rtRequirement =
         institutionTierRequirementDao.save(
             new DbInstitutionTierRequirement()
@@ -61,5 +61,9 @@ public class InstitutionTierRequirementDaoTest extends SpringTest {
         .setRequirementEnum(RequirementEnum.ADDRESSES).setEraRequired(true));
 
     assertThat(institutionTierRequirementDao.getByInstitution(testInst)).containsExactly(rtRequirement, ctRequirement);
+
+    // Then delete by institution, verify empty after deletion
+    institutionTierRequirementDao.deleteByInstitution(testInst);
+    assertThat(institutionTierRequirementDao.getByInstitution(testInst)).isEmpty();
   }
 }

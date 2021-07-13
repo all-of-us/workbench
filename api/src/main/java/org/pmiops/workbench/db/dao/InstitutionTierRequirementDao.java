@@ -8,4 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface InstitutionTierRequirementDao extends CrudRepository<DbInstitutionTierRequirement, Long> {
 
   Set<DbInstitutionTierRequirement> getByInstitution(final DbInstitution institution);
+
+  long deleteByInstitution(final DbInstitution institution);
 }
