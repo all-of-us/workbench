@@ -14,7 +14,7 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
+import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
 import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
@@ -188,7 +188,6 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     title: 'Data User Code of Conduct',
     description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
-    featureFlag: serverConfigStore.get().config.enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
       if (profile.dataUseAgreementBypassTime) {
@@ -196,7 +195,7 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
       }
       // The DUA completion time field tracks the most recent DUA completion
       // timestamp, but doesn't specify whether that DUA is currently active.
-      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
+      const requiredDuaVersion = getLiveDUCCVersion();
       if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
         return profile.dataUseAgreementCompletionTime;
       }

@@ -14,10 +14,9 @@ import {
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
-import {BugReportComponent} from 'app/components/bug-report';
 import {FooterComponent} from 'app/components/footer';
-import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
+import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
@@ -35,12 +34,11 @@ describe('SignedInComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        BugReportComponent,
         SignedInComponent,
-        RoutingSpinnerComponent,
         TextModalComponent,
         NavBarComponent,
-        FooterComponent
+        FooterComponent,
+        ZendeskWidgetComponent
       ],
       providers: [
         {provide: SignInService, useValue: new SignInServiceStub()},

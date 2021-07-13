@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
@@ -34,6 +36,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -280,17 +283,29 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   // TODO split into registered tier and controlled tier versions, when available
   private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
-    return ImmutableMap.of(
-        ModuleNameEnum.COMPLIANCETRAINING,
-            new ModuleTimes(
-                user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()),
-        ModuleNameEnum.DATAUSEAGREEMENT,
-            new ModuleTimes(
-                user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()),
-        ModuleNameEnum.PROFILECONFIRMATION,
-            new ModuleTimes(user.getProfileLastConfirmedTime(), null),
-        ModuleNameEnum.PUBLICATIONCONFIRMATION,
-            new ModuleTimes(user.getPublicationsLastConfirmedTime(), null));
+    final Map<ModuleNameEnum, ModuleTimes> moduleMap =
+        new HashMap<>(
+            ImmutableMap.of(
+                ModuleNameEnum.PROFILECONFIRMATION,
+                new ModuleTimes(user.getProfileLastConfirmedTime(), null),
+                ModuleNameEnum.PUBLICATIONCONFIRMATION,
+                new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
+
+    if (isModuleEnabledInEnvironment(ModuleNameEnum.COMPLIANCETRAINING)) {
+      moduleMap.put(
+          ModuleNameEnum.COMPLIANCETRAINING,
+          new ModuleTimes(
+              user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()));
+    }
+
+    if (isModuleEnabledInEnvironment(ModuleNameEnum.DATAUSEAGREEMENT)) {
+      moduleMap.put(
+          ModuleNameEnum.DATAUSEAGREEMENT,
+          new ModuleTimes(
+              user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()));
+    }
+
+    return moduleMap;
   }
 
   private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
@@ -462,7 +477,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setGivenName(givenName);
     dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
-    dbUser.setAboutYou(null);
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
@@ -555,7 +569,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   @Transactional
-  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+  public void submitTermsOfService(DbUser dbUser, @Nonnull Integer tosVersion) {
+
+    // Validates a given tosVersion, by running all validation checks.
+    if (tosVersion == null) {
+      throw new BadRequestException("Terms of Service version is NULL");
+    }
     if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
       throw new BadRequestException("Terms of Service version is not up to date");
     }
@@ -564,7 +583,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userTermsOfService.setTosVersion(tosVersion);
     userTermsOfService.setUserId(dbUser.getUserId());
     userTermsOfServiceDao.save(userTermsOfService);
-
     userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
@@ -660,11 +678,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asAdmin(userProvider.get()));
-    userServiceAuditor.fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        targetProperty,
-        Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
-        Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
+
+    if (!configProvider.get().featureFlags.enableAccessModuleRewrite) {
+      // After launch access module rewrite, we will start firing this audit event from
+      // AccessModuleService.
+      userServiceAuditor.fireAdministrativeBypassTime(
+          dbUser.getUserId(),
+          targetProperty,
+          Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
+          Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
+    }
   }
 
   @Override
@@ -1138,8 +1161,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>First: ignore any bypassed modules. These are in compliance and do not need to be renewed.
    *
    * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
-   * If no, either the feature flag is not set or the user does not have access for reasons other
-   * than access renewal compliance. In either negative case, we should not send an email.
+   * If no, either the AAR feature flag is not set or the user does not have access for reasons
+   * other than access renewal compliance. In either negative case, we should not send an email.
    *
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
@@ -1166,6 +1189,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // note: min() returns EMPTY if the stream is empty at this point,
           // which is also an indicator that we should not send an email
           .min(Timestamp::compareTo);
+    }
+  }
+
+  private boolean isModuleEnabledInEnvironment(ModuleNameEnum moduleName) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    switch (moduleName) {
+      case COMPLIANCETRAINING:
+        return accessConfig.enableComplianceTraining;
+      case DATAUSEAGREEMENT:
+        return accessConfig.enableDataUseAgreement;
+      default:
+        return true;
     }
   }
 

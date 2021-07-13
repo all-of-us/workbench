@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-171-user-access-module-user-drop-null-constraint-and-add-bypassable">
+    <addColumn tableName="access_module">
+      <column name="bypassable" type="boolean">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <sql>
+      UPDATE access_module SET bypassable = true WHERE name = 'TWO_FACTOR_AUTH';
+      UPDATE access_module SET bypassable = true WHERE name = 'ERA_COMMONS';
+      UPDATE access_module SET bypassable = true WHERE name = 'RAS_LOGIN_GOV';
+      UPDATE access_module SET bypassable = true WHERE name = 'RT_COMPLIANCE_TRAINING';
+      UPDATE access_module SET bypassable = true WHERE name = 'DATA_USER_CODE_OF_CONDUCT';
+      UPDATE access_module SET bypassable = false WHERE name = 'PROFILE_CONFIRMATION';
+      UPDATE access_module SET bypassable = false WHERE name = 'PUBLICATION_CONFIRMATION';
+    </sql>
+    <dropNotNullConstraint
+      columnDataType="datetime"
+      columnName="bypass_time"
+      tableName="user_access_module"/>
+    <dropNotNullConstraint
+      columnDataType="datetime"
+      columnName="completion_time"
+      tableName="user_access_module"/>
+  </changeSet>
+</databaseChangeLog>

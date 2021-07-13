@@ -108,12 +108,14 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": true,
+    "enableBillingUpgrade": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : false
+    "enableFireCloudV2Billing" : false,
+    "enableAccessModuleRewrite" : false,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

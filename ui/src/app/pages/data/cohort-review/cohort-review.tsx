@@ -3,12 +3,13 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
-import {cohortReviewStore, queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
+import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -25,7 +26,7 @@ interface State {
   readonly: boolean;
 }
 
-export class CohortReview extends React.Component<{}, State> {
+export class CohortReview extends React.Component<WithSpinnerOverlayProps, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -36,6 +37,7 @@ export class CohortReview extends React.Component<{}, State> {
   }
 
   componentDidMount(): void {
+    this.props.hideSpinner();
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
@@ -46,7 +48,7 @@ export class CohortReview extends React.Component<{}, State> {
       filters: {items: []}
     }).then(resp => {
       const {cohortReview, queryResultSize} = resp;
-      cohortReviewStore.next(cohortReview);
+      currentCohortReviewStore.next(cohortReview);
       queryResultSizeStore.next(queryResultSize);
       const reviewPresent = cohortReview.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});

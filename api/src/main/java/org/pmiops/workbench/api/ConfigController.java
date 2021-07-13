@@ -44,6 +44,8 @@ public class ConfigController implements ConfigApiDelegate {
             .enableRasLoginGovLinking(config.access.enableRasLoginGovLinking)
             .enableAccessRenewal(config.access.enableAccessRenewal)
             .enableGenomicExtraction(config.featureFlags.enableGenomicExtraction)
+            .enableAccessModuleRewrite(config.featureFlags.enableAccessModuleRewrite)
+            .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)
             .rasHost(config.ras.host)
             .rasClientId(config.ras.clientId)
             .runtimeImages(

@@ -261,13 +261,14 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
   }
 
   userSearch(value: string): void {
+    const {accessTierShortName} = this.props.workspace;
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
     if (!value.trim()) {
       this.setState({autocompleteLoading: false, dropDown: false});
       return;
     }
     const searchTerm = this.state.searchTerm;
-    userApi().user(this.state.searchTerm)
+    userApi().userSearch(accessTierShortName, this.state.searchTerm)
       .then((response) => {
         if (this.state.searchTerm !== searchTerm) {
           return;

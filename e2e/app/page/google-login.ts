@@ -107,7 +107,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   async load(): Promise<void> {
-    const url = `${config.uiBaseUrl}${config.loginUrlPath}`;
+    const url = `${config.LOGIN_URL_DOMAIN_NAME}${config.LOGIN_URL_PATH}`;
     const response = await this.page.goto(url, {
       waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
       timeout: 2 * 60 * 1000
@@ -127,8 +127,8 @@ export default class GoogleLoginPage {
    * @param paswd
    */
   async login(email?: string, paswd?: string): Promise<void> {
-    const user = email || config.userEmail;
-    const pwd = paswd || config.userPassword;
+    const user = email || config.USER_NAME;
+    const pwd = paswd || config.PASSWORD;
 
     if (!user || user.trim().length === 0) {
       console.warn('Login user email: value is empty!!!');
@@ -166,7 +166,7 @@ export default class GoogleLoginPage {
     const emailInputXpath = '//input[@type="email" and @aria-label="Enter recovery email address"]';
     const [emailInput] = await this.page.$x(emailInputXpath);
     if (emailInput) {
-      await emailInput.type(config.institutionContactEmail);
+      await emailInput.type(config.INSTITUTION_CONTACT_EMAIL);
       await Promise.all([
         this.page.waitForNavigation({ waitUntil: ['networkidle2', 'load'], timeout: 60000 }),
         this.page.keyboard.press(String.fromCharCode(13)) // Press Enter key.

@@ -140,7 +140,7 @@ function restrictTab(workspace, tab) {
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
-  withCdrVersions(),
+  withCdrVersions()
 )(props => {
   const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);

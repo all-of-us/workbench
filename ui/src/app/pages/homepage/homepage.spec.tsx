@@ -20,7 +20,7 @@ describe('HomepageComponent', () => {
   let profileApi: ProfileApiStub;
 
   const component = () => {
-    return mount(<Homepage/>);
+    return mount(<Homepage hideSpinner={() => {}} />);
   };
 
   const load = jest.fn();
@@ -44,12 +44,10 @@ describe('HomepageComponent', () => {
 
     profileStore.set({profile, load, reload, updateCache: () => {}});
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true
+      enableEraCommons: true
     }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });

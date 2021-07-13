@@ -12,7 +12,6 @@ import org.pmiops.workbench.model.ReportingUser;
  * dataset.
  */
 public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUser> {
-  ABOUT_YOU("about_you", ReportingUser::getAboutYou),
   ACCESS_TIER_SHORT_NAMES("access_tier_short_names", ReportingUser::getAccessTierShortNames),
   AREA_OF_RESEARCH("area_of_research", ReportingUser::getAreaOfResearch),
   COMPLIANCE_TRAINING_BYPASS_TIME(
@@ -26,7 +25,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       u -> toInsertRowString(u.getComplianceTrainingExpirationTime())),
   CONTACT_EMAIL("contact_email", ReportingUser::getContactEmail),
   CREATION_TIME("creation_time", u -> toInsertRowString(u.getCreationTime())),
-  CURRENT_POSITION("current_position", ReportingUser::getCurrentPosition),
   DATA_USE_AGREEMENT_BYPASS_TIME(
       "data_use_agreement_bypass_time", u -> toInsertRowString(u.getDataUseAgreementBypassTime())),
   DATA_USE_AGREEMENT_COMPLETION_TIME(
@@ -47,8 +45,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       "first_registration_completion_time",
       u -> toInsertRowString(u.getFirstRegistrationCompletionTime())),
   FIRST_SIGN_IN_TIME("first_sign_in_time", u -> toInsertRowString(u.getFirstSignInTime())),
-  FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE(
-      "free_tier_credits_limit_days_override", ReportingUser::getFreeTierCreditsLimitDaysOverride),
   FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE(
       "free_tier_credits_limit_dollars_override",
       ReportingUser::getFreeTierCreditsLimitDollarsOverride),

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -120,6 +121,7 @@ public class ProfileServiceTest extends SpringTest {
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({
+    AccessModuleService.class,
     AccessTierService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,

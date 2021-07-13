@@ -47,8 +47,6 @@ public class AuthDomainControllerTest extends SpringTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String ORGANIZATION = "Test";
-  private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
 
   @Autowired private UserDao userDao;
@@ -154,8 +152,6 @@ public class AuthDomainControllerTest extends SpringTest {
     user.setFamilyName(FAMILY_NAME);
     user.setUsername(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
-    user.setOrganization(ORGANIZATION);
-    user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
     return userDao.save(user);

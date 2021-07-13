@@ -1,5 +1,4 @@
 import { Page } from 'puppeteer';
-import { PageUrl } from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
@@ -40,8 +39,8 @@ export default abstract class AuthenticatedPage extends BasePage {
   /**
    * Load AoU page URL.
    */
-  async loadPageUrl(url: PageUrl): Promise<void> {
-    await this.gotoUrl(url.toString());
+  async loadPageUrl(url: string): Promise<void> {
+    await this.gotoUrl(url);
     await this.waitForLoad();
   }
 

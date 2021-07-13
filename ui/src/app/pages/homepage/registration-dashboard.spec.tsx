@@ -26,12 +26,10 @@ describe('RegistrationDashboard', () => {
       updateCache: jest.fn()
     });
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true,
       enableRasLoginGovLinking: false,
     }});
     props = {

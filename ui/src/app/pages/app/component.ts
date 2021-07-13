@@ -1,27 +1,33 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
-  Event as RouterEvent,
   NavigationEnd,
   NavigationError,
   Router,
+  RouterEvent,
 } from '@angular/router';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
+import * as fp from 'lodash/fp';
 
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {initializeAnalytics} from 'app/utils/analytics';
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
 import {
+  currentWorkspaceStore,
+  nextWorkspaceWarmupStore,
   queryParamsStore,
   routeConfigDataStore,
+  setSidebarActiveIconStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
+import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
-import {configApi} from 'app/services/swagger-fetch-clients';
+import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from 'app/components/help-sidebar';
+import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import outdatedBrowserRework from 'outdated-browser-rework';
 
 @Component({
@@ -30,11 +36,14 @@ import outdatedBrowserRework from 'outdated-browser-rework';
     '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   isSignedIn = false;
   initialSpinner = true;
   cookiesEnabled = true;
   overriddenUrl: string = null;
+  pollAborter = new AbortController();
+
+  private subscriptions = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -81,7 +90,7 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(buildPageTitleForEnvironment());
     }
 
-    this.router.events.subscribe((e: RouterEvent) => {
+    this.subscriptions.push(this.router.events.subscribe((e: RouterEvent) => {
       this.setTitleFromRoute(e);
       if (e instanceof NavigationEnd || e instanceof NavigationError) {
         // Terminal navigation events.
@@ -93,14 +102,97 @@ export class AppComponent implements OnInit {
         queryParamsStore.next(queryParams);
         routeConfigDataStore.next(routeConfig.data);
       }
-    });
+    }));
 
-    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+    this.subscriptions.push(routeDataStore.subscribe(({title, pathElementForTitle}) => {
       this.zone.run(() => {
         this.setTitleFromReactRoute({title, pathElementForTitle});
         this.initialSpinner = false;
       });
-    });
+    }));
+
+
+    // TODO angular2react: this active icon stuff can move into help-sidebar once it reaches a state where it
+    // doesn't remount on every navigation event
+    setSidebarActiveIconStore.next(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+
+    this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
+      if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
+        setSidebarActiveIconStore.next(null);
+      }
+    }));
+
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
+      // due to urlParamsStore being updated multiple times while rendering a route.
+      // What we really want to subscribe to here is an event that triggers on navigation start or end
+      // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
+      // since multiple update recent workspace requests (from the same page) within the span of 1 second should
+      // almost always be for the same workspace and extremely rarely for different workspaces
+      .subscribe(({ns, wsid}) => {
+        if (ns && wsid) {
+          workspacesApi().updateRecentWorkspaces(ns, wsid);
+        }
+      }));
+
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid}) => {
+        currentWorkspaceStore.next(null);
+
+        // This needs to happen for testing because we seed the urlParamsStore with {}.
+        // Otherwise it tries to make an api call with undefined, because the component
+        // initializes before we have access to the route.
+        if (!ns || !wsid) {
+          return Promise.resolve(null);
+        }
+
+        // In a handful of situations - namely on workspace creation/clone,
+        // the application will preload the next workspace to avoid a redundant
+        // refetch here.
+        const nextWs = nextWorkspaceWarmupStore.getValue();
+        nextWorkspaceWarmupStore.next(undefined);
+        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+          return Promise.resolve(nextWs);
+        }
+        return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+          return {
+            ...wsResponse.workspace,
+            accessLevel: wsResponse.accessLevel
+          };
+        });
+      })
+      .subscribe(async(workspace) => {
+        if (workspace === null) {
+          // This handles the empty urlParamsStore story.
+          return;
+        }
+        currentWorkspaceStore.next(workspace);
+        runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+        this.pollAborter.abort();
+        this.pollAborter = new AbortController();
+        try {
+          await LeoRuntimeInitializer.initialize({
+            workspaceNamespace: workspace.namespace,
+            pollAbortSignal: this.pollAborter.signal,
+            maxCreateCount: 0,
+            maxDeleteCount: 0,
+            maxResumeCount: 0
+          });
+        } catch (e) {
+          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+          // initialization here.
+          if (!(e instanceof ExceededActionCountError)) {
+            throw e;
+          }
+        }
+      })
+    );
+
+
     initializeAnalytics();
   }
 
@@ -175,6 +267,10 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   private async loadConfig() {

@@ -24,7 +24,6 @@ import com.google.common.primitives.Doubles;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -120,12 +119,6 @@ public class FreeTierBillingServiceTest {
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    // set an arbitrary registration time
-
-    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(100));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
 
     // check that we have not alerted before the threshold
 
@@ -740,7 +733,6 @@ public class FreeTierBillingServiceTest {
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
     user.setUsername(email);
-    user.setFirstRegistrationCompletionTime(Timestamp.from(START_INSTANT));
     return userDao.save(user);
   }
 

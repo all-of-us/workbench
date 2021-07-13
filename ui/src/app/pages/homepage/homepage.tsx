@@ -14,6 +14,7 @@ import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
@@ -70,7 +71,7 @@ export const styles = reactStyles({
   },
 });
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -128,6 +129,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.checkWorkspaces();
     this.validateNihToken();
     this.validateRasLoginGovLink();
@@ -233,9 +235,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
-        dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
+        dataUserCodeOfConductCompleted:
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
-            .completionTimestamp(profile)))() : true)
+            .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 

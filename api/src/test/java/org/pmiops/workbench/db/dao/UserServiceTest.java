@@ -29,6 +29,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -434,9 +435,27 @@ public class UserServiceTest extends SpringTest {
   }
 
   @Test
+  public void testSubmitTermsOfService_illegalTosVersion() {
+    // Testing NULL input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
+        });
+
+    // Testing not current term input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
+        });
+  }
+
+  @Test
   public void testSubmitTermsOfService() {
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }

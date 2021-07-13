@@ -560,6 +560,7 @@ paths:
       tags:
       - user
       description: >
+        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
         Return a page of users matching a search term.
         Used by autocomplete for workspace sharing.
       operationId: user
@@ -593,6 +594,50 @@ paths:
           user's email.
         type: string
         required: false
+  "/v1/userSearch/{accessTierShortName}/{term}":
+    get:
+      tags:
+        - user
+      description: >
+        Return a page of users matching a search term and an access tier.
+        Used by autocomplete for workspace sharing.
+      operationId: userSearch
+      responses:
+        200:
+          description: The user information matching supplied search terms
+          schema:
+            "$ref": "#/definitions/UserResponse"
+      parameters:
+        - in: path
+          name: accessTierShortName
+          description: The shortName corresponding to an access tier to search in. Requesting user
+            must also be a member of this tier.
+          required: true
+          type: string
+        - in: path
+          name: term
+          description: String to find in user's name or email address. Search is a case-insensitive
+            substring match.
+          required: true
+          type: string
+        - in: query
+          name: pageToken
+          description: 'Pagination token retrieved from a previous call to user; used
+         for retrieving additional pages of results.'
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: 'Maximum number of results to return in a response. Defaults
+         to 10.'
+          type: integer
+          required: false
+        - in: query
+          name: sortOrder
+          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
+            user's email.
+          type: string
+          required: false
   "/v1/user/billingAccounts":
     get:
       tags:
@@ -4192,6 +4237,14 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
+      enableAccessModuleRewrite:
+        type: boolean
+        default: false
+        description: Whether to use the new rewrite access module.
+      enableStandardSourceDomains:
+        type: boolean
+        default: false
+        description: Whether to show separate source and standard domains
       rasHost:
         type: string
         description: The RAS base host name.
@@ -4714,6 +4767,8 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - PROFILE_CONFIRMATION
+    - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
@@ -5413,19 +5468,10 @@ definitions:
       institutionName:
         description: Verified institution name
         type: string
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
       firstSignInTime:
         type: integer
         format: int64
       creationTime:
-        type: integer
-        format: int64
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-      idVerificationCompletionTime:
         type: integer
         format: int64
       twoFactorAuthBypassTime:
@@ -5450,15 +5496,6 @@ definitions:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-      emailVerificationCompletionTime:
         type: integer
         format: int64
       dataUseAgreementBypassTime:
@@ -5605,11 +5642,6 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user first changed from Unregistered to Registered
-          data access level. May be null if the user has never done so.'
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
@@ -8479,9 +8511,6 @@ definitions:
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
-      aboutYou:
-        type: string
-        description: User's description of themselves.
       accessTierShortNames:
         description: |-
           Short names of access tiers available to the user, comma-delimited if multiple.
@@ -8511,9 +8540,6 @@ definitions:
         type: string
         format: date-time
         description: Timestamp of account creation.
-      currentPosition:
-        type: string
-        description: User's current role/position.
       dataUseAgreementBypassTime:
         type: string
         format: date-time
@@ -8556,10 +8582,6 @@ definitions:
         type: string
         format: date-time
         description: Time user first signed into the Workbench with a GSuite account.
-      freeTierCreditsLimitDaysOverride:
-        type: integer
-        format: int32
-        description: Override value for the default free tier time limit (days).
       freeTierCreditsLimitDollarsOverride:
         type: number
         format: double
