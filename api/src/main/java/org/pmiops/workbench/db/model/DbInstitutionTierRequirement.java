@@ -80,8 +80,10 @@ public class DbInstitutionTierRequirement {
     return this;
   }
 
-  // omit ID field from equality so equivalent objects match regardless
-  // of whether they are actually present in the DB
+  /**
+   * Omits ID field from equality so equivalent objects match regardless of whether they are
+   * actually present in the DB.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
