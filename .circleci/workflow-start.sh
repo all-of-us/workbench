@@ -5,7 +5,6 @@ set -xv
 
 # CIRCLECI_TOKEN is a personal token.
 # https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
-token=process.env.CIRCLECI_TOKEN
 branch='master';
 slug="gh/all-of-us"
 
@@ -14,7 +13,7 @@ slug="gh/all-of-us"
 workflow_active_status=("running" "failing")
 
 base_url="https://circleci.com/api/v2"
-curl_headers="-H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Circle-Token: ${token}\""
+curl_headers="-H \"Accept: application/json\" -H \"Content-Type: application/json\" -H \"Circle-Token: ${CIRCLECI_TOKEN}\""
 
 # Get list of recently built pipelines. Save results to json file.
 pipeline_json="/tmp/master_branch_pipelines.json"
