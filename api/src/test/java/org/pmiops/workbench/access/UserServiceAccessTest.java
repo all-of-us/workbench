@@ -223,46 +223,6 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
-  // This should be removed after June 30 2021
-  @Test
-  public void testGracePeriod() {
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
-    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
-    Instant julyFirst = Instant.parse("2021-07-01T01:00:00.00Z");
-    PROVIDED_CLOCK.setInstant(mayFirst);
-
-    // initialize user as registered with generic values including bypassed DUA
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // add a proper DUA completion which will expire soon, but remove DUA bypass
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    dbUser = updateUserWithRetries(this::removeDuaBypass);
-
-    // User is compliant
-    assertRegisteredTierEnabled(dbUser);
-
-    // Simulate time passing, user is granted a grace period
-    advanceClockDays(providedWorkbenchConfig.accessRenewal.expiryDays);
-    dbUser = updateUserWithRetries(Function.identity());
-    assertRegisteredTierEnabled(dbUser);
-
-    // The grace period is over, and the user loses access
-    PROVIDED_CLOCK.setInstant(julyFirst);
-    dbUser = updateUserWithRetries(Function.identity());
-    assertRegisteredTierDisabled(dbUser);
-
-    // The user updates their agreement, they are compliant again
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-              return user;
-            });
-    assertRegisteredTierEnabled(dbUser);
-  }
-
   // Ensure that we don't enforce access renewal in environments where the flag is not set:
   // make the user expire in all of the ways possible by access renewal, and test that none
   // of these cause noncompliance.
@@ -960,7 +920,7 @@ public class UserServiceAccessTest {
   }
 
   private void advanceClockDays(long days) {
-    PROVIDED_CLOCK.increment(Duration.ofDays(days).toMillis());
+    PROVIDED_CLOCK.increment(daysPlusSome(days).toMillis());
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
