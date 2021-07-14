@@ -20,6 +20,7 @@ public class DbCriteriaMenu {
   private String name;
   private boolean group;
   private long sortOrder;
+  private long version;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -95,6 +96,15 @@ public class DbCriteriaMenu {
     this.sortOrder = sortOrder;
   }
 
+  @Column(name = "version")
+  public long getVersion() {
+    return version;
+  }
+
+  public void setVersion(long version) {
+    this.version = version;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -107,6 +117,7 @@ public class DbCriteriaMenu {
     return parentId == that.parentId
         && group == that.group
         && sortOrder == that.sortOrder
+        && version == that.version
         && Objects.equals(category, that.category)
         && Objects.equals(domainId, that.domainId)
         && Objects.equals(type, that.type)
@@ -115,7 +126,7 @@ public class DbCriteriaMenu {
 
   @Override
   public int hashCode() {
-    return Objects.hash(parentId, category, domainId, type, name, group, sortOrder);
+    return Objects.hash(parentId, category, domainId, type, name, group, sortOrder, version);
   }
 
   @Override
@@ -136,6 +147,7 @@ public class DbCriteriaMenu {
     private String name;
     private boolean group;
     private long sortOrder;
+    private long version;
 
     private Builder() {}
 
@@ -179,6 +191,11 @@ public class DbCriteriaMenu {
       return this;
     }
 
+    public DbCriteriaMenu.Builder addVersion(long version) {
+      this.version = version;
+      return this;
+    }
+
     public DbCriteriaMenu build() {
       DbCriteriaMenu dbCriteriaMenu = new DbCriteriaMenu();
       dbCriteriaMenu.setId(this.id);
@@ -189,6 +206,7 @@ public class DbCriteriaMenu {
       dbCriteriaMenu.setName(this.name);
       dbCriteriaMenu.setGroup(this.group);
       dbCriteriaMenu.setSortOrder(this.sortOrder);
+      dbCriteriaMenu.setVersion(this.version);
       return dbCriteriaMenu;
     }
   }

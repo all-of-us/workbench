@@ -16,13 +16,16 @@ import org.springframework.test.annotation.DirtiesContext;
 public class CriteriaMenuDaoTest extends SpringTest {
 
   @Autowired private CriteriaMenuDao criteriaMenuDao;
-  private DbCriteriaMenu dbCriteriaMenuParent;
-  private DbCriteriaMenu dbCriteriaMenuParent1;
-  private DbCriteriaMenu dbCriteriaMenuChild;
+  private DbCriteriaMenu version1DbCriteriaMenuParent;
+  private DbCriteriaMenu version1AnotherDbCriteriaMenuParent;
+  private DbCriteriaMenu version1DbCriteriaMenuChild;
+  private DbCriteriaMenu version2DbCriteriaMenuParent;
+  private DbCriteriaMenu version2AnotherDbCriteriaMenuParent;
+  private DbCriteriaMenu version2DbCriteriaMenuChild;
 
   @BeforeEach
   public void setUp() {
-    dbCriteriaMenuParent =
+    version1DbCriteriaMenuParent =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
                 .addParentId(0L)
@@ -31,39 +34,90 @@ public class CriteriaMenuDaoTest extends SpringTest {
                 .addGroup(true)
                 .addName("Condition")
                 .addSortOrder(2L)
+                .addVersion(1)
                 .build());
-    dbCriteriaMenuParent1 =
+    version1AnotherDbCriteriaMenuParent =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
                 .addParentId(0L)
                 .addCategory("Program Data")
                 .addDomainId("Procedure")
-                .addGroup(true)
+                .addGroup(false)
                 .addName("Procedure")
                 .addSortOrder(1L)
+                .addVersion(1)
                 .build());
-    dbCriteriaMenuChild =
+    version1DbCriteriaMenuChild =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
-                .addParentId(dbCriteriaMenuParent.getId())
+                .addParentId(version1DbCriteriaMenuParent.getId())
                 .addCategory("Program Data")
                 .addDomainId("Condition")
                 .addType("type")
                 .addGroup(false)
                 .addName("Condition")
                 .addSortOrder(1L)
+                .addVersion(1)
+                .build());
+    version2DbCriteriaMenuParent =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Condition")
+                .addGroup(true)
+                .addName("Condition")
+                .addSortOrder(2L)
+                .addVersion(2)
+                .build());
+    version2AnotherDbCriteriaMenuParent =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Procedure")
+                .addGroup(false)
+                .addName("Procedure")
+                .addSortOrder(1L)
+                .addVersion(2)
+                .build());
+    version2DbCriteriaMenuChild =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(version1DbCriteriaMenuParent.getId())
+                .addCategory("Program Data")
+                .addDomainId("Condition")
+                .addType("type")
+                .addGroup(false)
+                .addName("Condition")
+                .addSortOrder(1L)
+                .addVersion(2)
                 .build());
   }
 
   @Test
-  public void findByParentIdOrderBySortOrderAscParent() {
-    assertThat(criteriaMenuDao.findByParentIdOrderBySortOrderAsc(0L))
-        .isEqualTo(ImmutableList.of(dbCriteriaMenuParent1, dbCriteriaMenuParent));
+  public void findCriteriaMenuCurrentVersionParent() {
+    assertThat(criteriaMenuDao.findCriteriaMenuCurrentVersion(0L))
+        .isEqualTo(
+            ImmutableList.of(version2AnotherDbCriteriaMenuParent, version2DbCriteriaMenuParent));
   }
 
   @Test
-  public void findByParentIdOrderBySortOrderAscChild() {
-    assertThat(criteriaMenuDao.findByParentIdOrderBySortOrderAsc(1L))
-        .isEqualTo(ImmutableList.of(dbCriteriaMenuChild));
+  public void findCriteriaMenuCurrentVersionChild() {
+    assertThat(criteriaMenuDao.findCriteriaMenuCurrentVersion(1L))
+        .isEqualTo(ImmutableList.of(version2DbCriteriaMenuChild));
+  }
+
+  @Test
+  public void findCriteriaMenuPreviousVersionParent() {
+    assertThat(criteriaMenuDao.findCriteriaMenuPreviousVersion(0L))
+        .isEqualTo(
+            ImmutableList.of(version1AnotherDbCriteriaMenuParent, version1DbCriteriaMenuParent));
+  }
+
+  @Test
+  public void findCriteriaMenuPreviousVersionChild() {
+    assertThat(criteriaMenuDao.findCriteriaMenuPreviousVersion(1L))
+        .isEqualTo(ImmutableList.of(version1DbCriteriaMenuChild));
   }
 }
