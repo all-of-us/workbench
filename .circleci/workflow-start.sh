@@ -1,27 +1,64 @@
-#!/bin/bash -x
+#! /bin/bash
 
-# set -eo pipefail
+set -e
+set -o pipefail
+set -o functrace
 set -xv
+
+#********************
+# VARIABLES
+# *******************
+api_root="https://circleci.com/api/v2/"
+branch='master';
+project_slug="gh/all-of-us"
 
 # CIRCLECI_TOKEN is a personal token.
 # https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
-branch='master';
-slug="gh/all-of-us"
+
 
 # v2 workflow api provides status, but not the pipeline api.
 # https://circleci.com/docs/2.0/workflows/#states
 workflow_active_status=("running" "failing")
 
-base_url="https://circleci.com/api/v2"
-curl_headers="-H 'Accept: application/json' -H 'Content-Type: application/json' -H 'Circle-Token: ${CIRCLECI_TOKEN}'"
+#********************
+# FUNCTIONS
+# *******************
+
+post () {
+  local url="${api_root}${1}"
+  printf "HTTP POST ${url}\n\n" > /dev/tty
+
+  curl -su ${circle_token}: -X POST \
+       -H "Content-Type: application/json" \
+       -H "Circle-Token: ${CIRCLECI_TOKEN}" \
+       -d "$2" \
+       "${url}"
+}
+
+get () {
+  local url="${api_root}${1}"
+  printf "HTTP GET ${url}\n\n" > /dev/tty
+  curl -su ${circle_token}: \
+       -H "Content-Type: application/json" \
+       -H "Circle-Token: ${CIRCLECI_TOKEN}" \
+       "${url}"
+}
+
+pretty_json () {
+  # jq . <<< "${result}" | sed 's/^/  /'
+  echo "\`\`\`"
+  jq . <<< "${result}"
+  echo "\`\`\`"
+}
+
 
 # Get list of recently built pipelines. Save results to json file.
 pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
-  curl -X GET -f --url "${base_url}/pipeline?org-slug=${slug}" \
-   -H "Accept: application/json" \
-   -H "Content-Type: application/json" \
-   -H "Circle-Token: ${CIRCLECI_TOKEN}" | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
+  get_path="${api_root}pipeline?org-slug=${project_slug}"
+  step "GET list of pipelines"
+  get_result=$(get $get_path)
+  echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
   echo "Saved ${pipeline_json}"
   cat ${pipeline_json}
 }
