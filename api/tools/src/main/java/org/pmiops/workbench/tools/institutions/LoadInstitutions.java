@@ -9,7 +9,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.institution.InstitutionEmailAddressMapperImpl;
 import org.pmiops.workbench.institution.InstitutionEmailDomainMapperImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
