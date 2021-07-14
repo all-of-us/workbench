@@ -20,7 +20,6 @@ project_slug="gh/all-of-us"
 # https://circleci.com/docs/2.0/workflows/#states
 workflow_active_status=("running" "failing")
 
-pipeline_json="/tmp/master_branch_pipelines.json"
 
 #********************
 # FUNCTIONS
@@ -54,26 +53,30 @@ pretty_json () {
 
 
 # Get list of recently built pipelines. Save results to json file.
-fetch_pipelines() {
-  get_path="pipeline?org-slug=${project_slug}"
+pipeline_json="/tmp/master_branch_pipelines.json"
+fetch_pipeline_ids() {
+  local get_path="pipeline?org-slug=${project_slug}"
   printf "GET list of pipelines"
-  get_result=$(get $get_path)
-  echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
-  printf "Saved ${pipeline_json}"
+  local get_result=$(get $get_path)
+  echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][] | [{created_at: .created_at, id: .id, number: .number}]' > ${pipeline_json}
   cat ${pipeline_json}
-  pipeline_id=$(echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' | jq -r .id)
-  printf pipeline_id
 }
 
-get_workflow () {
-  GET_PIPELINE_OUTPUT=$(curl --silent -X GET \
-  "https://circleci.com/api/v2/pipeline/${PIPELINE_ID}?circle-token=${CIRCLECI_TOKEN}" \
-  -H 'Accept: */*' \
-  -H 'Content-Type: application/json')
-  WORKFLOW_ID=$(echo $GET_PIPELINE_OUTPUT | jq -r .items[0].id)
-  echo "The created worlkflow is ${WORKFLOW_ID}"
-  echo "Link to workflow is"
-  echo "https://circleci.com/workflow-run/${WORKFLOW_ID}"
+fetch_pipeline_workflow () {
+  local get_path="pipeline/{${1}}/workflow"
+  printf "GET workflow in pipeline id '${$1}'"
+  local get_result=$(get $get_path)
+  workflow_ids=$(echo $get_result | jq -r .items[].id)
+  printf workflow_ids
 }
 
-fetch_pipelines
+fetch_pipeline_ids
+pipeline_ids=$(echo $pipeline_json | jq -r .id)
+printf pipeline_ids
+
+pipeline_ids=(${pipeline_ids[@]//\'/})
+for id in ${pipeline_ids[@]}; do
+  fetch_pipeline_workflow(id)
+done
+
+
