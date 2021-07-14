@@ -3,13 +3,9 @@ package org.pmiops.workbench.access;
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -17,13 +13,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -105,8 +98,9 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
-   return  userAccessModuleDao.getAllByUser(user).stream().map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).get()))
-    .collect(Collectors.toList());
+    return userAccessModuleDao.getAllByUser(user).stream()
+        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .collect(Collectors.toList());
   }
 
   private static DbAccessModule getDbAccessModuleFromApi(
@@ -120,22 +114,40 @@ public class AccessModuleServiceImpl implements AccessModuleService {
                     "There is no access module named: " + apiAccessModule.toString()));
   }
 
+  /**
+   * Calculates the module expiration time.
+   *
+   * <p>The value is only present when:
+   *
+   * <ul>
+   *   <li>The module is expirable.
+   *   <li>The module was completed(CompletionTime is not null).
+   *   <li>The module is not bypassed(BypassTime is null).
+   *   <li>Access annual renewal is enabled(enableAccessRenewal is true).
+   * </ul>
+   */
   private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
     // Don't set expiration time if CompletionTime is null OR BypassTime is NOT null OR
     // enableAccessRenewal not enabled.
-    if(dbUserAccessModule.getCompletionTime() == null || dbUserAccessModule.getBypassTime() != null && !configProvider.get().access.enableAccessRenewal) {
+    if (!dbUserAccessModule.getAccessModule().getExpirable()
+        || dbUserAccessModule.getCompletionTime() == null
+        || dbUserAccessModule.getBypassTime() != null
+            && !configProvider.get().access.enableAccessRenewal) {
       return Optional.empty();
     }
-
-    return Optional.of(extractExpirationTimestamp(dbUserAccessModule, configProvider.get().accessRenewal.expiryDays));
+    return Optional.of(
+        extractExpirationTimestamp(
+            dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
   }
 
-  @VisibleForTesting
-  static Timestamp extractExpirationTimestamp(DbUserAccessModule dbUserAccessModule, Long expiryDays) {
+  /**
+   * Extracts module expiration time from completionTime and expiry days: completionTime plus
+   * expiryDays in millseconds.
+   */
+  public static Timestamp extractExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
     Preconditions.checkNotNull(
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-
-    return new Timestamp(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs);
+    return new Timestamp(completionTime.getTime() + expiryDaysInMs);
   }
 }

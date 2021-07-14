@@ -21,10 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
-import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.access.UserAccessModuleMapper;
-import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -118,7 +115,6 @@ public class ProfileServiceTest extends SpringTest {
 
   @TestConfiguration
   @Import({
-      AccessModuleServiceImpl.class,
     AddressMapperImpl.class,
     CommonConfig.class,
     CommonMappers.class,
@@ -126,15 +122,15 @@ public class ProfileServiceTest extends SpringTest {
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    UserAccessModuleMapperImpl.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
   })
   @MockBean({
     AccessTierService.class,
+    AccessModuleService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
-      UserServiceAuditor.class,
+    UserServiceAuditor.class,
   })
   static class Configuration {
 

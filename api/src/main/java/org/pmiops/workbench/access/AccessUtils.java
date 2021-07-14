@@ -2,11 +2,8 @@ package org.pmiops.workbench.access;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import java.util.List;
-import java.util.Optional;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.model.AccessModule;
 
 /** Utilities for RW Access related functionalities. */
@@ -26,19 +23,19 @@ public class AccessUtils {
 
   private static final BiMap<BypassTimeTargetProperty, AccessModuleName>
       AUDIT_TO_STORAGE_ACCESS_MODULE =
-      ImmutableBiMap.<BypassTimeTargetProperty, AccessModuleName>builder()
-          .put(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME, AccessModuleName.ERA_COMMONS)
-          .put(
-              BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
-              AccessModuleName.RT_COMPLIANCE_TRAINING)
-          .put(
-              BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
-              AccessModuleName.TWO_FACTOR_AUTH)
-          .put(BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
-          .put(
-              BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-              AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-          .build();
+          ImmutableBiMap.<BypassTimeTargetProperty, AccessModuleName>builder()
+              .put(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME, AccessModuleName.ERA_COMMONS)
+              .put(
+                  BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
+                  AccessModuleName.RT_COMPLIANCE_TRAINING)
+              .put(
+                  BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+                  AccessModuleName.TWO_FACTOR_AUTH)
+              .put(BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
+              .put(
+                  BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
+                  AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+              .build();
 
   public static AccessModuleName clientAccessModuleToStorage(AccessModule s) {
     return CLIENT_TO_STORAGE_ACCESS_MODULE.get(s);

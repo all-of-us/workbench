@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -139,7 +138,8 @@ public class ProfileService {
         new ProfileRenewableAccessModules()
             .modules(renewableAccessModuleStatus)
             .anyModuleHasExpired(
-                renewableAccessModuleStatus.stream().anyMatch(RenewableAccessModuleStatus::getHasExpired));
+                renewableAccessModuleStatus.stream()
+                    .anyMatch(RenewableAccessModuleStatus::getHasExpired));
 
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getClientAccessModuleStatus(userLite);
@@ -147,7 +147,11 @@ public class ProfileService {
         new ProfileAccessModules()
             .modules(accessModuleStatuses)
             .anyModuleHasExpired(
-                accessModuleStatuses.stream().anyMatch(a -> Instant.now().toEpochMilli() > a.getExpirationEpochMillis()));
+                accessModuleStatuses.stream()
+                    .anyMatch(
+                        a ->
+                            (a.getExpirationEpochMillis() != null
+                                && Instant.now().toEpochMilli() > a.getExpirationEpochMillis())));
 
     return profileMapper.toModel(
         user,
