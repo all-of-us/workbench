@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @Import({
-  AccessTierServiceImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
