@@ -56,7 +56,6 @@ public class UserAccessModuleMapperTest extends SpringTest {
         .isEqualTo(
             new AccessModuleStatus()
                 .moduleName(AccessModule.ERA_COMMONS)
-                .expirationEpochMillis(expirationTime.getTime())
                 .completionEpochMillis(completionTime.getTime()));
   }
 }
