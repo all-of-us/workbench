@@ -56,10 +56,10 @@ pretty_json () {
 pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
   get_path="${api_root}pipeline?org-slug=${project_slug}"
-  step "GET list of pipelines"
+  printf "GET list of pipelines"
   get_result=$(get $get_path)
   echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
-  echo "Saved ${pipeline_json}"
+  printf "Saved ${pipeline_json}"
   cat ${pipeline_json}
 }
 
