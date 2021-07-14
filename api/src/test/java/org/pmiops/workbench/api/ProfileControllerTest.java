@@ -33,6 +33,7 @@ import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -189,6 +190,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     PageVisitMapperImpl.class,
     ProfileController.class,
     ProfileMapperImpl.class,
+    UserAccessModuleMapperImpl.class,
     ProfileService.class,
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
