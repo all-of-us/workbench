@@ -1,5 +1,9 @@
 package org.pmiops.workbench.access;
 
+import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
+import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -41,33 +45,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   private final UserServiceAuditor userServiceAuditor;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserAccessModuleMapper userAccessModuleMapper;
-
-  private static final BiMap<AccessModule, AccessModuleName> CLIENT_TO_STORAGE_ACCESS_MODULE =
-      ImmutableBiMap.<AccessModule, AccessModuleName>builder()
-          .put(AccessModule.TWO_FACTOR_AUTH, AccessModuleName.TWO_FACTOR_AUTH)
-          .put(AccessModule.ERA_COMMONS, AccessModuleName.ERA_COMMONS)
-          .put(AccessModule.COMPLIANCE_TRAINING, AccessModuleName.RT_COMPLIANCE_TRAINING)
-          .put(AccessModule.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
-          .put(AccessModule.DATA_USE_AGREEMENT, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-          .put(AccessModule.PUBLICATION_CONFIRMATION, AccessModuleName.PUBLICATION_CONFIRMATION)
-          .put(AccessModule.PROFILE_CONFIRMATION, AccessModuleName.PROFILE_CONFIRMATION)
-          .build();
-
-  private static final BiMap<BypassTimeTargetProperty, AccessModuleName>
-      AUDIT_TO_STORAGE_ACCESS_MODULE =
-          ImmutableBiMap.<BypassTimeTargetProperty, AccessModuleName>builder()
-              .put(BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME, AccessModuleName.ERA_COMMONS)
-              .put(
-                  BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
-                  AccessModuleName.RT_COMPLIANCE_TRAINING)
-              .put(
-                  BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
-                  AccessModuleName.TWO_FACTOR_AUTH)
-              .put(BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
-              .put(
-                  BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-                  AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-              .build();
 
   @Autowired
   public AccessModuleServiceImpl(
@@ -149,19 +126,16 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     if(dbUserAccessModule.getCompletionTime() == null || dbUserAccessModule.getBypassTime() != null && !configProvider.get().access.enableAccessRenewal) {
       return Optional.empty();
     }
-    Long expiryDays = configProvider.get().accessRenewal.expiryDays;
+
+    return Optional.of(extractExpirationTimestamp(dbUserAccessModule, configProvider.get().accessRenewal.expiryDays));
+  }
+
+  @VisibleForTesting
+  static Timestamp extractExpirationTimestamp(DbUserAccessModule dbUserAccessModule, Long expiryDays) {
     Preconditions.checkNotNull(
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
 
-    return Optional.of(new Timestamp(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs));
-  }
-
-  private static AccessModuleName clientAccessModuleToStorage(AccessModule s) {
-    return CLIENT_TO_STORAGE_ACCESS_MODULE.get(s);
-  }
-
-  private static BypassTimeTargetProperty auditAccessModuleFromStorage(AccessModuleName s) {
-    return AUDIT_TO_STORAGE_ACCESS_MODULE.inverse().get(s);
+    return new Timestamp(dbUserAccessModule.getCompletionTime().getTime() + expiryDaysInMs);
   }
 }

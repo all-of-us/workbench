@@ -5710,7 +5710,7 @@ definitions:
     properties:
       moduleName:
         "$ref": "#/definitions/AccessModule"
-      completetionEpochMillis:
+      completionEpochMillis:
         type: integer
         format: int64
         description: When this module completed

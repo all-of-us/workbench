@@ -5,8 +5,10 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -26,6 +28,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -177,6 +180,59 @@ public class AccessModuleServiceTest extends SpringTest {
             accessModuleService.updateBypassTime(
                 user.getUserId(), AccessModule.PROFILE_CONFIRMATION, true));
   }
+
+  @Test
+  public void testGetClientAccessModuleStatus() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    DbAccessModule eRAModule =
+        accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+
+    // 2FA moduleL: Completion time + expiryDays is before current timestamp, user is supposed to
+    // be expired. But they have byPassTime present, so this module is not expired.
+    Timestamp twoFactorCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    Timestamp twoFactorBypassTime = Timestamp.from(now);
+    DbUserAccessModule twoFactorAuthUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setUser(user)
+            .setBypassTime(twoFactorBypassTime).setCompletionTime(twoFactorCompletionTime);
+    AccessModuleStatus expected2FAModuleStatus = new AccessModuleStatus().moduleName(AccessModule.TWO_FACTOR_AUTH)
+        .bypassEpochMillis(twoFactorBypassTime.getTime()).completionEpochMillis(twoFactorCompletionTime.getTime());
+
+    // CT Training module: Completion time + expiryDays is 10 days ahead current time, this module
+    // expired for 10 days.
+    Timestamp rtTrainingCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    DbUserAccessModule rtTrainingAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(rtTrainingModule)
+            .setUser(user)
+            .setCompletionTime(rtTrainingCompletionTime);
+    AccessModuleStatus expectedRtTrainingModuleStatus = new AccessModuleStatus().moduleName(AccessModule.COMPLIANCE_TRAINING)
+        .completionEpochMillis(rtTrainingCompletionTime.getTime()).setExpirationEpochMillis(extractExpirationTimestamp(rtTrainingAccessModule));
+
+    // ERA module: Completion time + expiryDays is 10 days after current time, this module
+    // will be expired in 10 days.
+    Timestamp eRACompletionTime= Timestamp.from(now.plus(expiryDays + 10, ChronoUnit.DAYS));
+    DbUserAccessModule eraAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(eRAModule)
+            .setUser(user)
+            .setCompletionTime(eRACompletionTime);
+    AccessModuleStatus expected2FAModuleStatus = new AccessModuleStatus().moduleName(AccessModule.TWO_FACTOR_AUTH)
+        .bypassEpochMillis(twoFactorBypassTime.getTime()).completionEpochMillis(twoFactorCompletionTime.getTime());
+
+    userAccessModuleDao.saveAll(ImmutableList.of(twoFactorAuthUserAccessModule,rtTrainingAccessModule, eraAccessModule));
+
+    accessModuleService.getClientAccessModuleStatus(user);
+  }
+
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(
       @Nullable Timestamp complianceTrainingBypassTime) {

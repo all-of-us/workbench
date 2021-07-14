@@ -21,8 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.UserAccessModuleMapper;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -30,6 +34,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -109,8 +114,11 @@ public class ProfileServiceTest extends SpringTest {
   // enables access to the logged in user
   private static DbUser loggedInUser;
 
+  private List<DbAccessModule> dbAccessModules;
+
   @TestConfiguration
   @Import({
+      AccessModuleServiceImpl.class,
     AddressMapperImpl.class,
     CommonConfig.class,
     CommonMappers.class,
@@ -118,14 +126,15 @@ public class ProfileServiceTest extends SpringTest {
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class
+    UserAccessModuleMapperImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class,
   })
   @MockBean({
-    AccessModuleService.class,
     AccessTierService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
+      UserServiceAuditor.class,
   })
   static class Configuration {
 
