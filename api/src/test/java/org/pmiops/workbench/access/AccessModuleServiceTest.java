@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.access.AccessModuleServiceImpl.extractExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessModuleServiceImpl.driveExpirationTimestamp;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -213,47 +213,47 @@ public class AccessModuleServiceTest extends SpringTest {
             .moduleName(AccessModule.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 
-    // Profile confirmation module: Completion time + expiryDays is 10 days before current time,
-    // but bypass time is not null, so no bypass time.
-    Timestamp profileCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
-    Timestamp ProfileBypassTime = Timestamp.from(now);
-    DbUserAccessModule profileAccessModule =
-        new DbUserAccessModule()
-            .setAccessModule(profileConfirmModule)
-            .setUser(user)
-            .setBypassTime(ProfileBypassTime)
-            .setCompletionTime(profileCompletionTime);
-    AccessModuleStatus expectedProfileModuleStatus =
-        new AccessModuleStatus()
-            .moduleName(AccessModule.PROFILE_CONFIRMATION)
-            .bypassEpochMillis(ProfileBypassTime.getTime())
-            .completionEpochMillis(profileCompletionTime.getTime());
-
     // RT Training module: Completion time + expiryDays is 10 days ahead current time, this module
     // has expired for 10 days.
     Timestamp rtTrainingCompletionTime =
         Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
-    // It's bit wired that use the production code to extract the expiration time, but that is a
-    // simple calculation, and even we wrote our own in test, it would just be the same code.
-    Timestamp expectedRtTrainingExpirationTime =
-        extractExpirationTimestamp(rtTrainingCompletionTime, expiryDays);
+    Timestamp rtTrainingBypassTime = Timestamp.from(now);
     DbUserAccessModule rtTrainingAccessModule =
         new DbUserAccessModule()
             .setAccessModule(rtTrainingModule)
             .setUser(user)
+            .setBypassTime(rtTrainingBypassTime)
             .setCompletionTime(rtTrainingCompletionTime);
     AccessModuleStatus expectedRtTrainingModuleStatus =
         new AccessModuleStatus()
             .moduleName(AccessModule.COMPLIANCE_TRAINING)
             .completionEpochMillis(rtTrainingCompletionTime.getTime())
-            .expirationEpochMillis(expectedRtTrainingExpirationTime.getTime());
+            .bypassEpochMillis(rtTrainingBypassTime.getTime());
+
+    // Profile confirmation module: Completion time + expiryDays is 10 days before current time,
+    // this module has expired for 10 days.
+    Timestamp profileCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    // It's bit wired that use the production code to extract the expiration time, but that is a
+    // simple calculation, and even we wrote our own in test, it would just be the same code.
+    Timestamp expectedProfileExpirationTime =
+        driveExpirationTimestamp(profileCompletionTime, expiryDays);
+    DbUserAccessModule profileAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(profileConfirmModule)
+            .setUser(user)
+            .setCompletionTime(profileCompletionTime);
+    AccessModuleStatus expectedProfileModuleStatus =
+        new AccessModuleStatus()
+            .moduleName(AccessModule.PROFILE_CONFIRMATION)
+            .completionEpochMillis(profileCompletionTime.getTime())
+            .expirationEpochMillis(expectedProfileExpirationTime.getTime());
 
     // RT Training module: Completion time + expiryDays is 10 days after current time, this module
     // expired for 10 days.
     Timestamp publicationCompletionTime =
         Timestamp.from(now.minus(expiryDays - 10, ChronoUnit.DAYS));
     Timestamp expectedPublicationExpirationTime =
-        extractExpirationTimestamp(publicationCompletionTime, expiryDays);
+        driveExpirationTimestamp(publicationCompletionTime, expiryDays);
     DbUserAccessModule publicationAccessModule =
         new DbUserAccessModule()
             .setAccessModule(publicationModule)
@@ -285,6 +285,30 @@ public class AccessModuleServiceTest extends SpringTest {
             expectedProfileModuleStatus,
             expectedPublicationModuleStatus,
             expectedRtTrainingModuleStatus);
+  }
+
+  @Test
+  public void testGetClientAccessModuleStatus_aarNotEnabled() {
+    config.access.enableAccessRenewal = false;
+    config.accessRenewal.expiryDays = 10L;
+
+    // RT Training module: Completion time is not null, bypass is null. But AAR is not enabeld,
+    // no expiration time.
+    Timestamp rtTrainingCompletionTime = Timestamp.from(Instant.now());
+    DbUserAccessModule rtTrainingAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(
+                accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
+            .setUser(user)
+            .setCompletionTime(rtTrainingCompletionTime);
+    AccessModuleStatus expectedRtTrainingModuleStatus =
+        new AccessModuleStatus()
+            .moduleName(AccessModule.COMPLIANCE_TRAINING)
+            .completionEpochMillis(rtTrainingCompletionTime.getTime());
+    userAccessModuleDao.save(rtTrainingAccessModule);
+
+    assertThat(accessModuleService.getClientAccessModuleStatus(user))
+        .containsExactly(expectedRtTrainingModuleStatus);
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(

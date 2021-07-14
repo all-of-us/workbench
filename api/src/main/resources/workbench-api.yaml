@@ -5672,9 +5672,8 @@ definitions:
           anyModuleHasExpired:
             type: boolean
             description: >
-              Whether any modules have expired. Each expired module will have
-              the expiration time set in the modules array, we just that to calculate expiration
-              status by comparing with current timestamp.
+              Whether any modules have expired. Expiration information is also included with each
+              module in the array; this field is provided for convenience.
 
   RenewableAccessModuleStatus:
     type: object

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.pmiops.workbench.access.AccessModuleServiceImpl.extractExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessModuleServiceImpl.driveExpirationTimestamp;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
@@ -261,7 +261,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return Optional.empty();
       }
       return completion.map(
-          c -> extractExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
+          c -> driveExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
     }
 
     public boolean hasExpired() {

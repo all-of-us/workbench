@@ -127,14 +127,14 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    * </ul>
    */
   private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
-    if (!dbUserAccessModule.getAccessModule().getExpirable()
+    if (!configProvider.get().access.enableAccessRenewal
+        || !dbUserAccessModule.getAccessModule().getExpirable()
         || dbUserAccessModule.getCompletionTime() == null
-        || dbUserAccessModule.getBypassTime() != null
-            && !configProvider.get().access.enableAccessRenewal) {
+        || dbUserAccessModule.getBypassTime() != null) {
       return Optional.empty();
     }
     return Optional.of(
-        extractExpirationTimestamp(
+        driveExpirationTimestamp(
             dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
   }
 
@@ -142,7 +142,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    * Extracts module expiration time from completionTime and expiry days: completionTime plus
    * expiryDays in millseconds.
    */
-  public static Timestamp extractExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
+  public static Timestamp driveExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
     Preconditions.checkNotNull(
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
