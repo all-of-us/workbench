@@ -60,7 +60,7 @@ const includeXhrResourceType = (request: Request): Request | null => {
 
 // Disable logging of API response body in test log to make log less cluttered.
 // Following API response body are not helpful for error troubleshooting.
-export const showResponse = (request: Request): boolean => {
+export const shouldLogResponse = (request: Request): boolean => {
   const filters = [
     '/readonly',
     '/chartinfo/',
@@ -80,11 +80,6 @@ export const showResponse = (request: Request): boolean => {
 // Truncate long Api response.
 const isResponseTruncatable = (request: Request): boolean => {
   return request && request.url().endsWith('/v1/workspaces');
-};
-
-// @ts-ignore
-const notOptionsRequest = (request: Request): Request | null => {
-  return request && request.method() !== 'OPTIONS' ? request : null;
 };
 
 const getRequestPostData = (request: Request): string | undefined => {
@@ -117,7 +112,7 @@ const getResponseText = async (request: Request): Promise<string> => {
   }
 };
 
-export const logError = async (request: Request): Promise<void> => {
+export const logRequestError = async (request: Request): Promise<void> => {
   const response = request.response();
   const status = response ? response.status() : '';
   const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
@@ -133,7 +128,7 @@ export const logError = async (request: Request): Promise<void> => {
   );
 };
 
-export const transformResponseBody = async (request: Request): Promise<string> => {
+export const formatResponseBody = async (request: Request): Promise<string> => {
   if (request) {
     let responseText = stringifyData(await getResponseText(request));
     if (isResponseTruncatable(request)) {

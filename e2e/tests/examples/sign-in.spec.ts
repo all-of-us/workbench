@@ -1,16 +1,16 @@
 import ProfilePage from 'app/page/profile-page';
-import { signIn, signInWithAccessToken, signOut } from 'utils/test-utils';
+import { signInWithAccessToken, signOut } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
-import { withPage, withSignIn } from 'libs/page-manager';
+import { withPageTest, withSignIn } from 'libs/page-manager';
 import { config } from 'resources/workbench-config';
 import HomePage from 'app/page/home-page';
 import GoogleLoginPage from 'app/page/google-login';
 import CookiePolicyPage from 'app/page/cookie-policy';
 import WorkspacesPage from 'app/page/workspaces-page';
 
-describe('login tests', async () => {
+describe('login tests', () => {
   test('withPage: Sign in by access token', async () => {
-    await withPage()(async (page) => {
+    await withPageTest()(async (page) => {
       await signInWithAccessToken(page);
 
       // Navigate to Profile page.
@@ -24,8 +24,8 @@ describe('login tests', async () => {
   });
 
   test('withPage example: Sign in as READER', async () => {
-    await withPage()(async (page) => {
-      await signIn(page, config.readerUserName, config.userPassword);
+    await withPageTest()(async (page) => {
+      await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
       const homePage = new HomePage(page);
       const plusIcon = homePage.getCreateNewWorkspaceLink();
       expect(await plusIcon.asElementHandle()).toBeTruthy();
@@ -33,7 +33,7 @@ describe('login tests', async () => {
   });
 
   test('withPage example: No sign in', async () => {
-    await withPage()(async (page, browser) => {
+    await withPageTest()(async (page, browser) => {
       const loginPage = new GoogleLoginPage(page);
       await loginPage.load();
       expect(await loginPage.loginButton()).toBeTruthy();
@@ -58,10 +58,7 @@ describe('login tests', async () => {
   });
 
   test('withSignIn example: Entering user email and password', async () => {
-    await withSignIn({
-      userEmail: config.readerUserName,
-      password: config.userPassword
-    })(async (page, _browser) => {
+    await withSignIn(config.READER_ACCESS_TOKEN_FILE)(async (page, _browser) => {
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
       expect(await workspacesPage.isLoaded()).toBe(true);

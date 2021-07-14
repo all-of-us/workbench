@@ -4,14 +4,14 @@ import {
   describeJsHandle,
   getRequestData,
   isLoggable,
-  logError,
-  showResponse,
-  transformResponseBody
+  logRequestError,
+  shouldLogResponse,
+  formatResponseBody
 } from './page-events-helper';
 import { logger } from './logger';
 import { defaultLaunchOptions } from './page-options';
 import fs from 'fs-extra';
-import { signIn, signInWithAccessToken } from 'utils/test-utils';
+import { signInWithAccessToken } from 'utils/test-utils';
 import { savePageToFile, takeScreenshot } from 'utils/save-file-utils';
 
 const failScreenshotDir = 'logs/screenshot';
@@ -62,7 +62,7 @@ export const withBrowser = (launchOpts?: LaunchOptions) => async (
  * Launch new browser and incognito page. Opens Workbench Login page.
  * @param launchOpts: {@link LaunchOptions} New browser launch options.
  */
-export const withPage = (launchOpts?: LaunchOptions) => async (
+export const withPageTest = (launchOpts?: LaunchOptions) => async (
   testFn: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
   await withBrowser(launchOpts)(async (browser) => {
@@ -91,12 +91,11 @@ export const withPage = (launchOpts?: LaunchOptions) => async (
   });
 };
 
-export const withSignIn = (opts: { userEmail?: string; password?: string } = {}) => async (
+export const withSignIn = (tokenFileName?: string) => async (
   testFn: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
-  const { userEmail, password } = opts;
-  await withPage()(async (page, browser) => {
-    userEmail ? await signIn(page, userEmail, password) : await signInWithAccessToken(page);
+  await withPageTest()(async (page, browser) => {
+    await signInWithAccessToken(page, tokenFileName);
     await testFn(page, browser);
   });
 };
@@ -148,7 +147,7 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
   // Emitted when a request fails: 4xx..5xx status codes
   page.on('requestfailed', async (request) => {
     if (showFailedResponse(request)) {
-      await logError(request);
+      await logRequestError(request);
     }
   });
 
@@ -163,12 +162,12 @@ export const initPageBeforeTest = async (page: Page): Promise<void> => {
       url = resp.url();
       status = resp.status();
       if (request.failure() != null || !resp.ok()) {
-        await logError(request);
+        await logRequestError(request);
       } else {
         if (isLoggable(request)) {
           let text = `Request finished: ${status} ${method} ${url}`;
-          if (request.method() !== 'OPTIONS' && showResponse(request)) {
-            text = `${text}\n${await transformResponseBody(request)}`;
+          if (request.method() !== 'OPTIONS' && shouldLogResponse(request)) {
+            text = `${text}\n${await formatResponseBody(request)}`;
           }
           logger.log('info', text);
         }

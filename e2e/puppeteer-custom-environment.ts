@@ -1,12 +1,11 @@
+// const NodeEnvironment = require('jest-environment-node');
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
 const path = require('path');
 
 require('jest-circus');
 
-// TODO Replace PuppeteerEnvironment with NodeEnvironment
-// const NodeEnvironment = require('jest-environment-node');
-// extends NodeEnvironment
+// TODO Replace PuppeteerEnvironment with NodeEnvironment: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   screenshotDir = 'logs/screenshot';
   htmlDir = 'logs/html';
@@ -53,7 +52,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     if (['hook_failure', 'test_fn_failure'].includes(name)) {
       const describeBlockName = this.global.__TEST_NAMES__[0];
       this.failedTestSuites[describeBlockName] = true;
-      // TODO REMOVE WHEN DELETING JEST-PUPPETEER
+      // TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
       await fs.ensureDir(this.screenshotDir);
       await fs.ensureDir(this.htmlDir);
       const screenshotFile = `${this.global.__SPEC_NAME__}.png`;
@@ -68,7 +67,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   }
 }
 
-// TODO REMOVE WHEN DELETING JEST-PUPPETEER
+// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
 const takeScreenshot = async (page, fileName) => {
   const dir = 'logs/screenshot';
   await fs.ensureDir(dir);
@@ -76,7 +75,7 @@ const takeScreenshot = async (page, fileName) => {
   console.info(`Saved screenshot file: ${fileName}`);
 };
 
-// TODO REMOVE WHEN DELETING JEST-PUPPETEER
+// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
 const savePageToFile = async (page, fileName) => {
   const dir = 'logs/html';
   await fs.ensureDir(dir);
