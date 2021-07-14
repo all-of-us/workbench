@@ -38,8 +38,7 @@ post () {
 get () {
   local url="${api_root}${1}"
   printf "HTTP GET ${url}\n\n" > /dev/tty
-  curl -su ${circle_token}: \
-       -H "Content-Type: application/json" \
+  curl -H "Content-Type: application/json" \
        -H "Circle-Token: ${CIRCLECI_TOKEN}" \
        "${url}"
 }
