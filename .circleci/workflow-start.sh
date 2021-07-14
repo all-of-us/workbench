@@ -66,19 +66,20 @@ fetch_pipeline_workflow () {
   local get_path="pipeline/{${1}}/workflow"
   printf "GET workflow in pipeline id '${$1}'"
   local get_result=$(get $get_path)
-  workflow_ids=$(echo $get_result | jq -r .items[].id)
-  printf workflow_ids
+  workflow_id=$(echo $get_result | jq .items[].id | @sh)
+  printf workflow_id
 }
 
 fetch_pipeline_ids
-pipeline_ids=$(jq -r .id $pipeline_json)
+pipeline_ids=$(jq - .id $pipeline_json | @sh)
 printf pipeline_ids
 
 # Get the workflow for each pipeline.
-pipeline_ids=(${pipeline_ids[@]//\'/})
-for id in ${pipeline_ids[@]}; do
+IFS=$'\n'
+for id in ${pipeline_ids}; do
+  # Remove double-quotes
+  id=$(echo $id | xargs echo)
   printf $id
   fetch_pipeline_workflow($id)
 done
-
-
+unset IFS
