@@ -23,7 +23,6 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
-import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -125,7 +124,7 @@ public class ProfileServiceTest extends SpringTest {
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({
-      AccessModuleService.class,
+    AccessModuleService.class,
     AccessTierService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,
