@@ -77,7 +77,8 @@ printf pipeline_ids
 # Get the workflow for each pipeline.
 pipeline_ids=(${pipeline_ids[@]//\'/})
 for id in ${pipeline_ids[@]}; do
-  fetch_pipeline_workflow(${id})
+  printf $id
+  fetch_pipeline_workflow($id)
 done
 
 
