@@ -10,35 +10,30 @@ export default class BypassPopup extends BaseMenu {
   }
 
   /**
-   *  Get texts of all visible options.
+   *  Get labels of all modules.
    */
   async getAllToggleTexts(): Promise<string[]> {
     const selector = `${this.getXpath()}//label/span/text()`;
     return this.getMenuItemTexts(selector);
   }
 
+  /**
+   *  Get all toggle status of all modules.
+   */
+  async getAllToggleInputs(): Promise<boolean[]> {
+    const selector = `${this.getXpath()}//label/div/input[@type='checkbox']`;
+    return this.getToggleStatus(selector);
+  }
+
+  // xpath of the bypass-link-checkbox in user admin table
   getMenuItemXpath(toggleAccessText: string): string {
-    return `//*[@role="switch" and normalize-space()="${toggleAccessText}"]`;
+    return `${this.getXpath()}//span[text()= "${toggleAccessText}"]/preceding-sibling::div/input[@type='checkbox']`;
   }
 
-  getTrainingBypassToggle(): Checkbox {
-    const xpath = `${this.getXpath()}//label/span[text()='Compliance Training']/preceding-sibling::div/input[@type='checkbox']`;
-    return new Checkbox(this.page, xpath);
-  }
-
-  getEraCommBypassToggle(): Checkbox {
-    const xpath = `${this.getXpath()}//label/span[text()='eRA Commons Linking']/preceding-sibling::div/input[@type='checkbox']`;
-    return new Checkbox(this.page, xpath);
-  }
-
-  getTwoFABypassToggle(): Checkbox {
-    const xpath = `${this.getXpath()}//label/span[text()='Two Factor Auth']/preceding-sibling::div/input[@type='checkbox']`;
-    return new Checkbox(this.page, xpath);
-  }
-
-  getDUCCBypassToggle(): Checkbox {
-    const xpath = `${this.getXpath()}//label/span[text()='Data Use Agreement']/preceding-sibling::div/input[@type='checkbox']`;
-    return new Checkbox(this.page, xpath);
+  //get status of each bypass modules individually
+  async getEachModuleStatus(toggleAccessText: string): Promise<boolean> {
+    const selector = this.getMenuItemXpath(toggleAccessText);
+    return this.getEachToggleStatus(selector);
   }
 
   // click the checkmark on the bypass-popup to save the bypass access

@@ -96,27 +96,27 @@ export default abstract class BaseMenu extends Container {
   /**
    *  Get toggle status all modules
    */
-     protected async getToggleStatus(selector: string): Promise<boolean[]> {
-      await this.page.waitForXPath(selector, { visible: true });
-      const inputs = await this.page.$x(selector);
-      const toggleStatus = [];
-      for (const element of inputs) {
-        new Checkbox(this.page, selector);
-        toggleStatus.push(await getPropValue<boolean>(element, 'checked'));
-      }
-      return toggleStatus ;
+  protected async getToggleStatus(selector: string): Promise<boolean[]> {
+    await this.page.waitForXPath(selector, { visible: true });
+    const inputs = await this.page.$x(selector);
+    const toggleStatus = [];
+    for (const element of inputs) {
+      new Checkbox(this.page, selector);
+      toggleStatus.push(await getPropValue<boolean>(element, 'checked'));
     }
+    return toggleStatus;
+  }
 
   /**
-   *  Get individual toggle status of each modules 
+   *  Get individual toggle status of each modules
    */
-     protected async getEachToggleStatus(selector: string): Promise<boolean> {
-      await this.page.waitForXPath(selector, { visible: true });
-       await this.page.$x(selector);
-       const btn =  new Checkbox(this.page, selector);
-       return await getPropValue<boolean>(await btn.asElementHandle(), 'checked')
-    }
-  
+  protected async getEachToggleStatus(selector: string): Promise<boolean> {
+    await this.page.waitForXPath(selector, { visible: true });
+    await this.page.$x(selector);
+    const btn = new Checkbox(this.page, selector);
+    return await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
+  }
+
   protected async isOpen(): Promise<boolean> {
 >>>>>>> 4cd69d210 (created functions to get the status of the bypass-link modules)
     try {
