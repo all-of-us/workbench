@@ -54,7 +54,7 @@ pretty_json () {
 # Get list of recently built pipelines. Save results to json file.
 pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
-  get_path="${api_root}pipeline?org-slug=${project_slug}"
+  get_path="pipeline?org-slug=${project_slug}"
   printf "GET list of pipelines"
   get_result=$(get $get_path)
   echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
