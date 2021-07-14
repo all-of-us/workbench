@@ -6476,7 +6476,7 @@ definitions:
         description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
       eraRequired:
         type: boolean
-        description: Whether eRA commons is required for members in the institution.
+        description: Whether eRA commons is required for members in the institution for this tier.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
