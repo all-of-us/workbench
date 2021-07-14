@@ -118,7 +118,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    * Calculates the module expiration time.
    *
    * <p>The value is only present when:
-   *
    * <ul>
    *   <li>The module is expirable.
    *   <li>The module was completed(CompletionTime is not null).
