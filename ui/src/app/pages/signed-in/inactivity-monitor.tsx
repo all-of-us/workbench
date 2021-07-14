@@ -26,7 +26,7 @@ export const INACTIVITY_CONFIG = {
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
 };
 
-function getInactivityElapsedMs(): number {
+const getInactivityElapsedMs = () => {
   const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
   if (!lastActive) {
     return null;
@@ -34,7 +34,7 @@ function getInactivityElapsedMs(): number {
   return Date.now() - parseInt(lastActive, 10);
 }
 
-function secondsToText(seconds: number) {
+const secondsToText = (seconds: number) => {
   return seconds % 60 === 0 && seconds > 60 ?
       `${seconds / 60} minutes` : `${seconds} seconds`;
 }
@@ -60,7 +60,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
     let logoutTimer: Timeout;
     let inactivityModalTimer: Timeout;
 
-    function startUserActivityTracker() {
+    const startUserActivityTracker = () => {
       const signalUserActivity = debouncer(() => {
         window.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
       }, 1000);
@@ -71,7 +71,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
       });
     }
 
-    function startInactivityTimers(elapsedMs: number = 0) {
+    const startInactivityTimers = (elapsedMs: number = 0) => {
       clearTimeout(logoutTimer);
       logoutTimer = setTimeout(
         () => signOut('/session-expired'),
@@ -83,7 +83,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
         Math.max(0, 1000 * (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) - elapsedMs));
     }
 
-    function startInactivityMonitoring() {
+    const startInactivityMonitoring = () => {
       startInactivityTimers();
 
       const resetTimers = () => {
