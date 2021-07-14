@@ -14,7 +14,7 @@ import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
@@ -47,7 +47,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
-  private final AccessTierService accessTierService;
+  private final AccessTierDao accessTierDao;
 
   private final InstitutionDao institutionDao;
   private final InstitutionEmailDomainDao institutionEmailDomainDao;
@@ -65,7 +65,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Autowired
   InstitutionServiceImpl(
-      AccessTierService accessTierService,
+      AccessTierDao accessTierDao,
       InstitutionDao institutionDao,
       InstitutionEmailDomainDao institutionEmailDomainDao,
       InstitutionEmailAddressDao institutionEmailAddressDao,
@@ -78,7 +78,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       InstitutionTierRequirementMapper institutionTierRequirementMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
-    this.accessTierService = accessTierService;
+    this.accessTierDao = accessTierDao;
     this.institutionDao = institutionDao;
     this.institutionEmailDomainDao = institutionEmailDomainDao;
     this.institutionEmailAddressDao = institutionEmailAddressDao;
@@ -353,7 +353,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   // note that this replaces all requirements for this institution with the passed-in requirements
   private void setInstitutionTierRequirement(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
-    List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
+    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
     institutionTierRequirementMapper
         .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
@@ -406,7 +406,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // All tier need to be present in API if tier requirement is present.
     if (institutionRequest.getTierRequirements() != null) {
-      List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
+      List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
       institutionRequest
           .getTierRequirements()
           .forEach(a -> getAccessTierByShortNameOrThrow(dbAccessTiers, a.getAccessTierShortName()));

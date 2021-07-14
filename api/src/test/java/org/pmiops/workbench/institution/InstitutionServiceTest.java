@@ -15,7 +15,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
-import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
@@ -26,7 +25,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
@@ -37,12 +35,10 @@ import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @Import({
-  AccessTierServiceImpl.class,
   InstitutionServiceImpl.class,
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
@@ -50,9 +46,6 @@ import org.springframework.context.annotation.Import;
   InstitutionEmailDomainMapperImpl.class,
   InstitutionEmailAddressMapperImpl.class,
   InstitutionTierRequirementMapperImpl.class,
-})
-@MockBean({
-  FireCloudService.class,
 })
 public class InstitutionServiceTest extends SpringTest {
 
