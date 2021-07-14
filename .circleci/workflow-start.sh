@@ -74,9 +74,10 @@ fetch_pipeline_ids
 pipeline_ids=$(jq -r .id $pipeline_json)
 printf pipeline_ids
 
+# Get the workflow for each pipeline.
 pipeline_ids=(${pipeline_ids[@]//\'/})
 for id in ${pipeline_ids[@]}; do
-  fetch_pipeline_workflow(id)
+  fetch_pipeline_workflow(${id})
 done
 
 
