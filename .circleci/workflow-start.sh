@@ -20,6 +20,8 @@ project_slug="gh/all-of-us"
 # https://circleci.com/docs/2.0/workflows/#states
 workflow_active_status=("running" "failing")
 
+pipeline_json="/tmp/master_branch_pipelines.json"
+
 #********************
 # FUNCTIONS
 # *******************
@@ -52,7 +54,6 @@ pretty_json () {
 
 
 # Get list of recently built pipelines. Save results to json file.
-pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
   get_path="pipeline?org-slug=${project_slug}"
   printf "GET list of pipelines"
@@ -60,6 +61,8 @@ fetch_pipelines() {
   echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
   printf "Saved ${pipeline_json}"
   cat ${pipeline_json}
+  pipeline_id=$(echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][]' | jq -r .id)
+  printf pipeline_id
 }
 
 get_workflow () {
