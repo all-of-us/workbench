@@ -404,11 +404,13 @@ public class InstitutionServiceImpl implements InstitutionService {
               });
     }
 
-    // All tier need to be present in API.
-    List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
-    institutionRequest
-        .getTierRequirements()
-        .forEach(a -> getAccessTierByShortNameOrThrow(dbAccessTiers, a.getAccessTierShortName()));
+    // All tier need to be present in API if tier requirement is present.
+    if(institutionRequest.getTierRequirements() != null) {
+      List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
+      institutionRequest
+          .getTierRequirements()
+          .forEach(a -> getAccessTierByShortNameOrThrow(dbAccessTiers, a.getAccessTierShortName()));
+    }
   }
 
   public Optional<Institution> getFirstMatchingInstitution(final String contactEmail) {
