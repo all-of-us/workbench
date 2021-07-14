@@ -24,12 +24,11 @@ echo "Starting load of prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
 TABLES=$(gsutil ls gs://"$BUCKET"/"$CSV_HOME_DIR"/*_"$TIER".csv | cut -d'/' -f7 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
 
 # Validate that all expected files are in bucket
-DIFF_OUTPUT=(`echo ${EXPECTED_TABLES[@]} ${TABLES[@]} | tr ' ' '\n' | sort | uniq -u`)
+DIFF_OUTPUT=( $(echo ${EXPECTED_TABLES[@]} ${TABLES[@]} | tr ' ' '\n' | sort | uniq -u) )
 if [[ ${#DIFF_OUTPUT[@]} > 0 ]];
   then
   echo "Missing following files: ${DIFF_OUTPUT[@]}"
   exit 1
-fi
 
 schema_path=generate-cdr/bq-schemas
 
@@ -44,11 +43,11 @@ done
 echo "Completed creation of prep ppi tables"
 
 echo "Starting creation of the prep_survey table"
-bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.prep_survey
-bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/prep_survey.json $BQ_DATASET.prep_survey
+bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.prep_survey"
+bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/prep_survey.json" "$BQ_DATASET.prep_survey"
 
 echo "Loading The Basics - Inserting prep_ppi_basics into prep_survey"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`
     (
         id
@@ -363,8 +362,8 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on lower(a.concept_code) = lower
 order by 1"
 
 echo "Extracting prep_survey to the proper bucket"
-bq extract --project_id=$BQ_PROJECT --destination_format CSV --print_header=false \
-"$BQ_DATASET.prep_survey" gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv
+bq extract --project_id="$BQ_PROJECT" --destination_format CSV --print_header=false \
+"$BQ_DATASET.prep_survey" gs://"$BUCKET"/"$BQ_DATASET"/"$CDR_CSV_DIR"/prep_survey.csv
 echo "Completed extract into bucket(gs://$BUCKET/$BQ_DATASET/$CDR_CSV_DIR/prep_survey.csv)"
 
 echo "Cleaning up prep tables"
