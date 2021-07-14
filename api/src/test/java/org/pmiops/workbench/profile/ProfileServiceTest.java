@@ -30,7 +30,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
-import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
@@ -109,8 +108,6 @@ public class ProfileServiceTest extends SpringTest {
 
   // enables access to the logged in user
   private static DbUser loggedInUser;
-
-  private List<DbAccessModule> dbAccessModules;
 
   @TestConfiguration
   @Import({

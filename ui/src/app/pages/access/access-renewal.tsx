@@ -260,21 +260,27 @@ export const AccessRenewal = fp.flow(
   // Render
   return <FadeBox style={{margin: '1rem auto 0', color: colors.primary}}>
     <div style={{display: 'grid', gridTemplateColumns: '1.5rem 1fr', alignItems: 'center', columnGap: '.675rem'}}>
-      {maybeDaysRemaining(profile) < 0
-        ? <React.Fragment>
-            <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
-            <div style={styles.h1}>Researcher workbench access has expired.</div>
-          </React.Fragment>
-        : <React.Fragment>
-            <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
-            <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
-          </React.Fragment>
+      {cond(
+        // Completed - no icon or button
+        [allModulesCompleteOrBypassed, () => null],
+        // Access expired icon
+        [maybeDaysRemaining(profile) < 0, () => <React.Fragment>
+          <ExclamationTriangle color={colors.warning} style={{height: '1.5rem', width: '1.5rem'}}/>
+          <div style={styles.h1}>Researcher workbench access has expired.</div>
+        </React.Fragment>],
+        // Default - back button
+        () => <React.Fragment>
+          <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
+          <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
+        </React.Fragment>
+        )
       }
-      <div style={{gridColumnStart: 2}}>Researchers are required to complete a number of steps as part of the annual renewal
+      <div style={allModulesCompleteOrBypassed ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
+        Researchers are required to complete a number of steps as part of the annual renewal
         to maintain access to <AoU/> data. Renewal of access will occur on a rolling basis annually (i.e. for each user, access
         renewal will be due 365 days after the date of authorization to access <AoU/> data.
       </div>
-      {allModulesCompleteOrBypassed && <div style={{...renewalStyle.completionBox, gridColumnStart: 2}}>
+      {allModulesCompleteOrBypassed && <div style={{...renewalStyle.completionBox, gridColumn: '1 / span 2'}}>
         <div style={renewalStyle.h2}>Thank you for completing all the necessary steps</div>
         <div>
           Your yearly Researcher Workbench access renewal is complete. You can use the menu icon in the top left to continue your research.

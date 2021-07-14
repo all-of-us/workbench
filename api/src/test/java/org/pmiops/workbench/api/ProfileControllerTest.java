@@ -111,6 +111,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -142,9 +143,11 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
+
+  // allows us to mock out only specific methods
+  @SpyBean private UserService userService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -170,7 +173,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static DbUser dbUser;
   private static List<DbAccessModule> accessModules;
 
-  private int DUA_VERSION;
+  private int DUCC_VERSION;
   private DbAccessTier registeredTier;
 
   @TestConfiguration
@@ -266,7 +269,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    DUA_VERSION = userService.getCurrentDuccVersion();
+    DUCC_VERSION = userService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(
@@ -486,7 +489,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testSubmitDataUseAgreement_success() {
     createAccountAndDbUserWithAffiliation();
     String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUCC_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
@@ -495,26 +498,38 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
     assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
-    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
+    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUCC_VERSION);
   }
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion() {
+  public void testSubmitDataUseAgreement_wrongVersion_older() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
           String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
+          profileController.submitDataUseAgreement(DUCC_VERSION - 1, duaInitials);
         });
   }
 
-  @Test
-  public void test_outdatedDataUseAgreement() {
-    // force version number to 2 instead of 3
-    config.featureFlags.enableV3DataUserCodeOfConduct = false;
-    final int previousDuaVersion = DUA_VERSION - 1;
+  // not really a use case for this, but shows we need an exact match
 
+  @Test
+  public void testSubmitDataUseAgreement_wrongVersion_newer() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          createAccountAndDbUserWithAffiliation();
+          String duaInitials = "NIH";
+          profileController.submitDataUseAgreement(DUCC_VERSION + 1, duaInitials);
+        });
+  }
+
+  // the user signs Version A of the DUCC, but the system later requires Version B instead
+  // and therefore the user is no longer compliant
+
+  @Test
+  public void test_DuccBecomesOutdated() {
     final long userId = createAccountAndDbUserWithAffiliation().getUserId();
 
     // bypass the other access requirements
@@ -526,19 +541,22 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setProfileLastConfirmedTime(TIMESTAMP);
     userDao.save(dbUser);
 
-    // sign the older version
+    // arbitrary; at coding time the current version is 3
+    final int versionA = 5;
+    final int versionB = 8;
 
-    String duaInitials = "NIH";
-    assertThat(
-            profileController
-                .submitDataUseAgreement(previousDuaVersion, duaInitials)
-                .getStatusCode())
+    // set the current DUCC version to version A
+    when(userService.getCurrentDuccVersion()).thenReturn(versionA);
+
+    // sign the current version (A)
+
+    final String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(versionA, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
-    // update and enforce the required version
-
-    config.featureFlags.enableV3DataUserCodeOfConduct = true;
+    // time passes and the system now requires a newer version (B)
+    when(userService.getCurrentDuccVersion()).thenReturn(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
@@ -775,7 +793,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
+    profileController.submitDataUseAgreement(DUCC_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);

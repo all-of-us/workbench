@@ -12,7 +12,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
-import {TabLabels} from "app/page/workspace-base";
+import { TabLabels } from 'app/page/workspace-base';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);

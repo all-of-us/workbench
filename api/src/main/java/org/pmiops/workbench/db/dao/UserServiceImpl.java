@@ -90,8 +90,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private static final int MAX_RETRIES = 3;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
-  private static final long MIN_ACCESS_EXPIRATION_EPOCH_MS =
-      Instant.parse("2021-07-01T00:00:00.00Z").toEpochMilli();
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<DbUser> userProvider;
@@ -150,7 +148,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @VisibleForTesting
   @Override
   public int getCurrentDuccVersion() {
-    return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
+    return 3;
   }
 
   /**
@@ -262,20 +260,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       if (isBypassed() || !configProvider.get().access.enableAccessRenewal) {
         return Optional.empty();
       }
-      Long expiryDays = configProvider.get().accessRenewal.expiryDays;
-      Preconditions.checkNotNull(
-          expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
-      long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-      return completion.map(c -> extractExpirationTimestamp(c, expiryDaysInMs));
+      return completion.map(
+          c -> extractExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
     }
 
     public boolean hasExpired() {
       Preconditions.checkArgument(
           isComplete(), "Cannot check expiration on module that has not been completed");
       final Timestamp now = new Timestamp(clock.millis());
-      if (now.before(new Timestamp(MIN_ACCESS_EXPIRATION_EPOCH_MS))) {
-        return false;
-      }
       return getExpiration().map(x -> x.before(now)).orElse(false);
     }
   }
@@ -324,9 +316,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final ModuleTimes duaTimes =
         new ModuleTimes(
             user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime());
-    if (!configProvider.get().access.enableDataUseAgreement) {
-      return true;
-    }
     if (duaTimes.isBypassed()) {
       return true;
     }
@@ -1197,8 +1186,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     switch (moduleName) {
       case COMPLIANCETRAINING:
         return accessConfig.enableComplianceTraining;
-      case DATAUSEAGREEMENT:
-        return accessConfig.enableDataUseAgreement;
       default:
         return true;
     }

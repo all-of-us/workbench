@@ -4192,14 +4192,6 @@ definitions:
         type: boolean
         default: false
         description: Whether the eRA Commons access module is enabled.
-      enableDataUseAgreement:
-        type: boolean
-        default: false
-        description: Whether the Data Use Agreement access module is enabled.
-      enableBetaAccess:
-        type: boolean
-        default: false
-        description: Whether the Beta Access module is enabled.
       unsafeAllowSelfBypass:
         type: boolean
         default: false
@@ -4213,10 +4205,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing upgrade
-      enableV3DataUserCodeOfConduct:
-        type: boolean
-        default: false
-        description: Whether to enable version 3 of the Data User Code of Conduct
       enableEventDateModifier:
         type: boolean
         default: false
@@ -5685,7 +5673,8 @@ definitions:
             type: boolean
             description: >
               Whether any modules have expired. Each expired module will have
-              the corresponding hasExpired flag set in the modules array.
+              the expiration time set in the modules array, we just that to calculate expiration
+              status by comparing with current timestamp.
 
   RenewableAccessModuleStatus:
     type: object
@@ -5713,15 +5702,15 @@ definitions:
       completionEpochMillis:
         type: integer
         format: int64
-        description: When this module completed
+        description: When this module completed if applicable
       expirationEpochMillis:
         type: integer
         format: int64
-        description: When this module expired or will expire.
+        description: When this module expired or will expire if applicable.
       bypassEpochMillis:
         type: integer
         format: int64
-        description: When this module is bypassed
+        description: When this module is bypassed if applicable
 
   UserAccessExpiration:
     type: object
