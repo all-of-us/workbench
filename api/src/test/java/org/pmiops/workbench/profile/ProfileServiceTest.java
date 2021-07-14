@@ -122,15 +122,14 @@ public class ProfileServiceTest extends SpringTest {
     PageVisitMapperImpl.class,
     ProfileMapperImpl.class,
     ProfileService.class,
-    VerifiedInstitutionalAffiliationMapperImpl.class,
+    VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({
+      AccessModuleService.class,
     AccessTierService.class,
-    AccessModuleService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,
-    UserServiceAuditor.class,
   })
   static class Configuration {
 
