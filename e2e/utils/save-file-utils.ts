@@ -1,42 +1,49 @@
 import { ensureDir, writeFile } from 'fs-extra';
 import { Page } from 'puppeteer';
-import { extractPageName, makeDateTimeStr } from './str-utils';
 import { logger } from 'libs/logger';
 
 /**
- * Save Html source to a file. Useful for test failure troubleshooting.
- * @param {Puppeteer.Page} page
- * @param {string} fileName file with path.
+ * Save Html source to a file in logs/html directory. Useful for test failure troubleshooting.
+ * @param {Page} page
+ * @param {string} fileName filename only without path. Example: home-page.html
  */
-export async function savePageToFile(page: Page, fileName?: string): Promise<boolean> {
-  const logDir = 'logs/html';
-  await ensureDir(logDir);
-  const name = fileName || (await extractPageName(page));
-  const htmlFile = `${logDir}/${makeDateTimeStr(name)}.html`;
+export const savePageToFile = async (page: Page, fileName: string): Promise<boolean> => {
+  const dir = 'logs/html';
+  await ensureDir(dir);
   const htmlContent = await page.content();
   return new Promise((resolve, reject) => {
-    writeFile(htmlFile, htmlContent, 'utf8', (error) => {
+    writeFile(`${dir}/${fileName}`, htmlContent, 'utf8', (error) => {
       if (error) {
-        logger.error('Failed to save file');
-        logger.error(error);
+        logger.error(`Failed to save html file. ERROR: ${error}`);
         reject(false);
       } else {
-        logger.info(`Saved file ${htmlFile}`);
+        logger.info(`Saved html file: ${fileName}`);
         resolve(true);
       }
     });
   });
-}
+};
 
 /**
- * Take a full-page screenshot, save file in .png format in logs/screenshot directory.
- * @param fileName
+ * Take a full-page screenshot in png format, save file in logs/screenshot directory.
+ * @param {Page} page
+ * @param {string} fileName filename only without path. Example: home-page.png
  */
-export async function takeScreenshot(page: Page, fileName?: string): Promise<void> {
-  const screenshotDir = 'logs/screenshot';
-  await ensureDir(screenshotDir);
-  const name = fileName || (await extractPageName(page));
-  const screenshotFile = `${screenshotDir}/${makeDateTimeStr(name)}.png`;
-  await page.screenshot({ path: screenshotFile, fullPage: true });
-  logger.info('Saved screenshot ' + screenshotFile);
-}
+export const takeScreenshot = async (page: Page, fileName: string): Promise<void> => {
+  const dir = 'logs/screenshot';
+  await ensureDir(dir);
+  await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
+  logger.info(`Saved screenshot file: ${fileName}`);
+};
+
+/**
+ * Save Html source to a pdf file in logs/screenshot directory.
+ * @param {Page} page
+ * @param {string} fileName filename only without path. Example: home-page.pdf
+ */
+export const savePageToPdf = async (page: Page, fileName: string): Promise<void> => {
+  const dir = 'logs/screenshot';
+  await ensureDir(dir);
+  await page.pdf({ format: 'A4', path: `${dir}/${fileName}` });
+  logger.info(`Saved pdf file: ${fileName}`);
+};
