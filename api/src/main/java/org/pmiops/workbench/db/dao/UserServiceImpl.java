@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @VisibleForTesting
   @Override
   public int getCurrentDuccVersion() {
-    return configProvider.get().featureFlags.enableV3DataUserCodeOfConduct ? 3 : 2;
+    return 3;
   }
 
   /**
@@ -325,9 +325,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final ModuleTimes duaTimes =
         new ModuleTimes(
             user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime());
-    if (!configProvider.get().access.enableDataUseAgreement) {
-      return true;
-    }
     if (duaTimes.isBypassed()) {
       return true;
     }
@@ -1198,8 +1195,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     switch (moduleName) {
       case COMPLIANCETRAINING:
         return accessConfig.enableComplianceTraining;
-      case DATAUSEAGREEMENT:
-        return accessConfig.enableDataUseAgreement;
       default:
         return true;
     }
