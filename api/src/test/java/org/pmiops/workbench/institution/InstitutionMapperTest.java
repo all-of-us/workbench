@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,11 +29,18 @@ public class InstitutionMapperTest extends SpringTest {
 
   private List<String> sortedModelDomains;
   private List<String> sortedModelAddresses;
+  private List<InstitutionTierRequirement> institutionTierRequirements;
 
   @BeforeEach
   public void setup() {
     sortedModelDomains = Lists.newArrayList("broad.org", "verily.com");
     sortedModelAddresses = Lists.newArrayList("alice@nih.gov", "joel@other-inst.org");
+    institutionTierRequirements =
+        Lists.newArrayList(
+            new InstitutionTierRequirement()
+                .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                .eraRequired(true)
+                .accessTierShortName("tier"));
   }
 
   @Test
@@ -58,6 +67,7 @@ public class InstitutionMapperTest extends SpringTest {
             .displayName("Test State University")
             .emailDomains(sortedModelDomains)
             .emailAddresses(sortedModelAddresses)
+            .tierRequirements(institutionTierRequirements)
             .userInstructions("UserInstruction");
 
     final DbInstitution dbInst = mapper.modelToDb(inst);
@@ -67,6 +77,7 @@ public class InstitutionMapperTest extends SpringTest {
 
     when(service.getEmailDomains(inst.getShortName())).thenReturn(inst.getEmailDomains());
     when(service.getEmailAddresses(inst.getShortName())).thenReturn(inst.getEmailAddresses());
+    when(service.getTierRequirements(inst.getShortName())).thenReturn(inst.getTierRequirements());
     when(service.getInstitutionUserInstructions(inst.getShortName()))
         .thenReturn(Optional.of(inst.getUserInstructions()));
 
@@ -76,6 +87,7 @@ public class InstitutionMapperTest extends SpringTest {
     assertThat(roundTrip.getDisplayName()).isEqualTo(inst.getDisplayName());
     assertThat(roundTrip.getEmailDomains()).isEqualTo(sortedModelDomains);
     assertThat(roundTrip.getEmailAddresses()).isEqualTo(sortedModelAddresses);
+    assertThat(roundTrip.getTierRequirements()).isEqualTo(institutionTierRequirements);
     assertThat(roundTrip.getUserInstructions()).isEqualTo("UserInstruction");
   }
 
@@ -103,12 +115,14 @@ public class InstitutionMapperTest extends SpringTest {
 
     when(service.getEmailDomains("ShortName")).thenReturn(sortedModelDomains);
     when(service.getEmailAddresses("ShortName")).thenReturn(sortedModelAddresses);
+    when(service.getTierRequirements("ShortName")).thenReturn(institutionTierRequirements);
     when(service.getInstitutionUserInstructions("ShortName")).thenReturn(Optional.of(instructions));
 
     mapper.populateFromAuxTables(instToPopulate, service);
 
     assertThat(instToPopulate.getEmailDomains()).isEqualTo(sortedModelDomains);
     assertThat(instToPopulate.getEmailAddresses()).isEqualTo(sortedModelAddresses);
+    assertThat(instToPopulate.getTierRequirements()).isEqualTo(institutionTierRequirements);
     assertThat(instToPopulate.getUserInstructions()).isEqualTo(instructions);
   }
 
@@ -124,6 +138,7 @@ public class InstitutionMapperTest extends SpringTest {
 
     assertThat(instToPopulate.getEmailDomains()).isEmpty();
     assertThat(instToPopulate.getEmailAddresses()).isEmpty();
+    assertThat(instToPopulate.getTierRequirements()).isEmpty();
     assertThat(instToPopulate.getUserInstructions()).isNull();
   }
 }

@@ -6319,6 +6319,11 @@ definitions:
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
+      tierRequirements:
+        type: array
+        description: List of requirements on how members can get access for each tier.
+        items:
+          "$ref": "#/definitions/InstitutionTierRequirement"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6392,6 +6397,15 @@ definitions:
       - MASTER
       - RESTRICTED
 
+  InstitutionMembershipRequirement:
+    type: string
+    description: 'Type of Institution requirement for member to access a tier.
+      It can be matching email address, email domains or no access'
+    enum:
+      - DOMAINS
+      - ADDRESSES
+      - NO_ACCESS
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all
@@ -6435,6 +6449,22 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
+  InstitutionTierRequirement:
+    type: object
+    description: Institution-specific access tier membership requirement.
+    required:
+      - accessTierShortName
+      - membershipRequirement
+    properties:
+      accessTierShortName:
+        type: string
+        description: The short unique name for the access tier.
+      membershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
+      eraRequired:
+        type: boolean
+        description: Whether eRA commons is required for members in the institution for this tier.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object

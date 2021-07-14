@@ -14,6 +14,7 @@ import org.pmiops.workbench.institution.InstitutionEmailDomainMapperImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
+import org.pmiops.workbench.institution.InstitutionTierRequirementMapperImpl;
 import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionEmailDomainMapperImpl.class,
   InstitutionEmailAddressMapperImpl.class,
+  InstitutionTierRequirementMapperImpl.class,
 })
 @EnableTransactionManagement
 public class LoadInstitutions {
