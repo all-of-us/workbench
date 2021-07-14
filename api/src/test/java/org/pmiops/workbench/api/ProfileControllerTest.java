@@ -523,8 +523,11 @@ public class ProfileControllerTest extends BaseControllerTest {
         });
   }
 
+  // the user signs Version A of the DUCC, but the system later requires Version B instead
+  // and therefore the user is no longer compliant
+
   @Test
-  public void test_outdatedDataUseAgreement() {
+  public void test_DuccBecomesOutdated() {
     final long userId = createAccountAndDbUserWithAffiliation().getUserId();
 
     // bypass the other access requirements
@@ -536,16 +539,22 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setProfileLastConfirmedTime(TIMESTAMP);
     userDao.save(dbUser);
 
-    // sign the current version
+    // arbitrary; at coding time the current version is 3
+    final int versionA = 5;
+    final int versionB = 8;
 
-    String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUCC_VERSION, duaInitials).getStatusCode())
+    // set the current DUCC version to version A
+    when(userService.getCurrentDuccVersion()).thenReturn(versionA);
+
+    // sign the current version (A)
+
+    final String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(versionA, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
-    // the UserService now requires a newer version
-    final int newDuccVersion = DUCC_VERSION + 1;
-    when(userService.getCurrentDuccVersion()).thenReturn(newDuccVersion);
+    // time passes and the system now requires a newer version (B)
+    when(userService.getCurrentDuccVersion()).thenReturn(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
