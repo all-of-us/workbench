@@ -1,6 +1,7 @@
 #!/bin/bash -x
 
-set -eo pipefail
+# set -eo pipefail
+set -xv
 
 # CIRCLECI_TOKEN is a personal token.
 # https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
