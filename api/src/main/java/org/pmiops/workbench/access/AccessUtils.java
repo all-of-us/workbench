@@ -40,17 +40,17 @@ public class AccessUtils {
                   AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
               .build();
 
-  /** Converts {@link AccessModule} to {@link AccessModuleName}.*/
+  /** Converts {@link AccessModule} to {@link AccessModuleName}. */
   public static AccessModuleName clientAccessModuleToStorage(AccessModule s) {
     return CLIENT_TO_STORAGE_ACCESS_MODULE.get(s);
   }
 
-  /** Converts {@link AccessModuleName} to {@link AccessModule}.*/
+  /** Converts {@link AccessModuleName} to {@link AccessModule}. */
   public static AccessModule storageAccessModuleToClient(AccessModuleName s) {
     return CLIENT_TO_STORAGE_ACCESS_MODULE.inverse().get(s);
   }
 
-  /** Converts {@link AccessModuleName} to {@link BypassTimeTargetProperty}.*/
+  /** Converts {@link AccessModuleName} to {@link BypassTimeTargetProperty}. */
   public static BypassTimeTargetProperty auditAccessModuleFromStorage(AccessModuleName s) {
     return AUDIT_TO_STORAGE_ACCESS_MODULE.inverse().get(s);
   }
