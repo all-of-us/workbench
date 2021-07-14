@@ -405,7 +405,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     // All tier need to be present in API if tier requirement is present.
-    if(institutionRequest.getTierRequirements() != null) {
+    if (institutionRequest.getTierRequirements() != null) {
       List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
       institutionRequest
           .getTierRequirements()
