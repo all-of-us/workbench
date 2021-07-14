@@ -86,26 +86,17 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
     final DbUser user = userDao.findUserByUserId(userId);
-    final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
-    Optional<DbUserAccessModule> retrievedAccessModule =
-        dbUserAccessModules.stream()
-            .filter(m -> m.getAccessModule().getName().equals(accessModule.getName()))
-            .findFirst();
+    DbUserAccessModule userAccessModuleToUpdate = retrieveUserAccessModuleOrCreate(user, accessModule);
     final Timestamp newBypassTime =
         isBypassed ? new Timestamp(clock.instant().toEpochMilli()) : null;
-    final Timestamp previousBypassTime =
-        retrievedAccessModule.map(DbUserAccessModule::getBypassTime).orElse(null);
-    final DbUserAccessModule userAccessModuleToUpdate;
+    final Timestamp previousBypassTime = userAccessModuleToUpdate.getBypassTime();
 
     logger.info(
         String.format(
             "Setting %s(uid: %d) for module %s bypass status to %s",
             user.getUsername(), userId, accessModule.getName(), isBypassed));
-    userAccessModuleToUpdate =
-        retrievedAccessModule
-            .orElseGet(() -> new DbUserAccessModule().setUser(user).setAccessModule(accessModule))
-            .setBypassTime(newBypassTime);
 
+    userAccessModuleToUpdate.setBypassTime(newBypassTime);
     userAccessModuleDao.save(userAccessModuleToUpdate);
     if (configProvider.get().featureFlags.enableAccessModuleRewrite) {
       // If enabled, fire audit event from here instead of from UserService.
@@ -115,6 +106,23 @@ public class AccessModuleServiceImpl implements AccessModuleService {
           Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
           Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
     }
+  }
+
+  @Override
+  public void completeModule(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+    DbUserAccessModule userAccessModuleToUpdate = retrieveUserAccessModuleOrCreate(dbUser, accessModule);
+  }
+
+  /**
+   * Retrieves the existing {@link DbUserAccessModule} by user and access module. Create a new one
+   * if not existing in DB.
+   */
+  private DbUserAccessModule retrieveUserAccessModuleOrCreate(DbUser user, DbAccessModule dbAccessModule) {
+   return
+       userAccessModuleDao.getAllByUser(user).stream()
+            .filter(m -> m.getAccessModule().getName().equals(dbAccessModule.getName()))
+            .findFirst().orElse(new DbUserAccessModule().setUser(user).setAccessModule(dbAccessModule));
   }
 
   private static DbAccessModule getDbAccessModuleFromApi(
