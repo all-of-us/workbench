@@ -1,4 +1,3 @@
-
 import UserAdminPage from 'app/page/admin-user-list-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import navigation, { NavLink } from 'app/component/navigation';
@@ -64,29 +63,27 @@ describe('Admin', () => {
     const toggleTexts = await bypassPopup.getAllToggleTexts();
     expect(toggleTexts.sort()).toEqual(toggleOptions.sort());
 
-    const trainingBypassToggle = bypassPopup.getTrainingBypassToggle();
-    expect(await trainingBypassToggle.isChecked()).toBe(true);
+    await bypassPopup.getAllToggleInputs();
 
-    const eraCommBypassToggle = bypassPopup.getEraCommBypassToggle();
-    expect(await eraCommBypassToggle.isChecked()).toBe(true);
+    // get status of each modules individually
+    const trainingToggleStatus = await bypassPopup.getEachModuleStatus('Compliance Training');
+    const eraCommToggleStatus = await bypassPopup.getEachModuleStatus('eRA Commons Linking');
+    const twoFAToggleStatus = await bypassPopup.getEachModuleStatus('Two Factor Auth');
+    const dUCCToggleStatus = await bypassPopup.getEachModuleStatus('Data Use Agreement');
 
-    const twoFABypassToggle = bypassPopup.getTwoFABypassToggle();
-    expect(await twoFABypassToggle.isChecked()).toBe(true);
-
-    const dUCCBypassToggle = bypassPopup.getDUCCBypassToggle();
-    expect(await dUCCBypassToggle.isChecked()).toBe(true);
-
-    //get the index of the user lockout column
+    //get the index of the User Lockout column
     const userLockoutColIndex = await adminTable.getColumnIndex('User Lockout');
-    await userAdminPage.getUserLockoutText(1, userLockoutColIndex);
+
+    // get the text in the User Lockout column
     const userLockout = await userAdminPage.getUserLockoutText(1, userLockoutColIndex);
 
+    //get the index of the Status column
     const statusColIndex = await adminTable.getColumnIndex('Status');
 
-    //get the status text to match the status on admin-user-profile page
+    //get the text in the Status column to match the status on admin-user-profile page
     const status = await userAdminPage.getStatusText(1, statusColIndex);
 
-    //switch statement to validate that the status reflects the user lockout
+    //switch statement to validate that the status reflects the user lockout access
     switch (userLockout) {
       case 'DISABLE':
         expect(status).toEqual('Active');
@@ -105,11 +102,14 @@ describe('Admin', () => {
     //navigate to admin-user-profile page
     await userProfileInfo.waitForLoad();
 
-    const accountAccessToggle = userProfileInfo.getAccountAccessToggle();
+    //verify that the save button is disabled
+    expect(await userProfileInfo.getSaveButton().isCursorNotAllowed()).toBe(true);
 
+    // get the Account Access toggle status (true or false) and the text (enabled or disabled)
+    const accountAccessToggle = userProfileInfo.getAccountAccessToggle();
     const accountAccessStatus = await userProfileInfo.getAccountAccessText();
 
-    //switch statement to validate that the Account Access reflects the user lockout
+    //switch statement to validate that the Account Access text and toggle reflects the user lockout on user-admin-table.
     switch (userLockout) {
       case 'DISABLE':
         expect(accountAccessStatus).toEqual('Enabled');
@@ -121,39 +121,32 @@ describe('Admin', () => {
         break;
     }
 
-    //verify that the save button is disabled
-    expect(await userProfileInfo.getSaveButton().isCursorNotAllowed()).toBe(true);
-
-    //verifying that all expected input fields are disabled
+    //verify that userfulName, username and FreeCreditsUsed input fields are disabled
     expect(await userProfileInfo.getNameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getUsernameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getFreeCreditsUsedInput().isCursorNotAllowed()).toBe(true);
 
+    // get the username field placeholder to verify the email on user-admin-table page and admin-user-profile page matches
     const userNamePlaceHolder = await userProfileInfo.getUserNamePlaceHolder();
-
-    //verify the email on user-admin-table page and admin-user-profile page matches
     expect(userNameEmail).toEqual(userNamePlaceHolder);
 
+    //verify the credit limit value matches the max value in the free credits used field
     const freeCreditLimit = await userProfileInfo.getFreeCreditsLimitValue();
     const freeCreditMaxValue = await userProfileInfo.getFreeCreditMaxValue();
-
-    //verify the credit limit value matches the max value in the free credits used field
     expect(freeCreditLimit).toEqual(freeCreditMaxValue);
 
-    const trainingBypassToggle2 = userProfileInfo.getTrainingBypassToggle();
-    expect(await trainingBypassToggle2.isChecked()).toBe(true);
+    //get the bypass access status of all modules on admin-user-profile page
+    const twoFAToggleStatus2 = await userProfileInfo.getEachBypassStatus('twoFactorAuthBypassToggle');
+    const trainingToggle2 = await userProfileInfo.getEachBypassStatus('complianceTrainingBypassToggle');
+    const eraCommToggleStatus2 = await userProfileInfo.getEachBypassStatus('eraCommonsBypassToggle');
+    const dUCCToggleStatus2 = await userProfileInfo.getEachBypassStatus('dataUseAgreementBypassToggle');
 
-    const eraCommBypassToggle2 = userProfileInfo.getEraCommBypassToggle();
-    expect(await eraCommBypassToggle2.isChecked()).toBe(true);
-
-    const twoFABypassToggle2 = userProfileInfo.getTwoFABypassToggle();
-    expect(await twoFABypassToggle2.isChecked()).toBe(true);
-
-    const dUCCBypassToggle2 = userProfileInfo.getDUCCBypassToggle();
-    expect(await dUCCBypassToggle2.isChecked()).toBe(true);
-
+    //verify all the modules status on user-admin-table page and admin-user-profile page match
+    expect(twoFAToggleStatus2).toEqual(twoFAToggleStatus);
+    expect(trainingToggle2).toEqual(trainingToggleStatus);
+    expect(eraCommToggleStatus2).toEqual(eraCommToggleStatus);
+    expect(dUCCToggleStatus2).toEqual(dUCCToggleStatus);
   });
-
 
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
@@ -180,10 +173,9 @@ describe('Admin', () => {
 
     const userNameAuditPage = await userAuditPage.getUsernameValue();
     expect(userNameAuditPage).toEqual(userNameValue);
-    
+
     await userAuditPage.clickUserAdminLink();
     const userProfileInfo = new UserProfileInfo(page);
     await userProfileInfo.waitForLoad();
-
   });
 });

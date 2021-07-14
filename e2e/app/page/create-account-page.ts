@@ -16,7 +16,6 @@ import { getPropValue } from 'utils/element-utils';
 
 const faker = require('faker/locale/en_US');
 
-
 export const InstitutionRoleSelectValue = {
   EarlyCareerTenureTrackResearcher: 'Early career tenure-track researcher',
   UndergraduteStudent: 'Undergraduate (Bachelor level) student',
