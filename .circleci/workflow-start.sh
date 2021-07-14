@@ -58,7 +58,7 @@ fetch_pipeline_ids() {
   local get_path="pipeline?org-slug=${project_slug}"
   printf "GET list of pipelines"
   local get_result=$(get $get_path)
-  echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][] | [{created_at: .created_at, id: .id, number: .number}]' > ${pipeline_json}
+  echo $get_result | jq '[.items[] | select(.vcs.branch=="master")][] | {created_at: .created_at, id: .id, number: .number}' > ${pipeline_json}
   cat ${pipeline_json}
 }
 
