@@ -71,7 +71,7 @@ fetch_pipeline_workflow () {
 }
 
 fetch_pipeline_ids
-pipeline_ids=$(echo $pipeline_json | jq -r .id)
+pipeline_ids=$(jq -r .id $pipeline_json)
 printf pipeline_ids
 
 pipeline_ids=(${pipeline_ids[@]//\'/})
