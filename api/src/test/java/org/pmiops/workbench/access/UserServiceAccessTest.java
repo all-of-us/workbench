@@ -61,15 +61,9 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceAccessTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
-  // long after the end of the "grace period" represented by
-  // UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS
   private static final Instant START_INSTANT = Instant.parse("2030-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final long EXPIRATION_DAYS = 365L;
-
-  private static final String INITIAL_ENFORCEMENT_DATE_STRING = "2021-07-01T00:00:00Z";
-  private static final Instant INITIAL_ENFORCEMENT_DATE =
-      Instant.parse(INITIAL_ENFORCEMENT_DATE_STRING);
 
   private static DbUser dbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
@@ -220,46 +214,6 @@ public class UserServiceAccessTest {
     assertRegisteredTierDisabled(dbUser);
 
     // Simulate user filling out DUA, becoming compliant again
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              user.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-              return user;
-            });
-    assertRegisteredTierEnabled(dbUser);
-  }
-
-  // This should be removed after June 30 2021
-  @Test
-  public void testGracePeriod() {
-    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
-    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
-    Instant julyFirst = Instant.parse("2021-07-01T01:00:00.00Z");
-    PROVIDED_CLOCK.setInstant(mayFirst);
-
-    // initialize user as registered with generic values including bypassed DUA
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // add a proper DUA completion which will expire soon, but remove DUA bypass
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-    dbUser.setDataUseAgreementCompletionTime(new Timestamp(PROVIDED_CLOCK.millis()));
-    dbUser = updateUserWithRetries(this::removeDuaBypass);
-
-    // User is compliant
-    assertRegisteredTierEnabled(dbUser);
-
-    // Simulate time passing, user is granted a grace period
-    advanceClockDays(providedWorkbenchConfig.accessRenewal.expiryDays);
-    dbUser = updateUserWithRetries(Function.identity());
-    assertRegisteredTierEnabled(dbUser);
-
-    // The grace period is over, and the user loses access
-    PROVIDED_CLOCK.setInstant(julyFirst);
-    dbUser = updateUserWithRetries(Function.identity());
-    assertRegisteredTierDisabled(dbUser);
-
-    // The user updates their agreement, they are compliant again
     dbUser =
         updateUserWithRetries(
             user -> {
@@ -822,35 +776,6 @@ public class UserServiceAccessTest {
     verify(mailService).alertUserRegisteredTierExpiration(dbUser, expirationTime);
   }
 
-  // don't send an email if we are in the initial-launch grace period
-  // before 30 June 2021
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expired_grace_period() throws MessagingException {
-    // set "today" to be June 1
-    PROVIDED_CLOCK.setInstant(Instant.parse("2021-06-01T00:00:00Z"));
-
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // this would be expired...
-    dbUser.setComplianceTrainingCompletionTime(expiredBy(Duration.ofHours(1)));
-
-    // ... and this would expire in 1 day ...
-    final Duration oneDayPlusSome = daysPlusSome(1);
-    dbUser.setPublicationsLastConfirmedTime(willExpireAfter(oneDayPlusSome));
-
-    userService.maybeSendAccessExpirationEmail(dbUser);
-
-    // ... but the grace period means that no one expires until 30 days from now
-    verify(mailService)
-        .alertUserRegisteredTierWarningThreshold(dbUser, 30, INITIAL_ENFORCEMENT_DATE);
-  }
-
   @Test
   public void test_maybeSendAccessExpirationEmail_expired_FF_false() {
     // these are up to date
@@ -973,30 +898,6 @@ public class UserServiceAccessTest {
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
   }
 
-  @Test
-  public void test_getRegisteredTierExpirations_initial_enforcement_date() {
-    Instant mayFirst = Instant.parse("2020-05-01T00:00:00.00Z");
-    PROVIDED_CLOCK.setInstant(mayFirst);
-
-    // register user by setting 2 bypassable modules' bypass to 5/1/2020
-    // and the 2 unbypassable modules' completions to 5/1/2020
-
-    dbUser = updateUserWithRetries(registerUserWithTime.apply(Timestamp.from(mayFirst)));
-    assertRegisteredTierEnabled(dbUser);
-
-    final List<UserAccessExpiration> expirations = userService.getRegisteredTierExpirations();
-    assertThat(expirations.size()).isEqualTo(1);
-    assertThat(expirations.get(0).getUserName()).isEqualTo(dbUser.getUsername());
-    assertThat(expirations.get(0).getContactEmail()).isEqualTo(dbUser.getContactEmail());
-    assertThat(expirations.get(0).getGivenName()).isEqualTo(dbUser.getGivenName());
-    assertThat(expirations.get(0).getFamilyName()).isEqualTo(dbUser.getFamilyName());
-
-    // the 2 unbypassable modules would expire in a year (5/1/2021)
-    // but this is before the initial enforcement date, so we use that value instead
-    // (equal to UserServiceImpl.MIN_ACCESS_EXPIRATION_EPOCH_MS)
-    assertThat(expirations.get(0).getExpirationDate()).isEqualTo(INITIAL_ENFORCEMENT_DATE_STRING);
-  }
-
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
@@ -1019,7 +920,7 @@ public class UserServiceAccessTest {
   }
 
   private void advanceClockDays(long days) {
-    PROVIDED_CLOCK.increment(Duration.ofDays(days).toMillis());
+    PROVIDED_CLOCK.increment(daysPlusSome(days).toMillis());
   }
 
   // checks which power most of these tests - confirm that the unregisteringFunction does that
