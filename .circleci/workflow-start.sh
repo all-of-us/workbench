@@ -18,7 +18,7 @@ curl_headers="-H \"Accept: application/json\" -H \"Content-Type: application/jso
 # Get list of recently built pipelines. Save results to json file.
 pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
-  curl -X GET -f --url "${base_url}/pipeline?org-slug=${slug} ${curl_headers}" | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
+  curl -X GET -f --url "${base_url}/pipeline?org-slug=${slug}" ${curl_headers} | jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
   echo "Saved ${pipeline_json}"
   cat ${pipeline_json}
 }
