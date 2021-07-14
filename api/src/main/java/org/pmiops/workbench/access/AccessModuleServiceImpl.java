@@ -127,8 +127,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    * </ul>
    */
   private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
-    // Don't set expiration time if CompletionTime is null OR BypassTime is NOT null OR
-    // enableAccessRenewal not enabled.
     if (!dbUserAccessModule.getAccessModule().getExpirable()
         || dbUserAccessModule.getCompletionTime() == null
         || dbUserAccessModule.getBypassTime() != null
