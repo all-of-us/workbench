@@ -32,12 +32,12 @@ const getInactivityElapsedMs = () => {
     return null;
   }
   return Date.now() - parseInt(lastActive, 10);
-}
+};
 
 const secondsToText = (seconds: number) => {
   return seconds % 60 === 0 && seconds > 60 ?
       `${seconds / 60} minutes` : `${seconds} seconds`;
-}
+};
 
 export interface Props {
   signOut: (continuePath?: string) => void;
@@ -69,7 +69,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
       INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
         window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
       });
-    }
+    };
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
       clearTimeout(logoutTimer);
@@ -81,7 +81,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
       inactivityModalTimer = setTimeout(
         () => setShowModal(true),
         Math.max(0, 1000 * (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) - elapsedMs));
-    }
+    };
 
     const startInactivityMonitoring = () => {
       startInactivityTimers();
@@ -122,7 +122,7 @@ export const InactivityMonitor = ({signOut}: Props) => {
           resetTimers();
         }
       });
-    }
+    };
 
     signOutIfLocalStorageInactivityElapsed('/sign-in-again');
     startUserActivityTracker();
