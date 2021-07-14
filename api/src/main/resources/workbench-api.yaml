@@ -6409,7 +6409,7 @@ definitions:
       - MASTER
       - RESTRICTED
 
-  InstitutionRequirementEnum:
+  InstitutionMembershipRequirement:
     type: string
     description: 'Type of Institution requirement for member to access a tier.
       It can be matching email address, email domains or no access'
@@ -6466,13 +6466,13 @@ definitions:
     description: Institution-specific access tier membership requirement.
     required:
       - accessTierShortName
-      - requirementEnum
+      - membershipRequirement
     properties:
       accessTierShortName:
         type: string
         description: The short unique name for the access tier.
-      requirementEnum:
-        "$ref": "#/definitions/InstitutionRequirementEnum"
+      membershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
         description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
       eraRequired:
         type: boolean

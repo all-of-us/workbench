@@ -29,7 +29,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionRequirementEnum;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -88,7 +88,7 @@ public class InstitutionServiceTest extends SpringTest {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     institutionTierRequirement =
         new InstitutionTierRequirement()
-            .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
             .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
   }
@@ -123,7 +123,7 @@ public class InstitutionServiceTest extends SpringTest {
             .tierRequirements(
                 ImmutableList.of(
                     new InstitutionTierRequirement()
-                        .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                         .eraRequired(false)
                         .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
@@ -296,7 +296,8 @@ public class InstitutionServiceTest extends SpringTest {
     final Institution instWithNewTierRequirement =
         existingInst.tierRequirements(
             ImmutableList.of(
-                institutionTierRequirement.requirementEnum(InstitutionRequirementEnum.NO_ACCESS)));
+                institutionTierRequirement.membershipRequirement(
+                    InstitutionMembershipRequirement.NO_ACCESS)));
     assertThat(
             service
                 .updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)

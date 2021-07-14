@@ -37,6 +37,7 @@ public interface InstitutionTierRequirementMapper {
   @Mapping(target = "institution", ignore = true)
   @Mapping(target = "accessTier", ignore = true)
   @Mapping(target = "institutionTierRequirementId", ignore = true)
+  @Mapping(target = "requirementEnum", source = "membershipRequirement")
   DbInstitutionTierRequirement tierRequirementToDb(
       InstitutionTierRequirement source,
       @Context DbInstitution dbInstitution,
@@ -67,5 +68,6 @@ public interface InstitutionTierRequirementMapper {
       List<DbInstitutionTierRequirement> dbInstitutionTierRequirements);
 
   @Mapping(target = "accessTierShortName", source = "accessTier.shortName")
+  @Mapping(target = "membershipRequirement", source = "requirementEnum")
   InstitutionTierRequirement tierRequirementToModel(DbInstitutionTierRequirement source);
 }
