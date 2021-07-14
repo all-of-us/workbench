@@ -6,8 +6,7 @@ import { LinkText } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
 import Link from 'app/element/link';
 
-
-const PageTitle = '[Test] User Audit | All of Us Researcher Workbench';
+const PageTitle = 'User Audit | All of Us Researcher Workbench';
 
 export default class UserAuditPage extends AuthenticatedPage {
   constructor(page: Page) {
@@ -20,11 +19,11 @@ export default class UserAuditPage extends AuthenticatedPage {
   }
 
   getAuditButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Audit});
+    return Button.findByName(this.page, { name: LinkText.Audit });
   }
 
   getDownloadSqlButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.DownloadSql});
+    return Button.findByName(this.page, { name: LinkText.DownloadSql });
   }
 
   getUsernameInput(): Textbox {
@@ -34,14 +33,13 @@ export default class UserAuditPage extends AuthenticatedPage {
 
   async getUsernameValue(): Promise<string> {
     const usernameInput = this.getUsernameInput();
-    const usernameValue =  await usernameInput.getProperty<string>('value');
-    return usernameValue; 
+    const usernameValue = await usernameInput.getProperty<string>('value');
+    return usernameValue;
   }
 
   async clickUserAdminLink(): Promise<Page> {
-    const link = new Link(this.page, `//a[text()="User"]`);
+    const link = new Link(this.page, '//a[text()="User"]');
     await link.click();
     return page;
   }
-  
 }

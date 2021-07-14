@@ -8,6 +8,7 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
+import { getPropValue } from 'utils/element-utils';
 
 const PageTitle = 'User Admin | All of Us Researcher Workbench';
 
@@ -20,6 +21,10 @@ const DataTestIdAlias = {
   VerifiedInstitution: 'verifiedInstitution',
   InstitutionalRole: 'institutionalRole',
   EmailErrorMessage: 'email-error-message',
+  TwoFactorAuth: 'twoFactorAuthBypassToggle',
+  ComplianceTraining: 'complianceTrainingBypassToggle',
+  EraCommons: 'eRA Commons',
+  DataUserCodeOfConduct: 'dataUseAgreementBypassToggle'
 };
 
 export const LabelAlias = {
@@ -117,6 +122,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Username });
   }
 
+  // get the placeholder in username field
   getUserNamePlaceHolder(): Promise<string> {
     const userName = this.getUsernameInput();
     const userProfileEmail = userName.getProperty<string>('placeholder');
@@ -131,35 +137,30 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.FreeCreditsUsed });
   }
 
+  // get the free credits used value
   async getFreeCreditMaxValue(): Promise<string> {
     const freeCreditsMax = this.getFreeCreditsUsedInput();
-    const freeCreditsMaxValue =  await freeCreditsMax.getProperty<string>('value');
+    const freeCreditsMaxValue = await freeCreditsMax.getProperty<string>('value');
     const regex = new RegExp(/(?<=of ).*(?= limit)/);
-    return regex.exec(freeCreditsMaxValue)[0]; 
+    return regex.exec(freeCreditsMaxValue)[0];
   }
 
+  // get the free credits limit value
   async getFreeCreditsLimitValue(): Promise<string> {
     const freeCreditsDropdown = SelectMenu.findByName(this.page, { dataTestId: DataTestIdAlias.FreeCreditLimit });
     return await freeCreditsDropdown.getSelectedValue();
   }
 
-  getTrainingBypassToggle(): Checkbox {
-    const xpath = "//div[@data-test-id='complianceTrainingBypassToggle']//input[@type='checkbox']";
-    return new Checkbox(this.page, xpath);
+  // get each modules bypass access status
+  async getEachBypassStatus(toggleAccessText: string): Promise<boolean> {
+    const btn = this.getEachBypassToggle(toggleAccessText);
+    const btnStatus = await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
+    return btnStatus;
   }
 
-  getEraCommBypassToggle(): Checkbox {
-    const xpath = "//div[@data-test-id='eraCommonsBypassToggle']//input[@type='checkbox']";
-    return new Checkbox(this.page, xpath);
-  }
-
-  getTwoFABypassToggle(): Checkbox {
-    const xpath = "//div[@data-test-id='twoFactorAuthBypassToggle']//input[@type='checkbox']";
-    return new Checkbox(this.page, xpath);
-  }
-
-  getDUCCBypassToggle(): Checkbox {
-    const xpath = "//div[@data-test-id='dataUseAgreementBypassToggle']//input[@type='checkbox']";
+  // get each modules checkbox
+  private getEachBypassToggle(toggleAccessText: string): Checkbox {
+    const xpath = `//div[@data-test-id='${toggleAccessText}']//input[@type='checkbox']`;
     return new Checkbox(this.page, xpath);
   }
 
@@ -168,5 +169,4 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const dropdown = SelectMenu.findByName(this.page, FieldSelector.VerifiedInstitutionSelect.textOption);
     return dropdown.select(selectTextValue);
   }
-  
 }
