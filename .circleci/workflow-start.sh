@@ -16,7 +16,7 @@ base_url="https://circleci.com/api/v2"
 curl_headers="-H 'Accept: application/json' -H 'Content-Type: application/json' -H 'Circle-Token: ${CIRCLECI_TOKEN}'"
 
 # Get list of recently built pipelines. Save results to json file.
-pipeline_json=/tmp/master_branch_pipelines.json
+pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipelines() {
   curl -X GET -f -s --url "${base_url}/pipeline?org-slug=${slug}" ${curl_headers} jq '[.items[] | select(.vcs.branch=="master")][]' > ${pipeline_json}
   echo "Saved ${pipeline_json}"
