@@ -15,6 +15,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "institution_tier_requirement")
 public class DbInstitutionTierRequirement {
+  public enum RequirementEnum {
+    DOMAINS,
+    ADDRESSES,
+    NO_ACCESS,
+  }
 
   private long institutionTierRequirementId;
   private DbInstitution institution;
@@ -101,11 +106,5 @@ public class DbInstitutionTierRequirement {
   @Override
   public int hashCode() {
     return Objects.hash(accessTier, institution, requirementEnum);
-  }
-
-  public enum RequirementEnum {
-    DOMAINS,
-    ADDRESSES,
-    NO_ACCESS,
   }
 }

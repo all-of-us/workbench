@@ -52,7 +52,7 @@ public class InstitutionTierRequirementDaoTest extends SpringTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(registeredTier)
                 .setInstitution(testInst)
-                .setRequirementEnum(RequirementEnum.ADDRESSES)
+                .setRequirementEnum(RequirementEnum.DOMAINS)
                 .setEraRequired(true));
     final DbInstitutionTierRequirement ctRequirement =
         institutionTierRequirementDao.save(

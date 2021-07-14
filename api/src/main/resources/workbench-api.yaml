@@ -6412,7 +6412,7 @@ definitions:
   InstitutionRequirementEnum:
     type: string
     description: 'Type of Institution requirement for member to access a tier.
-      It can be matting email address, email domains or no access'
+      It can be matching email address, email domains or no access'
     enum:
       - DOMAINS
       - ADDRESSES

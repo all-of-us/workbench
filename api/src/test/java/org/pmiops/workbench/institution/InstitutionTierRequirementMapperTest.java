@@ -24,7 +24,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InstitutionTierRequirementMapperTest extends SpringTest {
-  @Autowired InstitutionTierRequirementMapper mapper;
   private static final String RT_ACCESS_TIER_SHORT_NAME = "registered";
   private static final String CT_ACCESS_TIER_SHORT_NAME = "controlled";
   private static final DbAccessTier RT_ACCESS_TIER =
@@ -44,6 +43,8 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
       new InstitutionTierRequirement()
           .requirementEnum(InstitutionRequirementEnum.NO_ACCESS)
           .accessTierShortName(CT_ACCESS_TIER_SHORT_NAME);
+
+  @Autowired InstitutionTierRequirementMapper mapper;
 
   @Test
   public void testModelToDbSuccess() {
