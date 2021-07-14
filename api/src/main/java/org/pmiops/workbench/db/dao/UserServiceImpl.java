@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
+
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
@@ -258,11 +260,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       if (isBypassed() || !configProvider.get().access.enableAccessRenewal) {
         return Optional.empty();
       }
-      Long expiryDays = configProvider.get().accessRenewal.expiryDays;
-      Preconditions.checkNotNull(
-          expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
-      long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-      return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
+      return completion.map(
+          c -> deriveExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
     }
 
     public boolean hasExpired() {

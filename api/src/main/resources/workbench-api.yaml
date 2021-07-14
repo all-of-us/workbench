@@ -5662,6 +5662,18 @@ definitions:
             description: >
               Whether any modules have expired. Each expired module will have
               the corresponding hasExpired flag set in the modules array.
+      accessModules:
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/AccessModuleStatus"
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Expiration information is also included with each
+              module in the array; this field is provided for convenience.
 
   RenewableAccessModuleStatus:
     type: object
@@ -5680,6 +5692,24 @@ definitions:
       hasExpired:
         type: boolean
         description: Whether this module has expired according to the server's clock.
+
+  AccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        "$ref": "#/definitions/AccessModule"
+      completionEpochMillis:
+        type: integer
+        format: int64
+        description: When this module completed if applicable
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire if applicable.
+      bypassEpochMillis:
+        type: integer
+        format: int64
+        description: When this module is bypassed if applicable
 
   UserAccessExpiration:
     type: object
