@@ -10,10 +10,10 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
-import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.RequirementEnum;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionRequirementEnum;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -36,12 +36,12 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
           new DbAccessTier().setShortName(CT_ACCESS_TIER_SHORT_NAME).setAccessTierId(222));
   private static final InstitutionTierRequirement RT_REQUIREMENT =
       new InstitutionTierRequirement()
-          .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+          .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
           .eraRequired(true)
           .accessTierShortName(RT_ACCESS_TIER_SHORT_NAME);
   private static final InstitutionTierRequirement CT_REQUIREMENT =
       new InstitutionTierRequirement()
-          .requirementEnum(InstitutionRequirementEnum.NO_ACCESS)
+          .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
           .accessTierShortName(CT_ACCESS_TIER_SHORT_NAME);
 
   @Autowired InstitutionTierRequirementMapper mapper;
@@ -63,12 +63,12 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(RT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setRequirementEnum(RequirementEnum.DOMAINS)
+                .setMembershipRequirement(MembershipRequirement.DOMAINS)
                 .setEraRequired(true),
             new DbInstitutionTierRequirement()
                 .setAccessTier(CT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setRequirementEnum(RequirementEnum.NO_ACCESS)
+                .setMembershipRequirement(MembershipRequirement.NO_ACCESS)
                 .setEraRequired(false));
 
     assertThat(mapper.modelToDb(modelInst, dbInst, ACCESS_TIERS)).isEqualTo(expectedResult);
@@ -113,12 +113,12 @@ public class InstitutionTierRequirementMapperTest extends SpringTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(RT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setRequirementEnum(RequirementEnum.DOMAINS)
+                .setMembershipRequirement(MembershipRequirement.DOMAINS)
                 .setEraRequired(true),
             new DbInstitutionTierRequirement()
                 .setAccessTier(CT_ACCESS_TIER)
                 .setInstitution(dbInst)
-                .setRequirementEnum(RequirementEnum.NO_ACCESS)
+                .setMembershipRequirement(MembershipRequirement.NO_ACCESS)
                 .setEraRequired(false));
 
     // Expect CT_REQUIREMENT to be false instead of null.

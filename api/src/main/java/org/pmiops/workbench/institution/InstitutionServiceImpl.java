@@ -1,5 +1,7 @@
 package org.pmiops.workbench.institution;
 
+import static org.pmiops.workbench.access.AccessUtils.getAccessTierByShortNameOrThrow;
+
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -401,6 +403,12 @@ public class InstitutionServiceImpl implements InstitutionService {
                 }
               });
     }
+
+    // All tier need to be present in API.
+    List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
+    institutionRequest
+        .getTierRequirements()
+        .forEach(a -> getAccessTierByShortNameOrThrow(dbAccessTiers, a.getAccessTierShortName()));
   }
 
   public Optional<Institution> getFirstMatchingInstitution(final String contactEmail) {

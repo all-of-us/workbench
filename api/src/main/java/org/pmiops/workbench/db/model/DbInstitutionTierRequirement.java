@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "institution_tier_requirement")
 public class DbInstitutionTierRequirement {
-  public enum RequirementEnum {
+  public enum MembershipRequirement {
     DOMAINS,
     ADDRESSES,
     NO_ACCESS,
@@ -25,7 +25,7 @@ public class DbInstitutionTierRequirement {
   private DbInstitution institution;
   private DbAccessTier accessTier;
   private boolean eraRequired;
-  private RequirementEnum requirementEnum;
+  private MembershipRequirement membershipRequirement;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,12 +74,13 @@ public class DbInstitutionTierRequirement {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "requirement_enum", nullable = false)
-  public RequirementEnum getRequirementEnum() {
-    return requirementEnum;
+  public MembershipRequirement getMembershipRequirement() {
+    return membershipRequirement;
   }
 
-  public DbInstitutionTierRequirement setRequirementEnum(RequirementEnum requirementEnum) {
-    this.requirementEnum = requirementEnum;
+  public DbInstitutionTierRequirement setMembershipRequirement(
+      MembershipRequirement membershipRequirement) {
+    this.membershipRequirement = membershipRequirement;
     return this;
   }
 
@@ -100,11 +101,11 @@ public class DbInstitutionTierRequirement {
 
     return Objects.equals(accessTier, that.accessTier)
         && Objects.equals(institution, that.institution)
-        && Objects.equals(requirementEnum, that.requirementEnum);
+        && Objects.equals(membershipRequirement, that.membershipRequirement);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(accessTier, institution, requirementEnum);
+    return Objects.hash(accessTier, institution, membershipRequirement);
   }
 }

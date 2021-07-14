@@ -11,7 +11,6 @@ import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -37,7 +36,6 @@ public interface InstitutionTierRequirementMapper {
   @Mapping(target = "institution", ignore = true)
   @Mapping(target = "accessTier", ignore = true)
   @Mapping(target = "institutionTierRequirementId", ignore = true)
-  @Mapping(target = "requirementEnum", source = "membershipRequirement")
   DbInstitutionTierRequirement tierRequirementToDb(
       InstitutionTierRequirement source,
       @Context DbInstitution dbInstitution,
@@ -52,11 +50,8 @@ public interface InstitutionTierRequirementMapper {
     dbInstitutionTierRequirement
         .setInstitution(dbInstitution)
         .setAccessTier(
-            AccessUtils.getAccessTierByShortName(dbAccessTiers, source.getAccessTierShortName())
-                .orElseThrow(
-                    () ->
-                        new NotFoundException(
-                            "Access tier " + source.getAccessTierShortName() + "not found")));
+            AccessUtils.getAccessTierByShortNameOrThrow(
+                dbAccessTiers, source.getAccessTierShortName()));
   }
 
   default List<InstitutionTierRequirement> dbToModel(
@@ -68,6 +63,5 @@ public interface InstitutionTierRequirementMapper {
       List<DbInstitutionTierRequirement> dbInstitutionTierRequirements);
 
   @Mapping(target = "accessTierShortName", source = "accessTier.shortName")
-  @Mapping(target = "membershipRequirement", source = "requirementEnum")
   InstitutionTierRequirement tierRequirementToModel(DbInstitutionTierRequirement source);
 }

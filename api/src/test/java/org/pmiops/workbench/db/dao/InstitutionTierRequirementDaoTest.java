@@ -9,7 +9,7 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
-import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.RequirementEnum;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -52,14 +52,14 @@ public class InstitutionTierRequirementDaoTest extends SpringTest {
             new DbInstitutionTierRequirement()
                 .setAccessTier(registeredTier)
                 .setInstitution(testInst)
-                .setRequirementEnum(RequirementEnum.DOMAINS)
+                .setMembershipRequirement(MembershipRequirement.DOMAINS)
                 .setEraRequired(true));
     final DbInstitutionTierRequirement ctRequirement =
         institutionTierRequirementDao.save(
             new DbInstitutionTierRequirement()
                 .setAccessTier(controlledTier)
                 .setInstitution(testInst)
-                .setRequirementEnum(RequirementEnum.ADDRESSES)
+                .setMembershipRequirement(MembershipRequirement.ADDRESSES)
                 .setEraRequired(true));
 
     assertThat(institutionTierRequirementDao.getByInstitution(testInst))

@@ -10,5 +10,5 @@ public interface InstitutionTierRequirementDao
 
   Set<DbInstitutionTierRequirement> getByInstitution(final DbInstitution institution);
 
-  long deleteByInstitution(final DbInstitution institution);
+  void deleteByInstitution(final DbInstitution institution);
 }

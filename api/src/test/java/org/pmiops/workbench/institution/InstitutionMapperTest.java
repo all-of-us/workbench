@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionRequirementEnum;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -38,7 +38,7 @@ public class InstitutionMapperTest extends SpringTest {
     institutionTierRequirements =
         Lists.newArrayList(
             new InstitutionTierRequirement()
-                .requirementEnum(InstitutionRequirementEnum.DOMAINS)
+                .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
                 .eraRequired(true)
                 .accessTierShortName("tier"));
   }
