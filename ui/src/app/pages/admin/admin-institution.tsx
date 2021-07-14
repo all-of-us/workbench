@@ -2,6 +2,7 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -51,7 +52,7 @@ interface State {
   institutionLoadError: boolean;
 }
 
-export class AdminInstitution extends React.Component<{}, State> {
+export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -62,6 +63,7 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     try {
       const details = await institutionApi().getInstitutions();
       this.setState({

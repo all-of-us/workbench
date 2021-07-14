@@ -157,7 +157,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             .build();
     InsertAllResponse response = bigQueryService.insertAll(insertAllRequest);
     checkResponse(ImmutableMultimap.of(tableId, response));
-    log.info(String.format("Verify snapshot at %d", captureTimestamp));
+    log.info(String.format("Verified snapshot at %d", captureTimestamp));
   }
 
   /** Issues one {@link BigQueryService#insertAll(InsertAllRequest)}, then logs the performance. */

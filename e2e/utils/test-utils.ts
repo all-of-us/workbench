@@ -2,7 +2,6 @@ import Checkbox from 'app/element/checkbox';
 import RadioButton from 'app/element/radiobutton';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import GoogleLoginPage from 'app/page/google-login';
 import HomePage from 'app/page/home-page';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import * as fs from 'fs';
@@ -16,36 +15,6 @@ import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 
-export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
-  logger.info('Sign in with Google to Workbench application');
-  const loginPage = new GoogleLoginPage(page);
-  await loginPage.login(userId, passwd);
-  const homePage = new HomePage(page);
-  await homePage.waitForLoad();
-}
-
-/**
- * Login in new Incognito page.
- * @param {string} userId
- * @param {string} passwd
- *
- * @deprecated use signInWithAccessToken, rm with RW-5580
- */
-export async function signInAs(userId: string, passwd: string, opts: { reset?: boolean } = {}): Promise<Page> {
-  const { reset = true } = opts;
-  if (reset) {
-    await jestPuppeteer.resetBrowser();
-  }
-  const newPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
-  const userAgent =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-    'Chrome/81.0.4044.138 Safari/537.36';
-  await newPage.setUserAgent(userAgent);
-  newPage.setDefaultNavigationTimeout(90000);
-  await signIn(newPage, userId, passwd);
-  return newPage;
-}
-
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(async () => {
     return 'window.setTestAccessTokenOverride(null)';
@@ -55,16 +24,18 @@ export async function signOut(page: Page): Promise<void> {
   await page.waitForTimeout(1000);
 }
 
-export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
+export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
-  await homePage.gotoUrl(PageUrl.Home.toString());
+  await homePage.gotoUrl(PageUrl.Home);
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
+  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
+  await navigationPromise;
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.
@@ -72,7 +43,7 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
-  await homePage.gotoUrl(PageUrl.Home.toString());
+  await homePage.gotoUrl(PageUrl.Home);
   await homePage.waitForLoad();
 }
 
@@ -149,7 +120,7 @@ export async function createWorkspace(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersion);
@@ -175,7 +146,7 @@ export async function findOrCreateWorkspace(
   page: Page,
   opts: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<string> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName } = opts;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
@@ -226,7 +197,7 @@ export async function findOrCreateWorkspaceCard(
   page: Page,
   options: { cdrVersion?: string; workspaceName?: string } = {}
 ): Promise<WorkspaceCard> {
-  const { cdrVersion = config.defaultCdrVersionName, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {
@@ -288,7 +259,7 @@ export async function dragDrop(page: Page, element: ElementHandle, destinationPo
 // See: https://stackoverflow.com/questions/18758772/how-do-i-validate-a-date-in-this-format-yyyy-mm-dd-using-jquery
 export function isValidDate(date: string) {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!date.match(regex)) {
+  if (!regex.exec(date)) {
     return false;
   }
   const d = new Date(date);

@@ -6,6 +6,7 @@ import {TextArea, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -52,7 +53,9 @@ interface InstitutionEditState {
 let title = 'Add new Institution';
 let institutionToEdit;
 
-export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<UrlParamsProps, InstitutionEditState> {
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+
+export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -74,6 +77,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);

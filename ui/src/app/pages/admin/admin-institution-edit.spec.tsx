@@ -14,7 +14,7 @@ import {AdminInstitutionEdit} from './admin-institution-edit';
 describe('AdminInstitutionEditSpec', () => {
 
   const component = () => {
-    return mount(<AdminInstitutionEdit/>);
+    return mount(<AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('AdminInstitutionEditSpec', () => {
     urlParamsStore.next({
       institutionId: 'Verily'
     });
-    const wrapper = mount(<AdminInstitutionEdit/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const testInput = fp.repeat(83, 'a');
@@ -48,7 +48,7 @@ describe('AdminInstitutionEditSpec', () => {
     urlParamsStore.next({
       institutionId: 'Verily'
     });
-    const wrapper = mount(<AdminInstitutionEdit/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 

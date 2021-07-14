@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -5,11 +6,11 @@ import {Button} from 'app/components/buttons';
 import {NumberInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
-import {cohortReviewStore, queryResultSizeStore} from 'app/services/review-state.service';
+import {queryResultSizeStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {currentCohortReviewStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
@@ -49,6 +50,7 @@ const styles = reactStyles({
 interface Props {
   canceled: Function;
   cohort: Cohort;
+  cohortReview: CohortReview;
   created: Function;
   workspace: WorkspaceData;
 }
@@ -57,10 +59,9 @@ interface State {
   create: boolean;
   creating: boolean;
   numberOfParticipants: string;
-  review: CohortReview;
 }
 
-export const CreateReviewModal = withCurrentWorkspace()(
+export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
 
     constructor(props: any) {
@@ -69,7 +70,6 @@ export const CreateReviewModal = withCurrentWorkspace()(
         create: true,
         creating: false,
         numberOfParticipants: '',
-        review: cohortReviewStore.getValue()
       };
     }
 
@@ -85,7 +85,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
 
       cohortReviewApi().createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
         .then(response => {
-          cohortReviewStore.next(response);
+          currentCohortReviewStore.next(response);
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({creating: false});
           this.props.created(true);
@@ -94,9 +94,9 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort} = this.props;
-      const {creating, numberOfParticipants, review} = this.state;
-      const max = Math.min(this.state.review.matchedParticipantCount, 10000);
+      const {cohort, cohortReview: {matchedParticipantCount}} = this.props;
+      const {creating, numberOfParticipants} = this.state;
+      const max = Math.min(matchedParticipantCount, 10000);
       const errors = validate({numberOfParticipants}, {
         numberOfParticipants: {
           numericality: {
@@ -112,9 +112,9 @@ export const CreateReviewModal = withCurrentWorkspace()(
         <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
         <ModalBody style={styles.body}>
           <div style={{marginBottom: '0.5rem'}}>
-            Cohort {cohort.name} has {review.matchedParticipantCount.toLocaleString() + ' '}
+            Cohort {cohort.name} has {matchedParticipantCount.toLocaleString() + ' '}
             participants for possible review.  How many would you like to review?
-            {review.matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
+            {matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
           </div>
           <ValidationError>
             {summarizeErrors(numberOfParticipants && errors && errors.numberOfParticipants)}

@@ -15,7 +15,7 @@ CSV_FILES=("cb_criteria_menu.csv"
 "prep_clinical_terms_nc.csv"
 "prep_concept.csv"
 "prep_concept_relationship.csv"
-"prep_criteria.csv"
+"prep_cpt.csv"
 "prep_physical_measurement.csv")
 
 for file in ${CSV_FILES[@]}; do

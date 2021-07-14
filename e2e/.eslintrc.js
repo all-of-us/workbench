@@ -104,6 +104,6 @@ module.exports = {
         asyncArrow: 'always'
       }
     ],
-    'quote-props': [2, 'as-needed']
+    'quote-props': [2, 'consistent-as-needed']
   }
 };

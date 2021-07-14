@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
 import * as fp from 'lodash/fp';
 import { LinkText } from 'app/text-labels';
@@ -67,17 +67,21 @@ export default class Container {
       )([
         {
           shouldWait: waitForNav,
-          waitFn: async () => {
-            await this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
+          waitFn: () => {
+            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
           }
         },
         {
           shouldWait: waitForClose,
-          waitFn: async () => {
-            await this.waitUntilClose(timeout);
+          waitFn: () => {
+            this.waitUntilClose(timeout);
           }
         }
       ])
     );
+  }
+
+  async asElement(): Promise<ElementHandle | null> {
+    return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
   }
 }

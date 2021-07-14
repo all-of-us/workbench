@@ -309,7 +309,7 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
           promises.push(
             cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
               namespace,
-              name,
+              id,
               surveyNode.conceptId,
               ppiQuestions.getValue()[parentId].conceptId,
               +value

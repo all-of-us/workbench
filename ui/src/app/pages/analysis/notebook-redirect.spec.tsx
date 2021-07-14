@@ -33,7 +33,8 @@ describe('NotebookRedirect', () => {
   let runtimeStub: RuntimeApiStub;
 
   const component = async() => {
-    const c = mount(<NotebookRedirect/>);
+    const c = mount(<NotebookRedirect hideSpinner={() => {}}
+                                      showSpinner={() => {}}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };

@@ -309,7 +309,7 @@ SELECT
     , a.has_attribute
     , a.has_hierarchy
     , a.path
-FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` a
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\` a
 LEFT JOIN
     (
         SELECT concept_id, concept_name
@@ -326,7 +326,7 @@ LEFT JOIN
                 (
                     -- get all concepts that are selectable
                     SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.prep_cpt\`
                     WHERE type = 'CPT4'
                         and is_selectable = 1
                 )

@@ -31,7 +31,6 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
       UserMapper.class
     })
 public interface ProfileMapper {
-  @Mapping(target = "contactEmailFailure", ignore = true) // I don't think we actually use this
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")

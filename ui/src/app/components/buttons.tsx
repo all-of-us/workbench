@@ -260,7 +260,7 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
   </TooltipTrigger>;
 };
 
-export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} propagateDataTestId={true}/>;
+export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} />;
 
 const cardButtonBase = {
   style: {

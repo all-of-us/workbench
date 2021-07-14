@@ -11,9 +11,11 @@ import org.springframework.data.repository.CrudRepository;
 public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findByWorkspaceIdAndInvalid(long workspaceId, boolean invalid);
 
-  List<DbDataset> findDataSetsByCohortIdsAndWorkspaceId(long cohortId, long workspaceId);
+  List<DbDataset> findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
+      long cohortId, long workspaceId, boolean dirty);
 
-  List<DbDataset> findDataSetsByConceptSetIdsAndWorkspaceId(long conceptId, long workspaceId);
+  List<DbDataset> findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(
+      long conceptId, long workspaceId, boolean dirty);
 
   List<DbDataset> findByWorkspaceId(long workspaceId);
 

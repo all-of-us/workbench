@@ -6,7 +6,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { createWorkspace, findOrCreateWorkspace, signIn, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
@@ -45,13 +45,13 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Share Workspace to a READER.
     const shareModal = await aboutPage.openShareModal();
-    await shareModal.shareWithUser(config.readerUserName, WorkspaceAccessLevel.Reader);
+    await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
   });
 
   test('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
-    await signIn(page, config.readerUserName, config.userPassword);
+    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
     // Create a new Workspace. This is the copy-to workspace.
     const readerWorkspaceName = await createWorkspace(page);
@@ -145,7 +145,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
   test('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
-    await signIn(page, config.readerUserName, config.userPassword);
+    await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();

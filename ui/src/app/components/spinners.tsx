@@ -31,7 +31,7 @@ export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
   </svg>;
 };
 
-interface SpinnerOverlayProps {
+export interface SpinnerOverlayProps {
   // Colors the spinner using darker colors.
   dark?: boolean;
   // Sets the background opacity on the spinner overlay. Defaults to 0, which creates a fully-

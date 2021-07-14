@@ -4,6 +4,7 @@ import {registerApiClient} from "app/services/swagger-fetch-clients";
 
 import {WorkspacesApi} from "generated/fetch";
 
+import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {exampleCohortStubs} from "testing/stubs/cohorts-api-stub";
 import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
@@ -23,11 +24,12 @@ describe('getTrail', () => {
     const trail = getTrail(BreadcrumbType.Participant,
       workspaceDataStub,
       exampleCohortStubs[0],
+      cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
       {ns: 'testns', wsid: 'testwsid', cid: 88, pid: 77}
     );
     expect(trail.map(item => item.label))
-      .toEqual(['Workspaces', 'defaultWorkspace', 'sample name', 'Participant 77']);
+      .toEqual(['Workspaces', 'defaultWorkspace', 'Cohort Name', 'Participant 77']);
     expect(trail[3].url)
       .toEqual('/workspaces/testns/testwsid/data/cohorts/88/review/participants/77');
   });

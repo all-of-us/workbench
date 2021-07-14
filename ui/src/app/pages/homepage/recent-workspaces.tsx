@@ -1,21 +1,19 @@
 import * as React from 'react';
 
-import {Profile, RecentWorkspace} from 'generated/fetch';
+import {RecentWorkspace} from 'generated/fetch';
 
 import {FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withUserProfile} from 'app/utils';
 
 interface State {
   loading: boolean;
   recentWorkspaces: RecentWorkspace[];
 }
 
-export const RecentWorkspaces = withUserProfile()
-(class extends React.Component<{ profileState: { profile: Profile, reload: Function } }, State> {
+export const RecentWorkspaces = (class extends React.Component<{}, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -56,7 +54,6 @@ export const RecentWorkspaces = withUserProfile()
               this.state.recentWorkspaces.map(recentWorkspace => {
                 return <WorkspaceCard
                   key={recentWorkspace.workspace.namespace}
-                  userEmail={this.props.profileState.profile.username}
                   workspace={recentWorkspace.workspace}
                   accessLevel={recentWorkspace.accessLevel}
                   reload={() => this.loadWorkspaces()}

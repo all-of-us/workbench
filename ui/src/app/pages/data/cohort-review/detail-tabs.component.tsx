@@ -5,13 +5,13 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
-import {cohortReviewStore, filterStateStore} from 'app/services/review-state.service';
+import {filterStateStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Domain, FilterColumns} from 'generated/fetch';
+import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
@@ -293,6 +293,7 @@ const domainList = [
 const EVENT_CATEGORY = 'Review Individual';
 
 interface Props {
+  cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
 
@@ -305,7 +306,7 @@ interface State {
   updateState: number;
 }
 
-export const DetailTabs = withCurrentWorkspace()(
+export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private subscription;
     constructor(props: any) {
@@ -324,7 +325,7 @@ export const DetailTabs = withCurrentWorkspace()(
     componentDidMount() {
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(({pid}) => !!pid)
-        .switchMap(({ns, wsid, cid, pid}) => {
+        .switchMap(({ns, wsid, pid}) => {
           const chartData = {};
           return Observable.forkJoin(
             ...domainList.map(domainName => {
@@ -335,8 +336,7 @@ export const DetailTabs = withCurrentWorkspace()(
               };
               this.setState({chartData, participantId: pid});
               return from(cohortReviewApi()
-                .getParticipantChartData(ns, wsid,
-                  cohortReviewStore.getValue().cohortReviewId, pid, domainName, 10))
+                .getParticipantChartData(ns, wsid, this.props.cohortReview.cohortReviewId, pid, domainName, 10))
                 .do(({items}) => {
                   chartData[domainName] = {
                     loading: false,

@@ -6,6 +6,7 @@ import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
+  withCurrentCohortReview,
   withCurrentConceptSet,
   withCurrentWorkspace,
   withRouteConfigData,
@@ -14,7 +15,7 @@ import {
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {BillingStatus, Cohort, ConceptSet} from 'generated/fetch';
+import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
 
 const styles = {
   firstLink: {
@@ -44,6 +45,7 @@ export const getTrail = (
   type: BreadcrumbType,
   workspace: WorkspaceData,
   cohort: Cohort,
+  cohortReview: CohortReview,
   conceptSet: ConceptSet,
   urlParams: any
 ): Array<BreadcrumbData> => {
@@ -56,22 +58,22 @@ export const getTrail = (
       ];
     case BreadcrumbType.Workspace:
       return [
-        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData(workspace ? workspace.name : '...', `${prefix}/data`)
       ];
     case BreadcrumbType.WorkspaceEdit:
       return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Edit Workspace', `${prefix}/edit`)
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`)
       ];
     case BreadcrumbType.Notebook:
       return [
-        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Notebooks', `${prefix}/notebooks`),
         new BreadcrumbData(
           nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
@@ -80,7 +82,7 @@ export const getTrail = (
       ];
     case BreadcrumbType.ConceptSet:
       return [
-        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData(
           conceptSet
             ? conceptSet.name
@@ -89,15 +91,23 @@ export const getTrail = (
       ];
     case BreadcrumbType.Cohort:
       return [
-        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData(
           cohort ? cohort.name : '...',
           `${prefix}/data/cohorts/${cid}/review/participants`
         )
       ];
+    case BreadcrumbType.CohortReview:
+      return [
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
+        new BreadcrumbData(
+          cohortReview ? cohortReview.cohortName : '...',
+          `${prefix}/data/cohorts/${cid}/review/participants`
+        )
+      ];
     case BreadcrumbType.Participant:
       return [
-        ...getTrail(BreadcrumbType.Cohort, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.CohortReview, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData(
           `Participant ${pid}`,
           `${prefix}/data/cohorts/${cid}/review/participants/${pid}`
@@ -105,22 +115,22 @@ export const getTrail = (
       ];
     case BreadcrumbType.CohortAdd:
       return [
-        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Build Cohort Criteria', `${prefix}/data/cohorts/build`)
       ];
     case BreadcrumbType.SearchConcepts:
       return [
-        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Search Concepts', `${prefix}/data/concepts`)
       ];
     case BreadcrumbType.Dataset:
       return [
-        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData('Dataset', `${prefix}/data/datasets`)
       ];
     case BreadcrumbType.Data:
       return [
-        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, conceptSet, urlParams),
+        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, cohortReview, conceptSet, urlParams),
         new BreadcrumbData(workspace ? workspace.name : '...', `${prefix}/data`)
       ];
     default: return [];
@@ -140,6 +150,7 @@ const BreadcrumbLink = ({href, ...props}) => {
 interface Props {
   workspace: WorkspaceData;
   cohort: Cohort;
+  cohortReview: CohortReview;
   conceptSet: ConceptSet;
   urlParams: any;
   routeConfigData: any;
@@ -153,6 +164,7 @@ interface State {
 export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohort(),
+  withCurrentCohortReview(),
   withCurrentConceptSet(),
   withUrlParams(),
   withRouteConfigData(),
@@ -185,6 +197,7 @@ export const Breadcrumb = fp.flow(
         this.props.routeConfigData.breadcrumb || this.props.reactRouteData.breadcrumb,
         this.props.workspace,
         this.props.cohort,
+        this.props.cohortReview,
         this.props.conceptSet,
         this.props.urlParams
       );

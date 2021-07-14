@@ -49,7 +49,8 @@ public class FireCloudConfig {
   public static final String SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API =
       "serviceAccountStaticNotebooksApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
-
+  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
+  public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
   public static final List<String> TERRA_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -186,11 +187,21 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean
+  @Bean(name = SERVICE_ACCOUNT_BILLING_V2_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingV2Api billingV2Api(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+  public BillingV2Api serviceAccountBillingV2Api(
+      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     // Billing calls are made by the AllOfUs service account, rather than using the end user's
     // credentials.
+    BillingV2Api api = new BillingV2Api();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = END_USER_STATIC_BILLING_V2_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public BillingV2Api endUserBillingV2Api(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    // Billing calls are made by the user
     BillingV2Api api = new BillingV2Api();
     api.setApiClient(apiClient);
     return api;

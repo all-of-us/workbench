@@ -10,7 +10,6 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBL
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DISABLED;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__PROFESSIONAL_URL;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
@@ -108,8 +107,6 @@ public class InsertAllRequestBuilderTest extends SpringTest {
     assertTimeApprox((long) contentMap.get("snapshot_timestamp"), PRINCE_PARTY_TIME.toEpochMilli());
     assertThat(contentMap).isNotEmpty();
     assertThat(contentMap.get("professional_url")).isEqualTo(USER__PROFESSIONAL_URL);
-    assertThat(contentMap.get("free_tier_credits_limit_days_override"))
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     assertThat(contentMap.get("disabled")).isEqualTo(USER__DISABLED);
     final Optional<OffsetDateTime> odt =
         rowToInsertStringToOffsetTimestamp(

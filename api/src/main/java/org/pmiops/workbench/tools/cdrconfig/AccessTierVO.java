@@ -12,4 +12,5 @@ public class AccessTierVO {
   public String servicePerimeter;
   public String authDomainName;
   public String authDomainGroupEmail;
+  public String datasetsBucket;
 }

@@ -15,7 +15,7 @@ CRITERIA_MENU="cb_criteria_menu.csv"
 DS_DATA_DICTIONARY="ds_data_dictionary.csv"
 CB_SURVEY_VERSION="cb_survey_version.csv"
 PREP_CDR_DATE="prep_cdr_date.csv"
-PREP_CRITERIA="prep_criteria.csv"
+PREP_CPT="prep_cpt.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 PREP_CONCEPT="prep_concept.csv"
 PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
@@ -25,7 +25,7 @@ NON_PREP_FILES=($CRITERIA_MENU
            $DS_DATA_DICTIONARY
            $CB_SURVEY_VERSION)
 PREP_FILES=($PREP_CDR_DATE
-           $PREP_CRITERIA
+           $PREP_CPT
            $PREP_CLINICAL_TERMS
            $PREP_CONCEPT
            $PREP_CONCEPT_RELATIONSHIP
@@ -175,7 +175,7 @@ else
         ;;
       $CB_SURVEY_VERSION | \
       $PREP_CDR_DATE | \
-      $PREP_CRITERIA | \
+      $PREP_CPT | \
       $PREP_CLINICAL_TERMS | \
       $PREP_CONCEPT | \
       $PREP_CONCEPT_RELATIONSHIP | \

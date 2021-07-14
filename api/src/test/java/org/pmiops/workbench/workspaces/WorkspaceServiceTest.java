@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -8,7 +9,9 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.api.services.cloudbilling.model.BillingAccount;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -39,7 +42,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
@@ -86,9 +89,8 @@ public class WorkspaceServiceTest {
   })
   static class Configuration {
     @Bean
+    @Scope("prototype")
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.billing.accountId = "free-tier-account";
       return workbenchConfig;
     }
 
@@ -102,7 +104,7 @@ public class WorkspaceServiceTest {
   @MockBean private BillingProjectAuditor mockBillingProjectAuditor;
   @MockBean private Clock mockClock;
   @MockBean private FireCloudService mockFireCloudService;
-
+  @MockBean private CloudBillingClient mockCloudBillingClient;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceService workspaceService;
 
@@ -114,8 +116,11 @@ public class WorkspaceServiceTest {
   private static final long USER_ID = 1L;
   private static final String DEFAULT_USERNAME = "mock@mock.com";
   private static final String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
+  private static final String FREE_TIER_BILLING_ACCOUNT_ID = "free-tier-account";
 
   private final AtomicLong workspaceIdIncrementer = new AtomicLong(1);
+
+  private static WorkbenchConfig workbenchConfig;
 
   @BeforeEach
   public void setUp() {
@@ -160,7 +165,9 @@ public class WorkspaceServiceTest {
     currentUser.setUsername(DEFAULT_USERNAME);
     currentUser.setUserId(USER_ID);
     currentUser.setDisabled(false);
-    currentUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_ID;
   }
 
   private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
@@ -416,5 +423,75 @@ public class WorkspaceServiceTest {
     // but the billing project is not deleted
 
     verify(mockBillingProjectAuditor, never()).fireDeleteAction(eq(billingProject));
+  }
+
+  @Test
+  public void updateBillingAccount_freeTierToUserOwned() throws Exception {
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
+    String newBillingAccount = "billing-123";
+    DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    BillingAccount billingAccount = new BillingAccount();
+    billingAccount.setOpen(true);
+    when(mockCloudBillingClient.getBillingAccount(newBillingAccount)).thenReturn(billingAccount);
+    assertThat(workspace.getBillingAccountName())
+        .isEqualTo(workbenchConfig.billing.freeTierBillingAccountName());
+
+    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount);
+
+    verify(mockFireCloudService)
+        .updateBillingAccount(workspace.getWorkspaceNamespace(), newBillingAccount);
+    verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
+    assertThat(workspace.getBillingAccountName()).isEqualTo(newBillingAccount);
+  }
+
+  @Test
+  public void updateBillingAccount_userOwnedToFreeTier() throws Exception {
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
+    String oldBillingAccount = "billing-123";
+    DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    workspace.setBillingAccountName(oldBillingAccount);
+    assertThat(workspace.getBillingAccountName()).isEqualTo(oldBillingAccount);
+
+    workspaceService.updateWorkspaceBillingAccount(
+        workspace, workbenchConfig.billing.freeTierBillingAccountName());
+
+    verify(mockFireCloudService)
+        .updateBillingAccountAsService(
+            workspace.getWorkspaceNamespace(),
+            workbenchConfig.billing.freeTierBillingAccountName());
+    verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
+    assertThat(workspace.getBillingAccountName())
+        .isEqualTo(workbenchConfig.billing.freeTierBillingAccountName());
+  }
+
+  @Test
+  public void updateBillingAccount_noChange() throws Exception {
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
+    String newBillingAccount = "billing-123";
+    DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    workspace.setBillingAccountName(newBillingAccount);
+
+    workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount);
+
+    verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
+    verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
+  }
+
+  @Test
+  public void updateBillingAccount_accountNotOpen() throws Exception {
+    workbenchConfig.featureFlags.enableBillingUpgrade = true;
+    String newBillingAccount = "billing-123";
+    DbWorkspace workspace = dbWorkspaces.get(1); // arbitrary choice of those defined for testing
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    BillingAccount billingAccount = new BillingAccount();
+    billingAccount.setOpen(false);
+    when(mockCloudBillingClient.getBillingAccount(newBillingAccount)).thenReturn(billingAccount);
+
+    assertThrows(
+        BadRequestException.class,
+        () -> workspaceService.updateWorkspaceBillingAccount(workspace, newBillingAccount));
+    verify(mockFireCloudService, never()).updateBillingAccountAsService(anyString(), anyString());
+    verify(mockFireCloudService, never()).updateBillingAccount(anyString(), anyString());
   }
 }

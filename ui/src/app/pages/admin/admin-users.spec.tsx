@@ -10,7 +10,7 @@ import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
 describe('AdminUser', () => {
-  let props: {profile: Profile};
+  let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}};
 
   const component = () => {
     return mount(<AdminUsers {...props}/>);
@@ -18,13 +18,13 @@ describe('AdminUser', () => {
 
   beforeEach(() => {
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
     }});
     props = {
+      ...props,
       profile: ProfileStubVariables.PROFILE_STUB
     };
     registerApiClient(ProfileApi, new ProfileApiStub());

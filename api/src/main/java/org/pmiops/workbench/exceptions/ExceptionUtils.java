@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -32,6 +33,8 @@ public class ExceptionUtils {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
       throw new ConflictException(e);
+    } else if (e instanceof TokenResponseException) {
+      throw codeToException(((TokenResponseException) e).getStatusCode());
     }
     throw new ServerErrorException(e);
   }
@@ -80,7 +83,7 @@ public class ExceptionUtils {
     return code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
   }
 
-  private static RuntimeException codeToException(int code) {
+  public static RuntimeException codeToException(int code) {
 
     if (code == HttpStatus.NOT_FOUND.value()) {
       return new NotFoundException();

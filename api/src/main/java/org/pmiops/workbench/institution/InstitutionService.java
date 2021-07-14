@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
 
@@ -118,4 +119,13 @@ public interface InstitutionService {
   Optional<Institution> getFirstMatchingInstitution(final String contactEmail);
 
   Optional<Institution> getByUser(DbUser user);
+
+  /**
+   * Retrieve list of the {@link InstitutionTierRequirement} which specifies how members can access
+   * each tier.
+   *
+   * @param institutionShortName the short name (key) used to refer to this institution in the API
+   * @return the list of {@link InstitutionTierRequirement} for each tier.
+   */
+  List<InstitutionTierRequirement> getTierRequirements(String institutionShortName);
 }

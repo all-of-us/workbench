@@ -1,0 +1,57 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "survey_seq",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Privacy_Rules",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Survey",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Display",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Concept_Code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Parent_PMI_Code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Source_Vocabulary",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Source_Concept_Id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Standard_Vocabulary",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "Standard_Concept_ID",
+    "type": "INTEGER"
+  }
+]

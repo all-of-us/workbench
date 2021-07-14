@@ -1,4 +1,5 @@
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -97,7 +98,9 @@ const AdminNotebookViewComponent = (props: Props) => {
   </React.Fragment>;
 };
 
-const AdminNotebookView = () => {
+const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
+
   const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 

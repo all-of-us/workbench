@@ -2,10 +2,9 @@
 .env
 
 node_modules/
+signin-tokens/
 tsc-out/
 out/
-
-puppeteer-access-token.txt
 
 # logs
 screenshot/

@@ -68,7 +68,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   // if the collaborator is already on this workspace, just remove them before continuing.
-  async removeCollaborator(name = config.collaboratorUsername): Promise<void> {
+  async removeCollaborator(name = config.COLLABORATOR_USER): Promise<void> {
     const modal = await this.openShareModal();
     await modal.removeUser(name);
     await waitWhileLoading(this.page);

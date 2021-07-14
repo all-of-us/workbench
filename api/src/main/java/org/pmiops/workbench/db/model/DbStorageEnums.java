@@ -16,7 +16,6 @@ import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
@@ -308,25 +307,6 @@ public final class DbStorageEnums {
 
   public static Domain domainIdToDomain(String domainId) {
     return DOMAIN_ID_MAP.inverse().get(domainId);
-  }
-
-  // EmailVerificationStatus
-  private static final BiMap<EmailVerificationStatus, Short>
-      CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS =
-          ImmutableBiMap.<EmailVerificationStatus, Short>builder()
-              .put(EmailVerificationStatus.UNVERIFIED, (short) 0)
-              .put(EmailVerificationStatus.PENDING, (short) 1)
-              .put(EmailVerificationStatus.SUBSCRIBED, (short) 2)
-              .build();
-
-  public static EmailVerificationStatus emailVerificationStatusFromStorage(
-      Short emailVerificationStatus) {
-    return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.inverse().get(emailVerificationStatus);
-  }
-
-  public static Short emailVerificationStatusToStorage(
-      EmailVerificationStatus emailVerificationStatus) {
-    return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.get(emailVerificationStatus);
   }
 
   // InstitutionalRole

@@ -7,11 +7,9 @@ import Select from 'react-select';
 
 import {Props, WorkspaceShare} from './workspace-share';
 
-import {profileApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  ProfileApi,
   User,
   UserApi,
   UserRole,
@@ -22,7 +20,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-describe('WorkspaceShareComponent', () => {
+describe('WorkspaceShare', () => {
   let props: Props;
 
   const component = () => {
@@ -51,12 +49,11 @@ describe('WorkspaceShareComponent', () => {
 
   beforeEach(() => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
-    registerApiClient(WorkspacesApi,
-      new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
+
     props = {
-      onClose: () => {},
-      accessLevel: WorkspaceAccessLevel.OWNER,
-      userRoles: tomRiddleDiaryUserRoles
+      workspace: tomRiddleDiary,
+      onClose: () => {}
     };
 
     profileStore.set({
@@ -67,12 +64,12 @@ describe('WorkspaceShareComponent', () => {
       reload: jest.fn(),
       updateCache: jest.fn()
     });
-
-    currentWorkspaceStore.next(tomRiddleDiary);
   });
 
-  it('display correct users', () => {
+  it('display correct users', async() => {
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="collab-user-name"]').length).toBe(3);
     expect(wrapper.find('[data-test-id="collab-user-email"]').length).toBe(3);
@@ -83,16 +80,20 @@ describe('WorkspaceShareComponent', () => {
       .toEqual(expectedUsers.map(u => u.email));
   });
 
-  it('displays correct role info', () => {
+  it('displays correct role info', async() => {
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
     expect(wrapper.find(getSelectString(harryRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
     expect(wrapper.find(getSelectString(hermioneRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
     expect(wrapper.find(getSelectString(ronRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
     expect(wrapper.find(getSelectString(lunaRole)).length).toBe(0);
   });
 
-  it('removes user correctly', () => {
+  it('removes user correctly', async() => {
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
     wrapper.find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]').first().simulate('click');
     const expectedNames = fp.sortBy('familyName', [harry, hermione])
       .map(u => u.givenName + ' ' + u.familyName);
@@ -119,8 +120,10 @@ describe('WorkspaceShareComponent', () => {
     expect(wrapper.find(dataString).length).toBe(0);
   });
 
-  it('does not allow self role change', () => {
+  it('does not allow self role change', async() => {
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
     expect(wrapper.find('[data-test-id="harry.potter@hogwarts.edu-user-role"]').first()
       .props()['isDisabled']).toBe(true);
   });

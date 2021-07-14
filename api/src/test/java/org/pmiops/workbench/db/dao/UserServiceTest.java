@@ -29,6 +29,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -361,7 +362,6 @@ public class UserServiceTest extends SpringTest {
     // documentation that these fields are expected to be null by default.
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
     assertThat(dbUser.getComplianceTrainingBypassTime()).isNull();
-    assertThat(dbUser.getBetaAccessBypassTime()).isNull();
     assertThat(dbUser.getEraCommonsBypassTime()).isNull();
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
     assertThat(dbUser.getRasLinkLoginGovBypassTime()).isNull();
@@ -396,16 +396,6 @@ public class UserServiceTest extends SpringTest {
             Optional.empty(),
             nullableTimestampToOptionalInstant(complianceTrainingBypassTime));
     assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
-
-    final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
-    userService.setBetaAccessBypassTime(dbUser.getUserId(), null, betaAccessBypassTime);
-    verify(mockUserServiceAuditAdapter)
-        .fireAdministrativeBypassTime(
-            dbUser.getUserId(),
-            BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
-            Optional.empty(),
-            nullableTimestampToOptionalInstant(betaAccessBypassTime));
-    assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
 
     final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
     userService.setEraCommonsBypassTime(dbUser.getUserId(), null, eraCommonsBypassTime);
@@ -445,9 +435,27 @@ public class UserServiceTest extends SpringTest {
   }
 
   @Test
+  public void testSubmitTermsOfService_illegalTosVersion() {
+    // Testing NULL input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
+        });
+
+    // Testing not current term input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
+        });
+  }
+
+  @Test
   public void testSubmitTermsOfService() {
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }
@@ -481,7 +489,7 @@ public class UserServiceTest extends SpringTest {
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
-    userService.confirmProfile();
+    userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
 
@@ -489,7 +497,7 @@ public class UserServiceTest extends SpringTest {
 
     tick();
 
-    userService.confirmProfile();
+    userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }

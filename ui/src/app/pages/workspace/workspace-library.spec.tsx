@@ -2,48 +2,29 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {FeaturedWorkspacesConfigApi, Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
+import {FeaturedWorkspacesConfigApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces-config-api-stub';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {buildWorkspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
-import {profileStore} from "app/utils/stores";
-
-// Mock the navigate function but not userProfileStore
-jest.mock('app/utils/navigation', () => ({
-  ...(jest.requireActual('app/utils/navigation')),
-  navigate: jest.fn()
-}));
 
 describe('WorkspaceLibrary', () => {
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   const suffixes = [" Phenotype Library", " Tutorial Workspace", " Published Workspace"];
-  let profileApi: ProfileApiStub;
-  const load = jest.fn();
-  const reload = jest.fn();
-  const updateCache = jest.fn();
+
+  const props = {
+    enablePublishedWorkspaces: true,
+    hideSpinner: () => {},
+    showSpinner: () => {}
+  };
 
   const component = () => {
-    return mount(<WorkspaceLibrary
-      enablePublishedWorkspaces={true}
-    />);
+    return mount(<WorkspaceLibrary {...props} />);
   };
 
   beforeEach(() => {
-    registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(FeaturedWorkspacesConfigApi, new FeaturedWorkspacesConfigApiStub());
-
-    // mocking because we don't have access to the angular service
-    reload.mockImplementation(async () => {
-      const newProfile = await profileApi.getMe();
-      profileStore.set({profile: newProfile, load, reload, updateCache});
-    });
-
-    profileStore.set({profile, load, reload, updateCache});
   });
 
   it('renders', () => {

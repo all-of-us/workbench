@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Objects;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,13 +10,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import org.pmiops.workbench.model.ArchivalStatus;
 
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
   private long cdrVersionId;
-  private boolean isDefault;
+  private Boolean isDefault;
   private String name;
   private DbAccessTier accessTier;
   private short releaseNumber;
@@ -29,6 +31,8 @@ public class DbCdrVersion {
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
+  private String allSamplesWgsDataBucket;
+  private String singleSampleArrayDataBucket;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -40,13 +44,22 @@ public class DbCdrVersion {
     this.cdrVersionId = cdrVersionId;
   }
 
+  // I changed the type to object Boolean because Hibernate started complaining about assigning
+  // nulls to primitive boolean.  TODO why now / what changed?
+
   @Column(name = "is_default")
-  public boolean getIsDefault() {
+  public Boolean getIsDefault() {
     return isDefault;
   }
 
-  public void setIsDefault(boolean isDefault) {
+  public void setIsDefault(Boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  @Transient
+  @NotNull
+  public boolean getIsDefaultNotNull() {
+    return Optional.ofNullable(isDefault).orElse(false);
   }
 
   @Column(name = "name")
@@ -176,6 +189,24 @@ public class DbCdrVersion {
     this.hasCopeSurveyData = hasCopeSurveyData;
   }
 
+  @Column(name = "all_samples_wgs_data_bucket")
+  public String getAllSamplesWgsDataBucket() {
+    return allSamplesWgsDataBucket;
+  }
+
+  public void setAllSamplesWgsDataBucket(String allSamplesWgsDataBucket) {
+    this.allSamplesWgsDataBucket = allSamplesWgsDataBucket;
+  }
+
+  @Column(name = "single_sample_array_data_bucket")
+  public String getSingleSampleArrayDataBucket() {
+    return singleSampleArrayDataBucket;
+  }
+
+  public void setSingleSampleArrayDataBucket(String singleSampleArrayDataBucket) {
+    this.singleSampleArrayDataBucket = singleSampleArrayDataBucket;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -193,7 +224,8 @@ public class DbCdrVersion {
         elasticIndexBaseName,
         wgsBigqueryDataset,
         hasFitbitData,
-        hasCopeSurveyData);
+        hasCopeSurveyData,
+        allSamplesWgsDataBucket);
   }
 
   @Override
@@ -219,6 +251,7 @@ public class DbCdrVersion {
         && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
-        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData);
+        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
+        && Objects.equals(allSamplesWgsDataBucket, that.allSamplesWgsDataBucket);
   }
 }

@@ -161,8 +161,8 @@ public class DataSetDaoTest extends SpringTest {
     dbDataset2 = dataSetDao.save(dbDataset2);
 
     List<DbDataset> actual =
-        dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(
-            dbCohort.getCohortId(), workspace.getWorkspaceId());
+        dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
+            dbCohort.getCohortId(), workspace.getWorkspaceId(), false);
     assertThat(actual.size()).isEqualTo(2);
     assertThat(actual).containsAllIn(ImmutableList.of(dbDataset1, dbDataset2));
   }
@@ -181,8 +181,8 @@ public class DataSetDaoTest extends SpringTest {
     DbWorkspace otherWorkspace = workspaceDao.save(new DbWorkspace());
 
     List<DbDataset> actual =
-        dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(
-            dbCohort.getCohortId(), otherWorkspace.getWorkspaceId());
+        dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
+            dbCohort.getCohortId(), otherWorkspace.getWorkspaceId(), false);
     assertThat(actual.size()).isEqualTo(0);
   }
 }

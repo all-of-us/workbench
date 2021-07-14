@@ -61,7 +61,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     final StringBuilder sb =
         new StringBuilder(
             String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
-    sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+    sb.append("Table\tSource\tDestination\tDifference(%)\n");
     Level detailsLogLevel = Level.INFO;
     boolean verified = true;
     for (final ReportingUploadResult result : uploadDetails.getUploads()) {
@@ -78,11 +78,11 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   @Override
   public boolean verifyBatchesAndLog(Set<String> batchTables, long captureSnapshotTime) {
     final StringBuilder sb =
-        new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
+        new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));
     Level detailsLogLevel = Level.INFO;
     boolean verified = true;
 
-    sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+    sb.append("Table\tSource\tDestination\tDifference(%)\n");
     if (batchTables.contains(WorkspaceColumnValueExtractor.TABLE_NAME)) {
       int sourceCount = reportingQueryService.getWorkspacesCount();
       if (!verifyCount(

@@ -1,17 +1,19 @@
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
 
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
-import {cohortReviewStore, filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
+import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
+  CohortReview,
   Filter,
   FilterColumns as Columns,
   Operator,
@@ -179,6 +181,7 @@ const FILTER_KEYS = {
   VISITS: 'Visits'
 };
 export interface DetailHeaderProps {
+  cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
 }
@@ -192,7 +195,7 @@ export interface DetailHeaderState {
   filterTab: string;
 }
 
-export const DetailHeader = withCurrentWorkspace()(
+export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);
@@ -217,12 +220,10 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     update = () => {
-      const review = cohortReviewStore.getValue();
+      const {cohortReview: {participantCohortStatuses}, participant} = this.props;
       const pagination = reviewPaginationStore.getValue();
-      const participant = this.props.participant;
-      const statuses = review.participantCohortStatuses;
       const id = participant && participant.participantId;
-      const index = statuses.findIndex(({participantId}) => participantId === id);
+      const index = participantCohortStatuses.findIndex(({participantId}) => participantId === id);
 
       // The participant is not on the current page... for now, just log it and ignore it
       // We get here by URL (when a direct link to a detail page is shared, for example)
@@ -239,10 +240,10 @@ export const DetailHeader = withCurrentWorkspace()(
       const totalPages = Math.ceil(pagination.queryResultSize / pagination.pageSize);
 
       this.setState({
-        afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
+        afterId: participantCohortStatuses[index + 1] && participantCohortStatuses[index + 1]['participantId'],
         isFirstParticipant: pagination.page === 0 && index === 0,
-        isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === statuses.length,
-        priorId: statuses[index - 1] && statuses[index - 1]['participantId']
+        isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === participantCohortStatuses.length,
+        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId']
       });
     }
 
@@ -281,7 +282,7 @@ export const DetailHeader = withCurrentWorkspace()(
           filters: {items: this.getRequestFilters()}
         } as PageFilterRequest;
         cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, request).then(response => {
-          cohortReviewStore.next(response.cohortReview);
+          currentCohortReviewStore.next(response.cohortReview);
           const status = statusGetter(response.cohortReview.participantCohortStatuses);
           this.navigateById(status.participantId);
         });
@@ -353,7 +354,7 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     render() {
-      const {participant} = this.props;
+      const {cohortReview: {cohortName, description}, participant} = this.props;
       const {
         filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}},
         filterState,
@@ -361,7 +362,6 @@ export const DetailHeader = withCurrentWorkspace()(
         isFirstParticipant,
         isLastParticipant
       } = this.state;
-      const review = cohortReviewStore.getValue();
       const errors = validate({ageMin, ageMax, dateMin, dateMax}, {
         ageMin: {
           numericality: {
@@ -395,8 +395,8 @@ export const DetailHeader = withCurrentWorkspace()(
           onClick={() => this.backToTable()}>
           Back to review set
         </button>
-        <h4 style={styles.title}>{review.cohortName}</h4>
-        <div style={styles.description}>{review.description}</div>
+        <h4 style={styles.title}>{cohortName}</h4>
+        <div style={styles.description}>{description}</div>
         {errors && <div className='error-messages'>
           <ValidationError>
             {summarizeErrors(errors && (

@@ -2,6 +2,7 @@ import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
+  currentCohortReviewStore,
   currentCohortSearchContextStore,
   currentCohortStore,
   currentConceptSetStore,
@@ -300,6 +301,11 @@ export const withCurrentWorkspace = () => {
 // HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
   return connectBehaviorSubject(currentCohortStore, 'cohort');
+};
+
+// HOC that provides a 'cohortReview' prop with current CohortReview
+export const withCurrentCohortReview = () => {
+  return connectBehaviorSubject(currentCohortReviewStore, 'cohortReview');
 };
 
 // HOC that provides a 'criteria' prop with current Cohort

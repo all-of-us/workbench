@@ -60,6 +60,22 @@ const expirationsInWindow: Profile = {
     }
 }
 
+const thirtyDaysPlusExpiration: Profile = {
+    ...ProfileStubVariables.PROFILE_STUB,
+    renewableAccessModules: {
+        modules: [{
+            moduleName: ModuleNameEnum.ComplianceTraining,
+            hasExpired: false,
+            expirationEpochMillis: todayPlusDays(30),
+        },
+        {
+            moduleName: ModuleNameEnum.DataUseAgreement,
+            hasExpired: false,
+            expirationEpochMillis: todayPlusDays(31),
+        }]
+    }
+}
+
 describe('maybeDaysRemaining', () => {
     it('returns undefined when the profile has no renewableAccessModules', () => {
          expect(maybeDaysRemaining(noModules)).toBeUndefined();
@@ -75,5 +91,10 @@ describe('maybeDaysRemaining', () => {
 
     it('returns the soonest of all expirations within the window', () => {
         expect(maybeDaysRemaining(expirationsInWindow)).toEqual(5);
+    });
+
+    // regression test for RW-7108
+    it('returns 30 days when the max expiration is between 30 and 31 days', () => {
+        expect(maybeDaysRemaining(thirtyDaysPlusExpiration)).toEqual(30);
     });
 });

@@ -8,6 +8,7 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -126,7 +127,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
@@ -177,6 +178,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     componentDidMount() {
+      this.props.hideSpinner();
       this.loadDomainsAndSurveys();
     }
 

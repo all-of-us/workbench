@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-170-add-access-tier-id-into-institution-tables">
+    <addColumn tableName="institution_email_address">
+      <column name="access_tier_id" type="bigint"/>
+    </addColumn>
+    <addColumn tableName="institution_email_domain">
+      <column name="access_tier_id" type="bigint"/>
+    </addColumn>
+    <addForeignKeyConstraint baseColumnNames="access_tier_id"
+      baseTableName="institution_email_address"
+      constraintName="fk_institution_email_address_tier"
+      onDelete="CASCADE"
+      referencedColumnNames="access_tier_id"
+      referencedTableName="access_tier"/>
+    <addForeignKeyConstraint baseColumnNames="access_tier_id"
+      baseTableName="institution_email_domain"
+      constraintName="fk_institution_email_domain_tier"
+      onDelete="CASCADE"
+      referencedColumnNames="access_tier_id"
+      referencedTableName="access_tier"/>
+  </changeSet>
+</databaseChangeLog>

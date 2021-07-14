@@ -15,6 +15,7 @@ import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -50,6 +51,7 @@ public class ProfileService {
 
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
+  private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
   private final Clock clock;
@@ -69,6 +71,7 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      AccessModuleService accessModuleService,
       AccessTierService accessTierService,
       AddressMapper addressMapper,
       Clock clock,
@@ -85,6 +88,7 @@ public class ProfileService {
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.accessModuleService = accessModuleService;
     this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
     this.clock = clock;
@@ -201,7 +205,7 @@ public class ProfileService {
    * @param updatedProfile
    * @param previousProfile
    */
-  public void updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public DbUser updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -236,7 +240,8 @@ public class ProfileService {
       dbDemographicSurvey.setUser(user);
     }
     user.setDemographicSurvey(dbDemographicSurvey);
-    userService.updateUserWithConflictHandling(user);
+
+    DbUser updatedUser = userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
 
@@ -260,6 +265,7 @@ public class ProfileService {
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    return updatedUser;
   }
 
   public void cleanProfile(Profile profile) {
@@ -492,9 +498,17 @@ public class ProfileService {
         .ifPresent(
             newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
+    // dual bypass time to DbUser and UserAccessModule. And eventually we want to deprecate DbUser
+    // update.
     request
         .getAccessBypassRequests()
         .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
+    request
+        .getAccessBypassRequests()
+        .forEach(
+            bypass ->
+                accessModuleService.updateBypassTime(
+                    dbUser.getUserId(), bypass.getModuleName(), bypass.getIsBypassed()));
 
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));

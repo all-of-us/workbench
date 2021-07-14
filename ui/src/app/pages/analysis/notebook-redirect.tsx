@@ -11,6 +11,7 @@ import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
 import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients';
@@ -211,7 +212,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -296,6 +297,9 @@ export const NotebookRedirect = fp.flow(
       }));
     }
 
+    componentDidMount() {
+      this.props.hideSpinner();
+    }
 
     componentDidUpdate(prevProps: Props) {
       const {runtimeStore: {runtime}, workspace} = this.props;

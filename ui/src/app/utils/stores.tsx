@@ -72,10 +72,10 @@ export const profileStore = atom<ProfileStore>({
   })
 });
 
-
 export interface NotificationStore {
   title: string;
   message: string;
+  showBugReportLink?: boolean;
   onDismiss?: () => void;
 }
 
@@ -136,6 +136,15 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
+export interface CanComponentDeactivate {
+  canDeactivate: () => Promise<boolean> | boolean;
+}
+
+export interface NavigationGuardStore {
+  component?: CanComponentDeactivate;
+}
+
+export const navigationGuardStore = atom<NavigationGuardStore>({});
 
 /**
  * @name useStore

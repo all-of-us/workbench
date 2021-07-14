@@ -123,7 +123,7 @@ public class CdrDbConfig {
                 .getAccessTier()
                 .getShortName()
                 .equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            && cdrVersion.getIsDefault()) {
+            && cdrVersion.getIsDefaultNotNull()) {
           if (defaultId != null) {
             throw new ServerErrorException(
                 String.format(

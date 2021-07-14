@@ -12,12 +12,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.common.base.Functions;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -46,7 +44,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class OfflineUserControllerTest extends SpringTest {
-  @Autowired private CloudResourceManagerService cloudResourceManagerService;
   @Autowired private UserService mockUserService;
   @Autowired private DirectoryService mockDirectoryService;
   @Autowired private OfflineUserController offlineUserController;
@@ -59,9 +56,9 @@ public class OfflineUserControllerTest extends SpringTest {
   @Import({OfflineUserController.class})
   @MockBean({
     AccessTierService.class,
-    CloudResourceManagerService.class,
-    UserService.class,
-    DirectoryService.class
+    DirectoryService.class,
+    TaskQueueService.class,
+    UserService.class
   })
   static class Configuration {
     @Bean
@@ -192,13 +189,5 @@ public class OfflineUserControllerTest extends SpringTest {
           // Even when a single call throws an exception, we call the service for all users.
           verify(mockUserService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
         });
-  }
-
-  @Test
-  public void testBulkProjectAudit() throws Exception {
-    List<Project> projectList = new ArrayList<>();
-    doReturn(projectList).when(cloudResourceManagerService).getAllProjectsForUser(any());
-    offlineUserController.bulkAuditProjectAccess();
-    verify(cloudResourceManagerService, times(4)).getAllProjectsForUser(any());
   }
 }

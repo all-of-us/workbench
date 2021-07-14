@@ -25,27 +25,29 @@ describe('ConceptSearch', () => {
       csid: conceptSet.id
     });
   });
+  
+  const component = () => {
+    return mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                setShowUnsavedModal={() => {}}
+                                setUnsavedConceptChanges={() => {}}
+                                hideSpinner={() => {}}
+                                showSpinner={() => {}}/>);
+  }
 
   it('should render', () => {
-    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                         setShowUnsavedModal={() => {}}
-                                         setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component(); 
     expect(wrapper).toBeTruthy();
   });
 
   it('should display the participant count and domain name', async() => {
-    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                         setShowUnsavedModal={() => {}}
-                                         setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="participant-count"]').text()).toContain(conceptSet.participantCount.toString());
     expect(wrapper.find('[data-test-id="concept-set-domain"]').text()).toContain(fp.capitalize(conceptSet.domain.toString()));
   });
 
   it('should allow validLength edits', async() => {
-    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                         setShowUnsavedModal={() => {}}
-                                         setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     const newName = 'cool new name';
     const newDesc = 'cool new description';
     await waitOneTickAndUpdate(wrapper);
@@ -63,9 +65,7 @@ describe('ConceptSearch', () => {
   });
 
   it('should disallow empty name edit', async() => {
-    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                         setShowUnsavedModal={() => {}}
-                                         setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -76,9 +76,7 @@ describe('ConceptSearch', () => {
   });
 
   it('should not edit on cancel', async() => {
-    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
-                                         setShowUnsavedModal={() => {}}
-                                         setUnsavedConceptChanges={() => {}}/>);
+    const wrapper = component();
     const newName = 'cool new name';
     const newDesc = 'cool new description';
     await waitOneTickAndUpdate(wrapper);

@@ -30,6 +30,13 @@
       "id": "featuredworkspaceversioningnotebooksandintermediateresults",
       "category": "TUTORIAL_WORKSPACES"
     },
+    {
+      "name": "How to Reproduce the All of Us SARS-CoV-2 Antibody Study",
+      "namespace": "aou-rw-52e226a8",
+      "id": "howtoreproducetheallofussarscov2antibodystudy",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+
 
     {
       "name": "Phenotype - Breast Cancer",
@@ -97,6 +104,12 @@
       "namespace": "aou-rw-a324db3e",
       "id": "demofamilyhistoryinehrppidata",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "How to Run Python Notebooks in the Background",
+      "namespace": "aou-rw-7172272a",
+      "id": "howtorunnotebooksinthebackground",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }

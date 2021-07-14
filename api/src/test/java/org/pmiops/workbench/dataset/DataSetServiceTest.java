@@ -538,6 +538,29 @@ public class DataSetServiceTest extends SpringTest {
   }
 
   @Test
+  public void testGetDataSets_cohort_onlyvalidDataSet() {
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setName("Data Set dirty 67");
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dbDataset.setInvalid(false);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+
+    DbDataset dbDataset_invalid = new DbDataset();
+    dbDataset_invalid.setName("Data Set dirty");
+    dbDataset_invalid.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset_invalid.setWorkspaceId(cohort.getWorkspaceId());
+    dbDataset_invalid.setInvalid(true);
+    dataSetServiceImpl.saveDataSet(dbDataset_invalid);
+
+    List<DataSet> datasets =
+        dataSetServiceImpl.getDataSets(
+            cohort.getWorkspaceId(), ResourceType.COHORT, cohort.getCohortId());
+    assertThat(datasets.size()).isEqualTo(1);
+    assertThat(datasets).containsExactly(dataset);
+  }
+
+  @Test
   public void testGetDataSets_conceptSet() {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setConceptSetId(3L);
@@ -552,6 +575,32 @@ public class DataSetServiceTest extends SpringTest {
     List<DataSet> datasets =
         dataSetServiceImpl.getDataSets(
             workspace.getWorkspaceId(), ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    assertThat(datasets).containsExactly(dataset);
+  }
+
+  @Test
+  public void testGetDataSets_conceptSet_onlyValidDataSet() {
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
+    dbConceptSet = conceptSetDao.save(dbConceptSet);
+
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
+    dbDataset.setWorkspaceId(workspace.getWorkspaceId());
+    dbDataset.setInvalid(false);
+    DataSet dataset = dataSetServiceImpl.saveDataSet(dbDataset);
+
+    DbDataset dbDataset_invalid = new DbDataset();
+    dbDataset_invalid.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
+    dbDataset_invalid.setWorkspaceId(workspace.getWorkspaceId());
+    dbDataset_invalid.setInvalid(true);
+    dataSetServiceImpl.saveDataSet(dbDataset_invalid);
+
+    List<DataSet> datasets =
+        dataSetServiceImpl.getDataSets(
+            workspace.getWorkspaceId(), ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    assertThat(datasets.size()).isEqualTo(1);
     assertThat(datasets).containsExactly(dataset);
   }
 

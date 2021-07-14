@@ -70,6 +70,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -81,7 +82,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -222,6 +222,7 @@ public class CohortsControllerTest extends SpringTest {
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrVersionService.class,
+    CloudBillingClient.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
@@ -284,7 +285,6 @@ public class CohortsControllerTest extends SpringTest {
     user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
 

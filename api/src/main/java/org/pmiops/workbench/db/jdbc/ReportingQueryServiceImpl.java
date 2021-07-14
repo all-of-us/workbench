@@ -174,14 +174,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         String.format(
             "SELECT \n"
                 + "  u.user_id,\n"
-                + "  u.about_you,\n"
                 + "  u.area_of_research,\n"
                 + "  u.compliance_training_bypass_time,\n"
                 + "  u.compliance_training_completion_time,\n"
                 + "  u.compliance_training_expiration_time,\n"
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
-                + "  u.current_position,\n"
                 + "  u.data_use_agreement_bypass_time,\n"
                 + "  u.data_use_agreement_completion_time,\n"
                 + "  u.data_use_agreement_signed_version,\n"
@@ -193,7 +191,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 // temporary solution to RW-6566
                 + "  uat.first_enabled AS first_registration_completion_time,\n"
                 + "  u.first_sign_in_time,\n"
-                + "  u.free_tier_credits_limit_days_override,\n"
                 + "  u.free_tier_credits_limit_dollars_override,\n"
                 + "  u.given_name,\n"
                 + "  u.last_modified_time,\n"
@@ -270,7 +267,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             limit, offset),
         (rs, unused) ->
             new ReportingUser()
-                .aboutYou(rs.getString("about_you"))
                 .areaOfResearch(rs.getString("area_of_research"))
                 .complianceTrainingBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_bypass_time")))
@@ -280,7 +276,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("compliance_training_expiration_time")))
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
-                .currentPosition(rs.getString("current_position"))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
@@ -297,8 +292,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .firstRegistrationCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))
                 .firstSignInTime(offsetDateTimeUtc(rs.getTimestamp("first_sign_in_time")))
-                .freeTierCreditsLimitDaysOverride(
-                    (int) rs.getShort("free_tier_credits_limit_days_override"))
                 .freeTierCreditsLimitDollarsOverride(
                     rs.getDouble("free_tier_credits_limit_dollars_override"))
                 .givenName(rs.getString("given_name"))

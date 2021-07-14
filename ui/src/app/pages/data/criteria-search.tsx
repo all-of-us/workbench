@@ -15,7 +15,8 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
-  currentCohortCriteriaStore, currentCohortStore,
+  currentCohortCriteriaStore,
+  currentCohortStore,
   currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';

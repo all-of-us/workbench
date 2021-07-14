@@ -1,10 +1,7 @@
-import {Component, Input} from '@angular/core';
-
 import {Button} from 'app/components/buttons';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle, } from 'app/components/modals';
 
-import {ReactWrapperBase} from 'app/utils';
 import {toDisplay} from 'app/utils/resources';
 import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
@@ -109,21 +106,5 @@ export class ConfirmDeleteModal
         </ModalFooter>
       </Modal>;
     }
-  }
-}
-
-@Component({
-  selector: 'app-confirm-delete-modal',
-  template: '<div #root></div>',
-})
-export class ConfirmDeleteModalComponent extends ReactWrapperBase {
-  @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
-  @Input('resourceName') resourceName: ConfirmDeleteModalProps['resourceName'];
-  @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
-  @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
-
-  constructor() {
-    super(ConfirmDeleteModal, ['resourceType', 'resourceName',
-      'closeFunction', 'receiveDelete']);
   }
 }

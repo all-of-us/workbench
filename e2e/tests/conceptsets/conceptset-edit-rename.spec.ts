@@ -39,7 +39,7 @@ describe('Editing and rename Concept Set', () => {
     console.log('Selected Procedures table row 1: ', row1);
     console.log('Selected Procedures table row 2: ', row2);
 
-    // Verify Code are numberical values
+    // Verify Code are numerical values
     expect(Number.isNaN(parseInt(row1.code, 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
 

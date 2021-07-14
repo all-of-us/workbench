@@ -102,7 +102,7 @@ describe('Copy Concept Set to another workspace', () => {
     const destWorkspace = await createWorkspace(page);
 
     const srcWorkspaceCard = await findOrCreateWorkspaceCard(page, {
-      cdrVersion: config.altCdrVersionName
+      cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME
     });
 
     const { conceptSetName } = await createConceptSet(srcWorkspaceCard);

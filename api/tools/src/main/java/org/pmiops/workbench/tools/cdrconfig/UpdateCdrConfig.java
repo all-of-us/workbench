@@ -144,7 +144,7 @@ public class UpdateCdrConfig {
                 id, accessTier));
       }
 
-      if (v.isDefault) {
+      if (v.isDefault != null && v.isDefault) {
         if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
           throw new IllegalArgumentException(
               String.format("Archived CDR Version %d cannot be the default", id));

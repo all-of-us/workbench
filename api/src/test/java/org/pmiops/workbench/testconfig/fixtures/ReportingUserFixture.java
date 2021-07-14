@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +45,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   // Manual modification should be avoided if possible as this is a one-time generation
   // and does not run on every build and updates must be merged manually for now.
 
-  public static final String USER__ABOUT_YOU = "foo_0";
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-07T00:00:00.00Z"));
@@ -57,7 +55,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final String USER__CONTACT_EMAIL = "foo_5";
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
-  public static final String USER__CURRENT_POSITION = "foo_7";
   public static final String USER__ACCESS_TIER_SHORT_NAMES =
       AccessTierService.REGISTERED_TIER_SHORT_NAME;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
@@ -75,7 +72,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final String USER__FAMILY_NAME = "foo_16";
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
       Timestamp.from(Instant.parse("2015-05-23T00:00:00.00Z"));
-  public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 19;
   public static final Double USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE = 20.500000;
   public static final String USER__GIVEN_NAME = "foo_21";
   public static final Timestamp USER__LAST_MODIFIED_TIME =
@@ -113,7 +109,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
 
   @Override
   public void assertDTOFieldsMatchConstants(ReportingUser user) {
-    assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
     assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
     assertTimeApprox(user.getComplianceTrainingBypassTime(), USER__COMPLIANCE_TRAINING_BYPASS_TIME);
     assertTimeApprox(
@@ -121,7 +116,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(
         user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
-    assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
@@ -135,8 +129,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
     assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
     assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
-    assertThat(user.getFreeTierCreditsLimitDaysOverride())
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     assertThat(user.getFreeTierCreditsLimitDollarsOverride())
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
@@ -168,14 +160,12 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   @Override
   public DbUser createEntity() {
     final DbUser user = new DbUser();
-    user.setAboutYou(USER__ABOUT_YOU);
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
     user.setComplianceTrainingBypassTime(USER__COMPLIANCE_TRAINING_BYPASS_TIME);
     user.setComplianceTrainingCompletionTime(USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
     user.setComplianceTrainingExpirationTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
-    user.setCurrentPosition(USER__CURRENT_POSITION);
     user.setDataUseAgreementBypassTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     user.setDataUseAgreementCompletionTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
@@ -185,7 +175,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setEraCommonsCompletionTime(USER__ERA_COMMONS_COMPLETION_TIME);
     user.setFamilyName(USER__FAMILY_NAME);
     user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
-    user.setFreeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     user.setGivenName(USER__GIVEN_NAME);
     user.setLastModifiedTime(USER__LAST_MODIFIED_TIME);
@@ -203,7 +192,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   @Override
   public ReportingUser createDto() {
     return new ReportingUser()
-        .aboutYou(USER__ABOUT_YOU)
         .areaOfResearch(USER__AREA_OF_RESEARCH)
         .complianceTrainingBypassTime(offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_BYPASS_TIME))
         .complianceTrainingCompletionTime(
@@ -212,7 +200,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
             offsetDateTimeUtc(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME))
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
-        .currentPosition(USER__CURRENT_POSITION)
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
@@ -223,8 +210,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
         .familyName(USER__FAMILY_NAME)
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
-        .freeTierCreditsLimitDaysOverride(
-            USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.intValue()) // manual adjustment
         .freeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
         .givenName(USER__GIVEN_NAME)
         .lastModifiedTime(offsetDateTimeUtc(USER__LAST_MODIFIED_TIME))
@@ -252,22 +237,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .genderIdentities(USER__GENDER_IDENTITY.toString())
         .lgbtqIdentity(USER__LGBTQ_IDENTITY)
         .identifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
-  }
-
-  /**
-   * DbAddress is a bit special, because it feeds into the user table on the reporting side.
-   *
-   * @return
-   */
-  public DbAddress createDbAddress() {
-    final DbAddress address = new DbAddress();
-    address.setCity(USER__CITY);
-    address.setCountry(USER__COUNTRY);
-    address.setState(USER__STATE);
-    address.setStreetAddress1(USER__STREET_ADDRESS_1);
-    address.setStreetAddress2(USER__STREET_ADDRESS_2);
-    address.setZipCode(USER__ZIP_CODE);
-    return address;
   }
 
   /** Creates a {@link DbDemographicSurvey}. */

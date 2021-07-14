@@ -2,17 +2,6 @@ import { ElementHandle, Page } from 'puppeteer';
 import Container from 'app/container';
 import { getPropValue } from 'utils/element-utils';
 
-// Table column names
-export enum TableColumn {
-  // Cohorts Criteria dialog: Condition search results table column names
-  Name = 'Name',
-  Code = 'Code',
-  Vocab = 'Vocab',
-  Count = 'Count',
-  ViewHierarchy = 'View Hierarchy'
-  // Add here some other table column names ...
-}
-
 export default class Table extends Container {
   private trXpath: string = this.xpath + '//tbody/tr';
   private theadXpath: string = this.xpath + '/thead/tr/th';
@@ -21,20 +10,12 @@ export default class Table extends Container {
     super(page, container === undefined ? xpath : `${container.getXpath()}${xpath}`);
   }
 
-  async asElement(): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
-  }
-
   async exists(): Promise<boolean> {
     try {
       return (await this.asElement()) !== null;
     } catch (e) {
       return false;
     }
-  }
-
-  async waitForVisible(): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, { visible: true });
   }
 
   async getCell(rowIndex: number, columnIndex: number): Promise<ElementHandle> {

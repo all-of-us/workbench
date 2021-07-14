@@ -7,6 +7,7 @@ import {ClrIcon} from 'app/components/icons';
 import {PlaygroundIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {EditComponentReact} from 'app/icons/edit';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
@@ -99,7 +100,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   urlParams: any;
   runtimeStore: RuntimeStore;
@@ -145,7 +146,8 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidMount(): void {
-      const {ns, wsid, nbName} = this.props.urlParams;
+      const {urlParams: {ns, wsid, nbName}, hideSpinner} = this.props;
+      hideSpinner();
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});

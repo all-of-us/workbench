@@ -154,7 +154,7 @@ public class DbDataset {
   }
 
   public void setInvalid(Boolean invalid) {
-    this.invalid = invalid;
+    this.invalid = invalid == null ? false : invalid;
   }
 
   @Column(name = "includes_all_participants")

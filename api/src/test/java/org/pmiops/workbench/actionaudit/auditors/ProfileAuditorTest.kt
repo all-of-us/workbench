@@ -18,7 +18,9 @@ import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty
 import org.pmiops.workbench.db.model.DbUser
+import org.pmiops.workbench.model.Address
 import org.pmiops.workbench.model.DemographicSurvey
 import org.pmiops.workbench.model.Disability
 import org.pmiops.workbench.model.Education
@@ -63,7 +65,7 @@ class ProfileAuditorTest {
         argumentCaptor<List<ActionAuditEvent>>().apply {
             verify(mockActionAuditService).send(capture())
             val sentEvents: List<ActionAuditEvent> = firstValue
-            assertThat(sentEvents).hasSize(13)
+            assertThat(sentEvents).hasSize(ProfileTargetProperty.values().size)
             assertThat(sentEvents.all { it.actionType == ActionType.CREATE })
             assertThat(sentEvents.map { ActionAuditEvent::actionId }.distinct().count() == 1)
         }
@@ -84,6 +86,14 @@ class ProfileAuditorTest {
                 .apply { identifiesAsLgbtq = true }
                 .apply { lgbtqIdentity = "gay" }
 
+        val addr = Address()
+            .apply { streetAddress1 = "415 Main Street" }
+            .apply { streetAddress2 = "7th floor" }
+            .apply { zipCode = "12345" }
+            .apply { city = "Cambridge" }
+            .apply { state = "MA" }
+            .apply { country = "USA" }
+
         return Profile()
                 .apply { userId = 444 }
                 .apply { username = "slim_shady" }
@@ -91,15 +101,12 @@ class ProfileAuditorTest {
                 .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
                 .apply { givenName = "Robert" }
                 .apply { familyName = "Paulson" }
-                .apply { phoneNumber = "867-5309" }
-                .apply { currentPosition = "Grad Student" }
-                .apply { organization = "Classified" }
                 .apply { disabled = false }
-                .apply { aboutYou = "Nobody in particular" }
                 .apply { areaOfResearch = "Aliens" }
                 .apply { professionalUrl = "linkedin.com" }
                 .apply { verifiedInstitutionalAffiliation = caltechAffiliation }
                 .apply { demographicSurvey = demographicSurvey1 }
+                .apply { address = addr }
     }
 
     @Test

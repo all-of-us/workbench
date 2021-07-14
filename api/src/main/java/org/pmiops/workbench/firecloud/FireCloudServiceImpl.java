@@ -6,10 +6,12 @@ import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -36,6 +38,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
+import org.pmiops.workbench.firecloud.model.FirecloudUpdateRawlsBillingAccountRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -45,6 +48,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.RetryException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,11 +60,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkbenchConfig> configProvider;
 
   private final Provider<BillingApi> billingApiProvider;
-  private final Provider<BillingV2Api> billingV2ApiProvider;
+  private final Provider<BillingV2Api> serviceAccountBillingV2ApiProvider;
+  private final Provider<BillingV2Api> endUserBillingV2ApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+      requestScopedGroupCacheProvider;
 
   // We call some of the endpoints in these APIs with the user's credentials
   // and others with the app's Service Account credentials
@@ -112,7 +119,10 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
-      Provider<BillingV2Api> billingV2ApiProvider,
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
+          Provider<BillingV2Api> serviceAccountBillingV2ApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_STATIC_BILLING_V2_API)
+          Provider<BillingV2Api> endUserBillingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
@@ -124,13 +134,17 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider,
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
+      @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
+          Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
+              requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
-    this.billingV2ApiProvider = billingV2ApiProvider;
+    this.serviceAccountBillingV2ApiProvider = serviceAccountBillingV2ApiProvider;
+    this.endUserBillingV2ApiProvider = endUserBillingV2ApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
@@ -139,6 +153,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
+    this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.iamCredentialsClient = iamCredentialsClient;
     this.httpTransport = httpTransport;
   }
@@ -252,7 +267,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .servicePerimeter(servicePerimeter);
 
     if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = billingV2ApiProvider.get();
+      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
       retryHandler.run(
           (context) -> {
             billingV2Api.createBillingProjectFullV2(request);
@@ -271,7 +286,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void deleteBillingProject(String billingProject) {
     if (isFireCloudBillingV2ApiEnabled()) {
-      BillingV2Api billingV2Api = billingV2ApiProvider.get();
+      BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
       retryHandler.run(
           (context) -> {
             billingV2Api.deleteBillingProject(billingProject);
@@ -291,6 +306,32 @@ public class FireCloudServiceImpl implements FireCloudService {
   public FirecloudBillingProjectStatus getBillingProjectStatus(String projectName) {
     return retryHandler.run(
         (context) -> billingApiProvider.get().billingProjectStatus(projectName));
+  }
+
+  @Override
+  public void updateBillingAccount(String billingProject, String billingAccount) {
+    retryHandler.run(
+        (context) -> {
+          endUserBillingV2ApiProvider
+              .get()
+              .updateBillingProjectBillingAccount(
+                  new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
+                  billingProject);
+          return null;
+        });
+  }
+
+  @Override
+  public void updateBillingAccountAsService(String billingProject, String billingAccount) {
+    retryHandler.run(
+        (context) -> {
+          serviceAccountBillingV2ApiProvider
+              .get()
+              .updateBillingProjectBillingAccount(
+                  new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
+                  billingProject);
+          return null;
+        });
   }
 
   private void addRoleToBillingProject(String email, String projectName, String role) {
@@ -478,10 +519,17 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public boolean isUserMemberOfGroup(String email, String groupName) {
+  public boolean isUserMemberOfGroupWithCache(String email, String groupName) {
     return retryHandler.run(
         (context) -> {
-          FirecloudManagedGroupWithMembers group = groupsApiProvider.get().getGroup(groupName);
+          FirecloudManagedGroupWithMembers group = null;
+          try {
+            group = requestScopedGroupCacheProvider.get().get(groupName);
+          } catch (ExecutionException e) {
+            // This is not expected, but might be possible if we access an entry at the exact time
+            // at which is is expiring from the cache. Just retry.
+            throw new RetryException("cache concurrent access failure", e);
+          }
           return group.getMembersEmails().contains(email)
               || group.getAdminsEmails().contains(email);
         });

@@ -20,6 +20,6 @@ export default class CdrVersionUpgradeModal extends Modal {
   }
 
   getUpgradeButton(): Button {
-    return Button.findByName(this.page, { normalizeSpace: `Try ${config.defaultCdrVersionName}` }, this);
+    return Button.findByName(this.page, { normalizeSpace: `Try ${config.DEFAULT_CDR_VERSION_NAME}` }, this);
   }
 }

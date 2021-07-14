@@ -4,6 +4,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
 import {PublicLayout} from 'app/components/public-layout';
 import {AouTitle} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
@@ -46,7 +47,11 @@ const COOKIE_DELETION_LINK = 'https://www.aboutcookies.org/how-to-delete-cookies
 const GOOGLE_PRIVACY_LINK = 'https://policies.google.com/privacy';
 const ZENDESK_PRIVACY_LINK = 'https://www.zendesk.com/company/customers-partners/privacy-policy/';
 
-export class CookiePolicy extends React.Component<{}, {}> {
+export class CookiePolicy extends React.Component<WithSpinnerOverlayProps, {}> {
+  componentDidMount() {
+    this.props.hideSpinner();
+  }
+
   render() {
     return <PublicLayout>
       <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '100%', color: colors.primary}}>

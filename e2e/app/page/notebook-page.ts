@@ -1,22 +1,21 @@
 import * as fs from 'fs';
-import { ElementHandle, Frame, Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
-import AuthenticatedPage from './authenticated-page';
 import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import NotebookPreviewPage from './notebook-preview-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
+import NotebookFrame from './notebook-frame';
 
 // CSS selectors
 enum CssSelector {
   body = 'body.notebook_app',
   notebookContainer = '#notebook-container',
-
   toolbarContainer = '#maintoolbar-container',
   runCellButton = 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
   saveNotebookButton = 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
@@ -41,7 +40,7 @@ export enum KernelStatus {
   Idle = 'Kernel Idle'
 }
 
-export default class NotebookPage extends AuthenticatedPage {
+export default class NotebookPage extends NotebookFrame {
   constructor(page: Page, private readonly documentTitle: string) {
     super(page);
   }
@@ -113,15 +112,14 @@ export default class NotebookPage extends AuthenticatedPage {
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
     const frame = await this.getIFrame();
-
     await frame.waitForXPath(Xpath.fileMenuDropdown, { visible: true }).then((element) => element.click());
     await frame.waitForXPath(Xpath.downloadMenuDropdown, { visible: true }).then((element) => element.hover());
     const menuOption = await frame.waitForXPath(formatXpath, { visible: true });
     await menuOption.hover();
     await menuOption.click();
 
-    const modal = new NotebookDownloadModal(this.page, frame);
-    return await modal.waitForLoad();
+    const modal = new NotebookDownloadModal(this.page);
+    return modal.waitForLoad();
   }
 
   async downloadAsIpynb(): Promise<NotebookDownloadModal> {
@@ -305,11 +303,6 @@ export default class NotebookPage extends AuthenticatedPage {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
     await runtimePanel.close();
-  }
-
-  async getIFrame(): Promise<Frame> {
-    const frame = await this.page.waitForSelector('iframe[src*="notebooks"]');
-    return frame.contentFrame();
   }
 
   private async findRunButton(timeout?: number): Promise<ElementHandle> {

@@ -21,7 +21,7 @@ public class CloudTasksConfig {
     if (!Strings.isNullOrEmpty(workbenchConfig.offlineBatch.unsafeCloudTasksForwardingHost)) {
       log.warning(
           String.format(
-              "Cloud Tasks will be forwarded synchronously to '%s'. This should only happen during "
+              "Cloud Tasks will be forwarded immediately to '%s'. This should only happen during "
                   + "local development. If you are seeing this in a cloud environment, please "
                   + "investigate immediately.",
               workbenchConfig.offlineBatch.unsafeCloudTasksForwardingHost));

@@ -10,6 +10,7 @@ import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
@@ -204,6 +205,8 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   </FlexColumn>;
 };
 
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+
 interface State {
   workspaceDetails?: WorkspaceAdminView;
   cloudStorageTraffic?: CloudStorageTraffic;
@@ -214,7 +217,7 @@ interface State {
   files?: Array<FileDetail>;
 }
 
-class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
+class AdminWorkspaceImpl extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
@@ -225,6 +228,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.getFederatedWorkspaceInformation();
   }
 

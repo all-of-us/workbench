@@ -14,6 +14,7 @@ import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
@@ -70,7 +71,7 @@ export const styles = reactStyles({
   },
 });
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -80,7 +81,6 @@ interface Props {
 interface State {
   accessTasksLoaded: boolean;
   accessTasksRemaining: boolean;
-  betaAccessGranted: boolean;
   dataUserCodeOfConductCompleted: boolean;
   eraCommonsError: string;
   eraCommonsLinked: boolean;
@@ -109,7 +109,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     this.state = {
       accessTasksLoaded: false,
       accessTasksRemaining: undefined,
-      betaAccessGranted: undefined,
       dataUserCodeOfConductCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -130,6 +129,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     this.checkWorkspaces();
     this.validateNihToken();
     this.validateRasLoginGovLink();
@@ -219,9 +219,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         reload();
       }, 10000);
     } else {
-      if (serverConfigStore.get().config.enableBetaAccess && !profile.betaAccessRequestTime) {
-        profileApi().requestBetaAccess();
-      }
       if (profile.pageVisits) {
         if (!profile.pageVisits.some(v => v.page === this.pageId)) {
           this.setFirstVisit();
@@ -238,12 +235,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
-        dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
+        dataUserCodeOfConductCompleted:
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
-            .completionTimestamp(profile)))() : true)
+            .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
-      this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
@@ -283,7 +279,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   render() {
     const {
-      betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+      videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse,
@@ -353,7 +349,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                             rasLoginGovLoading={rasLoginGovLoading}
                                             trainingCompleted={trainingCompleted}
                                             firstVisitTraining={firstVisitTraining}
-                                            betaAccessGranted={betaAccessGranted}
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (

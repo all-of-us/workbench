@@ -12,12 +12,13 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
+import { TabLabels } from 'app/page/workspace-base';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Export to notebook tests', () => {
-  const KernelLanguages = [{ LANGUAGE: Language.R }, { LANGUAGE: Language.Python }];
+describe('Export dataset to notebook tests', () => {
+  const KernelLanguages = [{ LANGUAGE: Language.Python }, { LANGUAGE: Language.R }];
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -70,8 +71,8 @@ describe('Export to notebook tests', () => {
     // Delete the cohort.
     await deleteCohort(cohortName, datasetName);
 
-    // Dataset automatically is no longer exists after delete cohort.
-    await dataPage.openDatasetsSubtab();
+    // Associated dataset is gone after delete cohort.
+    await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
     expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
   });
 
@@ -79,7 +80,8 @@ describe('Export to notebook tests', () => {
    * Test:
    * - Create dataset and export to notebook. Start the notebook and run the dataset code.
    */
-  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
+  // TODO Enable notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
+  xtest.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button

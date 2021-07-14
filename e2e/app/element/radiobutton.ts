@@ -31,15 +31,4 @@ export default class RadioButton extends BaseElement {
       await this.page.waitForTimeout(500);
     }
   }
-
-  /**
-   * Unselect a RadioButton.
-   */
-  async unSelect(): Promise<void> {
-    const is = await this.isSelected();
-    if (is) {
-      await this.click();
-      await this.page.waitForTimeout(500);
-    }
-  }
 }
