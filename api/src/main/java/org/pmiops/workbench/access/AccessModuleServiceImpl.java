@@ -134,7 +134,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       return Optional.empty();
     }
     return Optional.of(
-        driveExpirationTimestamp(
+        deriveExpirationTimestamp(
             dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
   }
 
@@ -142,7 +142,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    * Extracts module expiration time from completionTime and expiry days: completionTime plus
    * expiryDays in millseconds.
    */
-  public static Timestamp driveExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
+  public static Timestamp deriveExpirationTimestamp(Timestamp completionTime, Long expiryDays) {
     Preconditions.checkNotNull(
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);

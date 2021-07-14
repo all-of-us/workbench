@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.access.AccessModuleServiceImpl.driveExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -80,6 +80,7 @@ public class AccessModuleServiceTest extends SpringTest {
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
+    config.access.enableAccessRenewal = true;
     TestMockFactory.createAccessModules(accessModuleDao);
     accessModules = accessModuleDao.findAll();
   }
@@ -213,8 +214,8 @@ public class AccessModuleServiceTest extends SpringTest {
             .moduleName(AccessModule.TWO_FACTOR_AUTH)
             .completionEpochMillis(twoFactorCompletionTime.getTime());
 
-    // RT Training module: Completion time + expiryDays is 10 days ahead current time, this module
-    // has expired for 10 days.
+    // RT Training module: Completion time + expiryDays is 10 days ahead current time, but the
+    // module was bypassed, so no expiration time.
     Timestamp rtTrainingCompletionTime =
         Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
     Timestamp rtTrainingBypassTime = Timestamp.from(now);
@@ -230,13 +231,13 @@ public class AccessModuleServiceTest extends SpringTest {
             .completionEpochMillis(rtTrainingCompletionTime.getTime())
             .bypassEpochMillis(rtTrainingBypassTime.getTime());
 
-    // Profile confirmation module: Completion time + expiryDays is 10 days before current time,
+    // Profile module: Completion time + expiryDays is 10 days before current time,
     // this module has expired for 10 days.
     Timestamp profileCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
     // It's bit wired that use the production code to extract the expiration time, but that is a
     // simple calculation, and even we wrote our own in test, it would just be the same code.
     Timestamp expectedProfileExpirationTime =
-        driveExpirationTimestamp(profileCompletionTime, expiryDays);
+        deriveExpirationTimestamp(profileCompletionTime, expiryDays);
     DbUserAccessModule profileAccessModule =
         new DbUserAccessModule()
             .setAccessModule(profileConfirmModule)
@@ -248,12 +249,12 @@ public class AccessModuleServiceTest extends SpringTest {
             .completionEpochMillis(profileCompletionTime.getTime())
             .expirationEpochMillis(expectedProfileExpirationTime.getTime());
 
-    // RT Training module: Completion time + expiryDays is 10 days after current time, this module
+    // Publication module: Completion time + expiryDays is 10 days after current time, this module
     // expired for 10 days.
     Timestamp publicationCompletionTime =
         Timestamp.from(now.minus(expiryDays - 10, ChronoUnit.DAYS));
     Timestamp expectedPublicationExpirationTime =
-        driveExpirationTimestamp(publicationCompletionTime, expiryDays);
+        deriveExpirationTimestamp(publicationCompletionTime, expiryDays);
     DbUserAccessModule publicationAccessModule =
         new DbUserAccessModule()
             .setAccessModule(publicationModule)

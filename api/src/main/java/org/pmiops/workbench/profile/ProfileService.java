@@ -3,7 +3,6 @@ package org.pmiops.workbench.profile;
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -151,7 +150,7 @@ public class ProfileService {
                     .anyMatch(
                         a ->
                             (a.getExpirationEpochMillis() != null
-                                && Instant.now().toEpochMilli() > a.getExpirationEpochMillis())));
+                                && clock.instant().toEpochMilli() > a.getExpirationEpochMillis())));
 
     return profileMapper.toModel(
         user,
