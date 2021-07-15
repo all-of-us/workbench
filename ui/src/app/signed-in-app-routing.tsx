@@ -1,35 +1,35 @@
-import * as React from "react";
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import {
   AppRoute, Guard,
   Navigate,
   ProtectedRoutes,
   withFullHeight,
   withRouteData
-} from "./components/app-router";
-import {profileStore, serverConfigStore} from "./utils/stores";
-import {BreadcrumbType} from "./utils/navigation";
-import {WorkspaceEdit, WorkspaceEditMode} from "./pages/workspace/workspace-edit";
-import * as fp from "lodash/fp";
-import {withRoutingSpinner} from "./components/with-routing-spinner";
-import {AccessRenewal} from "./pages/access/access-renewal";
-import {AdminBanner} from "./pages/admin/admin-banner";
-import {AdminNotebookView} from "./pages/admin/admin-notebook-view";
-import {AdminReviewWorkspace} from "./pages/admin/admin-review-workspace";
-import {DataUserCodeOfConduct} from "./pages/profile/data-user-code-of-conduct";
-import {Homepage} from "./pages/homepage/homepage";
-import {AdminInstitution} from "./pages/admin/admin-institution";
-import {AdminInstitutionEdit} from "./pages/admin/admin-institution-edit";
-import {ProfileComponent} from "./pages/profile/profile-component";
-import {AdminUser} from "./pages/admin/admin-user";
-import {AdminUsers} from "./pages/admin/admin-users";
-import {UserAudit} from "./pages/admin/user-audit";
-import {WorkspaceWrapper} from "./pages/workspace/workspace-wrapper";
-import {AdminWorkspace} from "./pages/admin/admin-workspace";
-import {WorkspaceAudit} from "./pages/admin/admin-workspace-audit";
-import {WorkspaceLibrary} from "./pages/workspace/workspace-library";
-import {WorkspaceList} from "./pages/workspace/workspace-list";
-import {AdminWorkspaceSearch} from "./pages/admin/admin-workspace-search";
-import {hasRegisteredAccess} from "./utils/access-tiers";
+} from './components/app-router';
+import {withRoutingSpinner} from './components/with-routing-spinner';
+import {AccessRenewal} from './pages/access/access-renewal';
+import {AdminBanner} from './pages/admin/admin-banner';
+import {AdminInstitution} from './pages/admin/admin-institution';
+import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
+import {AdminNotebookView} from './pages/admin/admin-notebook-view';
+import {AdminReviewWorkspace} from './pages/admin/admin-review-workspace';
+import {AdminUser} from './pages/admin/admin-user';
+import {AdminUsers} from './pages/admin/admin-users';
+import {AdminWorkspace} from './pages/admin/admin-workspace';
+import {WorkspaceAudit} from './pages/admin/admin-workspace-audit';
+import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
+import {UserAudit} from './pages/admin/user-audit';
+import {Homepage} from './pages/homepage/homepage';
+import {DataUserCodeOfConduct} from './pages/profile/data-user-code-of-conduct';
+import {ProfileComponent} from './pages/profile/profile-component';
+import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
+import {WorkspaceLibrary} from './pages/workspace/workspace-library';
+import {WorkspaceList} from './pages/workspace/workspace-list';
+import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
+import {hasRegisteredAccess} from './utils/access-tiers';
+import {BreadcrumbType} from './utils/navigation';
+import {profileStore, serverConfigStore} from './utils/stores';
 
 const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
@@ -176,5 +176,5 @@ export const SignedInRoutes = React.memo(() => {
           component={() => <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>}
       />
     </ProtectedRoutes>
-  </React.Fragment>
+  </React.Fragment>;
 });

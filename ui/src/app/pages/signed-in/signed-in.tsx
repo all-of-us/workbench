@@ -1,25 +1,25 @@
-import * as React from "react";
+import * as React from 'react';
 
-import {FlexColumn, FlexRow} from "app/components/flex";
-import {NavBar} from "app/pages/signed-in/nav-bar";
-import {Footer, FooterTypeEnum} from "app/components/footer";
-import {environment} from "environments/environment";
-import {INACTIVITY_CONFIG, InactivityMonitor} from "app/pages/signed-in/inactivity-monitor";
-import {ZendeskWidget} from "app/components/zendesk-widget";
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {Footer, FooterTypeEnum} from 'app/components/footer';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {ZendeskWidget} from 'app/components/zendesk-widget';
+import {INACTIVITY_CONFIG, InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
+import {NavBar} from 'app/pages/signed-in/nav-bar';
+import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
+import {SignedInRoutes} from 'app/signed-in-app-routing';
+import {reactStyles} from 'app/utils';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {setInstitutionCategoryState} from 'app/utils/analytics';
+import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
   profileStore,
   routeDataStore, serverConfigStore, useStore
-} from "app/utils/stores";
-import {SignedInRoutes} from "app/signed-in-app-routing";
-import {useEffect, useState} from "react";
-import {WithSpinnerOverlayProps} from "app/components/with-spinner-overlay";
-import {reactStyles} from "app/utils";
-import {navigateSignOut, routeConfigDataStore} from "app/utils/navigation";
-import {setInstitutionCategoryState} from "app/utils/analytics";
-import {hasRegisteredAccess} from "app/utils/access-tiers";
-import {cdrVersionsApi} from "app/services/swagger-fetch-clients";
+} from 'app/utils/stores';
+import {environment} from 'environments/environment';
+import {useEffect, useState} from 'react';
 
 const styles = reactStyles({
   appContainer: {
@@ -57,7 +57,7 @@ export const SignedIn = (props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [profile, setProfile] = useState(null);
-  const [minimizeChrome, setMinimizeChrome] = useState(null);
+  const [hideFooter, setHideFooter] = useState(null);
   const [cdrVersionsInitialized, setCdrVersionsInitialized] = useState(false);
   const [serverConfigInitialized, setServerConfigInitialized] = useState(false);
   const [subscriptions, setSubscriptions] = useState([]);
@@ -70,22 +70,22 @@ export const SignedIn = (props: Props) => {
 
     return () => {
       window.removeEventListener('beforeunload', checkOpsBeforeUnload);
-    }
+    };
   }, []);
 
   useEffect(() => {
-    let subs = [];
+    const subs = [];
     // TODO: signOutNavigateSub?
 
     // This handles detection of Angular-based routing data.
     subs.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
-      setMinimizeChrome(minimizeChrome);
+      setHideFooter(minimizeChrome);
     }));
     // This handles detection of React-based routing data. During migrations,
     // we assume React routing data will be set deeper/later in the component
     // hierarchy, therefore it will generally take precedence over React.
     subs.push(routeDataStore.subscribe(({minimizeChrome}) => {
-      setMinimizeChrome(minimizeChrome);
+      setHideFooter(minimizeChrome);
     }));
     setSubscriptions(subs);
 
@@ -94,7 +94,7 @@ export const SignedIn = (props: Props) => {
       for (const s of subscriptions) {
         s.unsubscribe();
       }
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -103,16 +103,16 @@ export const SignedIn = (props: Props) => {
     // before it's available.
     // This will need to be a step in the React bootstrapping as well.
     // See discussion on https://github.com/all-of-us/workbench/pull/4713
-    const checkStoresLoaded = async () => {
+    const checkStoresLoaded = async() => {
       if (serverConfig.config) {
         setServerConfigInitialized(true);
-        const profile = await profileStore.get().load();
-        setProfile(profile);
+        const p = await profileStore.get().load();
+        setProfile(p);
         setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(profile.accessTierShortNames)) {
           if (!cdrVersions) {
-            const cdrVersions = await cdrVersionsApi().getCdrVersionsByTier();
-            cdrVersionStore.set(cdrVersions);
+            const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
+            cdrVersionStore.set(cdrVersionsByTier);
             setCdrVersionsInitialized(true);
           } else {
             setCdrVersionsInitialized(true);
@@ -121,7 +121,7 @@ export const SignedIn = (props: Props) => {
           setCdrVersionsInitialized(true);
         }
       }
-    }
+    };
 
     checkStoresLoaded();
   }, []);
@@ -134,7 +134,7 @@ export const SignedIn = (props: Props) => {
     props.onSignOut();
     props.signOut();
     navigateSignOut(continuePath);
-  }
+  };
 
   return <FlexColumn style={{
     minHeight: '100vh',
@@ -149,7 +149,7 @@ export const SignedIn = (props: Props) => {
       {cdrVersionsInitialized && serverConfigInitialized &&
         <div
             style={
-              minimizeChrome
+              hideFooter
                   ? styles.appContainer
                   : {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
             }
@@ -158,12 +158,12 @@ export const SignedIn = (props: Props) => {
         </div>
       }
     </FlexRow>
-    {!minimizeChrome && environment.enableFooter &&
+    {!hideFooter && environment.enableFooter &&
     <Footer
         type={FooterTypeEnum.Workbench}
     />
     }
     <InactivityMonitor signOut={() => signOut()}/>
     <ZendeskWidget/>
-  </FlexColumn>
-}
+  </FlexColumn>;
+};

@@ -10,7 +10,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
-import {cdrVersionStore} from "../../../utils/stores";
+import {cdrVersionStore} from "app/utils/stores";
 
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
@@ -27,7 +27,7 @@ describe('ConceptSearch', () => {
       csid: conceptSet.id
     });
   });
-  
+
   const component = () => {
     return mount(<ConceptSearch setConceptSetUpdating={() => {}}
                                 setShowUnsavedModal={() => {}}
@@ -37,7 +37,7 @@ describe('ConceptSearch', () => {
   }
 
   it('should render', () => {
-    const wrapper = component(); 
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
