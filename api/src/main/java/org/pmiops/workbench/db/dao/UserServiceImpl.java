@@ -987,7 +987,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user -> {
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
-              // user.setEraCommonsCompletionTime() will be replaced by
+              // user.setTwoFactorAuthCompletionTime() will be replaced by
               // accessModuleService.updateCompletionTime()
               Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
               user.setTwoFactorAuthCompletionTime(timestamp);
