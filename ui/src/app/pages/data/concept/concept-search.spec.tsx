@@ -10,6 +10,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
+import {cdrVersionStore} from "../../../utils/stores";
 
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
@@ -18,6 +19,7 @@ describe('ConceptSearch', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    cdrVersionStore.set({tiers: []});
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
