@@ -1025,7 +1025,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       newBypassTime = null;
     }
     switch (accessBypassRequest.getModuleName()) {
-      case DATA_USE_AGREEMENT:
+      case DATA_USER_CODE_OF_CONDUCT:
         previousBypassTime = user.getDataUseAgreementBypassTime();
         setDataUseAgreementBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
