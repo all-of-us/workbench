@@ -172,7 +172,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
-      log.info("getRuntime: " + leoRuntimeResponse.toString());
       if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
@@ -253,7 +252,6 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    // need to modify the following logic
     if (runtime.getGceConfig() == null
         && runtime.getDataprocConfig() == null
         && runtime.getGceWithPdConfig() == null) {

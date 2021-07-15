@@ -49,6 +49,7 @@ public interface LeonardoNotebooksClient {
 
   /** Create a new data synchronization Welder storage link on a runtime. */
   StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
+
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
 }
