@@ -52,11 +52,11 @@ public interface LeonardoMapper {
 
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "bootDiskSize", ignore = true)
-//  @Mapping(target = "persistentDisk", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
 
   @AfterMapping
-  default void addPdCloudServiceEnum(@MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
+  default void addPdCloudServiceEnum(
+      @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
     leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
   }
 
@@ -128,13 +128,8 @@ public interface LeonardoMapper {
           toDataprocConfig(
               gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoMachineConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
-      if (runtime.getGceWithPdConfig() != null){
-        runtime.gceWithPdConfig(
-                toGceWithPdConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceWithPdConfig.class)));
-      }else{
-        runtime.gceConfig(
-                toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
-      }
+      runtime.gceConfig(
+          toGceConfig(gson.fromJson(gson.toJson(runtimeConfigObj), LeonardoGceConfig.class)));
     } else {
       throw new IllegalArgumentException(
           "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "

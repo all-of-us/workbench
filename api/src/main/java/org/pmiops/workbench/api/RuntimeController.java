@@ -172,6 +172,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
+      log.info("getRuntime: " + leoRuntimeResponse.toString());
       if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
@@ -253,12 +254,18 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     // need to modify the following logic
-    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null && runtime.getGceWithPdConfig() == null) {
-      throw new BadRequestException("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+    if (runtime.getGceConfig() == null
+        && runtime.getDataprocConfig() == null
+        && runtime.getGceWithPdConfig() == null) {
+      throw new BadRequestException(
+          "Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
-    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
-      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null
+        || runtime.getGceWithPdConfig() != null && runtime.getDataprocConfig() != null
+        || runtime.getGceConfig() != null && runtime.getGceWithPdConfig() != null) {
+      throw new BadRequestException(
+          "Only one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);

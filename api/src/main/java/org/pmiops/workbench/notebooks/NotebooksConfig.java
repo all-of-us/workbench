@@ -109,7 +109,7 @@ public class NotebooksConfig {
   @Bean(name = USER_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi disksApi(
-          @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+      @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
