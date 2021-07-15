@@ -3,26 +3,33 @@
 set -e
 set -o pipefail
 set -o functrace
-set -x
+
 #********************
 # VARIABLES
 # *******************
 api_root="https://circleci.com/api/v2/"
-branch='master';
+# polling branch name. Other branches (PRs) are excluded from consideration.
+branch="master";
+# Polling workflow name. Other workflow names (nightly-tests and deploy-staging) are excluded from consideration.
+workflow_name="build-test-deploy"
 project_slug="gh/all-of-us"
-
-# CIRCLECI_TOKEN is a personal token.
-# https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
-
 
 # v2 workflow api provides status, but not the pipeline api.
 # https://circleci.com/docs/2.0/workflows/#states
 workflow_active_status=("running" "failing")
 
-
 #********************
 # FUNCTIONS
 # *******************
+
+# CIRCLECI_TOKEN is a env variable whose value is personal token.
+# See https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
+check_circleci_token() {
+  if [[ ! $CIRCLECI_TOKEN ]]; then
+    printf '%s\n' "Required env variable \"CIRCLECI_TOKEN\" not found.\n Create a personal token then create \"CIRCLECI_TOKEN\" env variable?\n" >&2
+    exit 1
+  fi
+}
 
 post () {
   local url="${api_root}${1}"
@@ -47,7 +54,7 @@ get () {
 pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipeline_ids() {
   local get_path="pipeline?org-slug=${project_slug}"
-  printf "Getting list of pipelines on master branch.\n"
+  printf "Getting list of pipelines on ${branch} branch.\n"
   local get_result=$(get ${get_path})
   # Debug echo ${get_result} | jq .
   echo ${get_result} | jq '[.items[] | select(.vcs.branch=="master")][] | {created_at: .created_at, id: .id, number: .number}' > ${pipeline_json}
@@ -60,11 +67,25 @@ fetch_pipeline_detail() {
   # Remove double or single quotes.
   local id=$(echo $1 | xargs echo)
   local get_path="pipeline/${id}"
-  printf "Getting detail of pipeline_id: ${id}.\n"
   local get_result=$(get ${get_path})
   # Debug echo ${get_result} | jq .
   pipeline_num=$(echo ${get_result} | jq -r .number)
   printf "pipeline_num: ${pipeline_num}\n"
+}
+
+# https://circleci.com/docs/2.0/workflows/#states
+fetch_workflow_status() {
+  # Remove double or single quotes.
+  local id=$(echo $1 | xargs echo)
+  local get_path="pipeline/${id}/workflow"
+  local get_result=$(get ${get_path})
+  # Debug echo $get_result | jq .
+  local workflow_summary=$(echo ${get_result} | jq '.items[] | {name: .name, id: .id, status: .status}')
+  printf "${workflow_summary}\n"
+  # workflow branch name is bound by $workflow_name variable.
+  # Rerunning a failed workflow produces an array. Get the status in the first array element.
+  # __=$(echo ${get_result} | jq '.items[]' | jq -r 'select(.name=='\"$workflow_name\"') | .status | @sh' )
+  __=$(echo ${get_result} | jq -r 'first(.items[]) | select(.name=='\"$workflow_name\"') | .status | @sh' )
 }
 
 fetch_pipeline_workflow() {
@@ -75,9 +96,9 @@ fetch_pipeline_workflow() {
   local get_result=$(get ${get_path})
   # Debug echo $get_result | jq .
   local workflow_name=$(echo ${get_result} | jq .items[].name | jq -r @sh)
-  local workflow_id=$(echo ${get_result} | jq .items[].id | jq -r @sh)
+  # local workflow_id=$(echo ${get_result} | jq .items[].id | jq -r @sh)
+  local workflow_id=$(echo ${get_result} | jq .items[] | select(.name=="build-test-deploy") | .id | jq -r @sh)
   printf "workflow_name: ${workflow_name}. workflow_id: ${workflow_id}\n"
-  # https://circleci.com/docs/2.0/workflows/#states
   __=$(echo ${get_result} | jq -r '.items[] | .status')
 }
 
@@ -93,51 +114,60 @@ is_deploy_to_test() {
   return 1
 }
 
-# Get pipeline ids.
+#********************
+# ACTIONS
+# *******************
+
+check_circleci_token
 fetch_pipeline_ids
 pipeline_ids=$(jq '. | .id' ${pipeline_json} | jq -r @sh)
 
-# Check workflow for each pipeline.
+# Check workflow status in each pipeline. Wait while status is running or failing. Max wait time for all active pipelines is 30 minutes.
+max_retries=60
+counter=0
+wait="30s"
+
 IFS=$'\n'
 for id in ${pipeline_ids}; do
+  # Get pipeline detail, print out pipeline number.
   fetch_pipeline_detail ${id}
-  # polling workflows status.
+  printf "Polling workflow's status while status is failing or running. Please wait...\n"
   is_running=true
-  # max_loops (60) multiple wait (30 sec) is 30 minutes.
-  max_retries=60
+  # Max wait time is 60 minutes because a workflow may take a long time like 30 minutes to finish.
+  max_retries=120
   counter=0
   wait="30s"
-  printf "polling workflows' status. Please wait...\n"
+
   while [[ "${is_running}" == "true" ]]; do
     ((counter+=1))
-    printf "counter: ${counter}\n"
-    if is_deploy_to_test ${id}; then
-      fetch_pipeline_workflow ${id}
-      status=$__
-      printf "workflow_status: ${status}\n"
-      if [[ -z $status ]]; then
-        printf '%s\n' "Fetch workflow status failed\n" >&2
-        exit 1
-      fi
+    # Getting pipeline's workflow status.
+    fetch_workflow_status ${id}
+    status=$__
+    # Debug printf "workflow_status: ${status}\n"
 
-      if [[ ( $status == "success" ) || ( $status == "failed" ) ]]; then
-        is_running=false
-        printf "pipeline_id: ${id} finished with status of ${status}!\n"
-      else
-        sleep $wait
-        printf "sleep ${wait} seconds...\n"
-      fi
-      if [[ $counter == $max_retries ]]; then
-        printf '%s\n' "Maximum number of wait loops (${max_retries}) has been reached, Stopping querying for this workflow.\n" >&2
-        break
-      fi
+    if [[ -z $status ]]; then
+      # This workflow name does not match $workflow_name variable.
+      printf '%s\n' "Skip querying this workflow because it is not \"${workflow_name}\"\n" >&2
+      break # Break out while loop. check next pipeline.
+    fi
+
+    # Check this workflow for status is running or failing.
+    if [[ ( $status == "'running'" ) || ( $status == "'failing'" ) ]]; then
+      printf "sleeping ${wait} seconds (workflow_status is ${status}).\n"
+      sleep $wait
     else
-      printf "pipeline_id: ${id} is not deploy-to-test workflow. Stop querying for this workflow.\n"
+      is_running=false
+      printf "workflow in its pipeline_id: ${id} has finished with status of ${status}!\n"
+    fi
+
+    if [[ $counter == $max_retries ]]; then
+      printf '%s\n' "Maximum loops (${max_retries}) has been reached, Stopping querying for this workflow.\n" >&2
       is_running=false
     fi
-    printf "in while"
   done
+  printf "\n"
 done
+
 unset IFS
-echo "finished checking all pipelines."
+echo "finished checking all pipelines.\n"
 exit 0
