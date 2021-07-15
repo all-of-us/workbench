@@ -135,7 +135,7 @@
     "clientId": ""
   },
   "accessRenewal": {
-    "expiryDays": 3650,
+    "expiryDays": 365,
     "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
