@@ -193,10 +193,10 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
       if (profile.dataUseAgreementBypassTime) {
         return profile.dataUseAgreementBypassTime;
       }
-      // The DUA completion time field tracks the most recent DUA completion
-      // timestamp, but doesn't specify whether that DUA is currently active.
-      const requiredDuaVersion = getLiveDUCCVersion();
-      if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
+      // The DUCC completion time field tracks the most recent DUCC completion
+      // timestamp, but doesn't specify whether that DUCC is currently active.
+      const requiredDuccVersion = getLiveDUCCVersion();
+      if (profile.dataUseAgreementSignedVersion === requiredDuccVersion) {
         return profile.dataUseAgreementCompletionTime;
       }
       return null;
@@ -304,7 +304,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       AccessModule.COMPLIANCETRAINING,
       AccessModule.ERACOMMONS,
       AccessModule.TWOFACTORAUTH,
-      AccessModule.DATAUSEAGREEMENT,
+      AccessModule.DATAUSERCODEOFCONDUCT,
       AccessModule.RASLINKLOGINGOV,
     ];
 

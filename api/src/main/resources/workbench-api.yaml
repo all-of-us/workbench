@@ -4750,7 +4750,7 @@ definitions:
   AccessModule:
     type: string
     enum:
-    - DATA_USE_AGREEMENT
+    - DATA_USER_CODE_OF_CONDUCT
     - COMPLIANCE_TRAINING
     - ERA_COMMONS
     - TWO_FACTOR_AUTH

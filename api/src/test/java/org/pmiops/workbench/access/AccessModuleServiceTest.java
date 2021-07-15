@@ -270,7 +270,7 @@ public class AccessModuleServiceTest extends SpringTest {
     DbUserAccessModule duccAccessModule =
         new DbUserAccessModule().setAccessModule(ducc).setUser(user);
     AccessModuleStatus expectedDuccModuleStatus =
-        new AccessModuleStatus().moduleName(AccessModule.DATA_USE_AGREEMENT);
+        new AccessModuleStatus().moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT);
 
     userAccessModuleDao.saveAll(
         ImmutableList.of(

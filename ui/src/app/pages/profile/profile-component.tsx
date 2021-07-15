@@ -303,7 +303,7 @@ export const ProfileComponent = fp.flow(
       }
     }
 
-    private getDataUseAgreementText(profile) {
+    private getDUCCText(profile) {
       const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
       View code of conduct
     </a>;
@@ -631,7 +631,7 @@ export const ProfileComponent = fp.flow(
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
                   childrenStyle={{marginLeft: 0}}
-                  content={this.getDataUseAgreementText(profile)}
+                  content={this.getDUCCText(profile)}
                 >
               </ProfileRegistrationStepStatus>
             </div>

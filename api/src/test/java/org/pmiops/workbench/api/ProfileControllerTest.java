@@ -1415,7 +1415,9 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
-            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
+            new AccessBypassRequest()
+                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .isBypassed(true),
             // would un-bypass if a bypass had existed
             new AccessBypassRequest()
                 .moduleName(AccessModule.COMPLIANCE_TRAINING)
@@ -1436,7 +1438,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
             // un-bypass the previously bypassed
-            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
+            new AccessBypassRequest()
+                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .isBypassed(false),
             // bypass
             new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
