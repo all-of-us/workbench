@@ -16,6 +16,7 @@ import static org.pmiops.workbench.genomics.GenomicExtractionService.EXTRACT_WOR
 
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -29,8 +30,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-
-import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -342,14 +341,14 @@ public class GenomicExtractionServiceTest {
   public void getExtractionJobs_saveSize() throws ApiException {
     Double expectedVcfSize = 54321.0;
 
-    DbWgsExtractCromwellSubmission dbSubmission = createSubmissionAndMockMonitorCall(
-        FirecloudSubmissionStatus.DONE, FirecloudWorkflowStatus.SUCCEEDED, expectedVcfSize);
+    DbWgsExtractCromwellSubmission dbSubmission =
+        createSubmissionAndMockMonitorCall(
+            FirecloudSubmissionStatus.DONE, FirecloudWorkflowStatus.SUCCEEDED, expectedVcfSize);
 
     assertThat(dbSubmission.getVcfSizeMb()).isNull();
 
-    genomicExtractionService
-        .getGenomicExtractionJobs(
-            targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
+    genomicExtractionService.getGenomicExtractionJobs(
+        targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
 
     assertThat(dbSubmission.getVcfSizeMb()).isEqualTo(expectedVcfSize.longValue());
   }
@@ -367,18 +366,22 @@ public class GenomicExtractionServiceTest {
   }
 
   private DbWgsExtractCromwellSubmission createSubmissionAndMockMonitorCall(
-      FirecloudSubmissionStatus submissionStatus, FirecloudWorkflowStatus workflowStatus, Double vcfSize) throws ApiException {
+      FirecloudSubmissionStatus submissionStatus,
+      FirecloudWorkflowStatus workflowStatus,
+      Double vcfSize)
+      throws ApiException {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
-    FirecloudSubmission firecloudSubmission = new FirecloudSubmission()
-        .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
-        .addWorkflowsItem(
-            new FirecloudWorkflow()
-                .workflowId(UUID.randomUUID().toString())
-                .statusLastChangedDate(OffsetDateTime.now())
-                .status(workflowStatus))
-        .status(submissionStatus)
-        .submissionDate(OffsetDateTime.now());
+    FirecloudSubmission firecloudSubmission =
+        new FirecloudSubmission()
+            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
+            .addWorkflowsItem(
+                new FirecloudWorkflow()
+                    .workflowId(UUID.randomUUID().toString())
+                    .statusLastChangedDate(OffsetDateTime.now())
+                    .status(workflowStatus))
+            .status(submissionStatus)
+            .submissionDate(OffsetDateTime.now());
 
     doReturn(firecloudSubmission)
         .when(submissionsApi)
@@ -388,17 +391,20 @@ public class GenomicExtractionServiceTest {
             dbWgsExtractCromwellSubmission.getSubmissionId());
 
     doReturn(
-        new FirecloudWorkflowOutputsResponse()
-            .tasks(ImmutableMap.of(EXTRACT_WORKFLOW_NAME,
-                new FirecloudWorkflowOutputs()
-                    .outputs(ImmutableMap.of(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb", vcfSize)))))
+            new FirecloudWorkflowOutputsResponse()
+                .tasks(
+                    ImmutableMap.of(
+                        EXTRACT_WORKFLOW_NAME,
+                        new FirecloudWorkflowOutputs()
+                            .outputs(
+                                ImmutableMap.of(
+                                    EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb", vcfSize)))))
         .when(submissionsApi)
         .getWorkflowOutputs(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId(),
-            firecloudSubmission.getWorkflows().get(0).getWorkflowId()
-        );
+            firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
     return dbWgsExtractCromwellSubmission;
   }
@@ -439,10 +445,7 @@ public class GenomicExtractionServiceTest {
 
     verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
     String actualOutputDir =
-        argument
-            .getValue()
-            .getInputs()
-            .get(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir");
+        argument.getValue().getInputs().get(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir");
 
     assertThat(actualOutputDir)
         .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");

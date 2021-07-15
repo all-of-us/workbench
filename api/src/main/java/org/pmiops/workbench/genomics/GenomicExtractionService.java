@@ -165,21 +165,27 @@ public class GenomicExtractionService {
   }
 
   private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
-    final FirecloudWorkflowOutputsResponse outputsResponse = submissionApiProvider.get().getWorkflowOutputs(
-        workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-        workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
-        firecloudSubmission.getSubmissionId(),
-        firecloudSubmission.getWorkflows().get(0).getWorkflowId());
+    final FirecloudWorkflowOutputsResponse outputsResponse =
+        submissionApiProvider
+            .get()
+            .getWorkflowOutputs(
+                workbenchConfigProvider.get()
+                    .wgsCohortExtraction
+                    .operationalTerraWorkspaceNamespace,
+                workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
+                firecloudSubmission.getSubmissionId(),
+                firecloudSubmission.getWorkflows().get(0).getWorkflowId());
 
-    final Optional<FirecloudWorkflowOutputs> workflowOutputs = Optional.ofNullable(outputsResponse
-        .getTasks()
-        .get(EXTRACT_WORKFLOW_NAME));
+    final Optional<FirecloudWorkflowOutputs> workflowOutputs =
+        Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME));
 
     if (workflowOutputs.isPresent()) {
-      final Optional<Object> vcfSizeMbOutput = Optional.ofNullable(
-          workflowOutputs.get()
-              .getOutputs()
-              .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+      final Optional<Object> vcfSizeMbOutput =
+          Optional.ofNullable(
+              workflowOutputs
+                  .get()
+                  .getOutputs()
+                  .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
 
       if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
         return Math.round((Double) vcfSizeMbOutput.get());
