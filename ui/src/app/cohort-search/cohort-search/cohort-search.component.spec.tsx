@@ -8,6 +8,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortSearch} from './cohort-search.component';
+import {cdrVersionStore} from "app/utils/stores";
 
 const searchContextStubs = [
   {
@@ -28,6 +29,7 @@ const searchContextStubs = [
 describe('CohortSearch', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
+    cdrVersionStore.set({tiers: []});
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
   it('should render', () => {
