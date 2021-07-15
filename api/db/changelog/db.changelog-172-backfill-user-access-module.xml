@@ -5,6 +5,13 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="yonghao" id="changelog-172-backfill-user-access-module">
+    <addUniqueConstraint tableName="user_access_module"
+      columnNames="user_id, access_module_id"
+      constraintName="user_access_module_unique_name_per_user_per_module"/>
+    <!--Remove everything before backfill-->
+    <sql>
+      DELETE from user_access_module WHERE true
+    </sql>
     <!--Back fill ERA_COMMONS module-->
     <sql>
       INSERT INTO user_access_module

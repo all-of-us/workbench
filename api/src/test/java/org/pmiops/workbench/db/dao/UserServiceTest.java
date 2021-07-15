@@ -169,14 +169,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user,
-                    accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -205,14 +201,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user,
-                    accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Deprecate the old training.
     long newExpiry = expiry - 1;
@@ -234,14 +226,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(newerExpiry)));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user,
-                    accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // A global expiration is set.
     long globalExpiry = expiry - 1000;
@@ -272,14 +260,7 @@ public class UserServiceTest extends SpringTest {
     userService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user,
-                    accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
-                .get()
-                .getCompletionTime())
-        .isNull();
+    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
   }
 
   @Test
@@ -315,13 +296,8 @@ public class UserServiceTest extends SpringTest {
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user, accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
+    assertModuleCompletionEqual(
+        AccessModuleName.ERA_COMMONS, user, Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -344,14 +320,7 @@ public class UserServiceTest extends SpringTest {
 
     DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
     assertThat(retrievedUser.getEraCommonsCompletionTime()).isNull();
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    retrievedUser,
-                    accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get())
-                .get()
-                .getCompletionTime())
-        .isNull();
+    assertModuleCompletionEqual(AccessModuleName.ERA_COMMONS, retrievedUser, null);
   }
 
   @Test
@@ -410,32 +379,22 @@ public class UserServiceTest extends SpringTest {
                 .get()
                 .getCompletionTime())
         .isNotNull();
-
+    assertThat(getModuleCompletionTime(AccessModuleName.TWO_FACTOR_AUTH, user)).isNotNull();
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompletionTime);
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user, accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(twoFactorAuthCompletionTime);
+    assertModuleCompletionEqual(
+        AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
+
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user, accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get())
-                .get()
-                .getCompletionTime())
-        .isNull();
+    assertModuleCompletionEqual(AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
   }
 
   @Test
@@ -578,14 +537,8 @@ public class UserServiceTest extends SpringTest {
     userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    providedDbUser,
-                    accessModuleDao.findOneByName(AccessModuleName.PROFILE_CONFIRMATION).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.PROFILE_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
@@ -594,13 +547,7 @@ public class UserServiceTest extends SpringTest {
     userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    providedDbUser,
-                    accessModuleDao.findOneByName(AccessModuleName.PROFILE_CONFIRMATION).get())
-                .get()
-                .getCompletionTime())
+    assertThat(getModuleCompletionTime(AccessModuleName.PROFILE_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 
@@ -613,14 +560,8 @@ public class UserServiceTest extends SpringTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    providedDbUser,
-                    accessModuleDao.findOneByName(AccessModuleName.PUBLICATION_CONFIRMATION).get())
-                .get()
-                .getCompletionTime())
-        .isEqualTo(Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
@@ -629,13 +570,19 @@ public class UserServiceTest extends SpringTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    providedDbUser,
-                    accessModuleDao.findOneByName(AccessModuleName.PUBLICATION_CONFIRMATION).get())
-                .get()
-                .getCompletionTime())
+    assertThat(getModuleCompletionTime(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  private void assertModuleCompletionEqual(
+      AccessModuleName moduleName, DbUser user, Timestamp timestamp) {
+    assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
+  }
+
+  private Timestamp getModuleCompletionTime(AccessModuleName moduleName, DbUser user) {
+    return userAccessModuleDao
+        .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
+        .get()
+        .getCompletionTime();
   }
 }

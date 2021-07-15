@@ -473,6 +473,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
@@ -837,7 +840,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       return updateUserWithRetries(
           u -> {
-            // user.setEraCommonsCompletionTime() will be replaced by
+            // user.setComplianceTrainingCompletionTime() will be replaced by
             // accessModuleService.updateCompletionTime()
             u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
             accessModuleService.updateCompletionTime(
@@ -1095,7 +1098,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          // user.setProfileLastConfirmedTime() will be replaced by
+          // user.setRasLinkLoginGovUsername() will be replaced by
           // accessModuleService.updateCompletionTime()
           Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setRasLinkLoginGovUsername(loginGovUserName);
