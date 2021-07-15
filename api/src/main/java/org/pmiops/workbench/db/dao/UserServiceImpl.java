@@ -1095,8 +1095,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
+          // user.setProfileLastConfirmedTime() will be replaced by
+          // accessModuleService.updateCompletionTime()
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setRasLinkLoginGovUsername(loginGovUserName);
-          user.setRasLinkLoginGovCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+          user.setRasLinkLoginGovCompletionTime(timestamp);
+          accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
           // TODO(RW-6480): Determine if need to set link expiration time.
           return user;
         },
