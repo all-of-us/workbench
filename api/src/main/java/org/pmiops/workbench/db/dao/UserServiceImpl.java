@@ -473,9 +473,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAddress(dbAddress);
     dbUser.setProfileLastConfirmedTime(now);
     dbUser.setPublicationsLastConfirmedTime(now);
-    accessModuleService.updateCompletionTime(
-        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
-    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     if (degrees != null) {
       dbUser.setDegreesEnum(degrees);
     }
@@ -493,6 +490,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser = userDao.save(dbUser);
       dbVerifiedAffiliation.setUser(dbUser);
       verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      accessModuleService.updateCompletionTime(
+          dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+      accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(username);
       if (dbUser == null) {
