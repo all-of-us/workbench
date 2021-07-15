@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Commands to load data and configs in a local Workbench environment.
 #
 # This script is meant to be run within the api-scripts Docker service in order to update

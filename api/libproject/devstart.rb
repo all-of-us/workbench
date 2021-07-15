@@ -89,7 +89,6 @@ def gcs_vars_path(project)
 end
 
 def read_db_vars(gcc)
-  Workbench.assert_in_docker
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{gcs_vars_path(gcc.project)}
   }))
@@ -123,6 +122,15 @@ def wait_for_mysql()
   sleep 5.0
 end
 
+def handle_gradle_interrupt()
+  common = Common.new
+  begin
+    yield
+  rescue Interrupt
+    common.run_inline %W{./gradlew --stop}
+    raise
+  end
+end
 
 def dev_up()
   common = Common.new
@@ -134,7 +142,6 @@ def dev_up()
 
   at_exit do
     common.run_inline %W{docker-compose down}
-    common.run_inline %W{./gradlew --stop}
   end
 
   setup_local_environment()
@@ -147,21 +154,22 @@ def dev_up()
     }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
-    common.status "Database init & migrations..."
-    bm = Benchmark.measure {
-      Dir.chdir('db') do
-        common.run_inline %W{./run-migrations.sh main}
-      end
-      init_new_cdr_db %W{--cdr-db-name cdr}
-    }
-    common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+    handle_gradle_interrupt() do
+      common.status "Database init & migrations..."
+      bm = Benchmark.measure {
+        Dir.chdir('db') do
+          common.run_inline %W{./run-migrations.sh main}
+        end
+        init_new_cdr_db %W{--cdr-db-name cdr}
+      }
+      common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
-    common.status "Loading configs & data..."
-    bm = Benchmark.measure {
-      common.run_inline %W{./libproject/load_local_data_and_configs.sh}
-    }
-    common.status "Loading configs complete (#{format_benchmark(bm)})"
-
+      common.status "Loading configs & data..."
+      bm = Benchmark.measure {
+        common.run_inline %W{./libproject/load_local_data_and_configs.sh}
+      }
+      common.status "Loading configs complete (#{format_benchmark(bm)})"
+    end
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
 
@@ -2430,7 +2438,6 @@ Common.register_command({
 })
 
 def connect_to_cloud_db(cmd_name, *args)
-  ensure_docker_with_ports cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
