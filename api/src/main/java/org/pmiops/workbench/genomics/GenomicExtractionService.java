@@ -145,30 +145,7 @@ public class GenomicExtractionService {
                   dbSubmission.setTerraStatusEnum(status);
 
                   if (TerraJobStatus.SUCCEEDED.equals(status)) {
-                    final FirecloudWorkflowOutputsResponse outputsResponse = submissionApiProvider.get().getWorkflowOutputs(
-                        cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                        cohortExtractionConfig.operationalTerraWorkspaceName,
-                        firecloudSubmission.getSubmissionId(),
-                        firecloudSubmission.getWorkflows().get(0).getWorkflowId());
-
-                    final Optional<FirecloudWorkflowOutputs> workflowOutputs = Optional.ofNullable(outputsResponse
-                            .getTasks()
-                            .get(EXTRACT_WORKFLOW_NAME));
-
-                    if (workflowOutputs.isPresent()) {
-                      final Optional<Object> vcfSizeOutput = Optional.ofNullable(
-                          workflowOutputs.get()
-                              .getOutputs()
-                              .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
-
-                      if (vcfSizeOutput.isPresent()) {
-                        if (vcfSizeOutput.get() instanceof String) {
-                          dbSubmission.setVcfSizeMb(Math.round(Double.parseDouble((String) vcfSizeOutput.get())));
-                        } else if (vcfSizeOutput.get() instanceof Double) {
-                          dbSubmission.setVcfSizeMb(Math.round((Double) vcfSizeOutput.get()));
-                        }
-                      }
-                    }
+                    dbSubmission.setVcfSizeMb(getWorkflowSize(firecloudSubmission));
                   }
 
                   if (isTerminal(status)) {
@@ -185,6 +162,33 @@ public class GenomicExtractionService {
               }
             })
         .collect(Collectors.toList());
+  }
+
+  private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
+    final FirecloudWorkflowOutputsResponse outputsResponse = submissionApiProvider.get().getWorkflowOutputs(
+        workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+        workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
+        firecloudSubmission.getSubmissionId(),
+        firecloudSubmission.getWorkflows().get(0).getWorkflowId());
+
+    final Optional<FirecloudWorkflowOutputs> workflowOutputs = Optional.ofNullable(outputsResponse
+        .getTasks()
+        .get(EXTRACT_WORKFLOW_NAME));
+
+    if (workflowOutputs.isPresent()) {
+      final Optional<Object> vcfSizeMbOutput = Optional.ofNullable(
+          workflowOutputs.get()
+              .getOutputs()
+              .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+
+      if (vcfSizeMbOutput.isPresent()) {
+        if (vcfSizeMbOutput.get() instanceof Double) {
+          return Math.round((Double) vcfSizeMbOutput.get());
+        }
+      }
+    }
+
+    return null;
   }
 
   public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
