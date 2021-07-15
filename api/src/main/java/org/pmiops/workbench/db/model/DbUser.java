@@ -33,6 +33,7 @@ import org.pmiops.workbench.model.Degree;
 public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
+  private static final String PD_NAME_PREFIX = "all-of-us-pd-";
 
   // user "system account" fields besides those related to access modules
 
@@ -686,5 +687,11 @@ public class DbUser {
   @Transient
   public String getRuntimeName() {
     return RUNTIME_NAME_PREFIX + getUserId();
+  }
+
+  /** Returns a name for the Persistent Disk to be created for this user. */
+  @Transient
+  public String getPDName() {
+    return PD_NAME_PREFIX + getUserId();
   }
 }

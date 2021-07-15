@@ -266,6 +266,10 @@ public class RuntimeController implements RuntimeApiDelegate {
           "Only one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
+    if (runtime.getGceWithPdConfig() != null){
+      runtime.getGceWithPdConfig().getPersistentDisk().setName(userProvider.get().getPDName());
+    }
+
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
