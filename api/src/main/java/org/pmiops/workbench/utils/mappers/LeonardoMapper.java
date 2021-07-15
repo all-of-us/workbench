@@ -9,10 +9,22 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.leonardo.model.*;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.GceConfig;
+import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeStatus;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
