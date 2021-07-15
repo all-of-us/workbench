@@ -4217,10 +4217,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
-      enableAccessRenewal:
-        type: boolean
-        default: false
-        description: Whether to enable the access renewal, allowing users to expire.
       enableGenomicExtraction:
         type: boolean
         default: false
