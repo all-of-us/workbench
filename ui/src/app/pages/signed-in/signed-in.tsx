@@ -95,7 +95,7 @@ export const SignedIn = (props: Props) => {
         s.unsubscribe();
       }
     }
-  });
+  }, []);
 
   useEffect(() => {
     // We want to block app rendering on the presence of server config
@@ -106,7 +106,8 @@ export const SignedIn = (props: Props) => {
     const checkStoresLoaded = async () => {
       if (serverConfig.config) {
         setServerConfigInitialized(true);
-        setProfile(await profileStore.get().load());
+        const profile = await profileStore.get().load();
+        setProfile(profile);
         setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(profile.accessTierShortNames)) {
           if (!cdrVersions) {
@@ -156,13 +157,13 @@ export const SignedIn = (props: Props) => {
           <SignedInRoutes/>
         </div>
       }
-      {!minimizeChrome && environment.enableFooter &&
-        <Footer
-            type={FooterTypeEnum.Workbench}
-        />
-      }
-      <InactivityMonitor signOut={() => signOut()}/>
-      <ZendeskWidget/>
     </FlexRow>
+    {!minimizeChrome && environment.enableFooter &&
+    <Footer
+        type={FooterTypeEnum.Workbench}
+    />
+    }
+    <InactivityMonitor signOut={() => signOut()}/>
+    <ZendeskWidget/>
   </FlexColumn>
 }
