@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+
+import com.google.common.primitives.Booleans;
 import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -252,18 +254,13 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (runtime.getGceConfig() == null
-        && runtime.getDataprocConfig() == null
-        && runtime.getGceWithPdConfig() == null) {
+    int nullCount = Booleans.countTrue(runtime.getGceConfig() == null, runtime.getDataprocConfig() == null, runtime.getGceWithPdConfig() == null);
+    if(nullCount == 3) {
       throw new BadRequestException(
-          "Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
-    }
-
-    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null
-        || runtime.getGceWithPdConfig() != null && runtime.getDataprocConfig() != null
-        || runtime.getGceConfig() != null && runtime.getGceWithPdConfig() != null) {
+              "Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+    }else if(nullCount < 2) {
       throw new BadRequestException(
-          "Only one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+              "Only one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     if (runtime.getGceWithPdConfig() != null){

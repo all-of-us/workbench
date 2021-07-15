@@ -5848,13 +5848,13 @@ definitions:
         description: The tool docker image to install. May be Dockerhub or GCR. If not
           set, a default Jupyter image will be installed.
       gceConfig:
-        description: oneOf gceConfig, dataprocConfig will be returned
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceConfig"
       gceWithPdConfig:
-        description: oneOf gceConfig, dataprocConfig will be returned
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceWithPdConfig"
       dataprocConfig:
-        description: oneOf gceConfig, dataprocConfig will be provided
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
   UpdateRuntimeRequest:
     type: object
