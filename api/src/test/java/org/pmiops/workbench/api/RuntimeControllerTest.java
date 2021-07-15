@@ -949,7 +949,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig must be provided");
+        .contains("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test
@@ -965,7 +965,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig must be provided");
+        .contains("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test
