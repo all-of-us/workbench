@@ -224,7 +224,7 @@ public class GenomicExtractionServiceTest {
 
     OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
 
-    mockGetFirecloudSubmission(
+    FirecloudSubmission submission =
         new FirecloudSubmission()
             .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
             .status(FirecloudSubmissionStatus.DONE)
@@ -232,7 +232,9 @@ public class GenomicExtractionServiceTest {
                 new FirecloudWorkflow()
                     .statusLastChangedDate(completionTimestamp)
                     .status(FirecloudWorkflowStatus.SUCCEEDED))
-            .submissionDate(submissionDate));
+            .submissionDate(submissionDate);
+    mockGetFirecloudSubmission(submission);
+    mockWorkflowOutputVcfSize(submission, 12345.0);
 
     GenomicExtractionJob wgsCohortExtractionJob =
         genomicExtractionService
@@ -390,6 +392,13 @@ public class GenomicExtractionServiceTest {
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
 
+    mockWorkflowOutputVcfSize(firecloudSubmission, vcfSize);
+
+    return dbWgsExtractCromwellSubmission;
+  }
+
+  private void mockWorkflowOutputVcfSize(FirecloudSubmission submission, Double vcfSize)
+      throws ApiException {
     doReturn(
             new FirecloudWorkflowOutputsResponse()
                 .tasks(
@@ -403,10 +412,8 @@ public class GenomicExtractionServiceTest {
         .getWorkflowOutputs(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-            dbWgsExtractCromwellSubmission.getSubmissionId(),
-            firecloudSubmission.getWorkflows().get(0).getWorkflowId());
-
-    return dbWgsExtractCromwellSubmission;
+            submission.getSubmissionId(),
+            submission.getWorkflows().get(0).getWorkflowId());
   }
 
   private DbWgsExtractCromwellSubmission createSubmissionAndMockMonitorCall(
