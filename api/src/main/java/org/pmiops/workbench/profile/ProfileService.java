@@ -15,6 +15,7 @@ import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -39,6 +41,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -50,6 +53,7 @@ public class ProfileService {
 
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
+  private final AccessModuleService accessModuleService;
   private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
   private final Clock clock;
@@ -69,6 +73,7 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      AccessModuleService accessModuleService,
       AccessTierService accessTierService,
       AddressMapper addressMapper,
       Clock clock,
@@ -85,6 +90,7 @@ public class ProfileService {
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.accessModuleService = accessModuleService;
     this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
     this.clock = clock;
@@ -124,14 +130,27 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
-    final List<RenewableAccessModuleStatus> modulesStatus =
+    // renewableAccessModuleStatus is deprecated and will be replaced by accessModules.
+    final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
         userService.getRenewableAccessModuleStatus(userLite);
-
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
-            .modules(modulesStatus)
+            .modules(renewableAccessModuleStatus)
             .anyModuleHasExpired(
-                modulesStatus.stream().anyMatch(RenewableAccessModuleStatus::getHasExpired));
+                renewableAccessModuleStatus.stream()
+                    .anyMatch(RenewableAccessModuleStatus::getHasExpired));
+
+    final List<AccessModuleStatus> accessModuleStatuses =
+        accessModuleService.getClientAccessModuleStatus(userLite);
+    final ProfileAccessModules accessModules =
+        new ProfileAccessModules()
+            .modules(accessModuleStatuses)
+            .anyModuleHasExpired(
+                accessModuleStatuses.stream()
+                    .anyMatch(
+                        a ->
+                            (a.getExpirationEpochMillis() != null
+                                && clock.instant().toEpochMilli() > a.getExpirationEpochMillis())));
 
     return profileMapper.toModel(
         user,
@@ -140,7 +159,8 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        renewableAccessModules);
+        renewableAccessModules,
+        accessModules);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -201,7 +221,7 @@ public class ProfileService {
    * @param updatedProfile
    * @param previousProfile
    */
-  public void updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
+  public DbUser updateProfile(DbUser user, Profile updatedProfile, Profile previousProfile) {
     // Apply cleaning methods to both the previous and updated profile, to avoid false positive
     // field diffs due to null-to-empty-object changes.
     cleanProfile(updatedProfile);
@@ -236,7 +256,8 @@ public class ProfileService {
       dbDemographicSurvey.setUser(user);
     }
     user.setDemographicSurvey(dbDemographicSurvey);
-    userService.updateUserWithConflictHandling(user);
+
+    DbUser updatedUser = userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?
 
@@ -260,6 +281,7 @@ public class ProfileService {
 
     final Profile appliedUpdatedProfile = getProfile(user);
     profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    return updatedUser;
   }
 
   public void cleanProfile(Profile profile) {
@@ -492,9 +514,17 @@ public class ProfileService {
         .ifPresent(
             newLimit -> freeTierBillingService.maybeSetDollarLimitOverride(dbUser, newLimit));
 
+    // dual bypass time to DbUser and UserAccessModule. And eventually we want to deprecate DbUser
+    // update.
     request
         .getAccessBypassRequests()
         .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
+    request
+        .getAccessBypassRequests()
+        .forEach(
+            bypass ->
+                accessModuleService.updateBypassTime(
+                    dbUser.getUserId(), bypass.getModuleName(), bypass.getIsBypassed()));
 
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));

@@ -1,6 +1,8 @@
 import {AuditPageComponent} from 'app/components/admin/audit-page-component';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import * as React from 'react';
+import {useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 
 const getAuditLog = (subject: string) => {
@@ -27,7 +29,9 @@ const getAdminPageUrl = (subject: string) => {
   return [`/admin/users/${subject}`];
 };
 
-export const UserAudit = () => {
+export const UserAudit = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
+
   const {username = ''} = useParams<{username: string}>();
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'

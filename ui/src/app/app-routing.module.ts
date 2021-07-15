@@ -1,20 +1,15 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
-import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {RegistrationGuard} from './guards/registration-guard.service';
-import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
-import {WorkspaceGuard} from './guards/workspace-guard.service';
-import {BreadcrumbType, NavStore} from './utils/navigation';
+import {SignInGuard} from './guards/sign-in-guard.service';
+import {NavStore} from './utils/navigation';
 
 
 declare let gtag: Function;
@@ -49,6 +44,7 @@ const routes: Routes = [
     component: SignedInComponent,
     canActivate: [SignInGuard],
     canActivateChild: [SignInGuard, DisabledGuard],
+    canDeactivate: [NavigationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       // legacy / duplicated routes go HERE
@@ -85,7 +81,6 @@ const routes: Routes = [
       // non-migrated routes go HERE
       {
         path: '',
-        canActivateChild: [RegistrationGuard],
         runGuardsAndResolvers: 'always',
         children: [
           // legacy / duplicated routes go HERE
@@ -97,7 +92,6 @@ const routes: Routes = [
           // non-migrated routes go HERE
           {
             path: 'workspaces',
-            canActivateChild: [WorkspaceGuard],
             children: [
               // legacy / duplicated routes go HERE
               {
@@ -114,10 +108,14 @@ const routes: Routes = [
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
+                 *
+                 * TODO angular2react: ideally, we should be able to just render the AppComponent here and let
+                 *  React drive the rest of the routing but the BrowserRouter isn't able to pick up changes to the
+                 *  route when it's embedded in Angular this way.. Until angular router is removed, we still need to
+                 *  declare all of our routes in Angular which has the side effect of forcing a rerender of the
+                 *  AppRouting component on every route change.
                  */
                 path: ':ns/:wsid',
-                component: WorkspaceWrapperComponent,
-                runGuardsAndResolvers: 'always',
                 children: [
                   // legacy / duplicated routes go HERE
                   {
@@ -187,13 +185,8 @@ const routes: Routes = [
                             children: [
                               {
                                 path: '',
-                                component: CohortPageComponent,
-                                canDeactivate: [CanDeactivateGuard],
-                                data: {
-                                  title: 'Build Cohort Criteria',
-                                  breadcrumb: BreadcrumbType.CohortAdd,
-                                  pageKey: 'cohortBuilder'
-                                }
+                                component: AppRouting,
+                                data: {}
                               },
                             ]
                           },
@@ -229,31 +222,24 @@ const routes: Routes = [
                           data: {}
                         }, {
                           path: ':domain',
-                          component: ConceptSearchComponent,
-                          canDeactivate: [CanDeactivateGuard],
-                          data: {
-                            title: 'Search Concepts',
-                            breadcrumb: BreadcrumbType.SearchConcepts,
-                            pageKey: 'conceptSets'
-                          }
+                          component: AppRouting,
+                          data: {}
                         }]
                       },
                       {
                         path: 'concepts/sets',
-                        children: [{
-                          path: ':csid',
-                          component: ConceptSearchComponent,
-                          canDeactivate: [CanDeactivateGuard],
-                          data: {
-                            title: 'Concept Set',
-                            breadcrumb: BreadcrumbType.ConceptSet,
-                            pageKey: 'conceptSets'
+                        children: [
+                          {
+                            path: ':csid',
+                            component: AppRouting,
+                            data: {}
                           },
-                        }, {
-                          path: ':csid/actions',
-                          component: AppRouting,
-                          data: {},
-                        }, ]
+                          {
+                            path: ':csid/actions',
+                            component: AppRouting,
+                            data: {},
+                          },
+                        ]
                       }
                     ]
                   }]
@@ -381,9 +367,7 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     DisabledGuard,
-    RegistrationGuard,
-    SignInGuard,
-    WorkspaceGuard
+    SignInGuard
   ]
 })
 export class AppRoutingModule {

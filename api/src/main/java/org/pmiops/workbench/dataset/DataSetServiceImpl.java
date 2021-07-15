@@ -912,9 +912,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     return ImmutableList.of(
         generateExtractionDirCode(qualifier, dataSetExportRequest),
-        "# Initialize Hail\n"
-            + "# Note: Hail must be run from a \"Hail Genomics Analysis\" cloud analysis environment"
+        "# Confirm Spark is installed.\n"
+            + "try:\n"
+            + "    import pyspark\n"
+            + "except ModuleNotFoundError:\n"
+            + "    print(\"!\" * 100 + \"\\n\\n\"\n"
+            + "          \"In the Researcher Workbench, Hail can only be used on a Dataproc cluster.\\n\"\n"
+            + "          \"Please use the 'Cloud Analysis Environment' side panel to update your runtime compute type.\\n\\n\" +\n"
+            + "          \"!\" * 100)\n"
             + "\n"
+            + "# Initialize Hail\n"
             + "import hail as hl\n"
             + "import os\n"
             + "from hail.plot import show\n"
@@ -1065,14 +1072,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
-        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets =
+            dataSetDao.findDataSetsByCohortIdsAndWorkspaceIdAndInvalid(
+                resourceId, workspaceId, false);
         break;
       case CONCEPT_SET:
         DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
         if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
           throw new NotFoundException("Resource does not belong to specified workspace");
         }
-        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
+        dbDataSets =
+            dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceIdAndInvalid(
+                resourceId, workspaceId, false);
         break;
     }
     return dbDataSets;

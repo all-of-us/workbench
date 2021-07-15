@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 // adapted from DbCdrVersion
 public class CdrVersionVO {
   public long cdrVersionId;
-  public boolean isDefault;
+  public Boolean isDefault;
   public String name;
   public String accessTier; // modified from DbAccessTier type in DbCdrVersion
   public short releaseNumber;
@@ -23,4 +23,6 @@ public class CdrVersionVO {
   public String wgsBigqueryDataset;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;
+  public String allSamplesWgsDataBucket;
+  public String singleSampleArrayDataBucket;
 }

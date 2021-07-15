@@ -6,14 +6,15 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {Spinner} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withUserProfile} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
+import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {
@@ -112,11 +113,6 @@ const LibraryTab: React.FunctionComponent<{
     </Clickable>;
   };
 
-interface ReloadableProfile {
-  profile: Profile;
-  reload: Function;
-}
-
 interface CurrentTab {
   description?: JSX.Element;
   filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => WorkspacePermissions[];
@@ -124,12 +120,11 @@ interface CurrentTab {
   title: string;
 }
 
-class Props {
-  profileState: ReloadableProfile;
+interface Props extends WithSpinnerOverlayProps {
   enablePublishedWorkspaces: boolean;
 }
 
-class State {
+interface State {
   currentTab: CurrentTab;
   errorText: string;
   workspaceList: WorkspacePermissions[];
@@ -137,8 +132,7 @@ class State {
   pendingWorkspaceRequests: number;
 }
 
-export const WorkspaceLibrary = withUserProfile()
-(class extends React.Component<Props, State> {
+export const WorkspaceLibrary = (class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -169,6 +163,7 @@ export const WorkspaceLibrary = withUserProfile()
     ];
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.updateWorkspaces();
   }
 
@@ -230,7 +225,6 @@ export const WorkspaceLibrary = withUserProfile()
   }
 
   render() {
-    const {profile: {username}} = this.props.profileState;
     const {
       currentTab,
       errorText
@@ -272,7 +266,6 @@ export const WorkspaceLibrary = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         workspace={wp.workspace}
                                         accessLevel={wp.accessLevel}
-                                        userEmail={username}
                                         reload={() => this.updateWorkspaces()}/>;
                 })}
               </div>)}

@@ -21,6 +21,9 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   DbUser findUserByUserId(long userId);
 
+  @Query("SELECT user.id FROM DbUser user")
+  List<Long> findUserIds();
+
   @Query("SELECT user FROM DbUser user")
   List<DbUser> findUsers();
 
@@ -99,8 +102,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     void setInstitutionName(String institutionName);
 
-    Timestamp getFirstRegistrationCompletionTime();
-
     Timestamp getFirstSignInTime();
 
     Timestamp getCreationTime();
@@ -113,19 +114,9 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getComplianceTrainingCompletionTime();
 
-    Timestamp getBetaAccessBypassTime();
-
-    Timestamp getEmailVerificationBypassTime();
-
-    Timestamp getEmailVerificationCompletionTime();
-
     Timestamp getEraCommonsBypassTime();
 
     Timestamp getEraCommonsCompletionTime();
-
-    Timestamp getIdVerificationBypassTime();
-
-    Timestamp getIdVerificationCompletionTime();
 
     Timestamp getTwoFactorAuthBypassTime();
 
@@ -154,20 +145,14 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.family_name AS familyName, "
               + "u.contact_email AS contactEmail, "
               + "i.display_name AS institutionName, "
-              + "u.first_registration_completion_time AS firstRegistrationCompletionTime, "
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
               + "u.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
               + "u.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
               + "u.compliance_training_bypass_time AS complianceTrainingBypassTime, "
               + "u.compliance_training_completion_time AS complianceTrainingCompletionTime, "
-              + "u.beta_access_bypass_time AS betaAccessBypassTime, "
-              + "u.email_verification_bypass_time AS emailVerificationBypassTime, "
-              + "u.email_verification_completion_time AS emailVerificationCompletionTime, "
               + "u.era_commons_bypass_time AS eraCommonsBypassTime, "
               + "u.era_commons_completion_time AS eraCommonsCompletionTime, "
-              + "u.id_verification_bypass_time AS idVerificationBypassTime, "
-              + "u.id_verification_completion_time AS idVerificationCompletionTime, "
               + "u.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
               + "u.two_factor_auth_completion_time AS twoFactorAuthCompletionTime, "
               + "u.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "

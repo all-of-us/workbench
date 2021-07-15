@@ -37,8 +37,6 @@ public interface UserService {
       String familyName,
       String userName,
       String contactEmail,
-      String currentPosition,
-      String organization,
       String areaOfResearch,
       String professionalUrl,
       List<Degree> degrees,
@@ -63,8 +61,6 @@ public interface UserService {
   void setComplianceTrainingBypassTime(
       Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
-  void setBetaAccessBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
-
   void setEraCommonsBypassTime(Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   void setTwoFactorAuthBypassTime(
@@ -74,6 +70,8 @@ public interface UserService {
       Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
+
+  List<Long> getAllUserIds();
 
   List<DbUser> getAllUsers();
 
@@ -153,6 +151,11 @@ public interface UserService {
 
   Optional<DbUser> getByDatabaseId(long databaseId);
 
+  /**
+   * @deprecated Use {@link org.pmiops.workbench.access.AccessModuleService#updateBypassTime(long,
+   *     AccessBypassRequest)}
+   */
+  @Deprecated
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);
@@ -162,7 +165,7 @@ public interface UserService {
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
-  DbUser confirmProfile();
+  DbUser confirmProfile(DbUser u);
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   DbUser confirmPublications();

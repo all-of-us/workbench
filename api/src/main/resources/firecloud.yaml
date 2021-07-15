@@ -521,6 +521,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorReport'
 
+  /api/billing/v2/{projectId}/billingAccount:
+    put:
+      tags:
+        - BillingV2
+      summary: update billing account on billing project
+      description: Update the Billing Account on the Billing Project and on each Workspace in the Billing Project
+      operationId: updateBillingProjectBillingAccount
+      parameters:
+        - name: projectId
+          in: path
+          description: Id of the billing project
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: update billing account request
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateRawlsBillingAccountRequest'
+        required: true
+      responses:
+        200:
+          description: Billing Account on Billing Project is successfully updated and process is started to update the Billing Account on each Workspace in the Billing Project
+        400:
+          description: Billing account not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Billing Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-passthrough: true
+      x-passthrough-target: rawls
+    delete:
+      tags:
+        - BillingV2
+      summary: deletes the billing account on billing project
+      description: Clears the Billing Account on the Billing Project and on each Workspace in the Billing Project
+      operationId: deleteBillingProjectBillingAccount
+      parameters:
+        - name: projectId
+          in: path
+          description: Id of the billing project
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Billing account successfully removed
+        404:
+          description: Billing project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-passthrough: true
+      x-passthrough-target: rawls
+
   /api/nih/status:
     get:
       tags:
@@ -2673,6 +2748,14 @@ components:
           items:
             type: string
           description: the roles the caller has on the project
+    UpdateRawlsBillingAccountRequest:
+      required:
+        - billingAccount
+      type: object
+      properties:
+        billingAccount:
+          type: string
+          description: The name of the billing account to use
   parameters:
     workspaceNamespaceParam:
       name: workspaceNamespace

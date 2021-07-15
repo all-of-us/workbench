@@ -6,6 +6,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
@@ -42,7 +43,7 @@ const LockoutButton: React.FunctionComponent<{disabled: boolean,
     </Button>;
   };
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile, reload: Function, updateCache: Function
   };
@@ -57,8 +58,7 @@ interface State {
 
 /**
  * Users with the ACCESS_MODULE_ADMIN permission use this
- * to manually set (approve/reject) the beta access state of a user, as well as
- * other access module bypasses.
+ * to manually set (approve/reject) access module bypasses.
  */
 export const AdminUsers = withUserProfile()(class extends React.Component<Props, State> {
   debounceUpdateFilter: Function;
@@ -74,6 +74,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   }
 
   async componentDidMount() {
+    this.props.hideSpinner();
     this.setState({contentLoaded: false});
     await this.loadProfiles();
     this.setState({contentLoaded: true});
@@ -91,36 +92,17 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     this.setState({loading: false});
   }
 
-  // We want to sort first by beta access status, then by
-  // submission time (newest at the top), then alphanumerically.
   sortProfileList(profileList: Array<Profile>): Array<Profile> {
     return profileList.sort((a, b) => {
       // put disabled accounts at the bottom
       if (a.disabled && b.disabled) {
-        return this.timeCompare(a, b);
+        return this.nameCompare(a, b);
       }
       if (a.disabled) {
         return 1;
       }
-      if (!!a.betaAccessBypassTime === !!b.betaAccessBypassTime) {
-        return this.timeCompare(a, b);
-      }
-      if (!!b.betaAccessBypassTime) {
-        return -1;
-      }
       return 1;
     });
-  }
-
-  private timeCompare(a: Profile, b: Profile): number {
-    if (a.betaAccessRequestTime === b.betaAccessRequestTime) {
-      return this.nameCompare(a, b);
-    } else if (a.betaAccessRequestTime === null) {
-      return 1;
-    } else if (b.betaAccessRequestTime === null) {
-      return -1;
-    }
-    return b.betaAccessRequestTime - a.betaAccessRequestTime;
   }
 
   private nameCompare(a: Profile, b: Profile): number {
@@ -185,8 +167,6 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
       eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
       rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
-      firstRegistrationCompletionTime: this.formattedTimestampOrEmptyString(user.firstRegistrationCompletionTime),
-      firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
       firstSignInTime: this.formattedTimestampOrEmptyString(user.firstSignInTime),
       firstSignInTimestamp: user.firstSignInTime,
       institutionName: user.institutionName,
@@ -207,7 +187,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
 
   render() {
     const {contentLoaded, filter, loading, users} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, enableRasLoginGovLinking} = serverConfigStore.get().config;
+    const {enableComplianceTraining, enableEraCommons, enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
       {loading &&
@@ -228,7 +208,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                    paginator={true}
                    rows={50}
                    scrollable
-                   sortField={'firstRegistrationCompletionTimestamp'}
+                   sortField={'firstSignInTimestamp'}
                    style={styles.tableStyle}>
           <Column field='name'
                   bodyStyle={{...styles.colStyle}}
@@ -252,17 +232,9 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   headerStyle={{...styles.colStyle, width: '180px'}}
                   sortable={true}
           />
-          <Column field='firstRegistrationCompletionTime'
-                  bodyStyle={{...styles.colStyle}}
-                  excludeGlobalFilter={true}
-                  header='Registration date'
-                  headerStyle={{...styles.colStyle, width: '180px'}}
-                  sortable={true}
-                  sortField={'firstRegistrationCompletionTimestamp'}
-          />
           <Column field='username'
                   bodyStyle={{...styles.colStyle}}
-                  header='User name'
+                  header='User Name'
                   headerStyle={{...styles.colStyle, width: '200px'}}
                   sortable={true}
           />
@@ -304,12 +276,12 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   header='eRA Commons'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />}
-          {enableDataUseAgreement && <Column field='dataUseAgreement'
+          <Column field='dataUseAgreement'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}
                   header='DUCC'
                   headerStyle={{...styles.colStyle, width: '80px'}}
-          />}
+          />
           {enableRasLoginGovLinking && <Column field='rasLinkLoginGov'
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}

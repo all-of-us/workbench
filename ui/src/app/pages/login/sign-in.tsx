@@ -18,6 +18,7 @@ import {Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AccountCreationInstitution} from 'app/pages/login/account-creation/account-creation-institution';
 import {environment} from 'environments/environment';
 import * as React from 'react';
@@ -106,7 +107,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 );
 
 
-export interface SignInProps extends WindowSizeProps {
+export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
   initialStep?: SignInStep;
   onSignIn: () => void;
   signIn: () => void;
@@ -131,8 +132,6 @@ export const createEmptyProfile = (): Profile => {
     givenName: '',
     familyName: '',
     contactEmail: '',
-    currentPosition: '',
-    organization: '',
     areaOfResearch: '',
     address: {
       streetAddress1: '',
@@ -178,6 +177,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     document.body.style.backgroundColor = colors.light;
     this.props.onSignIn();
   }

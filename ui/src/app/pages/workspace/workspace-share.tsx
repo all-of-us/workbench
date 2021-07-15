@@ -1,9 +1,12 @@
-import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {isBlank, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {
+  isBlank,
+  reactStyles,
+  withUserProfile
+} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -13,9 +16,9 @@ import * as React from 'react';
 
 import {
   BillingAccountType,
+  Profile,
   User,
   UserRole,
-  Workspace,
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
@@ -24,7 +27,7 @@ import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AnalyticsTracker} from 'app/utils/analytics';
 
 const styles = reactStyles( {
@@ -149,26 +152,26 @@ export interface State {
   saving: boolean;
   workspaceFound: boolean;
   workspaceUpdateConflictError: boolean;
+  loadingUserRoles: boolean;
   userRoles: UserRole[];
   searchTerm: string;
   dropDown: boolean;
 }
 
 export interface Props {
-  workspace: Workspace;
-  accessLevel: WorkspaceAccessLevel;
-  userEmail: string;
   onClose: Function;
-  // The userRoles to pre-populate the share dialog. Must be filled with all
-  // pre-existing roles on the workspace for this dialog to work correctly.
-  userRoles: UserRole[];
+  workspace: WorkspaceData;
 }
 
-export const WorkspaceShare = withCurrentWorkspace()(class extends React.Component<Props, State> {
+interface HocProps extends Props {
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+}
+
+export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Component<HocProps, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
-  constructor(props: Props) {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       autocompleteLoading: false,
@@ -178,7 +181,8 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      userRoles: fp.sortBy('familyName', this.props.userRoles),
+      loadingUserRoles: true,
+      userRoles: [],
       searchTerm: '',
       dropDown: false,
     };
@@ -187,6 +191,8 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
 
   componentDidMount(): void {
     document.addEventListener('mousedown', this.handleClickOutsideSearch, false);
+
+    this.loadUserRoles();
   }
 
   componentWillUnmount(): void {
@@ -194,6 +200,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   }
 
   async loadUserRoles() {
+    this.setState({loadingUserRoles: true});
     try {
       const resp = await workspacesApi()
         .getFirecloudWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
@@ -202,6 +209,8 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       if (error.status === 404) {
         this.setState({workspaceFound: false});
       }
+    } finally {
+      this.setState({loadingUserRoles: false});
     }
   }
 
@@ -252,13 +261,14 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   }
 
   userSearch(value: string): void {
+    const {accessTierShortName} = this.props.workspace;
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
     if (!value.trim()) {
       this.setState({autocompleteLoading: false, dropDown: false});
       return;
     }
     const searchTerm = this.state.searchTerm;
-    userApi().user(this.state.searchTerm)
+    userApi().userSearch(accessTierShortName, this.state.searchTerm)
       .then((response) => {
         if (this.state.searchTerm !== searchTerm) {
           return;
@@ -313,7 +323,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   }
 
   get hasPermission(): boolean {
-    return this.props.accessLevel === WorkspaceAccessLevel.OWNER;
+    return this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
   get showSearchResults(): boolean {
@@ -399,43 +409,46 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
           {this.state.workspaceShareError && <div style={{color: 'red'}}>
             Failed to share workspace. Please try again.
           </div>}
-            <h3>Current Collaborators</h3>
-          <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
-            {this.state.userRoles.map((user, i) => {
-              return <div key={user.email}>
-                <div data-test-id='collab-user-row' style={styles.wrapper}>
-                  <div style={styles.box}>
-                    <h5 data-test-id='collab-user-name'
-                        style={{...styles.userName, ...styles.collabUser}}>
-                      {user.givenName} {user.familyName}
-                    </h5>
-                    <div data-test-id='collab-user-email'
-                         style={styles.userName}>{user.email}</div>
-                    {/* Minimally, the z-index must be higher than that of the
+          <h3>Current Collaborators</h3>
+          {this.state.loadingUserRoles
+            ? <Spinner size={36} style={{margin: 'auto', marginTop: '1rem'}}/>
+            : <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
+              {this.state.userRoles.map((user, i) => {
+                return <div key={user.email}>
+                  <div data-test-id='collab-user-row' style={styles.wrapper}>
+                    <div style={styles.box}>
+                      <h5 data-test-id='collab-user-name'
+                          style={{...styles.userName, ...styles.collabUser}}>
+                        {user.givenName} {user.familyName}
+                      </h5>
+                      <div data-test-id='collab-user-email'
+                           style={styles.userName}>{user.email}</div>
+                      {/* Minimally, the z-index must be higher than that of the
                         modal. See https://react-select.com/advanced#portaling */}
-                    <Select value={user.role}
-                            styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
-                            menuPortalTarget={document.getElementById('popup-root')}
-                            isDisabled={user.email === this.props.userEmail}
-                            classNamePrefix={this.cleanClassNameForSelect(user.email)}
-                            data-test-id={user.email + '-user-role'}
-                            onChange={e => this.setRole(e, user)}
-                            options={UserRoleOptions}/>
+                      <Select value={user.role}
+                              styles={{menuPortal: base => ({ ...base, zIndex: 110 })}}
+                              menuPortalTarget={document.getElementById('popup-root')}
+                              isDisabled={user.email === this.props.profileState.profile.username}
+                              classNamePrefix={this.cleanClassNameForSelect(user.email)}
+                              data-test-id={user.email + '-user-role'}
+                              onChange={e => this.setRole(e, user)}
+                              options={UserRoleOptions}/>
+                    </div>
+                    <div style={styles.box}>
+                      <div style={styles.collaboratorIcon}>
+                        {(this.hasPermission && (user.email !== this.props.profileState.profile.username)) &&
+                        <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
+                                 style={{height: '21px', width: '21px'}}
+                                 onClick={() => this.removeCollaborator(user)}/>}
+                      </div>
+                    </div>
                   </div>
-                <div style={styles.box}>
-                  <div style={styles.collaboratorIcon}>
-                    {(this.hasPermission && (user.email !== this.props.userEmail)) &&
-                    <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
-                             style={{height: '21px', width: '21px'}}
-                             onClick={() => this.removeCollaborator(user)}/>}
-                  </div>
-                </div>
-                </div>
                   {(this.state.userRoles.length !== i + 1) &&
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
-              </div>;
-            })}
-          </div>
+                </div>;
+              })}
+            </div>
+          }
         </ModalBody>
         <ModalFooter style={{alignItems: 'center'}}>
             <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
@@ -463,20 +476,3 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
     </React.Fragment>;
   }
 });
-
-@Component({
-  selector: 'app-workspace-share',
-  template: '<div #root></div>'
-})
-export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit {
-  @Input('workspace') workspace: Workspace;
-  @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
-  @Input('userEmail') userEmail: Props['userEmail'];
-  @Input('onClose') onClose: Props['onClose'];
-  @Input('userRoles') userRoles: Props['userRoles'];
-
-  constructor() {
-    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail', 'userRoles']);
-  }
-
-}

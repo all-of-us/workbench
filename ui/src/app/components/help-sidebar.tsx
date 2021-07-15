@@ -14,7 +14,6 @@ import * as moment from 'moment';
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
-import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
@@ -56,21 +55,27 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {Clickable, MenuItem, StyledAnchorTag} from 'app/components/buttons';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
+import {withErrorModal} from 'app/components/modals';
+import {Spinner} from 'app/components/spinners';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
   ParticipantCohortStatus,
+  ResourceType,
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {Spinner} from './spinners';
 
-const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -222,7 +227,6 @@ const pageKeyToAnalyticsLabels = {
 };
 
 interface Props {
-  deleteFunction: Function;
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -235,6 +239,12 @@ interface Props {
   genomicExtraction: GenomicExtractionStore;
 }
 
+enum CurrentModal {
+  None,
+  Share,
+  Delete
+}
+
 interface State {
   activeIcon: string;
   filteredContent: Array<any>;
@@ -242,6 +252,7 @@ interface State {
   searchTerm: string;
   showCriteria: boolean;
   tooltipId: number;
+  currentModal: CurrentModal;
 }
 
 export const HelpSidebar = fp.flow(
@@ -255,8 +266,6 @@ export const HelpSidebar = fp.flow(
   withCdrVersions()
 )(
   class extends React.Component<Props, State> {
-    subscription: Subscription;
-    private loadLastSavedKey: () => void;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -265,9 +274,25 @@ export const HelpSidebar = fp.flow(
         participant: undefined,
         searchTerm: '',
         showCriteria: false,
-        tooltipId: undefined
+        tooltipId: undefined,
+        currentModal: CurrentModal.None
       };
     }
+
+    subscriptions = [];
+
+    deleteWorkspace = withErrorModal({
+      title: 'Error Deleting Workspace',
+      message: `Could not delete workspace '${this.props.workspace.name}'.`,
+      showBugReportLink: true,
+      onDismiss: () => {
+        this.setState({currentModal: CurrentModal.None});
+      }
+    }, async() => {
+      AnalyticsTracker.Workspaces.Delete();
+      await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+      navigate(['/workspaces']);
+    });
 
     iconConfig(iconKey): IconConfig {
       return {
@@ -332,7 +357,7 @@ export const HelpSidebar = fp.flow(
           label: 'Cloud Icon',
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
-          tooltip: 'Compute Configuration'
+          tooltip: 'Cloud Analysis Environment'
         },
         'genomicExtractions': {
           id: 'genomicExtractions',
@@ -370,37 +395,23 @@ export const HelpSidebar = fp.flow(
     }
 
     setActiveIcon(activeIcon: string) {
-      this.setState({activeIcon});
-      if (activeIcon) {
-        localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-      } else {
-        localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-      }
+      setSidebarActiveIconStore.next(activeIcon);
     }
 
     async componentDidMount() {
-      const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-
-      // This is a little hacky but it's necessary because
-      // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
-      // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
-      //    and overwrite the value stored in localStorage key so we need to "save" it here
-      // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
-      this.loadLastSavedKey = (() => {
-        let loadedLastSavedKey = false;
-        return () => {
-          if (!loadedLastSavedKey && this.props.pageKey) {
-            const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
-            setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
-            loadedLastSavedKey = true;
-          }
-        };
-      })();
-
-      this.loadLastSavedKey();
-      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
-      this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
+      // This is being set here instead of the constructor to show the opening animation of the side panel and
+      // indicate to the user that it's something they can close.
+      this.setActiveIcon(setSidebarActiveIconStore.getValue());
+      this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
+      this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
+        this.setState({activeIcon});
+        if (activeIcon) {
+          localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+        }
+      }));
+      this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -416,14 +427,13 @@ export const HelpSidebar = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      this.loadLastSavedKey();
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.setActiveIcon(null);
       }
     }
 
     componentWillUnmount(): void {
-      this.subscription.unsubscribe();
+      this.subscriptions.forEach(sub => sub.unsubscribe());
     }
 
     onIconClick(icon: IconConfig) {
@@ -462,7 +472,7 @@ export const HelpSidebar = fp.flow(
     }
 
     renderWorkspaceMenu() {
-      const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const {workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
       const tooltip = isNotOwner && 'Requires owner permission';
       return <PopupTrigger
@@ -495,7 +505,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenShareModal();
-                shareFunction();
+                this.setState({currentModal: CurrentModal.Share});
               }}>
               Share
             </MenuItem>
@@ -505,7 +515,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDeleteModal();
-                deleteFunction();
+                this.setState({currentModal: CurrentModal.Delete});
               }}>
               Delete
             </MenuItem>
@@ -868,6 +878,17 @@ export const HelpSidebar = fp.flow(
             </div>
           </CSSTransition>
         </TransitionGroup>
+
+        {
+          switchCase(this.state.currentModal,
+            [CurrentModal.Share, () => <WorkspaceShare workspace={this.props.workspace}
+                                                             onClose={() => this.setState({currentModal: CurrentModal.None})}/>],
+            [CurrentModal.Delete, () => <ConfirmDeleteModal closeFunction={() => this.setState({currentModal: CurrentModal.None})}
+                                                            resourceType={ResourceType.WORKSPACE}
+                                                            receiveDelete={() => this.deleteWorkspace()}
+                                                            resourceName={this.props.workspace.name}/>]
+          )
+        }
       </div>;
     }
   }
@@ -878,11 +899,9 @@ export const HelpSidebar = fp.flow(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('pageKey') pageKey: Props['pageKey'];
-  @Input('shareFunction') shareFunction: Props['shareFunction'];
 
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'pageKey', 'shareFunction']);
+    super(HelpSidebar, ['pageKey' ]);
   }
 }

@@ -2,11 +2,11 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {act} from 'react-dom/test-utils';
-import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {
   currentCohortCriteriaStore,
+  currentCohortReviewStore,
   currentWorkspaceStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
@@ -29,12 +29,14 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {
   cdrVersionStore,
-  clearCompoundRuntimeOperations, genomicExtractionStore,
+  clearCompoundRuntimeOperations,
+  genomicExtractionStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore
 } from 'app/utils/stores';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
@@ -51,6 +53,18 @@ jest.mock('react-transition-group', () => {
   return {
     CSSTransition: (props) => props.children,
     TransitionGroup: (props) => props.children
+  };
+});
+
+class MockWorkspaceShare extends React.Component {
+  render() {
+    return <div>Mock Workspace Share</div>;
+  }
+}
+
+jest.mock('app/pages/workspace/workspace-share', () => {
+  return {
+    WorkspaceShare: () => <MockWorkspaceShare/>
   };
 });
 
@@ -104,7 +118,7 @@ describe('HelpSidebar', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    cohortReviewStore.next(cohortReviewStubs[0]);
+    currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({config: {...defaultServerConfig, enableGenomicExtraction: true}});
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -149,22 +163,20 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
-  it('should call delete method when clicked', async() => {
-    const deleteSpy = jest.fn();
-    props = {deleteFunction: deleteSpy};
+  it('should show delete workspace modal on clicking delete workspace', async() => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
-    expect(deleteSpy).toHaveBeenCalled();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
   });
 
-  it('should call share method when clicked', async() => {
-    const shareSpy = jest.fn();
-    props = {shareFunction: shareSpy};
+  it('should show workspace share modal on clicking share workspace', async() => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
-    expect(shareSpy).toHaveBeenCalled();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
   });
 
   it('should hide workspace icon if on criteria search page', async() => {

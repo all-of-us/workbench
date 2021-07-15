@@ -351,17 +351,6 @@ paths:
           description: Error occurred while creating account.
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/beta-access":
-    post:
-      tags:
-      - profile
-      description: Request betaAccess.
-      operationId: requestBetaAccess
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            "$ref": "#/definitions/Profile"
   "/v1/update-nih-token":
     post:
       tags:
@@ -571,6 +560,7 @@ paths:
       tags:
       - user
       description: >
+        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
         Return a page of users matching a search term.
         Used by autocomplete for workspace sharing.
       operationId: user
@@ -604,6 +594,50 @@ paths:
           user's email.
         type: string
         required: false
+  "/v1/userSearch/{accessTierShortName}/{term}":
+    get:
+      tags:
+        - user
+      description: >
+        Return a page of users matching a search term and an access tier.
+        Used by autocomplete for workspace sharing.
+      operationId: userSearch
+      responses:
+        200:
+          description: The user information matching supplied search terms
+          schema:
+            "$ref": "#/definitions/UserResponse"
+      parameters:
+        - in: path
+          name: accessTierShortName
+          description: The shortName corresponding to an access tier to search in. Requesting user
+            must also be a member of this tier.
+          required: true
+          type: string
+        - in: path
+          name: term
+          description: String to find in user's name or email address. Search is a case-insensitive
+            substring match.
+          required: true
+          type: string
+        - in: query
+          name: pageToken
+          description: 'Pagination token retrieved from a previous call to user; used
+         for retrieving additional pages of results.'
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: 'Maximum number of results to return in a response. Defaults
+         to 10.'
+          type: integer
+          required: false
+        - in: query
+          name: sortOrder
+          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
+            user's email.
+          type: string
+          required: false
   "/v1/user/billingAccounts":
     get:
       tags:
@@ -2675,6 +2709,26 @@ paths:
       responses:
         200:
           description: 'A SQL query for each domain in the Data Set'
+  "/v1/cloudTask/auditProjectAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: "Audits the provided user's access to GCP resources"
+      operationId: auditProjectAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Audit configuration to run.
+        schema:
+          "$ref": "#/definitions/AuditProjectAccessRequest"
+      responses:
+        200:
+          description: 'Audit ran successfully (possibly with audit findings)'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -4138,14 +4192,6 @@ definitions:
         type: boolean
         default: false
         description: Whether the eRA Commons access module is enabled.
-      enableDataUseAgreement:
-        type: boolean
-        default: false
-        description: Whether the Data Use Agreement access module is enabled.
-      enableBetaAccess:
-        type: boolean
-        default: false
-        description: Whether the Beta Access module is enabled.
       unsafeAllowSelfBypass:
         type: boolean
         default: false
@@ -4159,10 +4205,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing upgrade
-      enableV3DataUserCodeOfConduct:
-        type: boolean
-        default: false
-        description: Whether to enable version 3 of the Data User Code of Conduct
       enableEventDateModifier:
         type: boolean
         default: false
@@ -4183,6 +4225,14 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
+      enableAccessModuleRewrite:
+        type: boolean
+        default: false
+        description: Whether to use the new rewrite access module.
+      enableStandardSourceDomains:
+        type: boolean
+        default: false
+        description: Whether to show separate source and standard domains
       rasHost:
         type: string
         description: The RAS base host name.
@@ -4255,13 +4305,6 @@ definitions:
     - pending
     - ready
     - error
-  EmailVerificationStatus:
-    type: string
-    description: stage of email verification
-    enum:
-    - unverified
-    - pending
-    - subscribed
   EmptyResponse:
     type: object
     properties:
@@ -4709,10 +4752,11 @@ definitions:
     enum:
     - DATA_USE_AGREEMENT
     - COMPLIANCE_TRAINING
-    - BETA_ACCESS
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - PROFILE_CONFIRMATION
+    - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
@@ -5412,19 +5456,10 @@ definitions:
       institutionName:
         description: Verified institution name
         type: string
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
       firstSignInTime:
         type: integer
         format: int64
       creationTime:
-        type: integer
-        format: int64
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-      idVerificationCompletionTime:
         type: integer
         format: int64
       twoFactorAuthBypassTime:
@@ -5449,15 +5484,6 @@ definitions:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-      emailVerificationCompletionTime:
         type: integer
         format: int64
       dataUseAgreementBypassTime:
@@ -5489,11 +5515,6 @@ definitions:
       contactEmail:
         description: email address that can be used to contact the user
         type: string
-      contactEmailFailure:
-        description: >
-          DEPRECATED. Whether or not contact email could be added to verification list. No longer in use.
-        type: boolean
-        default: false
       firstSignInTime:
         type: integer
         format: int64
@@ -5512,17 +5533,8 @@ definitions:
       familyName:
         description: the user's family  name (e.g. Jones)
         type: string
-      phoneNumber:
-        description: the user's phone number
-        type: string
       professionalUrl:
         description: the link to the user's professional url
-        type: string
-      currentPosition:
-        description: the user's curent position (job title)
-        type: string
-      organization:
-        description: the user's current organization
         type: string
       authorities:
         description: authorities granted to this user
@@ -5542,10 +5554,6 @@ definitions:
       disabled:
         type: boolean
         default: false
-      emailVerificationStatus:
-        "$ref": "#/definitions/EmailVerificationStatus"
-      aboutYou:
-        type: string
       areaOfResearch:
         type: string
       verifiedInstitutionalAffiliation:
@@ -5555,14 +5563,6 @@ definitions:
         "$ref": "#/definitions/VerifiedInstitutionalAffiliation"
       demographicSurvey:
         "$ref": "#/definitions/DemographicSurvey"
-      idVerificationCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completes identity verification.
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user is bypassed for completing identity verification
       twoFactorAuthCompletionTime:
         type: integer
         format: int64
@@ -5599,22 +5599,6 @@ definitions:
         format: int64
         description: Timestamp when a user was bypassed for completing compliance
           training
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for beta access
-      betaAccessRequestTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user requests beta access.
-      emailVerificationCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user completed email verification
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when a user was bypassed for completing email verification
       dataUseAgreementCompletionTime:
         type: integer
         format: int64
@@ -5646,11 +5630,6 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user first changed from Unregistered to Registered
-          data access level. May be null if the user has never done so.'
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
@@ -5683,6 +5662,18 @@ definitions:
             description: >
               Whether any modules have expired. Each expired module will have
               the corresponding hasExpired flag set in the modules array.
+      accessModules:
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/AccessModuleStatus"
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Expiration information is also included with each
+              module in the array; this field is provided for convenience.
 
   RenewableAccessModuleStatus:
     type: object
@@ -5701,6 +5692,24 @@ definitions:
       hasExpired:
         type: boolean
         description: Whether this module has expired according to the server's clock.
+
+  AccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        "$ref": "#/definitions/AccessModule"
+      completionEpochMillis:
+        type: integer
+        format: int64
+        description: When this module completed if applicable
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire if applicable.
+      bypassEpochMillis:
+        type: integer
+        format: int64
+        description: When this module is bypassed if applicable
 
   UserAccessExpiration:
     type: object
@@ -6340,6 +6349,11 @@ definitions:
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
+      tierRequirements:
+        type: array
+        description: List of requirements on how members can get access for each tier.
+        items:
+          "$ref": "#/definitions/InstitutionTierRequirement"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6413,6 +6427,15 @@ definitions:
       - MASTER
       - RESTRICTED
 
+  InstitutionMembershipRequirement:
+    type: string
+    description: 'Type of Institution requirement for member to access a tier.
+      It can be matching email address, email domains or no access'
+    enum:
+      - DOMAINS
+      - ADDRESSES
+      - NO_ACCESS
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all
@@ -6456,6 +6479,22 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
+  InstitutionTierRequirement:
+    type: object
+    description: Institution-specific access tier membership requirement.
+    required:
+      - accessTierShortName
+      - membershipRequirement
+    properties:
+      accessTierShortName:
+        type: string
+        description: The short unique name for the access tier.
+      membershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
+      eraRequired:
+        type: boolean
+        description: Whether eRA commons is required for members in the institution for this tier.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
@@ -8145,6 +8184,17 @@ definitions:
         format: int64
       conceptName:
         type: string
+
+  AuditProjectAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: 'List of users to audit'
+        type: array
+        items:
+          type: integer
+          format: int64
+
   WorkspaceAuditLogQueryResponse:
     type: object
     description: >
@@ -8509,9 +8559,6 @@ definitions:
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
-      aboutYou:
-        type: string
-        description: User's description of themselves.
       accessTierShortNames:
         description: |-
           Short names of access tiers available to the user, comma-delimited if multiple.
@@ -8541,9 +8588,6 @@ definitions:
         type: string
         format: date-time
         description: Timestamp of account creation.
-      currentPosition:
-        type: string
-        description: User's current role/position.
       dataUseAgreementBypassTime:
         type: string
         format: date-time
@@ -8586,10 +8630,6 @@ definitions:
         type: string
         format: date-time
         description: Time user first signed into the Workbench with a GSuite account.
-      freeTierCreditsLimitDaysOverride:
-        type: integer
-        format: int32
-        description: Override value for the default free tier time limit (days).
       freeTierCreditsLimitDollarsOverride:
         type: number
         format: double

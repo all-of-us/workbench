@@ -1,16 +1,14 @@
 import * as React from 'react';
 
-import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {ResourceType, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
-import {BugReportModal} from 'app/components/bug-report';
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Modal, ModalBody, ModalFooter, ModalTitle, withErrorModal} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {AouTitle} from 'app/components/text-wrappers';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -130,20 +128,12 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
 };
 
 interface WorkspaceCardState {
-  bugReportError: string;
-  bugReportOpen: boolean;
   confirmDeleting: boolean;
-  // Whether this card is busy loading data specific to the workspace.
-  loadingData: boolean;
-  sharing: boolean;
+  showShareModal: boolean;
   showResearchPurposeReviewModal: boolean;
-  // The list of user roles associated with this workspace. Lazily populated
-  // only when the workspace share dialog is opened.
-  userRoles?: UserRole[];
 }
 
 interface WorkspaceCardProps {
-  userEmail: string;
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
   // A reload function that can be called by this component to reqeust a refresh
@@ -155,54 +145,31 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   constructor(props) {
     super(props);
     this.state = {
-      bugReportError: '',
-      bugReportOpen: false,
       confirmDeleting: false,
-      loadingData: false,
-      sharing: false,
+      showShareModal: false,
       showResearchPurposeReviewModal: false,
-      userRoles: null
     };
   }
 
-  async deleteWorkspace() {
-    const {workspace} = this.props;
-    this.setState({
-      confirmDeleting: false,
-      loadingData: true});
-    try {
-      await workspacesApi().deleteWorkspace(workspace.namespace, workspace.id);
-      this.setState({loadingData: false});
-      await this.props.reload();
-    } catch (e) {
-      this.setState({bugReportOpen: true, bugReportError: 'Could not delete workspace', loadingData: false});
+  deleteWorkspace = withErrorModal({
+    title: 'Error Deleting Workspace',
+    message: `Could not delete workspace '${this.props.workspace.id}'.`,
+    showBugReportLink: true,
+    onDismiss: () => {
+      this.setState({confirmDeleting: false});
     }
-  }
-
-  // The function called when the 'share' action is called on a workspace card
-  // within the recentWorkspaces list.
-  async handleShareAction() {
-    this.setState({
-      loadingData: true
-    });
-    const userRolesResponse = await workspacesApi().getFirecloudWorkspaceUserRoles(
-      this.props.workspace.namespace,
-      this.props.workspace.id);
-    // Trigger the sharing dialog to be shown.
-    this.setState({
-      loadingData: false,
-      sharing: true,
-      userRoles: userRolesResponse.items});
-  }
+  }, async() => {
+    AnalyticsTracker.Workspaces.Delete();
+    await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+    await this.props.reload();
+  });
 
   async handleShareDialogClose() {
     // Share workspace publishes to current workspace,
     // but here we aren't in the context of a workspace
     // so we need to clear it.
     currentWorkspaceStore.next(undefined);
-    this.setState({
-      sharing: false,
-      userRoles: null});
+    this.setState({showShareModal: false});
     this.reloadData();
   }
 
@@ -231,9 +198,8 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   }
 
   render() {
-    const {userEmail, workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
-    const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
-      sharing, showResearchPurposeReviewModal, userRoles} = this.state;
+    const {workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
+    const {confirmDeleting, showShareModal, showResearchPurposeReviewModal} = this.state;
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -249,7 +215,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
               }}
               onShare={() => {
                 triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
-                this.handleShareAction();
+                this.setState({showShareModal: true});
               }}
               disabled={false}
             />
@@ -261,7 +227,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
             }}
             data-test-id='workspace-card'
           >
-            {loadingData && <SpinnerOverlay/>}
             <FlexColumn style={{marginBottom: 'auto'}}>
               <FlexRow style={{ alignItems: 'flex-start' }}>
                 <Clickable>
@@ -313,15 +278,9 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                             this.deleteWorkspace();
                           }}
                           closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
-      {sharing && <WorkspaceShare data-test-id='workspace-share-modal'
-                                  workspace={workspace}
-                                  accessLevel={accessLevel}
-                                  userEmail={userEmail}
-                                  sharing={sharing}
-                                  userRoles={userRoles}
+      {showShareModal && <WorkspaceShare data-test-id='workspace-share-modal'
+                                  workspace={{...workspace, accessLevel}}
                                   onClose={() => this.handleShareDialogClose()} />}
-      {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
-                                        onClose={() => this.setState({bugReportOpen: false})}/>}
       {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
         <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
         <ModalBody style={{display: 'flex', flexDirection: 'column'}}>

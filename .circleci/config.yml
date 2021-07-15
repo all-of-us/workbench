@@ -231,6 +231,7 @@ commands:
       - ui-cache
       - when:
           condition: << parameters.connect_local_api >>
+          # connect_local_api = true.  run against Local->Local.
           steps:
             - run:
                 name: Launch local UI server
@@ -239,6 +240,7 @@ commands:
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
+          # connect_local_api = false.  run against Local->Test.
           steps:
             - run:
                 name: Launch local UI server
@@ -548,10 +550,6 @@ jobs:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
-            - run:
-                name: Change WORKBENCH_ENV to "test" if needed
-                command: bash .circleci/choose-e2e-env.sh
-            # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
       - run:
           name: "echo WORKBENCH_ENV & TEST_MODE"
@@ -600,7 +598,7 @@ jobs:
       - browser-tools/install-browser-tools
       - restore_cache:
           keys:
-            - v1-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           working_directory: ~/workbench/e2e
           command: yarn install --frozen-lockfile --non-interactive
@@ -608,7 +606,7 @@ jobs:
           paths:
             - ~/workbench/e2e/.cache/yarn
             - ~/workbench/e2e/node_modules
-          key: v1-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - persist_to_workspace:
           root: .
           paths:

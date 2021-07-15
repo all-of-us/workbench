@@ -63,10 +63,6 @@ export default abstract class BaseModal extends Container {
     return Checkbox.findByName(this.page, { name: checkboxName }, this);
   }
 
-  async waitUntilClose(timeout = 60000): Promise<void> {
-    await this.page.waitForXPath(this.xpath, { hidden: true, timeout });
-  }
-
   /**
    * Returns true if Dialog exists on page.
    */

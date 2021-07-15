@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
@@ -126,18 +126,22 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUnregistered() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(false);
     assertThrows(
         ForbiddenException.class,
-        () -> userController.user("Robinson", null, null, null).getBody());
+        () ->
+            userController.userSearch(registeredTier.getShortName(), "Robinson", null, null, null));
   }
 
   @Test
   public void testUserSearch() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     DbUser john = userDao.findUserByUsername("john@lis.org");
 
-    UserResponse response = userController.user("John", null, null, null).getBody();
+    UserResponse response =
+        userController
+            .userSearch(registeredTier.getShortName(), "John", null, null, null)
+            .getBody();
     assertThat(response.getUsers()).hasSize(1);
     assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUsername());
     assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUsername());
@@ -145,10 +149,13 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserPartialStringSearch() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     List<DbUser> allUsers = Lists.newArrayList(userDao.findAll());
 
-    UserResponse response = userController.user("obin", null, null, null).getBody();
+    UserResponse response =
+        userController
+            .userSearch(registeredTier.getShortName(), "obin", null, null, null)
+            .getBody();
 
     // We only want to include users that have active billing projects to avoid users not
     // initialized in FC.
@@ -157,22 +164,27 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserEmptyResponse() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    UserResponse response = userController.user("", null, null, null).getBody();
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
+    UserResponse response =
+        userController.userSearch(registeredTier.getShortName(), "", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserNoUsersResponse() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    UserResponse response = userController.user("Smith", null, null, null).getBody();
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
+    UserResponse response =
+        userController
+            .userSearch(registeredTier.getShortName(), "Smith", null, null, null)
+            .getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testInvalidPageTokenCharacters() {
     ResponseEntity<UserResponse> response =
-        userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
+        userController.userSearch(
+            registeredTier.getShortName(), "Robinson", "Inv@l!dT0k3n#", null, null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
@@ -180,7 +192,8 @@ public class UserControllerTest extends SpringTest {
   @Test
   public void testInvalidPageToken() {
     ResponseEntity<UserResponse> response =
-        userController.user("Robinson", "eyJvZmZzZXQBhcmFtZF9", null, null);
+        userController.userSearch(
+            registeredTier.getShortName(), "Robinson", "eyJvZmZzZXQBhcmFtZF9", null, null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
@@ -188,25 +201,65 @@ public class UserControllerTest extends SpringTest {
   @Test
   public void testNegativePageOffset() {
     ResponseEntity<UserResponse> response =
-        userController.user("Robinson", PaginationToken.of(-1).toBase64(), null, null);
+        userController.userSearch(
+            registeredTier.getShortName(),
+            "Robinson",
+            PaginationToken.of(-1).toBase64(),
+            null,
+            null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserPageSize() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     int size = 1;
     UserResponse robinsons_0 =
-        userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(0).toBase64(),
+                size,
+                null)
+            .getBody();
     UserResponse robinsons_1 =
-        userController.user("Robinson", PaginationToken.of(1).toBase64(), size, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(1).toBase64(),
+                size,
+                null)
+            .getBody();
     UserResponse robinsons_2 =
-        userController.user("Robinson", PaginationToken.of(2).toBase64(), size, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(2).toBase64(),
+                size,
+                null)
+            .getBody();
     UserResponse robinsons_3 =
-        userController.user("Robinson", PaginationToken.of(3).toBase64(), size, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(3).toBase64(),
+                size,
+                null)
+            .getBody();
     UserResponse robinsons_4 =
-        userController.user("Robinson", PaginationToken.of(4).toBase64(), size, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(4).toBase64(),
+                size,
+                null)
+            .getBody();
 
     assertThat(robinsons_0.getUsers()).hasSize(size);
     assertThat(robinsons_0.getNextPageToken()).isEqualTo(PaginationToken.of(1).toBase64());
@@ -222,13 +275,34 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserPagedResponses() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
     UserResponse robinsons_0_1 =
-        userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(0).toBase64(),
+                2,
+                null)
+            .getBody();
     UserResponse robinsons_2_3 =
-        userController.user("Robinson", PaginationToken.of(1).toBase64(), 2, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(1).toBase64(),
+                2,
+                null)
+            .getBody();
     UserResponse robinsons_4 =
-        userController.user("Robinson", PaginationToken.of(3).toBase64(), 1, null).getBody();
+        userController
+            .userSearch(
+                registeredTier.getShortName(),
+                "Robinson",
+                PaginationToken.of(3).toBase64(),
+                1,
+                null)
+            .getBody();
 
     // Assert the expected size for each page
     assertThat(robinsons_0_1.getUsers()).hasSize(2);
@@ -243,9 +317,15 @@ public class UserControllerTest extends SpringTest {
 
   @Test
   public void testUserSort() {
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    UserResponse robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
-    UserResponse robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
+    when(fireCloudService.isUserMemberOfGroupWithCache(any(), any())).thenReturn(true);
+    UserResponse robinsonsAsc =
+        userController
+            .userSearch(registeredTier.getShortName(), "Robinson", null, null, "asc")
+            .getBody();
+    UserResponse robinsonsDesc =
+        userController
+            .userSearch(registeredTier.getShortName(), "Robinson", null, null, "desc")
+            .getBody();
 
     // Assert we have the same elements in both responses
     assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());

@@ -213,6 +213,10 @@ const useRuntime = (currentWorkspaceNamespace) => {
   // No cleanup is being handled at the moment.
   // When the user initiates a runtime change we want that change to take place even if they navigate away
   useEffect(() => {
+    if (!currentWorkspaceNamespace) {
+      return;
+    }
+
     const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
       async() => {
@@ -234,7 +238,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
         }
       });
     getRuntime();
-  }, []);
+  }, [currentWorkspaceNamespace]);
 };
 
 export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
@@ -324,6 +328,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
   useRuntime(currentWorkspaceNamespace);
 
   useEffect(() => {
+    let mounted = true;
     const aborter = new AbortController();
     const runAction = async() => {
       // Only delete if the runtime already exists.
@@ -369,7 +374,9 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
         }
       } finally {
         markCompoundRuntimeOperationCompleted(currentWorkspaceNamespace);
-        setRequestedRuntime(undefined);
+        if (mounted) {
+          setRequestedRuntime(undefined);
+        }
       }
     };
 
@@ -380,6 +387,11 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       });
       runAction();
     }
+
+    // After dismount, we still want the above store modifications to occur.
+    // However, we should not continue to mutate the now unmounted hook state -
+    // this will result in React warnings.
+    return () => { mounted = false; };
   }, [requestedRuntime]);
 
   return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];

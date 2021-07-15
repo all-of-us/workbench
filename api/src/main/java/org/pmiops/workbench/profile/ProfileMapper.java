@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ProfileAccessModules;
 import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -31,7 +32,6 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
       UserMapper.class
     })
 public interface ProfileMapper {
-  @Mapping(target = "contactEmailFailure", ignore = true) // I don't think we actually use this
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
@@ -42,7 +42,8 @@ public interface ProfileMapper {
       Double freeTierUsage,
       Double freeTierDollarQuota,
       List<String> accessTierShortNames,
-      ProfileRenewableAccessModules renewableAccessModules);
+      ProfileRenewableAccessModules renewableAccessModules,
+      ProfileAccessModules accessModules);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

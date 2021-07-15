@@ -1,11 +1,13 @@
 import { config } from 'resources/workbench-config';
+import { IPageUrl } from 'types';
+const { LOGIN_URL_DOMAIN_NAME, WORKSPACES_URL_PATH, ADMIN_URL_PATH, PROFILE_URL_PATH } = config;
 
-export enum PageUrl {
-  Home = config.uiBaseUrl,
-  Workspaces = config.uiBaseUrl + config.workspacesUrlPath,
-  Admin = config.uiBaseUrl + config.adminUrlPath,
-  Profile = config.uiBaseUrl + config.profileUrlPath
-}
+export const PageUrl: IPageUrl = {
+  Home: LOGIN_URL_DOMAIN_NAME,
+  Workspaces: LOGIN_URL_DOMAIN_NAME + WORKSPACES_URL_PATH,
+  Admin: LOGIN_URL_DOMAIN_NAME + ADMIN_URL_PATH,
+  Profile: LOGIN_URL_DOMAIN_NAME + PROFILE_URL_PATH
+};
 
 export enum WorkspaceAccessLevel {
   Owner = 'OWNER',

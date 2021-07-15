@@ -20,32 +20,57 @@ e2e tests are run using pre-existing users (rather than by generating new users)
 so we must supply their credentials using an environment property file `.env`.  See [.env.sample](.env.sample) for an example. 
 
 ### CircleCI Test Users
-CircleCI uses the user `puppetcilocaltester1@fake-research-aou.org` to run the e2e tests on every PR and 
-`puppetcitester6@fake-research-aou.org` for running tests on master after every merge.  **DO NOT**
+**DO NOT**
 use these users for local development.
 
+All users have bypassed access modules. Free credits: $800.
+See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167yrhMf4KMA/edit?usp=sharing).
+* Master branch (after merge)
+    - `puppeteer-tester-1@fake-research-aou.org`
+    - `puppeteer-collaborator-1@fake-research-aou.org`
+    - `puppeteer-reader-1@fake-research-aou.org`
+    - `puppeteer-writer-1@fake-research-aou.org`
+* Presubmit (PR testing on local ui server connected to test api server)
+    - `puppeteer-pr-tester-1@fake-research-aou.org`
+    - `puppeteer-pr-collaborator-1@fake-research-aou.org`
+    - `puppeteer-pr-reader-1@fake-research-aou.org`
+    - `puppeteer-pr-writer-1@fake-research-aou.org`
+* Staging env (releases)
+    - `puppeteer-tester-1@staging.fake-research-aou.org`
+    - `puppeteer-collaborator-1@staging.fake-research-aou.org`
+    - `puppeteer-reader-1@staging.fake-research-aou.org`
+    - `puppeteer-writer-1@staging.fake-research-aou.org`
+
+## Running Tests on Localhost
 ### Local Test Users
 Developers' Local environments share a Google Suite domain with the Test environment,
 so users with matching emails share the same Terra and Google cloud resources between these
-environments. To avoid contention, it's necessary to create a test user unique to the local 
-environment.  This is the same process as creating any other local user.  Ensure that this 
-user is 2FA-Bypassed and populate the environment property file `.env` with this user's credentials.
+environments. To avoid contention, it's necessary to create some test users unique to the local 
+environment.  This is the same process as creating other local test users.  Ensure that local test 
+users are 2FA-Bypassed. Fill out the environment property file `.env` with local test users credentials.
 
-## Running tests
-Command line tests are run using the [Yarn](https://classic.yarnpkg.com/en/) build tool. Tests can be run in 
-**headless mode** (with invisible browser execution) or "headful" mode, with the browser
-interactions visible to you.
+e2e tests require 4 test users:
+- USER_NAME: Default test user
+- WRITER_USER: Share workspace to this test user with WRITER role
+- READER_USER: Share workspace to this test user with READER role
+- COLLABORATOR_USER: Share workspace to this test user with OWNER role
 
-**To see the list of available Yarn commands**
-- `yarn run`
+Fill out local test user credentials
+  - Copy `.env.sample`, save as `.env`.
+  - Update `.env` with your local user emails.
+    
+    
 
-### Examples
-* Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
-* Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
+## Command line tests are run using [Yarn](https://classic.yarnpkg.com/en/)
+**To see the list of available Yarn commands** <div class="text-blue">`yarn run`</div>
+### Examples  
+* Run one test in **headless mode** (with invisible browser execution) <div class="text-blue">`yarn test [TEST_FILE]` </div>
+* Run one test in **headful mode** (with the browser interactions visible to you) <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
+* Run all tests in parallel in **headless mode** on "test" environment <div class="text-blue">`yarn test`</div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
 * Run tests against a local UI and API server (RW-6132 will eliminate this distinction):
   * Stop your local API server
-  * `e2e$ yarn impersonate-test-user`
+  * `e2e$ yarn impersonate-test-users`
   * Restart your local API server: `api$ ./project.rb run-api`
   * `e2e$ yarn test-local-devup`
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>

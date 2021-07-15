@@ -57,6 +57,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -65,7 +66,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -210,6 +210,7 @@ public class ConceptSetsControllerTest extends SpringTest {
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
+    CloudBillingClient.class,
     CloudStorageClient.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
@@ -269,7 +270,6 @@ public class ConceptSetsControllerTest extends SpringTest {
     user.setUsername(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
 

@@ -1,7 +1,8 @@
-import {navigate} from 'app/utils/navigation';
+import {navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect} from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 const {Fragment} = React;
@@ -16,8 +17,24 @@ export const usePath = () => {
   return path;
 };
 
-export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
-  routeDataStore.set(routeData);
+// TODO angular2react: This isn't really the right place to be making the store updates but it's the
+// best place I found while we're using both angular and react routers
+export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
+  const params = useParams();
+
+  useEffect(() => {
+    if (!intermediaryRoute) {
+      routeConfigDataStore.next(routeData);
+      routeDataStore.set(routeData);
+    }
+  }, [routeData]);
+
+  useEffect(() => {
+    if (!intermediaryRoute) {
+      urlParamsStore.next(params);
+    }
+  }, [params]);
+
   return <WrappedComponent {...props}/>;
 };
 
@@ -39,11 +56,11 @@ export const NavRedirect = ({path}) => {
   return null;
 };
 
-export const AppRoute = ({path, data = {}, guards = [], component: Component}): React.ReactElement => {
+export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
 
-  return <Route exact={true} path={path} render={
+  return <Route exact={exact} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
       return redirectPath

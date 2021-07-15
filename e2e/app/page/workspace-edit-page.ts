@@ -396,7 +396,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select CDR Version by name.
    * @param {string} value
    */
-  async selectCdrVersion(value: string = config.defaultCdrVersionName): Promise<string> {
+  async selectCdrVersion(value: string = config.DEFAULT_CDR_VERSION_NAME): Promise<string> {
     const select = this.getCdrVersionSelect();
     return select.selectOption(value);
   }
@@ -486,7 +486,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const modal = new NewWorkspaceModal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
-    await modal.clickButton(LinkText.Confirm, { waitForClose: true, waitForNav: true });
+    await modal.clickButton(LinkText.Confirm, { waitForClose: true, waitForNav: true, timeout: 120000 });
     await waitWhileLoading(this.page);
     return modalTextContent;
   }
