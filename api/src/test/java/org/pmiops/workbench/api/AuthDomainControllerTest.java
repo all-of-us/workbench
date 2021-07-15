@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -52,6 +53,7 @@ public class AuthDomainControllerTest extends SpringTest {
   @Autowired private UserDao userDao;
 
   @Mock private AccessTierService accessTierService;
+  @Mock private AccessModuleService accessModuleService;
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Mock private ComplianceService complianceService;
@@ -91,6 +93,7 @@ public class AuthDomainControllerTest extends SpringTest {
             userDataUseAgreementDao,
             userTermsOfServiceDao,
             verifiedInstitutionalAffiliationDao,
+            accessModuleService,
             fireCloudService,
             complianceService,
             directoryService,

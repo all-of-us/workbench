@@ -181,6 +181,7 @@
   <include file="changelog/db.changelog-169-add-institution-tier-requirement-tables.xml"/>
   <include file="changelog/db.changelog-170-add-access-tier-id-into-institution-tables.xml"/>
   <include file="changelog/db.changelog-171-user-access-module-user-drop-null-constraint-and-add-bypassable.xml"/>
+  <include file="changelog/db.changelog-172-backfill-user-access-module.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

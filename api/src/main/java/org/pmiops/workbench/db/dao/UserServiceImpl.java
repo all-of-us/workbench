@@ -32,6 +32,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -104,6 +106,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final AccessTierService accessTierService;
+  private final AccessModuleService accessModuleService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
@@ -123,6 +126,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       UserDataUseAgreementDao userDataUseAgreementDao,
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      AccessModuleService accessModuleService,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
       DirectoryService directoryService,
@@ -138,6 +142,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.accessModuleService = accessModuleService;
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
@@ -485,6 +490,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser = userDao.save(dbUser);
       dbVerifiedAffiliation.setUser(dbUser);
       verifiedInstitutionalAffiliationDao.save(dbVerifiedAffiliation);
+      accessModuleService.updateCompletionTime(
+          dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
+      accessModuleService.updateCompletionTime(dbUser, AccessModuleName.PROFILE_CONFIRMATION, now);
     } catch (DataIntegrityViolationException e) {
       dbUser = userDao.findUserByUsername(username);
       if (dbUser == null) {
@@ -533,8 +541,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         (user) -> {
           // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          // user.setDataUseAgreementCompletionTime will be replaced by
+          // accessModuleService.updateCompletionTime().
           user.setDataUseAgreementCompletionTime(timestamp);
           user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          accessModuleService.updateCompletionTime(
+              user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, timestamp);
           return user;
         },
         dbUser,
@@ -828,7 +840,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       return updateUserWithRetries(
           u -> {
+            // user.setComplianceTrainingCompletionTime() will be replaced by
+            // accessModuleService.updateCompletionTime()
             u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
+            accessModuleService.updateCompletionTime(
+                u, AccessModuleName.RT_COMPLIANCE_TRAINING, newComplianceTrainingCompletionTime);
             u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
           },
@@ -890,11 +906,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
             user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
             user.setEraCommonsLinkExpireTime(nihLinkExpireTime);
+            // user.setEraCommonsCompletionTime() will be replaced by
+            // accessModuleService.updateCompletionTime()
             user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+            accessModuleService.updateCompletionTime(
+                user, AccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
           } else {
             user.setEraCommonsLinkedNihUsername(null);
             user.setEraCommonsLinkExpireTime(null);
             user.setEraCommonsCompletionTime(null);
+            accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, null);
           }
           return user;
         },
@@ -966,10 +987,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user -> {
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
-              user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+              // user.setTwoFactorAuthCompletionTime() will be replaced by
+              // accessModuleService.updateCompletionTime()
+              Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+              user.setTwoFactorAuthCompletionTime(timestamp);
+              accessModuleService.updateCompletionTime(
+                  user, AccessModuleName.TWO_FACTOR_AUTH, timestamp);
             }
           } else {
             user.setTwoFactorAuthCompletionTime(null);
+            accessModuleService.updateCompletionTime(user, AccessModuleName.TWO_FACTOR_AUTH, null);
           }
           return user;
         },
@@ -1071,8 +1098,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
+          // user.setRasLinkLoginGovUsername() will be replaced by
+          // accessModuleService.updateCompletionTime()
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
           user.setRasLinkLoginGovUsername(loginGovUserName);
-          user.setRasLinkLoginGovCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+          user.setRasLinkLoginGovCompletionTime(timestamp);
+          accessModuleService.updateCompletionTime(user, AccessModuleName.RAS_LOGIN_GOV, timestamp);
           // TODO(RW-6480): Determine if need to set link expiration time.
           return user;
         },
@@ -1085,7 +1116,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser confirmProfile(DbUser dbUser) {
     return updateUserWithRetries(
         user -> {
-          user.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          // user.setProfileLastConfirmedTime() will be replaced by
+          // accessModuleService.updateCompletionTime()
+          user.setProfileLastConfirmedTime(timestamp);
+          accessModuleService.updateCompletionTime(
+              user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
           return user;
         },
         dbUser,
@@ -1098,7 +1134,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final DbUser dbUser = userProvider.get();
     return updateUserWithRetries(
         user -> {
-          user.setPublicationsLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          // user.setPublicationsLastConfirmedTime() will be replaced by
+          // accessModuleService.updateCompletionTime()
+          user.setPublicationsLastConfirmedTime(timestamp);
+          accessModuleService.updateCompletionTime(
+              user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
           return user;
         },
         dbUser,
