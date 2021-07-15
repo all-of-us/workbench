@@ -61,7 +61,9 @@ def ensure_docker_with_ports(cmd_name, args=nil)
 end
 
 def init_new_cdr_db(args)
-  Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
+  Dir.chdir('db-cdr') do
+    Common.new.run_inline %W{./generate-cdr/init-new-cdr-db.sh} + args
+  end
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -116,6 +118,12 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
+def wait_for_mysql()
+  # XXX: poll
+  sleep 5.0
+end
+
+
 def dev_up()
   common = Common.new
 
@@ -126,36 +134,31 @@ def dev_up()
 
   at_exit do
     common.run_inline %W{docker-compose down}
+    common.run_inline %W{./gradlew --stop}
   end
 
-  # ensures that sa-key.json is included in the docker-sync image
-  # This is necessary because docker-compose exposes it as GOOGLE_APPLICATION_CREDENTIALS
-  # which is needed to construct the IamCredentialsClient Bean
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    ensure_docker_sync()
-  end
+  setup_local_environment()
 
   overall_bm = Benchmark.measure {
     common.status "Database startup..."
     bm = Benchmark.measure {
       common.run_inline %W{docker-compose up -d db}
+      wait_for_mysql()
     }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run --rm db-scripts ./run-migrations.sh main
-      }
+      Dir.chdir('db') do
+        common.run_inline %W{./run-migrations.sh main}
+      end
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
     common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
     common.status "Loading configs & data..."
     bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run --rm api-scripts ./libproject/load_local_data_and_configs.sh
-      }
+      common.run_inline %W{./libproject/load_local_data_and_configs.sh}
     }
     common.status "Loading configs complete (#{format_benchmark(bm)})"
 
@@ -281,12 +284,9 @@ Common.register_command({
 
 def run_api()
   common = Common.new
+  at_exit { common.run_inline %W{./gradlew --stop} }
   ServiceAccountContext.new(TEST_PROJECT).run do
-    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-    common.status "are here:"
-    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-    at_exit { common.run_inline %W{docker-compose down} }
-    common.run_inline_swallowing_interrupt %W{docker-compose up api}
+    common.run_inline_swallowing_interrupt %W{./gradlew appengineRun}
   end
 end
 
@@ -303,8 +303,11 @@ Common.register_command({
 
 
 def run_api_and_db()
+  setup_local_environment
+
   common = Common.new
   common.status "Starting database..."
+  at_exit { common.run_inline %W{docker-compose down} }
   common.run_inline %W{docker-compose up -d db}
   run_api()
 end
