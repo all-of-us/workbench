@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -211,6 +212,7 @@ public class CohortReviewControllerTest extends SpringTest {
     WorkspaceService.class,
     WorkspaceAuthService.class,
     AccessTierService.class,
+    AccessModuleService.class,
     CdrVersionService.class,
   })
   static class Configuration {
