@@ -29,17 +29,6 @@
       FROM user u, access_module a
       WHERE a.name = 'RAS_LOGIN_GOV'
     </sql>
-    <sql>
-      INSERT INTO user_access_module
-      (user_id, access_module_id, completion_time, bypass_time)
-      SELECT
-      u.user_id,
-      a.access_module_id,
-      u.era_commons_completion_time AS completion_time,
-      u.era_commons_bypass_time AS bypass_time
-      FROM user u, access_module a
-      WHERE a.name = 'ERA_COMMONS'
-    </sql>
     <!--Back fill RT_COMPLIANCE_TRAINING module-->
     <sql>
       INSERT INTO user_access_module
