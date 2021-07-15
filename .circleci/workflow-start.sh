@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 set -o functrace
-
+set -x
 #********************
 # VARIABLES
 # *******************
@@ -71,13 +71,26 @@ fetch_pipeline_workflow() {
   # Remove double or single quotes.
   local id=$(echo $1 | xargs echo)
   local get_path="pipeline/${id}/workflow"
-  printf "Getting workflow_id in pipeline_id: ${id}\n"
+  printf "Getting workflow info in pipeline_id: ${id}\n"
   local get_result=$(get ${get_path})
   # Debug echo $get_result | jq .
+  local workflow_name=$(echo ${get_result} | jq .items[].name | jq -r @sh)
   local workflow_id=$(echo ${get_result} | jq .items[].id | jq -r @sh)
-  printf "workflow_id: ${workflow_id}\n\n"
+  printf "workflow_name: ${workflow_name}. workflow_id: ${workflow_id}\n"
   # https://circleci.com/docs/2.0/workflows/#states
   __=$(echo ${get_result} | jq -r '.items[] | .status')
+}
+
+is_deploy_to_test() {
+  local id=$(echo $1 | xargs echo)
+  local get_path="pipeline/${id}/workflow"
+  local get_result=$(get ${get_path})
+  # Debug echo $get_result | jq .
+  workflow_name=$(echo ${get_result} | jq .items[].name | jq -r @sh)
+  if [[ $workflow_name == "build-test-deploy" ]]; then
+    return 0;
+  fi
+  return 1
 }
 
 # Get pipeline ids.
@@ -95,30 +108,34 @@ for id in ${pipeline_ids}; do
   counter=0
   wait="30s"
   printf "polling workflows' status. Please wait...\n"
-  while [ $is_running ]; do
-    if [[ $counter == $max_retries ]]; then
-      echo "Maximum number of wait loops (${max_retries}) has been reached, Stopping querying for this workflow."
-      break
-    fi
-    fetch_pipeline_workflow ${id}
-    status=$__
-
-    printf "workflow_status: ${status}\n"
-    if [[ -z $status ]]; then
-      printf '%s\n' "Fetch workflow status failed" >&2
-      exit 1
-    fi
-
-    if [[ ( $status == "success" ) || ( $status == "failed" ) ]]; then
-      is_running=false
-      printf "pipeline_id: ${id} finished with status of ${status}!\n"
-      break
-    else
-      sleep $wait
-      printf "sleep ${wait} seconds...\n"
-    fi
+  while [[ "${is_running}" == "true" ]]; do
     ((counter+=1))
     printf "counter: ${counter}\n"
+    if is_deploy_to_test ${id}; then
+      fetch_pipeline_workflow ${id}
+      status=$__
+      printf "workflow_status: ${status}\n"
+      if [[ -z $status ]]; then
+        printf '%s\n' "Fetch workflow status failed\n" >&2
+        exit 1
+      fi
+
+      if [[ ( $status == "success" ) || ( $status == "failed" ) ]]; then
+        is_running=false
+        printf "pipeline_id: ${id} finished with status of ${status}!\n"
+      else
+        sleep $wait
+        printf "sleep ${wait} seconds...\n"
+      fi
+      if [[ $counter == $max_retries ]]; then
+        printf '%s\n' "Maximum number of wait loops (${max_retries}) has been reached, Stopping querying for this workflow.\n" >&2
+        break
+      fi
+    else
+      printf "pipeline_id: ${id} is not deploy-to-test workflow. Stop querying for this workflow.\n"
+      is_running=false
+    fi
+    printf "in while"
   done
 done
 unset IFS
