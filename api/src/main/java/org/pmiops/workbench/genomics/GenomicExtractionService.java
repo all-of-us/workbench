@@ -181,10 +181,8 @@ public class GenomicExtractionService {
               .getOutputs()
               .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
 
-      if (vcfSizeMbOutput.isPresent()) {
-        if (vcfSizeMbOutput.get() instanceof Double) {
-          return Math.round((Double) vcfSizeMbOutput.get());
-        }
+      if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
+        return Math.round((Double) vcfSizeMbOutput.get());
       }
     }
 
