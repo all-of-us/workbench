@@ -372,13 +372,6 @@ public class UserServiceTest extends SpringTest {
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
-    assertThat(
-            userAccessModuleDao
-                .getByUserAndAccessModule(
-                    user, accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get())
-                .get()
-                .getCompletionTime())
-        .isNotNull();
     assertThat(getModuleCompletionTime(AccessModuleName.TWO_FACTOR_AUTH, user)).isNotNull();
     // twoFactorAuthCompletionTime should not change when already set
     tick();
