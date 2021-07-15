@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -109,9 +110,11 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public void completeModule(DbUser dbUser, AccessModuleName accessModuleName) {
-    DbAccessModule dbAccessModule =
-    DbUserAccessModule userAccessModuleToUpdate = retrieveUserAccessModuleOrCreate(dbUser, accessModule);
+  public void updateCompletionTime(DbUser dbUser, AccessModule accessModuleName,
+      @Nullable Timestamp timestamp) {
+    DbAccessModule dbAccessModule = getDbAccessModuleOrThrow((dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModuleToUpdate = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
   }
 
   /**
@@ -125,15 +128,19 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             .findFirst().orElse(new DbUserAccessModule().setUser(user).setAccessModule(dbAccessModule));
   }
 
-  private static DbAccessModule getDbAccessModuleFromApi(
-      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
+  private static DbAccessModule getDbAccessModuleOrThrow(List<DbAccessModule> dbAccessModules, AccessModuleName accessModuleName) {
     return dbAccessModules.stream()
-        .filter(a -> a.getName() == clientAccessModuleToStorage(apiAccessModule))
+        .filter(a -> a.getName() == accessModuleName)
         .findFirst()
         .orElseThrow(
             () ->
                 new BadRequestException(
-                    "There is no access module named: " + apiAccessModule.toString()));
+                    "There is no access module named: " + accessModuleName.toString()));
+  }
+
+  private static DbAccessModule getDbAccessModuleFromApi(
+      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
+    return getDbAccessModuleOrThrow(dbAccessModules, clientAccessModuleToStorage(apiAccessModule));
   }
 
   private static AccessModuleName clientAccessModuleToStorage(AccessModule s) {
