@@ -80,7 +80,7 @@ fetch_workflow_status() {
   local get_path="pipeline/${id}/workflow"
   local get_result=$(get ${get_path})
   # Debug echo $get_result | jq .
-  local workflow_summary=$(echo ${get_result} | jq '.items[] | {name: .name, id: .id, status: .status}')
+  local workflow_summary=$(echo ${get_result} | jq '.items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}')
   printf "${workflow_summary}\n"
   # workflow branch name is bound by $workflow_name variable.
   # Rerunning a failed workflow produces an array. Get the status in the first array element.
@@ -114,6 +114,15 @@ is_deploy_to_test() {
   return 1
 }
 
+fetch_this_workflow_pipeline_id() {
+  echo ${CIRCLE_WORKFLOW_ID}
+  local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
+  local get_result=$(get ${get_path})
+  echo $get_result | jq .
+
+  __=$(echo ${get_result} | jq -r '.pipeline_number')
+}
+
 #********************
 # ACTIONS
 # *******************
@@ -121,6 +130,11 @@ is_deploy_to_test() {
 check_circleci_token
 fetch_pipeline_ids
 pipeline_ids=$(jq '. | .id' ${pipeline_json} | jq -r @sh)
+
+# Get this pipeline id for comparison later.
+fetch_this_workflow_pipeline_id
+this_pipeline_id=$__
+printf "this_pipeline_id: ${this_pipeline_id}\n"
 
 # Check workflow status in each pipeline. Wait while status is running or failing. Max wait time for all active pipelines is 30 minutes.
 max_retries=60
@@ -134,6 +148,7 @@ for id in ${pipeline_ids}; do
   printf "Polling workflow's status while status is failing or running. Please wait...\n"
   is_running=true
   # Max wait time is 60 minutes because a workflow may take a long time like 30 minutes to finish.
+  # DISCLAIMER This max time may not be enough if there are 2 or more workflows in waiting before this workflow.
   max_retries=120
   counter=0
   wait="30s"
@@ -146,12 +161,12 @@ for id in ${pipeline_ids}; do
     # Debug printf "workflow_status: ${status}\n"
 
     if [[ -z $status ]]; then
-      # This workflow name does not match $workflow_name variable.
+      # $status is blank because this workflow name does not match $workflow_name variable.
       printf '%s\n' "Skip querying this workflow because it is not \"${workflow_name}\"\n" >&2
       break # Break out while loop. check next pipeline.
     fi
 
-    # Check this workflow for status is running or failing.
+    # An active workflow has status running or failing.
     if [[ ( $status == "'running'" ) || ( $status == "'failing'" ) ]]; then
       printf "sleeping ${wait} seconds (workflow_status is ${status}).\n"
       sleep $wait
