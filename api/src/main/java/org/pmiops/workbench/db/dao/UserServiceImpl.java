@@ -262,7 +262,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     public Optional<Timestamp> getExpiration() {
-      if (isBypassed() || !configProvider.get().access.enableAccessRenewal) {
+      if (isBypassed()) {
         return Optional.empty();
       }
       return completion.map(
@@ -348,22 +348,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
   }
 
-  // these 2 modules will not be checked at all until we flip the feature flag
-
   private boolean isProfileConfirmationCompliant(DbUser user) {
-    if (!configProvider.get().access.enableAccessRenewal) {
-      return true;
-    }
-
     final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
     return profileTimes.isComplete() && !profileTimes.hasExpired();
   }
 
   private boolean isPublicationConfirmationCompliant(DbUser user) {
-    if (!configProvider.get().access.enableAccessRenewal) {
-      return true;
-    }
-
     final ModuleTimes publicationTimes =
         new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
     return publicationTimes.isComplete() && !publicationTimes.hasExpired();
