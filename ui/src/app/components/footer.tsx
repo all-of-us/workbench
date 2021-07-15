@@ -43,7 +43,7 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     padding: '1rem',
     // Must be higher than the side helpbar index for now. See help-bar.tsx.
-    // Eventually the footer should be reflowed benetah this, per RW-5110. The footer
+    // Eventually the footer should be reflowed beneath this, per RW-5110. The footer
     // should be beneath any other floating elements, such as modals.
     zIndex: 102
   },

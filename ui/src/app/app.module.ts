@@ -16,7 +16,6 @@ import {AppRouting} from './app-routing';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {AppComponent} from './pages/app/component';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 
 /* Our Modules */
@@ -53,7 +52,6 @@ import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
     HelpSidebarComponent,
     InactivityMonitorComponent,
     InitialErrorComponent,
-    SignedInComponent,
     NavBarComponent,
     TextModalComponent,
     WorkspaceNavBarComponent,
