@@ -49,7 +49,7 @@ const checkOpsBeforeUnload = (e) => {
 };
 
 interface Props extends WithSpinnerOverlayProps {
-  onSignOut: () => {};
+  subscribeToInactivitySignOut: () => {};
   signOut: () => {};
 }
 
@@ -57,12 +57,11 @@ export const SignedIn = (props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [hideFooter, setHideFooter] = useState(null);
-  const [cdrVersionsInitialized, setCdrVersionsInitialized] = useState(false);
-  const [serverConfigInitialized, setServerConfigInitialized] = useState(false);
   const [subscriptions, setSubscriptions] = useState([]);
 
   const serverConfig = useStore(serverConfigStore);
   const cdrVersions = useStore(cdrVersionStore);
+  const {profile} = useStore(profileStore);
 
   useEffect(() => {
     window.addEventListener('beforeunload', checkOpsBeforeUnload);
@@ -74,6 +73,7 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subs = [];
+    subs.push(props.subscribeToInactivitySignOut());
     // This handles detection of Angular-based routing data.
     subs.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
@@ -105,22 +105,17 @@ export const SignedIn = (props: Props) => {
      *  See discussion on https://github.com/all-of-us/workbench/pull/4713
      */
     const checkStoresLoaded = async() => {
+      // AppComponent should be loading the server config.
       if (serverConfig.config) {
-        setServerConfigInitialized(true);
-        if (!profileStore.get().profile) {
+        if (!profile) {
           await profileStore.get().load();
         }
-        setInstitutionCategoryState(profileStore.get().profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(profileStore.get().profile.accessTierShortNames)) {
-          if (!cdrVersions) {
+        setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
+        if (hasRegisteredAccess(profile.accessTierShortNames)) {
+          if (!cdrVersions.tiers) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
-            setCdrVersionsInitialized(true);
-          } else {
-            setCdrVersionsInitialized(true);
           }
-        } else {
-          setCdrVersionsInitialized(true);
         }
       }
     };
@@ -130,7 +125,6 @@ export const SignedIn = (props: Props) => {
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-    props.onSignOut();
     props.signOut();
     navigateSignOut(continuePath);
   };
@@ -148,7 +142,7 @@ export const SignedIn = (props: Props) => {
       <div
           style={styles.backgroundImage}
       />
-      {cdrVersionsInitialized && serverConfigInitialized &&
+      {serverConfig.config && cdrVersions.tiers &&
         <div
             style={
               hideFooter

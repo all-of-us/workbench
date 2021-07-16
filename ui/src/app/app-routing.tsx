@@ -16,6 +16,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {authStore, useStore} from 'app/utils/stores';
+import {Subscription} from 'rxjs/Subscription';
 
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
@@ -32,11 +33,11 @@ const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled
 interface RoutingProps {
   onSignIn: () => void;
   signIn: () => void;
-  onSignOut: () => void;
+  subscribeToInactivitySignOut: () => void;
   signOut: () => void;
 }
 
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, onSignOut, signOut}) => {
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, subscribeToInactivitySignOut, signOut}) => {
   const {authLoaded = false} = useStore(authStore);
 
   return authLoaded && <React.Fragment>
@@ -67,7 +68,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
             path=''
             exact={false}
-            component={() => <SignedInPage intermediaryRoute={true} routeData={{}} onSignOut={onSignOut} signOut={signOut}/>}
+            component={() => <SignedInPage
+                intermediaryRoute={true}
+                routeData={{}}
+                subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                signOut={signOut}
+            />}
         />
       </ProtectedRoutes>
     </AppRouter>
@@ -79,10 +85,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
 })
 export class AppRouting extends ReactWrapperBase {
   constructor(private signInService: SignInService) {
-    super(AppRoutingComponent, ['onSignIn', 'signIn', 'onSignOut', 'signOut']);
+    super(AppRoutingComponent, ['onSignIn', 'signIn', 'subscribeToInactivitySignOut', 'signOut']);
     this.onSignIn = this.onSignIn.bind(this);
     this.signIn = this.signIn.bind(this);
-    this.onSignOut = this.onSignOut.bind(this);
+    this.subscribeToInactivitySignOut = this.subscribeToInactivitySignOut.bind(this);
     this.signOut = this.signOut.bind(this);
   }
 
@@ -99,8 +105,8 @@ export class AppRouting extends ReactWrapperBase {
     this.signInService.signIn();
   }
 
-  onSignOut(): void {
-    this.signInService.isSignedIn$.subscribe(signedIn => {
+  subscribeToInactivitySignOut(): Subscription {
+    return this.signInService.isSignedIn$.subscribe(signedIn => {
       if (!signedIn) {
         this.signOut();
       }

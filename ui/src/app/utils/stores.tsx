@@ -2,7 +2,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {
-  CdrVersionTiersResponse,
+  CdrVersionTier,
   ConfigResponse,
   GenomicExtractionJob,
   Profile,
@@ -31,7 +31,11 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
-export const cdrVersionStore = atom<CdrVersionTiersResponse>(null);
+interface CdrVersionStore {
+  tiers?: Array<CdrVersionTier>;
+}
+
+export const cdrVersionStore = atom<CdrVersionStore>({});
 
 export interface GenomicExtractionStore {
   [workspaceNamespace: string]: GenomicExtractionJob[];
