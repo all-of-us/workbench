@@ -24,6 +24,7 @@ public class DbWgsExtractCromwellSubmission {
   private DbUser creator;
   private DbDataset dataset;
   private Long sampleCount;
+  private Long vcfSizeMb;
   private String outputDir;
   private BigDecimal userCost;
   private Timestamp creationTime;
@@ -88,6 +89,15 @@ public class DbWgsExtractCromwellSubmission {
 
   public void setSampleCount(Long sampleCount) {
     this.sampleCount = sampleCount;
+  }
+
+  @Column(name = "vcf_size_mb")
+  public Long getVcfSizeMb() {
+    return vcfSizeMb;
+  }
+
+  public void setVcfSizeMb(Long vcfSizeMb) {
+    this.vcfSizeMb = vcfSizeMb;
   }
 
   @Column(name = "output_dir")

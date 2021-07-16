@@ -47,7 +47,7 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionpreprod",
     "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
     "extractionPetServiceAccount": "pet-110393474898566940625@aouwgscohortextraction-preprod.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-preprod-manual",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-preprod",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
     "extractionMethodConfigurationVersion": 1,
     "extractionCohortsDataset": "fc-aou-cdr-preprod-ct.wgs_extraction_cohorts",
