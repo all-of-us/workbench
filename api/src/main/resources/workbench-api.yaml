@@ -5861,6 +5861,29 @@ definitions:
       dataprocConfig:
         description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
+      diskConfig:
+        description: The configuration of a persistent disk
+        "$ref": "#/definitions/DiskConfig"
+  DiskConfig:
+    description: The configuration of a persistent disk, returned in runtime responses
+    type: object
+    required:
+      - name
+      - size
+      - diskType
+      - blockSize
+    properties:
+      name:
+        type: string
+        description: Name of the persistent disk
+      size:
+        type: integer
+        description: Size of persistent disk in GB
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: Block size of persistent disk in bytes
   UpdateRuntimeRequest:
     type: object
     required:

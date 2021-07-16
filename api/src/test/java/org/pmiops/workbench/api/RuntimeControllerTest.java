@@ -734,6 +734,23 @@ public class RuntimeControllerTest extends SpringTest {
         .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
   }
 
+  //  @Test
+  //  public void testGetRuntime_diskConfig() throws ApiException {
+  //
+  //    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+  //            .thenReturn(new
+  // LeonardoGetRuntimeResponse().runtimeConfig(gceConfigObj).diskConfig(new
+  // LeonardoDiskConfig().diskType(LeonardoDiskType.SSD)
+  //            .name("pd").blockSize(100).size(100)));
+  //
+  //    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+  //
+  //    assertThat(runtime.getDiskConfig().getDiskType()).isEqualTo(DiskType.SSD);
+  //    assertThat(runtime.getDiskConfig().getName()).isEqualTo("pd");
+  //    assertThat(runtime.getDiskConfig().getSize()).isEqualTo(100);
+  //    assertThat(runtime.getDiskConfig().getBlockSize()).isEqualTo(100);
+  //  }
+
   @Test
   public void testGetRuntime_UnknownStatus() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
