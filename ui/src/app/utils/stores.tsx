@@ -31,7 +31,7 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
-export const cdrVersionStore = atom<CdrVersionTiersResponse>( null);
+export const cdrVersionStore = atom<CdrVersionTiersResponse>(null);
 
 export interface GenomicExtractionStore {
   [workspaceNamespace: string]: GenomicExtractionJob[];
