@@ -64,10 +64,33 @@ import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.*;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.GceConfig;
+import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.RuntimeLocalizeRequest;
+import org.pmiops.workbench.model.RuntimeLocalizeResponse;
+import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.UpdateRuntimeRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -924,38 +947,47 @@ public class RuntimeControllerTest extends SpringTest {
   @Test
   public void testCreateRuntime_gceWihPD() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-            .thenThrow(new NotFoundException());
+        .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
-            WORKSPACE_NS,
-            new Runtime().gceWithPdConfig(new GceWithPdConfig().bootDiskSize(50).machineType("standard")
-                    .persistentDisk(new PersistentDiskRequest().diskType(DiskType.SSD).name(user.getPDName()).size(500))));
+        WORKSPACE_NS,
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .bootDiskSize(50)
+                    .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest()
+                            .diskType(DiskType.SSD)
+                            .name(user.getPDName())
+                            .size(500))));
 
     verify(userRuntimesApi)
-            .createRuntime(
-                    eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
 
     assertThat(
             gson.fromJson(
                     gson.toJson(createRuntimeRequest.getRuntimeConfig()),
                     LeonardoRuntimeConfig.class)
-                    .getCloudService())
-            .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
 
     assertThat(createLeonardoGceWithPdConfig.getBootDiskSize()).isEqualTo(50);
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
-    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType()).isEqualTo(LeonardoDiskType.SSD);
-    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(user.getPDName());
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
+        .isEqualTo(LeonardoDiskType.SSD);
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName())
+        .isEqualTo(user.getPDName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
-
   }
 
   @Test
