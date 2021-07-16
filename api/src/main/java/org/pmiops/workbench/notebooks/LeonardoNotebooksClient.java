@@ -34,7 +34,8 @@ public interface LeonardoNotebooksClient {
   void updateRuntime(Runtime runtime) throws WorkbenchException;
 
   /** Deletes a notebook runtime */
-  void deleteRuntime(String googleProject, String runtimeName) throws WorkbenchException;
+  void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk)
+      throws WorkbenchException;
 
   /** Deletes a notebook runtime as the appengine SA, to be used only for admin operations */
   void deleteRuntimeAsService(String googleProject, String runtimeName) throws WorkbenchException;
