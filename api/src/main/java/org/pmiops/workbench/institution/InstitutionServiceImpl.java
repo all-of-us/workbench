@@ -35,6 +35,8 @@ import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.TierEmailAddresses;
+import org.pmiops.workbench.model.TierEmailDomains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -233,7 +235,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public List<String> getEmailDomains(String institutionShortName) {
+  public List<TierEmailDomains> getEmailDomains(String institutionShortName) {
     return new ArrayList<>(
         institutionEmailDomainMapper.dbDomainsToStrings(
             institutionEmailDomainDao.getByInstitution(
@@ -241,7 +243,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public List<String> getEmailAddresses(String institutionShortName) {
+  public List<TierEmailAddresses> getEmailAddresses(String institutionShortName) {
     return new ArrayList<>(
         institutionEmailAddressMapper.dbAddressesToStrings(
             institutionEmailAddressDao.getByInstitution(

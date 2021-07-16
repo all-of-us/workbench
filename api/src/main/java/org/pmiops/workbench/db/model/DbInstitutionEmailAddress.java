@@ -16,6 +16,7 @@ public class DbInstitutionEmailAddress {
 
   private long institutionEmailAddressId;
   private DbInstitution institution;
+  private DbAccessTier accessTier;
   private String emailAddress;
 
   public DbInstitutionEmailAddress() {}
@@ -53,6 +54,17 @@ public class DbInstitutionEmailAddress {
     return this;
   }
 
+  @ManyToOne()
+  @JoinColumn(name = "access_tier_id", nullable = false)
+  public DbAccessTier getAccessTier() {
+    return accessTier;
+  }
+
+  public DbInstitutionEmailAddress setAccessTier(DbAccessTier accessTier) {
+    this.accessTier = accessTier;
+    return this;
+  }
+
   // omit ID field from equality so equivalent objects match regardless
   // of whether they are actually present in the DB
 
@@ -68,11 +80,11 @@ public class DbInstitutionEmailAddress {
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 
     return Objects.equals(emailAddress, that.emailAddress)
-        && Objects.equals(institution, that.institution);
+        && Objects.equals(institution, that.institution) && Objects.equals(accessTier, that.accessTier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(emailAddress, institution);
+    return Objects.hash(accessTier, emailAddress, institution);
   }
 }

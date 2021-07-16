@@ -38,7 +38,7 @@ public interface LeonardoMapper {
 
   DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
 
-  @Mapping(target = "cloudService", constant = LeonardoMachineConfig.CloudServiceEnum.DATAPROC.)
+  @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 

@@ -17,8 +17,8 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface InstitutionEmailDomainMapper {
 
   default Set<DbInstitutionEmailDomain> modelToDb(
-      Institution modelInstitution, @Context DbInstitution dbInstitution) {
-    return emailDomainsToDb(modelInstitution.getEmailDomains(), dbInstitution);
+      Institution modelInstitution, @Context DbInstitution dbInstitution, @Context Acc) {
+    return emailDomainsToDb(modelInstitution.getTierEmailDomains(), dbInstitution);
   }
 
   Set<DbInstitutionEmailDomain> emailDomainsToDb(

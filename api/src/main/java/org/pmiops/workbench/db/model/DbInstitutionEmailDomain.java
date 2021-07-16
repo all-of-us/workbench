@@ -16,6 +16,7 @@ public class DbInstitutionEmailDomain {
 
   private long institutionEmailDomainId;
   private DbInstitution institution;
+  private DbAccessTier accessTier;
   private String emailDomain;
 
   public DbInstitutionEmailDomain() {}
@@ -53,6 +54,17 @@ public class DbInstitutionEmailDomain {
     return this;
   }
 
+  @ManyToOne()
+  @JoinColumn(name = "access_tier_id", nullable = false)
+  public DbAccessTier getAccessTier() {
+    return accessTier;
+  }
+
+  public DbInstitutionEmailDomain setAccessTier(DbAccessTier accessTier) {
+    this.accessTier = accessTier;
+    return this;
+  }
+
   // omit ID field from equality so equivalent objects match regardless
   // of whether they are actually present in the DB
 
@@ -68,11 +80,11 @@ public class DbInstitutionEmailDomain {
     DbInstitutionEmailDomain that = (DbInstitutionEmailDomain) o;
 
     return Objects.equals(emailDomain, that.emailDomain)
-        && Objects.equals(institution, that.institution);
+        && Objects.equals(institution, that.institution) && Objects.equals(accessTier, that.accessTier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(emailDomain, institution);
+    return Objects.hash(accessTier, emailDomain, institution);
   }
 }

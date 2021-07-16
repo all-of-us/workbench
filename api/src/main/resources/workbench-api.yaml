@@ -6506,8 +6506,8 @@ definitions:
         description: The short unique name for the access tier.
       emailDomains:
         type: array
-        description: A list of email domains which can access the tier
-          this Institution
+        items:
+          type: string
   TierEmailAddresses:
     type: object
     description: A list of email addresses which can access each tiers for an institution.
@@ -6519,8 +6519,8 @@ definitions:
         description: The short unique name for the access tier.
       emailAddresses:
         type: array
-        description: A list of email addresses can access the tier.
-          this Institution
+        items:
+          type: string
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
