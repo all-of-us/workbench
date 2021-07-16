@@ -125,7 +125,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class RuntimeControllerTest extends SpringTest {
-  private static final Logger log = Logger.getLogger(RuntimeControllerTest.class.getName());
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String GOOGLE_PROJECT_ID_2 = "aou-gcp-id-2";
