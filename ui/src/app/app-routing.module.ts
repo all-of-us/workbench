@@ -46,7 +46,6 @@ const routes: Routes = [
      *  AppRouting component on every route change.
      */
     path: '',
-    component: AppRouting,
     canActivate: [SignInGuard],
     canActivateChild: [SignInGuard, DisabledGuard],
     canDeactivate: [NavigationGuard],

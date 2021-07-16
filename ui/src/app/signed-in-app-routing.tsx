@@ -68,13 +68,16 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
  */
 export const SignedInRoutes = React.memo(() => {
   return <React.Fragment>
-    <AppRoute path='/access-renewal' component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}/>
     <ProtectedRoutes guards={[expiredGuard]}>
       <AppRoute
           path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
     </ProtectedRoutes>
+    <AppRoute
+        path='/access-renewal'
+        component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}
+    />
     <AppRoute
         path='/admin/banner'
         component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
