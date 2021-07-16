@@ -4356,6 +4356,11 @@ definitions:
       firstVisit:
         type: integer
         format: int64
+  DiskType:
+    type: string
+    enum:
+      - pd-standard
+      - pd-ssd
   WorkspaceListResponse:
     type: object
     required:
@@ -5848,10 +5853,13 @@ definitions:
         description: The tool docker image to install. May be Dockerhub or GCR. If not
           set, a default Jupyter image will be installed.
       gceConfig:
-        description: oneOf gceConfig, dataprocConfig will be returned
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceConfig"
+      gceWithPdConfig:
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
+        "$ref": "#/definitions/GceWithPdConfig"
       dataprocConfig:
-        description: oneOf gceConfig, dataprocConfig will be provided
+        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
   UpdateRuntimeRequest:
     type: object
@@ -5860,6 +5868,23 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+  PersistentDiskRequest:
+    description: configuration to create a disk
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: The name of the disk. This can reference an existing disk.
+      size:
+        type: integer
+        description: the size of the disk, if this is a creation request. Has an intelligent default otherwise
+      diskType:
+        $ref: "#/definitions/DiskType"
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
   GceConfig:
     description: Configuration for Google Compute Engine instances.
     properties:
@@ -5874,6 +5899,23 @@ definitions:
           Optional, the machine type determines the number of CPUs and memory
           for the master node. For example "n1-standard-16"
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+          see https://cloud.google.com/compute/docs/machine-types
+  GceWithPdConfig:
+    description: Configuration for Google Compute Engine instances with Persistent Disk.
+    properties:
+      persistentDisk:
+        $ref: "#/definitions/PersistentDiskRequest"
+      bootDiskSize:
+        type: integer
+        description: size for boot disk
+      machineType:
+        type: string
+        description: >
+          Optional, the machine type determines the number of CPUs and memory
+          for the master node. For example "n1-standard-16"
+
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+
           see https://cloud.google.com/compute/docs/machine-types
   DataprocConfig:
     description: Configuration for a single Dataproc cluster.
