@@ -1,8 +1,8 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
-  AppRoute, Guard,
-  Navigate,
+  AppRoute,
+  Guard,
   ProtectedRoutes,
   withFullHeight,
   withRouteData
@@ -29,7 +29,7 @@ import {WorkspaceList} from './pages/workspace/workspace-list';
 import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {BreadcrumbType} from './utils/navigation';
-import {profileStore, serverConfigStore} from './utils/stores';
+import {profileStore} from './utils/stores';
 
 const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
