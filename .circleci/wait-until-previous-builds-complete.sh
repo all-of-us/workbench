@@ -99,7 +99,6 @@ should_skip() {
   # Get the pipeline id of this job.
   fetch_this_pipeline_id
   this_pipeline_id=$__
-  # Debug printf "This pipeline id is ${this_pipeline_id}. This workflow id is ${CIRCLE_WORKFLOW_ID}\n\n"
   if [[ "$this_pipeline_id" == $1 ]]; then
     # Don't check this pipeline if this pipeline is itself.
     printf '%s\n' "Not waiting on myself (pipeline id: \"${this_pipeline_id}\"). Skip checking.\n" >&2
@@ -120,7 +119,7 @@ check_circleci_token
 fetch_pipeline_ids
 pipeline_ids=$(jq '. | .id' ${pipeline_json} | jq -r @sh)
 
-# Check workflow status in each pipeline. Wait while status is running or failing. Max wait time for all active pipelines is 30 minutes.
+# Check workflow status in each pipeline. Wait while workflow status is running or failing.
 wait="30s"
 IFS=$'\n'
 for id in ${pipeline_ids}; do
