@@ -326,6 +326,13 @@ commands:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
 
+  block-concurrent-build:
+    description: "Block this job until all previous builds has finished"
+    steps:
+      - run:
+          command: bash .circleci/wait-until-previous-builds-complete.sh
+          name: "Run wait-until-previous-builds-complete.sh"
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -647,6 +654,8 @@ workflows:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
+          optional_steps:
+            - block-concurrent-build
           requires:
             - puppeteer-env-setup
             - api-deploy-to-test
