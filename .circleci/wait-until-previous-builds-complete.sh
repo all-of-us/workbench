@@ -90,16 +90,6 @@ fetch_this_pipeline_id() {
   __=$(echo ${get_result} | jq -r '.pipeline_number')
 }
 
-is_current_pipeline() {
-  fetch_this_pipeline_id
-  this_pipeline_id=$__
-  printf "this_current_pipeline_id: ${this_pipeline_id}\n"
-  if [[ $this_pipeline_id == $1 ]]; then
-    return true
-  fi
-  return false
-}
-
 #********************
 # ACTIONS
 # *******************
