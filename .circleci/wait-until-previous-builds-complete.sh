@@ -51,7 +51,7 @@ pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipeline_ids() {
   local get_path="pipeline?org-slug=${project_slug}"
   local get_result=$(get "${get_path}")
-  echo ${get_result} | jq "[.items[] | select(.vcs.branch==\"master\")][] | {created_at: .created_at, id: .id, number: .number}" >${pipeline_json}
+  echo ${get_result} | jq "[.items[] | select(.vcs.branch==\"master\")][] | {created_at: .created_at, id: .id, number: .number}" > "${pipeline_json}"
   printf "Found following pipelines on ${branch} branch:\n"
   cat ${pipeline_json}
   printf "\n"
@@ -59,7 +59,7 @@ fetch_pipeline_ids() {
 
 fetch_pipeline_number() {
   # Remove double or single quotes.
-  local id=$(echo "$1" | xargs echo)
+  local id=$(echo "${1}" | xargs echo)
   local get_path="pipeline/${id}"
   local get_result=$(get "${get_path}")
   __=$(echo "${get_result}" | jq -r .number)
@@ -69,19 +69,19 @@ fetch_pipeline_number() {
 # v2 workflow api tells status, but not the pipeline api.
 fetch_workflow_status() {
   # Remove double or single quotes.
-  local id=$(echo $1 | xargs echo)
+  local id=$(echo "${1}" | xargs echo)
   local get_path="pipeline/${id}/workflow"
   local get_result=$(get "${get_path}")
-  local workflow_summary=$(echo ${get_result} | jq ".items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}")
+  local workflow_summary=$(echo "${get_result}" | jq ".items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}")
   printf "${workflow_summary}\n"
   # workflow branch name is bound by $workflow_name variable.
   # Rerunning a failed workflow produces a nested datetime sorted array. Get the status of latest run (first array element).
-  __=$(echo ${get_result} | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .status | @sh")
+  __=$(echo "${get_result}" | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .status | @sh")
 }
 
 fetch_this_pipeline_id() {
   local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
-  local get_result=$(get ${get_path})
+  local get_result=$(get "${get_path}")
   __=$(echo "${get_result}" | jq -r '.pipeline_number')
 }
 
@@ -151,13 +151,13 @@ for id in ${pipeline_ids}; do
       sleep $sleep_time
       waited_time=$((sleep_time + waited_time))
     else
-      is_running=false
       printf "Finished waiting for workflow in its pipeline_id: ${id}. It finished with status of ${status}!\n"
+      is_running=false
     fi
     printf "Polling has been waiting for ${waited_time} seconds.\n\n"
-    if [ $waited_time -ge $max_time_seconds ]; then
+    if [ $waited_time -gt $max_time_seconds ]; then
       printf "\n\n***** Max wait time (${max_time_seconds} seconds) exceeded. Stop checking. *****\n\n"
-      break
+      is_running=false
     fi
   done
   printf "***   \n\n"
