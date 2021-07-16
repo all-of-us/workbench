@@ -55,8 +55,7 @@ interface Props extends WithSpinnerOverlayProps {
 
 export const SignedIn = (props: Props) => {
   useEffect(() => props.hideSpinner(), []);
-
-  const [profile, setProfile] = useState(null);
+  
   const [hideFooter, setHideFooter] = useState(null);
   const [cdrVersionsInitialized, setCdrVersionsInitialized] = useState(false);
   const [serverConfigInitialized, setServerConfigInitialized] = useState(false);
@@ -106,10 +105,11 @@ export const SignedIn = (props: Props) => {
     const checkStoresLoaded = async() => {
       if (serverConfig.config) {
         setServerConfigInitialized(true);
-        const p = await profileStore.get().load();
-        setProfile(p);
-        setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(profile.accessTierShortNames)) {
+        if (!profileStore.get().profile) {
+          await profileStore.get().load();
+        }
+        setInstitutionCategoryState(profileStore.get().profile.verifiedInstitutionalAffiliation);
+        if (hasRegisteredAccess(profileStore.get().profile.accessTierShortNames)) {
           if (!cdrVersions) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
