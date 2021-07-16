@@ -315,7 +315,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName(), deleteDisk);
     return ResponseEntity.ok(new EmptyResponse());
