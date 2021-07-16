@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -1001,7 +1000,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+        .contains("Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test
@@ -1017,7 +1016,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+        .contains("Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test

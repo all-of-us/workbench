@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Booleans;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
@@ -253,17 +252,13 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    int nullCount =
-        Booleans.countTrue(
-            runtime.getGceConfig() == null,
-            runtime.getDataprocConfig() == null,
-            runtime.getGceWithPdConfig() == null);
-    if (nullCount == 3) {
+    long configCount =
+        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
+            .filter(c -> c != null)
+            .count();
+    if (configCount != 1) {
       throw new BadRequestException(
-          "Either a GceConfig or DataprocConfig or GceWithPdConfig must be provided");
-    } else if (nullCount < 2) {
-      throw new BadRequestException(
-          "Only one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
+          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
     if (runtime.getGceWithPdConfig() != null) {
