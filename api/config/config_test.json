@@ -108,7 +108,7 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
-    "enableBillingUpgrade": false,
+    "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
