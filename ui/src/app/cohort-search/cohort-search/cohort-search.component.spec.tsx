@@ -3,12 +3,12 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {cdrVersionStore} from 'app/utils/stores';
 import {CohortBuilderApi, CriteriaType, Domain} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortSearch} from './cohort-search.component';
-import {cdrVersionStore} from "app/utils/stores";
 
 const searchContextStubs = [
   {
