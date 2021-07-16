@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Booleans;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
@@ -258,6 +259,13 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+    }
+
+    int nullCount = Booleans.countTrue(runtime.getGceConfig() == null, runtime.getGceConfig() == null);
+    if(nullCount == 3) {
+
+    }else if(nullCount < 2) {
+
     }
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);

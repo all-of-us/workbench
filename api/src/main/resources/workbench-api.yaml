@@ -6334,18 +6334,18 @@ definitions:
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
         description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
-      emailAddresses:
-        type: array
+      tierEmailAddresses:
         description: A list of email addresses which can be validated as members of
-          this Institution
-        items:
-          type: string
-      emailDomains:
+          this Institution for each access tier.
         type: array
-        description: A list of email domains which can be validated as members of
-          this Institution
         items:
-          type: string
+          "$ref": "#/definitions/TierEmailAddresses"
+      tierEmailDomains:
+        description: A list of email domains which can be validated as members of
+          this Institution for each access tier.
+        type: array
+        items:
+          "$ref": "#/definitions/TierEmailDomains"
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
@@ -6495,6 +6495,32 @@ definitions:
       eraRequired:
         type: boolean
         description: Whether eRA commons is required for members in the institution for this tier.
+  TierEmailDomains:
+    type: object
+    description: A list of email domains which can access each tiers for an institution.
+    required:
+      - accessTierShortName
+    properties:
+      accessTierShortName:
+        type: string
+        description: The short unique name for the access tier.
+      emailDomains:
+        type: array
+        description: A list of email domains which can access the tier
+          this Institution
+  TierEmailAddresses:
+    type: object
+    description: A list of email addresses which can access each tiers for an institution.
+    required:
+      - accessTierShortName
+    properties:
+      accessTierShortName:
+        type: string
+        description: The short unique name for the access tier.
+      emailAddresses:
+        type: array
+        description: A list of email addresses can access the tier.
+          this Institution
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object
