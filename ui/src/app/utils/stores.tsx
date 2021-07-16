@@ -31,7 +31,6 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
-// TODO: does initializing this to null break anything
 export const cdrVersionStore = atom<CdrVersionTiersResponse>( null);
 
 export interface GenomicExtractionStore {

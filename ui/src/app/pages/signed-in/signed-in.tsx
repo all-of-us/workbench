@@ -128,9 +128,6 @@ export const SignedIn = (props: Props) => {
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-    // Unsubscribe from our standard signout navigation handler before signing out, so we can handle
-    // different navigation scenarios explicitly within this method.
-    // TODO: Does the above still apply?
     props.onSignOut();
     props.signOut();
     navigateSignOut(continuePath);
