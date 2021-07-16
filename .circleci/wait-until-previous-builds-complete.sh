@@ -14,10 +14,6 @@ branch="master";
 workflow_name="build-test-deploy"
 project_slug="gh/all-of-us"
 
-# v2 workflow api provides status, but not the pipeline api.
-# https://circleci.com/docs/2.0/workflows/#states
-workflow_active_status=("running" "failing")
-
 #********************
 # FUNCTIONS
 # *******************
@@ -72,6 +68,7 @@ fetch_pipeline_number() {
 }
 
 # https://circleci.com/docs/2.0/workflows/#states
+# v2 workflow api tells status, but not the pipeline api.
 fetch_workflow_status() {
   # Remove double or single quotes.
   local id=$(echo $1 | xargs echo)
@@ -82,34 +79,7 @@ fetch_workflow_status() {
   printf "${workflow_summary}\n"
   # workflow branch name is bound by $workflow_name variable.
   # Rerunning a failed workflow produces an array. Get the status in the first array element.
-  # __=$(echo ${get_result} | jq '.items[]' | jq -r 'select(.name=='\"$workflow_name\"') | .status | @sh' )
   __=$(echo ${get_result} | jq -r 'first(.items[]) | select(.name=='\"$workflow_name\"') | .status | @sh' )
-}
-
-fetch_pipeline_workflow() {
-  # Remove double or single quotes.
-  local id=$(echo $1 | xargs echo)
-  local get_path="pipeline/${id}/workflow"
-  printf "Getting workflow info in pipeline_id: ${id}\n"
-  local get_result=$(get ${get_path})
-  # Debug echo $get_result | jq .
-  local workflow_name=$(echo ${get_result} | jq .items[].name | jq -r @sh)
-  # local workflow_id=$(echo ${get_result} | jq .items[].id | jq -r @sh)
-  local workflow_id=$(echo ${get_result} | jq .items[] | select(.name=="build-test-deploy") | .id | jq -r @sh)
-  # Debug printf "workflow_name: ${workflow_name}. workflow_id: ${workflow_id}\n"
-  __=$(echo ${get_result} | jq -r '.items[] | .status')
-}
-
-is_deploy_to_test() {
-  local id=$(echo $1 | xargs echo)
-  local get_path="pipeline/${id}/workflow"
-  local get_result=$(get ${get_path})
-  # Debug echo $get_result | jq .
-  workflow_name=$(echo ${get_result} | jq .items[].name | jq -r @sh)
-  if [[ $workflow_name == "build-test-deploy" ]]; then
-    return 0;
-  fi
-  return 1
 }
 
 fetch_this_pipeline_id() {
