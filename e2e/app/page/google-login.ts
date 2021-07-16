@@ -92,7 +92,7 @@ export default class GoogleLoginPage {
       submitButton.click()
     ]);
     await submitButton.dispose();
-    await this.page.waitForSelector('app-signed-in', { timeout: 2 * 60 * 1000 }).catch(async (err) => {
+    await this.page.waitForSelector('[data-test-id="signed-in"]', { timeout: 2 * 60 * 1000 }).catch(async (err) => {
       // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
       // At this time, we can only handle "Enter Recover Email" page if it exists.
       const found = await this.fillOutRecoverEmail();

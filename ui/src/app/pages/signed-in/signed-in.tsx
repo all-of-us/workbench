@@ -74,8 +74,6 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subs = [];
-    // TODO: signOutNavigateSub?
-
     // This handles detection of Angular-based routing data.
     subs.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
@@ -89,7 +87,10 @@ export const SignedIn = (props: Props) => {
     setSubscriptions(subs);
 
     return () => {
-      // TODO: duck-type the heck out of this so we can use lodash instead
+      /*
+       * TODO RW-1920: we will only need one subscription after routeConfigDataStore and
+       *  routeDataStore are collapsed, and then we won't have to duck-this
+       */
       for (const s of subscriptions) {
         s.unsubscribe();
       }
@@ -97,11 +98,12 @@ export const SignedIn = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    // We want to block app rendering on the presence of server config
-    // data so that route components don't try to lookup config data
-    // before it's available.
-    // This will need to be a step in the React bootstrapping as well.
-    // See discussion on https://github.com/all-of-us/workbench/pull/4713
+    /*
+     * TODO RW-6726 We want to block app rendering on the presence of server config data
+     *  so that route components don't try to lookup config data before it's available.
+     *  We should holistically figure out a Reacty way to do this.
+     *  See discussion on https://github.com/all-of-us/workbench/pull/4713
+     */
     const checkStoresLoaded = async() => {
       if (serverConfig.config) {
         setServerConfigInitialized(true);
@@ -133,11 +135,14 @@ export const SignedIn = (props: Props) => {
     navigateSignOut(continuePath);
   };
 
-  return <FlexColumn style={{
-    minHeight: '100vh',
-    /* minimum supported width is 1300, this allows 20px for the scrollbar */
-    minWidth: '1280px'
-  }}>
+  return <FlexColumn
+    style={{
+      minHeight: '100vh',
+      /* minimum supported width is 1300, this allows 20px for the scrollbar */
+      minWidth: '1280px'
+    }}
+    data-test-id='signed-in'
+  >
     <NavBar/>
     <FlexRow style={{position: 'relative', flex: '1 0 auto'}}>
       <div
@@ -156,9 +161,9 @@ export const SignedIn = (props: Props) => {
       }
     </FlexRow>
     {!hideFooter && environment.enableFooter &&
-    <Footer
-        type={FooterTypeEnum.Workbench}
-    />
+      <Footer
+          type={FooterTypeEnum.Workbench}
+      />
     }
     <InactivityMonitor signOut={() => signOut()}/>
     <ZendeskWidget/>
