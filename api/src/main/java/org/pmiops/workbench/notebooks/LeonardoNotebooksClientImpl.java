@@ -228,11 +228,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void deleteRuntime(String googleProject, String runtimeName) {
+  public void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
+          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ deleteDisk);
           return null;
         });
   }

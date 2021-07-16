@@ -796,6 +796,13 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: query
+        name: deleteDisk
+        description: Whether or not disk should be deleted if the runtime is using persistent disk. Default to false if not specified
+        required: false
+#        schema:
+        type: boolean
+        default: false
       responses:
         200:
           description: Success
