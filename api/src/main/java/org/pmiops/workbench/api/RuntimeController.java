@@ -312,6 +312,10 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(
       String workspaceNamespace, Boolean deleteDisk) {
+    if (deleteDisk == null) {
+      throw new BadRequestException(
+          "DeleteDisk cannot be empty. Default to false if not specified");
+    }
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
