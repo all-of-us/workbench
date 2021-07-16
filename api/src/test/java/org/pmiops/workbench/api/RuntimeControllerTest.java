@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -66,7 +67,9 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -76,8 +79,11 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
+import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
@@ -167,6 +173,7 @@ public class RuntimeControllerTest extends SpringTest {
     AccessTierServiceImpl.class,
   })
   @MockBean({
+    AccessModuleService.class,
     ConceptSetService.class,
     CohortService.class,
     MailService.class,
@@ -938,6 +945,52 @@ public class RuntimeControllerTest extends SpringTest {
   }
 
   @Test
+  public void testCreateRuntime_gceWihPD() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .bootDiskSize(50)
+                    .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest()
+                            .diskType(DiskType.SSD)
+                            .name(user.getPDName())
+                            .size(500))));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+
+    assertThat(createLeonardoGceWithPdConfig.getBootDiskSize()).isEqualTo(50);
+    assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
+        .isEqualTo(LeonardoDiskType.SSD);
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName())
+        .isEqualTo(user.getPDName());
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
+  }
+
+  @Test
   public void testCreateRuntime_nullRuntime() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
@@ -949,7 +1002,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig must be provided");
+        .contains("Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test
@@ -965,7 +1018,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(e)
         .hasMessageThat()
-        .contains("Either a GceConfig or DataprocConfig must be provided");
+        .contains("Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
   }
 
   @Test

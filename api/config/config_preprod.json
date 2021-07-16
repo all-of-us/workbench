@@ -79,7 +79,7 @@
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
   "mandrill": {
-    "fromEmail": "donotreply@researchallofus.org",
+    "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {

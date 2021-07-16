@@ -78,7 +78,7 @@
     "adminIdVerification": "support@researchallofus.org"
   },
   "mandrill": {
-    "fromEmail": "donotreply@fake-research-aou.org",
+    "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {

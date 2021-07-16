@@ -19,7 +19,7 @@ public class AccessUtils {
           .put(AccessModule.ERA_COMMONS, AccessModuleName.ERA_COMMONS)
           .put(AccessModule.COMPLIANCE_TRAINING, AccessModuleName.RT_COMPLIANCE_TRAINING)
           .put(AccessModule.RAS_LINK_LOGIN_GOV, AccessModuleName.RAS_LOGIN_GOV)
-          .put(AccessModule.DATA_USE_AGREEMENT, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
+          .put(AccessModule.DATA_USER_CODE_OF_CONDUCT, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)
           .put(AccessModule.PUBLICATION_CONFIRMATION, AccessModuleName.PUBLICATION_CONFIRMATION)
           .put(AccessModule.PROFILE_CONFIRMATION, AccessModuleName.PROFILE_CONFIRMATION)
           .build();

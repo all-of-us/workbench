@@ -28,8 +28,8 @@ import {
   SpecificPopulationItem,
   SpecificPopulationItems,
   toolTipText,
-  toolTipTextDataUseAgreement,
   toolTipTextDemographic,
+  toolTipTextDucc,
   toolTipTextStigmatization
 } from 'app/pages/workspace/workspace-edit-text';
 import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
@@ -1371,10 +1371,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             &nbsp;in analyses can result, often unintentionally,
             in findings that may be misinterpreted or misused by others to foster stigma. While it
             may not be possible to completely prevent misuse of research for stigmatizing purposes,
-            data users can take important steps to minimize the risk of this happening–
-            <TooltipTrigger content={toolTipTextDataUseAgreement}>
-              <Link style={{display: 'inline-block'}}>taking this step is a condition of your
-                Data Use Agreement.</Link>
+            data users can take important steps to minimize the risk of this happening–taking this
+            step is a condition of your
+            <TooltipTrigger content={toolTipTextDucc}>
+              <Link style={{display: 'inline-block'}}>Data User Code of Conduct agreement.</Link>
             </TooltipTrigger>
             &nbsp;If you are concerned that your research could inadvertently stigmatize
             participants or communities, or if you are unsure, let us know. We encourage you to

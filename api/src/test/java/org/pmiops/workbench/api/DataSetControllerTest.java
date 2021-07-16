@@ -50,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -241,6 +242,7 @@ public class DataSetControllerTest extends SpringTest {
     AccessTierServiceImpl.class,
   })
   @MockBean({
+    AccessModuleService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     CloudBillingClient.class,

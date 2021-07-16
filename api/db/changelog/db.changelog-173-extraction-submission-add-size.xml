@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="ericsong" id="changelog-172-extraction-submission-add-size">
+    <changeSet author="ericsong" id="changelog-173-extraction-submission-add-size">
         <addColumn tableName="wgs_extract_cromwell_submission">
             <column name="vcf_size_mb" type="bigint">
                 <constraints nullable="true"/>

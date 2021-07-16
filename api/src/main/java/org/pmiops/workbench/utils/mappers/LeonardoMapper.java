@@ -10,6 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.GceConfig;
+import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
@@ -58,6 +60,17 @@ public interface LeonardoMapper {
     leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
   }
 
+  GceWithPdConfig toGceWithPdConfig(LeonardoGceWithPdConfig leonardoGceWithPdConfig);
+
+  @Mapping(target = "cloudService", ignore = true)
+  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
+
+  @AfterMapping
+  default void addPdCloudServiceEnum(
+      @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
+    leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
+  }
+
   @Mapping(target = "patchInProgress", ignore = true)
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
@@ -70,6 +83,7 @@ public interface LeonardoMapper {
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
   @Mapping(target = "configurationType", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
@@ -78,6 +92,7 @@ public interface LeonardoMapper {
   @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(target = "configurationType", ignore = true)
   @Mapping(target = "gceConfig", ignore = true)
+  @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 

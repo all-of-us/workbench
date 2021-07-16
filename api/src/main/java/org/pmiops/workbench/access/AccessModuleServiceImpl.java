@@ -11,12 +11,14 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -65,26 +67,18 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
     final DbUser user = userDao.findUserByUserId(userId);
-    final List<DbUserAccessModule> dbUserAccessModules = userAccessModuleDao.getAllByUser(user);
-    Optional<DbUserAccessModule> retrievedAccessModule =
-        dbUserAccessModules.stream()
-            .filter(m -> m.getAccessModule().getName().equals(accessModule.getName()))
-            .findFirst();
+    DbUserAccessModule userAccessModuleToUpdate =
+        retrieveUserAccessModuleOrCreate(user, accessModule);
     final Timestamp newBypassTime =
         isBypassed ? new Timestamp(clock.instant().toEpochMilli()) : null;
-    final Timestamp previousBypassTime =
-        retrievedAccessModule.map(DbUserAccessModule::getBypassTime).orElse(null);
-    final DbUserAccessModule userAccessModuleToUpdate;
+    final Timestamp previousBypassTime = userAccessModuleToUpdate.getBypassTime();
 
     logger.info(
         String.format(
             "Setting %s(uid: %d) for module %s bypass status to %s",
             user.getUsername(), userId, accessModule.getName(), isBypassed));
-    userAccessModuleToUpdate =
-        retrievedAccessModule
-            .orElseGet(() -> new DbUserAccessModule().setUser(user).setAccessModule(accessModule))
-            .setBypassTime(newBypassTime);
 
+    userAccessModuleToUpdate.setBypassTime(newBypassTime);
     userAccessModuleDao.save(userAccessModuleToUpdate);
     if (configProvider.get().featureFlags.enableAccessModuleRewrite) {
       // If enabled, fire audit event from here instead of from UserService.
@@ -97,21 +91,32 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
+  public void updateCompletionTime(
+      DbUser dbUser, AccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModuleToUpdate =
+        retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+  }
+
+  @Override
   public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
         .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
         .collect(Collectors.toList());
   }
 
-  private static DbAccessModule getDbAccessModuleFromApi(
-      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
-    return dbAccessModules.stream()
-        .filter(a -> a.getName() == clientAccessModuleToStorage(apiAccessModule))
+  /**
+   * Retrieves the existing {@link DbUserAccessModule} by user and access module. Create a new one
+   * if not existing in DB.
+   */
+  private DbUserAccessModule retrieveUserAccessModuleOrCreate(
+      DbUser user, DbAccessModule dbAccessModule) {
+    return userAccessModuleDao.getAllByUser(user).stream()
+        .filter(m -> m.getAccessModule().getName().equals(dbAccessModule.getName()))
         .findFirst()
-        .orElseThrow(
-            () ->
-                new BadRequestException(
-                    "There is no access module named: " + apiAccessModule.toString()));
+        .orElse(new DbUserAccessModule().setUser(user).setAccessModule(dbAccessModule));
   }
 
   /**
@@ -136,6 +141,22 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     return Optional.of(
         deriveExpirationTimestamp(
             dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
+  }
+
+  private static DbAccessModule getDbAccessModuleOrThrow(
+      List<DbAccessModule> dbAccessModules, AccessModuleName accessModuleName) {
+    return dbAccessModules.stream()
+        .filter(a -> a.getName() == accessModuleName)
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    "There is no access module named: " + accessModuleName.toString()));
+  }
+
+  private static DbAccessModule getDbAccessModuleFromApi(
+      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
+    return getDbAccessModuleOrThrow(dbAccessModules, clientAccessModuleToStorage(apiAccessModule));
   }
 
   /**

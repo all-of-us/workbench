@@ -21,7 +21,12 @@ import {
   routeConfigDataStore,
   urlParamsStore,
 } from 'app/utils/navigation';
-import {serverConfigStore} from "./app/utils/stores";
+import {
+  compoundRuntimeOpStore,
+  profileStore,
+  routeDataStore,
+  serverConfigStore
+} from "app/utils/stores";
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
 declare let __karma__: any;
@@ -36,12 +41,15 @@ getTestBed().initTestEnvironment(
   platformBrowserDynamicTesting()
 );
 beforeEach(() => {
+  compoundRuntimeOpStore.set({});
   currentCohortReviewStore.next(undefined);
   currentWorkspaceStore.next(undefined);
   currentCohortStore.next(undefined);
   currentConceptSetStore.next(undefined);
+  profileStore.set({profile: undefined, load: () => {}, reload :() => {}, updateCache: () => {}});
   queryParamsStore.next({});
   routeConfigDataStore.next({});
+  routeDataStore.set({});
   serverConfigStore.set({});
   urlParamsStore.next({});
 });
