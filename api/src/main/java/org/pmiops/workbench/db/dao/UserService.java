@@ -151,6 +151,11 @@ public interface UserService {
 
   Optional<DbUser> getByDatabaseId(long databaseId);
 
+  /**
+   * @deprecated Use {@link org.pmiops.workbench.access.AccessModuleService#updateBypassTime(long,
+   *     AccessBypassRequest)}
+   */
+  @Deprecated
   void updateBypassTime(long userDatabaseId, AccessBypassRequest accessBypassRequest);
 
   boolean hasAuthority(long userId, Authority required);

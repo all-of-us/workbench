@@ -55,11 +55,6 @@ public class DbUser {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
 
-  // possibly obsolete system account fields (not used)
-
-  @Deprecated private Short freeTierCreditsLimitDaysOverride = null;
-  @Deprecated private Timestamp firstRegistrationCompletionTime;
-
   // user-editable Profile fields
 
   private String givenName;
@@ -69,12 +64,6 @@ public class DbUser {
   private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
-
-  // potentially obsolete profile-style fields (not used)
-
-  @Deprecated private String currentPosition;
-  @Deprecated private String organization;
-  @Deprecated private String aboutYou;
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
 
@@ -104,16 +93,6 @@ public class DbUser {
   private Timestamp publicationsLastConfirmedTime;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
-
-  @Deprecated private Timestamp betaAccessRequestTime;
-  @Deprecated private Timestamp betaAccessBypassTime;
-
-  @Deprecated private Timestamp idVerificationCompletionTime;
-  @Deprecated private Timestamp idVerificationBypassTime;
-
-  @Deprecated private Timestamp emailVerificationCompletionTime;
-  @Deprecated private Timestamp emailVerificationBypassTime;
-
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
   @Deprecated private Integer moodleId;
 
@@ -195,28 +174,6 @@ public class DbUser {
     this.familyName = familyName;
   }
 
-  @Deprecated
-  @Column(name = "current_position")
-  public String getCurrentPosition() {
-    return currentPosition;
-  }
-
-  @Deprecated
-  public void setCurrentPosition(String currentPosition) {
-    this.currentPosition = currentPosition;
-  }
-
-  @Deprecated
-  @Column(name = "organization")
-  public String getOrganization() {
-    return organization;
-  }
-
-  @Deprecated
-  public void setOrganization(String organization) {
-    this.organization = organization;
-  }
-
   @Column(name = "free_tier_credits_limit_dollars_override")
   public Double getFreeTierCreditsLimitDollarsOverride() {
     return freeTierCreditsLimitDollarsOverride;
@@ -226,16 +183,6 @@ public class DbUser {
     this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
   }
 
-  @Deprecated
-  @Column(name = "free_tier_credits_limit_days_override")
-  public Short getFreeTierCreditsLimitDaysOverride() {
-    return freeTierCreditsLimitDaysOverride;
-  }
-
-  public void setFreeTierCreditsLimitDaysOverride(Short freeTierCreditsLimitDaysOverride) {
-    this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
-  }
-
   @Column(name = "first_sign_in_time")
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
@@ -243,18 +190,6 @@ public class DbUser {
 
   public void setFirstSignInTime(Timestamp firstSignInTime) {
     this.firstSignInTime = firstSignInTime;
-  }
-
-  @Deprecated
-  @Column(name = "first_registration_completion_time")
-  public Timestamp getFirstRegistrationCompletionTime() {
-    return firstRegistrationCompletionTime;
-  }
-
-  @Deprecated
-  @VisibleForTesting
-  public void setFirstRegistrationCompletionTime(Timestamp registrationCompletionTime) {
-    this.firstRegistrationCompletionTime = registrationCompletionTime;
   }
 
   // Authorities (special permissions) are granted using api/project.rb set-authority.
@@ -302,21 +237,13 @@ public class DbUser {
       return null;
     }
     return this.degrees.stream()
-        .map(
-            (degreeObject) -> {
-              return DbStorageEnums.degreeFromStorage(degreeObject);
-            })
+        .map(DbStorageEnums::degreeFromStorage)
         .collect(Collectors.toList());
   }
 
   public void setDegreesEnum(List<Degree> degreeList) {
     this.degrees =
-        degreeList.stream()
-            .map(
-                (degree) -> {
-                  return DbStorageEnums.degreeToStorage(degree);
-                })
-            .collect(Collectors.toList());
+        degreeList.stream().map(DbStorageEnums::degreeToStorage).collect(Collectors.toList());
   }
 
   @OneToMany(
@@ -351,17 +278,6 @@ public class DbUser {
     this.disabled = disabled;
   }
 
-  @Deprecated
-  @Column(name = "about_you")
-  public String getAboutYou() {
-    return aboutYou;
-  }
-
-  @Deprecated
-  public void setAboutYou(String aboutYou) {
-    this.aboutYou = aboutYou;
-  }
-
   @Column(name = "area_of_research")
   public String getAreaOfResearch() {
     return areaOfResearch;
@@ -369,17 +285,6 @@ public class DbUser {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
-  }
-
-  @Deprecated
-  @Column(name = "beta_access_request_time")
-  public Timestamp getBetaAccessRequestTime() {
-    return betaAccessRequestTime;
-  }
-
-  @Deprecated
-  public void setBetaAccessRequestTime(Timestamp betaAccessRequestTime) {
-    this.betaAccessRequestTime = betaAccessRequestTime;
   }
 
   @Deprecated
@@ -509,39 +414,6 @@ public class DbUser {
     this.complianceTrainingExpirationTime = null;
   }
 
-  @Deprecated
-  @Column(name = "beta_access_bypass_time")
-  public Timestamp getBetaAccessBypassTime() {
-    return betaAccessBypassTime;
-  }
-
-  @Deprecated
-  public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
-    this.betaAccessBypassTime = betaAccessBypassTime;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_completion_time")
-  public Timestamp getEmailVerificationCompletionTime() {
-    return emailVerificationCompletionTime;
-  }
-
-  @Deprecated
-  public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
-    this.emailVerificationCompletionTime = emailVerificationCompletionTime;
-  }
-
-  @Deprecated
-  @Column(name = "email_verification_bypass_time")
-  public Timestamp getEmailVerificationBypassTime() {
-    return emailVerificationBypassTime;
-  }
-
-  @Deprecated
-  public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
-    this.emailVerificationBypassTime = emailVerificationBypassTime;
-  }
-
   @Column(name = "era_commons_bypass_time")
   public Timestamp getEraCommonsBypassTime() {
     return eraCommonsBypassTime;
@@ -549,32 +421,6 @@ public class DbUser {
 
   public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
     this.eraCommonsBypassTime = eraCommonsBypassTime;
-  }
-
-  /*
-   * This column and attribute appear to be disused. We should drop the column and the code here
-   * together.
-   */
-  @Deprecated
-  @Column(name = "id_verification_completion_time")
-  public Timestamp getIdVerificationCompletionTime() {
-    return idVerificationCompletionTime;
-  }
-
-  @Deprecated
-  public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
-    this.idVerificationCompletionTime = idVerificationCompletionTime;
-  }
-
-  @Column(name = "id_verification_bypass_time")
-  @Deprecated
-  public Timestamp getIdVerificationBypassTime() {
-    return idVerificationBypassTime;
-  }
-
-  @Deprecated
-  public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
-    this.idVerificationBypassTime = idVerificationBypassTime;
   }
 
   @Column(name = "two_factor_auth_completion_time")

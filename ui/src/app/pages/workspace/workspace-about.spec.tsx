@@ -29,7 +29,7 @@ describe('WorkspaceAbout', () => {
   };
 
   const component = () => {
-    return mount(<WorkspaceAbout/>);
+    return mount(<WorkspaceAbout hideSpinner={() => {}} showSpinner={() => {}} />);
   };
 
   beforeEach(() => {
@@ -46,7 +46,6 @@ describe('WorkspaceAbout', () => {
     profileStore.set({profile, load, reload, updateCache});
     currentWorkspaceStore.next(workspace);
     serverConfigStore.set({config: {
-      enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',

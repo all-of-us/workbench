@@ -14,7 +14,6 @@ import * as moment from 'moment';
 import {CSSProperties} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
-import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
@@ -76,7 +75,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
-const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -280,8 +279,7 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    subscription: Subscription;
-    private loadLastSavedKey: () => void;
+    subscriptions = [];
 
     deleteWorkspace = withErrorModal({
       title: 'Error Deleting Workspace',
@@ -397,37 +395,23 @@ export const HelpSidebar = fp.flow(
     }
 
     setActiveIcon(activeIcon: string) {
-      this.setState({activeIcon});
-      if (activeIcon) {
-        localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
-      } else {
-        localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-      }
+      setSidebarActiveIconStore.next(activeIcon);
     }
 
     async componentDidMount() {
-      const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-
-      // This is a little hacky but it's necessary because
-      // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
-      // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
-      //    and overwrite the value stored in localStorage key so we need to "save" it here
-      // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
-      this.loadLastSavedKey = (() => {
-        let loadedLastSavedKey = false;
-        return () => {
-          if (!loadedLastSavedKey && this.props.pageKey) {
-            const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
-            setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
-            loadedLastSavedKey = true;
-          }
-        };
-      })();
-
-      this.loadLastSavedKey();
-      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
-      this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
+      // This is being set here instead of the constructor to show the opening animation of the side panel and
+      // indicate to the user that it's something they can close.
+      this.setActiveIcon(setSidebarActiveIconStore.getValue());
+      this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
+      this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
+        this.setState({activeIcon});
+        if (activeIcon) {
+          localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+        }
+      }));
+      this.subscriptions.push(routeDataStore.subscribe((newRoute, oldRoute) => {
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -443,14 +427,13 @@ export const HelpSidebar = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      this.loadLastSavedKey();
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.setActiveIcon(null);
       }
     }
 
     componentWillUnmount(): void {
-      this.subscription.unsubscribe();
+      this.subscriptions.forEach(sub => sub.unsubscribe());
     }
 
     onIconClick(icon: IconConfig) {

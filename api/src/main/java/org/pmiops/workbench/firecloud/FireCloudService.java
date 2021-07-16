@@ -108,6 +108,11 @@ public interface FireCloudService {
 
   String staticNotebooksConvertAsService(byte[] notebook);
 
+  /** Update billing account using end user credential. */
+  void updateBillingAccount(String billingProject, String billingAccount);
+  /** Update billing account using APP's service account. */
+  void updateBillingAccountAsService(String billingProject, String billingAccount);
+
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *

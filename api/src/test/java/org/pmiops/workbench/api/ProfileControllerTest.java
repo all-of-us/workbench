@@ -30,8 +30,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -44,12 +46,14 @@ import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -107,6 +111,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -130,6 +135,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
@@ -137,9 +143,11 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private ProfileService profileService;
   @Autowired private UserDao userDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Autowired private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Autowired private FakeClock fakeClock;
+
+  // allows us to mock out only specific methods
+  @SpyBean private UserService userService;
 
   private static final long NONCE_LONG = 12345;
   private static final String CAPTCHA_TOKEN = "captchaToken";
@@ -159,15 +167,18 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String ZIP_CODE = "12345";
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;
+  private static List<DbAccessModule> accessModules;
 
-  private int DUA_VERSION;
+  private int DUCC_VERSION;
   private DbAccessTier registeredTier;
 
   @TestConfiguration
   @Import({
+    AccessModuleServiceImpl.class,
     ActionAuditQueryServiceImpl.class,
     AddressMapperImpl.class,
     AuditLogEntryMapperImpl.class,
@@ -182,6 +193,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     PageVisitMapperImpl.class,
     ProfileController.class,
     ProfileMapperImpl.class,
+    UserAccessModuleMapperImpl.class,
     ProfileService.class,
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
@@ -214,6 +226,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     public WorkbenchConfig workbenchConfig() {
       return config;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public List<DbAccessModule> getDbAccessModules() {
+      return accessModules;
+    }
   }
 
   @BeforeEach
@@ -241,6 +259,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
+    createAccountRequest.setTermsOfServiceVersion(CURRENT_TERMS_OF_SERVICE_VERSION);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
@@ -250,7 +269,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
-    DUA_VERSION = userService.getCurrentDuccVersion();
+    DUCC_VERSION = userService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(
@@ -264,6 +283,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     } catch (ApiException e) {
       e.printStackTrace();
     }
+
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -468,7 +489,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testSubmitDataUseAgreement_success() {
     createAccountAndDbUserWithAffiliation();
     String duaInitials = "NIH";
-    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUCC_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
@@ -477,26 +498,38 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
     assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
     assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
-    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
+    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUCC_VERSION);
   }
 
   @Test
-  public void testSubmitDataUseAgreement_wrongVersion() {
+  public void testSubmitDataUseAgreement_wrongVersion_older() {
     assertThrows(
         BadRequestException.class,
         () -> {
           createAccountAndDbUserWithAffiliation();
           String duaInitials = "NIH";
-          profileController.submitDataUseAgreement(DUA_VERSION - 1, duaInitials);
+          profileController.submitDataUseAgreement(DUCC_VERSION - 1, duaInitials);
         });
   }
 
-  @Test
-  public void test_outdatedDataUseAgreement() {
-    // force version number to 2 instead of 3
-    config.featureFlags.enableV3DataUserCodeOfConduct = false;
-    final int previousDuaVersion = DUA_VERSION - 1;
+  // not really a use case for this, but shows we need an exact match
 
+  @Test
+  public void testSubmitDataUseAgreement_wrongVersion_newer() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          createAccountAndDbUserWithAffiliation();
+          String duaInitials = "NIH";
+          profileController.submitDataUseAgreement(DUCC_VERSION + 1, duaInitials);
+        });
+  }
+
+  // the user signs Version A of the DUCC, but the system later requires Version B instead
+  // and therefore the user is no longer compliant
+
+  @Test
+  public void test_DuccBecomesOutdated() {
     final long userId = createAccountAndDbUserWithAffiliation().getUserId();
 
     // bypass the other access requirements
@@ -508,19 +541,22 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setProfileLastConfirmedTime(TIMESTAMP);
     userDao.save(dbUser);
 
-    // sign the older version
+    // arbitrary; at coding time the current version is 3
+    final int versionA = 5;
+    final int versionB = 8;
 
-    String duaInitials = "NIH";
-    assertThat(
-            profileController
-                .submitDataUseAgreement(previousDuaVersion, duaInitials)
-                .getStatusCode())
+    // set the current DUCC version to version A
+    when(userService.getCurrentDuccVersion()).thenReturn(versionA);
+
+    // sign the current version (A)
+
+    final String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(versionA, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
-    // update and enforce the required version
-
-    config.featureFlags.enableV3DataUserCodeOfConduct = true;
+    // time passes and the system now requires a newer version (B)
+    when(userService.getCurrentDuccVersion()).thenReturn(versionB);
 
     // a bit of a hack here: use this to sync the registration status
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
@@ -757,7 +793,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
+    profileController.submitDataUseAgreement(DUCC_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
@@ -1023,17 +1059,6 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     profileController.deleteProfile();
     verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
-  }
-
-  @Test
-  public void testBypassAccessModule() {
-    Profile profile = createAccountAndDbUserWithAffiliation();
-    profileController.bypassAccessRequirement(
-        profile.getUserId(),
-        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
-
-    DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(dbUser.getDataUseAgreementBypassTime()).isNotNull();
   }
 
   @Test
@@ -1390,7 +1415,9 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final List<AccessBypassRequest> bypasses1 =
         ImmutableList.of(
-            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(true),
+            new AccessBypassRequest()
+                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .isBypassed(true),
             // would un-bypass if a bypass had existed
             new AccessBypassRequest()
                 .moduleName(AccessModule.COMPLIANCE_TRAINING)
@@ -1411,7 +1438,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     final List<AccessBypassRequest> bypasses2 =
         ImmutableList.of(
             // un-bypass the previously bypassed
-            new AccessBypassRequest().moduleName(AccessModule.DATA_USE_AGREEMENT).isBypassed(false),
+            new AccessBypassRequest()
+                .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
+                .isBypassed(false),
             // bypass
             new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
             new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
@@ -1427,11 +1456,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(retrieved2.getEraCommonsBypassTime()).isNotNull();
     assertThat(retrieved2.getTwoFactorAuthBypassTime()).isNotNull();
 
+    // TODO(RW-6930): Make Profile contain the new AccessModule block, then read from there.
     verify(mockProfileAuditor).fireUpdateAction(original, retrieved1);
     verify(mockProfileAuditor).fireUpdateAction(retrieved1, retrieved2);
 
     // DUA and COMPLIANCE x2, one for each request
-
     verify(mockUserServiceAuditor, times(2))
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),
@@ -1446,7 +1475,6 @@ public class ProfileControllerTest extends BaseControllerTest {
             any());
 
     // ERA and 2FA once in request 2
-
     verify(mockUserServiceAuditor)
         .fireAdministrativeBypassTime(
             eq(dbUser.getUserId()),

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -47,13 +48,12 @@ public class AuthDomainControllerTest extends SpringTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String ORGANIZATION = "Test";
-  private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
 
   @Autowired private UserDao userDao;
 
   @Mock private AccessTierService accessTierService;
+  @Mock private AccessModuleService accessModuleService;
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Mock private ComplianceService complianceService;
@@ -79,7 +79,6 @@ public class AuthDomainControllerTest extends SpringTest {
     when(fireCloudService.createGroup(any())).thenReturn(testGroup);
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.access.enableDataUseAgreement = true;
     config.accessRenewal.expiryDays = (long) 365;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
@@ -94,6 +93,7 @@ public class AuthDomainControllerTest extends SpringTest {
             userDataUseAgreementDao,
             userTermsOfServiceDao,
             verifiedInstitutionalAffiliationDao,
+            accessModuleService,
             fireCloudService,
             complianceService,
             directoryService,
@@ -154,8 +154,6 @@ public class AuthDomainControllerTest extends SpringTest {
     user.setFamilyName(FAMILY_NAME);
     user.setUsername(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
-    user.setOrganization(ORGANIZATION);
-    user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
     return userDao.save(user);

@@ -12,6 +12,7 @@ import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertToResource} from 'app/utils/resources';
@@ -26,20 +27,24 @@ const styles = {
   }
 };
 
-export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
-  workspace: WorkspaceData
-}, {
-  notebookList: FileDetail[],
-  notebookNameList: string[],
-  creating: boolean,
-  loading: boolean
-}> {
+interface Props extends WithSpinnerOverlayProps {
+  workspace: WorkspaceData;
+}
+
+export const NotebookList = withCurrentWorkspace()(class extends React.Component<
+  Props, {
+    notebookList: FileDetail[],
+    notebookNameList: string[],
+    creating: boolean,
+    loading: boolean
+  }> {
   constructor(props) {
     super(props);
     this.state = {notebookList: [], notebookNameList: [], creating: false, loading: false};
   }
 
   componentDidMount() {
+    this.props.hideSpinner();
     profileApi().updatePageVisits({page: 'notebook'});
     this.loadNotebooks();
   }

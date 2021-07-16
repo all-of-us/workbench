@@ -1,0 +1,42 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "parent_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "min",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "answers_bucketed",
+    "type": "INTEGER"
+  }
+]

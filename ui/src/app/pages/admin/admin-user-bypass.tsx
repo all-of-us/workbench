@@ -34,7 +34,7 @@ interface State {
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
     ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
-    ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
+    ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
@@ -113,7 +113,6 @@ export class AdminUserBypass extends React.Component<Props, State> {
     const {
       enableComplianceTraining,
       enableEraCommons,
-      enableDataUseAgreement,
       enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <PopupTrigger
         ref={this.popupRef}
@@ -139,12 +138,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
           />
-          {enableDataUseAgreement && <Toggle name='Data Use Agreement'
-                  checked={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
-                  data-test-id='data-use-agreement-toggle'
+          <Toggle name='Data User Code of Conduct'
+                  checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
+                  data-test-id='ducc-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}
-          />}
+                    fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
+          />
           {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
                                        checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
                                        data-test-id='ras-link-login-gov-toggle'

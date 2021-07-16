@@ -79,7 +79,7 @@
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
   },
   "mandrill": {
-    "fromEmail": "donotreply@fake-research-aou.org",
+    "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {
@@ -113,7 +113,9 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : false
+    "enableFireCloudV2Billing" : false,
+    "enableAccessModuleRewrite" : false,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

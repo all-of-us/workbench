@@ -79,7 +79,7 @@
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
   "mandrill": {
-    "fromEmail": "donotreply@researchallofus.org",
+    "fromEmail": "support@researchallofus.org",
     "sendRetries": 3
   },
   "zendesk": {
@@ -113,12 +113,14 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableFireCloudV2Billing" : false
+    "enableFireCloudV2Billing" : false,
+    "enableAccessModuleRewrite" : false,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
-    "bigQueryDataset": "workbench_action_audit_prepropd",
-    "bigQueryTable": "workbench_action_audit_prepropd"
+    "bigQueryDataset": "workbench_action_audit_preprod",
+    "bigQueryTable": "workbench_action_audit_preprod"
   },
   "captcha": {
     "enableCaptcha": true,

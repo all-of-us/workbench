@@ -1,41 +1,28 @@
-##COUNT GENERATION
+# Creating CDR indices
 
-This document describes what counts are generated for each of the data domains.
+## Before building a brand new CDR indices we have to build pre-requisite prep tables 
 
-1. Total Person count is generated and stored with analysis id 1.
-2. Person count by gender is generated and stored with analysis id 2.
-3. Person count by year of birth is generated and stored with analysis id 3.
-4. Person count by race is generated and stored with analysis id 4.
-5. Person count by ethnicity is generated and stored with analysis id 5.
-6. Person count by year of birth and gender is generated and stored with analysis id 10.
-7. Person count by race and ethnicity is generated and stored with analysis id 12.
+## Prep Tables Playbook
+Please refer to the  [Prep Tables Playbook](https://docs.google.com/document/d/17B31LeN7fBLi84OJfpY6zjqS7NR3kIbztw3axl-5Tu4/edit#)
+for a step-by-step guide to creating all pre-requisite tables. All relevant commands listed below, but the playbook should be referenced for usage.
 
+## Prep Table commands
 
-####1. EHR DATA
+### Copy over all static prep tables into a new CDR bucket
+`./project.rb make-prep-tables-bucket --new-cdr-version C2021Q2R2 --previous-cdr-version C2021Q2R1`
 
-######Domains( VISIT, CONDITION, PROCEDURE, DRUG, OBSERVATION, MEASUREMENT):
-1. Counts and source counts of distinct patients with at least one occurrence of the concepts in these domains are generated and stored in analysis id 3000.
-   Most EHR data in OMOP has two concepts associated with it. The source concept and the standard concept that source maps to.
-   Hence, we calculate two counts for each concept.
-   Counts are the number of people that have the concept or some concept mapped to it. 
-   Source counts are the number of people that have the concept as real EHR data. 
-   In the case of source concepts that always map to a standard concept, the count value would be zero.
-   In that case we set the countValue to be the same as sourceCountValue to make it more user-friendly in apis and front end development.
-2. Counts and source counts of gender of patients are generated in the similar way and stored in analysis id 3101.
-3. Counts and source counts of different age deciles of patient data are generated and stored in analysis id 3102.
-4. Participant count in each of the domains is generated and stored with analysis id 3000.
+### Build prep ppi tables from surveys in redcap - [Install Python](https://github.com/all-of-us/workbench/tree/master/api/db-cdr/prep-ppi-tables)
+`./project.rb make-prep-ppi-csv-files --project all-of-us-workbench-test --dataset DummySR --date 2021-04-21`
 
-####2. PPI SURVEYS
+### Build prep_survey table from prep ppi tables in previous command
+`./project.rb make-bq-prep-survey --project all-of-us-workbench-test --dataset DummySR --date 2021-04-21 --tier controlled`
 
-######Survey Modules (The Basics, Lifestyle, Overall health)
+## CDR Indices Playbook
+NOTE: All pre-requistie prep tables must exist, then CDR indices builds can be run as many times as required against the prep tables.
+Please refer to the  [CDR Indices Playbook](https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#)
+for a step-by-step guide.
 
-1. Response count for each of the survey question in each module is generated and stored with analysis id 3110.
-2. Response count by gender is generated and stored with analysis id 3111.
-3. Response count by age decile is generated and stored with analysis id 3112.
-4. Participant count in each of the survey module is generated.
+## CDR indices commands
 
-####3. MEASUREMENTS
-
-1. Box distribution of value is generated for each measurement.
-2. Box distribution of age with gender is generated for each measurement.
-3. Counts and source counts of different gender, age for binned values are generated. (Values are binned by 10)
+### Full CDR indices build run in CircleCi
+`./project.rb circle-build-cdr-indices --project all-of-us-rw-preprod --bq-dataset C2021Q2R1 --cdr-version c_2021q2_4 --wgv-project aou-res-curation-output-prod --wgv-dataset C2021Q2R1 --wgv-table prep_wgs_metadata`

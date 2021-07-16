@@ -18,6 +18,7 @@ public interface InstitutionMapper {
   @Mapping(target = "emailDomains", ignore = true)
   @Mapping(target = "emailAddresses", ignore = true)
   @Mapping(target = "userInstructions", ignore = true)
+  @Mapping(target = "tierRequirements", ignore = true)
   Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
 
   @AfterMapping
@@ -25,6 +26,7 @@ public interface InstitutionMapper {
       @MappingTarget Institution target, @Context InstitutionService institutionService) {
     target.setEmailDomains(institutionService.getEmailDomains(target.getShortName()));
     target.setEmailAddresses(institutionService.getEmailAddresses(target.getShortName()));
+    target.setTierRequirements(institutionService.getTierRequirements(target.getShortName()));
     institutionService
         .getInstitutionUserInstructions(target.getShortName())
         .ifPresent(target::setUserInstructions);

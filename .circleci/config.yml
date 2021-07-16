@@ -231,6 +231,7 @@ commands:
       - ui-cache
       - when:
           condition: << parameters.connect_local_api >>
+          # connect_local_api = true.  run against Local->Local.
           steps:
             - run:
                 name: Launch local UI server
@@ -239,6 +240,7 @@ commands:
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
+          # connect_local_api = false.  run against Local->Test.
           steps:
             - run:
                 name: Launch local UI server

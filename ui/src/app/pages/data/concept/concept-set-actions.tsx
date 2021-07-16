@@ -3,6 +3,7 @@ import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -63,7 +64,7 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
@@ -78,6 +79,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
+      this.props.hideSpinner();
       conceptSetUpdating.next(false);
       const csid = urlParamsStore.getValue().csid;
       this.setState({conceptSetLoading: true});

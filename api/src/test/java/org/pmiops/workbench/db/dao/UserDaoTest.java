@@ -159,7 +159,6 @@ public class UserDaoTest extends SpringTest {
     user.setContactEmail(contactEmail);
     user.setGivenName("givenName");
     user.setFamilyName("familyName");
-    user.setFirstRegistrationCompletionTime(nowTime);
     user.setDataUseAgreementCompletionTime(nowTime);
     user.setDataUseAgreementBypassTime(nowTime);
     user.setEraCommonsBypassTime(nowTime);
@@ -171,12 +170,6 @@ public class UserDaoTest extends SpringTest {
     user.setDataUseAgreementBypassTime(nowTime);
     user.setTwoFactorAuthBypassTime(nowTime);
     user.setTwoFactorAuthCompletionTime(nowTime);
-    user.setBetaAccessBypassTime(nowTime);
-    user.setBetaAccessRequestTime(nowTime);
-    user.setEmailVerificationCompletionTime(nowTime);
-    user.setEmailVerificationBypassTime(nowTime);
-    user.setIdVerificationBypassTime(nowTime);
-    user.setIdVerificationCompletionTime(nowTime);
     user.setCreationTime(nowTime);
     user.setFirstSignInTime(nowTime);
 

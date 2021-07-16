@@ -4199,14 +4199,6 @@ definitions:
         type: boolean
         default: false
         description: Whether the eRA Commons access module is enabled.
-      enableDataUseAgreement:
-        type: boolean
-        default: false
-        description: Whether the Data Use Agreement access module is enabled.
-      enableBetaAccess:
-        type: boolean
-        default: false
-        description: Whether the Beta Access module is enabled.
       unsafeAllowSelfBypass:
         type: boolean
         default: false
@@ -4220,10 +4212,6 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing upgrade
-      enableV3DataUserCodeOfConduct:
-        type: boolean
-        default: false
-        description: Whether to enable version 3 of the Data User Code of Conduct
       enableEventDateModifier:
         type: boolean
         default: false
@@ -4244,6 +4232,14 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
+      enableAccessModuleRewrite:
+        type: boolean
+        default: false
+        description: Whether to use the new rewrite access module.
+      enableStandardSourceDomains:
+        type: boolean
+        default: false
+        description: Whether to show separate source and standard domains
       rasHost:
         type: string
         description: The RAS base host name.
@@ -4766,11 +4762,13 @@ definitions:
   AccessModule:
     type: string
     enum:
-    - DATA_USE_AGREEMENT
+    - DATA_USER_CODE_OF_CONDUCT
     - COMPLIANCE_TRAINING
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - PROFILE_CONFIRMATION
+    - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
     type: object
     required:
@@ -5470,19 +5468,10 @@ definitions:
       institutionName:
         description: Verified institution name
         type: string
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
       firstSignInTime:
         type: integer
         format: int64
       creationTime:
-        type: integer
-        format: int64
-      idVerificationBypassTime:
-        type: integer
-        format: int64
-      idVerificationCompletionTime:
         type: integer
         format: int64
       twoFactorAuthBypassTime:
@@ -5507,15 +5496,6 @@ definitions:
         type: integer
         format: int64
       complianceTrainingCompletionTime:
-        type: integer
-        format: int64
-      betaAccessBypassTime:
-        type: integer
-        format: int64
-      emailVerificationBypassTime:
-        type: integer
-        format: int64
-      emailVerificationCompletionTime:
         type: integer
         format: int64
       dataUseAgreementBypassTime:
@@ -5662,11 +5642,6 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
-      firstRegistrationCompletionTime:
-        type: integer
-        format: int64
-        description: 'Timestamp when the user first changed from Unregistered to Registered
-          data access level. May be null if the user has never done so.'
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
@@ -5699,6 +5674,18 @@ definitions:
             description: >
               Whether any modules have expired. Each expired module will have
               the corresponding hasExpired flag set in the modules array.
+      accessModules:
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/AccessModuleStatus"
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Expiration information is also included with each
+              module in the array; this field is provided for convenience.
 
   RenewableAccessModuleStatus:
     type: object
@@ -5717,6 +5704,24 @@ definitions:
       hasExpired:
         type: boolean
         description: Whether this module has expired according to the server's clock.
+
+  AccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        "$ref": "#/definitions/AccessModule"
+      completionEpochMillis:
+        type: integer
+        format: int64
+        description: When this module completed if applicable
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire if applicable.
+      bypassEpochMillis:
+        type: integer
+        format: int64
+        description: When this module is bypassed if applicable
 
   UserAccessExpiration:
     type: object
@@ -6393,6 +6398,11 @@ definitions:
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
+      tierRequirements:
+        type: array
+        description: List of requirements on how members can get access for each tier.
+        items:
+          "$ref": "#/definitions/InstitutionTierRequirement"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6466,6 +6476,15 @@ definitions:
       - MASTER
       - RESTRICTED
 
+  InstitutionMembershipRequirement:
+    type: string
+    description: 'Type of Institution requirement for member to access a tier.
+      It can be matching email address, email domains or no access'
+    enum:
+      - DOMAINS
+      - ADDRESSES
+      - NO_ACCESS
+
   InstitutionalRole:
     type: string
     description: 'The union of the roles researchers can have at Institutions of all
@@ -6509,6 +6528,22 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
+  InstitutionTierRequirement:
+    type: object
+    description: Institution-specific access tier membership requirement.
+    required:
+      - accessTierShortName
+      - membershipRequirement
+    properties:
+      accessTierShortName:
+        type: string
+        description: The short unique name for the access tier.
+      membershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: Type of Institution requirement per tier. Domain or restrict to email addresses or none.
+      eraRequired:
+        type: boolean
+        description: Whether eRA commons is required for members in the institution for this tier.
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object

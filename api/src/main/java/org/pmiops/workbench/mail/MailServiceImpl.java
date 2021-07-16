@@ -151,28 +151,26 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            "Registered Tier access expiration will occur for user %s in %d days (on %s).",
-            user.getUsername(), daysRemaining, formatCentralTime(expirationTime));
+            "Registered Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            user.getUsername(),
+            user.getContactEmail(),
+            daysRemaining,
+            formatCentralTime(expirationTime));
     log.info(logMsg);
 
-    if (workbenchConfig.accessRenewal.sendEmails) {
-      final String htmlMessage =
-          buildHtml(
-              REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-              registeredTierAccessSubstitutionMap(expirationTime));
+    final String htmlMessage =
+        buildHtml(
+            REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
+            registeredTierAccessSubstitutionMap(expirationTime));
 
-      sendWithRetries(
-          user.getContactEmail(),
-          "Your access to All of Us Registered Tier Data will expire "
-              + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
-          String.format(
-              "User %s will lose registered tier access in %d days",
-              user.getUsername(), daysRemaining),
-          htmlMessage);
-    } else {
-      log.info(
-          "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
-    }
+    sendWithRetries(
+        user.getContactEmail(),
+        "Your access to All of Us Registered Tier Data will expire "
+            + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
+        String.format(
+            "User %s (%s) will lose registered tier access in %d days",
+            user.getUsername(), user.getContactEmail(), daysRemaining),
+        htmlMessage);
   }
 
   @Override
@@ -182,25 +180,22 @@ public class MailServiceImpl implements MailService {
 
     final String logMsg =
         String.format(
-            "Registered Tier access expired for user %s (on %s).",
-            user.getUsername(), formatCentralTime(expirationTime));
+            "Registered Tier access expired for user %s (%s) on %s.",
+            user.getUsername(), user.getContactEmail(), formatCentralTime(expirationTime));
     log.info(logMsg);
 
-    if (workbenchConfig.accessRenewal.sendEmails) {
-      final String htmlMessage =
-          buildHtml(
-              REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-              registeredTierAccessSubstitutionMap(expirationTime));
+    final String htmlMessage =
+        buildHtml(
+            REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
+            registeredTierAccessSubstitutionMap(expirationTime));
 
-      sendWithRetries(
-          user.getContactEmail(),
-          "Your access to All of Us Registered Tier Data has expired",
-          String.format("Registered Tier access expired for user %s", user.getUsername()),
-          htmlMessage);
-    } else {
-      log.info(
-          "Email NOT sent.  Enable `accessRenewal.sendEmails` to send emails in this environment.");
-    }
+    sendWithRetries(
+        user.getContactEmail(),
+        "Your access to All of Us Registered Tier Data has expired",
+        String.format(
+            "Registered Tier access expired for user %s (%s)",
+            user.getUsername(), user.getContactEmail()),
+        htmlMessage);
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(

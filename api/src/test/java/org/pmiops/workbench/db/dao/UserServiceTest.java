@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -21,14 +22,19 @@ import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -40,6 +46,7 @@ import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -65,6 +72,7 @@ public class UserServiceTest extends SpringTest {
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static DbAccessTier registeredTier;
+  private static List<DbAccessModule> accessModules;
 
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
@@ -75,10 +83,15 @@ public class UserServiceTest extends SpringTest {
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
 
   @Import({
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
+    AccessModuleServiceImpl.class,
+    CommonMappers.class,
+    UserAccessModuleMapperImpl.class,
   })
   @MockBean({
     MailService.class,
@@ -106,6 +119,12 @@ public class UserServiceTest extends SpringTest {
     DbUser getDbUser() {
       return providedDbUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public List<DbAccessModule> getDbAccessModules() {
+      return accessModules;
+    }
   }
 
   @BeforeEach
@@ -127,6 +146,7 @@ public class UserServiceTest extends SpringTest {
     // but it was injecting null clocks giving NPEs long after construction, and so far this
     // is the only working approach I've seen.
     PROVIDED_CLOCK.setInstant(START_INSTANT);
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -149,6 +169,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -177,6 +201,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(expiry)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Deprecate the old training.
     long newExpiry = expiry - 1;
@@ -198,6 +226,10 @@ public class UserServiceTest extends SpringTest {
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochSecond(newerExpiry)));
+    assertModuleCompletionEqual(
+        AccessModuleName.RT_COMPLIANCE_TRAINING,
+        user,
+        Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // A global expiration is set.
     long globalExpiry = expiry - 1000;
@@ -228,6 +260,7 @@ public class UserServiceTest extends SpringTest {
     userService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
+    assertModuleCompletionEqual(AccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
   }
 
   @Test
@@ -263,6 +296,8 @@ public class UserServiceTest extends SpringTest {
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
+    assertModuleCompletionEqual(
+        AccessModuleName.ERA_COMMONS, user, Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -285,6 +320,7 @@ public class UserServiceTest extends SpringTest {
 
     DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
     assertThat(retrievedUser.getEraCommonsCompletionTime()).isNull();
+    assertModuleCompletionEqual(AccessModuleName.ERA_COMMONS, retrievedUser, null);
   }
 
   @Test
@@ -336,19 +372,22 @@ public class UserServiceTest extends SpringTest {
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
-
+    assertThat(getModuleCompletionTime(AccessModuleName.TWO_FACTOR_AUTH, user)).isNotNull();
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompletionTime);
+    assertModuleCompletionEqual(
+        AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
 
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
+    assertModuleCompletionEqual(AccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
   }
 
   @Test
@@ -434,9 +473,27 @@ public class UserServiceTest extends SpringTest {
   }
 
   @Test
+  public void testSubmitTermsOfService_illegalTosVersion() {
+    // Testing NULL input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ null);
+        });
+
+    // Testing not current term input version
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          userService.submitTermsOfService(
+              userDao.findUserByUsername(USERNAME), /* tosVersion */ -1);
+        });
+  }
+
+  @Test
   public void testSubmitTermsOfService() {
     userService.submitTermsOfService(userDao.findUserByUsername(USERNAME), /* tosVersion */ 1);
-
     verify(mockUserTermsOfServiceDao).save(any(DbUserTermsOfService.class));
     verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
   }
@@ -473,6 +530,8 @@ public class UserServiceTest extends SpringTest {
     userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.PROFILE_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
@@ -480,6 +539,8 @@ public class UserServiceTest extends SpringTest {
 
     userService.confirmProfile(providedDbUser);
     assertThat(providedDbUser.getProfileLastConfirmedTime())
+        .isGreaterThan(Timestamp.from(START_INSTANT));
+    assertThat(getModuleCompletionTime(AccessModuleName.PROFILE_CONFIRMATION, providedDbUser))
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 
@@ -492,6 +553,8 @@ public class UserServiceTest extends SpringTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser, Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
@@ -500,5 +563,19 @@ public class UserServiceTest extends SpringTest {
     userService.confirmPublications();
     assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
+    assertThat(getModuleCompletionTime(AccessModuleName.PUBLICATION_CONFIRMATION, providedDbUser))
+        .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
+
+  private void assertModuleCompletionEqual(
+      AccessModuleName moduleName, DbUser user, Timestamp timestamp) {
+    assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
+  }
+
+  private Timestamp getModuleCompletionTime(AccessModuleName moduleName, DbUser user) {
+    return userAccessModuleDao
+        .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
+        .get()
+        .getCompletionTime();
   }
 }
