@@ -89,7 +89,7 @@ export const SignedIn = (props: Props) => {
     return () => {
       /*
        * TODO RW-1920: we will only need one subscription after routeConfigDataStore and
-       *  routeDataStore are collapsed, and then we won't have to duck-this
+       *  routeDataStore are collapsed, and then we won't have to duck-type this
        */
       for (const s of subscriptions) {
         s.unsubscribe();
