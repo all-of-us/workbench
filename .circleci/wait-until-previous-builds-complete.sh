@@ -14,6 +14,11 @@ branch="master"
 workflow_name="build-test-deploy"
 project_slug="gh/all-of-us"
 
+# Max check time on a workflow is 45 minutes because e2e tests may take a long time to finish.
+# DISCLAIMER This max time may not be enough if there are 2 or more workflows in waiting before this workflow.
+max_time=$((45 * 60))
+sleep_time=30
+
 #********************
 # FUNCTIONS
 # *******************
@@ -22,7 +27,7 @@ project_slug="gh/all-of-us"
 # See https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
 check_circleci_token() {
   if [[ ! $CIRCLECI_TOKEN ]]; then
-    printf '%s\n' "Required env variable \"CIRCLECI_TOKEN\" not found.\n Create a personal token then create \"CIRCLECI_TOKEN\" env variable?\n" >&2
+    printf '%s\n' "Required env variable \"CIRCLECI_TOKEN\" is not found.\n Create a personal token then create \"CIRCLECI_TOKEN\" env variable?\n" >&2
     exit 1
   fi
 }
@@ -51,7 +56,7 @@ pipeline_json="/tmp/master_branch_pipelines.json"
 fetch_pipeline_ids() {
   local get_path="pipeline?org-slug=${project_slug}"
   local get_result=$(get "${get_path}")
-  echo ${get_result} | jq "[.items[] | select(.vcs.branch==\"master\")][] | {created_at: .created_at, id: .id, number: .number}" > "${pipeline_json}"
+  echo "${get_result}" | jq "[.items[] | select(.vcs.branch==\"master\")][] | {created_at: .created_at, id: .id, number: .number}" > "${pipeline_json}"
   printf "Found following pipelines on ${branch} branch:\n"
   cat ${pipeline_json}
   printf "\n"
@@ -74,7 +79,6 @@ fetch_workflow_status() {
   local get_result=$(get "${get_path}")
   local workflow_summary=$(echo "${get_result}" | jq ".items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}")
   printf "${workflow_summary}\n"
-  # workflow branch name is bound by $workflow_name variable.
   # Rerunning a failed workflow produces a nested datetime sorted array. Get the status of latest run (first array element).
   __=$(echo "${get_result}" | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .status | @sh")
 }
@@ -98,7 +102,7 @@ should_skip() {
   # Debug printf "This pipeline id is ${this_pipeline_id}. This workflow id is ${CIRCLE_WORKFLOW_ID}\n\n"
   if [[ "$this_pipeline_id" == $1 ]]; then
     # Don't check this pipeline if this pipeline is itself.
-    printf '%s\n' "Not waiting on myself (pipeline id: ${this_pipeline_id}). Skip checking.\n" >&2
+    printf '%s\n' "Not waiting on myself (pipeline id: \"${this_pipeline_id}\"). Skip checking.\n" >&2
     return 0
   fi
 
@@ -127,12 +131,8 @@ for id in ${pipeline_ids}; do
   if should_skip "${pipeline_num}"; then continue; fi
 
   is_running=true
-  # Max wait time is 40 minutes because e2e tests may take a long time to finish.
-  # DISCLAIMER This max time may not be enough if there are 2 or more workflows in waiting before this workflow.
-  max_time_seconds=$((40 * 60))
   waited_time=0
-  sleep_time=30 # seconds
-  printf "Polling workflow status in pipeline number \"${pipeline_num}\" while status is failing or running. Max wait time is ${max_time_seconds} seconds. Please wait...\n"
+  printf "Polling workflow status in pipeline number \"${pipeline_num}\" while status is failing or running. Max wait time is ${max_time} seconds. Please wait...\n"
   while [[ "${is_running}" == "true" ]]; do
     # Getting pipeline's workflow status.
     fetch_workflow_status "${id}"
@@ -141,7 +141,7 @@ for id in ${pipeline_ids}; do
 
     if [[ -z "$status" ]]; then
       # $status is blank because this workflow name does not match $workflow_name variable.
-      printf '%s\n' "Skip checking this workflow because it is not \"${workflow_name}\"\n" >&2
+      printf '%s\n' "Not \"${workflow_name}\". Skip checking.\n" >&2
       break # Break out while loop. check next pipeline.
     fi
 
@@ -151,17 +151,16 @@ for id in ${pipeline_ids}; do
       sleep $sleep_time
       waited_time=$((sleep_time + waited_time))
     else
-      printf "Finished waiting for workflow in its pipeline_id: ${id}. It finished with status of ${status}!\n"
+      printf "Finished waiting for workflow in pipeline_id: ${id}. It finished with status of ${status}!\n"
       is_running=false
     fi
-    printf "Polling has been waiting for ${waited_time} seconds.\n\n"
-    if [ $waited_time -gt $max_time_seconds ]; then
-      printf "\n\n***** Max wait time (${max_time_seconds} seconds) exceeded. Stop checking. *****\n\n"
+    printf "Has been waiting for ${waited_time} seconds.\n\n"
+    if [ $waited_time -gt $max_time ]; then
+      printf "\n\n***** Max wait time (${max_time} seconds) exceeded. Stop checking this workflow. *****\n\n"
       is_running=false
     fi
   done
-  printf "***   \n\n"
+  printf "\n\n"
 done
-
 unset IFS
-printf "finished checking all pipelines.\n"
+printf "finished checking all pipelines.\n\n"
