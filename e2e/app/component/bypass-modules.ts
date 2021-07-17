@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import BaseMenu from './base-menu';
 import Checkbox from 'app/element/checkbox';
+import { getPropValue } from 'utils/element-utils'
 
 const defaultXpath = '//*[@id="popup-root"]';
 
@@ -17,23 +18,18 @@ export default class BypassPopup extends BaseMenu {
     return this.getMenuItemTexts(selector);
   }
 
-  /**
-   *  Get all toggle status of all modules.
-   */
-  async getAllToggleInputs(): Promise<boolean[]> {
-    const selector = `${this.getXpath()}//label/div/input[@type='checkbox']`;
-    return this.getToggleStatus(selector);
-  }
-
+  
   // xpath of the bypass-link-checkbox in user admin table
-  getMenuItemXpath(toggleAccessText: string): string {
-    return `${this.getXpath()}//span[text()= "${toggleAccessText}"]/preceding-sibling::div/input[@type='checkbox']`;
+  getMenuItemXpath(accessModule: string): string {
+    return `${this.getXpath()}//span[text()= "${accessModule}"]/preceding-sibling::div/input[@type='checkbox']`;
   }
 
   //get status of each bypass modules individually
-  async getEachModuleStatus(toggleAccessText: string): Promise<boolean> {
-    const selector = this.getMenuItemXpath(toggleAccessText);
-    return this.getEachToggleStatus(selector);
+  async getAccessModuleStatus(accessModule: string): Promise<boolean> {
+    const selector = this.getMenuItemXpath(accessModule);
+    const btn = new Checkbox(this.page, selector);
+    const accessModuleStatus =await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
+    return accessModuleStatus;
   }
 
   // click the checkmark on the bypass-popup to save the bypass access
