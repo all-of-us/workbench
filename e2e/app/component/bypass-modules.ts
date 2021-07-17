@@ -44,7 +44,4 @@ export default class BypassPopup extends BaseMenu {
     await new Checkbox(this.page, xpath).click();
   }
 
-  async waitUntilGone(page: Page, timeout = 60000): Promise<void> {
-    await page.waitForXPath(this.xpath, { hidden: true, timeout });
-  }
 }
