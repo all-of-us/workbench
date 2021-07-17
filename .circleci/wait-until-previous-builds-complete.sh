@@ -32,7 +32,7 @@ check_circleci_token() {
   fi
 }
 
-post() {
+circle_post() {
   local url="${api_root}${1}"
   printf "curl POST ${url}\n" >/dev/tty
   curl -X POST \
@@ -42,7 +42,7 @@ post() {
     "${url}"
 }
 
-get() {
+circle_get() {
   local url="${api_root}${1}"
   printf "curl GET ${url}\n" >/dev/tty
   curl -X GET -sS \
@@ -51,22 +51,23 @@ get() {
     "${url}"
 }
 
-# Get list of recently built pipelines. Save results to json file.
-pipeline_json="/tmp/master_branch_pipelines.json"
+# Get list of recently built pipelines. Returns json string.
 fetch_pipeline_ids() {
+  pipeline_json="/tmp/master_branch_pipelines.json"
   local get_path="pipeline?org-slug=${project_slug}"
-  local get_result=$(get "${get_path}")
+  local get_result=$(circle_get "${get_path}")
   echo "${get_result}" | jq "[.items[] | select(.vcs.branch==\"master\")][] | {created_at: .created_at, id: .id, number: .number}" > "${pipeline_json}"
   printf "Found following pipelines on ${branch} branch:\n"
   cat ${pipeline_json}
   printf "\n"
+  __=$(echo "${pipeline_json}")
 }
 
 fetch_pipeline_number() {
   # Remove double or single quotes.
   local id=$(echo "${1}" | xargs echo)
   local get_path="pipeline/${id}"
-  local get_result=$(get "${get_path}")
+  local get_result=$(circle_get "${get_path}")
   __=$(echo "${get_result}" | jq -r .number)
 }
 
@@ -76,7 +77,7 @@ fetch_workflow_status() {
   # Remove double or single quotes.
   local id=$(echo "${1}" | xargs echo)
   local get_path="pipeline/${id}/workflow"
-  local get_result=$(get "${get_path}")
+  local get_result=$(circle_get "${get_path}")
   local workflow_summary=$(echo "${get_result}" | jq ".items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}")
   printf "${workflow_summary}\n"
   # Rerunning a failed workflow produces a nested datetime sorted array. Get the status of latest run (first array element).
@@ -85,23 +86,24 @@ fetch_workflow_status() {
 
 fetch_this_pipeline_id() {
   local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
-  local get_result=$(get "${get_path}")
+  local get_result=$(circle_get "${get_path}")
   __=$(echo "${get_result}" | jq -r '.pipeline_number')
 }
 
-# Skip checking once condition is met.
+# '/v2/pipeline' api retrieves all recent pipelines on all branches (PR, build-test-deploy and releases).
+# We should consider blocking only if job is running on "master" branch.
+# Release pipelines and PR pipelines are not considered for blocking.
 should_skip() {
   if [[ "$CIRCLE_BRANCH" != "master" ]]; then
-    printf "Not on master branch. Skip checking.\n"
+    printf "Not on master branch.\n"
     return 0
   fi
 
-  # Get the pipeline id of this job.
+  # Get this job pipeline id. Don't poll and block itself.
   fetch_this_pipeline_id
   this_pipeline_id=$__
   if [[ "$this_pipeline_id" == $1 ]]; then
-    # Don't check this pipeline if this pipeline is itself.
-    printf '%s\n' "Not waiting on myself (pipeline id: \"${this_pipeline_id}\"). Skip checking.\n" >&2
+    printf '%s\n' "Not waiting on myself (pipeline id: \"${this_pipeline_id}\").\n" >&2
     return 0
   fi
 
@@ -117,7 +119,9 @@ check_circleci_token
 
 # Get recent pipelines.
 fetch_pipeline_ids
-pipeline_ids=$(jq '. | .id' ${pipeline_json} | jq -r @sh)
+# Save returned json string to variable.
+ids=$__
+pipeline_ids=$(jq '. | .id' ${ids} | jq -r @sh)
 
 # Check workflow status in each pipeline. Wait while workflow status is running or failing.
 wait="30s"
@@ -136,11 +140,10 @@ for id in ${pipeline_ids}; do
     # Getting pipeline's workflow status.
     fetch_workflow_status "${id}"
     status=$__
-    # Debug printf "workflow_status: ${status}\n"
 
     if [[ -z "$status" ]]; then
       # $status is blank because this workflow name does not match $workflow_name variable.
-      printf '%s\n' "Not \"${workflow_name}\". Skip checking.\n" >&2
+      printf '%s\n' "Not \"${workflow_name}\".\n" >&2
       break # Break out while loop. check next pipeline.
     fi
 
