@@ -326,13 +326,6 @@ commands:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
 
-  block-concurrent-build:
-    description: "Block this job until all previous builds has finished"
-    steps:
-      - run:
-          command: bash .circleci/wait-until-previous-builds-complete.sh
-          name: "Block this job if another build-test-deploy pipeline is running concurrently"
-
 # -------------------------
 #        JOBS
 # -------------------------
