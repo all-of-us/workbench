@@ -617,7 +617,7 @@ jobs:
     steps:
       - run:
           working_directory: ~/workbench/api
-          command: echo "hello joel"
+          command: echo "hello ${JOEL_TEST_1}"
 
 workflows:
   joel-workflow:
