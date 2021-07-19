@@ -617,7 +617,10 @@ jobs:
     steps:
       - run:
           working_directory: ~/workbench/api
-          command: echo "hello ${JOEL_TEST_1}"
+          command: echo "hello ${JOEL_TEST_1}" > joel_test_1.txt
+      - store_artifacts:
+          path: ~/workbench/api/joel_test_1.txt
+          destination: joel-test-1
 
 workflows:
   joel-workflow:
