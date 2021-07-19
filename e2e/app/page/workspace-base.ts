@@ -6,9 +6,8 @@ import Textbox from 'app/element/textbox';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
-import { waitForAttributeEquality, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
-import { getPropValue } from 'utils/element-utils';
 import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
@@ -62,7 +61,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openDatasetsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.Datasets, { waitPageChange: false }));
+    return this.openDataSubtab(TabLabels.Datasets);
   }
 
   /**
@@ -70,7 +69,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openCohortsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.Cohorts, { waitPageChange: false }));
+    return this.openDataSubtab(TabLabels.Cohorts);
   }
 
   /**
@@ -78,7 +77,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openCohortReviewsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.CohortReviews, { waitPageChange: false }));
+    return this.openDataSubtab(TabLabels.CohortReviews);
   }
 
   /**
@@ -86,7 +85,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openConceptSetsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.ConceptSets, { waitPageChange: false }));
+    return this.openDataSubtab(TabLabels.ConceptSets);
   }
 
   /**
@@ -97,23 +96,28 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   async openTab(pageTabName: TabLabels, opts: { waitPageChange?: boolean } = {}): Promise<void> {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
-    const tab = new Link(this.page, selector);
-    const isSelected = await getPropValue<boolean>(await tab.asElementHandle(), 'ariaSelected');
-    if (isSelected === true) {
-      return; // Tab is already open.
-    }
-    waitPageChange ? await tab.clickAndWait() : await tab.click();
-    await tab.dispose();
+    const tabLink = new Link(this.page, selector);
+    waitPageChange ? await tabLink.clickAndWait() : await tabLink.click();
+    await tabLink.dispose();
     return waitWhileLoading(this.page);
   }
 
-  /**
-   * Is tab currently open or selected?
-   * @param {TabLabels} pageTabName Tab name.
-   */
-  async isOpen(pageTabName: TabLabels): Promise<boolean> {
-    const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
-    return waitForAttributeEquality(this.page, { xpath: selector }, 'aria-selected', 'true');
+  private async openDataSubtab(subtabName: TabLabels): Promise<void> {
+    const tabXpath = buildXPath({ name: subtabName, type: ElementType.Tab });
+    const tabLink = new Link(this.page, tabXpath);
+    if (await tabLink.exists()) {
+      await this.openTab(subtabName, { waitPageChange: false });
+      return waitWhileLoading(this.page);
+    } else {
+      // Try find and click Data tab if subtab is not found.
+      const dataTabXpath = buildXPath({ name: TabLabels.Data, type: ElementType.Tab });
+      const dataTabLink = new Link(this.page, dataTabXpath);
+      if (await dataTabLink.exists()) {
+        return this.openDataPage();
+      }
+    }
+    logger.error(`Failed to find and click ${subtabName} tab.`);
+    throw new Error(`Failed to find and click ${subtabName} tab.`);
   }
 
   /**
