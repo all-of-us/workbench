@@ -612,8 +612,18 @@ jobs:
           paths:
             - .
 
+  joel-hello-world:
+    executor: db-executor
+    steps:
+      - run:
+          working_directory: ~/workbench/api
+          command: echo "hello joel"
 
 workflows:
+  joel-workflow:
+    jobs:
+      - joel-hello-world
+      
   # build-test-deploy:
   #   jobs:
       # # Always run basic test/lint/compilation (open PRs, master branch merge)
