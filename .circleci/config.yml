@@ -634,11 +634,11 @@ jobs:
       - run:
           name: "Download test credential JSON"
           working_directory: ~/workbench
-          command: gsutil cp gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-credentials/app-engine-default-sa.json artifacts
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/app-engine-default-sa.json artifacts
       - run:
           name: "Download test credential vars"
           working_directory: ~/workbench
-          command: gsutil cp gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-credentials/vars.env artifacts
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/vars.env artifacts
       - store_artifacts:
           path: ~/workbench/api/artifacts
           destination: artifacts
