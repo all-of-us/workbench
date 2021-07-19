@@ -109,15 +109,15 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const tabXpath = buildXPath({ name: subtabName, type: ElementType.Tab });
     const tabLink = new Link(this.page, tabXpath);
     if (!(await tabLink.exists())) {
-      // Try find and click Data tab if the subtab is not found.
+      // Try to find and click Data tab if the subtab is not found.
       const dataTabXpath = buildXPath({ name: TabLabels.Data, type: ElementType.Tab });
       const dataTabLink = new Link(this.page, dataTabXpath);
       if (await dataTabLink.exists()) {
-        // Find Data tab and click it.
+        // Fount the Data tab. Click it.
         await this.openDataPage();
       }
       // else:
-      // Data tab not found. Let openTab func throws error.
+      // Cannot find Data tab or subtab. Let openTab func throws error.
     }
     // openTab func throws error if subtab are not found.
     await this.openTab(subtabName, { waitPageChange: false });
