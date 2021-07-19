@@ -622,10 +622,30 @@ jobs:
           path: ~/workbench/api/joel_test_1.txt
           destination: joel-test-1
 
+  joel-creds-test:
+    executor: db-executor
+    steps:
+      - run:
+          command: mkdir -p artifacts
+      - gcloud-auth-login
+      - run:
+          name: "Download test credential JSON"
+          working_directory: ~/workbench
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-credentials/app-engine-default-sa.json artifacts
+      - run:
+          name: "Download test credential vars"
+          working_directory: ~/workbench
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-credentials/vars.env artifacts
+      - store_artifacts:
+          path: ~/workbench/api/artifacts
+          destination: artifacts
+
+
 workflows:
   joel-workflow:
     jobs:
       - joel-hello-world
+      - joel-creds-test
       
   # build-test-deploy:
   #   jobs:
