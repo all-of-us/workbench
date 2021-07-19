@@ -625,9 +625,12 @@ jobs:
   joel-creds-test:
     executor: db-executor
     steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
       - run:
           command: mkdir -p artifacts
-      - gcloud-auth-login
       - run:
           name: "Download test credential JSON"
           working_directory: ~/workbench
