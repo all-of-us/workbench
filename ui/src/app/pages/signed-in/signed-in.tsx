@@ -144,7 +144,7 @@ export const SignedIn = (props: Props) => {
       <div
           style={styles.backgroundImage}
       />
-      {serverConfig.config && cdrVersions.tiers &&
+      {config && tiers &&
         <div
             style={
               hideFooter
