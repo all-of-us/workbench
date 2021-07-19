@@ -23,7 +23,7 @@ export async function getBillingAccountInfo(workspaceNamespace: string) {
 const BILLING_SCOPE_DELAY_MS = 250;
 
 const getAuthInstance = () => {
-  return window.gapi.auth2.getAuthInstance()
+  return gapi.auth2.getAuthInstance()
 }
 
 export const hasBillingScope = () => {
@@ -39,7 +39,17 @@ export const hasBillingScope = () => {
  * and retry ensureBillingScope in reaction to the click.
  */
 export const ensureBillingScope = async () => {
+  console.error("~~~~~~~~hasBillingScope11111");
+  console.error("~~~~~~~~hasBillingScope11111");
+  console.error("~~~~~~~~hasBillingScope11111");
+  console.log("~~~~~~~~hasBillingScope11111");
+  console.log("~~~~~~~~hasBillingScope11111");
+  console.log("~~~~~~~~hasBillingScope11111");
+  console.log("~~~~~~~~hasBillingScope11111");
   if (!hasBillingScope()) {
+    console.error("~~~~~~~~!hasBillingScope");
+    console.error("~~~~~~~~!hasBillingScope");
+    console.error("~~~~~~~~!hasBillingScope");
     const options = gapi.auth2.SigninOptionsBuilder({ scope: 'https://www.googleapis.com/auth/cloud-billing' })
     await getAuthInstance().currentUser.get().grant(options)
     // Wait 250ms before continuing to avoid errors due to delays in applying the new scope grant
