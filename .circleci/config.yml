@@ -657,7 +657,7 @@ jobs:
       - gcloud-auth-login
       - run:
           name: Start Cloud Proxy
-          command: cloud_sql_proxy -instances ${WORKBENCH_ENV}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307 &
+          command: cloud_sql_proxy -instances ${WORKBENCH_ENV}:us-central1:workbenchmaindb=tcp:127.0.0.1:3307 &
       - run:
           name: Await Cloud Proxy startup
           command: dockerize -wait tcp://127.0.0.1:3307 -timeout 2m
