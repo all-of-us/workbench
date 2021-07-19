@@ -643,7 +643,7 @@ jobs:
       - run:
           name: "Get db passwd"
           working_directory: ~/workbench/api
-          command: echo ${WORKBENCH_DB_PASSWORD} artifacts/dbpass.txt
+          command: echo ${WORKBENCH_DB_PASSWORD} > artifacts/dbpass.txt
       - store_artifacts:
           path: ~/workbench/api/artifacts
           destination: artifacts
