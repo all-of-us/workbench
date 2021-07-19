@@ -320,7 +320,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     leonardoNotebooksClient.deleteRuntime(
         dbWorkspace.getGoogleProject(),
         userProvider.get().getRuntimeName(),
-        deleteDisk != null && deleteDisk);
+        Optional.ofNullable(deleteDisk).orElse(false));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
