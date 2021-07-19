@@ -648,12 +648,40 @@ jobs:
           path: ~/workbench/api/artifacts
           destination: artifacts
 
+  execute-cloud-db-command:
+    executor: db-executor
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          name: Start Cloud Proxy
+          command: cloud_sql_proxy -instances ${WORKBENCH_ENV}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307 &
+      - run:
+          name: Await Cloud Proxy startup
+          command: dockerize -wait tcp://127.0.0.1:3307 -timeout 2m
+      - run:
+          working_directory: ~/workbench/api
+          command: mkdir -p artifacts
+      - run:
+          working_directory: ~/workbench/api
+          name: Execute SQL
+          command: |
+            mysql --host=127.0.0.1 --port=3307 \
+              --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
+              -e "select count(*) from user;" > artifacts/sql_out.txt
+      - store_artifacts:
+          path: ~/workbench/api/artifacts
+          destination: artifacts
+  
+
 
 workflows:
   joel-workflow:
     jobs:
-      - joel-hello-world
       - joel-creds-test
+      - execute-cloud-db-command
       
   # build-test-deploy:
   #   jobs:
