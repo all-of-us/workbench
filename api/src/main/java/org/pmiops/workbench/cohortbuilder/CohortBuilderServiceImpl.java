@@ -308,8 +308,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CriteriaMenu> findCriteriaMenuCurrentVersion(long parentId) {
-    return criteriaMenuDao.findCriteriaMenuCurrentVersion(parentId).stream()
+  public List<CriteriaMenu> findCriteriaMenuByParentId(long parentId) {
+    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }

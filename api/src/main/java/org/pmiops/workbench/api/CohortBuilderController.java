@@ -176,9 +176,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, Long parentId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    return ResponseEntity.ok(
+    CriteriaMenuListResponse response =
         new CriteriaMenuListResponse()
-            .items(cohortBuilderService.findCriteriaMenuCurrentVersion(parentId)));
+            .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
+    return ResponseEntity.ok(response);
   }
 
   @Override
