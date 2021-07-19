@@ -113,7 +113,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       const dataTabXpath = buildXPath({ name: TabLabels.Data, type: ElementType.Tab });
       const dataTabLink = new Link(this.page, dataTabXpath);
       if (await dataTabLink.exists()) {
-        // Fount the Data tab. Click it.
+        // Found Data tab. Click it.
         await this.openDataPage();
       }
       // else:

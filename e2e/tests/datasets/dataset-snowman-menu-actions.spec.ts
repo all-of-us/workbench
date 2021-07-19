@@ -107,7 +107,7 @@ describe('Datasets card snowman menu actions', () => {
 
     const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(oldDatasetExists).toBe(false);
-    await new WorkspaceDataPage(page).openDataPage();
+
     await resourceCard.delete(newDatasetName, ResourceCard.Dataset);
   });
 
