@@ -48,6 +48,11 @@ export const withBrowser = (launchOpts?: LaunchOptions) => async (
   const browser = await launchBrowser(launchOpts);
   try {
     await testFn(browser);
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(err.message);
+      logger.error(err.stack);
+    }
   } finally {
     await browser
       .close()
@@ -73,6 +78,7 @@ export const withPageTest = (launchOpts?: LaunchOptions) => async (
     } catch (err) {
       if (err instanceof Error) {
         logger.error(err.message);
+        logger.error(err.stack);
       }
       // Take screenshot and save html contents immediately after failure.
       await fs.ensureDir(failScreenshotDir);

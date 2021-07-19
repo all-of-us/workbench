@@ -102,16 +102,13 @@ describe('Datasets card snowman menu actions', () => {
     await renameModal.clickButton(LinkText.RenameDataset, { waitForClose: true });
 
     // Verify existences of old and new Datasets cards.
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDatasetsSubtab();
-
     const newDatasetExists = await resourceCard.cardExists(newDatasetName, ResourceCard.Dataset);
     expect(newDatasetExists).toBe(true);
 
     const oldDatasetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(oldDatasetExists).toBe(false);
 
-    await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
+    await resourceCard.delete(newDatasetName, ResourceCard.Dataset);
   });
 
   /**
