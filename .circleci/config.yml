@@ -630,15 +630,20 @@ jobs:
           at: .
       - gcloud-auth-login
       - run:
+          working_directory: ~/workbench/api
           command: mkdir -p artifacts
       - run:
           name: "Download test credential JSON"
-          working_directory: ~/workbench
+          working_directory: ~/workbench/api
           command: gsutil cp gs://all-of-us-workbench-test-credentials/app-engine-default-sa.json artifacts
       - run:
           name: "Download test credential vars"
-          working_directory: ~/workbench
+          working_directory: ~/workbench/api
           command: gsutil cp gs://all-of-us-workbench-test-credentials/vars.env artifacts
+      - run:
+          name: "Get db passwd"
+          working_directory: ~/workbench/api
+          command: echo ${WORKBENCH_DB_PASSWORD} artifacts/dbpass.txt
       - store_artifacts:
           path: ~/workbench/api/artifacts
           destination: artifacts
