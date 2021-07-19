@@ -624,8 +624,96 @@ jobs:
           paths:
             - .
 
+  joel-hello-world:
+    executor: db-executor
+    steps:
+      - run:
+          working_directory: ~/workbench/api
+          command: echo "hello ${JOEL_TEST_1}" > joel_test_1.txt
+      - store_artifacts:
+          path: ~/workbench/api/joel_test_1.txt
+          destination: joel-test-1
+
+  joel-creds-test:
+    executor: db-executor
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          working_directory: ~/workbench/api
+          command: mkdir -p artifacts
+      - run:
+          name: "Download test credential JSON"
+          working_directory: ~/workbench/api
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/app-engine-default-sa.json artifacts
+      - run:
+          name: "Download test credential vars"
+          working_directory: ~/workbench/api
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/vars.env artifacts
+      - run:
+          name: "Get db passwd"
+          working_directory: ~/workbench/api
+          command: echo ${WORKBENCH_DB_PASSWORD} > artifacts/dbpass.txt
+      - store_artifacts:
+          path: ~/workbench/api/artifacts
+          destination: artifacts
+
+  execute-cloud-db-command:
+    executor: db-executor
+    parameters:
+      env_project:
+        description: |
+          The Google project corresponding to the Workbench environment.
+          Currently implemented for Test only.
+        default: "all-of-us-workbench-test"
+        type: enum
+        enum: ["all-of-us-workbench-test"]
+      proxy_port:
+        description: the local port for running the GCloud sql proxy
+        type: integer
+        default: 3307
+      sql_command:
+        description: |
+          The command to execute in the RW DB.  With great power comes great responsibility.
+        type: string
+        default: "SELECT COUNT(*) FROM user;"  
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          name: Start Cloud Proxy
+          command: cloud_sql_proxy -instances << parameters.env_project >>:us-central1:workbenchmaindb=tcp:0.0.0.0:3007
+          background: true
+      - run:
+          name: Await Cloud Proxy startup
+          command: dockerize -wait tcp://0.0.0.0:3007 -timeout 2m
+      - run:
+          working_directory: ~/workbench/api
+          command: mkdir -p artifacts
+      - run:
+          working_directory: ~/workbench/api
+          name: Execute SQL
+          command: |
+            mysql --host=0.0.0.0 --port=3007 \
+              --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
+              -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
+      - store_artifacts:
+          path: ~/workbench/api/artifacts
+          destination: artifacts
+  
 
 workflows:
+  joel-workflow:
+    jobs:
+      - joel-creds-test
+      - execute-cloud-db-command:
+          sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-10' WHERE email LIKE 'joel@fake%';"
+        
+
   # build-test-deploy:
   #   jobs:
       # # Always run basic test/lint/compilation (open PRs, master branch merge)
