@@ -97,6 +97,9 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const { waitPageChange = true } = opts;
     const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
     const tabLink = new Link(this.page, selector);
+    if (!(await tabLink.exists())) {
+      throw new Error(`Failed to find and click \"${pageTabName}\" page tab.`);
+    }
     waitPageChange ? await tabLink.clickAndWait() : await tabLink.click();
     await tabLink.dispose();
     return waitWhileLoading(this.page);
@@ -105,19 +108,19 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   private async openDataSubtab(subtabName: TabLabels): Promise<void> {
     const tabXpath = buildXPath({ name: subtabName, type: ElementType.Tab });
     const tabLink = new Link(this.page, tabXpath);
-    if (await tabLink.exists()) {
-      await this.openTab(subtabName, { waitPageChange: false });
-      return waitWhileLoading(this.page);
-    } else {
-      // Try find and click Data tab if subtab is not found.
+    if (!(await tabLink.exists())) {
+      // Try find and click Data tab if the subtab is not found.
       const dataTabXpath = buildXPath({ name: TabLabels.Data, type: ElementType.Tab });
       const dataTabLink = new Link(this.page, dataTabXpath);
       if (await dataTabLink.exists()) {
-        return this.openDataPage();
+        // Find Data tab and click it.
+        await this.openDataPage();
       }
+      // else:
+      // Data tab not found. Let openTab func throws error.
     }
-    logger.error(`Failed to find and click ${subtabName} tab.`);
-    throw new Error(`Failed to find and click ${subtabName} tab.`);
+    // openTab func throws error if subtab are not found.
+    await this.openTab(subtabName, { waitPageChange: false });
   }
 
   /**
