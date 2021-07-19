@@ -13,20 +13,13 @@ import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
-import {HelpSidebarComponent} from './components/help-sidebar';
 import {AppComponent} from './pages/app/component';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
 
-import {FooterComponent} from 'app/components/footer';
-import {TextModalComponent} from 'app/components/text-modal';
-import {ZendeskWidgetComponent} from 'app/components/zendesk-widget';
-import {InactivityMonitorComponent} from 'app/pages/signed-in/inactivity-monitor';
-import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -48,14 +41,7 @@ import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
   declarations: [
     AppComponent,
     AppRouting,
-    FooterComponent,
-    HelpSidebarComponent,
-    InactivityMonitorComponent,
-    InitialErrorComponent,
-    NavBarComponent,
-    TextModalComponent,
-    WorkspaceNavBarComponent,
-    ZendeskWidgetComponent
+    InitialErrorComponent
   ],
   providers: [
     SignInService,

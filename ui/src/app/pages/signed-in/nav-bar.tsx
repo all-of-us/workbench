@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
@@ -7,7 +6,7 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
@@ -223,13 +222,3 @@ export const NavBar = () => {
     }
   </div>;
 };
-
-@Component({
-  selector: 'app-nav-bar',
-  template: '<div #root></div>'
-})
-export class NavBarComponent extends ReactWrapperBase {
-  constructor() {
-    super(NavBar, []);
-  }
-}

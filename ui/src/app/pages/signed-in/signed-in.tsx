@@ -108,20 +108,22 @@ export const SignedIn = (props: Props) => {
       // AppComponent should be loading the server config.
       if (serverConfig.config) {
         if (!profile) {
-          await profileStore.get().load();
+          profileStore.get().load();
+          return;
         }
         setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(profile.accessTierShortNames)) {
           if (!cdrVersions.tiers) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
+            return;
           }
         }
       }
     };
 
     checkStoresLoaded();
-  }, []);
+  }, [profileStore]);
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
