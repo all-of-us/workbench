@@ -59,8 +59,8 @@ export const SignedIn = (props: Props) => {
   const [hideFooter, setHideFooter] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
 
-  const serverConfig = useStore(serverConfigStore);
-  const cdrVersions = useStore(cdrVersionStore);
+  const {config} = useStore(serverConfigStore);
+  const {tiers} = useStore(cdrVersionStore);
   const {profile} = useStore(profileStore);
 
   useEffect(() => {
@@ -106,14 +106,14 @@ export const SignedIn = (props: Props) => {
      */
     const checkStoresLoaded = async() => {
       // AppComponent should be loading the server config.
-      if (serverConfig.config) {
+      if (config) {
         if (!profile) {
           profileStore.get().load();
           return;
         }
         setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(profile.accessTierShortNames)) {
-          if (!cdrVersions.tiers) {
+          if (!tiers) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
             return;
@@ -123,7 +123,7 @@ export const SignedIn = (props: Props) => {
     };
 
     checkStoresLoaded();
-  }, [profileStore]);
+  }, [profileStore, cdrVersionStore]);
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
