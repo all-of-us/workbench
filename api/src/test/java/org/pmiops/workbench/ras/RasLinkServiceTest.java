@@ -17,19 +17,26 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Random;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -38,6 +45,8 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -81,12 +90,15 @@ public class RasLinkServiceTest extends SpringTest {
 
   private long userId;
   private static DbUser currentUser;
+  private static List<DbAccessModule> accessModules;
 
   private RasLinkService rasLinkService;
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
+  @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Mock private static OpenIdConnectClient mockOidcClient;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static HttpTransport mockHttpTransport;
@@ -94,6 +106,9 @@ public class RasLinkServiceTest extends SpringTest {
 
   @TestConfiguration
   @Import({
+    AccessModuleServiceImpl.class,
+    UserAccessModuleMapperImpl.class,
+    CommonMappers.class,
     RasLinkService.class,
     UserServiceTestConfiguration.class,
   })
@@ -137,6 +152,12 @@ public class RasLinkServiceTest extends SpringTest {
     DbUser user() {
       return currentUser;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public List<DbAccessModule> getDbAccessModules() {
+      return accessModules;
+    }
   }
 
   @BeforeEach
@@ -149,6 +170,8 @@ public class RasLinkServiceTest extends SpringTest {
     currentUser.setDisabled(false);
     currentUser = userDao.save(currentUser);
     userId = currentUser.getUserId();
+
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -162,6 +185,14 @@ public class RasLinkServiceTest extends SpringTest {
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
+    assertThat(
+            userAccessModuleDao
+                .getByUserAndAccessModule(
+                    currentUser,
+                    accessModuleDao.findOneByName(AccessModuleName.RAS_LOGIN_GOV).get())
+                .get()
+                .getCompletionTime())
+        .isEqualTo(NOW);
   }
 
   @Test

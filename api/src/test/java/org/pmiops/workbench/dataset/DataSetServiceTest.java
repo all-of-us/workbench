@@ -334,7 +334,7 @@ public class DataSetServiceTest extends SpringTest {
                 + "and concept_id in (3, 2, 1, 6, 5, 4)\n"
                 + "and is_selectable = 1\n"
                 + "and full_text like '%[condition_rank1]%') a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
                 + "where domain_id = 'CONDITION'\n"
                 + "and is_standard = 1\n"
                 + "and is_selectable = 1))");
@@ -359,7 +359,7 @@ public class DataSetServiceTest extends SpringTest {
                 + "and concept_id in (3, 2, 1)\n"
                 + "and is_selectable = 1\n"
                 + "and full_text like '%[condition_rank1]%') a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%') or c.path = a.id)\n"
                 + "where domain_id = 'CONDITION'\n"
                 + "and is_standard = 1\n"
                 + "and is_selectable = 1))");

@@ -92,7 +92,7 @@ public final class SearchGroupItemQueryBuilder {
           + "and concept_id in unnest(%s)\n"
           + "and is_selectable = 1\n"
           + "and full_text like %s) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%'))\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and is_selectable = 1)";
@@ -108,7 +108,7 @@ public final class SearchGroupItemQueryBuilder {
           + "and concept_id in unnest(%s)\n"
           + "and is_selectable = 1\n"
           + "and full_text like %s) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%') or c.path = a.id)\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";

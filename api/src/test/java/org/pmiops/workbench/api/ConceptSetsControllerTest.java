@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -207,6 +208,7 @@ public class ConceptSetsControllerTest extends SpringTest {
     AccessTierServiceImpl.class,
   })
   @MockBean({
+    AccessModuleService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,

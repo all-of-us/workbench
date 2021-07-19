@@ -14,10 +14,10 @@ export const toolTipTextDemographic = 'For example, by stratifying results based
     'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
     'education level, or income\n';
 
-export const toolTipTextDataUseAgreement = <div>These steps include, but are not limited to:
+export const toolTipTextDucc = <div>These steps include, but are not limited to:
   <ul>
     <li>Giving careful consideration to the sensibilities of the different groups of people you are studying.</li>
-    <li> Ensuring that you understand, and suitably wield, your analytical tools.</li>
+    <li>Ensuring that you understand, and suitably wield, your analytical tools.</li>
     <li>Being conscientiously expansive in your inclusion of participant populations and your analytical controls. </li>
     <li>Using precise language to describe your findings including both what your results mean and do not mean.</li>
   </ul>
@@ -220,9 +220,9 @@ export const researchPurposeQuestions: Array<ResearchPurposeQuestion> = [
       <div>in analyses can result, often unintentionally, in findings that may be misinterpreted or
       misused by others to foster stigma. While it may not be possible to completely prevent misuse
       of research for stigmatizing purposes, data users can take important steps to minimize the
-        risk of this happening–</div>
-      <TooltipTrigger content={toolTipTextDataUseAgreement}>
-        <div>taking this step is a condition of your Data Use Agreement.</div>
+      risk of this happening–taking this step is a condition of your</div>
+      <TooltipTrigger content={toolTipTextDucc}>
+        <div> Data User Code of Conduct agreement. </div>
       </TooltipTrigger>
       <div>If you are concerned that your research could inadvertently stigmatize participants
       or communities, or if you are unsure, let us know. We encourage you to request a review of

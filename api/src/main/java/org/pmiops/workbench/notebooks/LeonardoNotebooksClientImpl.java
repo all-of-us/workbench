@@ -128,6 +128,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
+    } else if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
       return leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
     }

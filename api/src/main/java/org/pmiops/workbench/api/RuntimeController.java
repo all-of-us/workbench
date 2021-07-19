@@ -252,12 +252,17 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
-      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    long configCount =
+        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
+            .filter(c -> c != null)
+            .count();
+    if (configCount != 1) {
+      throw new BadRequestException(
+          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
-    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
-      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
+    if (runtime.getGceWithPdConfig() != null) {
+      runtime.getGceWithPdConfig().getPersistentDisk().setName(userProvider.get().getPDName());
     }
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);

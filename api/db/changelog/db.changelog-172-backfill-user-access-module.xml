@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="changelog-172-backfill-user-access-module">
+    <!--Remove everything before backfill-->
+    <sql>
+      DELETE from user_access_module WHERE true
+    </sql>
+    <addUniqueConstraint tableName="user_access_module"
+      columnNames="user_id, access_module_id"
+      constraintName="user_access_module_unique_name_per_user_per_module"/>
+    <!--Back fill ERA_COMMONS module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time, bypass_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.era_commons_completion_time AS completion_time,
+      u.era_commons_bypass_time AS bypass_time
+      FROM user u, access_module a
+      WHERE a.name = 'ERA_COMMONS'
+    </sql>
+    <!--Back fill TWO_FACTOR_AUTH module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time, bypass_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.two_factor_auth_completion_time AS completion_time,
+      u.two_factor_auth_bypass_time AS bypass_time
+      FROM user u, access_module a
+      WHERE a.name = 'TWO_FACTOR_AUTH'
+    </sql>
+    <!--Back fill RAS_LOGIN_GOV module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time, bypass_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.ras_link_login_gov_completion_time AS completion_time,
+      u.ras_link_login_gov_bypass_time AS bypass_time
+      FROM user u, access_module a
+      WHERE a.name = 'RAS_LOGIN_GOV'
+    </sql>
+    <!--Back fill RT_COMPLIANCE_TRAINING module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time, bypass_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.compliance_training_completion_time AS completion_time,
+      u.compliance_training_bypass_time AS bypass_time
+      FROM user u, access_module a
+      WHERE a.name = 'RT_COMPLIANCE_TRAINING'
+    </sql>
+    <!--Back fill DATA_USER_CODE_OF_CONDUCT module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time, bypass_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.data_use_agreement_completion_time AS completion_time,
+      u.data_use_agreement_bypass_time AS bypass_time
+      FROM user u, access_module a
+      WHERE a.name = 'DATA_USER_CODE_OF_CONDUCT'
+    </sql>
+    <!--Back fill PROFILE_CONFIRMATION module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.profile_last_confirmed_time AS completion_time
+      FROM user u, access_module a
+      WHERE a.name = 'PROFILE_CONFIRMATION'
+    </sql>
+    <!--Back fill PUBLICATION_CONFIRMATION module-->
+    <sql>
+      INSERT INTO user_access_module
+      (user_id, access_module_id, completion_time)
+      SELECT
+      u.user_id,
+      a.access_module_id,
+      u.publications_last_confirmed_time AS completion_time
+      FROM user u, access_module a
+      WHERE a.name = 'PUBLICATION_CONFIRMATION'
+    </sql>
+  </changeSet>
+</databaseChangeLog>

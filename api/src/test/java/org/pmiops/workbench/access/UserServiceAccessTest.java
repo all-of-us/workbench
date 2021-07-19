@@ -39,6 +39,7 @@ import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -84,6 +85,9 @@ public class UserServiceAccessTest {
   @Import({
     UserServiceTestConfiguration.class,
     AccessTierServiceImpl.class,
+    AccessModuleServiceImpl.class,
+    UserAccessModuleMapperImpl.class,
+    CommonMappers.class,
   })
   @MockBean({
     ComplianceService.class,

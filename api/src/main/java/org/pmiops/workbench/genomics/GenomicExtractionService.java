@@ -31,6 +31,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
@@ -141,6 +143,11 @@ public class GenomicExtractionService {
                           // Extraction submissions should only have one workflow.
                           firecloudSubmission.getWorkflows().get(0).getStatus());
                   dbSubmission.setTerraStatusEnum(status);
+
+                  if (TerraJobStatus.SUCCEEDED.equals(status)) {
+                    dbSubmission.setVcfSizeMb(getWorkflowSize(firecloudSubmission));
+                  }
+
                   if (isTerminal(status)) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
@@ -155,6 +162,37 @@ public class GenomicExtractionService {
               }
             })
         .collect(Collectors.toList());
+  }
+
+  private Long getWorkflowSize(FirecloudSubmission firecloudSubmission) throws ApiException {
+    final FirecloudWorkflowOutputsResponse outputsResponse =
+        submissionApiProvider
+            .get()
+            .getWorkflowOutputs(
+                workbenchConfigProvider.get()
+                    .wgsCohortExtraction
+                    .operationalTerraWorkspaceNamespace,
+                workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
+                firecloudSubmission.getSubmissionId(),
+                firecloudSubmission.getWorkflows().get(0).getWorkflowId());
+
+    final Optional<FirecloudWorkflowOutputs> workflowOutputs =
+        Optional.ofNullable(outputsResponse.getTasks().get(EXTRACT_WORKFLOW_NAME));
+
+    if (workflowOutputs.isPresent()) {
+      final Optional<Object> vcfSizeMbOutput =
+          Optional.ofNullable(
+              workflowOutputs
+                  .get()
+                  .getOutputs()
+                  .get(EXTRACT_WORKFLOW_NAME + ".total_vcfs_size_mb"));
+
+      if (vcfSizeMbOutput.isPresent() && vcfSizeMbOutput.get() instanceof Double) {
+        return Math.round((Double) vcfSizeMbOutput.get());
+      }
+    }
+
+    return null;
   }
 
   public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
@@ -222,9 +260,6 @@ public class GenomicExtractionService {
                                 EXTRACT_WORKFLOW_NAME + ".gvs_dataset",
                                 "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + "\"")
                             .put(
-                                EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_cohorts_dataset",
-                                "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
-                            .put(
                                 EXTRACT_WORKFLOW_NAME + ".fq_gvs_extraction_destination_dataset",
                                 "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
                             .put(
@@ -251,7 +286,7 @@ public class GenomicExtractionService {
                             .put(EXTRACT_WORKFLOW_NAME + ".output_gcs_dir", "\"" + outputDir + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar\"")
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.2.0.0-359-gb3f0558-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
