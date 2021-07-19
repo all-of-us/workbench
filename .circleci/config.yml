@@ -612,8 +612,61 @@ jobs:
           paths:
             - .
 
+  execute-cloud-db-command:
+    executor: db-executor
+    parameters:
+      env_project:
+        description: |
+          The Google project corresponding to the Workbench environment.
+          Currently implemented for Test only.
+        default: "all-of-us-workbench-test"
+        type: enum
+        enum: ["all-of-us-workbench-test"]
+      proxy_host:
+        description: the IP where we're running the Google Cloud sql proxy
+        type: string
+        default: 0.0.0.0
+      proxy_port:
+        description: the local port for running the Google Cloud sql proxy
+        type: integer
+        default: 3307
+      sql_command:
+        description: The command to execute in the RW DB.  With great power comes great responsibility.
+        type: string
+        default: "SELECT COUNT(*) FROM user;"  
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          name: Start Cloud Proxy
+          command: cloud_sql_proxy -instances << parameters.env_project >>:us-central1:workbenchmaindb=tcp:<< parameters.proxy_host >>:<< parameters.proxy_port >>
+          background: true
+      - run:
+          name: Await Cloud Proxy startup
+          command: dockerize -wait tcp://<< parameters.proxy_host >>:<< parameters.proxy_port >> -timeout 2m
+      - run:
+          working_directory: ~/workbench/api
+          command: mkdir -p artifacts
+      - run:
+          working_directory: ~/workbench/api
+          name: Execute SQL
+          command: |
+            mysql --host=<< parameters.proxy_host >> --port=<< parameters.proxy_port >> \
+              --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
+              -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
+      - store_artifacts:
+          path: ~/workbench/api/artifacts
+          destination: artifacts
 
 workflows:
+  joel-db-write:
+    jobs:
+      - execute-cloud-db-command:
+          sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-05' WHERE email LIKE 'joel@fake%';"
+        
+
   # build-test-deploy:
   #   jobs:
       # # Always run basic test/lint/compilation (open PRs, master branch merge)
