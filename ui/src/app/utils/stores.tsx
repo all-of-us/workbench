@@ -154,9 +154,26 @@ export const navigationGuardStore = atom<NavigationGuardStore>({});
  */
 export function useStore<T>(theStore: Atom<T>) {
   const [value, setValue] = useState(theStore.get());
+  console.log(theStore.get());
+  if (theStore === routeDataStore) {
+    console.log(value);
+  };
   useEffect(() => {
-    return theStore.subscribe(v => setValue(v)).unsubscribe;
+    if (theStore === routeDataStore) {
+      console.log("Adding Route Data Store sub")
+    }
+
+    return theStore.subscribe(v => {
+      if (v && v.pageKey) {
+        console.log("Setting value from store subscription ", v);
+      }
+      setValue(v);
+    }).unsubscribe;
   }, [theStore]);
+
+  if (theStore === routeDataStore) {
+    console.log(value);
+  };
   return value;
 }
 
@@ -168,6 +185,9 @@ export const withStore = (theStore, name) => WrappedComponent => {
   return (props) => {
     const value = useStore(theStore);
     const storeProp = {[name]: value};
+    if (name === 'routeData') {
+      console.log(value);
+    }
     return <WrappedComponent {...props} {...storeProp}/> ;
   };
 };

@@ -200,6 +200,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   render() {
+    console.log("Rendering about page");
+
     const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>

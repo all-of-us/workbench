@@ -36,15 +36,20 @@ export function subscribable<T>(): Subscribable<T> {
   return {
     subscribe: fn => {
       subscribers = fp.concat(subscribers, [fn]);
+      console.log("Added sub ", subscribers);
       return {
         unsubscribe: () => {
+          console.log(subscribers);
           subscribers = fp.without([fn], subscribers);
+          console.log(subscribers);
         }
       };
     },
     next: (newValue?: T, oldValue?: T) => {
       fp.forEach((fn: subscriber) => setTimeout(
         () => {
+//          console.log(fn);
+          console.log("Calling sub ", subscribers);
           try {
             fn(newValue, oldValue);
           } catch (e) {
@@ -61,10 +66,18 @@ export function subscribable<T>(): Subscribable<T> {
 export function atom<T>(initialValue: T): Atom<T> {
   let value = initialValue;
   const { subscribe, next } = subscribable<T>();
-  const get = () => value;
+  const get = () => {
+    if (value && value.pageKey) {
+      console.log(value);
+    }
+    return value;
+  }
   const set = newValue => {
     const oldValue = value;
     value = newValue;
+    if (newValue && newValue.pageKey) {
+      console.log(newValue, oldValue);
+    }
     next(newValue, oldValue);
   };
   return { subscribe, get, set, reset: () => set(initialValue) };

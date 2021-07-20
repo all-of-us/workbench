@@ -83,6 +83,7 @@ interface RoutingProps {
 }
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
+  console.log("Rendering AppRouting");
   const {authLoaded = false} = useStore(authStore);
 
   return authLoaded && <React.Fragment>
@@ -232,6 +233,8 @@ export class AppRouting extends ReactWrapperBase {
     super(AppRoutingComponent, ['onSignIn', 'signIn']);
     this.onSignIn = this.onSignIn.bind(this);
     this.signIn = this.signIn.bind(this);
+
+    console.log("Angular rendering AppRouting");
   }
 
   onSignIn(): void {
