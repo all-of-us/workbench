@@ -54,7 +54,7 @@ import {
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+import {getBillingAccountInfo, ensureBillingScope} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -317,6 +317,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async fetchBillingAccounts() {
+      await ensureBillingScope()
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {

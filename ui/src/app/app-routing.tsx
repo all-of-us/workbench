@@ -35,6 +35,7 @@ import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {BillingDashboardComponent} from "./pages/billing/billing-dasboard";
 
 
 const signInGuard: Guard = {
@@ -76,6 +77,7 @@ const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEd
 const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceLibrary);
 const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
 const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspaceSearch);
+const BillingDashboardPage = fp.flow(withRouteData, withRoutingSpinner)(BillingDashboardComponent);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -217,6 +219,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               path='/workspaces/:ns/:wsid'
               exact={false}
               component={() => <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>}
+          />
+          <AppRoute
+              path='/billing'
+              exact={false}
+              component={() => <BillingDashboardPage intermediaryRoute={true} routeData={{}}/>}
           />
         </ProtectedRoutes>
       </ProtectedRoutes>

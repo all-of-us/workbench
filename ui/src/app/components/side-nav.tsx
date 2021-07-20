@@ -133,6 +133,10 @@ const profileActive = () =>  {
   return window.location.pathname === '/profile';
 };
 
+const billingActive = () =>  {
+  return window.location.pathname === '/billing';
+};
+
 interface SideNavItemProps {
   icon?: string;
   hasProfileImage?: boolean;
@@ -262,6 +266,14 @@ export const SideNav = (props: SideNavProps) => {
           onToggleSideNav={() => onToggleSideNav()}
           href='/profile'
           active={profileActive()}
+      />
+    }
+    {
+      showUserOptions && <SideNavItem
+          content={'Billing'}
+          onToggleSideNav={() => onToggleSideNav()}
+          href='/billing'
+          active={billingActive()}
       />
     }
     {
