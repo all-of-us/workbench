@@ -100,7 +100,6 @@ export class AppComponent implements OnInit, OnDestroy {
         const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
         urlParamsStore.next(params);
         queryParamsStore.next(queryParams);
-        routeConfigDataStore.next(routeConfig.data);
       }
     }));
 
