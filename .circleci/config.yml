@@ -333,6 +333,7 @@ jobs:
   wait_until_previous_workflow_done:
     executor: workbench-executor
     steps:
+      - checkout-code
       - run:
           command: bash .circleci/workflow-queue-v1.sh
           name: "Wait until all previously submitted builds to complete."
