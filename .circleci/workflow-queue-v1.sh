@@ -23,7 +23,7 @@ sleep_time=30
 # FUNCTIONS
 # *******************
 
-# CIRCLECI_TOKEN is a env variable whose value is personal token.
+# CIRCLECI_API_TOKEN is a env variable whose value is project token.
 # See https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
 check_circleci_token() {
   if [[ ! $CIRCLECI_API_TOKEN ]]; then

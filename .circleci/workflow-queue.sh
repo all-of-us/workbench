@@ -63,7 +63,7 @@ circle_get() {
 fetch_current_pipeline() {
   local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
   local get_result=$(circle_get "${get_path}")
-  __=$(echo $get_result | jq .)
+  __=$(echo "$get_result" | jq .)
 }
 
 # 'pipeline' api returns list of recent pipelines on all branches (PR, build-test-deploy and releases).
@@ -82,9 +82,9 @@ fetch_pipeline_ids() {
 
   # jq filter out pipelines that were submitted after the current pipeline and not on master branch.
   # Don’t count the current pipeline that is doing the poll.
-  jq_filter="[.items[] | select(.number < "${1}" and .vcs.branch==\"${branch}\")]"
+  jq_filter="[.items[] | select(.number < ${1} and .vcs.branch==\"${branch}\")]"
   length=$(echo "${get_result}" | jq "${jq_filter} | length")
-  printf "%s\n" "pipelines size: ${length}"
+  printf "%s\n\n" "pipelines size: ${length}"
 
   echo "${get_result}" | jq "${jq_filter}[] | {created_at: .created_at, id: .id, number: .number}" >"${pipeline_json}"
   cat ${pipeline_json}
@@ -117,11 +117,11 @@ current_pipeline_num=$(echo "${current_pipeline_json}" | jq -r '.pipeline_number
 current_created_time=$(echo "${current_pipeline_json}" | jq -r '.created_at')
 printf "%s\n\n" "${current_pipeline_json}"
 
-# Get all recently submitted pipelines (including finished and ongoing pipelines) on all branches.
+# Get all recently submitted pipelines.
 fetch_pipeline_ids "${current_pipeline_num}"
 pipelines=$__
 # Parse out IDs.
-pipeline_ids=$(jq '. | .id' ${pipelines} | jq -r @sh)
+pipeline_ids=$(jq '. | .id' "${pipelines}" | jq -r @sh)
 
 # Check workflow status in each pipeline. Wait while workflow status is running or failing.
 wait="30s"
