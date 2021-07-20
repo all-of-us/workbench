@@ -20,6 +20,7 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
+import {BillingDashboardComponent} from "./pages/billing/billing-dasboard";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
