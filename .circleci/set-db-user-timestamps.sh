@@ -35,10 +35,7 @@ declare -a COMMANDS=(
 
 for SQL_COMMAND in "${COMMANDS[@]}"
 do
-   echo mysql --host=${PROXY_HOST} --port=${PROXY_PORT} \
-              --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
-              -e "${SQL_COMMAND}";
-   mysql --host=${PROXY_HOST} --port=${PROXY_PORT} \
-              --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
-              -e "${SQL_COMMAND}"
+  mysql --host=${PROXY_HOST} --port=${PROXY_PORT} \
+    --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
+    -e "${SQL_COMMAND}"
 done
