@@ -686,9 +686,6 @@ jobs:
           working_directory: ~/workbench/api
           name: Execute SQL
           command: |
-            echo mysql --host=0.0.0.0 --port=3007 \
-              --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
-              -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
             mysql --host=0.0.0.0 --port=3007 \
               --user=workbench --database=workbench --password=${WORKBENCH_DB_WRITE_PASSWORD} \
               -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
