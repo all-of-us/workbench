@@ -639,7 +639,6 @@ jobs:
           at: .
       - gcloud-auth-login
       - run:
-          working_directory: ~/workbench/api
           name: Execute SQL Commands
           command: |
             bash .circleci/set-db-user-timestamps.sh << parameters.env_project >> << parameters.user_id >>
