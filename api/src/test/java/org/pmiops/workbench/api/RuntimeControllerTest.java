@@ -1138,7 +1138,7 @@ public class RuntimeControllerTest extends SpringTest {
 
   @Test
   public void testDeleteRuntime() throws ApiException {
-    runtimeController.deleteRuntime(WORKSPACE_NS);
+    runtimeController.deleteRuntime(WORKSPACE_NS, false);
     verify(userRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
   }
 

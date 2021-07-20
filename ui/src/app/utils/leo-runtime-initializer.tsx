@@ -224,7 +224,7 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime delete count (${this.maxDeleteCount})`, this.currentRuntime);
     }
-    await runtimeApi().deleteRuntime(this.workspaceNamespace, {signal: this.pollAbortSignal});
+    await runtimeApi().deleteRuntime(this.workspaceNamespace, false, {signal: this.pollAbortSignal});
     this.deleteCount++;
   }
 

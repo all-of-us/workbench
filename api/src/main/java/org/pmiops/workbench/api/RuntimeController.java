@@ -310,14 +310,17 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
+  public ResponseEntity<EmptyResponse> deleteRuntime(
+      String workspaceNamespace, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(
-        dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
+        dbWorkspace.getGoogleProject(),
+        userProvider.get().getRuntimeName(),
+        Optional.ofNullable(deleteDisk).orElse(false));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
