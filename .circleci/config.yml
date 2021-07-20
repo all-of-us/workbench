@@ -698,8 +698,10 @@ workflows:
   joel-workflow:
     jobs:
       - joel-creds-test
-      - execute-cloud-db-command
-      
+      - execute-cloud-db-command:
+          sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-10' WHERE email LIKE 'joel@fake%';"
+        
+
   # build-test-deploy:
   #   jobs:
       # # Always run basic test/lint/compilation (open PRs, master branch merge)
