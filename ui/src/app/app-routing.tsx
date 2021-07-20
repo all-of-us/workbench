@@ -2,6 +2,7 @@ import {Component as AComponent} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {Switch} from 'react-router-dom';
 
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
 import {NotificationModal} from 'app/components/modals';
@@ -44,38 +45,40 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     <AppRouter>
-      <AppRoute
-          path='/cookie-policy'
-          component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-      />
-      <AppRoute
-          path='/login'
-          component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-      />
-      <AppRoute
-          path='/session-expired'
-          component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-      />
-      <AppRoute
-          path='/sign-in-again'
-          component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-      />
-      <AppRoute
-          path='/user-disabled'
-          component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-      />
-      <ProtectedRoutes guards={[signInGuard]}>
+      <Switch>
         <AppRoute
-            path=''
-            exact={false}
-            component={() => <SignedInPage
-                intermediaryRoute={true}
-                routeData={{}}
-                subscribeToInactivitySignOut={subscribeToInactivitySignOut}
-                signOut={signOut}
-            />}
+            path='/cookie-policy'
+            component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
         />
-      </ProtectedRoutes>
+        <AppRoute
+            path='/login'
+            component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+        />
+        <AppRoute
+            path='/session-expired'
+            component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+        />
+        <AppRoute
+            path='/sign-in-again'
+            component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+        />
+        <AppRoute
+            path='/user-disabled'
+            component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+        />
+        <ProtectedRoutes guards={[signInGuard]}>
+          <AppRoute
+              path=''
+              exact={false}
+              component={() => <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                  signOut={signOut}
+              />}
+          />
+        </ProtectedRoutes>
+      </Switch>
     </AppRouter>
   </React.Fragment>;
 };
