@@ -2861,30 +2861,6 @@ paths:
           description: Whether the email is a valid member of the institution.
           schema:
             "$ref": "#/definitions/CheckEmailResponse"
-  "/v1/institutions/{shortName}/checkEmail/{email}/":
-    parameters:
-      - in: path
-        name: shortName
-        type: string
-        description: 'The short name / key of the institution to check, e.g. "VUMC"'
-        required: true
-      - in: path
-        name: email
-        type: string
-        description: Institutional contact email address to check.
-        required: true
-    get:
-      tags:
-        - institution
-      operationId: deprecatedCheckEmail
-      description: Checks whether the given email address is a verified member of an institution. DEPRECATED in favor of the POST endpoint.
-      x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
-      security: []
-      responses:
-        200:
-          description: Whether the email is a valid member of the institution.
-          schema:
-            "$ref": "#/definitions/CheckEmailResponse"
   "/v1/institutions/instructionsEmail":
     post:
       tags:
