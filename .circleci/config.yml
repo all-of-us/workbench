@@ -334,7 +334,6 @@ jobs:
     executor: workbench-executor
     steps:
       - run:
-          working_directory: ~/workbench
           command: bash .circleci/workflow-queue-v1.sh
           name: "Wait until all previously submitted builds to complete."
 
