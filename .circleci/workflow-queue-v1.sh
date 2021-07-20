@@ -54,14 +54,14 @@ circle_get() {
 # Function returns json object.
 fetch_pipelines() {
   printf '%s\n' "Recently submitted pipelines on \"${branch}\" branch that are running, pending or queued:"
-  local get_path="project/${project_slug}?filter=running"
+  local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
   if [[ ! "${get_result}" ]]; then
     printf "curl failed."
     exit 1
   fi
   echo "${get_result}" | jq ".[] | select(.branch==\"${branch}\")"
-  __=$(echo "${get_result}" | jq -r ".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\"))) | select(.branch==\"${branch}\") | .build_num | @sh")
+  __=$(echo "${get_result}" | jq -r ".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\"))) | select(.branch==\"${branch}\") | select(.workflows.workflow_name=\"${workflow_name}\") | .build_num | @sh")
 }
 
 
