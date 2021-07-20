@@ -612,6 +612,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     DbWorkspace workspace = workspaceDao.getRequired(ns, id);
+
+    // RW-7087 replace with a new workspaceAuditor action (fireReviewAction?)
+    // because this uses the deprecated DbAdminActionHistory
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",

@@ -718,12 +718,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void logAdminUserAction(
-      long targetUserId, String targetAction, Object oldValue, Object newValue) {
-    logAdminAction(targetUserId, null, targetAction, oldValue, newValue);
-  }
-
-  @Override
   public void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);

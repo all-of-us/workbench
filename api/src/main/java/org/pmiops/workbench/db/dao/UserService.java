@@ -78,9 +78,6 @@ public interface UserService {
   List<DbUser> getAllUsersExcludingDisabled();
 
   @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
-  void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
-
-  @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
 
