@@ -555,45 +555,6 @@ paths:
       summary: enable/disable a user to an auth domain if you have ID verification
         authority
       operationId: updateUserDisabledStatus
-  "/v1/user/{term}":
-    get:
-      tags:
-      - user
-      description: >
-        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
-        Return a page of users matching a search term.
-        Used by autocomplete for workspace sharing.
-      operationId: user
-      responses:
-        200:
-          description: The user information matching supplied search terms
-          schema:
-            "$ref": "#/definitions/UserResponse"
-      parameters:
-      - in: path
-        name: term
-        description: String to find in user's name or email address. Search is a case-insensitive
-          substring match.
-        required: true
-        type: string
-      - in: query
-        name: pageToken
-        description: 'Pagination token retrieved from a previous call to user; used
-          for retrieving additional pages of results.'
-        type: string
-        required: false
-      - in: query
-        name: pageSize
-        description: 'Maximum number of results to return in a response. Defaults
-          to 10.'
-        type: integer
-        required: false
-      - in: query
-        name: sortOrder
-        description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
-          user's email.
-        type: string
-        required: false
   "/v1/userSearch/{accessTierShortName}/{term}":
     get:
       tags:
