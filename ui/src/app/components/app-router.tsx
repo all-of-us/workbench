@@ -43,7 +43,7 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
 };
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
-export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{children}</BrowserRouter>;
+export const AppRouter = ({children}): React.ReactElement => <BrowserRouter><Switch>{children}</Switch></BrowserRouter>;
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
