@@ -27,7 +27,14 @@ sleep_time=30
 # See https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
 check_circleci_token() {
   if [[ ! $CIRCLECI_TOKEN ]]; then
-    printf '%s\n' "Required env variable \"CIRCLECI_TOKEN\" is not found.\n Create a personal token then create \"CIRCLECI_TOKEN\" env variable?\n" >&2
+    printf '%s\n' "Required env variable \"CIRCLECI_TOKEN\" is not found.\n Create a personal token then create \"CIRCLECI_TOKEN\" env variable?" >&2
+    exit 1
+  fi
+}
+
+check_circleci_workflow_id() {
+  if [[ ! $CIRCLE_WORKFLOW_ID ]]; then
+    printf '%s\n' "Required env variable \"CIRCLE_WORKFLOW_ID\" is not found." >&2
     exit 1
   fi
 }
@@ -51,8 +58,21 @@ circle_get() {
     "${url}"
 }
 
-# Get list of recently built pipelines. Returns a json object.
+# Get pipeline that is doing the poll.
+# Returns json object.
+fetch_current_pipeline() {
+  printf "%s\n" "CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
+  local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
+  local get_result=$(circle_get "${get_path}")
+  __=$(echo $get_result | jq .)
+}
+
+# 'pipeline' api returns list of recent pipelines on all branches (PR, build-test-deploy and releases).
+# We should consider blocking only if job is running on "master" branch.
+# Release pipelines and PR pipelines are not considered for blocking.
+# Function returns json object.
 fetch_pipeline_ids() {
+  printf '%s\n' "Recently submitted pipelines on \"${branch}\" branch:"
   pipeline_json="/tmp/master_branch_pipelines.json"
   local get_path="pipeline?org-slug=${project_slug}"
   local get_result=$(circle_get "${get_path}")
@@ -60,8 +80,7 @@ fetch_pipeline_ids() {
     printf "curl failed."
     exit 1
   fi
-  echo "${get_result}" | jq "[.items[] | select(.vcs.branch==\"${branch}\")][] | {created_at: .created_at, id: .id, number: .number}" > "${pipeline_json}"
-  printf "Found following pipelines on \"${branch}\" branch:\n"
+  echo "${get_result}" | jq "[.items[] | select(.vcs.branch==\"${branch}\")][] | {created_at: .created_at, id: .id, number: .number}" >"${pipeline_json}"
   cat ${pipeline_json}
   printf "\n"
   __=$(echo "${pipeline_json}")
@@ -75,74 +94,59 @@ fetch_pipeline_number() {
   __=$(echo "${get_result}" | jq -r .number)
 }
 
-# https://circleci.com/docs/2.0/workflows/#states
-# v2 workflow api tells status, but not the pipeline api.
-fetch_workflow_status() {
-  # Remove double or single quotes.
-  local id=$(echo "${1}" | xargs echo)
-  local get_path="pipeline/${id}/workflow"
-  local get_result=$(circle_get "${get_path}")
-  local workflow_summary=$(echo "${get_result}" | jq ".items[] | {name: .name, id: .id, status: .status, pipeline_number: .pipeline_number}")
-  printf "${workflow_summary}\n"
-  # Rerunning a failed workflow produces a nested datetime sorted array. Get the status of latest run (first array element).
-  __=$(echo "${get_result}" | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .status | @sh")
-}
-
-# '/v2/pipeline' api retrieves all recent pipelines on all branches (PR, build-test-deploy and releases).
-# We should consider blocking only if job is running on "master" branch.
-# Release pipelines and PR pipelines are not considered for blocking.
-should_skip_pipeline() {
-  # Pipelines on non-master branches are not considered.
-  if [[ $CIRCLE_BRANCH && "$CIRCLE_BRANCH" != "master" ]]; then
-    printf "Not on master branch.\n"
-    return 0
-  fi
-
-  # Ensure we don’t count the current pipeline that is doing the poll.
-  # Compare pipeline number to ensure two pipelines are different.
-  # The current workflow id is available as built-in environment variable CIRCLE_WORKFLOW_ID. It's used to get pipeline number.
-  local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
-  local get_result=$(circle_get "${get_path}")
-  this_pipeline_num=$(echo "${get_result}" | jq -r '.pipeline_number')
-  if [[ "$this_pipeline_num" == "$1" ]]; then
-    printf '%s\n' "Not waiting on own pipeline (pipeline id: \"${this_pipeline_num}\").\n" >&2
-    return 0
-  fi
-  return 1
-}
 
 #********************
 # RUNNING
 # *******************
 
-printf "\n"
 check_circleci_token
+check_circleci_workflow_id
+printf "\n"
 
-# Get recently submitted pipelines (including finished and ongoing pipelines) on all branches.
+# Get pipeline that is doing the polling.
+printf "%s\n" "Current pipeline:"
+fetch_current_pipeline
+current_pipeline_json=$__
+current_pipeline_num=$(echo "${current_pipeline_json}" | jq -r '.pipeline_number')
+current_created_time=$(echo "${current_pipeline_json}" | jq -r '.created_at')
+printf "%s\n\n" "${current_pipeline_json}"
+
+# Get all recently submitted pipelines (including finished and ongoing pipelines) on all branches.
 fetch_pipeline_ids
-# Save returned json object.
-ids=$__
-# Get IDs.
-pipeline_ids=$(jq '. | .id' ${ids} | jq -r @sh)
+pipelines=$__
+# Parse out IDs.
+pipeline_ids=$(jq '. | .id' ${pipelines} | jq -r @sh)
 
 # Check workflow status in each pipeline. Wait while workflow status is running or failing.
 wait="30s"
 IFS=$'\n'
 for id in ${pipeline_ids}; do
-  printf "********   \n"
+  printf "********\n"
+  id=$(echo "${id}" | xargs echo)
+
   fetch_pipeline_number "${id}"
   pipeline_num=$__
-  if should_skip_pipeline "${pipeline_num}"; then
+
+  # Ensure we don’t count the current pipeline that is doing the poll.
+  # The current workflow id is available as built-in environment variable CIRCLE_WORKFLOW_ID. It's used to get pipeline number.
+  if [[ "$current_pipeline_num" == "$pipeline_num" ]]; then
+    printf '%s\n' "Pipeline \"${current_pipeline_num}\" is the current pipeline that is doing the polling."
+    printf '%s\n\n' "Continue to check next pipeline."
     continue
   fi
 
   is_running=true
   waited_time=0
+
   printf "%s\n" "Polling pipeline \"${pipeline_num}\" while status is failing or running. Max wait time is ${max_time} seconds. Please wait..."
   while [[ "${is_running}" == "true" ]]; do
-    # Getting pipeline's workflow status.
-    fetch_workflow_status "${id}"
-    status=$__
+    get_path="pipeline/${id}/workflow"
+    request_result=$(circle_get "${get_path}")
+    workflow_summary=$(echo "${request_result}" | jq '.items[]')
+    printf "%s\n" "${workflow_summary}"
+
+    status=$(echo "${request_result}" | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .status | @sh")
+    created_time=$(echo "${request_result}" | jq -r "first(.items[]) | select(.name==\"${workflow_name}\") | .created_at | @sh")
 
     if [[ -z "$status" ]]; then
       # $status is blank because this workflow name does not match $workflow_name variable.
@@ -150,15 +154,23 @@ for id in ${pipeline_ids}; do
       break # Break out while loop. check next pipeline.
     fi
 
-    # An active workflow has running or failing status.
-    if [[ ("${status}" == "'running'") || ("${status}" == "'failing'") ]]; then
-      printf "%s\n" "sleeping ${wait} seconds (workflow status is ${status})."
-      sleep $sleep_time
-      waited_time=$((sleep_time + waited_time))
+    # Include only pipelines that were submitted before the current pipeline that is doing the polling.
+    if [[ "$current_created_time" > "$created_time" ]]; then
+      # An active workflow has running or failing status.
+      if [[ ("${status}" == "'running'") || ("${status}" == "'failing'") ]]; then
+        printf "%s\n" "sleeping ${wait} seconds (workflow status is ${status})."
+        sleep $sleep_time
+        waited_time=$((sleep_time + waited_time))
+      else
+        printf "%s\n" "Finished polling. workflow status is ${status}!"
+        is_running=false
+      fi
     else
-      printf "%s\n" "Finished polling for status of workflow \"${workflow_name}\" in pipeline_id: ${id}. It finished with status of ${status}!"
-      is_running=false
+      # Break out while loop if time of compare to workflow is not earlier than the workflow that is polling.
+      printf "%s\n\n" "pipeline \"${pipeline_num}\" is not a workflow which was submitted before this polling pipeline \"${current_pipeline_num}\"."
+      break # Break out while loop. check next pipeline.
     fi
+
     printf "%s\n" "Has been waiting for ${waited_time} seconds."
     if [ $waited_time -gt $max_time ]; then
       printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop checking this workflow. *****"
