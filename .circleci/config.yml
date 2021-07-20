@@ -688,10 +688,10 @@ jobs:
           command: |
             echo mysql --host=0.0.0.0 --port=3007 \
               --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
-              -e << parameters.sql_command >> > artifacts/sql_out.txt
+              -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
             mysql --host=0.0.0.0 --port=3007 \
               --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
-              -e << parameters.sql_command >> > artifacts/sql_out.txt
+              -e "<< parameters.sql_command >>" > artifacts/sql_out.txt
       - store_artifacts:
           path: ~/workbench/api/artifacts
           destination: artifacts
