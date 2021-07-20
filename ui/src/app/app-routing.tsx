@@ -223,7 +223,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           <AppRoute
               path='/billing'
               exact={false}
-              component={() => <BillingDashboardPage intermediaryRoute={true} routeData={{}}/>}
+              component={() => <BillingDashboardPage intermediaryRoute={false} routeData={{}}/>}
           />
         </ProtectedRoutes>
       </ProtectedRoutes>

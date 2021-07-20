@@ -78,6 +78,11 @@ const routes: Routes = [
         component: AppRouting,
         data: {}
       },
+      {
+        path: 'billing',
+        component: AppRouting,
+        data: {}
+      },
       // non-migrated routes go HERE
       {
         path: '',

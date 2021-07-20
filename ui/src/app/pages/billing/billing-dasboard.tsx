@@ -105,11 +105,6 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
     this.loadData();
   }
 
-  componentDidUpdate(prevProps: any): void {
-    this.props.hideSpinner();
-    this.loadData();
-  }
-
   async loadData() {
     this.setState({dataLoading: true});
     try {
@@ -117,7 +112,7 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
       await ensureBillingScope()
       this.setState({billingAccounts: (await userApi().listBillingAccounts()).billingAccounts})
       this.setState({ownedWorkspaceTableData: workspacesReceived
-        .filter(w => w.accessLevel === WorkspaceAccessLevel.WRITER).map(
+        .filter(w => w.accessLevel === WorkspaceAccessLevel.OWNER).map(
             workspaceResponse =>
               this.getTableData(workspaceResponse)
             )})
@@ -128,15 +123,21 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
                 this.getTableData(workspaceResponse)
         )})
       this.setState({dataLoading: false});
+      console.error("~~~~~~~~~!!!!111111111")
+      console.error(workspacesReceived)
+      console.error("~~~~~~~~~!!!!111111111aaaaaaaa")
+      console.error(workspacesReceived
+      .filter(w => w.accessLevel == WorkspaceAccessLevel.OWNER))
+      console.error("~~~~~~~~~!!!!")
+      console.error(workspacesReceived
+      .filter(w => w.accessLevel === WorkspaceAccessLevel.OWNER).map(
+          workspaceResponse =>
+              this.getTableData(workspaceResponse)
+      ))
     } catch (e) {
       const response = await convertAPIError(e);
       this.setState({errorText: response.message});
     }
-  }
-
-  tabChange = (e: any) => {
-    const tab = e.index === 0 ? 'My Workspace' : "Shared Workspace";
-    this.setState({activeTab: e.index});
   }
 
   getTableData(workspaceResponse: WorkspaceResponse) : TableData {
@@ -155,30 +156,19 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
       ownedWorkspaceTableData,
       sharedWorkspaceTableData,
     } = this.state;
-
+    console.error("~~~~~~~~~!!!!2222222222")
+    console.error(ownedWorkspaceTableData[0])
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={styles.tabContainer}>
-          <h2 style={{
-            margin: 0,
-            color: colors.primary,
-            fontSize: '16px',
-            fontWeight: 600
-          }}>Show:</h2>
-          <TabButton active={activeTab === 0} onClick={() => this.tabChange(0)}>
-            My Workspaces
-          </TabButton>
-          <TabButton active={activeTab === 1} onClick={() => this.tabChange(1)}>
-            Shared Workspaces
-          </TabButton>
-          <TabView style={{padding: 0}} activeIndex={activeTab} onTabChange={this.tabChange}>
+          <TabView style={{padding: 0}} activeIndex={activeTab}>
             <TabPanel header='Workspaces you own'>
               <div data-test-id='owned-workspace-table'><DataTable
                   value={ownedWorkspaceTableData}
                   scrollable={true}>
                 <Column field='workspaceName' header='Workspace name' style={styles.column}/>
-                <Column field='workspaceCreator' header='Created by' style={styles.column}/>
-                <Column field='billingAccount' header='Billing account name' style={styles.column}/>
+                <Column field='createdBy' header='Created by' style={styles.column}/>
+                <Column field='billingAccountName' header='Billing account name' style={styles.column}/>
               </DataTable></div>
             </TabPanel>
             <TabPanel header='Workspaces shared with you'>
@@ -186,8 +176,8 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
                   value={sharedWorkspaceTableData}
                   scrollable={true}>
                 <Column field='workspaceName' header='Workspace name' style={styles.column}/>
-                <Column field='workspaceCreator' header='Created by' style={styles.column}/>
-                <Column field='billingAccount' header='Billing account name' style={styles.column}/>
+                <Column field='createdBy' header='Created by' style={styles.column}/>
+                <Column field='billingAccountName' header='Billing account name' style={styles.column}/>
               </DataTable></div>
             </TabPanel>
           </TabView>
