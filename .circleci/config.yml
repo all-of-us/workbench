@@ -619,7 +619,7 @@ jobs:
           paths:
             - .
 
-  execute-cloud-db-command:
+  set-test-user-timestamps:
     executor: db-executor
     parameters:
       env_project:
@@ -647,8 +647,7 @@ jobs:
 workflows:
   joel-db-write:
     jobs:
-      - execute-cloud-db-command:
-          sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-05' WHERE email LIKE 'joel@fake%';"
+      - set-test-user-timestamps
         
 
   # build-test-deploy:
