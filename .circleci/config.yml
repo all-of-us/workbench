@@ -650,6 +650,29 @@ jobs:
 
   execute-cloud-db-command:
     executor: db-executor
+    parameters:
+      env:
+        description: |
+          The Google project corresponding to the Workbench environment.
+          Currently implemented for Test only.
+        default: "all-of-us-workbench-test"
+        type: enum
+        enum: ["all-of-us-workbench-test"]
+      proxy_port:
+        description: the local port for running the GCloud sql proxy
+        type: integer
+        default: 3307
+      sql_command:
+        description: |
+          The command to execute in the RW DB.  With great power comes great responsibility.
+        type: string
+        default: "SELECT COUNT(*) FROM user;"  
+    environment:
+      # TODO: is this boilerplate really needed?
+      WORKBENCH_ENV: << parameters.env >>
+      PROXY_PORT: << parameters.proxy_port >>
+      SQL_COMMAND: << parameters.sql_command >>
+      LOCALHOST: 0.0.0.0 # I dunno, let's just be consistent
     steps:
       - checkout-code
       - attach_workspace:
@@ -657,11 +680,11 @@ jobs:
       - gcloud-auth-login
       - run:
           name: Start Cloud Proxy
-          command: cloud_sql_proxy -instances ${WORKBENCH_ENV}:us-central1:workbenchmaindb=tcp:127.0.0.1:3307
+          command: cloud_sql_proxy -instances ${WORKBENCH_ENV}:us-central1:workbenchmaindb=tcp:${LOCALHOST}:${PROXY_PORT}
           background: true
       - run:
           name: Await Cloud Proxy startup
-          command: dockerize -wait tcp://127.0.0.1:3307 -timeout 2m
+          command: dockerize -wait tcp://${LOCALHOST}:${PROXY_PORT} -timeout 2m
       - run:
           working_directory: ~/workbench/api
           command: mkdir -p artifacts
@@ -669,14 +692,13 @@ jobs:
           working_directory: ~/workbench/api
           name: Execute SQL
           command: |
-            mysql --host=127.0.0.1 --port=3307 \
+            mysql --host=${LOCALHOST} --port=3${PROXY_PORT} \
               --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
-              -e "select count(*) from user;" > artifacts/sql_out.txt
+              -e ${SQL_COMMAND} > artifacts/sql_out.txt
       - store_artifacts:
           path: ~/workbench/api/artifacts
           destination: artifacts
   
-
 
 workflows:
   joel-workflow:
