@@ -148,8 +148,8 @@ export const SignedIn = (props: Props) => {
         <div
             style={
               hideFooter
-                  ? styles.appContainer
-                  : {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
+                  ? {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
+                  : styles.appContainer
             }
         >
           <SignedInRoutes/>
