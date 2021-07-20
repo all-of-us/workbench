@@ -20,6 +20,7 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
+import {expiredGuard, registrationGuard} from "./guards/react-guards";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -45,7 +46,8 @@ export const WorkspaceRoutes = React.memo(() => {
   return <React.Fragment>
     <AppRoute
       path='/workspaces/:ns/:wsid/about'
-      component={() => <WorkspaceAboutPage
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <WorkspaceAboutPage
         routeData={{
           title: 'View Workspace Details',
           breadcrumb: BreadcrumbType.Workspace,
@@ -56,7 +58,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/duplicate'
-      component={() => <WorkspaceEditPage
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <WorkspaceEditPage
         routeData={{
           title: 'Duplicate Workspace',
           breadcrumb: BreadcrumbType.WorkspaceDuplicate,
@@ -67,7 +70,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/edit'
-      component={() => <WorkspaceEditPage
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <WorkspaceEditPage
         routeData={{
           title: 'Edit Workspace',
           breadcrumb: BreadcrumbType.WorkspaceEdit,
@@ -78,7 +82,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/notebooks'
-      component={() => <NotebookListPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
         workspaceNavBarTab: 'notebooks',
@@ -87,7 +92,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
-      component={() => <InteractiveNotebookPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
         pageKey: NOTEBOOK_PAGE_KEY,
@@ -97,7 +103,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/notebooks/:nbName'
-      component={() => <NotebookRedirectPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <NotebookRedirectPage routeData={{
         pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
         breadcrumb: BreadcrumbType.Notebook,
         // The iframe we use to display the Jupyter notebook does something strange
@@ -111,7 +118,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data'
-      component={() => <DataComponentPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
         workspaceNavBarTab: 'data',
@@ -120,7 +128,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/data-sets'
-      component={() => <DataSetComponentPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <DataSetComponentPage routeData={{
         title: 'Dataset Page',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
@@ -129,7 +138,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
-      component={() => <DataSetComponentPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <DataSetComponentPage routeData={{
         title: 'Edit Dataset',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
@@ -138,7 +148,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/build'
-      component={() => <CohortPagePage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <CohortPagePage routeData={{
         title: 'Build Cohort Criteria',
         breadcrumb: BreadcrumbType.CohortAdd,
         workspaceNavBarTab: 'data',
@@ -147,7 +158,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
-      component={() => <CohortActionsPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <CohortActionsPage routeData={{
         title: 'Cohort Actions',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
@@ -156,7 +168,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
-      component={() => <ParticipantsTablePage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <ParticipantsTablePage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
@@ -165,7 +178,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
-      component={() => <DetailPagePage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <DetailPagePage routeData={{
         title: 'Participant Detail',
         breadcrumb: BreadcrumbType.Participant,
         workspaceNavBarTab: 'data',
@@ -174,7 +188,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
-      component={() => <QueryReportPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <QueryReportPage routeData={{
         title: 'Review Cohort Description',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
@@ -183,7 +198,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
-      component={() => <CohortReviewPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <CohortReviewPage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
@@ -192,7 +208,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/concepts'
-      component={() => <ConceptHomepagePage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <ConceptHomepagePage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
@@ -201,7 +218,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'
-      component={() => <ConceptSearchPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <ConceptSearchPage routeData={{
         title: 'Concept Set',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',
@@ -210,7 +228,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/concepts/:domain'
-      component={() => <ConceptSearchPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <ConceptSearchPage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
@@ -219,7 +238,8 @@ export const WorkspaceRoutes = React.memo(() => {
     />
     <AppRoute
       path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
-      component={() => <ConceptSetActionsPage routeData={{
+      guards={[expiredGuard, registrationGuard]}
+      render={() => <ConceptSetActionsPage routeData={{
         title: 'Concept Set Actions',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',

@@ -1,8 +1,13 @@
 import * as React from "react";
-import {AppRoute, AppRouter, Guard, NavRedirect, ProtectedRoutes} from "app/components/app-router";
+import {
+  AppRoute,
+  AppRouter,
+  NavRedirect,
+} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
 import {NavStore} from "app/utils/navigation";
+import {Guard} from "app/guards/react-guards";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -77,19 +82,11 @@ const makeAppRouter = () => {
   return <AppRouter>
     <AppRoute path='/unprotected-route' component={() => <TestComponent text={'Unprotected Route'}/>}/>
     <AppRoute path='/punting' component={() => <TestComponent text={'Punting'}/>}/>
-    <ProtectedRoutes guards={[alwaysFalseGuard]}>
-      <AppRoute path='/unreachable-path' component={() => <TestComponent text={'Unreachable Path'}/>}/>
-    </ProtectedRoutes>
-    <ProtectedRoutes guards={[alwaysTrueGuard]}>
-      <AppRoute path='/protected-route' component={() => <TestComponent text={'Protected Route'}/>}/>
-      <AppRoute path='/other-protected-route' component={() => <TestComponent text={'Other Protected Route'}/>}/>
-      <ProtectedRoutes guards={[otherAlwaysTrueGuard]}>
-        <AppRoute path='/nested-protected-route' component={() => <TestComponent text={'Nested Protected Route'}/>}/>
-      </ProtectedRoutes>
-      <ProtectedRoutes guards={[alwaysFalseGuard]}>
-        <AppRoute path='/nested-unreachable-path' component={() => <TestComponent text={'Unreachable Path'}/>}/>
-      </ProtectedRoutes>
-    </ProtectedRoutes>
+    <AppRoute path='/unreachable-path' guards={[alwaysFalseGuard]} component={() => <TestComponent text={'Unreachable Path'}/>}/>
+    <AppRoute path='/protected-route' guards={[alwaysTrueGuard]} component={() => <TestComponent text={'Protected Route'}/>}/>
+    <AppRoute path='/other-protected-route' guards={[alwaysTrueGuard]} component={() => <TestComponent text={'Other Protected Route'}/>}/>
+    <AppRoute path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]} component={() => <TestComponent text={'Nested Protected Route'}/>}/>
+    <AppRoute path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}component={() => <TestComponent text={'Unreachable Path'}/>}/>
   </AppRouter>
 }
 

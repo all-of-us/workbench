@@ -3,14 +3,21 @@ import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
-import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import {
+  BrowserRouter,
+  Link,
+  Redirect,
+  Route,
+  RouteProps,
+  Switch,
+  useHistory,
+  useLocation,
+  useParams,
+  useRouteMatch
+} from 'react-router-dom';
+import {Guard} from "app/guards/react-guards";
 
 const {Fragment} = React;
-
-export interface Guard {
-  allowed: () => boolean;
-  redirectPath: string;
-}
 
 export const usePath = () => {
   const {path} = useRouteMatch();
@@ -56,37 +63,25 @@ export const NavRedirect = ({path}) => {
   return null;
 };
 
-export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
-  const routeParams = useParams();
-  const routeHistory = useHistory();
+interface AppRouteProps extends RouteProps {
+  data?: object
+  guards?: Array<Guard>
+}
 
-  return <Route exact={exact} path={path} render={
-    () => {
-      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-      return redirectPath
-        ? <NavRedirect path={redirectPath}/>
-        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
-    }}>
-  </Route>;
-};
+export class AppRoute extends Route<AppRouteProps> {
+  static defaultProps = {exact: true}
 
-export const ProtectedRoutes = (
-  {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
+  constructor(props) {
+    super(props);
+  }
 
-  // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
-  const guardedChildren = fp.flow(
-    fp.flatten,
-    fp.toPairs,
-    fp.map(
-      ([key, element]: [string, React.ReactElement]) => {
-        const {guards: elementGuards = []} = element.props;
-        return React.cloneElement(element, {key, guards: [...guards, ...elementGuards ]});
-      }
-    )
-  )([children]); // Make sure children is an array - a single child will not be in an array
-
-  return <Fragment>{guardedChildren}</Fragment>;
-};
+  render() {
+    const { redirectPath = null } = fp.find(({allowed}) => !allowed(), this.props.guards) || {};
+    return redirectPath
+      ? <NavRedirect path={redirectPath}/>
+      : super.render();
+  }
+}
 
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
