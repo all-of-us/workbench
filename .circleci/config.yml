@@ -625,8 +625,7 @@ workflows:
     jobs:
       # Running two or more build-test-deploy workflows concurrently may result in failures to
       #  puppeteer-test, api-deploy-to-test or/and ui-deploy-to-test jobs.
-      - wait_until_previous_workflow_done:
-          <<: *filter-master-branch
+      - wait_until_previous_workflow_done
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
       - api-local-test
