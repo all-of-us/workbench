@@ -114,6 +114,7 @@ export class BillingDashboardComponent extends React.Component<WithSpinnerOverla
     this.setState({dataLoading: true});
     try {
       const workspacesReceived = (await workspacesApi().getWorkspaces()).items
+      await ensureBillingScope()
       this.setState({billingAccounts: (await userApi().listBillingAccounts()).billingAccounts})
       this.setState({ownedWorkspaceTableData: workspacesReceived
         .filter(w => w.accessLevel === WorkspaceAccessLevel.WRITER).map(
