@@ -24,7 +24,6 @@ sleep_time=30
 # *******************
 
 # CIRCLECI_API_TOKEN is a env variable whose value is project token.
-# See https://circleci.com/docs/2.0/managing-api-tokens/#creating-a-personal-api-token
 check_circleci_token() {
   if [[ ! $CIRCLECI_API_TOKEN ]]; then
     printf '%s\n' "Required env variable \"CIRCLECI_API_TOKEN\" is not found." >&2
@@ -58,14 +57,18 @@ circle_get() {
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_pipelines() {
   printf '%s\n' "Fetch previously submitted builds on \"${branch}\" branch that are running, pending or queued:"
-  local get_path="project/${project_slug}?filter=running&shallow=true"
+  local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
   if [[ ! "${get_result}" ]]; then
     printf "curl failed."
     exit 1
   fi
-  jq_filter="select(.branch==\"${branch}\" and .build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\"))) | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
-  # echo "${get_result}" | jq -r ".[] | ${jq_filter}"
+  jq_filter="select(.branch==\"${branch}\""
+  jq_filter+=" and .build_num < $CIRCLE_BUILD_NUM"
+  jq_filter+=" and (.status | test(\"running|pending|queued\")))"
+  jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\""
+  jq_filter+=" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
+
   __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | .build_num | @sh")
 }
 
