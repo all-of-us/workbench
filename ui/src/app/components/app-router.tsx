@@ -1,3 +1,4 @@
+import {Guard} from 'app/guards/react-guards';
 import {navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
@@ -10,14 +11,10 @@ import {
   Route,
   RouteProps,
   Switch,
-  useHistory,
   useLocation,
   useParams,
   useRouteMatch
 } from 'react-router-dom';
-import {Guard} from "app/guards/react-guards";
-
-const {Fragment} = React;
 
 export const usePath = () => {
   const {path} = useRouteMatch();
@@ -64,11 +61,11 @@ export const NavRedirect = ({path}) => {
 };
 
 interface AppRouteProps extends RouteProps {
-  guards?: Array<Guard>
+  guards?: Array<Guard>;
 }
 
 export class AppRoute extends Route<AppRouteProps> {
-  static defaultProps = {exact: true}
+  static defaultProps = {exact: true};
 
   constructor(props) {
     super(props);

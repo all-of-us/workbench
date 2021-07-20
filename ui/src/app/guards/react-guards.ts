@@ -1,5 +1,5 @@
-import {hasRegisteredAccess} from "app/utils/access-tiers";
-import {authStore, profileStore} from "app/utils/stores";
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {authStore, profileStore} from 'app/utils/stores';
 
 export interface Guard {
   allowed: () => boolean;

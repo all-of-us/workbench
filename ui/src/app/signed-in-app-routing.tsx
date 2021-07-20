@@ -6,6 +6,7 @@ import {
   withRouteData
 } from './components/app-router';
 import {withRoutingSpinner} from './components/with-routing-spinner';
+import {expiredGuard, registrationGuard} from './guards/react-guards';
 import {AccessRenewal} from './pages/access/access-renewal';
 import {AdminBanner} from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
@@ -26,7 +27,6 @@ import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
 import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {BreadcrumbType} from './utils/navigation';
-import {expiredGuard, registrationGuard} from "./guards/react-guards";
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);

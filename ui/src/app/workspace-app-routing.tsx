@@ -4,6 +4,7 @@ import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
+import {expiredGuard, registrationGuard} from './guards/react-guards';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
@@ -20,7 +21,6 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
-import {expiredGuard, registrationGuard} from "./guards/react-guards";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);

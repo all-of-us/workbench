@@ -1,7 +1,7 @@
 import {Component as AComponent} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Redirect, Route} from 'react-router';
+import {Redirect} from 'react-router';
 
 import {
   AppRoute,
@@ -10,6 +10,7 @@ import {
 } from 'app/components/app-router';
 import {NotificationModal} from 'app/components/modals';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
+import {signInGuard} from 'app/guards/react-guards';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {SignIn} from 'app/pages/login/sign-in';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -21,7 +22,6 @@ import {ReactWrapperBase} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {authStore, useStore} from 'app/utils/stores';
 import {Subscription} from 'rxjs/Subscription';
-import {signInGuard} from "app/guards/react-guards";
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
