@@ -335,7 +335,7 @@ jobs:
     steps:
       - run:
           working_directory: ~/workbench
-          command: bash .circleci/workflow_queue-v1.sh
+          command: bash .circleci/workflow-queue-v1.sh
           name: "Wait until all previously submitted builds to complete."
 
   api-unit-test:
