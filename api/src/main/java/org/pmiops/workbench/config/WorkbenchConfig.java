@@ -238,8 +238,6 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    public boolean enableDataUseAgreement;
-    public boolean enableBetaAccess;
     // If true, users can be expired on the system, losing access
     public boolean enableAccessRenewal;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
@@ -258,8 +256,6 @@ public class WorkbenchConfig {
     // Setting this to true will enable the use of Billing Accounts controlled by the user
     // See RW-4711.
     public boolean enableBillingUpgrade;
-    // Flag to indicate whether to use the V2 Data User Code of Conduct
-    public boolean enableV3DataUserCodeOfConduct;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
@@ -328,10 +324,6 @@ public class WorkbenchConfig {
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
-    // Do we send expiration emails when users have expired due to Access Renewal
-    // as well as warning emails when users will expire soon?
-    // true = send emails.  false = log only.
-    public boolean sendEmails;
     // Thresholds for sending warning emails based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
   }

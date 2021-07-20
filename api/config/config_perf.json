@@ -98,8 +98,6 @@
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": true,
-    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableAccessRenewal": true,
@@ -109,7 +107,6 @@
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableBillingUpgrade": false,
-    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
@@ -141,7 +138,6 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {
