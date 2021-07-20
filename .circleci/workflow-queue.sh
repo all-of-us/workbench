@@ -61,7 +61,6 @@ circle_get() {
 # Get pipeline that is doing the poll.
 # Returns json object.
 fetch_current_pipeline() {
-  printf "%s\n" "CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
   local get_path="workflow/${CIRCLE_WORKFLOW_ID}"
   local get_result=$(circle_get "${get_path}")
   __=$(echo $get_result | jq .)
@@ -72,7 +71,7 @@ fetch_current_pipeline() {
 # Release pipelines and PR pipelines are not considered for blocking.
 # Function returns json object.
 fetch_pipeline_ids() {
-  printf '%s\n' "Recently submitted pipelines on \"${branch}\" branch:"
+  printf '%s\n' "Fetch recently submitted pipelines on \"${branch}\" branch:"
   pipeline_json="/tmp/master_branch_pipelines.json"
   local get_path="pipeline?org-slug=${project_slug}"
   local get_result=$(circle_get "${get_path}")
@@ -80,7 +79,14 @@ fetch_pipeline_ids() {
     printf "curl failed."
     exit 1
   fi
-  echo "${get_result}" | jq "[.items[] | select(.vcs.branch==\"${branch}\")][] | {created_at: .created_at, id: .id, number: .number}" >"${pipeline_json}"
+
+  # jq filter out pipelines that were submitted after the current pipeline and not on master branch.
+  # Don’t count the current pipeline that is doing the poll.
+  jq_filter="[.items[] | select(.number < "${1}" and .vcs.branch==\"${branch}\")]"
+  length=$(echo "${get_result}" | jq "${jq_filter} | length")
+  printf "%s\n" "pipelines size: ${length}"
+
+  echo "${get_result}" | jq "${jq_filter}[] | {created_at: .created_at, id: .id, number: .number}" >"${pipeline_json}"
   cat ${pipeline_json}
   printf "\n"
   __=$(echo "${pipeline_json}")
@@ -112,7 +118,7 @@ current_created_time=$(echo "${current_pipeline_json}" | jq -r '.created_at')
 printf "%s\n\n" "${current_pipeline_json}"
 
 # Get all recently submitted pipelines (including finished and ongoing pipelines) on all branches.
-fetch_pipeline_ids
+fetch_pipeline_ids "${current_pipeline_num}"
 pipelines=$__
 # Parse out IDs.
 pipeline_ids=$(jq '. | .id' ${pipelines} | jq -r @sh)
@@ -123,17 +129,8 @@ IFS=$'\n'
 for id in ${pipeline_ids}; do
   printf "********\n"
   id=$(echo "${id}" | xargs echo)
-
   fetch_pipeline_number "${id}"
   pipeline_num=$__
-
-  # Ensure we don’t count the current pipeline that is doing the poll.
-  # The current workflow id is available as built-in environment variable CIRCLE_WORKFLOW_ID. It's used to get pipeline number.
-  if [[ "$current_pipeline_num" == "$pipeline_num" ]]; then
-    printf '%s\n' "Pipeline \"${current_pipeline_num}\" is the current pipeline that is doing the polling."
-    printf '%s\n\n' "Continue to check next pipeline."
-    continue
-  fi
 
   is_running=true
   waited_time=0
@@ -154,20 +151,21 @@ for id in ${pipeline_ids}; do
       break # Break out while loop. check next pipeline.
     fi
 
-    # Include only pipelines that were submitted before the current pipeline that is doing the polling.
-    if [[ "$current_created_time" > "$created_time" ]]; then
+    # Additional filter by "create_at" time: Include only pipelines that were submitted before the current pipeline that is doing the polling.
+    if [[ "$created_time" < "$current_created_time" ]]; then
       # An active workflow has running or failing status.
       if [[ ("${status}" == "'running'") || ("${status}" == "'failing'") ]]; then
         printf "%s\n" "sleeping ${wait} seconds (workflow status is ${status})."
         sleep $sleep_time
         waited_time=$((sleep_time + waited_time))
       else
-        printf "%s\n" "Finished polling. workflow status is ${status}!"
+        printf "%s\n\n" "Finished polling. workflow status is ${status}!"
         is_running=false
       fi
     else
       # Break out while loop if time of compare to workflow is not earlier than the workflow that is polling.
-      printf "%s\n\n" "pipeline \"${pipeline_num}\" is not a workflow which was submitted before this polling pipeline \"${current_pipeline_num}\"."
+      printf "%s\n" "pipeline \"${pipeline_num}\" is not a workflow which was submitted before this polling pipeline \"${current_pipeline_num}\"."
+      printf '%s\n\n' "Continue to check next pipeline."
       break # Break out while loop. check next pipeline.
     fi
 
@@ -177,7 +175,7 @@ for id in ${pipeline_ids}; do
       is_running=false
     fi
   done
-  printf "\n"
+  printf "%s\n" "End of while loop."
 done
 unset IFS
 printf "%s\n" "finished checking all pipelines."
