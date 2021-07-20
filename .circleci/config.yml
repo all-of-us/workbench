@@ -692,7 +692,10 @@ jobs:
           working_directory: ~/workbench/api
           name: Execute SQL
           command: |
-            mysql --host=${LOCALHOST} --port=3${PROXY_PORT} \
+            echo mysql --host=${LOCALHOST} --port=${PROXY_PORT} \
+              --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
+              -e ${SQL_COMMAND} > artifacts/sql_out.txt
+            mysql --host=${LOCALHOST} --port=${PROXY_PORT} \
               --user=workbench --database=workbench --password=${WORKBENCH_DB_PASSWORD} \
               -e ${SQL_COMMAND} > artifacts/sql_out.txt
       - store_artifacts:
