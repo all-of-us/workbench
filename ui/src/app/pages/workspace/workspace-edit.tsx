@@ -328,7 +328,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             prevState));
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
 
         if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
           // If the user has owner access on the workspace but does not have access to the billing account
