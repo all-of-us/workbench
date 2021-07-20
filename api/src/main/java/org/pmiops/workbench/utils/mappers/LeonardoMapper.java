@@ -9,6 +9,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnu
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
+import org.pmiops.workbench.model.DiskConfig;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -60,7 +62,7 @@ public interface LeonardoMapper {
     leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
   }
 
-  GceWithPdConfig toGceWithPdConfig(LeonardoGceWithPdConfig leonardoGceWithPdConfig);
+  DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
 
   @Mapping(target = "cloudService", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
@@ -85,6 +87,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "diskConfig", ignore = true)
   Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -94,6 +97,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "diskConfig", ignore = true)
   Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
 
   @AfterMapping
@@ -101,6 +105,7 @@ public interface LeonardoMapper {
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
     mapLabels(runtime, leonardoGetRuntimeResponse.getLabels());
     mapRuntimeConfig(runtime, leonardoGetRuntimeResponse.getRuntimeConfig());
+    mapDiskConfig(runtime, leonardoGetRuntimeResponse);
   }
 
   @AfterMapping
@@ -123,6 +128,16 @@ public interface LeonardoMapper {
               .inverse()
               .get(runtimeLabels.get(RUNTIME_LABEL_AOU_CONFIG)));
     }
+  }
+
+  default void mapDiskConfig(
+      Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
+    Gson gson = new Gson();
+    runtime.diskConfig(
+        toDiskConfig(
+            gson.fromJson(
+                gson.toJson(leonardoGetRuntimeResponse.getDiskConfig()),
+                LeonardoDiskConfig.class)));
   }
 
   default void mapRuntimeConfig(Runtime runtime, Object runtimeConfigObj) {

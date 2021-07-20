@@ -67,6 +67,7 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
@@ -732,6 +733,27 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
+  }
+
+  @Test
+  public void testGetRuntime_diskConfig() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenReturn(
+            testLeoRuntime
+                .runtimeConfig(gceConfigObj)
+                .diskConfig(
+                    new LeonardoDiskConfig()
+                        .diskType(LeonardoDiskType.SSD)
+                        .name("pd")
+                        .blockSize(100)
+                        .size(100)));
+
+    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+
+    assertThat(runtime.getDiskConfig().getDiskType()).isEqualTo(DiskType.SSD);
+    assertThat(runtime.getDiskConfig().getName()).isEqualTo("pd");
+    assertThat(runtime.getDiskConfig().getSize()).isEqualTo(100);
+    assertThat(runtime.getDiskConfig().getBlockSize()).isEqualTo(100);
   }
 
   @Test
