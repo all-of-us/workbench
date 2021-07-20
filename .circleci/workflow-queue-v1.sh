@@ -39,6 +39,13 @@ check_circleci_build_num() {
   fi
 }
 
+check_circleci_workflow_id() {
+  if [[ ! $CIRCLE_WORKFLOW_ID ]]; then
+    printf '%s\n' "Required env variable \"CIRCLE_WORKFLOW_ID\" is not found." >&2
+    exit 1
+  fi
+}
+
 circle_get() {
   local url="${api_root}${1}"
   printf "curl GET ${url}\n" >/dev/tty
@@ -48,20 +55,18 @@ circle_get() {
     "${url}"
 }
 
-# 'pipeline' api returns list of recent pipelines on all branches (PR, build-test-deploy and releases).
-# We should consider blocking only if job is running on "master" branch.
-# Release pipelines and PR pipelines are not considered for blocking.
-# Function returns json object.
+# Fetch list of builds on master branch that are running, pending or queued.
 fetch_pipelines() {
-  printf '%s\n' "Recently submitted pipelines on \"${branch}\" branch that are running, pending or queued:"
+  printf '%s\n' "Fetch previously submitted builds on \"${branch}\" branch that are running, pending or queued:"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
   if [[ ! "${get_result}" ]]; then
     printf "curl failed."
     exit 1
   fi
-  echo "${get_result}" | jq ".[] | select(.branch==\"${branch}\")"
-  __=$(echo "${get_result}" | jq -r ".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\"))) | select(.branch==\"${branch}\") | select(.workflows.workflow_name=\"${workflow_name}\") | .build_num | @sh")
+  jq_filter="select(.branch==\"${branch}\" and .build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\"))) | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
+  # echo "${get_result}" | jq -r ".[] | ${jq_filter}"
+  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | .build_num | @sh")
 }
 
 
@@ -71,11 +76,13 @@ fetch_pipelines() {
 
 check_circleci_token
 check_circleci_build_num
+check_circleci_workflow_id
 
 # Get pipeline that is doing the polling.
-printf "%s\n\n" "Current pipeline CIRCLE_BUILD_NUM: ${CIRCLE_BUILD_NUM}"
+printf "%s\n" "Current pipeline CIRCLE_BUILD_NUM: ${CIRCLE_BUILD_NUM}"
+printf "%s\n\n" "Current pipeline CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
 
-# Wait as long as "pipelines" variable is not empty.
+# Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
 waited_time=0
 wait="30s"
@@ -96,7 +103,7 @@ while [[ "${is_running}" == "true" ]]; do
 
   printf "%s\n" "Has been waiting for ${waited_time} seconds."
   if [ $waited_time -gt $max_time ]; then
-    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop checking this workflow. *****"
+    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds. *****"
     is_running=false
   fi
 done
