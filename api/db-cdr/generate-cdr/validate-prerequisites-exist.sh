@@ -88,7 +88,6 @@ mkdir $TEMP_FILE_DIR
 # Process all tables with full validation
 if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
 then
-  timestamp=$(date +%s)
   for file in ${ALL_FILES[@]}; do
     case $file in
       $CRITERIA_MENU|$DS_DATA_DICTIONARY)
