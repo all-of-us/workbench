@@ -64,7 +64,6 @@ export const NavRedirect = ({path}) => {
 };
 
 interface AppRouteProps extends RouteProps {
-  data?: object
   guards?: Array<Guard>
 }
 
