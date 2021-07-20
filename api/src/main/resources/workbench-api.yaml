@@ -155,20 +155,6 @@ paths:
           description: List of featured workspaces
           schema:
             "$ref": "#/definitions/FeaturedWorkspacesConfigResponse"
-  "/v1/cdrVersions":
-    get:
-      tags:
-      - cdrVersions
-      description: >
-        DEPRECATED.
-        Returns all curated data repository (CDR) versions in the Registered Tier
-        that the user has access to
-      operationId: getCdrVersions
-      responses:
-        200:
-          description: A list of CDR versions.
-          schema:
-            "$ref": "#/definitions/CdrVersionListResponse"
   "/v1/cdrVersionsByTier":
     get:
       tags:
@@ -3891,19 +3877,6 @@ definitions:
     - DEMO_PROJECTS
     - PHENOTYPE_LIBRARY
     - TUTORIAL_WORKSPACES
-  CdrVersionListResponse:
-    type: object
-    required:
-    - items
-    - defaultCdrVersionId
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/CdrVersion"
-      defaultCdrVersionId:
-        type: string
-        description: ID of the CDR versions that should be used by the user by default
   CdrVersionTiersResponse:
     type: object
     required:
