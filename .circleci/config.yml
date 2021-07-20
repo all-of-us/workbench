@@ -621,52 +621,52 @@ jobs:
 
 
 workflows:
-  build-test-deploy:
-    jobs:
-      # Running two or more build-test-deploy workflows concurrently may result in failures to
-      #  puppeteer-test, api-deploy-to-test or/and ui-deploy-to-test jobs.
-      - wait_until_previous_workflow_done:
-          <<: *filter-master-branch
-      # Always run basic test/lint/compilation (open PRs, master branch merge)
-      # Note: by default tags are not picked up.
-      - api-local-test
-      - api-unit-test
-      - ui-unit-test
-      - api-bigquery-test
-      - api-integration-test
-      # Deploy to "test" on master branch merges
-      - api-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - api-unit-test
-            - wait_until_previous_workflow_done
-      - ui-deploy-to-test:
-          <<: *filter-master-branch
-          requires:
-            - ui-unit-test
-            - wait_until_previous_workflow_done
-      # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup
-      - puppeteer-test:
-          <<: *filter-pr-branch
-          env_name: "local"
-          parallel_num: 4
-          optional_steps:
-            - halt-puppeteer-check
-          requires:
-            - puppeteer-env-setup
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
-      - puppeteer-test:
-          parallel_num: 4
-          env_name: "test"
-          <<: *filter-master-branch
-          requires:
-            - puppeteer-env-setup
-            - api-deploy-to-test
-            - ui-deploy-to-test
-            - wait_until_previous_workflow_done
-          post-steps:
-            - gcs-load-test-results
+  # build-test-deploy:
+  #   jobs:
+  #     # Running two or more build-test-deploy workflows concurrently may result in failures to
+  #     #  puppeteer-test, api-deploy-to-test or/and ui-deploy-to-test jobs.
+  #     - wait_until_previous_workflow_done:
+  #         <<: *filter-master-branch
+  #     # Always run basic test/lint/compilation (open PRs, master branch merge)
+  #     # Note: by default tags are not picked up.
+  #     - api-local-test
+  #     - api-unit-test
+  #     - ui-unit-test
+  #     - api-bigquery-test
+  #     - api-integration-test
+  #     # Deploy to "test" on master branch merges
+  #     - api-deploy-to-test:
+  #         <<: *filter-master-branch
+  #         requires:
+  #           - api-unit-test
+  #           - wait_until_previous_workflow_done
+  #     - ui-deploy-to-test:
+  #         <<: *filter-master-branch
+  #         requires:
+  #           - ui-unit-test
+  #           - wait_until_previous_workflow_done
+  #     # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
+  #     - puppeteer-env-setup
+  #     - puppeteer-test:
+  #         <<: *filter-pr-branch
+  #         env_name: "local"
+  #         parallel_num: 4
+  #         optional_steps:
+  #           - halt-puppeteer-check
+  #         requires:
+  #           - puppeteer-env-setup
+  #     # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
+  #     - puppeteer-test:
+  #         parallel_num: 4
+  #         env_name: "test"
+  #         <<: *filter-master-branch
+  #         requires:
+  #           - puppeteer-env-setup
+  #           - api-deploy-to-test
+  #           - ui-deploy-to-test
+  #           - wait_until_previous_workflow_done
+  #         post-steps:
+  #           - gcs-load-test-results
 
   deploy-staging:
     jobs:
