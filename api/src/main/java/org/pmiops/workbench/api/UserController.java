@@ -299,7 +299,8 @@ public class UserController implements UserApiDelegate {
     try {
       response = cloudBillingProvider.get().billingAccounts().list().execute();
     } catch (IOException e) {
-      throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
+      throw new ServerErrorException(
+          "Could not retrieve billing accounts list from Google Cloud", e);
     }
 
     return Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())

@@ -128,6 +128,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private Object buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
       return leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig());
+    } else if (runtime.getGceWithPdConfig() != null) {
+      return leonardoMapper.toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig());
     } else {
       return leonardoMapper.toLeonardoMachineConfig(runtime.getDataprocConfig());
     }
@@ -226,11 +228,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void deleteRuntime(String googleProject, String runtimeName) {
+  public void deleteRuntime(String googleProject, String runtimeName, Boolean deleteDisk) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          runtimesApi.deleteRuntime(googleProject, runtimeName, /* deleteDisk */ false);
+          runtimesApi.deleteRuntime(googleProject, runtimeName, deleteDisk);
           return null;
         });
   }

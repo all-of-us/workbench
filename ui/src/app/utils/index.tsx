@@ -449,26 +449,30 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
   if (searchTerm.length < 3) {
     return stringToHighlight;
   }
-  const words: string[] = [];
-  const matchString = new RegExp(searchTerm.replace(/([^a-zA-z0-9]+)/g, () => '').trim(), 'i');
-  const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
-  const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
-  if (matches) {
-    for (let i = 0; i < matches.length; i++) {
-      words.push(splits[i], matches[i]);
+  try {
+    const words: string[] = [];
+    const matchString = new RegExp(searchTerm.replace(/([^a-zA-z0-9 \-<>=\/]+)/g, () => '').trim(), 'i');
+    const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
+    const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
+    if (matches) {
+      for (let i = 0; i < matches.length; i++) {
+        words.push(splits[i], matches[i]);
+      }
+      words.push(splits[splits.length - 1]);
+    } else {
+      words.push(splits[0]);
     }
-    words.push(splits[splits.length - 1]);
-  } else {
-    words.push(splits[0]);
-  }
-  return words.map((word, w) => <span key={w}
-    style={matchString.test(word.toLowerCase()) ? {
-      color: colorWithWhiteness(highlightColor, -0.4),
-      backgroundColor: colorWithWhiteness(highlightColor, 0.7),
-      display: 'inline-block'
-    } : {}}>
+    return words.map((word, w) => <span key={w}
+                                        style={matchString.test(word.toLowerCase()) ? {
+                                          color: colorWithWhiteness(highlightColor, -0.4),
+                                          backgroundColor: colorWithWhiteness(highlightColor, 0.7),
+                                          display: 'inline-block'
+                                        } : {}}>
       {word}
     </span>);
+  } catch (e) {
+    return stringToHighlight;
+  }
 }
 
 // render a float value as US currency, rounded to cents: 255.372793 -> $255.37

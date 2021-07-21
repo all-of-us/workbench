@@ -5,12 +5,12 @@ interface GoogleBillingAccountInfo {
   billingEnabled: boolean;
 }
 
-export async function getBillingAccountInfo(workspaceNamespace: string) {
+export async function getBillingAccountInfo(googleProject: string) {
   return new Promise<GoogleBillingAccountInfo>((resolve) => {
     gapi.load('client', () => {
       gapi.client.load('cloudbilling', 'v1', () => {
         gapi.client.cloudbilling.projects.getBillingInfo({
-          name: 'projects/' + workspaceNamespace
+          name: 'projects/' + googleProject
         }).then(response => resolve(JSON.parse(response.body)));
       });
     });

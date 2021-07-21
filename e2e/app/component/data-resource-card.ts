@@ -1,9 +1,11 @@
 import { ElementHandle, Page } from 'puppeteer';
 import * as fp from 'lodash/fp';
 import { getPropValue } from 'utils/element-utils';
-import { ResourceCard } from 'app/text-labels';
+import {LinkText, MenuOption, ResourceCard} from 'app/text-labels';
 import CardBase from './card-base';
 import { waitWhileLoading } from 'utils/waits-utils';
+import Modal from "../modal/modal";
+import {logger} from "../../libs/logger";
 
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
@@ -146,6 +148,38 @@ export default class DataResourceCard extends CardBase {
     const names = await Promise.all(cards.map((item) => item.getResourceName()));
     const filteredList = names.filter((name) => name === cardName);
     return filteredList.length === 1;
+  }
+
+  async delete(cardName: string, cardType: ResourceCard): Promise<string[]> {
+    const card = await this.findCard(cardName, cardType);
+    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
+    const modal = new Modal(this.page);
+    await modal.waitForLoad();
+    const modalTextContent = await modal.getTextContent();
+    let link;
+    switch (cardType) {
+      case ResourceCard.Cohort:
+        link = LinkText.DeleteCohort;
+        break;
+      case ResourceCard.ConceptSet:
+        link = LinkText.DeleteConceptSet;
+        break;
+      case ResourceCard.Dataset:
+        link = LinkText.DeleteDataset;
+        break;
+      case ResourceCard.Notebook:
+        link = LinkText.DeleteNotebook;
+        break;
+      case ResourceCard.CohortReview:
+        link = MenuOption.Delete;
+        break;
+      default:
+        throw new Error(`Case ${cardType} handling is not defined.`);
+    }
+    await modal.clickButton(link, { waitForClose: true });
+    await waitWhileLoading(this.page);
+    logger.info(`Deleted ${cardType} "${cardName}"`);
+    return modalTextContent;
   }
 
   private asCard(elementHandle: ElementHandle): DataResourceCard {

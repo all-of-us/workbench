@@ -48,8 +48,8 @@
     "operationalTerraWorkspaceBucket": "fc-71462dce-ffcf-4d66-9075-7fce9b8daf4b",
     "extractionPetServiceAccount": "pet-111879944971009838720@aouwgscohortextraction-perf.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
-    "extractionMethodConfigurationName": "",
-    "extractionMethodConfigurationVersion": 1,
+    "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
+    "extractionMethodConfigurationVersion": 2,
     "extractionCohortsDataset": "fc-aou-cdr-perf-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-perf-ct.wgs_extraction_temp_tables"
@@ -98,8 +98,6 @@
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": true,
-    "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableAccessRenewal": true,
@@ -109,7 +107,6 @@
     "unsafeAllowDeleteUser": true,
     "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableBillingUpgrade": false,
-    "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
@@ -141,7 +138,6 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "sendEmails": true,
     "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
   },
   "offlineBatch": {

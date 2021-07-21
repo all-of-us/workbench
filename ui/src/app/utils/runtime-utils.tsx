@@ -340,7 +340,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, {
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
                 signal: aborter.signal
               });
             }
