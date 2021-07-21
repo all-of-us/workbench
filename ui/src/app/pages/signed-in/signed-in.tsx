@@ -144,13 +144,17 @@ export const SignedIn = (props: Props) => {
       />
       {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
       {/* know about CDR details; they'll be blocked from other routes by not having access too */}
-      {config && (tiers || !hasRegisteredAccess(profileState.profile.accessTierShortNames)) &&
-        <div
-            style={
-              hideFooter
-                  ? {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
-                  : styles.appContainer
-            }
+      {
+        config && (
+            tiers || (
+                profileState.profile &&
+                !hasRegisteredAccess(profileState.profile.accessTierShortNames)
+            )) && <div
+          style={
+            hideFooter
+                ? {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
+                : styles.appContainer
+          }
         >
           <SignedInRoutes/>
         </div>
