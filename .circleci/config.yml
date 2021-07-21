@@ -701,6 +701,7 @@ jobs:
           at: .
       - gcloud-auth-login
       - run:
+          working_directory: ~/workbench/api
           name: An arbitrary project.rb command
           command: ./project.rb connect-to-db --project all-of-us-workbench-test
  
