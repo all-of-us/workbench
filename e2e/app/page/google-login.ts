@@ -1,7 +1,7 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { config } from 'resources/workbench-config';
 import Button from 'app/element/button';
-import {signedInIndicator} from 'app/page/authenticated-page';
+import { signedInIndicator } from 'app/page/authenticated-page';
 
 export enum FieldSelector {
   LoginButton = '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',

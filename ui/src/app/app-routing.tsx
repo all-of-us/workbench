@@ -45,6 +45,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     <AppRouter>
+      {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+      {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+      {/* It should be noted that the reason this is currently working is because Switch only */}
+      {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+      {/* that they are a Route or a subclass of Route. */}
       <Switch>
         <AppRoute
             path='/cookie-policy'

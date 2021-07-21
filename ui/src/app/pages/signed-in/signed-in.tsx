@@ -56,12 +56,11 @@ interface Props extends WithSpinnerOverlayProps {
 export const SignedIn = (props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
-  const [hideFooter, setHideFooter] = useState(null);
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [hideFooter, setHideFooter] = useState(false);
 
   const {config} = useStore(serverConfigStore);
   const {tiers} = useStore(cdrVersionStore);
-  const {profile} = useStore(profileStore);
+  const profileState = useStore(profileStore);
 
   useEffect(() => {
     window.addEventListener('beforeunload', checkOpsBeforeUnload);
@@ -72,19 +71,18 @@ export const SignedIn = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    const subs = [];
-    subs.push(props.subscribeToInactivitySignOut());
+    const subscriptions = [];
+    subscriptions.push(props.subscribeToInactivitySignOut());
     // This handles detection of Angular-based routing data.
-    subs.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
+    subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
     }));
     // This handles detection of React-based routing data. During migrations,
     // we assume React routing data will be set deeper/later in the component
     // hierarchy, therefore it will generally take precedence over React.
-    subs.push(routeDataStore.subscribe(({minimizeChrome}) => {
+    subscriptions.push(routeDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
     }));
-    setSubscriptions(subs);
 
     return () => {
       /*
@@ -107,12 +105,12 @@ export const SignedIn = (props: Props) => {
     const checkStoresLoaded = async() => {
       // AppComponent should be loading the server config.
       if (config) {
-        if (!profile) {
-          profileStore.get().load();
+        if (!profileState.profile) {
+          profileState.load();
           return;
         }
-        setInstitutionCategoryState(profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(profile.accessTierShortNames)) {
+        setInstitutionCategoryState(profileState.profile.verifiedInstitutionalAffiliation);
+        if (hasRegisteredAccess(profileState.profile.accessTierShortNames)) {
           if (!tiers) {
             const cdrVersionsByTier = await cdrVersionsApi().getCdrVersionsByTier();
             cdrVersionStore.set(cdrVersionsByTier);
@@ -123,7 +121,7 @@ export const SignedIn = (props: Props) => {
     };
 
     checkStoresLoaded();
-  }, [profileStore, cdrVersionStore]);
+  }, [profileState, tiers]);
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
