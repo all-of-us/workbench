@@ -693,13 +693,24 @@ jobs:
           path: ~/workbench/api/artifacts
           destination: artifacts
   
-
+  joel-project-rb:
+    executor: workbench-executor
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          name: An arbitrary project.rb command
+          command: ./project.rb connect-to-db --project all-of-us-workbench-test
+ 
 workflows:
   joel-workflow:
     jobs:
       - joel-creds-test
       - execute-cloud-db-command:
           sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-10' WHERE email LIKE 'joel@fake%';"
+      - joel-project-rb
         
 
   # build-test-deploy:
