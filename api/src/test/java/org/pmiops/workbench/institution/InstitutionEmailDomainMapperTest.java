@@ -1,7 +1,9 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -11,9 +13,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.TierEmailAddresses;
+import org.pmiops.workbench.model.TierEmailDomains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -23,81 +29,81 @@ import org.springframework.test.annotation.DirtiesContext;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class InstitutionEmailDomainMapperTest extends SpringTest {
+  private static final String RT_SHORT_NAME = "REGISTERED";
+  private static final String CT_SHORT_NAME = "CONTROLLED";
+  private static final DbAccessTier REGISTERED_ACCESS_TIER = new DbAccessTier().setShortName(RT_SHORT_NAME);
+  private static final DbAccessTier CONTROLLED_ACCESS_TIER = new DbAccessTier().setShortName(CT_SHORT_NAME);
+
   @Autowired InstitutionEmailDomainMapper mapper;
 
   @Test
-  public void test_modelToDb() {
+  public void test_modelToDb_thenModelToDb() {
     // contains an out-of-order duplicate
-    final List<String> rawDomains = Lists.newArrayList("nih.gov", "other-inst.org", "nih.gov");
-    final SortedSet<String> sortedDistinctDomains = new TreeSet<>(rawDomains);
+    final List<String> rtRawDomains = Lists.newArrayList("nih.gov", "other-inst.org", "nih.gov");
+    final List<String> ctRawDomains = Lists.newArrayList("ct.gov");
+    final SortedSet<String> sortedRtDistinctDomains = new TreeSet<>(rtRawDomains);
+    final SortedSet<String> sortedCtDistinctDomains = new TreeSet<>(ctRawDomains);
+
+    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(rtRawDomains).accessTierShortName(RT_SHORT_NAME);
+    TierEmailDomains ctEmailDomains = new TierEmailDomains().emailDomains(ctRawDomains).accessTierShortName(CT_SHORT_NAME);
 
     final Institution modelInst =
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailDomains(rawDomains);
+            .tierEmailDomains(ImmutableList.of(rtEmailDomains, ctEmailDomains));
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
 
-    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst);
+    final Set<DbInstitutionEmailDomain> rtDbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> ctDbDomains = mapper.modelToDb(modelInst, dbInst, CONTROLLED_ACCESS_TIER);
 
-    assertThat(dbDomains).hasSize(sortedDistinctDomains.size());
+    assertThat(rtDbDomains).hasSize(sortedRtDistinctDomains.size());
+    assertThat(ctDbDomains).hasSize(sortedCtDistinctDomains.size());
 
-    for (final DbInstitutionEmailDomain dbDomain : dbDomains) {
-      assertThat(sortedDistinctDomains).contains(dbDomain.getEmailDomain());
+    for (final DbInstitutionEmailDomain dbDomain : rtDbDomains) {
+      assertThat(sortedRtDistinctDomains).contains(dbDomain.getEmailDomain());
       assertThat(dbDomain.getInstitution()).isEqualTo(dbInst);
     }
-
-    final SortedSet<String> roundTripModelDomains = mapper.dbDomainsToStrings(dbDomains);
-    assertThat(roundTripModelDomains).isEqualTo(sortedDistinctDomains);
+    for (final DbInstitutionEmailDomain dbDomain : ctDbDomains) {
+      assertThat(sortedCtDistinctDomains).contains(dbDomain.getEmailDomain());
+      assertThat(dbDomain.getInstitution()).isEqualTo(dbInst);
+    }
+    
+    final List<TierEmailDomains> roundTripModelDomains = mapper.dbDomainsToTierEmailDomains(Sets.union(rtDbDomains, ctDbDomains));
+    assertThat(roundTripModelDomains).containsExactly(rtEmailDomains, ctEmailDomains);
   }
 
   @Test
+  public void test_modelToDb_tierNotFound() {
+    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(ImmutableList.of()).accessTierShortName(RT_SHORT_NAME);
+    final Institution modelInst =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .tierEmailDomains(ImmutableList.of(rtEmailDomains));
+
+    assertThrows(NotFoundException.class, () -> mapper.modelToDb(modelInst, new DbInstitution(), CONTROLLED_ACCESS_TIER));
+  }
+  
+  @Test
   public void test_modelToDb_null() {
     final Institution modelInst =
-        new Institution().shortName("Broad").displayName("The Broad Institute").emailDomains(null);
+        new Institution().shortName("Broad").displayName("The Broad Institute").tierEmailDomains(null);
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
 
-    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst);
+    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
     assertThat(dbDomains).isEmpty();
   }
 
   @Test
-  public void test_dbDomainsToStrings() {
-    final DbInstitution dbInst =
-        new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
-
-    final Set<DbInstitutionEmailDomain> dbDomains =
-        Sets.newHashSet(
-            new DbInstitutionEmailDomain().setEmailDomain("vumc.org").setInstitution(dbInst),
-            new DbInstitutionEmailDomain().setEmailDomain("broad.org").setInstitution(dbInst),
-            new DbInstitutionEmailDomain().setEmailDomain("vumc.org").setInstitution(dbInst));
-
-    // sorted and de-duplicated
-    final SortedSet<String> expected = new TreeSet<>(Sets.newHashSet("broad.org", "vumc.org"));
-
-    final SortedSet<String> modelDomains = mapper.dbDomainsToStrings(dbDomains);
-    assertThat(modelDomains).isEqualTo(expected);
-
-    // does not need to match dbInst: we only care about its emailDomains
-    final Institution modelInst =
-        new Institution()
-            .shortName("Whatever")
-            .displayName("Whatever Tech")
-            .emailDomains(new ArrayList<>(modelDomains));
-
-    final Set<DbInstitutionEmailDomain> roundTripDbDomains = mapper.modelToDb(modelInst, dbInst);
-    assertThat(roundTripDbDomains).isEqualTo(dbDomains);
-  }
-
-  @Test
   public void test_dbDomainsToStrings_null() {
-    final Set<String> modelDomains = mapper.dbDomainsToStrings(null);
+    final List<TierEmailDomains> modelDomains = mapper.dbDomainsToTierEmailDomains(null);
     assertThat(modelDomains).isNotNull();
     assertThat(modelDomains).isEmpty();
   }
