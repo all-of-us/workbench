@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Booleans;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
@@ -117,8 +116,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
     List<LeonardoListRuntimeResponse> runtimesToDelete =
         filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                req.getRuntimesToDelete())
+            leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
+            req.getRuntimesToDelete())
             .collect(Collectors.toList());
 
     runtimesToDelete.forEach(
@@ -127,8 +126,8 @@ public class RuntimeController implements RuntimeApiDelegate {
                 runtime.getGoogleProject(), runtime.getRuntimeName()));
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
-                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-                req.getRuntimesToDelete())
+            leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
+            req.getRuntimesToDelete())
             .collect(Collectors.toList());
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
@@ -227,8 +226,8 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-            .values()
-            .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+        .values()
+        .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
@@ -253,19 +252,17 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
-      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    long configCount =
+        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
+            .filter(c -> c != null)
+            .count();
+    if (configCount != 1) {
+      throw new BadRequestException(
+          "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
-    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
-      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
-    }
-
-    int nullCount = Booleans.countTrue(runtime.getGceConfig() == null, runtime.getGceConfig() == null);
-    if(nullCount == 3) {
-
-    }else if(nullCount < 2) {
-
+    if (runtime.getGceWithPdConfig() != null) {
+      runtime.getGceWithPdConfig().getPersistentDisk().setName(userProvider.get().getPDName());
     }
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
@@ -313,14 +310,17 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
+  public ResponseEntity<EmptyResponse> deleteRuntime(
+      String workspaceNamespace, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(
-        dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
+        dbWorkspace.getGoogleProject(),
+        userProvider.get().getRuntimeName(),
+        Optional.ofNullable(deleteDisk).orElse(false));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
