@@ -6,6 +6,7 @@ set -e
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
 export CDR_VERSION=$3       # CDR version
+export DATA_BROWSER=$4      # data browser flag
 
 PREP_TABLE_RUN="!_prep_tables_!"
 BUCKET="all-of-us-workbench-private-cloudsql"
@@ -114,11 +115,14 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   exit 1
 fi
 
-for table in ${DEPENDENT_TABLES[@]}; do
-  echo "Validating that $table exists!"
-  tableInfo=$(bq show "$BQ_PROJECT:$BQ_DATASET.$table")
-  echo $tableInfo
-done
+if [ "$DATA_BROWSER" == false ]
+then
+  for table in ${DEPENDENT_TABLES[@]}; do
+    echo "Validating that $table exists!"
+    tableInfo=$(bq show "$BQ_PROJECT:$BQ_DATASET.$table")
+    echo $tableInfo
+  done
+fi
 
 rm -rf $TEMP_FILE_DIR
 mkdir $TEMP_FILE_DIR
