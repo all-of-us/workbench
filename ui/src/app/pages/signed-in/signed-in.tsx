@@ -142,7 +142,9 @@ export const SignedIn = (props: Props) => {
       <div
           style={styles.backgroundImage}
       />
-      {config && tiers &&
+      {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
+      {/* know about CDR details; they'll be blocked from other routes by not having access too */}
+      {config && (tiers || !hasRegisteredAccess(profileState.profile.accessTierShortNames)) &&
         <div
             style={
               hideFooter
