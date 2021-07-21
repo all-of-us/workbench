@@ -128,12 +128,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
    *   <li>The module is expirable.
    *   <li>The module was completed(CompletionTime is not null).
    *   <li>The module is not bypassed(BypassTime is null).
-   *   <li>Access annual renewal is enabled(enableAccessRenewal is true).
    * </ul>
    */
   private Optional<Timestamp> getExpirationTime(DbUserAccessModule dbUserAccessModule) {
-    if (!configProvider.get().access.enableAccessRenewal
-        || !dbUserAccessModule.getAccessModule().getExpirable()
+    if (!dbUserAccessModule.getAccessModule().getExpirable()
         || dbUserAccessModule.getCompletionTime() == null
         || dbUserAccessModule.getBypassTime() != null) {
       return Optional.empty();
