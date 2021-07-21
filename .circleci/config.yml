@@ -714,15 +714,12 @@ jobs:
       - gcloud-auth-login
       - run:
           working_directory: ~/workbench/api
-          name: An arbitrary project.rb command
-          command: ./project.rb connect-to-cloud-db --project all-of-us-workbench-test
+          name: Prep the e2e users by setting access module timestamps
+          command: ./project.rb set-access-module-timestamps
  
 workflows:
   joel-workflow:
     jobs:
-      - joel-creds-test
-      - execute-cloud-db-command:
-          sql_command: "UPDATE user SET profile_last_confirmed_time = '2020-07-10' WHERE email LIKE 'joel@fake%';"
       - joel-project-rb
         
 
