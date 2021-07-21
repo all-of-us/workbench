@@ -813,6 +813,15 @@ task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
   }
 }
 
+task setAccessModuleTimestamps(type: JavaExec) {
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 //
 // Kotlin Plugin compiler arguments
 // https://kotlinlang.org/docs/reference/using-gradle.html#compiler-options
