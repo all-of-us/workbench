@@ -216,7 +216,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
             {label: options[0].category, className: 'menuitem-header'},
             ...options.map((dt) => this.mapCriteriaMenuItem(dt, 0))
           ];
-          if (index < options.length - 1) {
+          if (index < criteriaMenuOptions.length - 1) {
             menuItems.push({separator: true});
           }
         });
