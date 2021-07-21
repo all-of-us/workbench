@@ -18,7 +18,6 @@ import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   queryParamsStore,
-  routeConfigDataStore,
   setSidebarActiveIconStore,
   urlParamsStore
 } from 'app/utils/navigation';
@@ -97,10 +96,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.initialSpinner = false;
       }
       if (e instanceof NavigationEnd) {
-        const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+        const {snapshot: {params, queryParams}} = this.getLeafRoute();
         urlParamsStore.next(params);
         queryParamsStore.next(queryParams);
-        routeConfigDataStore.next(routeConfig.data);
       }
     }));
 

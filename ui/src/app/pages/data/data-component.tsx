@@ -84,6 +84,7 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
+  console.log("Rendering DataComponent");
   useEffect(() => props.hideSpinner(), []);
 
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
