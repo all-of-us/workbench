@@ -1,10 +1,9 @@
-import {Component, Input} from '@angular/core';
 import { Link, StyledAnchorTag } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
@@ -43,7 +42,7 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     padding: '1rem',
     // Must be higher than the side helpbar index for now. See help-bar.tsx.
-    // Eventually the footer should be reflowed benetah this, per RW-5110. The footer
+    // Eventually the footer should be reflowed beneath this, per RW-5110. The footer
     // should be beneath any other floating elements, such as modals.
     zIndex: 102
   },
@@ -223,18 +222,5 @@ export class Footer extends React.Component<FooterProps> {
       case FooterTypeEnum.Workbench:
         return <WorkbenchFooter />;
     }
-  }
-}
-
-@Component({
-  selector: 'app-footer',
-  template: '<div #root></div>'
-})
-export class FooterComponent extends ReactWrapperBase {
-  @Input('type') type: FooterProps['type'];
-  constructor() {
-    super(Footer, [
-      'type',
-    ]);
   }
 }

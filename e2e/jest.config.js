@@ -44,7 +44,7 @@ module.exports = {
       tsconfig: 'tsconfig.jest.json'
     }
   },
-  testPathIgnorePatterns: ['/node_modules/', '/tsc-out/'],
+  testPathIgnorePatterns: ['/node_modules/', '/tsc-out/', '/examples/'],
   testMatch:
     process.env.TEST_MODE === 'nightly-integration'
       ? ['<rootDir>/tests/nightly/**/*.spec.ts']

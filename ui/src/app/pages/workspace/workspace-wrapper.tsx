@@ -1,6 +1,6 @@
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {Spinner} from 'app/components/spinners';
-import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
+import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
 import {withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {WorkspaceRoutes} from 'app/workspace-app-routing';
 import * as fp from 'lodash/fp';
@@ -15,7 +15,7 @@ export const WorkspaceWrapper = fp.flow(
   return <React.Fragment>
     {workspace
         ? <React.Fragment>
-          {!routeConfigData.minimizeChrome && <WorkspaceNavBarReact tabPath={routeConfigData.workspaceNavBarTab}/>}
+          {!routeConfigData.minimizeChrome && <WorkspaceNavBar tabPath={routeConfigData.workspaceNavBarTab}/>}
           <HelpSidebar pageKey={routeConfigData.pageKey}/>
           <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
             <WorkspaceRoutes/>

@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
@@ -9,7 +8,6 @@ import {ClrIcon} from 'app/components/icons';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   withCdrVersions,
   withCurrentWorkspace,
   withUrlParams
@@ -137,7 +135,7 @@ function restrictTab(workspace, tab) {
       && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
 }
 
-export const WorkspaceNavBarReact = fp.flow(
+export const WorkspaceNavBar = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
   withCdrVersions()
@@ -172,14 +170,3 @@ export const WorkspaceNavBarReact = fp.flow(
   </div>;
 });
 
-@Component({
-  selector: 'app-workspace-nav-bar',
-  template: '<div #root></div>',
-})
-export class WorkspaceNavBarComponent extends ReactWrapperBase {
-  @Input() tabPath;
-
-  constructor() {
-    super(WorkspaceNavBarReact, ['tabPath']);
-  }
-}

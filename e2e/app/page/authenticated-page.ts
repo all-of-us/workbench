@@ -3,7 +3,7 @@ import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
 
-const signedInIndicator = 'app-signed-in';
+export const signedInIndicator = '[data-test-id="signed-in"]';
 
 /**
  * AuthenticatedPage represents the base page for any AoU page after user has successfully logged in (aka authenticated).

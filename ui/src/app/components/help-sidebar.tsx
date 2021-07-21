@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
   faBook,
@@ -28,8 +27,7 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
-  reactStyles,
-  ReactWrapperBase, switchCase, withCdrVersions,
+  reactStyles, switchCase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -893,15 +891,3 @@ export const HelpSidebar = fp.flow(
     }
   }
 );
-
-@Component({
-  selector: 'app-help-sidebar',
-  template: '<div #root></div>',
-})
-export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('pageKey') pageKey: Props['pageKey'];
-
-  constructor() {
-    super(HelpSidebar, ['pageKey' ]);
-  }
-}
