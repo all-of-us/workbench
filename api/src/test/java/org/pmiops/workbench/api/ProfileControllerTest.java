@@ -83,6 +83,8 @@ import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.NihToken;
@@ -92,6 +94,8 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SexAtBirth;
+import org.pmiops.workbench.model.TierEmailAddresses;
+import org.pmiops.workbench.model.TierEmailDomains;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
@@ -175,6 +179,10 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   private int DUCC_VERSION;
   private DbAccessTier registeredTier;
+  private InstitutionTierRequirement rtAddressRequirement;
+  private InstitutionTierRequirement rtDomainsRequirement;
+  private TierEmailAddresses rtTierEmailAddress;
+  private TierEmailDomains rtTierEmailDomains;
 
   @TestConfiguration
   @Import({
@@ -244,6 +252,19 @@ public class ProfileControllerTest extends BaseControllerTest {
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
+    rtAddressRequirement =
+        new InstitutionTierRequirement()
+            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+            .eraRequired(false)
+            .accessTierShortName(registeredTier.getShortName());
+    rtDomainsRequirement =
+        new InstitutionTierRequirement()
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+            .eraRequired(false)
+            .accessTierShortName(registeredTier.getShortName());
+    rtTierEmailAddress = new TierEmailAddresses().accessTierShortName(registeredTier.getShortName());
+    rtTierEmailDomains  = new TierEmailDomains().accessTierShortName(registeredTier.getShortName());
+
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -308,9 +329,9 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"))
-                  .duaTypeEnum(DuaType.RESTRICTED);
+                  .addTierRequirementsItem(rtAddressRequirement)
+                  .tierEmailDomains(ImmutableList.of(rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "mit.edu"))))
+                  .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("email@domain.org"))));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -331,9 +352,9 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"))
-                  .duaTypeEnum(DuaType.MASTER);
+                  .addTierRequirementsItem(rtDomainsRequirement)
+                  .addTierEmailAddressesItem(rtTierEmailAddress.addEmailAddressesItem(CONTACT_EMAIL))
+                  .addTierEmailDomainsItem(rtTierEmailDomains.addEmailDomainsItem("example.com"));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -345,36 +366,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateAccount_MismatchEmailDomainNullDUA() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          final Institution broad =
-              new Institution()
-                  .shortName("Broad")
-                  .displayName("The Broad Institute")
-                  .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .emailDomains(Collections.singletonList("example.com"));
-          institutionService.createInstitution(broad);
-          final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-              new VerifiedInstitutionalAffiliation()
-                  .institutionShortName("Broad")
-                  .institutionalRoleEnum(InstitutionalRole.STUDENT);
-          createAccountRequest.getProfile().contactEmail("bob@broadInstitute.com");
-          createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-        });
-  }
-
-  @Test
-  public void testCreateAccount_Success_RESTRICTEDDUA() {
+  public void testCreateAccount_Success_addressesRtRequirement() {
     final Institution broad =
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierRequirementsItem(rtAddressRequirement)
+            .addTierEmailAddressesItem(rtTierEmailAddress.addEmailAddressesItem(CONTACT_EMAIL))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
@@ -387,14 +385,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateAccount_Success_MasterDUA() {
+  public void testCreateAccount_Success_domainsRtRequirement() {
     final Institution broad =
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList("institution@example.com"))
-            .emailDomains(Collections.singletonList("example.com"))
-            .duaTypeEnum(DuaType.MASTER)
+            .addTierEmailDomainsItem(rtTierEmailDomains.addEmailDomainsItem("example.com"))
+            .addTierRequirementsItem(rtDomainsRequirement)
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
@@ -412,7 +409,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailDomains(Collections.singletonList("example.com"))
+            .addTierEmailDomainsItem(rtTierEmailDomains.emailDomains(Collections.singletonList("example.com")))
+            .addTierRequirementsItem(rtDomainsRequirement)
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 
@@ -606,8 +604,8 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .addTierRequirementsItem(rtAddressRequirement)
+                  .addTierEmailAddressesItem(rtTierEmailAddress.addEmailAddressesItem(CONTACT_EMAIL))
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broad);
           // "Broad" is the only institution
@@ -630,8 +628,8 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailAddresses(Collections.emptyList())
-                  .duaTypeEnum(DuaType.RESTRICTED);
+                  .addTierRequirementsItem(rtAddressRequirement)
+                  .addTierEmailAddressesItem(rtTierEmailAddress.emailAddresses(Collections.emptyList()));
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -654,8 +652,8 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("Broad")
                   .displayName("The Broad Institute")
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                  .emailDomains(emailDomains)
-                  .duaTypeEnum(DuaType.MASTER);
+                  .addTierEmailDomainsItem(rtTierEmailDomains.emailDomains(emailDomains))
+                  .addTierRequirementsItem(rtDomainsRequirement);
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
               new VerifiedInstitutionalAffiliation()
@@ -1154,8 +1152,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierEmailAddressesItem(rtTierEmailAddress.emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail)))
+            .addTierRequirementsItem(rtAddressRequirement)
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broadPlus);
 
@@ -1193,8 +1191,8 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail))
-                  .duaTypeEnum(DuaType.RESTRICTED)
+                  .addTierEmailAddressesItem(rtTierEmailAddress.emailAddresses(ImmutableList.of(CONTACT_EMAIL, newContactEmail)))
+                  .addTierRequirementsItem(rtAddressRequirement)
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broadPlus);
           final VerifiedInstitutionalAffiliation affiliation =
@@ -1250,8 +1248,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("MGH123")
             .displayName("Massachusetts General Hospital")
-            .emailAddresses(ImmutableList.of(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierEmailAddressesItem(rtTierEmailAddress.addEmailAddressesItem(CONTACT_EMAIL))
+            .addTierRequirementsItem(rtAddressRequirement)
             .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
     institutionService.createInstitution(massGeneral);
 
@@ -1284,8 +1282,8 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
-                  .duaTypeEnum(DuaType.MASTER)
-                  .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+                  .addTierRequirementsItem(rtDomainsRequirement)
+                  .addTierEmailDomainsItem(rtTierEmailDomains.emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital")))
                   .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
           institutionService.createInstitution(massGeneral);
           final VerifiedInstitutionalAffiliation newAffiliation =
@@ -1324,8 +1322,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("MGH123")
             .displayName("Massachusetts General Hospital")
-            .duaTypeEnum(DuaType.MASTER)
-            .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+            .addTierRequirementsItem(rtDomainsRequirement)
+            .addTierEmailDomainsItem(rtTierEmailDomains.emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital")))
             .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
     institutionService.createInstitution(massGeneral);
 
@@ -1371,7 +1369,8 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .shortName("MGH123")
                   .displayName("Massachusetts General Hospital")
                   .duaTypeEnum(DuaType.MASTER)
-                  .emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital"))
+                  .addTierRequirementsItem(rtDomainsRequirement)
+                  .addTierEmailDomainsItem(rtTierEmailDomains.emailDomains(ImmutableList.of("mgh.org", "massgeneral.hospital")))
                   .organizationTypeEnum(OrganizationType.HEALTH_CENTER_NON_PROFIT);
           institutionService.createInstitution(massGeneral);
           final VerifiedInstitutionalAffiliation newAffiliation =
@@ -1642,8 +1641,8 @@ public class ProfileControllerTest extends BaseControllerTest {
         new Institution()
             .shortName("Broad")
             .displayName("The Broad Institute")
-            .emailAddresses(Collections.singletonList(CONTACT_EMAIL))
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierRequirementsItem(rtAddressRequirement)
+            .addTierEmailAddressesItem(rtTierEmailAddress.addEmailAddressesItem(CONTACT_EMAIL))
             .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
     institutionService.createInstitution(broad);
 

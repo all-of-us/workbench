@@ -216,7 +216,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
     InstitutionTierRequirement rtRequirement = getTierRequirementOrThrow(institution, REGISTERED_TIER_SHORT_NAME);
-    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
     // If the Institution's registered tier agreement requires email addresses, that is restricted
     // just to few researchers. Confirm if the email address is in the allowed email list
     if (rtRequirement != null
@@ -224,8 +223,9 @@ public class InstitutionServiceImpl implements InstitutionService {
       final boolean validated = getEmailAddressesByTierOrThrow(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmail);
       log.info(
           String.format(
-              "Contact email '%s' validated against RESTRICTED-DUA institution '%s': address %s",
-              contactEmail, institution.getShortName(), validated ? "MATCHED" : "DID NOT MATCH"));
+              "Contact email '%s' validated against registered tier with ADDRESSES requirement: "
+                  + "'%s': address %s" , contactEmail, institution.getShortName(), validated ?
+                  "MATCHED" : "DID NOT MATCH"));
       return validated;
     }
 
@@ -236,7 +236,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     final boolean validated = getEmailDomainsByTierOrThrow(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmailDomain);
     log.info(
         String.format(
-            "Contact email '%s' validated against MASTER-DUA institution '%s': domain %s %s",
+            "Contact email '%s' validated against registered tier with DOMAINS requirement '%s': "
+                + "domain %s %s",
             contactEmail,
             institution.getShortName(),
             contactEmailDomain,
