@@ -5,24 +5,21 @@ import {Redirect} from 'react-router';
 import {Switch} from 'react-router-dom';
 
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
-import {NotificationModal} from 'app/components/modals';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
-import {SignIn} from 'app/pages/login/sign-in';
 import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
-import {authStore, useStore} from 'app/utils/stores';
+import {useIsUserDisabled} from 'app/utils/access-utils';
+import { authStore, useStore} from 'app/utils/stores';
 import {Subscription} from 'rxjs/Subscription';
+import {NotificationModal} from './components/modals';
+import {SignIn} from './pages/login/sign-in';
+import {AnalyticsTracker} from './utils/analytics';
 
-const signInGuard: Guard = {
-  allowed: (): boolean => authStore.get().isSignedIn,
-  redirectPath: '/login'
-};
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
@@ -30,6 +27,16 @@ const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
+
+const signInGuard: Guard = {
+  allowed: (): boolean => authStore.get().isSignedIn,
+  redirectPath: '/login'
+};
+
+const disabledGuard = (userDisabled: boolean): Guard => ({
+  allowed: (): boolean => !userDisabled,
+  redirectPath: '/user-disabled'
+});
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -40,8 +47,9 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, subscribeToInactivitySignOut, signOut}) => {
   const {authLoaded = false} = useStore(authStore);
+  const isUserDisabled = useIsUserDisabled();
 
-  return authLoaded && <React.Fragment>
+  return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     <AppRouter>
@@ -71,7 +79,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             path='/user-disabled'
             component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
         />
-        <ProtectedRoutes guards={[signInGuard]}>
+        <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
           <AppRoute
               path=''
               exact={false}
