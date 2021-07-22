@@ -141,7 +141,7 @@ interface Props {
 }
 
 interface State {
-  criteriaMenuOptions: any;
+  criteriaMenuOptions: Array<any>;
   index: number;
   loadingMenuOptions: boolean;
 }
@@ -152,7 +152,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
     constructor(props: Props) {
       super(props);
       this.state = {
-        criteriaMenuOptions: {programTypes: [], domainTypes: []},
+        criteriaMenuOptions: [],
         index: 0,
         loadingMenuOptions: false
       };
@@ -191,10 +191,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
           }
           return option;
         }));
-        criteriaMenuOptions[cdrVersionId] = {
-          programTypes: menuOptions.filter(opt => opt.category === 'Program Data'),
-          domainTypes: menuOptions.filter(opt => opt.category === 'Domains')
-        };
+        criteriaMenuOptions[cdrVersionId] = Object.values(fp.groupBy('category', menuOptions));
         criteriaMenuOptionsStore.next(criteriaMenuOptions);
         this.setState({loadingMenuOptions: false});
       });
@@ -208,16 +205,23 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
     }
 
     get criteriaMenuItems() {
-      const {criteriaMenuOptions: {domainTypes, programTypes}, loadingMenuOptions} = this.state;
-      return loadingMenuOptions
-      ? [{icon: 'pi pi-spin pi-spinner'}]
-      : [
-        {label: 'Program Data', className: 'menuitem-header'},
-        ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
-        {separator: true},
-        {label: 'Domains', className: 'menuitem-header'},
-        ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
-      ];
+      const {criteriaMenuOptions, loadingMenuOptions} = this.state;
+      if (loadingMenuOptions) {
+        return [{icon: 'pi pi-spin pi-spinner'}];
+      } else {
+        let menuItems = [];
+        criteriaMenuOptions.forEach((options, index) => {
+          menuItems = [
+            ...menuItems,
+            {label: options[0].category, className: 'menuitem-header'},
+            ...options.map((dt) => this.mapCriteriaMenuItem(dt, 0))
+          ];
+          if (index < criteriaMenuOptions.length - 1) {
+            menuItems.push({separator: true});
+          }
+        });
+        return menuItems;
+      }
     }
 
     launchSearch(criteria: any) {
