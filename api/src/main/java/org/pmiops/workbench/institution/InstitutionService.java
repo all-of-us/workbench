@@ -10,6 +10,8 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.TierEmailAddresses;
+import org.pmiops.workbench.model.TierEmailDomains;
 
 public interface InstitutionService {
   List<Institution> getInstitutions();
@@ -61,7 +63,7 @@ public interface InstitutionService {
    * @param institutionShortName the short name (key) used to refer to this institution in the API
    * @return the list of email domains associated with this institution, if any
    */
-  List<String> getEmailDomains(String institutionShortName);
+  List<TierEmailDomains> getEmailDomains(String institutionShortName);
 
   /**
    * Retrieve an ordered list of the email addresses which this institution uses to match user
@@ -71,7 +73,7 @@ public interface InstitutionService {
    * @param institutionShortName the short name (key) used to refer to this institution in the API
    * @return the list of email addresses associated with this institution, if any
    */
-  List<String> getEmailAddresses(String institutionShortName);
+  List<TierEmailAddresses> getEmailAddresses(String institutionShortName);
 
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after

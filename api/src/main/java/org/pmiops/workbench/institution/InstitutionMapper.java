@@ -15,8 +15,8 @@ public interface InstitutionMapper {
   DbInstitution modelToDb(Institution modelObject);
 
   // these fields will be populated by @AfterMapping populateFromAuxTables
-  @Mapping(target = "emailDomains", ignore = true)
-  @Mapping(target = "emailAddresses", ignore = true)
+  @Mapping(target = "tierEmailDomains", ignore = true)
+  @Mapping(target = "tierEmailAddresses", ignore = true)
   @Mapping(target = "userInstructions", ignore = true)
   @Mapping(target = "tierRequirements", ignore = true)
   Institution dbToModel(DbInstitution dbObject, @Context InstitutionService institutionService);
@@ -24,8 +24,8 @@ public interface InstitutionMapper {
   @AfterMapping
   default void populateFromAuxTables(
       @MappingTarget Institution target, @Context InstitutionService institutionService) {
-    target.setEmailDomains(institutionService.getEmailDomains(target.getShortName()));
-    target.setEmailAddresses(institutionService.getEmailAddresses(target.getShortName()));
+    target.setTierEmailDomains(institutionService.getEmailDomains(target.getShortName()));
+    target.setTierEmailAddresses(institutionService.getEmailAddresses(target.getShortName()));
     target.setTierRequirements(institutionService.getTierRequirements(target.getShortName()));
     institutionService
         .getInstitutionUserInstructions(target.getShortName())
