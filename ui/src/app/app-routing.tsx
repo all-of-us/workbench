@@ -14,19 +14,12 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import { authStore, useStore} from 'app/utils/stores';
+import {authStore, useStore} from 'app/utils/stores';
 import {Subscription} from 'rxjs/Subscription';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
 import {AnalyticsTracker} from './utils/analytics';
 
-
-const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
-const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
-const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
-const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
-const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
-const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
 
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
@@ -37,6 +30,13 @@ const disabledGuard = (userDisabled: boolean): Guard => ({
   allowed: (): boolean => !userDisabled,
   redirectPath: '/user-disabled'
 });
+
+const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
+const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
+const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
+const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
+const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
+const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
 
 interface RoutingProps {
   onSignIn: () => void;
