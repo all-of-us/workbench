@@ -5,12 +5,15 @@ import { waitForDocumentTitle, waitForUrl, waitWhileLoading } from 'utils/waits-
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
 import { PageUrl } from 'app/text-labels';
+import Link from 'app/element/link';
 
 export const PageTitle = 'Profile';
 
 const LabelAlias = {
   ResearchBackground: 'Your research background, experience and research interests',
-  SaveProfile: 'Save Profile'
+  SaveProfile: 'Save Profile',
+  NeedsConfirmation: 'Please update or verify your profile.',
+  LooksGood: 'Looks Good'
 };
 
 const DataTestIdAlias = {
@@ -101,5 +104,13 @@ export default class ProfilePage extends AuthenticatedPage {
 
   getSaveProfileButton(): Button {
     return Button.findByName(this.page, { name: LabelAlias.SaveProfile });
+  }
+
+  needsConfirmation(): Promise<boolean> {
+    return this.containsText(LabelAlias.NeedsConfirmation);
+  }
+
+  getLooksGoodLink(): Link {
+    return Link.findByName(this.page, { name: LabelAlias.LooksGood });
   }
 }
