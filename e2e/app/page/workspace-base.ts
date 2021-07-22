@@ -98,7 +98,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
     const tabLink = new Link(this.page, selector);
     if (!(await tabLink.exists())) {
-      throw new Error(`Failed to find and click \"${pageTabName}\" page tab.`);
+      throw new Error(`Failed to find and click "${pageTabName}" page tab.`);
     }
     waitPageChange ? await tabLink.clickAndWait() : await tabLink.click();
     await tabLink.dispose();

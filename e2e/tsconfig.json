@@ -7,7 +7,7 @@
     "allowUnreachableCode": false,
     "skipLibCheck": true,
     "target": "es2018",
-    "module": "commonJS",
+    "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "importHelpers": true,
@@ -25,5 +25,8 @@
     "baseUrl": ".",
     "lib": ["es2018", "dom"]
   },
-  "exclude": [ "tsc-out", "node_modules", "logs" ]
+  "exclude": [ "tsc-out", "node_modules", "logs" ],
+  "include": [
+    "."
+  ]
 }

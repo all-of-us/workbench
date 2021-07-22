@@ -7,8 +7,9 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 
 const Selector = {
-  editLink: '//div[normalize-space(text())="Edit"]',
-  runPlaygroundModeLink: '//div[normalize-space(text())="Run (Playground Mode)"]'
+  editLink: '//*[contains(normalize-space(text()), "Edit")]',
+  runPlaygroundModeLink: '//*[contains(normalize-space(text()), "Run")]',
+  previewLink: '//*[contains(normalize-space(text()), "Preview")]'
 };
 
 export default class NotebookPreviewPage extends AuthenticatedPage {
@@ -21,7 +22,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     await Promise.all([
       this.page.waitForXPath(Selector.editLink, { visible: true }),
       this.page.waitForXPath(Selector.runPlaygroundModeLink, { visible: true }),
-      this.page.waitForXPath('//*[text()="Preview (Read-Only)"]', { visible: true })
+      this.page.waitForXPath(Selector.previewLink, { visible: true })
     ]);
     return true;
   }

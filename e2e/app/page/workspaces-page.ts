@@ -35,17 +35,15 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
-
     await waitWhileLoading(this.page, 120000).catch(async () => {
       logger.warn('Retry loading Workspaces page');
       await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
       await waitWhileLoading(this.page);
     });
-
-    await Promise.all([
-      this.page.waitForXPath('//a[text()="Workspaces"]', { visible: true }),
-      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', { visible: true }) // Texts above Filter By Select
-    ]);
+    await this.page.waitForXPath('//a[text()="Workspaces"]', { visible: true });
+    await this.page.waitForSelector('[data-test-id="workspace-card"], [role="button"]', {
+      visible: true
+    });
     return true;
   }
 
