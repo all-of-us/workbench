@@ -78,22 +78,8 @@ public interface UserService {
   List<DbUser> getAllUsersExcludingDisabled();
 
   @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
-  void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
-
-  @Deprecated // use or create an auditor in org.pmiops.workbench.actionaudit.auditors
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
-
-  /**
-   * Find users with Registered Tier access whose name or username match the supplied search terms.
-   *
-   * @param term User-supplied search term
-   * @param sort Option(s) for ordering query results
-   * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(String, Sort, String)} instead.
-   */
-  @Deprecated
-  List<DbUser> findUsersBySearchString(String term, Sort sort);
 
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate

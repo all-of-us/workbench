@@ -708,12 +708,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public void logAdminUserAction(
-      long targetUserId, String targetAction, Object oldValue, Object newValue) {
-    logAdminAction(targetUserId, null, targetAction, oldValue, newValue);
-  }
-
-  @Override
   public void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);
@@ -734,20 +728,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     adminActionHistory.setAdminUserId(userProvider.get().getUserId());
     adminActionHistory.setTimestamp();
     adminActionHistoryDao.save(adminActionHistory);
-  }
-
-  /**
-   * Find users with Registered Tier access whose name or username match the supplied search terms.
-   *
-   * @param term User-supplied search term
-   * @param sort Option(s) for ordering query results
-   * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link UserService#findUsersBySearchString(String, Sort, String)} instead.
-   */
-  @Deprecated
-  @Override
-  public List<DbUser> findUsersBySearchString(String term, Sort sort) {
-    return findUsersBySearchString(term, sort, accessTierService.REGISTERED_TIER_SHORT_NAME);
   }
 
   /**

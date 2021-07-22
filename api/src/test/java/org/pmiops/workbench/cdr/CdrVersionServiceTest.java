@@ -29,7 +29,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersion;
-import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.pmiops.workbench.test.FakeClock;
@@ -257,32 +256,6 @@ public class CdrVersionServiceTest {
           cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
         });
   }
-
-  // Tests for deprecated registered-tier-only getCdrVersions()
-
-  @Test
-  public void testGetCdrVersionsRegisteredOnly() {
-    addMembershipForTest(registeredTier);
-    CdrVersionListResponse response = cdrVersionService.getCdrVersions();
-
-    List<CdrVersion> expected =
-        ImmutableList.of(cdrVersionMapper.dbModelToClient(defaultCdrVersion));
-    assertThat(response.getItems()).containsExactlyElementsIn(expected);
-
-    String expectedId = String.valueOf(defaultCdrVersion.getCdrVersionId());
-    assertThat(response.getDefaultCdrVersionId()).isEqualTo(expectedId);
-  }
-
-  @Test
-  public void testGetCdrVersionsUnregistered() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          cdrVersionService.getCdrVersions();
-        });
-  }
-
-  // Tests for multi-tier getCdrVersionsByTier()
 
   @Test
   public void testGetCdrVersionsByTierRegisteredOnly() {

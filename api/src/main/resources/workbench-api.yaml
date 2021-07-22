@@ -155,20 +155,6 @@ paths:
           description: List of featured workspaces
           schema:
             "$ref": "#/definitions/FeaturedWorkspacesConfigResponse"
-  "/v1/cdrVersions":
-    get:
-      tags:
-      - cdrVersions
-      description: >
-        DEPRECATED.
-        Returns all curated data repository (CDR) versions in the Registered Tier
-        that the user has access to
-      operationId: getCdrVersions
-      responses:
-        200:
-          description: A list of CDR versions.
-          schema:
-            "$ref": "#/definitions/CdrVersionListResponse"
   "/v1/cdrVersionsByTier":
     get:
       tags:
@@ -555,45 +541,6 @@ paths:
       summary: enable/disable a user to an auth domain if you have ID verification
         authority
       operationId: updateUserDisabledStatus
-  "/v1/user/{term}":
-    get:
-      tags:
-      - user
-      description: >
-        DEPRECATED.  Use /v1/userSearch/{accessTier}/{term} instead.
-        Return a page of users matching a search term.
-        Used by autocomplete for workspace sharing.
-      operationId: user
-      responses:
-        200:
-          description: The user information matching supplied search terms
-          schema:
-            "$ref": "#/definitions/UserResponse"
-      parameters:
-      - in: path
-        name: term
-        description: String to find in user's name or email address. Search is a case-insensitive
-          substring match.
-        required: true
-        type: string
-      - in: query
-        name: pageToken
-        description: 'Pagination token retrieved from a previous call to user; used
-          for retrieving additional pages of results.'
-        type: string
-        required: false
-      - in: query
-        name: pageSize
-        description: 'Maximum number of results to return in a response. Defaults
-          to 10.'
-        type: integer
-        required: false
-      - in: query
-        name: sortOrder
-        description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the
-          user's email.
-        type: string
-        required: false
   "/v1/userSearch/{accessTierShortName}/{term}":
     get:
       tags:
@@ -2861,30 +2808,6 @@ paths:
           description: Whether the email is a valid member of the institution.
           schema:
             "$ref": "#/definitions/CheckEmailResponse"
-  "/v1/institutions/{shortName}/checkEmail/{email}/":
-    parameters:
-      - in: path
-        name: shortName
-        type: string
-        description: 'The short name / key of the institution to check, e.g. "VUMC"'
-        required: true
-      - in: path
-        name: email
-        type: string
-        description: Institutional contact email address to check.
-        required: true
-    get:
-      tags:
-        - institution
-      operationId: deprecatedCheckEmail
-      description: Checks whether the given email address is a verified member of an institution. DEPRECATED in favor of the POST endpoint.
-      x-aou-note: This endpoint is publicly-accessible and called by clients during user registration.
-      security: []
-      responses:
-        200:
-          description: Whether the email is a valid member of the institution.
-          schema:
-            "$ref": "#/definitions/CheckEmailResponse"
   "/v1/institutions/instructionsEmail":
     post:
       tags:
@@ -3954,19 +3877,6 @@ definitions:
     - DEMO_PROJECTS
     - PHENOTYPE_LIBRARY
     - TUTORIAL_WORKSPACES
-  CdrVersionListResponse:
-    type: object
-    required:
-    - items
-    - defaultCdrVersionId
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/CdrVersion"
-      defaultCdrVersionId:
-        type: string
-        description: ID of the CDR versions that should be used by the user by default
   CdrVersionTiersResponse:
     type: object
     required:
