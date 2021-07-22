@@ -7,8 +7,9 @@ import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, findOrCreateWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findOrCreateWorkspaceCard } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
+import { withSignInTest } from 'libs/page-manager';
 
 async function createConceptSet(
   srcWorkspaceCard: WorkspaceCard
@@ -41,55 +42,52 @@ async function createConceptSet(
 }
 
 describe('Copy Concept Set to another workspace', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-  });
-
   /**
    * Test:
    * - Copy Concept Set from one workspace to another workspace when both have the same CDR Version.
    */
   test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
-    // Create a source and a destination workspace with the same CDR Version.
+    await withSignInTest()(async (page) => {
+      // Create a source and a destination workspace with the same CDR Version.
+      const destWorkspace = await createWorkspace(page);
 
-    const destWorkspace = await createWorkspace(page);
+      const srcWorkspaceCard = await findOrCreateWorkspaceCard(page);
+      const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
 
-    const srcWorkspaceCard = await findOrCreateWorkspaceCard(page);
-    const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
+      const { dataPage, conceptSetName } = await createConceptSet(srcWorkspaceCard);
 
-    const { dataPage, conceptSetName } = await createConceptSet(srcWorkspaceCard);
+      // Concept Set page is open.
+      const conceptSetPage = new ConceptSetPage(page);
+      await conceptSetPage.waitForLoad();
 
-    // Concept Set page is open.
-    const conceptSetPage = new ConceptSetPage(page);
-    await conceptSetPage.waitForLoad();
+      // Copy Concept Set to another workspace with new Concept name.
 
-    // Copy Concept Set to another workspace with new Concept name.
+      const conceptSetCopyName = makeRandomName();
 
-    const conceptSetCopyName = makeRandomName();
+      const conceptSetCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
+      await conceptSetCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
 
-    const conceptSetCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
-    await conceptSetCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
+      // Click "Go to Copied Concept Set" button.
+      await conceptSetCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).click();
 
-    // Click "Go to Copied Concept Set" button.
-    await conceptSetCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).click();
+      await dataPage.waitForLoad();
 
-    await dataPage.waitForLoad();
+      // Verify destWorkspace is open.
+      const url = page.url();
+      expect(url).toContain(destWorkspace.replace(/-/g, ''));
 
-    // Verify destWorkspace is open.
-    const url = page.url();
-    expect(url).toContain(destWorkspace.replace(/-/g, ''));
+      const resourceCard = new DataResourceCard(page);
+      const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
+      expect(exists).toBe(true);
 
-    const resourceCard = new DataResourceCard(page);
-    const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
-    expect(exists).toBe(true);
+      console.log(
+        `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" ` +
+          `to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
+      );
 
-    console.log(
-      `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" ` +
-        `to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
-    );
-
-    // Delete Concept Set in destWorkspace.
-    await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
+      // Delete Concept Set in destWorkspace.
+      await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);
+    });
   });
 
   /**
@@ -97,24 +95,25 @@ describe('Copy Concept Set to another workspace', () => {
    * - Fail to Copy Concept Set from one workspace to another workspace when CDR Versions mismatch.
    */
   test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
-    // Create a source and a destination workspace with differing CDR Versions.
+    await withSignInTest()(async (page) => {
+      // Create a source and a destination workspace with differing CDR Versions.
+      const destWorkspace = await createWorkspace(page);
 
-    const destWorkspace = await createWorkspace(page);
+      const srcWorkspaceCard = await findOrCreateWorkspaceCard(page, {
+        cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME
+      });
 
-    const srcWorkspaceCard = await findOrCreateWorkspaceCard(page, {
-      cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME
+      const { conceptSetName } = await createConceptSet(srcWorkspaceCard);
+
+      // Concept Set page is open.
+      const conceptSetPage = new ConceptSetPage(page);
+      await conceptSetPage.waitForLoad();
+
+      const conceptCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
+      await conceptCopyModal.beginCopyToAnotherWorkspace(destWorkspace, makeRandomName());
+
+      const copyButton = conceptCopyModal.waitForButton(LinkText.Copy);
+      expect(await copyButton.isCursorNotAllowed()).toBe(true);
     });
-
-    const { conceptSetName } = await createConceptSet(srcWorkspaceCard);
-
-    // Concept Set page is open.
-    const conceptSetPage = new ConceptSetPage(page);
-    await conceptSetPage.waitForLoad();
-
-    const conceptCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
-    await conceptCopyModal.beginCopyToAnotherWorkspace(destWorkspace, makeRandomName());
-
-    const copyButton = conceptCopyModal.waitForButton(LinkText.Copy);
-    expect(await copyButton.isCursorNotAllowed()).toBe(true);
   });
 });

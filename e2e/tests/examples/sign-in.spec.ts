@@ -1,7 +1,7 @@
 import ProfilePage from 'app/page/profile-page';
 import { signInWithAccessToken, signOut } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
-import { withPageTest, withSignIn } from 'libs/page-manager';
+import { withPageTest, withSignInTest } from 'libs/page-manager';
 import { config } from 'resources/workbench-config';
 import HomePage from 'app/page/home-page';
 import GoogleLoginPage from 'app/page/google-login';
@@ -50,7 +50,7 @@ describe('login tests', () => {
   });
 
   test('withSignIn example: Default is access token', async () => {
-    await withSignIn()(async (page, _browser) => {
+    await withSignInTest()(async (page, _browser) => {
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
       expect(await workspacesPage.isLoaded()).toBe(true);
@@ -58,7 +58,7 @@ describe('login tests', () => {
   });
 
   test('withSignIn example: Entering user email and password', async () => {
-    await withSignIn(config.READER_ACCESS_TOKEN_FILE)(async (page, _browser) => {
+    await withSignInTest(config.READER_ACCESS_TOKEN_FILE)(async (page, _browser) => {
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
       expect(await workspacesPage.isLoaded()).toBe(true);

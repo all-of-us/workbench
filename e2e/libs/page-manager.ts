@@ -97,7 +97,7 @@ export const withPageTest = (launchOpts?: LaunchOptions) => async (
   });
 };
 
-export const withSignIn = (tokenFileName?: string) => async (
+export const withSignInTest = (tokenFileName?: string) => async (
   testFn: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
   await withPageTest()(async (page, browser) => {

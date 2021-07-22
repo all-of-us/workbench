@@ -1,10 +1,11 @@
 import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, findWorkspaceCard } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeWorkspaceName } from 'utils/str-utils';
+import { withSignInTest } from 'libs/page-manager';
 
 describe('Workspace Share Modal', () => {
   const assignAccess = [
@@ -24,90 +25,90 @@ describe('Workspace Share Modal', () => {
   const workspace = makeWorkspaceName();
 
   test.each(assignAccess)('Share workspace %s', async (assign) => {
-    await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await withSignInTest()(async (page) => {
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
+      const dataPage = new WorkspaceDataPage(page);
+      await dataPage.waitForLoad();
 
-    await dataPage.openAboutPage();
-    const aboutPage = new WorkspaceAboutPage(page);
-    await aboutPage.waitForLoad();
+      await dataPage.openAboutPage();
+      const aboutPage = new WorkspaceAboutPage(page);
+      await aboutPage.waitForLoad();
 
-    let collaborators = await aboutPage.findUsersInCollaboratorList();
+      let collaborators = await aboutPage.findUsersInCollaboratorList();
 
-    // Verify No WRITER or READER exists.
-    expect(collaborators.has(assign.accessRole)).toBeFalsy();
+      // Verify No WRITER or READER exists.
+      expect(collaborators.has(assign.accessRole)).toBeFalsy();
 
-    const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
-    await aboutPage.waitForLoad();
+      const shareWorkspaceModal = await aboutPage.shareWorkspace();
+      await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
+      await aboutPage.waitForLoad();
 
-    await reloadAboutPage();
-    collaborators = await aboutPage.findUsersInCollaboratorList();
-    // Verify OWNER (login user) information.
-    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
-      true
-    );
-    // Verify WRITER or READER information.
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+      await reloadAboutPage();
+      collaborators = await aboutPage.findUsersInCollaboratorList();
+      // Verify OWNER (login user) information.
+      expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
+        true
+      );
+      // Verify WRITER or READER information.
+      expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+    });
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
   test.each(assignAccess)('Verify WRITER and READER cannot share, edit or delete workspace', async (assign) => {
-    // Log in could fail if encounters Google Captcha
-    await signInWithAccessToken(page, assign.userAccessTokenFilename);
+    await withSignInTest(assign.userAccessTokenFilename)(async (page) => {
+      // Find workspace created by previous test. If not found, test will fail.
+      const workspaceCard = await findWorkspaceCard(page, workspace);
+      const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+      // Verify Snowman menu: Share, Edit and Delete actions are not available for click.
+      expect(accessLevel).toBe(assign.accessRole);
+      await workspaceCard.verifyWorkspaceCardMenuOptions(assign.accessRole);
 
-    // Find workspace created by previous test. If not found, test will fail.
-    const workspaceCard = await findWorkspaceCard(page, workspace);
-    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
-    // Verify Snowman menu: Share, Edit and Delete actions are not available for click.
-    expect(accessLevel).toBe(assign.accessRole);
-    await workspaceCard.verifyWorkspaceCardMenuOptions(assign.accessRole);
+      const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
 
-    const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
+      const collaborators = await aboutPage.findUsersInCollaboratorList();
+      // Verify OWNER information in Collaborator list.
+      expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
+        true
+      );
+      // Verify WRITER or READER information in Collaborator list.
+      expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
 
-    const collaborators = await aboutPage.findUsersInCollaboratorList();
-    // Verify OWNER information in Collaborator list.
-    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
-      true
-    );
-    // Verify WRITER or READER information in Collaborator list.
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+      // Verify Share modal: the Search input and Save button are disabled.
+      const modal = await aboutPage.openShareModal();
+      const searchInput = modal.waitForSearchBox();
+      expect(await searchInput.isDisabled()).toBe(true);
+      expect(await modal.getSaveButton().isCursorNotAllowed()).toBe(true);
+      await modal.clickButton(LinkText.Cancel, { waitForClose: true });
+      await aboutPage.waitForLoad();
 
-    // Verify Share modal: the Search input and Save button are disabled.
-    const modal = await aboutPage.openShareModal();
-    const searchInput = modal.waitForSearchBox();
-    expect(await searchInput.isDisabled()).toBe(true);
-    expect(await modal.getSaveButton().isCursorNotAllowed()).toBe(true);
-    await modal.clickButton(LinkText.Cancel, { waitForClose: true });
-    await aboutPage.waitForLoad();
-
-    // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
-    await verifyWorkspaceActionMenuOptions();
+      // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
+      await verifyWorkspaceActionMenuOptions();
+    });
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
   test.each(assignAccess)('Stop share workspace %s', async (assign) => {
-    await signInWithAccessToken(page);
+    await withSignInTest()(async (page) => {
+      // Find workspace created by previous test. If not found, test will fail.
+      const workspaceCard = await findWorkspaceCard(page, workspace);
+      const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
 
-    // Find workspace created by previous test. If not found, test will fail.
-    const workspaceCard = await findWorkspaceCard(page, workspace);
-    const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
+      // Verify WRITER or READER exists in Collaborator list.
+      let collaborators = await aboutPage.findUsersInCollaboratorList();
+      expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+      collaborators.clear();
 
-    // Verify WRITER or READER exists in Collaborator list.
-    let collaborators = await aboutPage.findUsersInCollaboratorList();
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
-    collaborators.clear();
+      await aboutPage.removeCollaborator(assign.userEmail);
+      await aboutPage.waitForLoad();
 
-    await aboutPage.removeCollaborator(assign.userEmail);
-    await aboutPage.waitForLoad();
+      await reloadAboutPage();
 
-    await reloadAboutPage();
-
-    // Verify WRITER or READER is gone in Collaborator list.
-    collaborators = await aboutPage.findUsersInCollaboratorList();
-    expect(collaborators.has(assign.accessRole)).toBe(false);
+      // Verify WRITER or READER is gone in Collaborator list.
+      collaborators = await aboutPage.findUsersInCollaboratorList();
+      expect(collaborators.has(assign.accessRole)).toBe(false);
+    });
   });
 
   // Open Data page then back to About page in order to refresh Collaborators list in page.
@@ -120,6 +121,7 @@ describe('Workspace Share Modal', () => {
     await dataPage.openAboutPage({ waitPageChange: true });
     await aboutPage.waitForLoad();
   }
+
   async function verifyWorkspaceActionMenuOptions(): Promise<void> {
     const dataPage = new WorkspaceDataPage(page);
     const snowmanMenu = await dataPage.getWorkspaceActionMenu();

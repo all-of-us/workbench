@@ -5,13 +5,10 @@ import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeString } from 'utils/str-utils';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace } from 'utils/test-utils';
+import { withSignInTest } from 'libs/page-manager';
 
 describe('Editing and rename Concept Set', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-  });
-
   const workspace = 'e2eEditRenameConceptSetsTest';
 
   /**
@@ -23,72 +20,77 @@ describe('Editing and rename Concept Set', () => {
    * - Delete Concept Set.
    */
   test('Workspace OWNER can edit Concept Set', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await withSignInTest()(async (page) => {
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-    const dataPage = new WorkspaceDataPage(page);
-    let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
+      const dataPage = new WorkspaceDataPage(page);
+      let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
 
-    // Search by Procedure name.
-    let procedureName = 'Radiologic examination';
-    await criteriaSearch.searchCriteria(procedureName);
+      // Search by Procedure name.
+      let procedureName = 'Radiologic examination';
+      await criteriaSearch.searchCriteria(procedureName);
 
-    // Select first two rows.
-    const row1 = await criteriaSearch.resultsTableSelectRow(1, 1);
-    const row2 = await criteriaSearch.resultsTableSelectRow(2, 1);
+      // Select first two rows.
+      const row1 = await criteriaSearch.resultsTableSelectRow(1, 1);
+      const row2 = await criteriaSearch.resultsTableSelectRow(2, 1);
 
-    console.log('Selected Procedures table row 1: ', row1);
-    console.log('Selected Procedures table row 2: ', row2);
+      console.log('Selected Procedures table row 1: ', row1);
+      console.log('Selected Procedures table row 2: ', row2);
 
-    // Verify Code are numerical values
-    expect(Number.isNaN(parseInt(row1.code, 10))).toBe(false);
-    expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
+      // Verify Code are numerical values
+      expect(Number.isNaN(parseInt(row1.code, 10))).toBe(false);
+      expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
 
-    // Verify Participant Count are numberical values
-    expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
-    expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
+      // Verify Participant Count are numberical values
+      expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
+      expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
-    // Save new Concept Set.
-    await conceptSearchPage.reviewAndSaveConceptSet();
-    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+      // Save new Concept Set.
+      await conceptSearchPage.reviewAndSaveConceptSet();
+      const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
-    // Add another Concept in Procedures domain.
-    const conceptSetActionsPage = new ConceptSetActionsPage(page);
-    conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
+      // Add another Concept in Procedures domain.
+      const conceptSetActionsPage = new ConceptSetActionsPage(page);
+      conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
-    const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
-    criteriaSearch = await procedures.clickSelectConceptButton();
+      const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+      criteriaSearch = await procedures.clickSelectConceptButton();
 
-    // Search in Procedures domain
-    procedureName = 'Screening procedure';
-    await criteriaSearch.searchCriteria(procedureName);
+      // Search in Procedures domain
+      procedureName = 'Screening procedure';
+      await criteriaSearch.searchCriteria(procedureName);
 
-    // Select first row. Its name cell should match the search words.
-    const row = await criteriaSearch.resultsTableSelectRow();
-    expect(row.name).toBe(procedureName);
+      // Select first row. Its name cell should match the search words.
+      const row = await criteriaSearch.resultsTableSelectRow();
+      expect(row.name).toBe(procedureName);
 
-    await conceptSearchPage.reviewAndSaveConceptSet();
+      await conceptSearchPage.reviewAndSaveConceptSet();
 
-    // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
-    const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet, conceptSetName);
-    expect(existingConceptSetName).toBe(conceptSetName);
-    console.log(`Added new Concept to existing Concept Set "${conceptSetName}"`);
+      // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
+      const existingConceptSetName = await conceptSearchPage.saveConceptSet(
+        SaveOption.ChooseExistingSet,
+        conceptSetName
+      );
+      expect(existingConceptSetName).toBe(conceptSetName);
+      console.log(`Added new Concept to existing Concept Set "${conceptSetName}"`);
 
-    // Concept Set saved. Click Concept Set link. Land on Concept Set page.
-    const conceptSetPage = await conceptSetActionsPage.openConceptSet(conceptSetName);
+      // Concept Set saved. Click Concept Set link. Land on Concept Set page.
+      const conceptSetPage = await conceptSetActionsPage.openConceptSet(conceptSetName);
 
-    // Verify Concept Set name is displayed.
-    const value = await conceptSetPage.getConceptSetName();
-    expect(value).toBe(conceptSetName);
+      // Verify Concept Set name is displayed.
+      const value = await conceptSetPage.getConceptSetName();
+      expect(value).toBe(conceptSetName);
 
-    // Edit Concept name and description.
-    const newName = makeRandomName();
-    await conceptSetPage.edit(newName, makeString(20));
-    console.log(`Renamed Concept Set: "${conceptSetName}" to "${newName}"`);
+      // Edit Concept name and description.
+      const newName = makeRandomName();
+      await conceptSetPage.edit(newName, makeString(20));
+      console.log(`Renamed Concept Set: "${conceptSetName}" to "${newName}"`);
 
-    // Navigate to workspace Data page, then delete Concept Set
-    await new Link(page, `//a[text()="${workspace}"]`).click();
-    await dataPage.waitForLoad();
-    await dataPage.openConceptSetsSubtab();
-    await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
+      // Navigate to workspace Data page, then delete Concept Set
+      await new Link(page, `//a[text()="${workspace}"]`).click();
+      await dataPage.waitForLoad();
+      await dataPage.openConceptSetsSubtab();
+      await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
+    });
   });
 });

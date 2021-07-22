@@ -2,9 +2,11 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findWorkspaceCard } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import Modal from 'app/modal/modal';
+import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 // Reuse same source workspace for all tests in this file, in order to reduce test playback time.
 // Workspace to be created in first test. If create failed in first test, next test will try create it.
@@ -29,15 +31,13 @@ let defaultCdrWorkspace: string;
  * @param {string} to create new destination workspace with CDR Version
  */
 describe('Workspace owner copy notebook tests', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-  });
-
   test(
     'Copy notebook to another Workspace when CDR versions match',
     async () => {
-      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
-      await copyNotebookTest(defaultCdrWorkspace, config.DEFAULT_CDR_VERSION_NAME);
+      await withSignInTest()(async (page) => {
+        defaultCdrWorkspace = await createCustomCdrVersionWorkspace(page, config.DEFAULT_CDR_VERSION_NAME);
+        await copyNotebookTest(page, defaultCdrWorkspace, config.DEFAULT_CDR_VERSION_NAME);
+      });
     },
     30 * 60 * 1000
   );
@@ -45,17 +45,19 @@ describe('Workspace owner copy notebook tests', () => {
   test(
     'Copy notebook to another Workspace when CDR versions differ',
     async () => {
-      // reuse same source workspace for all tests, but always create new destination workspace.
-      if (defaultCdrWorkspace === undefined) {
-        defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.DEFAULT_CDR_VERSION_NAME);
-      }
-      await copyNotebookTest(defaultCdrWorkspace, config.ALTERNATIVE_CDR_VERSION_NAME);
+      await withSignInTest()(async (page) => {
+        // reuse same source workspace for all tests, but always create new destination workspace.
+        if (defaultCdrWorkspace === undefined) {
+          defaultCdrWorkspace = await createCustomCdrVersionWorkspace(page, config.DEFAULT_CDR_VERSION_NAME);
+        }
+        await copyNotebookTest(page, defaultCdrWorkspace, config.ALTERNATIVE_CDR_VERSION_NAME);
+      });
     },
     30 * 60 * 1000
   );
 });
 
-async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
+async function copyNotebookTest(page: Page, sourceWorkspaceName: string, destCdrVersionName: string) {
   const destWorkspace = await createWorkspace(page, { cdrVersion: destCdrVersionName });
 
   // Find and open source workspace Data page.
@@ -120,7 +122,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   await analysisPage.deleteWorkspace();
 }
 
-async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
+async function createCustomCdrVersionWorkspace(page: Page, cdrVersion: string): Promise<string> {
   const workspaceName = await createWorkspace(page, { cdrVersion });
   return workspaceName;
 }
