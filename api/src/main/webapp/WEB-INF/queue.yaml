@@ -4,7 +4,6 @@ queue:
   target: api
   
   # rate parameters
-  
   bucket_size: 500
   rate: 1/m
   
@@ -16,7 +15,6 @@ queue:
   target: api
   
   # rate parameters
-  
   bucket_size: 1
   rate: 4/m
   max_concurrent_requests: 1
