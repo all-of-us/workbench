@@ -30,17 +30,26 @@ See [doc](https://docs.google.com/document/d/1rbAlU6CVgfh6R_o2BdD476AXrZR6qB7167
     - `puppeteer-collaborator-1@fake-research-aou.org`
     - `puppeteer-reader-1@fake-research-aou.org`
     - `puppeteer-writer-1@fake-research-aou.org`
+    - TBD (access test user)
 * Presubmit (PR testing on local ui server connected to test api server)
     - `puppeteer-pr-tester-1@fake-research-aou.org`
     - `puppeteer-pr-collaborator-1@fake-research-aou.org`
     - `puppeteer-pr-reader-1@fake-research-aou.org`
     - `puppeteer-pr-writer-1@fake-research-aou.org`
+    - TBD (access test user)
 * Staging env (releases)
     - `puppeteer-tester-1@staging.fake-research-aou.org`
     - `puppeteer-collaborator-1@staging.fake-research-aou.org`
     - `puppeteer-reader-1@staging.fake-research-aou.org`
     - `puppeteer-writer-1@staging.fake-research-aou.org`
-
+    - TBD (access test user)
+* Perf env (releases)
+    - `[TODO]@perf.fake-research-aou.org`
+    - `puppetciperfreader@perf.fake-research-aou.org`
+    - `puppetciperfreader@perf.fake-research-aou.org`
+    - `puppetciperfwriter1@perf.fake-research-aou.org`
+    - TBD (access test user)
+  
 ## Running Tests on Localhost
 ### Local Test Users
 Developers' Local environments share a Google Suite domain with the Test environment,
@@ -49,17 +58,16 @@ environments. To avoid contention, it's necessary to create some test users uniq
 environment.  This is the same process as creating other local test users.  Ensure that local test 
 users are 2FA-Bypassed. Fill out the environment property file `.env` with local test users credentials.
 
-e2e tests require 4 test users:
+e2e tests require 5 test users:
 - USER_NAME: Default test user
 - WRITER_USER: Share workspace to this test user with WRITER role
 - READER_USER: Share workspace to this test user with READER role
 - COLLABORATOR_USER: Share workspace to this test user with OWNER role
+- ACCESS_TEST_USER: User to be modified outside of e2e tests to prepare for access testing
 
 Fill out local test user credentials
   - Copy `.env.sample`, save as `.env`.
   - Update `.env` with your local user emails.
-    
-    
 
 ## Command line tests are run using [Yarn](https://classic.yarnpkg.com/en/)
 **To see the list of available Yarn commands** <div class="text-blue">`yarn run`</div>
