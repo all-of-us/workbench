@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -44,8 +45,8 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
         Lists.newArrayList("foo@nih.gov");
     final SortedSet<String> sortedRtDistinctAddresses = new TreeSet<>(rtRawAddresses);
     final SortedSet<String> sortedCtDistinctAddresses = new TreeSet<>(ctRawAddresses);
-    TierEmailAddresses rtEmailAddresses = new TierEmailAddresses().emailAddresses(rtRawAddresses).accessTierShortName(RT_SHORT_NAME);
-    TierEmailAddresses ctEmailAddresses = new TierEmailAddresses().emailAddresses(ctRawAddresses).accessTierShortName(CT_SHORT_NAME);
+    TierEmailAddresses rtEmailAddresses = new TierEmailAddresses().emailAddresses(new ArrayList<>(sortedRtDistinctAddresses)).accessTierShortName(RT_SHORT_NAME);
+    TierEmailAddresses ctEmailAddresses = new TierEmailAddresses().emailAddresses(new ArrayList<>(sortedCtDistinctAddresses)).accessTierShortName(CT_SHORT_NAME);
 
     final Institution modelInst =
         new Institution()
@@ -86,7 +87,12 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
             .displayName("The Broad Institute")
             .tierEmailAddresses(ImmutableList.of(rtEmailAddresses));
 
-    assertThrows(NotFoundException.class, () -> mapper.modelToDb(modelInst, new DbInstitution(), CONTROLLED_ACCESS_TIER));
+    // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailAddress
+    final DbInstitution dbInst = new DbInstitution();
+    final Set<DbInstitutionEmailAddress> dbAddresses = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+
+    assertThat(dbAddresses).isNotNull();
+    assertThat(dbAddresses).isEmpty();
   }
 
   @Test
@@ -99,6 +105,22 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailAddress
     final DbInstitution dbInst = new DbInstitution();
+    final Set<DbInstitutionEmailAddress> dbAddresses = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+
+    assertThat(dbAddresses).isNotNull();
+    assertThat(dbAddresses).isEmpty();
+  }
+
+  @Test
+  public void test_modelToDb_empty() {
+    final Institution modelInst =
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .tierEmailAddresses(new ArrayList<>());
+
+    // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailAddress
+    final DbInstitution dbInst = new DbInstitution();
 
     final Set<DbInstitutionEmailAddress> dbAddresses = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
@@ -107,7 +129,7 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
   }
 
   @Test
-  public void test_dbAddressesToStrings() {
+  public void test_dbAddressesToModel() {
     final DbInstitution dbInst =
         new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute");
 
@@ -154,8 +176,8 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
   }
 
   @Test
-  public void test_dbAddressesToStrings_null() {
-    final List<TierEmailAddresses> modelAddresses = mapper.dbAddressesToTierEmailAddresses(null);
+  public void test_dbAddressesToStrings_empty() {
+    final List<TierEmailAddresses> modelAddresses = mapper.dbAddressesToTierEmailAddresses(new HashSet<>());
     assertThat(modelAddresses).isNotNull();
     assertThat(modelAddresses).isEmpty();
   }

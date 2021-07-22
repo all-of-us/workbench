@@ -2,9 +2,9 @@ package org.pmiops.workbench.institution;
 
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessUtils.getAccessTierByShortNameOrThrow;
-import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddressesByTierOrThrow;
-import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrThrow;
-import static org.pmiops.workbench.institution.InstitutionUtils.getTierRequirementOrThrow;
+import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddressesByTierOrEmptySet;
+import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
+import static org.pmiops.workbench.institution.InstitutionUtils.getTierRequirement;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -215,12 +215,12 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
-    InstitutionTierRequirement rtRequirement = getTierRequirementOrThrow(institution, REGISTERED_TIER_SHORT_NAME);
+    Optional<InstitutionTierRequirement> rtRequirement = getTierRequirement(institution, REGISTERED_TIER_SHORT_NAME);
     // If the Institution's registered tier agreement requires email addresses, that is restricted
     // just to few researchers. Confirm if the email address is in the allowed email list
-    if (rtRequirement != null
-        && rtRequirement.getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
-      final boolean validated = getEmailAddressesByTierOrThrow(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmail);
+    if (rtRequirement.isPresent()
+        && rtRequirement.get().getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
+      final boolean validated = getEmailAddressesByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmail);
       log.info(
           String.format(
               "Contact email '%s' validated against registered tier with ADDRESSES requirement: "
@@ -233,7 +233,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     // If the Institution's registered tier agreement requires email domains, confirm if the contact
     // email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    final boolean validated = getEmailDomainsByTierOrThrow(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmailDomain);
+    final boolean validated = getEmailDomainsByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME).contains(contactEmailDomain);
     log.info(
         String.format(
             "Contact email '%s' validated against registered tier with DOMAINS requirement '%s': "
@@ -411,7 +411,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         getAccessTierByShortNameOrThrow(dbAccessTiers, tierRequirement.getAccessTierShortName());
         // Each Email address in all tiers is valid.
         if(tierRequirement.getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
-          validateEmailAddressOrThrow(getEmailAddressesByTierOrThrow(institutionRequest, tierRequirement.getAccessTierShortName()));
+          validateEmailAddressOrThrow(
+              getEmailAddressesByTierOrEmptySet(institutionRequest, tierRequirement.getAccessTierShortName()));
         }
       }
     }

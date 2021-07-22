@@ -254,6 +254,7 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("hasEmails")
             .displayName("another test")
+            .addTierRequirementsItem(rtDomainsRequirement)
             .tierEmailDomains(ImmutableList.of(rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))
             .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"))))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
@@ -322,7 +323,7 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("test2")
             .displayName("another test")
-            .tierEmailDomains(ImmutableList.of(rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))
+            .tierEmailDomains(ImmutableList.of(rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "broad.org", "google.com"))))
             .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("joel@broad.org", "joel@broad.org", "joel@google.com"))))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
@@ -496,7 +497,7 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_restricted_mismatch() {
+  public void test_emailValidation_address_mismatch() {
     final Institution inst =
         service.createInstitution(
             new Institution()
@@ -504,7 +505,7 @@ public class InstitutionServiceTest extends SpringTest {
                 .displayName("The Broad Institute")
                 .tierEmailDomains(ImmutableList.of(rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "lab.broad.org"))))
                 .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("testing@broad.org"))))
-                .duaTypeEnum(DuaType.RESTRICTED)
+                .addTierRequirementsItem(rtAddressRequirement)
                 .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
 
     final DbUser user = createUser("hack@broad.org");
@@ -527,7 +528,7 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_nullDuaType_incorrectEmailDomain() {
+  public void test_emailValidation_nullTierRequirement_incorrectEmailDomain() {
     final Institution inst =
         service.createInstitution(
             new Institution()
@@ -687,7 +688,7 @@ public class InstitutionServiceTest extends SpringTest {
           Institution institution_NoOrgType =
               new Institution()
                   .displayName("No Organization")
-                  .duaTypeEnum(DuaType.MASTER)
+                  .addTierRequirementsItem(rtDomainsRequirement)
                   .tierEmailAddresses(Collections.emptyList())
                   .tierEmailDomains(Collections.emptyList())
                   .tierRequirements(Collections.emptyList())
@@ -705,21 +706,7 @@ public class InstitutionServiceTest extends SpringTest {
               new Institution()
                   .displayName("No Organization")
                   .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("CorrectEmailAddress@domain.com, incorrectEmail.com"))))
-                  .tierRequirements(Collections.emptyList())
-                  .organizationTypeEnum(OrganizationType.INDUSTRY);
-          service.createInstitution(institution_EmailAddress);
-        });
-  }
-
-  @Test
-  public void test_createInstitution_DisplayNameWithSpaces() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          Institution institution_EmailAddress =
-              new Institution()
-                  .displayName("     ")
-                  .tierRequirements(Collections.emptyList())
+                  .addTierRequirementsItem(rtAddressRequirement)
                   .organizationTypeEnum(OrganizationType.INDUSTRY);
           service.createInstitution(institution_EmailAddress);
         });
@@ -745,7 +732,7 @@ public class InstitutionServiceTest extends SpringTest {
     Institution institution_withOtherOrganizationType =
         new Institution()
             .displayName("     ")
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierRequirementsItem(rtAddressRequirement)
             .tierEmailAddresses(ImmutableList.of(rtTierEmailAddress.emailAddresses(ImmutableList.of("CorrectEmailAddress@domain.com"))))
             .tierEmailDomains(Collections.emptyList())
             .tierRequirements(Collections.emptyList())
@@ -760,7 +747,7 @@ public class InstitutionServiceTest extends SpringTest {
     Institution institution_WithUserInstructions =
         new Institution()
             .displayName("No Organization")
-            .duaTypeEnum(DuaType.RESTRICTED)
+            .addTierRequirementsItem(rtAddressRequirement)
             .tierEmailAddresses(Collections.emptyList())
             .tierEmailDomains(Collections.emptyList())
             .tierRequirements(Collections.emptyList())

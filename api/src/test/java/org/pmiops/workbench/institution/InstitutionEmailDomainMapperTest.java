@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -44,8 +45,8 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
     final SortedSet<String> sortedRtDistinctDomains = new TreeSet<>(rtRawDomains);
     final SortedSet<String> sortedCtDistinctDomains = new TreeSet<>(ctRawDomains);
 
-    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(rtRawDomains).accessTierShortName(RT_SHORT_NAME);
-    TierEmailDomains ctEmailDomains = new TierEmailDomains().emailDomains(ctRawDomains).accessTierShortName(CT_SHORT_NAME);
+    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(new ArrayList<>(sortedRtDistinctDomains)).accessTierShortName(RT_SHORT_NAME);
+    TierEmailDomains ctEmailDomains = new TierEmailDomains().emailDomains(new ArrayList<>(sortedCtDistinctDomains)).accessTierShortName(CT_SHORT_NAME);
 
     final Institution modelInst =
         new Institution()
@@ -84,7 +85,12 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
             .displayName("The Broad Institute")
             .tierEmailDomains(ImmutableList.of(rtEmailDomains));
 
-    assertThrows(NotFoundException.class, () -> mapper.modelToDb(modelInst, new DbInstitution(), CONTROLLED_ACCESS_TIER));
+    // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
+    final DbInstitution dbInst = new DbInstitution();
+    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+
+    assertThat(dbDomains).isNotNull();
+    assertThat(dbDomains).isEmpty();
   }
   
   @Test
@@ -94,7 +100,6 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
-
     final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
@@ -102,8 +107,21 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
   }
 
   @Test
-  public void test_dbDomainsToStrings_null() {
-    final List<TierEmailDomains> modelDomains = mapper.dbDomainsToTierEmailDomains(null);
+  public void test_modelToDb_empty() {
+    final Institution modelInst =
+        new Institution().shortName("Broad").displayName("The Broad Institute").tierEmailDomains(new ArrayList<>());
+
+    // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
+    final DbInstitution dbInst = new DbInstitution();
+    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+
+    assertThat(dbDomains).isNotNull();
+    assertThat(dbDomains).isEmpty();
+  }
+
+  @Test
+  public void test_dbDomainsToModel_empty() {
+    final List<TierEmailDomains> modelDomains = mapper.dbDomainsToTierEmailDomains(new HashSet<>());
     assertThat(modelDomains).isNotNull();
     assertThat(modelDomains).isEmpty();
   }
