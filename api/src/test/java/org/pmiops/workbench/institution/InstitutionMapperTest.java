@@ -48,7 +48,9 @@ public class InstitutionMapperTest extends SpringTest {
                 .accessTierShortName("tier"));
     tierEmailAddresses =
         Lists.newArrayList(
-            new TierEmailAddresses().emailAddresses(sortedModelAddresses).accessTierShortName(TIER_NAME));
+            new TierEmailAddresses()
+                .emailAddresses(sortedModelAddresses)
+                .accessTierShortName(TIER_NAME));
     tierEmailDomains =
         Lists.newArrayList(
             new TierEmailDomains().emailDomains(sortedModelDomains).accessTierShortName(TIER_NAME));

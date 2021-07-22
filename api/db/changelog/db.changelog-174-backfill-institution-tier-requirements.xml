@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="ericsong" id="changelog-174-backfill-institution-tier-requirements">
+        <sql>
+            DELETE from institution_tier_requirement WHERE true
+        </sql>
+        <!--Back fill institution_tier_requirement table for DuaType is MASTER -->
+        <sql>
+            INSERT INTO institution_tier_requirement
+            (institution_id, access_tier_id, requirement_enum, era_required)
+            SELECT
+            i.institution_id,
+            a.access_tier_id,
+            'DOMAINS',
+            true
+            FROM institution i, access_tier a
+            WHERE a.short_name = 'registered'
+            AND (i.dua_type_enum IS NULL OR i.dua_type_enum = 0)
+        </sql>
+        <!--Back fill institution_tier_requirement table for DuaType is RESTRICT -->
+        <sql>
+            INSERT INTO institution_tier_requirement
+            (institution_id, access_tier_id, requirement_enum, era_required)
+            SELECT
+            i.institution_id,
+            a.access_tier_id,
+            'RESTRICT',
+            true
+            FROM institution i, access_tier a
+            WHERE a.short_name = 'registered' AND i.dua_type_enum = 1
+        </sql>
+        <!--Back fill institution_email_domain table for registered tier -->
+        <sql>
+            UPDATE institution_email_domain
+            SET access_tier_id =
+            (select access_tier_id FROM access_tier a WHERE a.short_name = 'registered')
+        </sql>
+        <sql>
+            UPDATE institution_email_address
+            SET access_tier_id =
+            (select access_tier_id FROM access_tier a WHERE a.short_name = 'registered')
+        </sql>
+    </changeSet>
+</databaseChangeLog>

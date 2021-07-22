@@ -80,7 +80,8 @@ public class DbInstitutionEmailAddress {
     DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
 
     return Objects.equals(emailAddress, that.emailAddress)
-        && Objects.equals(institution, that.institution) && Objects.equals(accessTier, that.accessTier);
+        && Objects.equals(institution, that.institution)
+        && Objects.equals(accessTier, that.accessTier);
   }
 
   @Override

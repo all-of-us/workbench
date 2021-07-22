@@ -116,8 +116,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
     List<LeonardoListRuntimeResponse> runtimesToDelete =
         filterByRuntimesInList(
-            leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-            req.getRuntimesToDelete())
+                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
 
     runtimesToDelete.forEach(
@@ -126,8 +126,8 @@ public class RuntimeController implements RuntimeApiDelegate {
                 runtime.getGoogleProject(), runtime.getRuntimeName()));
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
-            leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
-            req.getRuntimesToDelete())
+                leonardoNotebooksClient.listRuntimesByProjectAsService(billingProjectId).stream(),
+                req.getRuntimesToDelete())
             .collect(Collectors.toList());
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
@@ -226,8 +226,8 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     if (runtimeLabels != null
         && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
-        .values()
-        .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+            .values()
+            .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {

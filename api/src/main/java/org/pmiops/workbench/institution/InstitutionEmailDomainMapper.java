@@ -25,31 +25,53 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 public interface InstitutionEmailDomainMapper {
 
   default Set<DbInstitutionEmailDomain> modelToDb(
-      Institution modelInstitution, @Context DbInstitution dbInstitution, @Context DbAccessTier dbAccessTier) {
-    if(modelInstitution.getTierEmailDomains() == null || modelInstitution.getTierEmailDomains().isEmpty()) {
+      Institution modelInstitution,
+      @Context DbInstitution dbInstitution,
+      @Context DbAccessTier dbAccessTier) {
+    if (modelInstitution.getTierEmailDomains() == null
+        || modelInstitution.getTierEmailDomains().isEmpty()) {
       return new HashSet<>();
     }
-    return emailDomainsToDb(getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()), dbInstitution, dbAccessTier);
+    return emailDomainsToDb(
+        getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
+        dbInstitution,
+        dbAccessTier);
   }
 
   Set<DbInstitutionEmailDomain> emailDomainsToDb(
-      Set<String> emailDomains, @Context DbInstitution dbInstitution, @Context DbAccessTier dbAccessTier);
+      Set<String> emailDomains,
+      @Context DbInstitution dbInstitution,
+      @Context DbAccessTier dbAccessTier);
 
   default DbInstitutionEmailDomain emailDomainToDb(
-      String emailDomain, @Context DbInstitution dbInstitution, @Context DbAccessTier dbAccessTier) {
-    return new DbInstitutionEmailDomain().setEmailDomain(emailDomain).setInstitution(dbInstitution).setAccessTier(dbAccessTier);
+      String emailDomain,
+      @Context DbInstitution dbInstitution,
+      @Context DbAccessTier dbAccessTier) {
+    return new DbInstitutionEmailDomain()
+        .setEmailDomain(emailDomain)
+        .setInstitution(dbInstitution)
+        .setAccessTier(dbAccessTier);
   }
 
-  default List<TierEmailDomains> dbDomainsToTierEmailDomains(final Set<DbInstitutionEmailDomain> dbDomains) {
+  default List<TierEmailDomains> dbDomainsToTierEmailDomains(
+      final Set<DbInstitutionEmailDomain> dbDomains) {
     // Iterate dbDomains to get tier name to domains list map. Each of map's entry is a
     // TierEmailDomains
-    Map<String, Set<String>> tierToDomainMap = dbDomains.stream()
-        .collect(Collectors.groupingBy(d -> d.getAccessTier().getShortName(),
-            Collectors.mapping(DbInstitutionEmailDomain::getEmailDomain, Collectors.toCollection(
-                TreeSet::new))));
+    Map<String, Set<String>> tierToDomainMap =
+        dbDomains.stream()
+            .collect(
+                Collectors.groupingBy(
+                    d -> d.getAccessTier().getShortName(),
+                    Collectors.mapping(
+                        DbInstitutionEmailDomain::getEmailDomain,
+                        Collectors.toCollection(TreeSet::new))));
     List<TierEmailDomains> result = new ArrayList<>();
-    tierToDomainMap.forEach((key, value) -> result
-        .add(new TierEmailDomains().accessTierShortName(key).emailDomains(new ArrayList<>(value))));
+    tierToDomainMap.forEach(
+        (key, value) ->
+            result.add(
+                new TierEmailDomains()
+                    .accessTierShortName(key)
+                    .emailDomains(new ArrayList<>(value))));
     return result;
   }
 }

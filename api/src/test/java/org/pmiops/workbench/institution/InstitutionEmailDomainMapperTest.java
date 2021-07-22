@@ -1,7 +1,6 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -17,9 +16,7 @@ import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.TierEmailAddresses;
 import org.pmiops.workbench.model.TierEmailDomains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -32,8 +29,10 @@ import org.springframework.test.annotation.DirtiesContext;
 public class InstitutionEmailDomainMapperTest extends SpringTest {
   private static final String RT_SHORT_NAME = "REGISTERED";
   private static final String CT_SHORT_NAME = "CONTROLLED";
-  private static final DbAccessTier REGISTERED_ACCESS_TIER = new DbAccessTier().setShortName(RT_SHORT_NAME);
-  private static final DbAccessTier CONTROLLED_ACCESS_TIER = new DbAccessTier().setShortName(CT_SHORT_NAME);
+  private static final DbAccessTier REGISTERED_ACCESS_TIER =
+      new DbAccessTier().setShortName(RT_SHORT_NAME);
+  private static final DbAccessTier CONTROLLED_ACCESS_TIER =
+      new DbAccessTier().setShortName(CT_SHORT_NAME);
 
   @Autowired InstitutionEmailDomainMapper mapper;
 
@@ -45,8 +44,14 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
     final SortedSet<String> sortedRtDistinctDomains = new TreeSet<>(rtRawDomains);
     final SortedSet<String> sortedCtDistinctDomains = new TreeSet<>(ctRawDomains);
 
-    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(new ArrayList<>(sortedRtDistinctDomains)).accessTierShortName(RT_SHORT_NAME);
-    TierEmailDomains ctEmailDomains = new TierEmailDomains().emailDomains(new ArrayList<>(sortedCtDistinctDomains)).accessTierShortName(CT_SHORT_NAME);
+    TierEmailDomains rtEmailDomains =
+        new TierEmailDomains()
+            .emailDomains(new ArrayList<>(sortedRtDistinctDomains))
+            .accessTierShortName(RT_SHORT_NAME);
+    TierEmailDomains ctEmailDomains =
+        new TierEmailDomains()
+            .emailDomains(new ArrayList<>(sortedCtDistinctDomains))
+            .accessTierShortName(CT_SHORT_NAME);
 
     final Institution modelInst =
         new Institution()
@@ -57,8 +62,10 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
 
-    final Set<DbInstitutionEmailDomain> rtDbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
-    final Set<DbInstitutionEmailDomain> ctDbDomains = mapper.modelToDb(modelInst, dbInst, CONTROLLED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> rtDbDomains =
+        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> ctDbDomains =
+        mapper.modelToDb(modelInst, dbInst, CONTROLLED_ACCESS_TIER);
 
     assertThat(rtDbDomains).hasSize(sortedRtDistinctDomains.size());
     assertThat(ctDbDomains).hasSize(sortedCtDistinctDomains.size());
@@ -71,14 +78,16 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
       assertThat(sortedCtDistinctDomains).contains(dbDomain.getEmailDomain());
       assertThat(dbDomain.getInstitution()).isEqualTo(dbInst);
     }
-    
-    final List<TierEmailDomains> roundTripModelDomains = mapper.dbDomainsToTierEmailDomains(Sets.union(rtDbDomains, ctDbDomains));
+
+    final List<TierEmailDomains> roundTripModelDomains =
+        mapper.dbDomainsToTierEmailDomains(Sets.union(rtDbDomains, ctDbDomains));
     assertThat(roundTripModelDomains).containsExactly(rtEmailDomains, ctEmailDomains);
   }
 
   @Test
   public void test_modelToDb_tierNotFound() {
-    TierEmailDomains rtEmailDomains = new TierEmailDomains().emailDomains(ImmutableList.of()).accessTierShortName(RT_SHORT_NAME);
+    TierEmailDomains rtEmailDomains =
+        new TierEmailDomains().emailDomains(ImmutableList.of()).accessTierShortName(RT_SHORT_NAME);
     final Institution modelInst =
         new Institution()
             .shortName("Broad")
@@ -87,20 +96,25 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
-    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> dbDomains =
+        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
     assertThat(dbDomains).isEmpty();
   }
-  
+
   @Test
   public void test_modelToDb_null() {
     final Institution modelInst =
-        new Institution().shortName("Broad").displayName("The Broad Institute").tierEmailDomains(null);
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .tierEmailDomains(null);
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
-    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> dbDomains =
+        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
     assertThat(dbDomains).isEmpty();
@@ -109,11 +123,15 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
   @Test
   public void test_modelToDb_empty() {
     final Institution modelInst =
-        new Institution().shortName("Broad").displayName("The Broad Institute").tierEmailDomains(new ArrayList<>());
+        new Institution()
+            .shortName("Broad")
+            .displayName("The Broad Institute")
+            .tierEmailDomains(new ArrayList<>());
 
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
-    final Set<DbInstitutionEmailDomain> dbDomains = mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+    final Set<DbInstitutionEmailDomain> dbDomains =
+        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
     assertThat(dbDomains).isEmpty();

@@ -13,12 +13,19 @@ import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
-import {DuaType, Institution, OrganizationType} from 'generated/fetch';
+import {
+  DuaType,
+  Institution,
+  InstitutionMembershipRequirement,
+  InstitutionTierRequirement,
+  OrganizationType
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {DuaTypes, OrganizationTypeOptions} from './admin-institution-options';
+import {AccessTierShortNames} from "../../utils/access-tiers";
 
 const styles = reactStyles({
   label: {
@@ -207,6 +214,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
+    const tierRequirement : InstitutionTierRequirement = {
+      accessTierShortName: AccessTierShortNames.Registered,
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS
+    }
     if (institution) {
       if (institution.duaTypeEnum === DuaType.MASTER) {
         institution.emailAddresses = [];
@@ -354,7 +365,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
             <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
                       placeholder='Your Agreement'
                       options={DuaTypes}
-                      value={institution.duaTypeEnum}
+                      value={institution.tierRequirements.find()}
                       onChange={v => this.setState(fp.set(['institution', 'duaTypeEnum'], v.value))}/>
             {institution.duaTypeEnum === DuaType.RESTRICTED && <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
               <label style={styles.label}>Accepted Email Addresses</label>
