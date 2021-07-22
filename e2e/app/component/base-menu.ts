@@ -4,6 +4,7 @@ import { MenuOption } from 'app/text-labels';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 import Link from 'app/element/link';
+//import Checkbox from 'app/element/checkbox';
 
 export default abstract class BaseMenu extends Container {
   protected abstract getMenuItemXpath(menuItemText: string): string;
@@ -90,6 +91,7 @@ export default abstract class BaseMenu extends Container {
 
   protected async isOpen(xpath?: string): Promise<boolean> {
     xpath = xpath || this.getXpath();
+
     try {
       await this.page.waitForXPath(xpath, { visible: true, timeout: 2000 });
       return true;
