@@ -504,6 +504,19 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
     return vocabularies;
   }
 
+  @Override
+  public Long participationCount(DbCohort dbCohort) {
+    SearchRequest request = new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    List<FieldValue> row = result.iterateAll().iterator().next();
+    long cohortCount = bigQueryService.getLong(row, rm.get("count"));
+    return cohortCount;
+  }
+
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(
       Long cohortAnnotationDefinitionId) {
     DbCohortAnnotationDefinition cohortAnnotationDefinition =
