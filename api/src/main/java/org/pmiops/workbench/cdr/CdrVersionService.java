@@ -13,7 +13,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,22 +110,6 @@ public class CdrVersionService {
 
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
     return Optional.ofNullable(cdrVersionDao.findByCdrVersionId(cdrVersionId));
-  }
-
-  @Deprecated // only handles the Registered Tier
-  public CdrVersionListResponse getCdrVersions() {
-    DbAccessTier registeredTier =
-        accessTierService.getAccessTiersForUser(userProvider.get()).stream()
-            .filter(
-                tier -> tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME))
-            .findFirst()
-            .orElseThrow(
-                () -> new ForbiddenException("User does not have access to any CDR versions"));
-
-    CdrVersionTier registeredTierVersions = getVersionsForTier(registeredTier);
-    return new CdrVersionListResponse()
-        .items(registeredTierVersions.getVersions())
-        .defaultCdrVersionId(String.valueOf(registeredTierVersions.getDefaultCdrVersionId()));
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {

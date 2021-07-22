@@ -25,7 +25,7 @@ describe('ConceptSearch', () => {
       csid: conceptSet.id
     });
   });
-  
+
   const component = () => {
     return mount(<ConceptSearch setConceptSetUpdating={() => {}}
                                 setShowUnsavedModal={() => {}}
@@ -35,7 +35,7 @@ describe('ConceptSearch', () => {
   }
 
   it('should render', () => {
-    const wrapper = component(); 
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 

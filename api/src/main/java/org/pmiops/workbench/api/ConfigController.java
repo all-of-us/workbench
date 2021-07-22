@@ -39,7 +39,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableRasLoginGovLinking(config.access.enableRasLoginGovLinking)
-            .enableAccessRenewal(config.access.enableAccessRenewal)
             .enableGenomicExtraction(config.featureFlags.enableGenomicExtraction)
             .enableAccessModuleRewrite(config.featureFlags.enableAccessModuleRewrite)
             .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)

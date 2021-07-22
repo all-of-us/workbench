@@ -1,8 +1,6 @@
-import {Component, Input} from '@angular/core';
 import Timeout = NodeJS.Timeout;
 import {TextModal} from 'app/components/text-modal';
 import {debouncer} from 'app/utils';
-import {ReactWrapperBase} from 'app/utils';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
@@ -152,15 +150,3 @@ export const InactivityMonitor = ({signOut}: Props) => {
      />}
   </React.Fragment>;
 };
-
-@Component({
-  selector: 'app-inactivity-monitor',
-  template: '<div #root></div>',
-})
-export class InactivityMonitorComponent extends ReactWrapperBase {
-  @Input() signOut: Props['signOut'];
-
-  constructor() {
-    super(InactivityMonitor as React.ComponentType<{}>, ['signOut']);
-  }
-}

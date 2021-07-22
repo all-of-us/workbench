@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
@@ -80,7 +79,6 @@ public class AccessModuleServiceTest extends SpringTest {
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
-    config.access.enableAccessRenewal = true;
     TestMockFactory.createAccessModules(accessModuleDao);
     accessModules = accessModuleDao.findAll();
   }
@@ -286,30 +284,6 @@ public class AccessModuleServiceTest extends SpringTest {
             expectedProfileModuleStatus,
             expectedPublicationModuleStatus,
             expectedRtTrainingModuleStatus);
-  }
-
-  @Test
-  public void testGetClientAccessModuleStatus_aarNotEnabled() {
-    config.access.enableAccessRenewal = false;
-    config.accessRenewal.expiryDays = 10L;
-
-    // RT Training module: Completion time is not null, bypass is null. But AAR is not enabeld,
-    // no expiration time.
-    Timestamp rtTrainingCompletionTime = Timestamp.from(Instant.now());
-    DbUserAccessModule rtTrainingAccessModule =
-        new DbUserAccessModule()
-            .setAccessModule(
-                accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get())
-            .setUser(user)
-            .setCompletionTime(rtTrainingCompletionTime);
-    AccessModuleStatus expectedRtTrainingModuleStatus =
-        new AccessModuleStatus()
-            .moduleName(AccessModule.COMPLIANCE_TRAINING)
-            .completionEpochMillis(rtTrainingCompletionTime.getTime());
-    userAccessModuleDao.save(rtTrainingAccessModule);
-
-    assertThat(accessModuleService.getClientAccessModuleStatus(user))
-        .containsExactly(expectedRtTrainingModuleStatus);
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(

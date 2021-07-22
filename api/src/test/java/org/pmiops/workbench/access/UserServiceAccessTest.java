@@ -124,7 +124,6 @@ public class UserServiceAccessTest {
   @BeforeEach
   public void setUp() {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = EXPIRATION_DAYS;
@@ -227,61 +226,6 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
   }
 
-  // Ensure that we don't enforce access renewal in environments where the flag is not set:
-  // make the user expire in all of the ways possible by access renewal, and test that none
-  // of these cause noncompliance.
-
-  @Test
-  public void testRenewalFlag() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    final Timestamp willExpire = Timestamp.from(START_INSTANT);
-
-    // initialize user as registered, including:
-    // bypassed DUA
-    // bypassed Compliance training
-    // recent confirmedPublications
-    // recent confirmedProfile
-
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // add proper DUA completion and compliance training and remove bypasses
-
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-              user.setDataUseAgreementCompletionTime(willExpire);
-              user.setDataUseAgreementBypassTime(null);
-
-              user.setComplianceTrainingCompletionTime(willExpire);
-              user.setComplianceTrainingBypassTime(null);
-              return user;
-            });
-
-    // This is just a switch from bypassed -> user-performed action so we remain compliant
-    // (and still would be so, with enableAccessRenewal = true)
-    assertRegisteredTierEnabled(dbUser);
-
-    // Time passing beyond the expiration window would cause the user to become
-    // noncompliant when enableAccessRenewal = true
-    advanceClockDays(EXPIRATION_DAYS + 1);
-
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              // removing publicationsConfirmed and profileConfirmed would also cause
-              // noncompliance when enableAccessRenewal = true
-              user.setPublicationsLastConfirmedTime(null);
-              user.setProfileLastConfirmedTime(null);
-              return user;
-            });
-
-    // the user is still compliant because we are not checking for expiration
-    assertRegisteredTierEnabled(dbUser);
-  }
-
   private DbUser removeDuaBypass(DbUser user) {
     user.setDataUseAgreementBypassTime(null);
     return userDao.save(user);
@@ -328,17 +272,6 @@ public class UserServiceAccessTest {
   // Compliance training can be bypassed, and is subject to annual renewal.
 
   @Test
-  public void test_updateUserWithRetries_training_unbypassed_no_aar_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setComplianceTrainingBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
   public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
     testUnregistration(
         user -> {
@@ -363,42 +296,6 @@ public class UserServiceAccessTest {
 
   // DUA can be bypassed, and is subject to annual renewal.
   // A missing DUA version or a version other than the latest is also noncompliant.
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_missing_version_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
-          return userDao.save(user);
-        });
-  }
-
-  @Test
-  public void test_updateUserWithRetries_dua_unbypassed_no_aar_wrong_version_noncompliant() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    testUnregistration(
-        user -> {
-          user.setDataUseAgreementBypassTime(null);
-          user.setDataUseAgreementCompletionTime(Timestamp.from(START_INSTANT));
-          user.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion() - 1);
-          return userDao.save(user);
-        });
-  }
 
   @Test
   public void test_updateUserWithRetries_dua_unbypassed_aar_noncompliant() {
@@ -546,30 +443,6 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verify(mailService).alertUserRegisteredTierWarningThreshold(dbUser, 1, expirationTime);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expiring_1_FF_false() {
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // expiring in 1 day (plus some) would trigger the 1-day warning...
-
-    final Duration oneDayPlusSome = daysPlusSome(1);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(oneDayPlusSome));
-
-    // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    userService.maybeSendAccessExpirationEmail(dbUser);
-
-    verifyZeroInteractions(mailService);
   }
 
   // if any module is incomplete, we don't send an email
@@ -778,27 +651,6 @@ public class UserServiceAccessTest {
     userService.maybeSendAccessExpirationEmail(dbUser);
 
     verify(mailService).alertUserRegisteredTierExpiration(dbUser, expirationTime);
-  }
-
-  @Test
-  public void test_maybeSendAccessExpirationEmail_expired_FF_false() {
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-    dbUser.setProfileLastConfirmedTime(now);
-    dbUser.setPublicationsLastConfirmedTime(now);
-    dbUser.setDataUseAgreementCompletionTime(now);
-    // a completion requirement for DUCC (formerly "DUA" - TODO rename)
-    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
-
-    // this would be expired...
-    dbUser.setComplianceTrainingCompletionTime(expiredBy(Duration.ofHours(1)));
-
-    // but the feature flag is off
-    providedWorkbenchConfig.access.enableAccessRenewal = false;
-
-    userService.maybeSendAccessExpirationEmail(dbUser);
-
-    verifyZeroInteractions(mailService);
   }
 
   // don't send an email if we have been expired for more than a day

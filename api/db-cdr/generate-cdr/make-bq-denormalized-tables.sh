@@ -14,7 +14,7 @@ export DATA_BROWSER=$7      # data browser flag
 
 echo ""
 echo 'Validating that all prerequisites exist'
-if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION
+if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION $DATA_BROWSER
 then
     echo "Validation is complete"
 else

@@ -1,18 +1,18 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
+import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 
-describe('WorkspaceNavBarComponent', () => {
+describe('WorkspaceNavBar', () => {
 
   let props: {};
 
   const component = () => {
-    return mount(<WorkspaceNavBarReact {...props}/>, {attachTo: document.getElementById('root')});
+    return mount(<WorkspaceNavBar {...props}/>, {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {
