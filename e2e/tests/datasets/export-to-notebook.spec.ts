@@ -80,8 +80,7 @@ describe('Export dataset to notebook tests', () => {
    * Test:
    * - Create dataset and export to notebook. Start the notebook and run the dataset code.
    */
-  // TODO Enable notebook test after bug fix. https://precisionmedicineinitiative.atlassian.net/browse/RW-6885
-  xtest.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
+  test.each(KernelLanguages)('Export to %s kernel Jupyter notebook when creating dataset', async (kernelLanguage) => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Dataset button

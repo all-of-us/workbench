@@ -6,6 +6,10 @@ const isCi = CI === 'true';
 const isDebug = PUPPETEER_DEBUG === 'true';
 const isHeadless = isDebug ? false : isCi || (PUPPETEER_HEADLESS || 'true') === 'true';
 
+console.log(`isCi: ${isCi}`)
+console.log(`isHeadLess: ${isHeadless}`)
+console.log(`isDebug: ${isDebug}`)
+
 const customChromeOptions = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
   '--disable-features=BlinkGenPropertyTrees,IsolateOrigins,site-per-process',

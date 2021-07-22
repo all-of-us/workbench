@@ -6,8 +6,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import { waitWhileLoading } from 'utils/waits-utils';
+import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signOut} from 'utils/test-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -46,10 +45,10 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // Share Workspace to a READER.
     const shareModal = await aboutPage.openShareModal();
     await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
-    await waitWhileLoading(page);
+    await signOut(page);
   });
 
-  test('Workspace READER copy notebook to another workspace', async () => {
+  xtest('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
@@ -143,7 +142,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
   });
 
-  test('Workspace READER edit copy of notebook in workspace clone', async () => {
+  xtest('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 

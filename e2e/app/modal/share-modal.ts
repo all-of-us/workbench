@@ -48,9 +48,9 @@ export default class ShareModal extends Modal {
       const ownerOpt = await this.waitForRoleOption(level);
       await ownerOpt.click();
     };
-    const typeAndAddUser = async (): Promise<boolean> => {
+    const typeAndAddUser = async (name): Promise<boolean> => {
       const addIcon = findCollaboratorAddIcon();
-      for (const char of userName) {
+      for (const char of name) {
         const input = await this.waitForSearchBox().asElementHandle();
         await input.type(char, { delay: 50 });
         if ((await existsDropDown()) && (await addIcon.exists())) {
@@ -62,7 +62,7 @@ export default class ShareModal extends Modal {
       return false;
     };
 
-    const isSuccess = await typeAndAddUser();
+    const isSuccess = await typeAndAddUser(userName);
     if (!isSuccess) {
       throw new Error(`Failed to share with user ${userName}.`);
     }
