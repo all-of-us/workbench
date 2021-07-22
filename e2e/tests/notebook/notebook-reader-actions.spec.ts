@@ -48,7 +48,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await signOut(page);
   });
 
-  xtest('Workspace READER copy notebook to another workspace', async () => {
+  test('Workspace READER copy notebook to another workspace', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
@@ -142,7 +142,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     await newAnalysisPage.deleteResource(copyNotebookName, ResourceCard.Notebook);
   });
 
-  xtest('Workspace READER edit copy of notebook in workspace clone', async () => {
+  test('Workspace READER edit copy of notebook in workspace clone', async () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
