@@ -214,11 +214,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortId,
-      String domain,
-      Integer limit) {
+      String workspaceNamespace, String workspaceId, Long cohortId, String domain, Integer limit) {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
