@@ -6,6 +6,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 describe('Workspace Share Modal', () => {
   const assignAccess = [
@@ -44,7 +45,7 @@ describe('Workspace Share Modal', () => {
       await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
       await aboutPage.waitForLoad();
 
-      await reloadAboutPage();
+      await reloadAboutPage(page);
       collaborators = await aboutPage.findUsersInCollaboratorList();
       // Verify OWNER (login user) information.
       expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
@@ -84,7 +85,7 @@ describe('Workspace Share Modal', () => {
       await aboutPage.waitForLoad();
 
       // Verify Workspace Actions menu: READER or WRITER cannot Share, Edit or Delete workspace.
-      await verifyWorkspaceActionMenuOptions();
+      await verifyWorkspaceActionMenuOptions(page);
     });
   });
 
@@ -103,7 +104,7 @@ describe('Workspace Share Modal', () => {
       await aboutPage.removeCollaborator(assign.userEmail);
       await aboutPage.waitForLoad();
 
-      await reloadAboutPage();
+      await reloadAboutPage(page);
 
       // Verify WRITER or READER is gone in Collaborator list.
       collaborators = await aboutPage.findUsersInCollaboratorList();
@@ -112,7 +113,7 @@ describe('Workspace Share Modal', () => {
   });
 
   // Open Data page then back to About page in order to refresh Collaborators list in page.
-  async function reloadAboutPage() {
+  async function reloadAboutPage(page: Page) {
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
     await aboutPage.openDataPage({ waitPageChange: true });
@@ -122,7 +123,7 @@ describe('Workspace Share Modal', () => {
     await aboutPage.waitForLoad();
   }
 
-  async function verifyWorkspaceActionMenuOptions(): Promise<void> {
+  async function verifyWorkspaceActionMenuOptions(page: Page): Promise<void> {
     const dataPage = new WorkspaceDataPage(page);
     const snowmanMenu = await dataPage.getWorkspaceActionMenu();
     const links = await snowmanMenu.getAllOptionTexts();

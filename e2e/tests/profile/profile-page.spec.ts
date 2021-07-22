@@ -24,14 +24,14 @@ describe('Profile', () => {
   }
 
   // TODO generalize - promote to a Div Element?
-  async function isDivWithTextPresent(text: string): Promise<boolean> {
+  async function isDivWithTextPresent(page: Page, text: string): Promise<boolean> {
     const selector = `//div[normalize-space(text())="${text}"]`;
     const elements = await page.$x(selector);
     return elements.length > 0;
   }
 
-  async function isMissingErrorPresent(fieldText: string): Promise<boolean> {
-    return isDivWithTextPresent(`${fieldText} can't be blank`);
+  async function isMissingErrorPresent(page: Page, fieldText: string): Promise<boolean> {
+    return isDivWithTextPresent(page, `${fieldText} can't be blank`);
   }
 
   test('Edit single field of existing user profile', async () => {
@@ -117,14 +117,14 @@ describe('Profile', () => {
 
       // save button is enabled and no error message is displayed
       await waitForSaveButton(true);
-      expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeFalsy();
+      expect(await isMissingErrorPresent(page, MissingErrorAlias.ResearchBackground)).toBeFalsy();
 
       // remove text from Research Background textarea
       await researchBackground.clear();
 
       // save button is disabled and error message is displayed
       await waitForSaveButton(false);
-      expect(await isMissingErrorPresent(MissingErrorAlias.ResearchBackground)).toBeTruthy();
+      expect(await isMissingErrorPresent(page, MissingErrorAlias.ResearchBackground)).toBeTruthy();
     });
   });
 
@@ -162,14 +162,14 @@ describe('Profile', () => {
 
         // save button is enabled and no error message is displayed
         await waitForSaveButton(true);
-        expect(await isMissingErrorPresent(missingError)).toBeFalsy();
+        expect(await isMissingErrorPresent(page, missingError)).toBeFalsy();
 
         // remove text from First Name
         await element.clear();
 
         // save button is disabled and error message is displayed
         await waitForSaveButton(false);
-        expect(await isMissingErrorPresent(missingError)).toBeTruthy();
+        expect(await isMissingErrorPresent(page, missingError)).toBeTruthy();
 
         // restore state for next loop
         await element.type(originalValue);

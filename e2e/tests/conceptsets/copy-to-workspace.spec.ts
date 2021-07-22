@@ -10,8 +10,10 @@ import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, findOrCreateWorkspaceCard } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 async function createConceptSet(
+  page: Page,
   srcWorkspaceCard: WorkspaceCard
 ): Promise<{ dataPage: WorkspaceDataPage; conceptSetName: string }> {
   // Open Source Workspace Data Page.
@@ -54,7 +56,7 @@ describe('Copy Concept Set to another workspace', () => {
       const srcWorkspaceCard = await findOrCreateWorkspaceCard(page);
       const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
 
-      const { dataPage, conceptSetName } = await createConceptSet(srcWorkspaceCard);
+      const { dataPage, conceptSetName } = await createConceptSet(page, srcWorkspaceCard);
 
       // Concept Set page is open.
       const conceptSetPage = new ConceptSetPage(page);
@@ -103,7 +105,7 @@ describe('Copy Concept Set to another workspace', () => {
         cdrVersion: config.ALTERNATIVE_CDR_VERSION_NAME
       });
 
-      const { conceptSetName } = await createConceptSet(srcWorkspaceCard);
+      const { conceptSetName } = await createConceptSet(page, srcWorkspaceCard);
 
       // Concept Set page is open.
       const conceptSetPage = new ConceptSetPage(page);

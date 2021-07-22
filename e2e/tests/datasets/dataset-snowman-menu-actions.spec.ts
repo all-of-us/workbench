@@ -10,6 +10,7 @@ import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);
@@ -23,7 +24,7 @@ describe('Datasets card snowman menu actions', () => {
     await withSignInTest()(async (page) => {
       await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-      const datasetName = await createDataSet();
+      const datasetName = await createDataSet(page);
 
       // Find Dataset card.
       const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
@@ -71,7 +72,7 @@ describe('Datasets card snowman menu actions', () => {
     await withSignInTest()(async (page) => {
       await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-      const datasetName = await createDataSet();
+      const datasetName = await createDataSet(page);
 
       // Find Dataset card.
       const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
@@ -121,7 +122,7 @@ describe('Datasets card snowman menu actions', () => {
     await withSignInTest()(async (page) => {
       await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-      const datasetName = await createDataSet();
+      const datasetName = await createDataSet(page);
 
       // Find Dataset card.
       const dataBuildPage = await new DatasetBuildPage(page).clickDataTab();
@@ -159,7 +160,7 @@ describe('Datasets card snowman menu actions', () => {
     });
   });
 
-  async function createDataSet(): Promise<string> {
+  async function createDataSet(page: Page): Promise<string> {
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
     const datasetBuildPage = await dataPage.clickAddDatasetButton();

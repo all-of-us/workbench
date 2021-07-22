@@ -8,12 +8,13 @@ import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Create python kernel notebook', () => {
-  const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {
+  const testDownloadModal = async (page: Page, modal: NotebookDownloadModal): Promise<void> => {
     const checkDownloadDisabledState = async (wantDisabled: boolean) => {
       expect(
         await waitForFn(async () => {
@@ -94,10 +95,10 @@ describe('Create python kernel notebook', () => {
       await notebook.save();
 
       console.log('downloading as ipynb');
-      await testDownloadModal(await notebook.downloadAsIpynb());
+      await testDownloadModal(page, await notebook.downloadAsIpynb());
 
       console.log('downloading as Markdown');
-      await testDownloadModal(await notebook.downloadAsMarkdown());
+      await testDownloadModal(page, await notebook.downloadAsMarkdown());
 
       // Ideally we would validate the download URLs or download content here.
       // As of 9/25/20 I was unable to find a clear mechanism for accessing this.

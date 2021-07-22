@@ -7,6 +7,7 @@ import { MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 describe('Editing Cohort tests', () => {
   // Tests require one and same workspace
@@ -15,7 +16,7 @@ describe('Editing Cohort tests', () => {
 
   test('Discard changes', async () => {
     await withSignInTest()(async (page) => {
-      await findAWorkspace();
+      await findAWorkspace(page);
 
       const dataPage = new WorkspaceDataPage(page);
       const cohortCard = await dataPage.findOrCreateCohort();
@@ -46,7 +47,9 @@ describe('Editing Cohort tests', () => {
 
   test('Delete cohort', async () => {
     await withSignInTest()(async (page) => {
-      const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
+      const cohortName = await setUpWorkspaceAndCohort(page).then((cohort: DataResourceCard) =>
+        cohort.clickResourceName()
+      );
 
       const cohortBuildPage = new CohortBuildPage(page);
       await cohortBuildPage.waitForLoad();
@@ -66,7 +69,7 @@ describe('Editing Cohort tests', () => {
 
   test('Save as cohort', async () => {
     await withSignInTest()(async (page) => {
-      const originalCohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) =>
+      const originalCohortName = await setUpWorkspaceAndCohort(page).then((cohort: DataResourceCard) =>
         cohort.clickResourceName()
       );
 
@@ -104,7 +107,7 @@ describe('Editing Cohort tests', () => {
   });
 
   // Helper functions
-  async function findAWorkspace(): Promise<void> {
+  async function findAWorkspace(page: Page): Promise<void> {
     if (workspaceUrl) {
       // Faster: Load previously saved URL instead clicks thru pages to open workspace data page.
       await page.goto(workspaceUrl, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
@@ -114,16 +117,16 @@ describe('Editing Cohort tests', () => {
     workspaceUrl = page.url();
   }
 
-  async function setUpWorkspaceAndCohort(): Promise<DataResourceCard> {
-    await findAWorkspace();
-    await deleteAllCohort('Duplicate');
+  async function setUpWorkspaceAndCohort(page: Page): Promise<DataResourceCard> {
+    await findAWorkspace(page);
+    await deleteAllCohort(page, 'Duplicate');
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.findOrCreateCohort();
-    return duplicateCohort(cohortCard);
+    return duplicateCohort(page, cohortCard);
   }
 
   // Make a duplicate of an existing cohort to avoid hitting issue of concurrent data editing.
-  async function duplicateCohort(cohortCard: DataResourceCard): Promise<DataResourceCard> {
+  async function duplicateCohort(page: Page, cohortCard: DataResourceCard): Promise<DataResourceCard> {
     const cohortName = await cohortCard.getResourceName();
     const snowmanMenu = await cohortCard.getSnowmanMenu();
     await snowmanMenu.select(MenuOption.Duplicate, { waitForNav: false });
@@ -140,7 +143,7 @@ describe('Editing Cohort tests', () => {
   }
 
   // Delete existing Cohorts with name contains 'Duplicate' string.
-  async function deleteAllCohort(pattern: string): Promise<void> {
+  async function deleteAllCohort(page: Page, pattern: string): Promise<void> {
     const dataResourceCard = new DataResourceCard(page);
     const cards = await dataResourceCard.getResourceCard(ResourceCard.Cohort);
 

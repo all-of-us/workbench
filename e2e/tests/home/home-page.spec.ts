@@ -2,11 +2,12 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 describe('Home page ui tests', () => {
   test('Check visibility of Workspace cards', async () => {
     await withSignInTest()(async (page) => {
-      await checkCreateNewWorkspaceLink();
+      await checkCreateNewWorkspaceLink(page);
 
       const allCards = await WorkspaceCard.findAllCards(page);
       let width;
@@ -42,7 +43,7 @@ describe('Home page ui tests', () => {
   });
 });
 
-async function checkCreateNewWorkspaceLink(): Promise<void> {
+async function checkCreateNewWorkspaceLink(page: Page): Promise<void> {
   const homePage = new HomePage(page);
   const plusIcon = homePage.getCreateNewWorkspaceLink();
   expect(plusIcon).toBeTruthy();

@@ -14,6 +14,7 @@ import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal'
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { TabLabels } from 'app/page/workspace-base';
 import { withSignInTest } from 'libs/page-manager';
+import { Page } from 'puppeteer';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
@@ -33,7 +34,7 @@ describe('Export dataset to notebook tests', () => {
 
       // Create a new cohort to use in new dataset.
       await datasetBuildPage.clickAddCohortsButton();
-      const cohortName = await createCohort();
+      const cohortName = await createCohort(page);
 
       // Click Add Datasets button.
       const cohortActionsPage = new CohortActionsPage(page);
@@ -67,7 +68,7 @@ describe('Export dataset to notebook tests', () => {
       await analysisPage.openDataPage({ waitPageChange: true });
 
       // Delete the cohort.
-      await deleteCohort(cohortName, datasetName);
+      await deleteCohort(page, cohortName, datasetName);
 
       // Associated dataset is gone after delete cohort.
       await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
@@ -89,7 +90,7 @@ describe('Export dataset to notebook tests', () => {
 
       // Create a new cohort to use in dataset.
       await datasetBuildPage.clickAddCohortsButton();
-      const cohortName = await createCohort();
+      const cohortName = await createCohort(page);
 
       const cohortActionsPage = new CohortActionsPage(page);
       await cohortActionsPage.waitForLoad();
@@ -182,7 +183,7 @@ describe('Export dataset to notebook tests', () => {
   });
 
   // Create a new cohort to use in new dataset.
-  async function createCohort(): Promise<string> {
+  async function createCohort(page: Page): Promise<string> {
     const cohortBuildPage = new CohortBuildPage(page);
     // Include Participants Group 1: Add Criteria: Ethnicity.
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
@@ -193,7 +194,7 @@ describe('Export dataset to notebook tests', () => {
   }
 
   // Delete cohort. Confirm warning about Dataset modal.
-  async function deleteCohort(cohortName: string, _datasetName: string): Promise<void> {
+  async function deleteCohort(page: Page, cohortName: string, _datasetName: string): Promise<void> {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.openCohortsSubtab();
     const dataResourceCard = new DataResourceCard(page);
