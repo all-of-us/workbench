@@ -1595,18 +1595,19 @@ def generate_impersonated_user_token(cmd_name, *args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
-      "--output-token-filename [output-token-filename]",
+      "--output-token-filenames [output-token-filename1, ...]",
       String,
-      ->(opts, v) { opts.output_token_filename = v},
-      "Path to an output file for the generated token")
+      ->(opts, v) { opts.output_token_filenames = v},
+      "Comma-separated paths to output file(s) for the generated token(s)")
   op.add_typed_option(
-      "--impersonated-username [impersonated-username]",
+      "--impersonated-usernames [impersonated-username1, ...]",
       String,
-      ->(opts, v) { opts.impersonated_username = v},
-      "AoU researcher email to impersonate, e.g. calbach@fake-research-aou.org")
-  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filename and opts.impersonated_username)}
+      ->(opts, v) { opts.impersonated_usernames = v},
+      "Comma-separated AoU researcher email(s) to impersonate, e.g. calbach@fake-research-aou.org")
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
   op.parse.validate
 
+  # derive the project_id from the username, failing if this is not possible
   project_id = nil
   ENVIRONMENTS.each_key do |project|
     if project == "local"
@@ -1614,13 +1615,13 @@ def generate_impersonated_user_token(cmd_name, *args)
     end
 
     config = get_config(project)
-    if op.opts.impersonated_username.end_with?("@" + config["googleDirectoryService"]["gSuiteDomain"])
+    if op.opts.impersonated_usernames.end_with?("@" + config["googleDirectoryService"]["gSuiteDomain"])
       project_id = project
       break
     end
   end
   if project_id.nil?
-    common.error "invalid domain for given user #{op.opts.impersonated_username} - target must be an AoU research domain email"
+    common.error "invalid domain for given user #{op.opts.impersonated_usernames} - target must be an AoU research domain email"
     raise ArgumentError
   end
 
@@ -1633,10 +1634,11 @@ def generate_impersonated_user_token(cmd_name, *args)
   end
 
   flags = ([
-      ["--output-token-filename", op.opts.output_token_filename],
-      ["--impersonated-username", op.opts.impersonated_username],
       ["--project-id", project_id]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    ] +
+    op.opts.output_token_filenames.split(',').map{ |filename| ["--output-token-filename", filename] } +
+    op.opts.impersonated_usernames.split(',').map{ |username| ["--impersonated-username", username] }
+  ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
   ServiceAccountContext.new(project_id).run do
@@ -1648,7 +1650,7 @@ end
 
 Common.register_command({
     :invocation => "generate-impersonated-user-token",
-    :description => "Generate an imperonsated oauth token for a target researcher",
+    :description => "Generate impersonated oauth token(s) for target researcher(s)",
     :fn => ->(*args) {generate_impersonated_user_token("generate-impersonated-user-token", *args)}
 })
 
