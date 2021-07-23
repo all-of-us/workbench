@@ -16,6 +16,7 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -227,9 +228,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
 
+    Optional<DbCohortReview> dbCohortReview = dbCohort.getCohortReviews().stream().findFirst();
+    long count =
+        dbCohortReview.isPresent()
+            ? dbCohortReview.get().getMatchedParticipantCount()
+            : cohortReviewService.participationCount(dbCohort);
+
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
-            .count(cohortReviewService.participationCount(dbCohort))
+            .count(count)
             .items(
                 cohortReviewService.findCohortChartData(
                     dbCohort, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
