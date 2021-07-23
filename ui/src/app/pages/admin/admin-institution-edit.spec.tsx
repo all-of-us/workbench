@@ -10,7 +10,6 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
-import {MembershipRequirements} from "./admin-institution-options";
 
 describe('AdminInstitutionEditSpec', () => {
 

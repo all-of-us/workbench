@@ -62,10 +62,16 @@ let institutionToEdit: Institution;
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
 function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
+  if(institution.tierEmailAddresses === null) {
+    return [];
+  }
   return institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier).emailAddresses;
 }
 
 function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
+  if(institution.tierEmailDomains === null) {
+    return [];
+  }
   return institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier).emailDomains;
 }
 
