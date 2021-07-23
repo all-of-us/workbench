@@ -4,57 +4,57 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
-    // External properties on the default project. Values declared in ext blocks
-    // outside of the buildscsript block aren't usable here.
-    ext {
-        ELASTICSEARCH_VERSION = '6.8.3'
-        GAE_VERSION = '1.9.64'
-        GSON_VERSION = '2.8.5'
-        JACKSON_DATABIND_VERSION = '2.11.3'
-        JACKSON_VERSION = '2.11.3'
-        JODA_VERSION = '2.10'
-        KOTLIN_VERSION = '1.3.50'
-        MAPSTRUCT_VERSION = '1.4.2.Final'
-        MOCKITO_KOTLIN_VERSION = '2.2.0'
-        OKHTTP_VERSION = '2.7.5'
-        OPENCENSUS_VERSION = '0.23.0'
-        SPRINGFOX_VERSION = '2.6.1'
-        SPRING_BOOT_VERSION = '2.3.9.RELEASE'
-        SPRING_DEPENDENCY_MANAGEMENT_VERSION = '1.0.11.RELEASE'
-        SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
-        SWAGGER_2_CODEGEN_VERSION = '2.2.3'
-        SWAGGER_3_CODEGEN_VERSION = '3.0.21'
-    }
+  // External properties on the default project. Values declared in ext blocks
+  // outside of the buildscsript block aren't usable here.
+  ext {
+    ELASTICSEARCH_VERSION = '6.8.3'
+    GAE_VERSION = '1.9.64'
+    GSON_VERSION = '2.8.5'
+    JACKSON_DATABIND_VERSION = '2.11.3'
+    JACKSON_VERSION = '2.11.3'
+    JODA_VERSION = '2.10'
+    KOTLIN_VERSION = '1.3.50'
+    MAPSTRUCT_VERSION = '1.4.2.Final'
+    MOCKITO_KOTLIN_VERSION = '2.2.0'
+    OKHTTP_VERSION = '2.7.5'
+    OPENCENSUS_VERSION = '0.23.0'
+    SPRINGFOX_VERSION = '2.6.1'
+    SPRING_BOOT_VERSION = '2.3.9.RELEASE'
+    SPRING_DEPENDENCY_MANAGEMENT_VERSION = '1.0.11.RELEASE'
+    SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
+    SWAGGER_2_CODEGEN_VERSION = '2.2.3'
+    SWAGGER_3_CODEGEN_VERSION = '3.0.21'
+  }
 
-    project.ext['hibernate.version'] = '5.4.31.Final'
+  project.ext['hibernate.version'] = '5.4.31.Final'
 
-    repositories {
-        // Bintray's repository - a fast Maven Central mirror & more
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+  repositories {
+    // Bintray's repository - a fast Maven Central mirror & more
+    mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
     }
+  }
 
-    // Buildscript-specific dependencies (uses buildscript-scoped repositories). This
-    // closure ensures allows the buildscript dependencies (e.g. for plgins) to be managed
-    // independently from the main project's application code's dependencies
-    dependencies {
-        classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.12.5'
-        classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
-        classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2'
-        // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
-        // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
-        // to match the modules imported by the Swagger codegen templates, and (2) some template files
-        // are overridden with forked templates within this repo; they will likely need to be re-copied from
-        // the newer release version and have AoU-specific modifications re-applied.
-        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
-        classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
-        classpath 'org.owasp:dependency-check-gradle:6.0.1'
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
-        classpath "io.spring.gradle:dependency-management-plugin:$project.ext.SPRING_DEPENDENCY_MANAGEMENT_VERSION"
-    }
+  // Buildscript-specific dependencies (uses buildscript-scoped repositories). This
+  // closure ensures allows the buildscript dependencies (e.g. for plgins) to be managed
+  // independently from the main project's application code's dependencies
+  dependencies {
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.12.5'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2'
+    // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
+    // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
+    // to match the modules imported by the Swagger codegen templates, and (2) some template files
+    // are overridden with forked templates within this repo; they will likely need to be re-copied from
+    // the newer release version and have AoU-specific modifications re-applied.
+    classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$project.ext.KOTLIN_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
+    classpath 'org.owasp:dependency-check-gradle:6.0.1'
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
+    classpath "io.spring.gradle:dependency-management-plugin:$project.ext.SPRING_DEPENDENCY_MANAGEMENT_VERSION"
+  }
 }
 
 // TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
@@ -76,23 +76,23 @@ apply plugin: 'war'
 // are concatenated by the Java plugin.
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
 configurations {
-    __bigQueryTest__Compile.extendsFrom testCompile
-    __bigQueryTest__Runtime.extendsFrom testRuntime
-    __bigQueryTest__Compile.extendsFrom testImplementation
+  __bigQueryTest__Compile.extendsFrom testCompile
+  __bigQueryTest__Runtime.extendsFrom testRuntime
+  __bigQueryTest__Compile.extendsFrom testImplementation
 
-    __integration__Compile.extendsFrom testCompile
-    __integration__Runtime.extendsFrom testRuntime
-    __integration__Compile.extendsFrom testImplementation
+  __integration__Compile.extendsFrom testCompile
+  __integration__Runtime.extendsFrom testRuntime
+  __integration__Compile.extendsFrom testImplementation
 
-    __tools__Implementation.extendsFrom implementation
-    __tools__RuntimeOnly.extendsFrom runtimeOnly
+  __tools__Implementation.extendsFrom implementation
+  __tools__RuntimeOnly.extendsFrom runtimeOnly
 
-    __swaggerCodegenV2__
-    __swaggerCodegenV3__
+  __swaggerCodegenV2__
+  __swaggerCodegenV3__
 
-    generatedCompile {
-        exclude group: 'com.google.guava', module: 'guava-jdk5'
-    }
+  generatedCompile {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
 }
 
 // Shared variables for Swagger codegen. Use "ext" rather than "def" to allow
@@ -106,69 +106,69 @@ ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
 ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
 // Raw options passed to the Swagger codegen CLI.
 ext.SWAGGER_2_RAW_OPTS = [
-        // By default, the ignore file within the output directory is used. Override
-        // as we don't track the output directory in source.
-        '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+  // By default, the ignore file within the output directory is used. Override
+  // as we don't track the output directory in source.
+  '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
 ]
 
 // Helper function to define a Java client Swagger codegen targets for the Gradle
 // Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
 def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
-    return {
-        inputFile = file("src/main/resources/${yaml}")
-        code {
-            configuration = configurations.__swaggerCodegenV2__
-            language = 'java'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
-            // Since the output directory is shared among these swagger tasks, wiping
-            // the directory would result in task invalidation / churn.
-            wipeOutputDir = false
-            rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
-            additionalProperties = [
-                    'sourceFolder'     : '',
-                    'library'          : 'okhttp-gson',
-                    'serializableModel': 'true',
-                    'dateLibrary'      : 'java8',
-                    'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
-                    'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
-                    'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
-            ]
-        }
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV2__
+      language = 'java'
+      outputDir = file(SWAGGER_2_CODEGEN_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+      ]
     }
+  }
 }
 
 def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
-    return {
-        inputFile = file("src/main/resources/${yaml}")
-        code {
-            configuration = configurations.__swaggerCodegenV3__
-            language = 'java'
-            outputDir = file(SWAGGER_3_CODEGEN_DIR)
-            templateDir = file("$projectDir/src/main/resources/swagger3codegen")
-            // Since the output directory is shared among these swagger tasks, wiping
-            // the directory would result in task invalidation / churn.
-            wipeOutputDir = false
-            rawOptions = [
-                    // By default, the ignore file within the output directory is used. Override
-                    // as we don't track the output directory in source.
-                    '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
-            ] + rawOptExtras
-            additionalProperties = [
-                    'sourceFolder'     : '',
-                    'library'          : 'okhttp-gson',
-                    'serializableModel': 'true',
-                    'dateLibrary'      : 'java8',
-                    'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
-                    'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
-                    'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
-            ]
-        }
-        // Validation only works for Swagger 2 - skip.
-        validation {
-            inputFile = null
-        }
+  return {
+    inputFile = file("src/main/resources/${yaml}")
+    code {
+      configuration = configurations.__swaggerCodegenV3__
+      language = 'java'
+      outputDir = file(SWAGGER_3_CODEGEN_DIR)
+      templateDir = file("$projectDir/src/main/resources/swagger3codegen")
+      // Since the output directory is shared among these swagger tasks, wiping
+      // the directory would result in task invalidation / churn.
+      wipeOutputDir = false
+      rawOptions = [
+        // By default, the ignore file within the output directory is used. Override
+        // as we don't track the output directory in source.
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
+      ] + rawOptExtras
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+      ]
     }
+    // Validation only works for Swagger 2 - skip.
+    validation {
+      inputFile = null
+    }
+  }
 }
 
 // Configuration for the Swagger Gradle plugin:
@@ -182,44 +182,44 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
 // overlapping files/diretories may be getting written by different Swagger
 // codegen tasks.
 swaggerSources {
-    firecloud swagger3JavaClient("firecloud.yaml", "firecloud", [
-            '--model-name-prefix', 'Firecloud'
-    ])
-    notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
-    jira swagger2JavaClient("jira.yaml", "jira")
-    mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
-    moodle swagger2JavaClient("moodle.yaml", "moodle")
-    rdr swagger2JavaClient("rdr.yaml", "rdr")
-    captcha swagger2JavaClient("captcha.yaml", "captcha")
-    shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
+  firecloud swagger3JavaClient("firecloud.yaml", "firecloud", [
+    '--model-name-prefix', 'Firecloud'
+  ])
+  notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
+  jira swagger2JavaClient("jira.yaml", "jira")
+  mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
+  moodle swagger2JavaClient("moodle.yaml", "moodle")
+  rdr swagger2JavaClient("rdr.yaml", "rdr")
+  captcha swagger2JavaClient("captcha.yaml", "captcha")
+  shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
-    leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
-            '--model-name-prefix', 'Leonardo'
-    ])
+  leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
+    '--model-name-prefix', 'Leonardo'
+  ])
 
-    // Workbench needs a special configuration style, as we generate Spring server
-    // bindings in this case.
-    workbench {
-        inputFile = file('src/main/resources/workbench-api.yaml')
-        code {
-            configuration = configurations.__swaggerCodegenV2__
-            language = 'spring'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
-            wipeOutputDir = false
-            rawOptions = SWAGGER_2_RAW_OPTS
-            additionalProperties = [
-                    'sourceFolder'   : '',
-                    'modelPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.model",
-                    'apiPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.api",
-                    'useTags'        : 'true',
-                    // Generates delegate interfaces; used to make method annotations work without
-                    // having to copy them to our implementations.
-                    'delegatePattern': 'true',
-                    'dateLibrary'    : 'java8'
-            ]
-        }
+  // Workbench needs a special configuration style, as we generate Spring server
+  // bindings in this case.
+  workbench {
+    inputFile = file('src/main/resources/workbench-api.yaml')
+    code {
+      configuration = configurations.__swaggerCodegenV2__
+      language = 'spring'
+      outputDir = file(SWAGGER_2_CODEGEN_DIR)
+      templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+      wipeOutputDir = false
+      rawOptions = SWAGGER_2_RAW_OPTS
+      additionalProperties = [
+        'sourceFolder'     : '',
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.api",
+        'useTags'        : 'true',
+        // Generates delegate interfaces; used to make method annotations work without
+        // having to copy them to our implementations.
+        'delegatePattern': 'true',
+        'dateLibrary': 'java8'
+      ]
     }
+  }
 }
 
 //
@@ -229,116 +229,117 @@ swaggerSources {
 // Generate AppEngine Cron file
 def workbenchEnv = System.getenv('WORKBENCH_ENV') != null ? System.getenv('WORKBENCH_ENV') : 'local'
 task generate_appengine_cron_yaml(type: Exec) {
-    executable "ruby"
-    args = ["libproject/generate_appengine_cron_yaml.rb", workbenchEnv]
+  executable "ruby"
+  args = ["libproject/generate_appengine_cron_yaml.rb", workbenchEnv]
 }
 
 // Generate AppEngine Web Configration XML file
 task generate_appengine_web_xml(type: Exec) {
-    executable "ruby"
-    args "libproject/generate_appengine_web_xml.rb"
+  executable "ruby"
+  args "libproject/generate_appengine_web_xml.rb"
 }
+
 
 
 // Spotless code linter plugin settings
 spotless {
-    java {
-        googleJavaFormat()
-        target fileTree('.') {
-            include '**/*.java'
+  java {
+    googleJavaFormat()
+    target fileTree('.') {
+      include '**/*.java'
 
-            exclude 'src/generated/**'
-            exclude 'build/**'
-        }
+      exclude 'src/generated/**'
+      exclude 'build/**'
     }
+  }
 
-    kotlin {
-        ktlint()
-    }
+  kotlin {
+    ktlint()
+  }
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 // The plugin generates configuration names by concatenating SourceSet names
 // with builtin identifiers according to the rules at
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
 sourceSets {
-    //
-    // SorceSets added by Java plugin. These share a namespace with the ones users create.
-    //
-    generated {
-        compileClasspath = configurations.generatedCompile
-        java {
-            srcDir SWAGGER_2_CODEGEN_DIR
-            srcDir SWAGGER_3_CODEGEN_DIR
-        }
+  //
+  // SorceSets added by Java plugin. These share a namespace with the ones users create.
+  //
+  generated {
+    compileClasspath = configurations.generatedCompile
+    java {
+      srcDir SWAGGER_2_CODEGEN_DIR
+      srcDir SWAGGER_3_CODEGEN_DIR
     }
-    main {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
+  }
+  main {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+  test {
+    // Allow unit tests to directly load config files.
+    resources {
+      srcDir "config/"
     }
-    test {
-        // Allow unit tests to directly load config files.
-        resources {
-            srcDir "config/"
-        }
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
 
-    //
-    // Custom SourceSets
-    //
-    // Here we use a naming convention with __ word boundaries at start and end
-    // to avoid confusion. For example, the plugin may define a __tools__Compile configuration
-    // or a compile__tools__Java task. This approach makes it more obvious where there's
-    // a dynamically defined symbol name, so usages stick out and it's easier to identify the
-    // constituent parts.
-    // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
-    // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
-    //
+  //
+  // Custom SourceSets
+  //
+  // Here we use a naming convention with __ word boundaries at start and end
+  // to avoid confusion. For example, the plugin may define a __tools__Compile configuration
+  // or a compile__tools__Java task. This approach makes it more obvious where there's
+  // a dynamically defined symbol name, so usages stick out and it's easier to identify the
+  // constituent parts.
+  // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_tasks
+  // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
+  //
 
-    // BigQuery testing sources
-    __bigQueryTest__ {
-        resources {
-            srcDir "bigquerytest/resources"
-            srcDir "config/"
-            include "bigquery/**"
-            include "cdm/**"
-        }
-        java {
-            compileClasspath += main.output + test.output + generated.output
-            runtimeClasspath += main.output + test.output + generated.output
-            srcDir file('src/bigquerytest/java')
-        }
+  // BigQuery testing sources
+  __bigQueryTest__ {
+    resources {
+      srcDir "bigquerytest/resources"
+      srcDir "config/"
+      include "bigquery/**"
+      include "cdm/**"
     }
-
-    // Integration testing sources
-    __integration__ {
-        resources {
-            srcDir "config/"
-        }
-        java {
-            compileClasspath += main.output + generated.output
-            runtimeClasspath += main.output + generated.output
-            srcDir file('src/integration/java')
-        }
+    java {
+      compileClasspath += main.output + test.output + generated.output
+      runtimeClasspath += main.output + test.output + generated.output
+      srcDir file('src/bigquerytest/java')
     }
+  }
 
-    // AoU Tools sources
-    __tools__ {
-        compileClasspath += main.output + generated.output
-        runtimeClasspath += main.output + generated.output
-
-        resources {
-            srcDir "tools/src/main/resources"
-        }
-        java {
-            srcDirs = ['tools/src/main/java']
-        }
+  // Integration testing sources
+  __integration__ {
+    resources {
+      srcDir "config/"
     }
+    java {
+      compileClasspath += main.output + generated.output
+      runtimeClasspath += main.output + generated.output
+      srcDir file('src/integration/java')
+    }
+  }
+
+  // AoU Tools sources
+  __tools__ {
+    compileClasspath += main.output + generated.output
+    runtimeClasspath += main.output + generated.output
+
+    resources {
+      srcDir "tools/src/main/resources"
+    }
+    java {
+      srcDirs = ['tools/src/main/java']
+    }
+  }
 }
 
 // Add dependencies to the classes builtin task from the  Java plugin.
@@ -357,262 +358,262 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
 project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
-                                 'generate_appengine_cron_yaml'])
+                             'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
-    delete(SWAGGER_2_CODEGEN_DIR)
-    delete(SWAGGER_3_CODEGEN_DIR)
+  delete(SWAGGER_2_CODEGEN_DIR)
+  delete(SWAGGER_3_CODEGEN_DIR)
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
-    annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+  annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-    __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
-    __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
+  __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
+  __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-    compile "ch.qos.logback:logback-classic:1.2.3"
-    compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
-    compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
-    compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
-    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
-    compile "com.github.java-json-tools:json-patch:1.13"
-    compile "com.github.rholder:guava-retrying:2.0.0"
-    compile "org.javers:javers-core:5.10.1"
-    compile "com.google.api-client:google-api-client-appengine:1.30.0"
-    compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
-    compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
-    compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
-    compile "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
-    compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
-    compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
-    compile "com.google.auth:google-auth-library-appengine:0.19.0"
-    compile "com.google.auth:google-auth-library-oauth2-http:0.19.0"
-    compile "com.google.cloud.sql:mysql-socket-factory:1.0.10"
-    compile "com.google.cloud:google-cloud-bigquery:1.122.2"
-    compile "com.google.cloud:google-cloud-iamcredentials:0.44.1"
-    compile "com.google.cloud:google-cloud-logging:1.102.0"
-    compile "com.google.cloud:google-cloud-monitoring:1.100.1"
-    compile "com.google.cloud:google-cloud-storage:1.113.1"
-    compile "com.google.cloud:google-cloud-tasks:1.30.4"
-    compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    compile "com.google.guava:guava:30.0-jre"
-    compile "com.google.http-client:google-http-client-apache:2.0.0"
-    compile "com.google.oauth-client:google-oauth-client-jetty:1.31.5"
-    compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
-    compile "com.opsgenie.integration:sdk:2+"
-    compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
-    compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-    compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-    compile "io.swagger:swagger-annotations:1.5.16"
-    compile "javax.inject:javax.inject:1"
-    compile "joda-time:joda-time:$project.ext.JODA_VERSION"
-    compile "org.liquibase:liquibase-core:3.10.0"
-    compile "mysql:mysql-connector-java:8.0.16"
-    compile "org.apache.commons:commons-collections4:4.4"
-    compile "org.apache.commons:commons-lang3:3.6"
-    compile "org.apache.commons:commons-text:1.8"
-    compile "org.apache.httpcomponents:httpclient:4.5.13"
-    compile 'org.springframework.boot:spring-boot-starter-validation'
-    compile "commons-codec:commons-codec:1.15"
-    compile 'com.auth0:java-jwt:3.14.0'
+  compile "ch.qos.logback:logback-classic:1.2.3"
+  compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
+  compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
+  compile "com.github.java-json-tools:json-patch:1.13"
+  compile "com.github.rholder:guava-retrying:2.0.0"
+  compile "org.javers:javers-core:5.10.1"
+  compile "com.google.api-client:google-api-client-appengine:1.30.0"
+  compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
+  compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
+  compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
+  compile "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
+  compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
+  compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
+  compile "com.google.auth:google-auth-library-appengine:0.19.0"
+  compile "com.google.auth:google-auth-library-oauth2-http:0.19.0"
+  compile "com.google.cloud.sql:mysql-socket-factory:1.0.10"
+  compile "com.google.cloud:google-cloud-bigquery:1.122.2"
+  compile "com.google.cloud:google-cloud-iamcredentials:0.44.1"
+  compile "com.google.cloud:google-cloud-logging:1.102.0"
+  compile "com.google.cloud:google-cloud-monitoring:1.100.1"
+  compile "com.google.cloud:google-cloud-storage:1.113.1"
+  compile "com.google.cloud:google-cloud-tasks:1.30.4"
+  compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
+  compile "com.google.guava:guava:30.0-jre"
+  compile "com.google.http-client:google-http-client-apache:2.0.0"
+  compile "com.google.oauth-client:google-oauth-client-jetty:1.31.5"
+  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+  compile "com.opsgenie.integration:sdk:2+"
+  compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+  compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+  compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+  compile "io.swagger:swagger-annotations:1.5.16"
+  compile "javax.inject:javax.inject:1"
+  compile "joda-time:joda-time:$project.ext.JODA_VERSION"
+  compile "org.liquibase:liquibase-core:3.10.0"
+  compile "mysql:mysql-connector-java:8.0.16"
+  compile "org.apache.commons:commons-collections4:4.4"
+  compile "org.apache.commons:commons-lang3:3.6"
+  compile "org.apache.commons:commons-text:1.8"
+  compile "org.apache.httpcomponents:httpclient:4.5.13"
+  compile 'org.springframework.boot:spring-boot-starter-validation'
+  compile "commons-codec:commons-codec:1.15"
+  compile 'com.auth0:java-jwt:3.14.0'
 
-    // Elasticsearch client
-    compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
-    compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
+  // Elasticsearch client
+  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
+  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
-    compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
+  compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
-    // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
-    // Kotlin dep, resulting in massive logspam.
-    compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
+  // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
+  // Kotlin dep, resulting in massive logspam.
+  compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
 
-    compile "org.json:json:20160810"
+  compile "org.json:json:20160810"
 
-    compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
-    compile("org.springframework.boot:spring-boot-starter-tomcat")
-    compile("org.springframework.boot:spring-boot-starter-jdbc") {
-        exclude group: 'com.zaxxer', module: 'HikariCP'
-    }
+  compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
+  compile("org.springframework.boot:spring-boot-starter-tomcat")
+  compile("org.springframework.boot:spring-boot-starter-jdbc") {
+    exclude group: 'com.zaxxer', module: 'HikariCP'
+  }
 
-    compile("org.springframework.boot:spring-boot-starter-data-jpa") {
-        exclude module: 'spring-boot-starter-tomcat'
-        exclude group: 'com.zaxxer', module: 'HikariCP'
-        exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-    }
+  compile("org.springframework.boot:spring-boot-starter-data-jpa") {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'com.zaxxer', module: 'HikariCP'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
 
-    compile("org.springframework.boot:spring-boot-starter-web") {
-        exclude module: 'spring-boot-starter-tomcat'
-        exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-    }
+  compile("org.springframework.boot:spring-boot-starter-web") {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
 
-    compile "org.springframework.retry:spring-retry"
-    compile "org.springframework.security:spring-security-core"
-    compile "org.springframework.security:spring-security-web"
+  compile "org.springframework.retry:spring-retry"
+  compile "org.springframework.security:spring-security-core"
+  compile "org.springframework.security:spring-security-web"
 
-    implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
-    testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+  implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
+  testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
-    // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
-    // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
-    // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
-    generatedCompile "org.springframework.boot:spring-boot-starter-data-rest"
-    generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
-    generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
-    generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
-    generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-    generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
-    generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    generatedCompile "joda-time:joda-time:$project.ext.JODA_VERSION"
-    generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$project.ext.JACKSON_VERSION"
-    // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
-    // template file api.mustache for more details.
-    generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-    generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+  // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
+  // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
+  // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest"
+  generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
+  generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
+  generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
+  generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+  generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+  generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
+  generatedCompile "joda-time:joda-time:$project.ext.JODA_VERSION"
+  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:$project.ext.JACKSON_VERSION"
+  // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
+  // template file api.mustache for more details.
+  generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
+  generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
 
-    // Swagger3 codegen deps
-    // TODO(calbach): The duplicated deps here are highly suspect. Investigate
-    // removing the generated sourceSet, or else fixing the runtime deps.
-    compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    compile 'io.gsonfire:gson-fire:1.8.3'
-    compile 'org.threeten:threetenbp:1.3.5'
-    generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-    generatedCompile 'io.gsonfire:gson-fire:1.8.3'
-    generatedCompile 'org.threeten:threetenbp:1.3.5'
+  // Swagger3 codegen deps
+  // TODO(calbach): The duplicated deps here are highly suspect. Investigate
+  // removing the generated sourceSet, or else fixing the runtime deps.
+  compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  compile 'io.gsonfire:gson-fire:1.8.3'
+  compile 'org.threeten:threetenbp:1.3.5'
+  generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  generatedCompile 'io.gsonfire:gson-fire:1.8.3'
+  generatedCompile 'org.threeten:threetenbp:1.3.5'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
-    // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
-    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+  // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
+  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
-    __tools__Compile 'commons-cli:commons-cli:1.4'
-    __tools__Compile 'com.opencsv:opencsv:4.6'
+  __tools__Compile 'commons-cli:commons-cli:1.4'
+  __tools__Compile 'com.opencsv:opencsv:4.6'
 
-    testCompile 'org.mockito:mockito-core:2.18.3'
-    testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
-    testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
-    testCompile 'com.google.truth:truth:0.42'
-    testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
-    testCompile 'com.h2database:h2:1.4.194'
-    testCompile 'org.liquibase:liquibase-core:3.10.0'
-    testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
-    testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
+  testCompile 'org.mockito:mockito-core:2.18.3'
+  testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
+  testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
+  testCompile 'com.google.truth:truth:0.42'
+  testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
+  testCompile 'com.h2database:h2:1.4.194'
+  testCompile 'org.liquibase:liquibase-core:3.10.0'
+  testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+  testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
 
-    // Use Mockito for testing only.
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+  // Use Mockito for testing only.
+  testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
-    // Test deps
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
+  // Test deps
+  testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+  }
 }
 
 tasks.compileJava {
-    dependsOn 'compileGeneratedJava'
-    options.compilerArgs << '-Xlint:unchecked'
+  dependsOn 'compileGeneratedJava'
+  options.compilerArgs << '-Xlint:unchecked'
 }
 
 task integrationTest(type: Test) {
-    group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Run integration test suite.'
-    testClassesDirs = sourceSets.__integration__.output.classesDirs
-    classpath = sourceSets.__integration__.runtimeClasspath
-    // These tests should always run when requested since they consume and produce side-effects.
-    outputs.upToDateWhen { false }
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  description = 'Run integration test suite.'
+  testClassesDirs = sourceSets.__integration__.output.classesDirs
+  classpath = sourceSets.__integration__.runtimeClasspath
+  // These tests should always run when requested since they consume and produce side-effects.
+  outputs.upToDateWhen { false }
 
-    useJUnitPlatform()
+  useJUnitPlatform()
 
-    // Option to control size of stack trace:
-    // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
+  // Option to control size of stack trace:
+  // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
 task bigQueryTest(type: Test) {
-    group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = 'Runs BigQery test suite.'
-    testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
-    classpath = sourceSets.__bigQueryTest__.runtimeClasspath
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  description = 'Runs BigQery test suite.'
+  testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
+  classpath = sourceSets.__bigQueryTest__.runtimeClasspath
 
-    outputs.upToDateWhen { false }
+  outputs.upToDateWhen { false }
 
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 tasks.withType(Test) {
+  testLogging {
+    // Causes the correct line to be reported on an exception.
+    exceptionFormat "full"
+  }
+  def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
+  if (verboseTestLogging == 'yes') {
     testLogging {
-        // Causes the correct line to be reported on an exception.
-        exceptionFormat "full"
+      events "passed", "skipped", "failed", "standardOut", "standardError"
     }
-    def verboseTestLogging = project.properties['verboseTestLogging'] ?: 'no'
-    if (verboseTestLogging == 'yes') {
-        testLogging {
-            events "passed", "skipped", "failed", "standardOut", "standardError"
-        }
-    } else {
-        testLogging {
-            events "passed", "skipped", "failed"
-        }
-        reports {
-            // Write XML file (used by CircleCI, Jenkins, etc) to api/build/test-results/test
-            junitXml.enabled = true
-            // Write human-readable test report to api/build/reports/
-            html.enabled = true
-        }
+  } else {
+    testLogging {
+      events "passed", "skipped", "failed"
     }
-    // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
-    maxHeapSize = "2g"
+    reports {
+      // Write XML file (used by CircleCI, Jenkins, etc) to api/build/test-results/test
+      junitXml.enabled = true
+      // Write human-readable test report to api/build/reports/
+      html.enabled = true
+    }
+  }
+  // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
+  maxHeapSize = "2g"
 }
 
 appengine {  // App Engine tasks configuration
-    run {      // local (dev_appserver) configuration (standard environments only)
-        port = 8081                 // default
-        host = "0.0.0.0"
-        // Allows you to attach a debugger on port 8001 when running locally.
-        jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
-        // Give dev_appserver 2 minutes to start up when running appengineStart; by
-        // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
-        startSuccessTimeout = 120
+  run {      // local (dev_appserver) configuration (standard environments only)
+    port = 8081                 // default
+    host = "0.0.0.0"
+    // Allows you to attach a debugger on port 8001 when running locally.
+    jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
+    // Give dev_appserver 2 minutes to start up when running appengineStart; by
+    // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
+    startSuccessTimeout = 120
 
-        environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
-    }
+    environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
+  }
 
-    deploy {   // deploy configuration
-        stopPreviousVersion = true  // default - stop the current version
-        promote = true              // default - & make this the current version
-    }
+  deploy {   // deploy configuration
+    stopPreviousVersion = true  // default - stop the current version
+    promote = true              // default - & make this the current version
+  }
 }
 
 task startCronEmulator(dependsOn: [':appengine-cron-emulator:jar', 'generate_appengine_cron_yaml']) {
-    doFirst {
-        ext.process = new ProcessBuilder()
-                .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
-                .redirectError(ProcessBuilder.Redirect.to(new File("cron-emulator-err.log")))
-                .directory(projectDir)
-                .command("java", "-jar",
-                        project(":appengine-cron-emulator").jar.archivePath.getPath(),
-                        "$projectDir/src/main/webapp/WEB-INF/cron.yaml"
-                ).start()
+  doFirst {
+    ext.process = new ProcessBuilder()
+            .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
+            .redirectError(ProcessBuilder.Redirect.to(new File("cron-emulator-err.log")))
+            .directory(projectDir)
+            .command("java", "-jar",
+                    project(":appengine-cron-emulator").jar.archivePath.getPath(),
+                    "$projectDir/src/main/webapp/WEB-INF/cron.yaml"
+            ).start()
 
-        println "Started Cron Emulator, check cron-emulator-err.log for startup errors (RW-3755)"
-    }
+    println "Started Cron Emulator, check cron-emulator-err.log for startup errors (RW-3755)"
+  }
 }
 
 // AppEngine plugin tasks
 project.tasks.appengineRun.dependsOn project.tasks.startCronEmulator
 project.tasks.appengineStart.dependsOn project.tasks.startCronEmulator
 appengineStart {
-    // This task has the side-effect of running a local server, and therefore
-    // should not be cacheable.
-    outputs.upToDateWhen { false }
+  // This task has the side-effect of running a local server, and therefore
+  // should not be cacheable.
+  outputs.upToDateWhen { false }
 }
 
 group = 'org.pmiops.allofus.workbench'
@@ -622,12 +623,13 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
-    inputDir = sourceSets.main.java.outputDir
-    // This is actually not used but required.
-    outputDir = sourceSets.main.java.outputDir
+  inputDir = sourceSets.main.java.outputDir
+  // This is actually not used but required.
+  outputDir = sourceSets.main.java.outputDir
 }
 
 task listProjectAPIs(type: GenerateAPIListingTask)
+
 
 
 //
@@ -652,92 +654,92 @@ def db_host = System.getenv("DB_HOST")
 def db_port = System.getenv("DB_PORT")
 
 def commandLineSpringProperties = [
-        'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
-        // Our database isn't configured to allow outside connections (which is good),
-        // so our connections are either local or through the encrypted proxy.
-        'spring.datasource.url'              : "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
-        'spring.datasource.username'         : System.getenv("WORKBENCH_DB_USER"),
-        'spring.datasource.password'         : System.getenv("WORKBENCH_DB_PASSWORD")
+  'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+  // Our database isn't configured to allow outside connections (which is good),
+  // so our connections are either local or through the encrypted proxy.
+  'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
+  'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
+  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
 // See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: fetch-workspace-details
 task fetchWorkspaceDetails(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: export-workspace-data
 task exportWorkspaceData(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ExportWorkspaceData"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ExportWorkspaceData"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: generate-impersonated-user-token
 task generateImpersonatedUserToken(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.GenerateImpersonatedUserToken"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserToken"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: delete-workspaces
 task deleteWorkspaces(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.DeleteWorkspaces"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.DeleteWorkspaces"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: delete-workspace-rdr-export
 task deleteWorkspaceFromRdrExport(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.DeleteFromRdrExport"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.DeleteFromRdrExport"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: backfill-workspaces-to-rdr
 task backfillWorkspacesToRdr(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.BackfillWorkspacesToRdr"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillWorkspacesToRdr"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // This task is called from a few different places:
@@ -745,45 +747,45 @@ task backfillWorkspacesToRdr(type: JavaExec) {
 // - directly via gradlew (used by "run-local-migrations" command)
 // - docker-compose.yaml#updateConfig (used by "dev-up" command)
 task loadConfig(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ConfigLoader"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
-        args config_key, config_file
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ConfigLoader"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
+    args config_key, config_file
+  }
 }
 
 // Called by devs from the command-line:
 // - devstart.rb > list_runtimes
 task manageLeonardoRuntimes(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // Called by devs from the command-line:
 // - devstart.rb > set_authority
 task setAuthority(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.SetAuthority"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAuthority"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // This task is called from:
 // - devstart.rb > update_cdr_config_for_project (called by run-local-migrations)
 task updateCdrConfig(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // This should be run directly
@@ -792,58 +794,58 @@ task updateReviewDemographics(type: JavaExec) {
     main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
     systemProperties = commandLineSpringProperties
     if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
+      args Eval.me(appArgs)
     }
 }
 
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: create-terra-method-snapshot
 task createTerraMethodSnapshot(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: load-institutions
 task loadInstitutions(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: populate-user-affiliations
 task populateUserAffiliations(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.institutions.PopulateUserAffiliations"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.institutions.PopulateUserAffiliations"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 // See project.rb command: fix-desynchronized-billing-project-owners
 task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 //
@@ -852,14 +854,14 @@ task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
 //
 
 compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 }
 
 // This is a hack to populate the (empty) output directory for the Kotlin
@@ -878,10 +880,10 @@ compileTestKotlin {
 //   specified for property 'compileGeneratedKotlinOutputClasses' does not exist.
 // """
 task prepareKotlinGeneratedDir() {
-    ext.out_path = "$projectDir/build/classes/kotlin/generated"
-    outputs.dir file(ext.out_path)
-    doLast {
-        mkdir ext.out_path
-    }
+  ext.out_path = "$projectDir/build/classes/kotlin/generated"
+  outputs.dir file(ext.out_path)
+  doLast {
+    mkdir ext.out_path
+  }
 }
 compileGeneratedKotlin.dependsOn 'prepareKotlinGeneratedDir'
