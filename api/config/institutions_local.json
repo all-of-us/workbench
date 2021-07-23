@@ -2,8 +2,6 @@
 	"shortName": "VUMC",
 	"displayName": "Vanderbilt University Medical Center",
 	"organizationTypeEnum": "HEALTH_CENTER_NON_PROFIT",
-	"emailAddresses": [],
-	"emailDomains": ["vumc.org"],
 	"tierEmailDomains": [
 		{
 			"accessTierShortName": "registered",
