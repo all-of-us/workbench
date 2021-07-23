@@ -12,23 +12,11 @@ BUCKET="all-of-us-workbench-private-cloudsql"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
 CRITERIA_MENU="cb_criteria_menu.csv"
-DS_DATA_DICTIONARY="ds_data_dictionary.csv"
 CB_SURVEY_VERSION="cb_survey_version.csv"
-PREP_CPT="prep_cpt.csv"
-PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
-PREP_CONCEPT="prep_concept.csv"
-PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
 PREP_SURVEY="prep_survey.csv"
-PREP_PHYSICAL_MEASUREMENT="prep_physical_measurement.csv"
 NON_PREP_FILES=($CRITERIA_MENU
-           $DS_DATA_DICTIONARY
            $CB_SURVEY_VERSION)
-PREP_FILES=($PREP_CPT
-           $PREP_CLINICAL_TERMS
-           $PREP_CONCEPT
-           $PREP_CONCEPT_RELATIONSHIP
-           $PREP_SURVEY
-           $PREP_PHYSICAL_MEASUREMENT)
+PREP_FILES=($PREP_SURVEY)
 ALL_FILES=("${NON_PREP_FILES[@]}" "${PREP_FILES[@]}")
 DEPENDENT_TABLES=("activity_summary"
             "concept"
@@ -94,19 +82,14 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
 then
   for file in ${ALL_FILES[@]}; do
     case $file in
-      $CRITERIA_MENU|$DS_DATA_DICTIONARY)
+      $CRITERIA_MENU)
         echo "Processing $file"
         gzip $TEMP_FILE_DIR/$file
         # Copy it back to bucket
         gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CDR_VERSION/
       ;;
     $CB_SURVEY_VERSION | \
-    $PREP_CPT | \
-    $PREP_CLINICAL_TERMS | \
-    $PREP_CONCEPT | \
-    $PREP_CONCEPT_RELATIONSHIP | \
-    $PREP_SURVEY | \
-    $PREP_PHYSICAL_MEASUREMENT)
+    $PREP_SURVEY)
       # Check to see if table exists
       tableName=${file%.*}
       loadCSVFile $file $tableName
