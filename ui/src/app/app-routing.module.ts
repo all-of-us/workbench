@@ -94,6 +94,9 @@ const routes: Routes = [
              * provided by the route rather than double-requesting it.
              */
             path: ':ns/:wsid',
+            // TODO: When removing ng router, replace this with react-router's Prompt component.
+            runGuardsAndResolvers: 'always',
+            canDeactivate: [NavigationGuard],
             children: [
               // legacy / duplicated routes go HERE
               {
@@ -133,8 +136,6 @@ const routes: Routes = [
               },
               {
                 path: 'data',
-                runGuardsAndResolvers: 'always',
-                canDeactivate: [NavigationGuard],
                 children: [
                   {
                     path: '',
