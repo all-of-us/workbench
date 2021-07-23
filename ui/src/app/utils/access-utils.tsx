@@ -1,9 +1,15 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {convertAPIError} from 'app/utils/errors';
 import {queryParamsStore} from 'app/utils/navigation';
+import {authStore, profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
+import {ErrorCode} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+
+const {useState, useEffect} = React;
 
 export async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
@@ -33,4 +39,37 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
       return daysRemaining;
     }
   }
+};
+
+// A hook to determine whether the current user is signed in and disabled.
+// Returns undefined if the status is unknown.
+export const useIsUserDisabled = () => {
+  const {authLoaded, isSignedIn} = useStore(authStore);
+  const [disabled, setDisabled] = useState<boolean|undefined>(undefined);
+  useEffect(() => {
+    if (!authLoaded) {
+      return;
+    }
+
+    let mounted = true;
+    if (!isSignedIn) {
+      setDisabled(false);
+    } else {
+      (async() => {
+        try {
+          await profileStore.get().load();
+          if (mounted) {
+            setDisabled(false);
+          }
+        } catch (e) {
+          const errorResponse = await convertAPIError(e);
+          if (errorResponse.errorCode === ErrorCode.USERDISABLED && mounted) {
+            setDisabled(true);
+          }
+        }
+      })();
+    }
+    return () => mounted = false;
+  }, [authLoaded, isSignedIn]);
+  return disabled;
 };

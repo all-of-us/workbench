@@ -26,6 +26,7 @@ import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporte
 import {environment} from 'environments/environment';
 
 import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from 'app/components/help-sidebar';
+import {SignInService} from 'app/services/sign-in.service';
 import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -37,9 +38,9 @@ import outdatedBrowserRework from 'outdated-browser-rework';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  isSignedIn = false;
   initialSpinner = true;
   cookiesEnabled = true;
+  configLoaded = false;
   overriddenUrl: string = null;
   pollAborter = new AbortController();
 
@@ -49,15 +50,12 @@ export class AppComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private titleService: Title,
-    private zone: NgZone
-  ) {
-    this.zone = zone;
-  }
+    private zone: NgZone,
+    private signInService: SignInService
+  ) {}
 
   async ngOnInit() {
     this.checkBrowserSupport();
-    await this.loadConfig();
-    this.loadErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -97,6 +95,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.initialSpinner = false;
       }
       if (e instanceof NavigationEnd) {
+        if (!this.activatedRoute) {
+          return;
+        }
         const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
         urlParamsStore.next(params);
         queryParamsStore.next(queryParams);
@@ -139,14 +140,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
-      .switchMap(({ns, wsid}) => {
+      .switchMap(async({ns, wsid}) => {
         currentWorkspaceStore.next(null);
 
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
         if (!ns || !wsid) {
-          return Promise.resolve(null);
+          return null;
         }
 
         // In a handful of situations - namely on workspace creation/clone,
@@ -155,9 +156,13 @@ export class AppComponent implements OnInit, OnDestroy {
         const nextWs = nextWorkspaceWarmupStore.getValue();
         nextWorkspaceWarmupStore.next(undefined);
         if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-          return Promise.resolve(nextWs);
+          return nextWs;
         }
-        return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+
+        // Hack to ensure auth is loaded before a workspaces API call.
+        await this.signInService.isSignedIn$.first().toPromise();
+
+        return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {
             ...wsResponse.workspace,
             accessLevel: wsResponse.accessLevel
@@ -192,7 +197,8 @@ export class AppComponent implements OnInit, OnDestroy {
       })
     );
 
-
+    await this.loadConfig();
+    this.loadErrorReporter();
     initializeAnalytics();
   }
 

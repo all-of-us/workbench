@@ -109,17 +109,17 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.props.hideSpinner();
     this.setVisits();
-    await this.reloadWorkspace(currentWorkspaceStore.getValue());
-    this.loadFreeTierUsage();
-    this.loadUserRoles();
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadFreeTierUsage(workspace);
+    this.loadUserRoles(workspace);
   }
 
-  async loadFreeTierUsage() {
+  async loadFreeTierUsage(workspace: WorkspaceData) {
     const freeTierUsage = await workspacesApi().getBillingUsage(
-      this.state.workspace.namespace, this.state.workspace.id);
+      workspace.namespace, workspace.id);
     this.setState({workspaceFreeTierUsage: freeTierUsage.cost});
   }
 
@@ -130,12 +130,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     }
   }
 
-  async reloadWorkspace(workspace: WorkspaceData) {
-    this.setState({workspace: workspace});
+  reloadWorkspace(workspace: WorkspaceData): WorkspaceData {
+    this.setState({workspace});
+    return workspace;
   }
 
-  async loadUserRoles() {
-    const {workspace} = this.state;
+  loadUserRoles(workspace: WorkspaceData) {
     this.setState({workspaceUserRoles: []});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
       resp => {
@@ -193,10 +193,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     }
   }
 
-  async onShare() {
+  onShare() {
     this.setState({sharing: false});
-    await this.reloadWorkspace(currentWorkspaceStore.getValue());
-    this.loadUserRoles();
+    const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadUserRoles(workspace);
   }
 
   render() {
