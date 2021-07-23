@@ -16,12 +16,12 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		}
 	]
 }, {
@@ -42,12 +42,12 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		}
 	]
 }, {
@@ -68,12 +68,12 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		}
 	]
 }, {
@@ -95,12 +95,12 @@
 		{
 			"accessTierShortName": "registered",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		},
 		{
 			"accessTierShortName": "controlled",
 			"membershipRequirement": "DOMAINS",
-			"eraRequired:": "true"
+			"eraRequired:": true
 		}
 	]
 }]
