@@ -189,9 +189,6 @@ export default class CohortParticipantsGroup {
   async deleteCriteria(criteriaName: string): Promise<void> {
     await this.clickCriteriaSnowmanIcon(criteriaName);
     await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
-    const xpath = `${this.rootXpath}//*[normalize-space()="UNDO" and @role="button"]`;
-    const undoButton = new Button(this.page, xpath);
-    await undoButton.waitForXPath(); // Find the UNDO button but do not click.
   }
 
   /**

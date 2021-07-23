@@ -32,10 +32,8 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
-  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
-  await navigationPromise;
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.
@@ -43,7 +41,9 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
   // logs; there is some delay between a console.log() execution and capture by
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
+  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'], timeout: 120000 });
   await homePage.gotoUrl(PageUrl.Home);
+  await navigationPromise;
   await homePage.waitForLoad();
 }
 

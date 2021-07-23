@@ -42,67 +42,42 @@ export const launchPage = async (browser: Browser): Promise<Page> => {
   return incognitoPage;
 };
 
-export const withBrowser = (launchOpts?: LaunchOptions) => async (
-  testFn: (browser: Browser) => Promise<void>
-): Promise<void> => {
-  const browser = await launchBrowser(launchOpts);
-  try {
-    await testFn(browser);
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error(err.message);
-      logger.error(err.stack);
-    }
-  } finally {
-    await browser
-      .close()
-      .then(() => logger.info('Closing browser'))
-      .catch((err: Error) => {
-        console.error(`Unable to close browser. Error message: ${err.message}`);
-      });
-  }
-};
-
 /**
  * Launch new browser and incognito page. Opens Workbench Login page.
  * @param launchOpts: {@link LaunchOptions} New browser launch options.
  */
 export const withPageTest = (launchOpts?: LaunchOptions) => async (
-  testFn: (page: Page, browser: Browser) => Promise<void>
+  callback: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
-  await withBrowser(launchOpts)(async (browser) => {
-    const incognitoPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
-    try {
-      await initPageBeforeTest(incognitoPage);
-      await testFn(incognitoPage, browser);
-    } catch (err) {
-      if (err instanceof Error) {
-        logger.error(err.message);
-        logger.error(err.stack);
-      }
-      // Take screenshot and save html contents immediately after failure.
-      await fs.ensureDir(failScreenshotDir);
-      await fs.ensureDir(failHtmlDir);
-      await takeScreenshot(incognitoPage, `${__SPEC_NAME__}.png`);
-      await savePageToFile(incognitoPage, `${__SPEC_NAME__}.html`);
-      throw err;
-    } finally {
-      await incognitoPage
-        .close()
-        .then(() => logger.info('Closing page'))
-        .catch((err: Error) => {
-          console.error(`Unable to close page. Error message: ${err.message}`);
-        });
+  const br = await launchBrowser(launchOpts);
+  const p = await launchPage(br);
+  try {
+    // await initPageBeforeTest(p);
+    await callback(p, br);
+  } catch (err) {
+    console.log(`withPageTest encountered err: ${err}`);
+    logger.error(err);
+    if (err instanceof Error) {
+      logger.error(err.stack);
     }
-  });
+    // Take screenshot and save html contents immediately after failure.
+    await fs.ensureDir(failScreenshotDir);
+    await fs.ensureDir(failHtmlDir);
+    await takeScreenshot(p, `${__SPEC_NAME__}.png`);
+    await savePageToFile(p, `${__SPEC_NAME__}.html`);
+    console.log(`withPageTest before throw err`);
+    throw err;
+  } finally {
+      await p.close().then(() => logger.info('Closing page'));
+    }
 };
 
 export const withSignInTest = (tokenFileName?: string) => async (
-  testFn: (page: Page, browser: Browser) => Promise<void>
+  callback: (page: Page, browser: Browser) => Promise<void>
 ): Promise<void> => {
   await withPageTest()(async (page, browser) => {
     await signInWithAccessToken(page, tokenFileName);
-    await testFn(page, browser);
+    await callback(page, browser);
   });
 };
 
@@ -126,7 +101,7 @@ const getPageTitle = async (page: Page) => {
 export const initPageBeforeTest = async (page: Page): Promise<void> => {
   page.setDefaultNavigationTimeout(90000); // Puppeteer default timeout is 30 seconds.
   await page.setUserAgent(userAgent);
-  await page.setViewport({ width: 1300, height: 0 });
+  await page.setViewport({ width: 1900, height: 0 });
   await page.setRequestInterception(true);
 
   /**

@@ -1,10 +1,10 @@
 module.exports = {
   verbose: false,
-  preset: 'jest-puppeteer',
+  preset: 'ts-jest',
   testTimeout: 1200000,
   testRunner: 'jest-circus/runner',
-  testEnvironment: '<rootDir>/puppeteer-custom-environment.ts',
-  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup.ts'],
+  testEnvironment: '<rootDir>/puppeteer-environment.ts',
+  setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts'],
   setupFiles: ['dotenv/config'],
   reporters: [
     'default',
@@ -36,9 +36,6 @@ module.exports = {
       }
     ]
   ],
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
-  },
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.jest.json'
@@ -50,6 +47,5 @@ module.exports = {
       ? ['<rootDir>/tests/nightly/**/*.spec.ts']
       : ['<rootDir>/tests(?!/nightly)/**/*.spec.ts'],
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!tests)'],
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   modulePaths: ['<rootDir>']
 };

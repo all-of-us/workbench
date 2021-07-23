@@ -387,16 +387,7 @@ export async function waitWhileLoading(
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
   // Wait for spinners stop and gone.
-  await Promise.all([
-    page.waitForFunction(
-      (css) => {
-        return !document.querySelectorAll(css).length;
-      },
-      { polling: 'mutation', timeout },
-      spinElementsSelector
-    ),
-    page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
-  ]).catch((err: Error) => {
+  await page.waitForSelector(spinElementsSelector, { hidden: true, timeout }).catch((err) => {
     logger.error(`Failed wait for spinner stop: xpath="${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
