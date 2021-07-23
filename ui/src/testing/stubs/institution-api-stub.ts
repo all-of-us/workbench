@@ -5,7 +5,7 @@ import {
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
-  InstitutionApi,
+  InstitutionApi, InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
@@ -14,21 +14,54 @@ export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
-  emailDomains: ['vumc.org'],
-  duaTypeEnum: DuaType.MASTER,
+  tierEmailDomains: [
+    {
+      accessTierShortName: "registered",
+      emailDomains: ["vumc.org"]
+    }
+  ],
+  tierRequirements: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true
+    }
+  ],
   userInstructions: 'Vanderbilt User Instruction'
 }, {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
-  emailDomains: [],
-  emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org'],
-  duaTypeEnum: DuaType.RESTRICTED
+  tierEmailAddresses: [
+    {
+      accessTierShortName: "registered",
+      emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
+    }
+  ],
+  tierRequirements: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
+      eraRequired: true
+    }
+  ],
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
   organizationTypeEnum: OrganizationType.INDUSTRY,
-  emailDomains: ['verily.com', 'google.com'],
+  tierEmailDomains: [
+    {
+      accessTierShortName: "registered",
+      emailDomains: ['verily.com', 'google.com']
+    }
+  ],
+  tierRequirements: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true
+    }
+  ],
   userInstructions: 'Verily User Instruction'
 }];
 
@@ -110,9 +143,9 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.emailAddresses && institution.emailAddresses.includes(contactEmail)) {
+    if (institution.tierEmailAddresses && institution.tierEmailAddresses.includes(contactEmail)) {
       response.isValidMember = true;
-    } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
+    } else if (institution.tierEmailDomains && institution.emailDomains.includes(domain)) {
       response.isValidMember = true;
     }
     return response;

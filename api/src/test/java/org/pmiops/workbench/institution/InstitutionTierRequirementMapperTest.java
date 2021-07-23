@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
