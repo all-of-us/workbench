@@ -2,7 +2,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {urlParamsStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import {DuaType, InstitutionApi} from 'generated/fetch';
+import {DuaType, InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
@@ -10,6 +10,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
+import {MembershipRequirements} from "./admin-institution-options";
 
 describe('AdminInstitutionEditSpec', () => {
 
@@ -53,7 +54,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]');
-    expect(agreementTypeDropDown.first().props().value).toBe(DuaType.MASTER);
+    expect(agreementTypeDropDown.first().props().value).toBe(InstitutionMembershipRequirement.DOMAINS);
   });
 
   it('should show appropriate section after changing agreement type', async() => {
@@ -65,8 +66,8 @@ describe('AdminInstitutionEditSpec', () => {
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({
       originalEvent: undefined,
-      value: DuaType.MASTER,
-      target: {name: 'name', id: '', value: DuaType.MASTER}
+      value: InstitutionMembershipRequirement.DOMAINS,
+      target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -80,8 +81,8 @@ describe('AdminInstitutionEditSpec', () => {
 
     agreementTypeDropDown.props.onChange(
       {
-        originalEvent: undefined, value: DuaType.RESTRICTED,
-        target: {name: 'name', id: '', value: DuaType.RESTRICTED}
+        originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}
       });
     await waitOneTickAndUpdate(wrapper);
 
@@ -104,7 +105,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(emailAddressError.length).toBe(0);
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: DuaType.RESTRICTED, target: {name: 'name', id: '', value: DuaType.RESTRICTED}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
     await waitOneTickAndUpdate(wrapper);
 
     // In case of a single entry which is not in the correct format
@@ -150,7 +151,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(emailAddressError.length).toBe(0);
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
@@ -194,7 +195,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
@@ -211,7 +212,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: DuaType.MASTER, target: {name: 'name', id: '', value: DuaType.MASTER}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
