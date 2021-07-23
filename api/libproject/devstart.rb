@@ -1589,7 +1589,7 @@ Common.register_command({
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
 
-def generate_impersonated_user_token(cmd_name, *args)
+def generate_impersonated_user_tokens(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
 
