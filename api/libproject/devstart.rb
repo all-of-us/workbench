@@ -1607,7 +1607,6 @@ def generate_impersonated_user_token(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
   op.parse.validate
 
-  # derive the project_id from the usernames, failing if this is not possible
   user_email_domain = nil
   op.opts.impersonated_usernames.split(',').each do |username|
    split_email = username.split('@')
@@ -1624,6 +1623,7 @@ def generate_impersonated_user_token(cmd_name, *args)
    end
   end
 
+  # derive the project_id from the usernames, failing if this is not possible
   project_id = nil
   ENVIRONMENTS.each_key do |project|
     if project == "local"

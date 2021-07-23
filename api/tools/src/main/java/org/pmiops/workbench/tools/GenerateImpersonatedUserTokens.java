@@ -54,7 +54,8 @@ public class GenerateImpersonatedUserTokens {
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
-  private static final Logger log = Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
+  private static final Logger log =
+      Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
   private static final List<String> AOU_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
