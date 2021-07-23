@@ -1607,7 +1607,23 @@ def generate_impersonated_user_token(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
   op.parse.validate
 
-  # derive the project_id from the username, failing if this is not possible
+  # derive the project_id from the usernames, failing if this is not possible
+  user_email_domain = nil
+  op.opts.impersonated_usernames.split(',').each do |username|
+   split_email = username.split('@')
+   if split_email.nil? || split_email[1].nil?
+     raise ArgumentError.new("Username is not a valid email address: " + username)
+   end
+
+   if user_email_domain.nil?
+     user_email_domain = split_email[1]
+   else
+     if user_email_domain != split_email[1]
+       raise ArgumentError.new("All usernames must have the same email domain. #{split_email[1]} does not match #{user_email_domain}")
+     end
+   end
+  end
+
   project_id = nil
   ENVIRONMENTS.each_key do |project|
     if project == "local"
@@ -1615,13 +1631,14 @@ def generate_impersonated_user_token(cmd_name, *args)
     end
 
     config = get_config(project)
-    if op.opts.impersonated_usernames.end_with?("@" + config["googleDirectoryService"]["gSuiteDomain"])
+    if user_email_domain == config["googleDirectoryService"]["gSuiteDomain"]
       project_id = project
       break
     end
   end
+
   if project_id.nil?
-    common.error "invalid domain for given user #{op.opts.impersonated_usernames} - target must be an AoU research domain email"
+    common.error "invalid domain #{user_email_domain} for given usernames - target must be an AoU research domain email"
     raise ArgumentError
   end
 
