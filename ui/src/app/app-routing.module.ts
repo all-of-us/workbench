@@ -133,6 +133,7 @@ const routes: Routes = [
               },
               {
                 path: 'data',
+                runGuardsAndResolvers: 'always',
                 canDeactivate: [NavigationGuard],
                 children: [
                   {
