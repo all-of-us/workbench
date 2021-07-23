@@ -330,10 +330,12 @@ export default class BaseElement {
       await this.click({ delay: 10 });
       await navigationPromise;
     } catch (err) {
-      logger.error('clickAndWait() failed.');
+      // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.
+      logger.error(`Failed click (${this.xpath}) and wait for navigation to complete.`);
       logger.error(err);
-      logger.error(err.stack);
-      throw new Error(err);
+      if (err instanceof Error) {
+        logger.error(err.stack);
+      }
     }
   }
 

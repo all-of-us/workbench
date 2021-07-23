@@ -29,7 +29,7 @@ export default class WorkspaceCard extends CardBase {
    * Delete workspace via Workspace card "Delete" dropdown menu option.
    */
   static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
-    const card = await WorkspaceCard.findCard(page, workspaceName);
+    const card = await WorkspaceCard.findCard(page, workspaceName, 30000);
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
@@ -74,20 +74,20 @@ export default class WorkspaceCard extends CardBase {
     return fp.shuffle(cards)[0];
   }
 
-  static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
-    const selector = `.//*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]`;
-    const allCards = await this.findAllCards(page);
-    for (const card of allCards) {
-      const handle = card.asElementHandle();
-      const children = await handle.$x(selector);
-      if (children.length > 0) {
-        logger.info(`Found "${workspaceName}" workspace card`);
-        return card; // matched workspace name, found the Workspace card.
-      }
-      await handle.dispose(); // not it, dispose the ElementHandle.
-    }
-    logger.info(`"${workspaceName}" workspace card not found`);
-    return null; // not found
+  static async findCard(page: Page, workspaceName: string, timeout = 5000): Promise<WorkspaceCard | null> {
+    const selector =
+      `${WorkspaceCardSelector.cardRootXpath}[.//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`;
+    return page
+      .waitForXPath(selector, { timeout })
+      .then((element) => {
+        logger.info(`Found workspace card: "${workspaceName}"`);
+        return new WorkspaceCard(page).asCard(element);
+      })
+      .catch(() => {
+        logger.info(`Workspace card: "${workspaceName}" is not found`);
+        return null;
+      });
   }
 
   static async waitUntilGone(page: Page, workspaceName: string, timeout = 60000): Promise<void> {
