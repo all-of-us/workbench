@@ -43,13 +43,24 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking domain_info survey_module cb_person cb_data_filter)
+create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking ds_data_dictionary domain_info survey_module cb_person cb_data_filter)
 
 for t in "${create_tables[@]}"
 do
     bq --project_id=$OUTPUT_PROJECT rm -f $OUTPUT_DATASET.$t
     bq --quiet --project_id=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
+
+# Populate ds_data_dictionary
+#######################
+# ds_data_dictionary #
+#######################
+echo "Inserting ds_data_dictionary"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.ds_data_dictionary\`
+(id,field_name,relevant_omop_table,description,field_type,omop_cdm_standard_or_custom_field,data_provenance,source_ppi_module,domain)
+SELECT id,field_name,relevant_omop_table,description,field_type,omop_cdm_standard_or_custom_field,data_provenance,source_ppi_module,domain
+FROM \`$BQ_PROJECT.$BQ_DATASET.ds_data_dictionary\`"
 
 # Populate cb_survey_attribute
 #######################

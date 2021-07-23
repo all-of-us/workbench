@@ -29,6 +29,7 @@ if [[ ${#DIFF_OUTPUT[@]} > 0 ]];
   then
   echo "Missing following files: ${DIFF_OUTPUT[@]}"
   exit 1
+fi
 
 schema_path=generate-cdr/bq-schemas
 
