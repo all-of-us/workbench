@@ -274,23 +274,23 @@ def main():
     bucket = storage_client.get_bucket('all-of-us-workbench-private-cloudsql')
     files = [f for f in listdir(home_dir) if isfile(join(home_dir, f))]
     for f in files:
-        blob = bucket.blob('cb_prep_tables/redcap/' + date + '/' + f)
+        blob = bucket.blob('redcap/' + date + '/' + f)
         blob.upload_from_filename(home_dir + "/" + f)
 
     # when done remove directory and all files
     shutil.rmtree(home_dir)
 
-    # copy static_prep_tables(Cope and Family History) to redcap date folder
+    # copy static_surveys(Cope and Family History) to redcap date folder
     # Family History survey is static right now until curation fixes it in 2022
     # We need to potentially automate the cope survey if possible
     blobs = bucket.list_blobs(
-        prefix='cb_prep_tables/redcap/static_prep_tables/',
+        prefix='redcap/static_surveys/',
         delimiter='/')
 
     for blob in blobs:
-        if blob.name.split('/')[3] != '':
-            new_name = 'cb_prep_tables/redcap/' + date + '/' + \
-                       blob.name.split('/')[3]
+        if blob.name.split('/')[2] != '':
+            new_name = 'redcap/' + date + '/' + \
+                       blob.name.split('/')[2]
             bucket.copy_blob(blob, bucket, new_name=new_name)
 
 
@@ -355,7 +355,7 @@ def get_blob(file):
         '../../sa-key.json')
     bucket = storage_client.get_bucket(
         'all-of-us-workbench-private-cloudsql')
-    return bucket.blob('cb_prep_tables/redcap/' + file)
+    return bucket.blob('redcap/' + file)
 
 
 def query_topic_code(project, dataset, concept_name):
