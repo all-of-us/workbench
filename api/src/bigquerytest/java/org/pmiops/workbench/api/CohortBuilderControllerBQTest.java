@@ -110,8 +110,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private CohortBuilderController controller;
 
-  private DbCdrVersion cdrVersion;
-
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private CloudStorageClient cloudStorageClient;
@@ -193,7 +191,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new CohortBuilderController(
             elasticSearchService, configProvider, cohortBuilderService, workspaceAuthService);
 
-    cdrVersion = new DbCdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
@@ -2131,8 +2129,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private DbCriteria saveCriteriaWithPath(String path, DbCriteria criteria) {
-    criteria = cbCriteriaDao.save(criteria);
-    String pathEnd = String.valueOf(criteria.getId());
+    String pathEnd = String.valueOf(cbCriteriaDao.save(criteria).getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     return cbCriteriaDao.save(criteria);
   }
