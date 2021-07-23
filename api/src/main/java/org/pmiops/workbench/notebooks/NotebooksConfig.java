@@ -11,6 +11,7 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
@@ -24,6 +25,8 @@ import org.springframework.web.context.annotation.RequestScope;
 public class NotebooksConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
+
+  public static final String USER_DISKS_API =  "userDisksApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
@@ -100,6 +103,14 @@ public class NotebooksConfig {
   public RuntimesApi runtimesApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     RuntimesApi api = new RuntimesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+  @Bean(name = USER_DISKS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public DisksApi disksApi(
+          @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
   }

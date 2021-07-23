@@ -842,6 +842,95 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/disks/{workspaceNamespace}":
+    get:
+      summary: Get the user's workspace runtime.
+      description: "Returns the current user's runtime, if any, which has been created
+        for the given workspace."
+      operationId: getDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The runtime for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    post:
+      summary: Create a workspace runtime.
+      description: |
+        Creates a new runtime for the current user in the given billing project. If a runtime already exists for the user in this billing project, a 409 conflict error is returned (even if the runtime is still initializing or is not in a ready state).
+        TODO(RW-3697): Custom runtime creation params should be added as a body param here.
+      operationId: createDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: body
+          name: disk
+          description: notebooks runtime definition
+          required: true
+          schema:
+            "$ref": "#/definitions/Disk"
+      responses:
+        200:
+          description: Runtime was created successfully
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        409:
+          description: A runtime for this user and workspace already exists.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+    #    patch:
+    #      summary: Updates the configuration of a runtime
+    #      description: In order to update the configuration of a runtime, it must first be running or paused
+    #      operationId: updatePd
+    #      tags:
+    #        - pdisks
+    #      parameters:
+    #        - "$ref": "#/parameters/workspaceNamespace"
+    #        - in: body
+    #          name: runtime
+    #          schema:
+    #            "$ref": "#/definitions/UpdateRuntimeRequest"
+    #      responses:
+    #        202:
+    #          description: Runtime update request accepted
+    #          schema:
+    #            "$ref": "#/definitions/EmptyResponse"
+    #        400:
+    #          description: Bad Request
+    #          schema:
+    #            "$ref": "#/definitions/ErrorResponse"
+    #        500:
+    #          description: Internal Server Error
+    #          schema:
+    #            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a workspace runtime.
+      description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint
+        here.'
+      operationId: deleteDisk
+      tags:
+        - disks
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
+
   "/v1/workspaces":
     get:
       tags:
@@ -4367,6 +4456,26 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+  Disk:
+    description: The configuration of a persistent disk, returned in runtime responses
+    type: object
+    required:
+      - name
+      - size
+      - diskType
+      - blockSize
+    properties:
+      name:
+        type: string
+        description: Name of the persistent disk
+      size:
+        type: integer
+        description: Size of persistent disk in GB
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: Block size of persistent disk in bytes
   WorkspaceListResponse:
     type: object
     required:

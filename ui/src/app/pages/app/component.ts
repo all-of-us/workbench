@@ -22,7 +22,13 @@ import {
   setSidebarActiveIconStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore, runtimeStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
+import {
+  diskStore,
+  routeDataStore,
+  runtimeStore,
+  serverConfigStore,
+  stackdriverErrorReporterStore
+} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from 'app/components/help-sidebar';
@@ -171,6 +177,7 @@ export class AppComponent implements OnInit, OnDestroy {
         }
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+        diskStore.set({workspaceNamespace: workspace.namespace, disk: undefined});
         this.pollAborter.abort();
         this.pollAborter = new AbortController();
         try {
