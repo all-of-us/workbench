@@ -531,6 +531,8 @@ task integrationTest(type: Test) {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 
+  useJUnitPlatform()
+
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
@@ -540,6 +542,8 @@ task bigQueryTest(type: Test) {
   description = 'Runs BigQery test suite.'
   testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs
   classpath = sourceSets.__bigQueryTest__.runtimeClasspath
+
+  useJUnitPlatform()
 
   outputs.upToDateWhen { false }
 }
