@@ -14,17 +14,17 @@ import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
-import {
-  Institution,
-  InstitutionMembershipRequirement,
-  InstitutionTierRequirement,
-  OrganizationType
-} from 'generated/fetch';
+import {Institution, InstitutionMembershipRequirement, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {MembershipRequirements, OrganizationTypeOptions} from './admin-institution-options';
+import {
+  getRegisteredTierRequirement,
+  getTierEmailAddresses,
+  getTierEmailDomains
+} from './institution-utils';
 
 const styles = reactStyles({
   label: {
@@ -60,28 +60,6 @@ let title = 'Add new Institution';
 let institutionToEdit: Institution;
 
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
-
-function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
-  if (institution.tierEmailAddresses === null) {
-    return [];
-  }
-  return institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier).emailAddresses;
-}
-
-function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
-  if (institution.tierEmailDomains === null) {
-    return [];
-  }
-  return institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier).emailDomains;
-}
-
-function getTierRequirement(institution: Institution, accessTier: string): InstitutionTierRequirement {
-  return institution.tierRequirements.find(t => t.accessTierShortName === accessTier);
-}
-
-function getRegisteredTierRequirement(institution: Institution): InstitutionTierRequirement {
-  return getTierRequirement(institution, AccessTierShortNames.Registered);
-}
 
 export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {

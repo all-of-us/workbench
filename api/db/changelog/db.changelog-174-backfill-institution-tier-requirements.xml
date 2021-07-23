@@ -11,12 +11,6 @@
         <addUniqueConstraint tableName="institution_tier_requirement"
           columnNames="institution_id, access_tier_id"
           constraintName="institution_tier_requirement_unique_per_inst_per_tier"/>
-        <addUniqueConstraint tableName="institution_email_domain"
-          columnNames="institution_id, access_tier_id"
-          constraintName="institution_domain_unique_per_inst_per_tier"/>
-        <addUniqueConstraint tableName="institution_email_address"
-          columnNames="institution_id, access_tier_id"
-          constraintName="institution_address_unique_per_inst_per_tier"/>
         <!--Back fill institution_tier_requirement table for DuaType is MASTER -->
         <sql>
             INSERT INTO institution_tier_requirement
