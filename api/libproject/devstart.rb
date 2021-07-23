@@ -1660,15 +1660,15 @@ def generate_impersonated_user_token(cmd_name, *args)
 
   ServiceAccountContext.new(project_id).run do
     common.run_inline %W{
-        gradle generateImpersonatedUserToken
+        gradle generateImpersonatedUserTokens
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
 Common.register_command({
-    :invocation => "generate-impersonated-user-token",
+    :invocation => "generate-impersonated-user-tokens",
     :description => "Generate impersonated oauth token(s) for target researcher(s)",
-    :fn => ->(*args) {generate_impersonated_user_token("generate-impersonated-user-token", *args)}
+    :fn => ->(*args) {generate_impersonated_user_tokens("generate-impersonated-user-tokens", *args)}
 })
 
 def load_institutions(cmd_name, *args)

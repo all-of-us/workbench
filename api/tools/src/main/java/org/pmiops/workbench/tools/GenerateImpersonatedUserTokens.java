@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 
 /** Tool to generate an impersonated oauth token for a research user in an given environment. */
 @Configuration
-public class GenerateImpersonatedUserToken {
+public class GenerateImpersonatedUserTokens {
 
   private static Option projectId =
       Option.builder()
@@ -54,7 +54,7 @@ public class GenerateImpersonatedUserToken {
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
-  private static final Logger log = Logger.getLogger(GenerateImpersonatedUserToken.class.getName());
+  private static final Logger log = Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
   private static final List<String> AOU_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -110,7 +110,7 @@ public class GenerateImpersonatedUserToken {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(GenerateImpersonatedUserToken.class)
+    new SpringApplicationBuilder(GenerateImpersonatedUserTokens.class)
         .web(WebApplicationType.NONE)
         .run(args)
         .close();
