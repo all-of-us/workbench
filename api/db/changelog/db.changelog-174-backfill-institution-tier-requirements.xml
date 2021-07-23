@@ -8,6 +8,15 @@
         <sql>
             DELETE from institution_tier_requirement WHERE true
         </sql>
+        <addUniqueConstraint tableName="institution_tier_requirement"
+          columnNames="institution_id, access_tier_id"
+          constraintName="institution_tier_requirement_unique_per_inst_per_tier"/>
+        <addUniqueConstraint tableName="institution_email_domain"
+          columnNames="institution_id, access_tier_id"
+          constraintName="institution_domain_unique_per_inst_per_tier"/>
+        <addUniqueConstraint tableName="institution_email_address"
+          columnNames="institution_id, access_tier_id"
+          constraintName="institution_address_unique_per_inst_per_tier"/>
         <!--Back fill institution_tier_requirement table for DuaType is MASTER -->
         <sql>
             INSERT INTO institution_tier_requirement
@@ -28,7 +37,7 @@
             SELECT
             i.institution_id,
             a.access_tier_id,
-            'RESTRICT',
+            'ADDRESSES',
             true
             FROM institution i, access_tier a
             WHERE a.short_name = 'registered' AND i.dua_type_enum = 1
@@ -39,6 +48,7 @@
             SET access_tier_id =
             (select access_tier_id FROM access_tier a WHERE a.short_name = 'registered')
         </sql>
+        <!--Back fill institution_email_address table for registered tier -->
         <sql>
             UPDATE institution_email_address
             SET access_tier_id =

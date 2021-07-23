@@ -1,8 +1,7 @@
-import {DuaType, OrganizationType} from 'generated/fetch';
+import {InstitutionMembershipRequirement, OrganizationType} from 'generated/fetch';
 
-export const DuaTypes =  [{label: 'Master', value: DuaType.MASTER},
-  {label: 'Individual', value: DuaType.RESTRICTED}];
-
+export const MembershipRequirements =  [{label: 'Master', value: InstitutionMembershipRequirement.DOMAINS},
+  {label: 'Individual', value: InstitutionMembershipRequirement.ADDRESSES}];
 export const OrganizationTypeOptions = [
   {label: 'Industry', value: OrganizationType.INDUSTRY},
   {label: 'Academic Research Institution', value: OrganizationType.ACADEMICRESEARCHINSTITUTION},
