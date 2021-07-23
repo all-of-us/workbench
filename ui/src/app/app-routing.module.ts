@@ -1,12 +1,10 @@
-import {NgModule} from '@angular/core';
+import {NgModule, NgZone} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {NavigationGuard} from 'app/guards/navigation-guard';
 import {AppRouting} from './app-routing';
 
 import {environment} from 'environments/environment';
-import {DisabledGuard} from './guards/disabled-guard.service';
-import {SignInGuard} from './guards/sign-in-guard.service';
+import {NavigationGuard} from './guards/navigation-guard';
 import {NavStore} from './utils/navigation';
 
 
@@ -37,324 +35,306 @@ const routes: Routes = [
     path: 'user-disabled',
     component: AppRouting
   },
+    // legacy / duplicated routes go HERE
   {
-    /*
-     * TODO angular2react: ideally, we should be able to just render the AppComponent here and let
-     *  React drive the rest of the routing but the BrowserRouter isn't able to pick up changes to the
-     *  route when it's embedded in Angular this way.. Until angular router is removed, we still need to
-     *  declare all of our routes in Angular which has the side effect of forcing a rerender of the
-     *  AppRouting component on every route change.
-     */
     path: '',
-    canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, DisabledGuard],
-    canDeactivate: [NavigationGuard],
-    runGuardsAndResolvers: 'always',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: 'data-code-of-conduct',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: 'nih-callback',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: 'ras-callback',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: 'access-renewal',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: 'profile',
+    component: AppRouting,
+    data: {}
+  },
+  {
+    path: '',
     children: [
       // legacy / duplicated routes go HERE
       {
-        path: '',
+        path: 'library',
         component: AppRouting,
         data: {}
       },
       {
-        path: 'data-code-of-conduct',
-        component: AppRouting,
-        data: {}
-      },
-      {
-        path: 'nih-callback',
-        component: AppRouting,
-        data: {}
-      },
-      {
-        path: 'ras-callback',
-        component: AppRouting,
-        data: {}
-      },
-      {
-        path: 'access-renewal',
-        component: AppRouting,
-        data: {}
-      },
-      {
-        path: 'profile',
-        component: AppRouting,
-        data: {}
-      },
-      // non-migrated routes go HERE
-      {
-        path: '',
-        runGuardsAndResolvers: 'always',
+        path: 'workspaces',
         children: [
           // legacy / duplicated routes go HERE
           {
-            path: 'library',
+            path: '',
             component: AppRouting,
             data: {}
           },
-          // non-migrated routes go HERE
           {
-            path: 'workspaces',
+            path: 'build',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            /* TODO The children under ./views need refactoring to use the data
+             * provided by the route rather than double-requesting it.
+             */
+            path: ':ns/:wsid',
+            // TODO(RW-1920): When removing ng router, replace this with react-router's Prompt component.
+            runGuardsAndResolvers: 'always',
+            canDeactivate: [NavigationGuard],
             children: [
               // legacy / duplicated routes go HERE
               {
-                path: '',
+                path: 'about',
                 component: AppRouting,
                 data: {}
               },
               {
-                path: 'build',
+                path: 'edit',
                 component: AppRouting,
                 data: {}
               },
-              // non-migrated routes go HERE
               {
-                /* TODO The children under ./views need refactoring to use the data
-                 * provided by the route rather than double-requesting it.
-                 */
-                path: ':ns/:wsid',
+                path: 'duplicate',
+                component: AppRouting,
+                data: {}
+              },
+              {
+                path: 'notebooks',
                 children: [
-                  // legacy / duplicated routes go HERE
                   {
-                    path: 'about',
+                    path: '',
                     component: AppRouting,
                     data: {}
                   },
                   {
-                    path: 'edit',
+                    path: ':nbName',
                     component: AppRouting,
                     data: {}
                   },
                   {
-                    path: 'duplicate',
+                    path: 'preview/:nbName',
+                    component: AppRouting,
+                    data: {}
+                  }
+                ]
+              },
+              {
+                path: 'data',
+                children: [
+                  {
+                    path: '',
                     component: AppRouting,
                     data: {}
                   },
                   {
-                    path: 'notebooks',
+                    path: 'data-sets',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'data-sets/:dataSetId',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'cohorts',
                     children: [
                       {
-                        path: '',
+                        path: ':cid/actions',
                         component: AppRouting,
-                        data: {}
+                        data: {},
                       },
                       {
-                        path: ':nbName',
-                        component: AppRouting,
-                        data: {}
-                      },
-                      {
-                        path: 'preview/:nbName',
-                        component: AppRouting,
-                        data: {}
-                      }
-                    ]
-                  },
-                  {
-                    path: 'data',
-                    children: [
-                      {
-                        path: '',
-                        component: AppRouting,
-                        data: {}
-                      },
-                      {
-                        path: 'data-sets',
-                        component: AppRouting,
-                        data: {}
-                      },
-                      {
-                        path: 'data-sets/:dataSetId',
-                        component: AppRouting,
-                        data: {}
-                      },
-                      // non-migrated routes go HERE
-                      {
-                        path: 'cohorts',
+                        path: 'build',
                         children: [
                           {
-                            path: ':cid/actions',
-                            component: AppRouting,
-                            data: {},
-                          },
-                          {
-                            path: 'build',
-                            children: [
-                              {
-                                path: '',
-                                component: AppRouting,
-                                data: {}
-                              },
-                            ]
-                          },
-                          {
-                            path: ':cid/review',
-                            children: [
-                              {
-                                path: '',
-                                component: AppRouting,
-                                data: {},
-                              }, {
-                                path: 'participants',
-                                component: AppRouting,
-                                data: {},
-                              }, {
-                                path: 'cohort-description',
-                                component: AppRouting,
-                                data: {},
-                              }, {
-                                path: 'participants/:pid',
-                                component: AppRouting,
-                                data: {},
-                              }
-                            ],
-                          }
-                        ]
-                      },
-                      {
-                        path: 'concepts',
-                        children: [{
-                          path: '',
-                          component: AppRouting,
-                          data: {}
-                        }, {
-                          path: ':domain',
-                          component: AppRouting,
-                          data: {}
-                        }]
-                      },
-                      {
-                        path: 'concepts/sets',
-                        children: [
-                          {
-                            path: ':csid',
+                            path: '',
                             component: AppRouting,
                             data: {}
                           },
+                        ]
+                      },
+                      {
+                        path: ':cid/review',
+                        children: [
                           {
-                            path: ':csid/actions',
+                            path: '',
                             component: AppRouting,
                             data: {},
-                          },
-                        ]
+                          }, {
+                            path: 'participants',
+                            component: AppRouting,
+                            data: {},
+                          }, {
+                            path: 'cohort-description',
+                            component: AppRouting,
+                            data: {},
+                          }, {
+                            path: 'participants/:pid',
+                            component: AppRouting,
+                            data: {},
+                          }
+                        ],
                       }
                     ]
-                  }]
+                  },
+                  {
+                    path: 'concepts',
+                    children: [{
+                      path: '',
+                      component: AppRouting,
+                      data: {}
+                    }, {
+                      path: ':domain',
+                      component: AppRouting,
+                      data: {}
+                    }]
+                  },
+                  {
+                    path: 'concepts/sets',
+                    children: [
+                      {
+                        path: ':csid',
+                        component: AppRouting,
+                        data: {}
+                      },
+                      {
+                        path: ':csid/actions',
+                        component: AppRouting,
+                        data: {},
+                      },
+                    ]
+                  }
+                ]
               }]
-          }
-        ]
+          }]
+      }
+    ]
+  },
+  {
+    path: 'admin',
+    children: [
+      {
+        path: 'banner',
+        component: AppRouting,
+        data: {}
       },
       {
-        path: 'admin',
-        children: [
-          {
-            path: 'banner',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'institution',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'institution/add',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'institution/edit/:institutionId',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'review-workspace',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'user', // included for backwards compatibility
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'users',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'users/:usernameWithoutGsuiteDomain',
-            component: AppRouting,
-            data: {title: 'User Admin'}
-          },
-          {
-            path: 'user-audit',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'institution/add',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'institution/edit/:institutionId',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'user', // included for backwards compatibility
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'users',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'users/:usernameWithoutGsuiteDomain',
-            component: AppRouting,
-            data: {title: 'User Admin'}
-          },
-          {
-            path: 'user-audit',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'user-audit/:username',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'workspace-audit',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'workspace-audit/:workspaceNamespace',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'workspaces/:workspaceNamespace/:nbName',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'workspaces',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'workspaces/:workspaceNamespace',
-            component: AppRouting,
-            data: {}
-          }
-        ]
+        path: 'institution',
+        component: AppRouting,
+        data: {}
       },
+      {
+        path: 'institution/add',
+        component: AppRouting,
+        data: {},
+      },
+      {
+        path: 'institution/edit/:institutionId',
+        component: AppRouting,
+        data: {},
+      },
+      {
+        path: 'review-workspace',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'user', // included for backwards compatibility
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'users',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'users/:usernameWithoutGsuiteDomain',
+        component: AppRouting,
+        data: {title: 'User Admin'}
+      },
+      {
+        path: 'user-audit',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'institution/add',
+        component: AppRouting,
+        data: {},
+      },
+      {
+        path: 'institution/edit/:institutionId',
+        component: AppRouting,
+        data: {},
+      },
+      {
+        path: 'user', // included for backwards compatibility
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'users',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'users/:usernameWithoutGsuiteDomain',
+        component: AppRouting,
+        data: {title: 'User Admin'}
+      },
+      {
+        path: 'user-audit',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'user-audit/:username',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'workspace-audit',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'workspace-audit/:workspaceNamespace',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'workspaces/:workspaceNamespace/:nbName',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'workspaces',
+        component: AppRouting,
+        data: {},
+      },
+      {
+        path: 'workspaces/:workspaceNamespace',
+        component: AppRouting,
+        data: {}
+      }
     ]
   }
 ];
@@ -362,17 +342,17 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes,
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
-  exports: [RouterModule],
-  providers: [
-    DisabledGuard,
-    SignInGuard
-  ]
+  exports: [RouterModule]
 })
 export class AppRoutingModule {
 
-  constructor(public router: Router) {
-    NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
-    NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
+  constructor(private router: Router, zone: NgZone) {
+    NavStore.navigate = (commands, extras) => {
+      zone.run(() => this.router.navigate(commands, extras));
+    };
+    NavStore.navigateByUrl = (url, extras) => {
+      zone.run(() => this.router.navigateByUrl(url, extras));
+    };
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
