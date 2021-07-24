@@ -17,7 +17,6 @@ import {
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
-import {serverConfigStore} from 'app/utils/stores';
 import {
   ComputeType,
   findMachineByName,
@@ -40,6 +39,7 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
