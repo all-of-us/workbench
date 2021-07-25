@@ -524,18 +524,19 @@ tasks.compileJava {
 }
 
 task integrationTest(type: Test) {
+  useJUnitPlatform()
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   description = 'Run integration test suite.'
   testClassesDirs = sourceSets.__integration__.output.classesDirs
   classpath = sourceSets.__integration__.runtimeClasspath
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
-
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
 
 task bigQueryTest(type: Test) {
+  useJUnitPlatform()
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   description = 'Runs BigQery test suite.'
   testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs

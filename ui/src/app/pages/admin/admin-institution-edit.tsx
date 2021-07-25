@@ -88,6 +88,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       title = institutionToEdit.displayName;
+      console.log("~~~~~~~1111111")
+      console.log("institutionToEdit")
+      console.log(institutionToEdit)
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: institutionToEdit,
@@ -109,7 +112,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         return emailAddress !== '' || !!emailAddress;
       });
 
-    this.setState(fp.set(['institution', 'emailAddresses'], updatedEmailAddress));
+    this.setState(fp.set(['institution', 'tierEmailAddresses'], updatedEmailAddress));
     updatedEmailAddress.map(emailAddress => {
       const errors = validate({
         emailAddress
@@ -164,6 +167,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setEmails(emailInput, attribute) {
     const emailList = emailInput.split(/[,\n]+/);
+    console.log("~~~~~~~1111111")
+    console.log(emailList)
+    console.log(attribute)
     this.setState(fp.set(['institution', attribute], emailList.map(email => email.trim())));
   }
 
@@ -196,6 +202,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   validateRequiredFields() {
     const {institution} = this.state;
     let emailValid = true;
+    if(!institution.tierRequirements) {
+      // It is not expect to not having empty tier requirement
+      return false
+    }
     const rtRequirement = getRegisteredTierRequirement(institution);
     if (rtRequirement && rtRequirement.membershipRequirement
         && rtRequirement.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
@@ -268,15 +278,20 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
+    console.error("validateEmailAddressPresence")
+    console.error(institution);
+    console.error(institution.tierRequirements);
     const rtEmailAddresses = getTierEmailAddresses(institution, AccessTierShortNames.Registered);
-    return getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+    return institution.tierRequirements && institution.tierEmailAddresses &&
+        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
         || rtEmailAddresses && rtEmailAddresses.length > 0;
   }
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
     const rtEmailDomains = getTierEmailDomains(institution, AccessTierShortNames.Registered);
-    return getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS ||
+    return institution.tierRequirements && institution.tierEmailDomains &&
+        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS ||
         rtEmailDomains && rtEmailDomains.length > 0;
   }
 
@@ -378,7 +393,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               && getTierEmailAddresses(institution, AccessTierShortNames.Registered).join(',\n')}
                         data-test-id='emailAddressInput'
                         onBlur={(v) => this.validateEmailAddresses()}
-                  onChange={(v) => this.setEmails(v, 'emailAddresses')}/>
+                  onChange={(v) => this.setEmails(v, 'tierEmailAddresses')}/>
               {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
                 {this.state.invalidEmailAddressMsg}
                 </div>}
@@ -389,7 +404,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               <TextArea value={getTierEmailDomains(institution, AccessTierShortNames.Registered) &&
               getTierEmailDomains(institution, AccessTierShortNames.Registered).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
-                        onChange={(v) => this.setEmails(v, 'emailDomains')}/>
+                        onChange={(v) => this.setEmails(v, 'tierEmailDomains')}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
                 {this.state.invalidEmailDomainsMsg}
                 </div>}
