@@ -28,7 +28,6 @@ import {
   RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
-import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,

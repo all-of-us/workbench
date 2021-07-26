@@ -14,7 +14,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
@@ -109,6 +109,7 @@ interface NameCellProps {
 }
 
 const NameCell = (props: NameCellProps) => {
+  const [navigate, ] = useNavigation();
   const {file, bucket, workspaceNamespace, accessReason} = props;
   const filename = file.name.trim();
 

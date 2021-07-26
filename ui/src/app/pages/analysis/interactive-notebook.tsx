@@ -15,7 +15,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {profileStore, RuntimeStore} from 'app/utils/stores';
@@ -100,7 +100,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   urlParams: any;
   runtimeStore: RuntimeStore;
@@ -126,7 +126,8 @@ enum PreviewErrorMode {
 export const InteractiveNotebook = fp.flow(
   withUrlParams(),
   withRuntimeStore(),
-  withCurrentWorkspace()
+  withCurrentWorkspace(),
+  withNavigation
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();
@@ -216,7 +217,7 @@ export const InteractiveNotebook = fp.flow(
         playgroundMode: playgroundMode
       };
 
-      navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
+      this.props.navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
         'notebooks', this.props.urlParams.nbName], {'queryParams': queryParams});
     }
 
@@ -248,7 +249,7 @@ export const InteractiveNotebook = fp.flow(
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.urlParams;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
-        navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
+        this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
       });
     }
 

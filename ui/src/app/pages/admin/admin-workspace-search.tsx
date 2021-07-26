@@ -4,18 +4,20 @@ import {TextInput} from 'app/components/inputs';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {UrlParamsProps, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
-const navigateToWorkspace = (workspaceNamespace) => {
-  navigate(['/admin/workspaces/' + workspaceNamespace]);
-};
+
 
 const AdminWorkspaceSearchImpl = (props: Props) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
+  const [navigate, ] = useNavigation();
+
+  const navigateToWorkspace = () => navigate(['/admin/workspaces/' + workspaceNamespace]);
+
   useEffect(() => props.hideSpinner(), []);
 
   return <FlexRow style={{justifyContent: 'flex-start', alignItems: 'center', marginTop: '1rem'}}>
@@ -28,13 +30,13 @@ const AdminWorkspaceSearchImpl = (props: Props) => {
         onChange={value => setWorkspaceNamespace(value)}
         onKeyDown={(event: KeyboardEvent) => {
           if (event.key === 'Enter') {
-            navigateToWorkspace(workspaceNamespace);
+            navigateToWorkspace();
           }
         }}
     />
     <Button
         style={{height: '1.5rem'}}
-        onClick={() => navigateToWorkspace(workspaceNamespace)}
+        onClick={() => navigateToWorkspace()}
     >
       Load Workspace
     </Button>
