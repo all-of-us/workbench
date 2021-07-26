@@ -80,7 +80,6 @@ interface State {
   rasLoginGovLoading: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
-  quickTour: boolean;
   trainingCompleted: boolean;
   twoFactorAuthCompleted: boolean;
   userWorkspacesResponse: WorkspaceResponseListResponse;
@@ -104,7 +103,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       rasLoginGovLoading: false,
       firstVisit: undefined,
       firstVisitTraining: true,
-      quickTour: false,
       trainingCompleted: undefined,
       twoFactorAuthCompleted: undefined,
       userWorkspacesResponse: undefined,
@@ -241,9 +239,6 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         });
       }
     }
-    this.setState((state, props) => ({
-      quickTour: state.firstVisit && state.accessTasksRemaining === false
-    }));
     // TODO(RW-6494): Update accessTasksRemaining from user tier status and RAS link status.
   }
 
@@ -260,7 +255,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   render() {
     const {
       accessTasksLoaded, accessTasksRemaining,
-      eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining, quickTour,
+      eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisit, firstVisitTraining,
       trainingCompleted, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, userWorkspacesResponse,
       rasLoginGovLinkError, rasLoginGovLinked, rasLoginGovLoading,
@@ -373,7 +368,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           </FlexColumn>
         </FadeBox>
       </FlexColumn>
-      <QuickTourAndVideos showQuickTourInitially={quickTour}/>
+      <QuickTourAndVideos showQuickTourInitially={firstVisit && accessTasksRemaining === false}/>
     </React.Fragment>;
   }
 });
