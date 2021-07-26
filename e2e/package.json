@@ -7,10 +7,6 @@
   "license": "BSD",
   "scripts": {
     "create-signin-token-dir": "mkdir -p ../e2e/signin-tokens",
-    "impersonate-test-user-owner": "env-cmd -x ../api/project.rb generate-impersonated-user-tokens --impersonated-usernames \\$USER_NAME --output-token-filenames ../e2e/signin-tokens/puppeteer-access-token.txt",
-    "impersonate-test-reader-user": "env-cmd -x ../api/project.rb generate-impersonated-user-tokens --impersonated-usernames \\$READER_USER --output-token-filenames ../e2e/signin-tokens/reader-puppeteer-access-token.txt",
-    "impersonate-test-writer-user": "env-cmd -x ../api/project.rb generate-impersonated-user-tokens --impersonated-usernames \\$WRITER_USER --output-token-filenames ../e2e/signin-tokens/writer-puppeteer-access-token.txt",
-    "impersonate-test-collaborator-user": "env-cmd -x ../api/project.rb generate-impersonated-user-tokens --impersonated-usernames \\$COLLABORATOR_USER --output-token-filenames ../e2e/signin-tokens/collaborator-puppeteer-access-token.txt",
     "impersonate-test-users": "yarn create-signin-token-dir && env-cmd -x ../api/project.rb generate-impersonated-user-tokens --impersonated-usernames \\$USER_NAME,\\$READER_USER,\\$WRITER_USER,\\$COLLABORATOR_USER --output-token-filenames ../e2e/signin-tokens/puppeteer-access-token.txt,../e2e/signin-tokens/reader-puppeteer-access-token.txt,../e2e/signin-tokens/writer-puppeteer-access-token.txt,../e2e/signin-tokens/collaborator-puppeteer-access-token.txt",
     "_test": "yarn impersonate-test-users && jest --no-color",
     "_test:debugTest": "yarn impersonate-test-users && node --inspect-brk node_modules/.bin/jest --no-color",
