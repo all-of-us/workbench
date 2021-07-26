@@ -532,6 +532,7 @@ task integrationTest(type: Test) {
   outputs.upToDateWhen { false }
 
   useJUnitPlatform()
+
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
 }
