@@ -524,6 +524,8 @@ tasks.compileJava {
 }
 
 task integrationTest(type: Test) {
+  useJUnitPlatform()
+
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   description = 'Run integration test suite.'
   testClassesDirs = sourceSets.__integration__.output.classesDirs
@@ -536,6 +538,8 @@ task integrationTest(type: Test) {
 }
 
 task bigQueryTest(type: Test) {
+  useJUnitPlatform()
+
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   description = 'Runs BigQery test suite.'
   testClassesDirs = sourceSets.__bigQueryTest__.output.classesDirs

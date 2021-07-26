@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -13,10 +14,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
+@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class BaseIntegrationTest {
 
