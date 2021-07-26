@@ -8,7 +8,7 @@ import {
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
+import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Spinner} from 'app/components/spinners';
@@ -28,6 +28,7 @@ import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
+import {WelcomeHeader} from './welcome-header';
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -55,9 +56,6 @@ export const styles = reactStyles({
   },
   pageWrapper: {
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
-  },
-  welcomeMessageIcon: {
-    height: '2.25rem', width: '2.75rem'
   },
 });
 
@@ -263,26 +261,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
     return <React.Fragment>
       <FlexColumn style={styles.pageWrapper}>
-        <FlexRow style={{marginLeft: '3%'}}>
-          <FlexColumn style={{width: '50%'}}>
-            <FlexRow>
-              <FlexColumn>
-                <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
-                  Welcome to the</Header>
-                <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
-                  Researcher Workbench</Header>
-              </FlexColumn>
-              <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
-              </FlexRow>
-            </FlexRow>
-            <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-              The secure platform to analyze <i>All of Us</i> data</SmallHeader>
-          </FlexColumn>
-          <div></div>
-        </FlexRow>
+        <WelcomeHeader/>
         <FadeBox style={styles.fadeBox}>
           {/* The elements inside this fadeBox will be changed as part of ongoing
           homepage redesign work*/}
