@@ -158,7 +158,7 @@ export const ResearchPurpose = withCurrentWorkspace()(
       </div>
 
       {/*Findings section*/}
-      <div style={styles.sectionHeader}>Findings will be disseminate by the following:</div>
+      <div style={styles.sectionHeader}>Findings will be disseminated via:</div>
       <div style={styles.sectionContentContainer}>
         {workspace.researchPurpose.disseminateResearchFindingList.map((disseminateFinding, i) =>
           <div key={i} style={{...styles.sectionItemWithBackground, marginTop: '0.5rem'}}>{disseminateFindings
