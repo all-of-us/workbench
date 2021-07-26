@@ -3,9 +3,11 @@ import {FadeBox} from 'app/components/containers';
 import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {navigateByUrl} from 'app/utils/navigation';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
@@ -13,8 +15,6 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {AccessTierShortNames} from '../../utils/access-tiers';
-import {OrganizationTypeOptions} from './admin-institution-options';
 import {
   getRegisteredTierRequirement,
   getTierEmailAddresses,

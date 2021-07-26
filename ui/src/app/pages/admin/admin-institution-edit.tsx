@@ -162,8 +162,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setTierRequirement(membershipRequirement, attribute) {
     this.setState(fp.set(['institution', attribute],
-        [{accessTierShortName: AccessTierShortNames.Registered,
-          membershipRequirement: membershipRequirement.value, eRARequired: true}]));
+      [{accessTierShortName: AccessTierShortNames.Registered,
+        membershipRequirement: membershipRequirement.value, eRARequired: true}]));
     console.info(this.state.institution);
   }
 
@@ -182,7 +182,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   setDomains(emailInput, attribute) {
     const emailList = emailInput.split(/[,\n]+/);
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList.map(email => email.trim())}]));
+    this.setState(fp.set(['institution', attribute],
+        [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList.map(email => email.trim())}]));
   }
 
   // Check if the fields have not been edited
