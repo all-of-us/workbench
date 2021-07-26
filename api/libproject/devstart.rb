@@ -1598,12 +1598,14 @@ def generate_impersonated_user_tokens(cmd_name, *args)
       "--output-token-filenames [output-token-filename1, ...]",
       String,
       ->(opts, v) { opts.output_token_filenames = v},
-      "Comma-separated paths to output file(s) for the generated token(s)")
+      "Comma-separated paths to output file(s) for the generated token(s)\n" +
+      "These filenames must correspond to the usernames, in order.")")
   op.add_typed_option(
       "--impersonated-usernames [impersonated-username1, ...]",
       String,
       ->(opts, v) { opts.impersonated_usernames = v},
-      "Comma-separated AoU researcher email(s) to impersonate, e.g. calbach@fake-research-aou.org")
+      "Comma-separated AoU researcher username(s) to impersonate, e.g. calbach@fake-research-aou.org\n" +
+      "These usernames must correspond to the output token filenames, in order.")
   op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
   op.parse.validate
 
