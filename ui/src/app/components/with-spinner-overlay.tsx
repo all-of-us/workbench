@@ -29,6 +29,7 @@ export const withSpinnerOverlay = (
       }
 
       hide() {
+        console.log("Hide spinner");
         this.setState({show: false});
       }
 

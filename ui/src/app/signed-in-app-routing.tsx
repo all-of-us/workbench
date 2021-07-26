@@ -176,7 +176,7 @@ export const SignedInRoutes = React.memo(() => {
       <AppRoute
           path='/workspaces/:ns/:wsid'
           exact={false}
-          component={() => <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>}
+          component={() => <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>}
       />
     </ProtectedRoutes>
   </React.Fragment>;

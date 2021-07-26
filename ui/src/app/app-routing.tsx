@@ -16,15 +16,16 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {authStore, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {Subscription} from 'rxjs/Subscription';
 import {environment} from '../environments/environment';
 import {ConfigResponse, Configuration} from '../generated/fetch';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
-import {bindApiClients, configApi, getApiBaseUrl} from './services/swagger-fetch-clients';
+import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
-import {NavStore} from './utils/navigation';
+import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
+import {currentWorkspaceStore, NavStore, nextWorkspaceWarmupStore, urlParamsStore} from './utils/navigation';
 
 declare const gapi: any;
 
@@ -86,7 +87,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
     authStore.set({...authStore.get(), authLoaded: true, isSignedIn: isSignedIn});
     setLoggedInState(isSignedIn);
-    console.log("SubscribeToAuth2User: ", isSignedIn);
 
     const conf = new Configuration({
       basePath: getApiBaseUrl(),
@@ -114,7 +114,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   };
 
   const makeAuth2 = (config: ConfigResponse): Promise<any> => {
-    console.log("makeAuth2: ", config);
 
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
@@ -132,7 +131,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   }
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
-    console.log("serverConfigStoreCallback: ", config);
 
     // TODO angular2react - restore puppeteer behavior
     // Enable test access token override via local storage. Intended to support
@@ -192,6 +190,69 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       }
     }
   };
+
+  useEffect(() => {
+    urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(async({ns, wsid}) => {
+        currentWorkspaceStore.next(null);
+        console.log("Running urlParamsStore sub to get workspace", ns, wsid)
+
+        // This needs to happen for testing because we seed the urlParamsStore with {}.
+        // Otherwise it tries to make an api call with undefined, because the component
+        // initializes before we have access to the route.
+        if (!ns || !wsid) {
+          return null;
+        }
+
+        // In a handful of situations - namely on workspace creation/clone,
+        // the application will preload the next workspace to avoid a redundant
+        // refetch here.
+        const nextWs = nextWorkspaceWarmupStore.getValue();
+        nextWorkspaceWarmupStore.next(undefined);
+        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+          return nextWs;
+        }
+
+        // TODO angular2react : do we really need this hack?
+        // Hack to ensure auth is loaded before a workspaces API call.
+        // await this.signInService.isSignedIn$.first().toPromise();
+
+        return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+          return {
+            ...wsResponse.workspace,
+            accessLevel: wsResponse.accessLevel
+          };
+        });
+      })
+      .subscribe(async(workspace) => {
+        if (workspace === null) {
+          // This handles the empty urlParamsStore story.
+          return;
+        }
+        currentWorkspaceStore.next(workspace);
+        runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+        this.pollAborter.abort();
+        this.pollAborter = new AbortController();
+        try {
+          await LeoRuntimeInitializer.initialize({
+            workspaceNamespace: workspace.namespace,
+            pollAbortSignal: this.pollAborter.signal,
+            maxCreateCount: 0,
+            maxDeleteCount: 0,
+            maxResumeCount: 0
+          });
+        } catch (e) {
+          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+          // initialization here.
+          if (!(e instanceof ExceededActionCountError)) {
+            throw e;
+          }
+        }
+      });
+  }, []);
 
   console.log("Rendering AppRouting: ", authLoaded, isUserDisabled);
 

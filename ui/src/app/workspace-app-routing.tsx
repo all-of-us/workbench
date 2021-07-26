@@ -3,6 +3,7 @@ import {AppRoute, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useRouteMatch} from 'react-router-dom';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
@@ -41,10 +42,12 @@ const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEd
 // TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
 // rendering over and over again on page load, rendering (hah) the app unusable.
 // We should be able to refactor this once we are driving the entire app through React router.
-export const WorkspaceRoutes = React.memo(() => {
+export const WorkspaceRoutes = () => {
+  const { path, url } = useRouteMatch();
+
   return <React.Fragment>
     <AppRoute
-      path='/workspaces/:ns/:wsid/about'
+      path={`${path}/about`}
       component={() => <WorkspaceAboutPage
         routeData={{
           title: 'View Workspace Details',
@@ -55,7 +58,7 @@ export const WorkspaceRoutes = React.memo(() => {
       />}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/duplicate'
+      path={`${path}/duplicate`}
       component={() => <WorkspaceEditPage
         routeData={{
           title: 'Duplicate Workspace',
@@ -66,7 +69,7 @@ export const WorkspaceRoutes = React.memo(() => {
       />}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/edit'
+      path={`${path}/edit`}
       component={() => <WorkspaceEditPage
         routeData={{
           title: 'Edit Workspace',
@@ -77,7 +80,7 @@ export const WorkspaceRoutes = React.memo(() => {
       />}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/notebooks'
+      path={`${path}/notebooks`}
       component={() => <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
@@ -86,7 +89,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'
+      path={`${path}/notebooks/preview/:nbName`}
       component={() => <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
@@ -96,7 +99,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/notebooks/:nbName'
+      path={`${path}/notebooks/:nbName`}
       component={() => <NotebookRedirectPage routeData={{
         pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
         breadcrumb: BreadcrumbType.Notebook,
@@ -110,7 +113,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data'
+      path={`${path}/data`}
       component={() => <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
@@ -119,7 +122,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/data-sets'
+      path={`${path}/data/data-sets`}
       component={() => <DataSetComponentPage routeData={{
         title: 'Dataset Page',
         breadcrumb: BreadcrumbType.Dataset,
@@ -128,7 +131,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
+      path={`${path}/data/data-sets/:dataSetId`}
       component={() => <DataSetComponentPage routeData={{
         title: 'Edit Dataset',
         breadcrumb: BreadcrumbType.Dataset,
@@ -137,7 +140,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/build'
+      path={`${path}/data/cohorts/build`}
       component={() => <CohortPagePage routeData={{
         title: 'Build Cohort Criteria',
         breadcrumb: BreadcrumbType.CohortAdd,
@@ -146,7 +149,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
+      path={`${path}/data/cohorts/:cid/actions`}
       component={() => <CohortActionsPage routeData={{
         title: 'Cohort Actions',
         breadcrumb: BreadcrumbType.Cohort,
@@ -155,7 +158,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
+      path={`${path}/data/cohorts/:cid/review/participants`}
       component={() => <ParticipantsTablePage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
@@ -164,7 +167,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
+      path={`${path}/data/cohorts/:cid/review/participants/:pid`}
       component={() => <DetailPagePage routeData={{
         title: 'Participant Detail',
         breadcrumb: BreadcrumbType.Participant,
@@ -173,7 +176,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
+      path={`${path}/data/cohorts/:cid/review/cohort-description`}
       component={() => <QueryReportPage routeData={{
         title: 'Review Cohort Description',
         breadcrumb: BreadcrumbType.Cohort,
@@ -182,7 +185,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
+      path={`${path}/data/cohorts/:cid/review`}
       component={() => <CohortReviewPage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
@@ -191,7 +194,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/concepts'
+      path={`${path}/data/concepts`}
       component={() => <ConceptHomepagePage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
@@ -200,7 +203,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'
+      path={`${path}/data/concepts/sets/:csid`}
       component={() => <ConceptSearchPage routeData={{
         title: 'Concept Set',
         breadcrumb: BreadcrumbType.ConceptSet,
@@ -209,7 +212,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/concepts/:domain'
+      path={`${path}/data/concepts/:domain`}
       component={() => <ConceptSearchPage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
@@ -218,7 +221,7 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
     <AppRoute
-      path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
+      path={`${path}/data/concepts/sets/:csid/actions`}
       component={() => <ConceptSetActionsPage routeData={{
         title: 'Concept Set Actions',
         breadcrumb: BreadcrumbType.ConceptSet,
@@ -227,4 +230,4 @@ export const WorkspaceRoutes = React.memo(() => {
       }}/>}
     />
   </React.Fragment>;
-});
+};

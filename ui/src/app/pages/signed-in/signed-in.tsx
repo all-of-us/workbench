@@ -55,6 +55,7 @@ interface Props extends WithSpinnerOverlayProps {
 
 export const SignedIn = (props: Props) => {
   useEffect(() => props.hideSpinner(), []);
+  console.log("Render SignedIn page");
 
   const [hideFooter, setHideFooter] = useState(false);
 

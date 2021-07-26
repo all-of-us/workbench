@@ -47,7 +47,6 @@ export const useIsUserDisabled = () => {
   const {authLoaded, isSignedIn} = useStore(authStore);
   const [disabled, setDisabled] = useState<boolean|undefined>(undefined);
   useEffect(() => {
-    console.log("useIsUserDisabled: ", authLoaded, isSignedIn);
     if (!authLoaded) {
       return;
     }
@@ -56,7 +55,6 @@ export const useIsUserDisabled = () => {
     if (!isSignedIn) {
       setDisabled(false);
     } else {
-      console.log("Will load profile");
       (async() => {
         try {
           await profileStore.get().load();

@@ -12,6 +12,8 @@ export const WorkspaceWrapper = fp.flow(
   withRouteConfigData()
 )(({workspace, routeConfigData, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
+  console.log("Rendering WorkspaceWrapper", workspace);
+
   return <React.Fragment>
     {workspace
         ? <React.Fragment>

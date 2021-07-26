@@ -31,6 +31,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
+      console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
@@ -59,8 +60,6 @@ export const NavRedirect = ({path}) => {
 export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
-
-  console.log(guards);
 
   return <Route exact={exact} path={path} render={
     () => {

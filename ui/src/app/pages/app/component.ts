@@ -38,7 +38,6 @@ import outdatedBrowserRework from 'outdated-browser-rework';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  initialSpinner = true;
   cookiesEnabled = true;
   configLoaded = false;
   overriddenUrl: string = null;
@@ -90,10 +89,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(this.router.events.subscribe((e: RouterEvent) => {
       this.setTitleFromRoute(e);
-      if (e instanceof NavigationEnd || e instanceof NavigationError) {
-        // Terminal navigation events.
-        this.initialSpinner = false;
-      }
       if (e instanceof NavigationEnd) {
         if (!this.activatedRoute) {
           return;
@@ -108,7 +103,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeDataStore.subscribe(({title, pathElementForTitle}) => {
       this.zone.run(() => {
         this.setTitleFromReactRoute({title, pathElementForTitle});
-        this.initialSpinner = false;
       });
     }));
 
