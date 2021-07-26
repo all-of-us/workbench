@@ -71,8 +71,12 @@ const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
  * Returns a getter for the service implementation (backed by the registry).
  */
 function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
+  console.log("Binding Ctor", ctor);
+
   apiCtors.push(ctor);
   return () => {
+    console.log(registry);
+    console.log(ctor);
     if (!registry.has(ctor)) {
       throw Error('API client is not registered: ensure you are not ' +
           'retrieving an API client before app initialization. In ' +

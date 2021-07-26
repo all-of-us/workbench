@@ -1,7 +1,9 @@
 import {Component as AComponent} from '@angular/core';
 import * as fp from 'lodash/fp';
+import {useEffect} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import {Switch} from 'react-router-dom';
 
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
@@ -14,12 +16,18 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase} from 'app/utils';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {authStore, useStore} from 'app/utils/stores';
+import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {Subscription} from 'rxjs/Subscription';
+import {environment} from '../environments/environment';
+import {ConfigResponse, Configuration} from '../generated/fetch';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
-import {AnalyticsTracker} from './utils/analytics';
+import {bindApiClients, configApi, getApiBaseUrl} from './services/swagger-fetch-clients';
+import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
 
+declare const gapi: any;
+
+const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const signInGuard: Guard = {
   allowed: (): boolean => authStore.get().isSignedIn,
@@ -48,6 +56,143 @@ interface RoutingProps {
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, subscribeToInactivitySignOut, signOut}) => {
   const {authLoaded = false} = useStore(authStore);
   const isUserDisabled = useIsUserDisabled();
+
+  const subscribeToAuth2User = (): void => {
+    // The listen below only fires on changes, so we need an initial
+    // check to handle the case where the user is already signed in.
+    // authStore.set({...authStore.get(), authLoaded: true, isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()});
+    // this.zone.run(() => {
+    //   const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+    //   this.isSignedIn.next(isSignedIn);
+    //   if (isSignedIn) {
+    //     this.nextSignInStore();
+    //     this.clearIdToken();
+    //   }
+    //   setLoggedInState(isSignedIn);
+    // });
+    // gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
+    //   authStore.set({...authStore.get(), isSignedIn});
+    //   this.zone.run(() => {
+    //     this.isSignedIn.next(isSignedIn);
+    //     if (isSignedIn) {
+    //       this.nextSignInStore();
+    //       this.clearIdToken();
+    //     }
+    //   });
+    // });
+
+
+    const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+    authStore.set({...authStore.get(), authLoaded: true, isSignedIn: isSignedIn});
+    setLoggedInState(isSignedIn);
+    console.log("SubscribeToAuth2User: ", isSignedIn);
+
+    const conf = new Configuration({
+      basePath: getApiBaseUrl(),
+      accessToken: () => currentAccessToken()
+    });
+
+    bindApiClients(conf);
+    notebooksBindApiClients(conf);
+
+    // TODO - this.nextSignInStore() logic
+    // TODO - this.clerIdToken() logic
+    // TODO - stuff about isSignedIn subscribable
+
+    // TODO - for subscribing
+    // gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
+    //   authStore.set({...authStore.get(), isSignedIn});
+    //   this.zone.run(() => {
+    //     this.isSignedIn.next(isSignedIn);
+    //     if (isSignedIn) {
+    //       this.nextSignInStore();
+    //       this.clearIdToken();
+    //     }
+    //   });
+    // });
+  };
+
+  const makeAuth2 = (config: ConfigResponse): Promise<any> => {
+    console.log("makeAuth2: ", config);
+
+    return new Promise((resolve) => {
+      gapi.load('auth2', () => {
+        gapi.auth2.init({
+          client_id: environment.clientId,
+          hosted_domain: config.gsuiteDomain,
+          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
+            + (config.enableBillingUpgrade ? ' https://www.googleapis.com/auth/cloud-billing' : '')
+        }).then(() => {
+          subscribeToAuth2User();
+        });
+        resolve(gapi.auth2);
+      });
+    });
+  }
+
+  const serverConfigStoreCallback = (config: ConfigResponse) => {
+    console.log("serverConfigStoreCallback: ", config);
+
+    // TODO angular2react - restore puppeteer behavior
+    // Enable test access token override via local storage. Intended to support
+    // Puppeteer testing flows. This is handled in the server config callback
+    // for signin timing consistency. Normally we cannot sign in until we've
+    // loaded the oauth client ID from the config service.
+    // if (environment.allowTestAccessTokenOverride) {
+    //   this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+    //   if (this.testAccessTokenOverride) {
+    //     console.log('found test access token in local storage, skipping normal auth flow');
+    //
+    //     // The client has already configured an access token override. Skip the normal oauth flow.
+    //     authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+    //     this.zone.run(() => {
+    //       this.isSignedIn.next(true);
+    //     });
+    //     return;
+    //   }
+    // }
+
+    makeAuth2(config);
+  };
+
+  const loadConfig = async() => {
+    const config = await configApi().getConfig();
+    serverConfigStore.set({config: config});
+  };
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  useEffect(() => {
+    if (serverConfigStore.get().config) {
+      serverConfigStoreCallback(serverConfigStore.get().config);
+    } else {
+      const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
+        unsubscribe();
+        serverConfigStoreCallback(configStore.config);
+      });
+    }
+  }, []);
+
+  const currentAccessToken = () => {
+    // TODO angular2react - testAccess case
+    const testAccessTokenOverride = null;
+    if (testAccessTokenOverride) {
+      return testAccessTokenOverride;
+    } else if (!gapi.auth2) {
+      return null;
+    } else {
+      const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
+      if (authResponse !== null) {
+        return authResponse.access_token;
+      } else {
+        return null;
+      }
+    }
+  };
+
+  console.log("Rendering AppRouting: ", authLoaded, isUserDisabled);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
@@ -86,7 +231,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               component={() => <SignedInPage
                   intermediaryRoute={true}
                   routeData={{}}
-                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                  subscribeToInactivitySignOut={() => {}} // Add subscription to sign out maybe?
                   signOut={signOut}
               />}
           />

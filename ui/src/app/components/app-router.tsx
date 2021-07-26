@@ -60,6 +60,8 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
   const routeParams = useParams();
   const routeHistory = useHistory();
 
+  console.log(guards);
+
   return <Route exact={exact} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
@@ -72,6 +74,7 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
+  console.log("Rendering Protected Routes");
 
   // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
   const guardedChildren = fp.flow(
