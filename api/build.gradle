@@ -702,10 +702,10 @@ task exportWorkspaceData(type: JavaExec) {
   }
 }
 
-// See project.rb command: generate-impersonated-user-token
-task generateImpersonatedUserToken(type: JavaExec) {
+// See project.rb command: generate-impersonated-user-tokens
+task generateImpersonatedUserTokens(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserToken"
+  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

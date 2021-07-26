@@ -1589,24 +1589,43 @@ Common.register_command({
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
 
-def generate_impersonated_user_token(cmd_name, *args)
+def generate_impersonated_user_tokens(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
-      "--output-token-filename [output-token-filename]",
+      "--output-token-filenames [output-token-filename1, ...]",
       String,
-      ->(opts, v) { opts.output_token_filename = v},
-      "Path to an output file for the generated token")
+      ->(opts, v) { opts.output_token_filenames = v},
+      "Comma-separated paths to output file(s) for the generated token(s)\n" +
+      "These filenames must correspond to the usernames, in order.")
   op.add_typed_option(
-      "--impersonated-username [impersonated-username]",
+      "--impersonated-usernames [impersonated-username1, ...]",
       String,
-      ->(opts, v) { opts.impersonated_username = v},
-      "AoU researcher email to impersonate, e.g. calbach@fake-research-aou.org")
-  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filename and opts.impersonated_username)}
+      ->(opts, v) { opts.impersonated_usernames = v},
+      "Comma-separated AoU researcher username(s) to impersonate, e.g. calbach@fake-research-aou.org\n" +
+      "These usernames must correspond to the output token filenames, in order.")
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filenames and opts.impersonated_usernames)}
   op.parse.validate
 
+  user_email_domain = nil
+  op.opts.impersonated_usernames.split(',').each do |username|
+   split_email = username.split('@')
+   if split_email.nil? || split_email[1].nil?
+     raise ArgumentError.new("Username is not a valid email address: " + username)
+   end
+
+   if user_email_domain.nil?
+     user_email_domain = split_email[1]
+   else
+     if user_email_domain != split_email[1]
+       raise ArgumentError.new("All usernames must have the same email domain. #{split_email[1]} does not match #{user_email_domain}")
+     end
+   end
+  end
+
+  # derive the project_id from the usernames, failing if this is not possible
   project_id = nil
   ENVIRONMENTS.each_key do |project|
     if project == "local"
@@ -1614,14 +1633,14 @@ def generate_impersonated_user_token(cmd_name, *args)
     end
 
     config = get_config(project)
-    if op.opts.impersonated_username.end_with?("@" + config["googleDirectoryService"]["gSuiteDomain"])
+    if user_email_domain == config["googleDirectoryService"]["gSuiteDomain"]
       project_id = project
       break
     end
   end
+
   if project_id.nil?
-    common.error "invalid domain for given user #{op.opts.impersonated_username} - target must be an AoU research domain email"
-    raise ArgumentError
+    raise ArgumentError.new("Invalid domain #{user_email_domain} for given usernames - target must be an AoU research domain email")
   end
 
   if ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project_id
@@ -1633,23 +1652,24 @@ def generate_impersonated_user_token(cmd_name, *args)
   end
 
   flags = ([
-      ["--output-token-filename", op.opts.output_token_filename],
-      ["--impersonated-username", op.opts.impersonated_username],
       ["--project-id", project_id]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    ] +
+    op.opts.output_token_filenames.split(',').map{ |filename| ["--output-token-filename", filename] } +
+    op.opts.impersonated_usernames.split(',').map{ |username| ["--impersonated-username", username] }
+  ).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
   ServiceAccountContext.new(project_id).run do
     common.run_inline %W{
-        gradle generateImpersonatedUserToken
+        gradle generateImpersonatedUserTokens
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
 Common.register_command({
-    :invocation => "generate-impersonated-user-token",
-    :description => "Generate an imperonsated oauth token for a target researcher",
-    :fn => ->(*args) {generate_impersonated_user_token("generate-impersonated-user-token", *args)}
+    :invocation => "generate-impersonated-user-tokens",
+    :description => "Generate impersonated oauth token(s) for target researcher(s)",
+    :fn => ->(*args) {generate_impersonated_user_tokens("generate-impersonated-user-tokens", *args)}
 })
 
 def load_institutions(cmd_name, *args)
