@@ -5,26 +5,32 @@ import {
   InstitutionTierRequirement
 } from 'generated/fetch';
 
+export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
+  return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
+}
+
 export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
-  if(institution.tierEmailAddresses) {
+  if (institution.tierEmailAddresses) {
     const tierEmailAddresses = institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier);
-    if(tierEmailAddresses) {
+    if (tierEmailAddresses) {
       return institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier).emailAddresses;
     }
   }
-  return []
+  return [];
+}
+
+export function getRegisteredTierEmailDomains(institution: Institution): Array<string> {
+  return getTierEmailDomains(institution, AccessTierShortNames.Registered);
 }
 
 export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
-  console.error("~~~~getTierEmailDomains")
-  console.error(institution)
-  if(institution.tierEmailDomains) {
+  if (institution.tierEmailDomains) {
     const tierEmailDomains = institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier);
-    if(tierEmailDomains) {
+    if (tierEmailDomains) {
       return institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier).emailDomains;
     }
   }
-  return []
+  return [];
 }
 
 export function getRegisteredTierRequirement(institution: Institution): InstitutionTierRequirement {
@@ -33,7 +39,7 @@ export function getRegisteredTierRequirement(institution: Institution): Institut
 
 
 function getTierRequirement(institution: Institution, accessTier: string): InstitutionTierRequirement {
-  if(!institution.tierRequirements) {
+  if (!institution.tierRequirements) {
     return {accessTierShortName: accessTier, membershipRequirement: InstitutionMembershipRequirement.NOACCESS};
   }
   return institution.tierRequirements.find(t => t.accessTierShortName === accessTier);

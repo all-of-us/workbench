@@ -6,7 +6,9 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddresse
 import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierRequirement;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
+import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
@@ -34,6 +37,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
@@ -182,7 +186,8 @@ public class InstitutionServiceImpl implements InstitutionService {
               });
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
-          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists",
+          ex);
     }
   }
 
@@ -384,9 +389,20 @@ public class InstitutionServiceImpl implements InstitutionService {
       final DbInstitution dbInstitution,
       final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
-    institutionTierRequirementMapper
-        .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
-        .forEach(institutionTierRequirementDao::save);
+    // Make sure the delete success.
+    Preconditions.checkArgument(
+        institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty());
+    try {
+      DbRetryUtils.executeAndRetry(
+          () ->
+              institutionTierRequirementDao.saveAll(
+                  institutionTierRequirementMapper.modelToDb(
+                      modelInstitution, dbInstitution, dbAccessTiers)),
+          Duration.ofSeconds(1),
+          5);
+    } catch (InterruptedException e) {
+      throw new ServerErrorException("Failed to update InstitutionTierRequirement table", e);
+    }
   }
 
   // Take first 76 characters from display Name (with no spaces) and append 3 random number

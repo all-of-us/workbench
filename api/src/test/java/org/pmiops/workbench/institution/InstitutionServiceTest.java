@@ -70,8 +70,10 @@ public class InstitutionServiceTest extends SpringTest {
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
 
   private DbAccessTier registeredTier;
+  private DbAccessTier controlledTier;
   private InstitutionTierRequirement rtAddressRequirement;
   private InstitutionTierRequirement rtDomainsRequirement;
+  private InstitutionTierRequirement ctDomainsRequirement;
   private TierEmailAddresses rtTierEmailAddress;
   private TierEmailDomains rtTierEmailDomains;
 
@@ -80,6 +82,7 @@ public class InstitutionServiceTest extends SpringTest {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     rtAddressRequirement =
         new InstitutionTierRequirement()
             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
@@ -90,6 +93,11 @@ public class InstitutionServiceTest extends SpringTest {
             .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
             .eraRequired(false)
             .accessTierShortName(registeredTier.getShortName());
+    ctDomainsRequirement =
+        new InstitutionTierRequirement()
+            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+            .eraRequired(false)
+            .accessTierShortName(controlledTier.getShortName());
     rtTierEmailAddress =
         new TierEmailAddresses().accessTierShortName(registeredTier.getShortName());
     rtTierEmailDomains = new TierEmailDomains().accessTierShortName(registeredTier.getShortName());
@@ -254,6 +262,7 @@ public class InstitutionServiceTest extends SpringTest {
             .shortName("hasEmails")
             .displayName("another test")
             .addTierRequirementsItem(rtDomainsRequirement)
+            .addTierRequirementsItem(ctDomainsRequirement)
             .tierEmailDomains(
                 ImmutableList.of(
                     rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))

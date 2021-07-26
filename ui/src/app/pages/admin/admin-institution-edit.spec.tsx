@@ -194,7 +194,8 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
@@ -211,7 +212,8 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
     const agreementTypeDropDown = wrapper.find('[data-test-id="agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS, target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format

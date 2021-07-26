@@ -21,9 +21,8 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 import {MembershipRequirements, OrganizationTypeOptions} from './admin-institution-options';
 import {
+  getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
   getRegisteredTierRequirement,
-  getTierEmailAddresses,
-  getTierEmailDomains
 } from './institution-utils';
 
 const styles = reactStyles({
@@ -88,9 +87,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       title = institutionToEdit.displayName;
-      console.log("~~~~~~~1111111")
-      console.log("institutionToEdit")
-      console.log(institutionToEdit)
+      console.log('~~~~~~~1111111');
+      console.log('institutionToEdit');
+      console.log(institutionToEdit);
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: institutionToEdit,
@@ -106,13 +105,14 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // Confirm each email is a valid email using validate.js
   validateEmailAddresses() {
     const invalidEmailAddress = [];
-    const emailAddresses = getTierEmailAddresses(this.state.institution, AccessTierShortNames.Registered);
+    const emailAddresses = getRegisteredTierEmailAddresses(this.state.institution);
     const updatedEmailAddress = emailAddresses.filter(
       emailAddress => {
         return emailAddress !== '' || !!emailAddress;
       });
 
-    this.setState(fp.set(['institution', 'tierEmailAddresses'], updatedEmailAddress));
+    this.setState(fp.set(['institution', 'tierEmailAddresses'],
+        [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: updatedEmailAddress}]));
     updatedEmailAddress.map(emailAddress => {
       const errors = validate({
         emailAddress
@@ -135,10 +135,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // Confirm each email domain matches with regex
   validateEmailDomains() {
     const invalidEmailDomain = [];
-    const emailDomains = getTierEmailDomains(this.state.institution, AccessTierShortNames.Registered);
+    const emailDomains = getRegisteredTierEmailDomains(this.state.institution);
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
-    this.setState(fp.set(['institution', 'emailDomains'], emailDomainsWithNoEmptyString));
+    this.setState(fp.set(['institution', 'tierEmailDomains'],
+        [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailDomainsWithNoEmptyString}]));
 
     emailDomainsWithNoEmptyString.map(emailDomain => {
       const testAddress = 'test@' + emailDomain;
@@ -160,28 +161,28 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   setTierRequirement(membershipRequirement, attribute) {
-    console.log("~~~~~~~1111111")
-    console.log(this.state.institution)
-    console.log(attribute)
-    this.setState(fp.set(['institution', attribute], [{accessTierShortName: AccessTierShortNames.Registered, membershipRequirement: attribute, eRARequired:true}]));
+    this.setState(fp.set(['institution', attribute],
+        [{accessTierShortName: AccessTierShortNames.Registered,
+          membershipRequirement: membershipRequirement.value, eRARequired: true}]));
+    console.info(this.state.institution);
   }
 
   setEmails(emailInput, attribute) {
-    const emailList = emailInput.split(/[,\n]+/).map(email => email.trim());
+    const emailList = emailInput.split(/[,\n]+/);
+    console.log('~~~~~~~1111111');
+    console.log('setEmails');
+    console.log(this.state.institution);
+    console.info(emailList);
+    console.info(emailInput);
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    console.log("~~~~~~~1111111")
-    console.log(emailList)
-    console.log(attribute)
-    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: emailList}]));
+    this.setState(fp.set(['institution', attribute],
+        [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: emailList.map(email => email.trim())}]));
   }
 
   setDomains(emailInput, attribute) {
-    const emailList = emailInput.split(/[,\n]+/).map(email => email.trim());
+    const emailList = emailInput.split(/[,\n]+/);
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    console.log("~~~~~~~1111111")
-    console.log(emailList)
-    console.log(attribute)
-    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList}]));
+    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList.map(email => email.trim())}]));
   }
 
   // Check if the fields have not been edited
@@ -213,9 +214,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   validateRequiredFields() {
     const {institution} = this.state;
     let emailValid = true;
-    if(!institution.tierRequirements) {
+    if (!institution.tierRequirements) {
       // It is not expect to not having empty tier requirement
-      return false
+      return false;
     }
     const rtRequirement = getRegisteredTierRequirement(institution);
     if (rtRequirement && rtRequirement.membershipRequirement
@@ -233,6 +234,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
+    console.info('disableSave');
+    console.info(errors);
     return this.validateRequiredFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
@@ -289,7 +292,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    const rtEmailAddresses = getTierEmailAddresses(institution, AccessTierShortNames.Registered);
+    const rtEmailAddresses = getRegisteredTierEmailAddresses(institution);
     return institution.tierRequirements && institution.tierEmailAddresses &&
         getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
         || rtEmailAddresses && rtEmailAddresses.length > 0;
@@ -297,7 +300,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
-    const rtEmailDomains = getTierEmailDomains(institution, AccessTierShortNames.Registered);
+    const rtEmailDomains = getRegisteredTierEmailDomains(institution);
     return institution.tierRequirements && institution.tierEmailDomains &&
         getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ||
         rtEmailDomains && rtEmailDomains.length > 0;
@@ -318,17 +321,20 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     } = institution;
     const errors = validate({
       displayName,
-      'emailAddresses': this.validateEmailAddressPresence(),
-      'emailDomain': this.validateEmailDomainPresence(),
+      'tierEmailAddresses': this.validateEmailAddressPresence(),
+      'tierEmailDomain': this.validateEmailDomainPresence(),
       organizationTypeEnum,
       tierRequirements
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
-      membershipRequirementEnum: {presence: {allowEmpty: false}},
-      emailAddresses: {truthiness: true},
-      emailDomain: {truthiness: true}
+      tierRequirements: {presence: {allowEmpty: false}},
+      tierEmailAddresses: {truthiness: true},
+      tierEmailDomain: {truthiness: true}
     });
+    console.log('~~~~~~~1111111');
+    console.log('rendering.....');
+    console.log(institution);
     return <div>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem', width: '1239px'}}>
          <FlexRow>
@@ -349,8 +355,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
                   {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
                   {errors.tierRequirements && <li>Agreement Type should not be empty</li>}
-                  {!errors.tierRequirements && errors.emailDomain && <li>Email Domain should not be empty</li>}
-                  {!errors.tierRequirements && errors.emailAddresses && <li>Email Address should not be empty</li>}
+                  {!errors.tierRequirements && errors.tierEmailDomains && <li>Email Domain should not be empty</li>}
+                  {!errors.tierRequirements && errors.tierEmailAddresses && <li>Email Address should not be empty</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
@@ -397,8 +403,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
             {getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
             <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
               <label style={styles.label}>Accepted Email Addresses</label>
-              <TextArea value={getTierEmailAddresses(institution, AccessTierShortNames.Registered)
-              && getTierEmailAddresses(institution, AccessTierShortNames.Registered).join(',\n')}
+              <TextArea value={getRegisteredTierEmailAddresses(institution)
+              && getRegisteredTierEmailAddresses(institution).join(',\n')}
                         data-test-id='emailAddressInput'
                         onBlur={(v) => this.validateEmailAddresses()}
                   onChange={(v) => this.setEmails(v, 'tierEmailAddresses')}/>
@@ -409,8 +415,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
             {getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
             && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
               <label style={styles.label}>Accepted Email Domains</label>
-              <TextArea value={getTierEmailDomains(institution, AccessTierShortNames.Registered) &&
-              getTierEmailDomains(institution, AccessTierShortNames.Registered).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
+              <TextArea value={getRegisteredTierEmailDomains(institution) &&
+              getRegisteredTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
                         onChange={(v) => this.setDomains(v, 'tierEmailDomains')}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
@@ -422,7 +428,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
             <label style={{...styles.label, marginTop: '0rem'}}>User Email Instructions Text (Optional)</label>
             <TextArea
                 id={'userEmailInstructions'}
-                value={institution.userInstructions}
+                value={institution.userInstructions ? institution.userInstructions : ''}
                 onChange={(s: string) => this.setState(fp.set(['institution', 'userInstructions'], s))}
             />
           </FlexColumn>

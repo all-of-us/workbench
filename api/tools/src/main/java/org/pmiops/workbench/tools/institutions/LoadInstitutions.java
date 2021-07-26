@@ -77,8 +77,6 @@ public class LoadInstitutions {
 
   private static Institution[] read(final String filename) throws IOException {
     try (final BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-      System.out.println("~~~~~~11111");
-      System.out.println(reader);
       return mapper.readValue(reader, Institution[].class);
     }
   }

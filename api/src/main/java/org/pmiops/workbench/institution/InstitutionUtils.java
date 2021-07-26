@@ -1,6 +1,5 @@
 package org.pmiops.workbench.institution;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -19,12 +18,14 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailAddressesByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    return new HashSet<>(
+    Optional<TierEmailAddresses> tierEmailAddresses =
         institution.getTierEmailAddresses().stream()
             .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-            .findFirst()
-            .orElse(new TierEmailAddresses().emailAddresses(new ArrayList<>()))
-            .getEmailAddresses());
+            .findFirst();
+    if (!tierEmailAddresses.isPresent() || tierEmailAddresses.get().getEmailAddresses() == null) {
+      return new HashSet<>();
+    }
+    return new HashSet<>(tierEmailAddresses.get().getEmailAddresses());
   }
 
   /**
@@ -33,12 +34,14 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailDomainsByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    return new HashSet<>(
+    Optional<TierEmailDomains> tierEmailDomains =
         institution.getTierEmailDomains().stream()
             .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-            .findFirst()
-            .orElse(new TierEmailDomains().emailDomains(new ArrayList<>()))
-            .getEmailDomains());
+            .findFirst();
+    if (!tierEmailDomains.isPresent() || tierEmailDomains.get().getEmailDomains() == null) {
+      return new HashSet<>();
+    }
+    return new HashSet<>(tierEmailDomains.get().getEmailDomains());
   }
 
   /**
