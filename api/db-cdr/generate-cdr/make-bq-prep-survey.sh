@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Create a new prep ppi tables from redcap file process in bucket: all-of-us-workbench-private-cloudsql/cb_prep_tables/redcap/$DATE.
+# Create a new prep ppi tables from redcap file process in bucket: all-of-us-workbench-private-cloudsql/redcap/$DATE.
 set -e
 
 export BQ_PROJECT=$1        # CDR project
@@ -9,7 +9,7 @@ export DATE=$3              # Redcap survey file date
 export TIER=$4              # Ex: registered or controlled
 
 BUCKET="all-of-us-workbench-private-cloudsql"
-CSV_HOME_DIR="cb_prep_tables/redcap/$DATE"
+CSV_HOME_DIR="redcap/$DATE"
 CDR_CSV_DIR="cdr_csv_files"
 EXPECTED_TABLES=("prep_ppi_basics"
 "prep_ppi_cope"
@@ -21,7 +21,7 @@ EXPECTED_TABLES=("prep_ppi_basics"
 
 echo "Starting load of prep ppi tables into $BQ_PROJECT:$BQ_DATASET"
 
-TABLES=$(gsutil ls gs://"$BUCKET"/"$CSV_HOME_DIR"/*_"$TIER".csv | cut -d'/' -f7 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
+TABLES=$(gsutil ls gs://"$BUCKET"/"$CSV_HOME_DIR"/*_"$TIER".csv | cut -d'/' -f6 | cut -d'.' -f1 | awk -F"_$TIER" '{print $1}')
 
 # Validate that all expected files are in bucket
 DIFF_OUTPUT=( $(echo ${EXPECTED_TABLES[@]} ${TABLES[@]} | tr ' ' '\n' | sort | uniq -u) )
@@ -29,6 +29,7 @@ if [[ ${#DIFF_OUTPUT[@]} > 0 ]];
   then
   echo "Missing following files: ${DIFF_OUTPUT[@]}"
   exit 1
+fi
 
 schema_path=generate-cdr/bq-schemas
 

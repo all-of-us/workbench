@@ -16,15 +16,15 @@ export default abstract class BasePage {
    * Reload current page.
    */
   async reloadPage(): Promise<Response> {
-    return await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
+    return await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
   }
 
   /**
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
-    logger.info(`goto url: ${url}`);
-    const response = await this.page.goto(url, { waitUntil: ['load'] });
+    logger.info(`Goto URL: ${url}`);
+    const response = await this.page.goto(url, { waitUntil: ['load', 'domcontentloaded'] });
     if (response && !response.ok()) {
       // Log response if status is not OK
       logger.info(`Goto URL: ${url}. Response status: ${response.status()}\n${await response.text()}`);

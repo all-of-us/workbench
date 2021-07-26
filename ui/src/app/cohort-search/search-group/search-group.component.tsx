@@ -206,7 +206,7 @@ interface Props {
 
 interface State {
   count: number;
-  criteriaMenuOptions: any;
+  criteriaMenuOptions: Array<any>;
   error: boolean;
   initializing: boolean;
   inputError: boolean;
@@ -230,7 +230,7 @@ export const SearchGroup = withCurrentWorkspace()(
       super(props);
       this.state = {
         count: undefined,
-        criteriaMenuOptions: {programTypes: [], domainTypes: []},
+        criteriaMenuOptions: [],
         error: false,
         initializing: true,
         inputError: false,
@@ -470,21 +470,28 @@ export const SearchGroup = withCurrentWorkspace()(
       return {label: domain.name, command: () => this.launchSearch(domain, temporalGroup)};
     }
 
-    get criteriaMenuItems() {
-      const {criteriaMenuOptions: {domainTypes, programTypes}} = this.state;
-      return this.props.group.temporal
-        ? domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
-        : [
-          {label: 'Program Data', className: 'menuitem-header'},
-          ...programTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0)),
-          {separator: true},
-          {label: 'Domains', className: 'menuitem-header'},
-          ...domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 0))
-        ];
+    criteriaMenuItems(temporalGroup: number) {
+      const {criteriaMenuOptions} = this.state;
+      let menuItems = [];
+      criteriaMenuOptions
+        .filter(optionList => !this.props.group.temporal || optionList[0].category !== 'Program Data')
+        .forEach((options, index) => {
+          menuItems = [
+            ...menuItems,
+            {label: options[0].category, className: 'menuitem-header'},
+            ...options.map((dt) => this.mapCriteriaMenuItem(dt, temporalGroup))
+          ];
+          if (index < criteriaMenuOptions.length - 1) {
+            menuItems.push({separator: true});
+          }
+        });
+      return menuItems;
     }
 
     get temporalCriteriaMenuItems() {
-      return this.state.criteriaMenuOptions.domainTypes.map((dt) => this.mapCriteriaMenuItem(dt, 1));
+      return this.state.criteriaMenuOptions
+        .filter(optionList => optionList[0].category !== 'Program Data')
+        .map((dt) => this.mapCriteriaMenuItem(dt, 1));
     }
 
     get mentionMenuItems() {
@@ -570,7 +577,7 @@ export const SearchGroup = withCurrentWorkspace()(
           <div style={styles.cardBlock}>
             <TieredMenu style={{...styles.menu, padding: '0.5rem 0'}}
               appendTo={document.body}
-              model={this.criteriaMenuItems}
+              model={this.criteriaMenuItems(0)}
               popup
               ref={el => this.criteriaMenu = el} />
             <button style={styles.menuButton} onClick={(e) => this.criteriaMenu.toggle(e)}>
@@ -610,7 +617,7 @@ export const SearchGroup = withCurrentWorkspace()(
             </div>)}
             {/* Criteria menu for temporal group 1 items */}
             <div style={styles.cardBlock}>
-              <Menu style={styles.menu} appendTo={document.body} model={this.temporalCriteriaMenuItems}
+              <Menu style={styles.menu} appendTo={document.body} model={this.criteriaMenuItems(1)}
                 popup ref={el => this.temporalCriteriaMenu = el} />
               <button style={styles.menuButton} onClick={(e) => this.temporalCriteriaMenu.toggle(e)}>
                 Add Criteria <ClrIcon shape='caret down' size={12}/>

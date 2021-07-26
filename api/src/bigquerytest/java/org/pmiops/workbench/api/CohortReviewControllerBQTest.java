@@ -56,6 +56,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
@@ -128,6 +129,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     FreeTierBillingService.class,
     UserRecentResourceService.class,
+    CloudBillingClientImpl.class
   })
   static class Configuration {
 

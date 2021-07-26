@@ -289,9 +289,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    console.error("validateEmailAddressPresence")
-    console.error(institution);
-    console.error(institution.tierRequirements);
     const rtEmailAddresses = getTierEmailAddresses(institution, AccessTierShortNames.Registered);
     return institution.tierRequirements && institution.tierEmailAddresses &&
         getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
@@ -302,7 +299,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const {institution} = this.state;
     const rtEmailDomains = getTierEmailDomains(institution, AccessTierShortNames.Registered);
     return institution.tierRequirements && institution.tierEmailDomains &&
-        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS ||
+        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ||
         rtEmailDomains && rtEmailDomains.length > 0;
   }
 

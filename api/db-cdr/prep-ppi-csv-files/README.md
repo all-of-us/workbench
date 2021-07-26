@@ -2,7 +2,7 @@
 
 ## How the build works
 This python script parses all surveys manually downloaded from redcap to a 
-[Google Bucket](https://console.cloud.google.com/storage/browser/all-of-us-workbench-private-cloudsql/cb_prep_tables/redcap;tab=objects?organizationId=394551486437&project=all-of-us-workbench-test&prefix=&forceOnObjectsSortingFiltering=false). 
+[Google Bucket](https://console.cloud.google.com/storage/browser/all-of-us-workbench-private-cloudsql/redcap;tab=objects?organizationId=394551486437&project=all-of-us-workbench-test&prefix=&forceOnObjectsSortingFiltering=false). 
 The output of this script is an attempt to create a survey tree for each survey type for the Cohort Builder. Each survey csv file produced,
 will be merged into a final prep_survey table used by the CDR indices build. 
 

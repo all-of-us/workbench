@@ -44,7 +44,9 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
   await homePage.gotoUrl(PageUrl.Home);
-  await homePage.waitForLoad();
+  await homePage.waitForLoad().catch(async () => {
+    await homePage.reloadPage();
+  });
 }
 
 /**
