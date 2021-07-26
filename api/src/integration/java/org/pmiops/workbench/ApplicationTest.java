@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
  * This test that all application injection is done properly. It loads all JPA repositories,
  * Services, Controllers, Components and Configurations.
  */
+@Disabled
 @SpringBootTest
 public class ApplicationTest {
 
@@ -32,7 +33,6 @@ public class ApplicationTest {
    *
    * <p>Ignoring this test due to observed flakiness and false positives. RW-4806
    */
-  @Disabled
   @Test
   public void contextLoads() {
     List<Object> beans = new ArrayList<>();
