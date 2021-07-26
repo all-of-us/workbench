@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +32,7 @@ public class ApplicationTest {
    *
    * <p>Ignoring this test due to observed flakiness and false positives. RW-4806
    */
-  @Ignore
+  @Disabled
   @Test
   public void contextLoads() {
     List<Object> beans = new ArrayList<>();
