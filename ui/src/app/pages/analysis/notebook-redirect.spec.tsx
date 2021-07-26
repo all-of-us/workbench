@@ -246,4 +246,41 @@ describe('NotebookRedirect', () => {
 
     expect(navSpy).toHaveBeenCalled();
   });
+
+
+  it('should not navigate after runtime transitions to updating', async() => {
+    const navSpy = jest.fn();
+    NavStore.navigate = navSpy;
+
+    queryParamsStore.next({
+      kernelType: Kernels.R,
+      creating: false
+    });
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+
+    const wrapper = await component();
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    // Wait for the "redirecting" timer to elapse, rendering the iframe.
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(wrapper.find(Iframe).exists()).toBeTruthy();
+    expect(navSpy).not.toHaveBeenCalled();
+
+    // Simulate transition to updating.
+    act(() => {
+      runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Updating};
+      runtimeStore.set({
+        workspaceNamespace: workspace.namespace,
+        runtime: runtimeStub.runtime
+      });
+    });
+    await waitForFakeTimersAndUpdate(wrapper);
+
+    expect(navSpy).not.toHaveBeenCalled();
+  });
 });
