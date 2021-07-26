@@ -1599,7 +1599,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
       String,
       ->(opts, v) { opts.output_token_filenames = v},
       "Comma-separated paths to output file(s) for the generated token(s)\n" +
-      "These filenames must correspond to the usernames, in order.")")
+      "These filenames must correspond to the usernames, in order.")
   op.add_typed_option(
       "--impersonated-usernames [impersonated-username1, ...]",
       String,
