@@ -73,9 +73,7 @@ public class GenerateImpersonatedUserTokens {
       final String username = usernames[i];
       final String filename = filenames[i];
 
-      final String logMsg =
-          String.format("Writing impersonated user credential for %s to %s", username, filename);
-      log.info(logMsg);
+      log.info(String.format("Writing impersonated user credential for %s to %s", username, filename));
 
       final DelegatedUserCredentials creds =
           new DelegatedUserCredentials(saEmail, username, AOU_SCOPES, credsClient, transport);
