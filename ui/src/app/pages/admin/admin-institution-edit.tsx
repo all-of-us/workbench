@@ -160,17 +160,28 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   setTierRequirement(membershipRequirement, attribute) {
-    const existingRtRequirement = getRegisteredTierRequirement(this.state.institution);
-    existingRtRequirement.membershipRequirement = membershipRequirement;
-    this.setState(fp.set(['institution', attribute], [{existingRtRequirement}]));
+    console.log("~~~~~~~1111111")
+    console.log(this.state.institution)
+    console.log(attribute)
+    this.setState(fp.set(['institution', attribute], [{accessTierShortName: AccessTierShortNames.Registered, membershipRequirement: attribute, eRARequired:true}]));
   }
 
   setEmails(emailInput, attribute) {
-    const emailList = emailInput.split(/[,\n]+/);
+    const emailList = emailInput.split(/[,\n]+/).map(email => email.trim());
+    // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     console.log("~~~~~~~1111111")
     console.log(emailList)
     console.log(attribute)
-    this.setState(fp.set(['institution', attribute], emailList.map(email => email.trim())));
+    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: emailList}]));
+  }
+
+  setDomains(emailInput, attribute) {
+    const emailList = emailInput.split(/[,\n]+/).map(email => email.trim());
+    // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
+    console.log("~~~~~~~1111111")
+    console.log(emailList)
+    console.log(attribute)
+    this.setState(fp.set(['institution', attribute],  [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList}]));
   }
 
   // Check if the fields have not been edited
@@ -404,7 +415,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               <TextArea value={getTierEmailDomains(institution, AccessTierShortNames.Registered) &&
               getTierEmailDomains(institution, AccessTierShortNames.Registered).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
-                        onChange={(v) => this.setEmails(v, 'tierEmailDomains')}/>
+                        onChange={(v) => this.setDomains(v, 'tierEmailDomains')}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
                 {this.state.invalidEmailDomainsMsg}
                 </div>}
