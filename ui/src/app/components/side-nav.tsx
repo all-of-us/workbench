@@ -4,7 +4,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
-import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
+import {navigateSignOut, signInStore, useNavigation} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -148,6 +148,7 @@ interface SideNavItemProps {
 export const SideNavItem = (props: SideNavItemProps) => {
   const [hovering, setHovering] = useState(false);
   const [subItemsOpen, setSubItemsOpen] = useState(false);
+  const [navigate, ] = useNavigation();
 
   const iconSize = 21;
 

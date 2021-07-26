@@ -145,7 +145,7 @@ interface WorkspaceCardProps extends NavigationProps {
   reload(): Promise<void>;
 }
 
-export const WorkspaceCard = fp.flow(withRouter, withNavigation)(
+export const WorkspaceCard = fp.flow(withNavigation)(
     class extends React.Component<WorkspaceCardProps, WorkspaceCardState> {
       constructor(props) {
         super(props);

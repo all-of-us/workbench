@@ -86,13 +86,16 @@ export const useNavigation = () => {
   // TODO angular2react - handle extras
   // TODO angular2react - rename back to non 2 version
   const navigate2 = (commands, extras?) => {
-    history.push(commands.join("/"));
+    // url should always lead with a slash so that the given url replaces the current one
+    const url = '/' + commands.join('/').replace(/^\//, '');
+    history.push(url);
   };
 
   const navigateByUrl2 = (url, extras?) => {
     history.push(url);
   };
-  return [navigate, navigateByUrl];
+
+  return [navigate2, navigateByUrl2];
 };
 
 export interface NavigationProps {

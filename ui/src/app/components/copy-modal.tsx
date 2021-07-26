@@ -18,9 +18,10 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {withRouter} from 'react-router-dom';
+import {NavigationProps, withNavigation} from '../utils/navigation';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
 
@@ -32,7 +33,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');
 
-export interface Props {
+export interface Props extends NavigationProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
@@ -125,7 +126,8 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
   Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
-class CopyModalComponent extends React.Component<Props, State> {
+const CopyModal = fp.flow(withNavigation, withCdrVersions())
+(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -232,7 +234,7 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   goToDestinationWorkspace() {
-    navigate(
+    this.props.navigate(
       [
         'workspaces',
         this.state.destination.namespace,
@@ -382,13 +384,10 @@ class CopyModalComponent extends React.Component<Props, State> {
         Do you want to view the copied {toDisplay(resourceType)}?</div>
     );
   }
-}
-
-const CopyModal = fp.flow(withCdrVersions())(CopyModalComponent);
+});
 
 export {
   CopyModal,
-  CopyModalComponent, // VisibleForTesting
   Props as CopyModalProps,
   State as CopyModalState,
 };

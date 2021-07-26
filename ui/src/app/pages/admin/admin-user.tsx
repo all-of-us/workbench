@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 
+import {Link as RouterLink} from 'react-router-dom';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -183,6 +184,16 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
 
   async componentDidMount() {
     this.props.hideSpinner();
+    this.getUserData();
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>) {
+    if (prevProps.urlParams.usernameWithoutGsuiteDomain !== this.props.urlParams.usernameWithoutGsuiteDomain) {
+      this.getUserData();
+    }
+  }
+
+  async getUserData() {
     try {
       Promise.all([
         this.getUser(),
@@ -239,7 +250,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
       const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
-      this.setState({oldProfile: profile, updatedProfile: profile});
+      this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
     }
@@ -405,6 +416,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   render() {
+    console.log(this.props.urlParams);
     const {
       emailValidationError,
       emailValidationResponse,
@@ -441,18 +453,18 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
-          <a onClick={() => navigate(['admin', 'users'])}>
+          <RouterLink to='/admin/users'>
             <ClrIcon
-              shape='arrow'
-              size={37}
-              style={{
-                backgroundColor: colorWithWhiteness(colors.accent, .85),
-                color: colors.accent,
-                borderRadius: '18px',
-                transform: 'rotate(270deg)'
-              }}
+                shape='arrow'
+                size={37}
+                style={{
+                  backgroundColor: colorWithWhiteness(colors.accent, .85),
+                  color: colors.accent,
+                  borderRadius: '18px',
+                  transform: 'rotate(270deg)'
+                }}
             />
-          </a>
+          </RouterLink>
           <SmallHeader style={{marginTop: 0, marginLeft: '0.5rem'}}>
             User Profile Information
           </SmallHeader>

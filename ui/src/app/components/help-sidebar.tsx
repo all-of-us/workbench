@@ -36,9 +36,9 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
-  currentConceptStore,
+  currentConceptStore, NavigationProps,
   NavStore,
-  setSidebarActiveIconStore
+  setSidebarActiveIconStore, withNavigation
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
@@ -63,7 +63,6 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
@@ -224,7 +223,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props {
+interface Props extends NavigationProps {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -261,7 +260,8 @@ export const HelpSidebar = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
-  withCdrVersions()
+  withCdrVersions(),
+  withNavigation
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -289,7 +289,7 @@ export const HelpSidebar = fp.flow(
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      navigate(['/workspaces']);
+      this.props.navigate(['/workspaces']);
     });
 
     iconConfig(iconKey): IconConfig {
@@ -483,7 +483,7 @@ export const HelpSidebar = fp.flow(
               icon='copy'
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+                this.props.navigate(['/workspaces', namespace, id, 'duplicate']);
               }}>
               Duplicate
             </MenuItem>
@@ -493,7 +493,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
-                NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+                this.props.navigate(['/workspaces', namespace, id, 'edit']);
               }}>
               Edit
             </MenuItem>

@@ -12,7 +12,7 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {DuaType, Institution, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
@@ -53,9 +53,9 @@ interface InstitutionEditState {
 let title = 'Add new Institution';
 let institutionToEdit;
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps, NavigationProps {}
 
-export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<Props, InstitutionEditState> {
+export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -250,7 +250,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backNavigate() {
-    navigate(['admin/institution']);
+    this.props.navigate(['admin/institution']);
   }
 
   validateEmailAddressPresence() {

@@ -12,7 +12,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
-import {CopyModalComponent, CopyModalProps, CopyModalState} from './copy-modal';
+import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 function simulateSelect(wrapper: ReactWrapper, reactSelect: Select, selection: string) {
@@ -40,12 +40,12 @@ function simulateWorkspaceSelection(wrapper: ReactWrapper, workspace: TestWorksp
   simulateSelect(wrapper, Select, workspace.name);
 }
 
-describe('CopyModal', () => {
+describe('CopyModalComponent', () => {
   let props: CopyModalProps;
 
   const component = () => {
-    return mount<CopyModalComponent, CopyModalProps, CopyModalState>
-    (<CopyModalComponent {...props}/>);
+    return mount<CopyModal, CopyModalProps, CopyModalState>
+    (<CopyModal {...props}/>);
   };
 
   const workspaces: TestWorkspace[] = [

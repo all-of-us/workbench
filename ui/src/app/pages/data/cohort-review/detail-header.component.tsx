@@ -10,7 +10,13 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentCohortReviewStore,
+  currentWorkspaceStore,
+  NavigationProps,
+  urlParamsStore,
+  withNavigation
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -180,7 +186,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps {
+export interface DetailHeaderProps extends NavigationProps {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
@@ -195,7 +201,7 @@ export interface DetailHeaderState {
   filterTab: string;
 }
 
-export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
+export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);
@@ -249,7 +255,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     backToTable() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     previous = () => {
@@ -291,7 +297,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 
     getRequestFilters = () => {
