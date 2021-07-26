@@ -87,9 +87,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     if (this.props.urlParams.institutionId) {
       institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       title = institutionToEdit.displayName;
-      console.log('~~~~~~~1111111');
-      console.log('institutionToEdit');
-      console.log(institutionToEdit);
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: institutionToEdit,
@@ -164,16 +161,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     this.setState(fp.set(['institution', attribute],
       [{accessTierShortName: AccessTierShortNames.Registered,
         membershipRequirement: membershipRequirement.value, eRARequired: true}]));
-    console.info(this.state.institution);
   }
 
   setEmails(emailInput, attribute) {
     const emailList = emailInput.split(/[,\n]+/);
-    console.log('~~~~~~~1111111');
-    console.log('setEmails');
-    console.log(this.state.institution);
-    console.info(emailList);
-    console.info(emailInput);
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', attribute],
         [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: emailList.map(email => email.trim())}]));
@@ -235,8 +226,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
-    console.info('disableSave');
-    console.info(errors);
     return this.validateRequiredFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
@@ -333,9 +322,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       tierEmailAddresses: {truthiness: true},
       tierEmailDomain: {truthiness: true}
     });
-    console.log('~~~~~~~1111111');
-    console.log('rendering.....');
-    console.log(institution);
     return <div>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem', width: '1239px'}}>
          <FlexRow>
