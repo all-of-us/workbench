@@ -39,6 +39,7 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
@@ -943,13 +944,22 @@ export const RuntimePanel = fp.flow(
     };
   };
 
+  const costErrorsAsWarnings = (
+    workspace.billingAccountType === BillingAccountType.USERPROVIDED ||
+    // We've increased the workspace creator's free credits. This means they may be expecting to run
+    // a more expensive analysis, and the program has extended some further trust for free credit
+    // use. Allow them to provision a larger runtime (still warn them). Block them if they get below
+    // the default amount of free credits because (1) this can result in overspend and (2) we have
+    // easy access to remaining credits, and not the creator's quota.
+    creatorFreeCreditsRemaining > serverConfigStore.get().config.defaultFreeCreditsDollarLimit);
+
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
       ? 25
       : 150;
-    const message = workspace.billingAccountType === BillingAccountType.FREETIER
-      ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
-      : '^Your runtime is very expensive. Are you sure you wish to proceed?';
+    const message = costErrorsAsWarnings
+      ? '^Your runtime is expensive. Are you sure you wish to proceed?'
+      : `^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $${maxRunningCost}/hr.`;
     return {
       numericality: {
         lessThan: maxRunningCost,
@@ -996,7 +1006,7 @@ export const RuntimePanel = fp.flow(
     if (dataprocErrors) {
       errorDivs.push(summarizeErrors(dataprocErrors));
     }
-    if (workspace.billingAccountType === BillingAccountType.FREETIER && runningCostErrors) {
+    if (!costErrorsAsWarnings && runningCostErrors) {
       errorDivs.push(summarizeErrors(runningCostErrors));
     }
     return errorDivs;
@@ -1004,7 +1014,7 @@ export const RuntimePanel = fp.flow(
 
   const getWarningMessageContent = () => {
     const warningDivs = [];
-    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED && runningCostErrors) {
+    if (costErrorsAsWarnings && runningCostErrors) {
       warningDivs.push(summarizeErrors(runningCostErrors));
     }
     return warningDivs;
