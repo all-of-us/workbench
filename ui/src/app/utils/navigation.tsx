@@ -4,6 +4,7 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import {useLocation} from 'react-router';
@@ -88,11 +89,18 @@ export const useNavigation = () => {
   const navigate2 = (commands, extras?) => {
     // url should always lead with a slash so that the given url replaces the current one
     const url = '/' + commands.join('/').replace(/^\//, '');
-    history.push(url);
+    history.push({
+      pathname: url,
+      search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
+    });
   };
 
+  // TODO angular2react - refactor this with navigate
   const navigateByUrl2 = (url, extras?) => {
-    history.push(url);
+    history.push({
+      pathname: url,
+      search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
+    });
   };
 
   return [navigate2, navigateByUrl2];
