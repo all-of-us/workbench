@@ -1640,8 +1640,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
   end
 
   if project_id.nil?
-    common.error "invalid domain #{user_email_domain} for given usernames - target must be an AoU research domain email"
-    raise ArgumentError
+    raise ArgumentError.new("Invalid domain #{user_email_domain} for given usernames - target must be an AoU research domain email")
   end
 
   if ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project_id
