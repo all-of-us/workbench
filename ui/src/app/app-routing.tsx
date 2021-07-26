@@ -4,7 +4,7 @@ import {useEffect} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
-import {Switch} from 'react-router-dom';
+import {Switch, useHistory} from 'react-router-dom';
 
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
@@ -24,6 +24,7 @@ import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
+import {NavStore} from './utils/navigation';
 
 declare const gapi: any;
 
