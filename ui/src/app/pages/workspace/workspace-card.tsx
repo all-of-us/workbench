@@ -17,7 +17,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps, useNavigation, withNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {useHistory, withRouter} from 'react-router-dom';
@@ -71,8 +71,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   onShare,
   onDelete
 }) => {
-  const history = useHistory();
-  const navigate = (commands, extras?) => history.push(commands.join("/"));
+  const [navigate, navigateByUrl] = useNavigation();
 
   const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
@@ -138,7 +137,7 @@ interface WorkspaceCardState {
   showResearchPurposeReviewModal: boolean;
 }
 
-interface WorkspaceCardProps {
+interface WorkspaceCardProps extends NavigationProps {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
   // A reload function that can be called by this component to reqeust a refresh
@@ -146,7 +145,7 @@ interface WorkspaceCardProps {
   reload(): Promise<void>;
 }
 
-export const WorkspaceCard = fp.flow(withRouter)(
+export const WorkspaceCard = fp.flow(withRouter, withNavigation)(
     class extends React.Component<WorkspaceCardProps, WorkspaceCardState> {
       constructor(props) {
         super(props);
@@ -155,10 +154,6 @@ export const WorkspaceCard = fp.flow(withRouter)(
           showShareModal: false,
           showResearchPurposeReviewModal: false,
         };
-      }
-
-      navigate(commands, extras?) {
-        this.props.history.push(commands.join("/"));
       }
 
       deleteWorkspace = withErrorModal({
@@ -191,7 +186,7 @@ export const WorkspaceCard = fp.flow(withRouter)(
 
       handleReviewResearchPurpose() {
         const {workspace} = this.props;
-        this.navigate(['workspaces', workspace.namespace, workspace.id, 'about']);
+        this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'about']);
 
       }
 
@@ -203,7 +198,7 @@ export const WorkspaceCard = fp.flow(withRouter)(
           workspace.published ?
             AnalyticsTracker.Workspaces.NavigateToFeatured(workspace.name) :
             triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-          this.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
         }
       }
 

@@ -4,8 +4,12 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect} from 'react';
 import {useLocation} from 'react-router';
+import {useHistory, useParams} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {routeDataStore} from './stores';
 
 export const NavStore = {
   navigate: undefined,
@@ -67,12 +71,41 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
 
 // NOTE: Because these are wired up directly to the router component,
 // all navigation done from here will effectively use absolute paths.
+// TODO angular2react - delete
 export const navigate = (...args) => {
   return NavStore.navigate(...args);
 };
 
 export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);
+};
+
+export const useNavigation = () => {
+  const history = useHistory();
+
+  // TODO angular2react - handle extras
+  // TODO angular2react - rename back to non 2 version
+  const navigate2 = (commands, extras?) => {
+    history.push(commands.join("/"));
+  };
+
+  const navigateByUrl2 = (url, extras?) => {
+    history.push(url);
+  };
+  return [navigate, navigateByUrl];
+};
+
+export interface NavigationProps {
+  navigate: (commands, extras?) => void;
+  navigateByUrl: (commands, extras?) => void;
+}
+
+export const withNavigation = WrappedComponent => ({...props}) => {
+  const [navigate, navigateByUrl] = useNavigation();
+
+  return <WrappedComponent navigate={navigate}
+                           navigateByUrl={navigateByUrl}
+                           {...props}/>;
 };
 
 /**
