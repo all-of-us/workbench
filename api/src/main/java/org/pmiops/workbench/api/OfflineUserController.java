@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;

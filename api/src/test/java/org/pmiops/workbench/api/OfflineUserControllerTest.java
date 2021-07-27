@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Functions;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;

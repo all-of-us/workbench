@@ -2,13 +2,11 @@ package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
 
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -52,9 +50,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;

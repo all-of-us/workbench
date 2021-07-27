@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
