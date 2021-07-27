@@ -14,7 +14,12 @@ import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
-import {Institution, InstitutionMembershipRequirement, OrganizationType} from 'generated/fetch';
+import {
+  DuaType,
+  Institution,
+  InstitutionMembershipRequirement,
+  OrganizationType
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
@@ -161,6 +166,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     this.setState(fp.set(['institution', attribute],
       [{accessTierShortName: AccessTierShortNames.Registered,
         membershipRequirement: membershipRequirement.value, eRARequired: true}]));
+
+    // Dual write DuaTypeEnum for now. Because account creation flow still uses that field.
+    const duaType = membershipRequirement.value === InstitutionMembershipRequirement.ADDRESSES
+        ? DuaType.RESTRICTED : DuaType.MASTER
+    this.setState(fp.set(['institution', 'duaTypeEnum'], duaType));
   }
 
   setEmails(emailInput, attribute) {

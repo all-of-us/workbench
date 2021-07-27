@@ -11,12 +11,7 @@ import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {
-  formatFreeCreditsUSD,
-  isBlank,
-  reactStyles,
-  withUrlParams
-} from 'app/utils';
+import {formatFreeCreditsUSD, isBlank, reactStyles, withUrlParams} from 'app/utils';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -32,13 +27,14 @@ import {serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,
-  DuaType,
   InstitutionalRole,
+  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
+import {getRegisteredTierRequirement} from "app/pages/admin/institution-utils";
 
 const styles = reactStyles({
   semiBold: {
@@ -101,7 +97,7 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
         institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
         verifiedInstitutionOptions
       );
-      if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
+      if (getRegisteredTierRequirement(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         // Institution has signed Restricted agreement and the email is not in allowed emails list
         return <RestrictedDuaEmailMismatchErrorMessage/>;
       } else {

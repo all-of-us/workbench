@@ -27,8 +27,7 @@ import {
   validateEmail
 } from 'app/utils/institutions';
 import {
-  CheckEmailResponse,
-  DuaType,
+  CheckEmailResponse, DuaType,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -217,9 +216,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
 
   /**
    * Returns a DOM fragment explaining to the user why institutional email verification has
-   * failed. This may be due to (1) restricted DUA which requires users to have an
-   * exact email address match, (2) email domain not matching a master DUA list of domains or
-   * emails, or (3) a server error when making the checkEmail request.
+   * failed. This may be due to (1) restricted registered tier requirement(ADDRESSES) which requires users
+   * to have an exact email address match, (2) email domain not matching registered tier requirement(DOMAINS)
+   * list of domains or emails, or (3) a server error when making the checkEmail request.
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,

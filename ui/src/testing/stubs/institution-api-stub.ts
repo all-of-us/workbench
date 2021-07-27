@@ -9,7 +9,11 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {getTierEmailAddresses, getTierEmailDomains} from "app/pages/admin/institution-utils";
+import {
+  getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
+  getTierEmailAddresses,
+  getTierEmailDomains
+} from "app/pages/admin/institution-utils";
 import {AccessTierShortNames} from "app/utils/access-tiers";
 
 export const defaultInstitutions: Array<Institution> = [{
@@ -29,6 +33,7 @@ export const defaultInstitutions: Array<Institution> = [{
       eraRequired: true
     }
   ],
+  duaTypeEnum: DuaType.MASTER,
   userInstructions: 'Vanderbilt User Instruction'
 }, {
   shortName: 'Broad',
@@ -47,6 +52,7 @@ export const defaultInstitutions: Array<Institution> = [{
       eraRequired: true
     }
   ],
+  duaTypeEnum: DuaType.RESTRICTED
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
@@ -145,9 +151,9 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.tierEmailAddresses && getTierEmailAddresses(institution, AccessTierShortNames.Registered).includes(contactEmail)) {
+    if (institution.tierEmailAddresses && getRegisteredTierEmailAddresses(institution).includes(contactEmail)) {
       response.isValidMember = true;
-    } else if (institution.tierEmailDomains && getTierEmailDomains(institution, AccessTierShortNames.Registered).includes(domain)) {
+    } else if (institution.tierEmailDomains && getRegisteredTierEmailDomains(institution).includes(domain)) {
       response.isValidMember = true;
     }
     return response;
