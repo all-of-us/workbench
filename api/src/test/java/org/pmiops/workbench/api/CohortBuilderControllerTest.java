@@ -42,10 +42,6 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -880,52 +876,6 @@ public class CohortBuilderControllerTest extends SpringTest {
     assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
-  }
-
-  @Test
-  public void isApproximate() {
-    SearchParameter inSearchParameter = new SearchParameter();
-    SearchParameter exSearchParameter = new SearchParameter();
-    SearchGroupItem inSearchGroupItem =
-        new SearchGroupItem().addSearchParametersItem(inSearchParameter);
-    SearchGroupItem exSearchGroupItem =
-        new SearchGroupItem().addSearchParametersItem(exSearchParameter);
-    SearchGroup inSearchGroup = new SearchGroup().addItemsItem(inSearchGroupItem);
-    SearchGroup exSearchGroup = new SearchGroup().addItemsItem(exSearchGroupItem);
-    SearchRequest searchRequest =
-        new SearchRequest().addIncludesItem(inSearchGroup).addExcludesItem(exSearchGroup);
-    // Temporal includes
-    inSearchGroup.temporal(true);
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // BP includes
-    inSearchGroup.temporal(false);
-    inSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // Deceased includes
-    inSearchParameter.type(CriteriaType.DECEASED.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // Temporal and BP includes
-    inSearchGroup.temporal(true);
-    inSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // No temporal/BP/Decease
-    inSearchGroup.temporal(false);
-    inSearchParameter.type(CriteriaType.ETHNICITY.toString()).subtype(null);
-    assertThat(controller.isApproximate(searchRequest)).isFalse();
-    // Temporal excludes
-    exSearchGroup.temporal(true);
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // BP excludes
-    exSearchGroup.temporal(false);
-    exSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // Deceased excludes
-    exSearchParameter.type(CriteriaType.DECEASED.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
-    // Temporal and BP excludes
-    exSearchGroup.temporal(true);
-    exSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertThat(controller.isApproximate(searchRequest)).isTrue();
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
