@@ -24,7 +24,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {MembershipRequirements, OrganizationTypeOptions} from './admin-institution-options';
+import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {
   getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
   getRegisteredTierRequirement,

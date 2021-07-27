@@ -27,7 +27,8 @@ import {
   validateEmail
 } from 'app/utils/institutions';
 import {
-  CheckEmailResponse, DuaType,
+  CheckEmailResponse,
+  DuaType,
   InstitutionalRole,
   Profile,
   PublicInstitutionDetails,
@@ -216,16 +217,16 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
 
   /**
    * Returns a DOM fragment explaining to the user why institutional email verification has
-   * failed. This may be due to (1) restricted registered tier requirement(ADDRESSES) which requires users
-   * to have an exact email address match, (2) email domain not matching registered tier requirement(DOMAINS)
-   * list of domains or emails, or (3) a server error when making the checkEmail request.
+   * failed. This may be due to (1) restricted DUA which requires users to have an
+   * exact email address match, (2) email domain not matching a master DUA list of domains or
+   * emails, or (3) a server error when making the checkEmail request.
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,
-    profile: {
-      contactEmail,
-      verifiedInstitutionalAffiliation: {institutionShortName}
-    }} = this.state;
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }} = this.state;
 
     // No error if we haven't entered an email or chosen an institution.
     if (!institutionShortName || isBlank(contactEmail)) {
@@ -409,7 +410,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
                           placeholder={getRoleOptions(institutions, institutionShortName) ?
-                            '' : 'First select an institution above'}
+                              '' : 'First select an institution above'}
                           options={getRoleOptions(institutions, institutionShortName)}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
