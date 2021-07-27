@@ -72,7 +72,6 @@ public class InstitutionServiceTest extends SpringTest {
   private DbAccessTier registeredTier;
   private InstitutionTierRequirement rtAddressRequirement;
   private InstitutionTierRequirement rtDomainsRequirement;
-  private InstitutionTierRequirement ctDomainsRequirement;
   private TierEmailAddresses rtTierEmailAddress;
   private TierEmailDomains rtTierEmailDomains;
 
@@ -255,7 +254,6 @@ public class InstitutionServiceTest extends SpringTest {
             .shortName("hasEmails")
             .displayName("another test")
             .addTierRequirementsItem(rtDomainsRequirement)
-            .addTierRequirementsItem(ctDomainsRequirement)
             .tierEmailDomains(
                 ImmutableList.of(
                     rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))
