@@ -16,6 +16,7 @@ import {formatFreeCreditsUSD, isBlank, reactStyles, withUrlParams} from 'app/uti
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {getRegisteredTierRequirement} from 'app/pages/admin/institution-utils';
 import {
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
@@ -34,7 +35,6 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
-import {getRegisteredTierRequirement} from "app/pages/admin/institution-utils";
 
 const styles = reactStyles({
   semiBold: {

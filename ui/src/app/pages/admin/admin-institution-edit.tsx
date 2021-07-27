@@ -169,7 +169,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
     // Dual write DuaTypeEnum for now. Because account creation flow still uses that field.
     const duaType = membershipRequirement.value === InstitutionMembershipRequirement.ADDRESSES
-        ? DuaType.RESTRICTED : DuaType.MASTER
+        ? DuaType.RESTRICTED : DuaType.MASTER;
     this.setState(fp.set(['institution', 'duaTypeEnum'], duaType));
   }
 
