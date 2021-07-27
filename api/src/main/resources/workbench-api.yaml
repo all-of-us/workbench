@@ -4468,6 +4468,9 @@ definitions:
       name:
         type: string
         description: Name of the persistent disk
+#      status:
+#        "$ref": "#/definitions/DiskStatus"
+#        description: Runtime status. Read only.
       size:
         type: integer
         description: Size of persistent disk in GB
@@ -5925,6 +5928,15 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+#  DiskStatus:
+#    type: string
+#    enum:
+#      - Creating
+#      - Restoring
+#      - Failed
+#      - Ready
+#      - Deleting
+#      - Deleted
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user

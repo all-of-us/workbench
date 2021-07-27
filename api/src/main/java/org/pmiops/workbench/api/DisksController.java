@@ -77,6 +77,7 @@ public class DisksController implements DisksApiDelegate{
             disk.diskType(DiskType.fromValue(response.getDiskType().toString()));
             disk.blockSize(response.getBlockSize());
             disk.size(response.getSize());
+//            disk.status(DiskStatus.valueOf(response.getStatus().toString()));
 
             return ResponseEntity.ok(disk);
 //            return ResponseEntity.ok(leonardoMapper.toApiRuntime(response));

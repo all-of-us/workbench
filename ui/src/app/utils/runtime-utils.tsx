@@ -46,7 +46,7 @@ export interface RuntimeConfig {
 }
 
 const compareComputeTypes = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  console.log("compareComputeTypes: ",oldRuntime,newRuntime.computeType)
+  console.log("compareComputeTypes: ",oldRuntime,newRuntime);
   return {
     desc: 'Change compute type',
     previous: oldRuntime.computeType,
@@ -212,6 +212,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
 };
 
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
+  console.log("print getRuntimeConfigDiffs",oldRuntime, newRuntime);
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
     compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
@@ -370,6 +371,45 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   return [runtime ? runtime.status : undefined, setStatusRequest];
 };
 
+const synchronousRecreate = async(runtime, requestedRuntime, workspaceNamespace, aborter ) => {
+  if (runtime.diskConfig.size > requestedRuntime.gceConfig.diskSize) {
+    await runtimeApi().deleteRuntime(workspaceNamespace, true);
+    await LeoRuntimeInitializer.initialize({
+      workspaceNamespace,
+      targetRuntime: requestedRuntime,
+      resolutionCondition: r => r.status === RuntimeStatus.Deleted,
+      pollAbortSignal: aborter.signal,
+      overallTimeout: 10000 * 300 // The switch to a non running status should occur quickly
+    });
+
+    const runtimeRequest: Runtime = {
+      gceWithPdConfig: {
+        bootDiskSize: 50,
+        machineType: requestedRuntime.gceConfig.machineType,
+        persistentDisk: {
+          name: 'pd',
+          size: requestedRuntime.gceConfig.diskSize,
+          diskType: DiskType.Standard,
+          labels: {}
+
+        }
+      }
+      // gceConfig: {
+      //   machineType: runtime.machine.name,
+      //   diskSize: runtime.diskSize
+      // }
+    };
+
+    // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+    runtimeRequest.configurationType = RuntimeConfigurationType.UserOverride;
+    console.log('up createRuntimeRequest: ', runtimeRequest);
+    await runtimeApi().createRuntime(workspaceNamespace, runtimeRequest);
+
+  } else {
+    await runtimeApi().updateRuntime(workspaceNamespace, {runtime: requestedRuntime});
+  }
+};
+
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
@@ -383,9 +423,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
-  useDisk(currentWorkspaceNamespace);
 
-  console.log("print runtime",runtime)
+  console.log("print runtime", runtime);
 
   useEffect(() => {
     let mounted = true;
@@ -397,7 +436,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       try {
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
-
+          console.log('use effect stage: ', runtime);
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
               await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
@@ -406,37 +445,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
             }
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
             if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
-
-              if(runtime.diskConfig != null && runtime.diskConfig.size > requestedRuntime.gceConfig.diskSize){
-                await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true);
-
-                const runtimeRequest: Runtime = {
-                  gceWithPdConfig: {
-                    bootDiskSize: 50,
-                    machineType: "n1-highmem-4",
-                    persistentDisk: {
-                      name: "pd",
-                      size: 512,
-                      diskType: DiskType.Standard,
-                      labels: {}
-
-                    }
-                  }
-                  // gceConfig: {
-                  //   machineType: runtime.machine.name,
-                  //   diskSize: runtime.diskSize
-                  // }
-                }
-
-                // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-                runtimeRequest.configurationType = RuntimeConfigurationType.UserOverride;
-                console.log("createRuntimeRequest: ",runtimeRequest)
-                await runtimeApi().createRuntime(currentWorkspaceNamespace, runtimeRequest);
-
-              }else{
-                await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
-              }
-
+              console.log('update stage: ', runtime.diskConfig, requestedRuntime);
+              await synchronousRecreate(runtime, requestedRuntime, currentWorkspaceNamespace, aborter);
               // Calling updateRuntime will not immediately set the Runtime status to not Running so the
               // default initializer will resolve on its first call. The polling below first checks for the
               // non Running status before initializing the default one that checks for Running status
@@ -447,6 +457,21 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
+            } else if (runtime.status === RuntimeStatus.Deleted) {
+
+              console.log('only PD createRuntimeRequest step 1: ', requestedRuntime);
+
+              await runtimeApi().createRuntime(currentWorkspaceNamespace, requestedRuntime);
+              await LeoRuntimeInitializer.initialize({
+                workspaceNamespace,
+                targetRuntime: requestedRuntime,
+                resolutionCondition: r => r.status === RuntimeStatus.Running,
+                pollAbortSignal: aborter.signal,
+                overallTimeout: 10000 * 300 // The switch to a non running status should occur quickly
+              });
+              console.log('only PD createRuntimeRequest step 2: ');
+              await synchronousRecreate(runtime,requestedRuntime,currentWorkspaceNamespace,aborter);
+
             }
           } else {
             // There are no differences, no extra requests needed
