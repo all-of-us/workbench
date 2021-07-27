@@ -29,6 +29,13 @@ import {currentWorkspaceStore, nextWorkspaceWarmupStore, signInStore, urlParamsS
 
 declare const gapi: any;
 
+// for e2e tests: provide your own oauth token to obviate Google's oauth UI
+// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
+// as non-human.
+declare global {
+  interface Window { setTestAccessTokenOverride: (token: string) => void; }
+}
+
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const signInGuard: Guard = {
@@ -69,6 +76,14 @@ function profileImage() {
   }
 }
 
+function signIn(): void {
+  gapi.auth2.getAuthInstance().signIn({
+    'prompt': 'select_account',
+    'ux_mode': 'redirect',
+    'redirect_uri': `${window.location.protocol}//${window.location.host}`
+  });
+}
+
 function signOut(): void {
   gapi.auth2.getAuthInstance().signOut();
 }
@@ -77,6 +92,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   const {authLoaded = false} = useStore(authStore);
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [testAccessTokenOverride, setTestAccessTokenOverride] = useState(undefined);
 
   const nextSignInStore = () => {
     signInStore.next({
@@ -85,59 +102,40 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     });
   };
 
-  const subscribeToAuth2User = (): void => {
-    // The listen below only fires on changes, so we need an initial
-    // check to handle the case where the user is already signed in.
-    // authStore.set({...authStore.get(), authLoaded: true, isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()});
-    // this.zone.run(() => {
-    //   const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-    //   this.isSignedIn.next(isSignedIn);
-    //   if (isSignedIn) {
-    //     this.nextSignInStore();
-    //     this.clearIdToken();
-    //   }
-    //   setLoggedInState(isSignedIn);
-    // });
-    // gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
-    //   authStore.set({...authStore.get(), isSignedIn});
-    //   this.zone.run(() => {
-    //     this.isSignedIn.next(isSignedIn);
-    //     if (isSignedIn) {
-    //       this.nextSignInStore();
-    //       this.clearIdToken();
-    //     }
-    //   });
-    // });
+  // TODO angular2react - this might need to go into main.ts now since useEffect runs fairly late
+  useEffect(() => {
+    // Set this as early as possible in the application boot-strapping process,
+    // so it's available for Puppeteer to call. If we need this even earlier in
+    // the page, it could go into something like main.ts, but ideally we'd keep
+    // this logic in one place, and keep main.ts minimal.
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        // Disclaimer: console.log statements here are unlikely to captured by
+        // Puppeteer, since it typically reloads the page immediately after
+        // invoking this function.
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+    }
+  }, []);
 
-    const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-    authStore.set({...authStore.get(), authLoaded: true, isSignedIn: isSignedIn});
+  useEffect(() => {
+    // TODO angular2react - verify that this only runs AFTER subscribeToAuth2User
+    // this might run before if react hooks run useEffect on the initial value, otherwise, we should be ok
+    // The main thing this affects in the value of authLoaded being true. The rest of the fields make sense
+    // with both values of isSignedIn
+    authStore.set({...authStore.get(), authLoaded: true, isSignedIn});
+    if (isSignedIn) {
+      nextSignInStore();
+      clearIdToken();
+    }
     setLoggedInState(isSignedIn);
-
-    // TODO angular2react - move this API client setup code somewhere else
-    const conf = new Configuration({
-      basePath: getApiBaseUrl(),
-      accessToken: () => currentAccessToken()
-    });
-    bindApiClients(conf);
-    notebooksBindApiClients(conf);
-
-    // TODO - this.nextSignInStore() logic
-    // TODO - this.clerIdToken() logic
-    // TODO - stuff about isSignedIn subscribable
-
-    // TODO - for subscribing
-    gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
-      authStore.set({...authStore.get(), isSignedIn});
-      this.isSignedIn.next(isSignedIn);
-      if (isSignedIn) {
-        nextSignInStore();
-        clearIdToken();
-      }
-    });
-  };
+  }, [isSignedIn]);
 
   const makeAuth2 = (config: ConfigResponse): Promise<any> => {
-
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
@@ -146,7 +144,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           scope: 'https://www.googleapis.com/auth/plus.login openid profile'
             + (config.enableBillingUpgrade ? ' https://www.googleapis.com/auth/cloud-billing' : '')
         }).then(() => {
-          subscribeToAuth2User();
+          setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
+
+          gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
+            setIsSignedIn(nextIsSignedIn);
+          });
         });
         resolve(gapi.auth2);
       });
@@ -154,28 +156,59 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   };
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
-
-    // TODO angular2react - restore puppeteer behavior
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
-    // if (environment.allowTestAccessTokenOverride) {
-    //   this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-    //   if (this.testAccessTokenOverride) {
-    //     console.log('found test access token in local storage, skipping normal auth flow');
-    //
-    //     // The client has already configured an access token override. Skip the normal oauth flow.
-    //     authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
-    //     this.zone.run(() => {
-    //       this.isSignedIn.next(true);
-    //     });
-    //     return;
-    //   }
-    // }
+    if (environment.allowTestAccessTokenOverride) {
+      const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      // TODO angular2react - can I just replace this with `setTestAccessTokenOverride(window....)` and assume that
+      // the right value will be used in the if conditional in the same execution loop?
+      setTestAccessTokenOverride(localStorageTestAccessToken);
+      if (localStorageTestAccessToken) {
+        console.log('found test access token in local storage, skipping normal auth flow');
+
+        // The client has already configured an access token override. Skip the normal oauth flow.
+        authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+        setIsSignedIn(true);
+        return;
+      }
+    }
+
+    // TODO angular2react - is this the right place for this?
+    const conf = new Configuration({
+      basePath: getApiBaseUrl(),
+      accessToken: () => currentAccessToken()
+    });
+    bindApiClients(conf);
+    notebooksBindApiClients(conf);
 
     makeAuth2(config);
   };
+
+  if (serverConfigStore.get().config) {
+    this.serverConfigStoreCallback(serverConfigStore.get().config);
+  } else {
+    const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
+      unsubscribe();
+      this.serverConfigStoreCallback(configStore.config);
+    });
+  }
+
+  useEffect(() => {
+    // We only want to run this callback once. Either run it now or subscribe and run it later when we
+    // get the config.
+    const serverConfig = useStore(serverConfigStore);
+    if (serverConfig.config) {
+      serverConfigStoreCallback(serverConfig.config);
+    } else {
+      // This is making the assumption that a value received from the serverConfigStore will be a valid config
+      const {unsubscribe} = serverConfigStore.subscribe((nextServerConfig) => {
+        unsubscribe();
+        serverConfigStoreCallback(nextServerConfig.config);
+      });
+    }
+  }, []);
 
   const loadConfig = async() => {
     const config = await configApi().getConfig();
@@ -198,8 +231,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   }, []);
 
   const currentAccessToken = () => {
-    // TODO angular2react - testAccess case
-    const testAccessTokenOverride = null;
     if (testAccessTokenOverride) {
       return testAccessTokenOverride;
     } else if (!gapi.auth2) {
@@ -350,7 +381,7 @@ export class AppRouting extends ReactWrapperBase {
 
   signIn(): void {
     AnalyticsTracker.Registration.SignIn();
-    this.signInService.signIn();
+    signIn();
   }
 
   subscribeToInactivitySignOut(): Subscription {
@@ -362,6 +393,6 @@ export class AppRouting extends ReactWrapperBase {
   }
 
   signOut(): void {
-    this.signInService.signOut();
+    signOut();
   }
 }

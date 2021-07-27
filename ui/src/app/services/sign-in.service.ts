@@ -51,6 +51,7 @@ export class SignInService {
       };
     }
 
+    // angular2react - ported
     if (serverConfigStore.get().config) {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
     } else {
@@ -59,8 +60,10 @@ export class SignInService {
         this.serverConfigStoreCallback(configStore.config);
       });
     }
+
   }
 
+  // angular2react - ported
   public signIn(): void {
     gapi.auth2.getAuthInstance().signIn({
       'prompt': 'select_account',
@@ -69,10 +72,12 @@ export class SignInService {
     });
   }
 
+  // angular2react - ported
   public signOut(): void {
     gapi.auth2.getAuthInstance().signOut();
   }
 
+  // angular2react - ported
   private serverConfigStoreCallback(config: ConfigResponse) {
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
@@ -95,6 +100,7 @@ export class SignInService {
     this.makeAuth2(config);
   }
 
+  // angular2react - ported
   private makeAuth2(config: ConfigResponse): Promise<any> {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
@@ -111,12 +117,14 @@ export class SignInService {
     });
   }
 
+  // angular2react - ported
   private clearIdToken(): void {
     // Using the full page redirect puts a long "id_token" parameter in the
     // window hash; clear this after gapi has consumed it.
     window.location.hash = '';
   }
 
+  // angular2react - ported
   private subscribeToAuth2User(): void {
     // The listen below only fires on changes, so we need an initial
     // check to handle the case where the user is already signed in.
@@ -158,6 +166,7 @@ export class SignInService {
     }
   }
 
+  // angular2react - ported
   public get profileImage() {
     if (!gapi.auth2) {
       return null;
@@ -166,6 +175,7 @@ export class SignInService {
     }
   }
 
+  // angular2react - ported
   nextSignInStore() {
     signInStore.next({
       signOut: () => this.signOut(),
