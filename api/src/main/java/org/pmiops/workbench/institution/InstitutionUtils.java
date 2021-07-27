@@ -1,13 +1,11 @@
 package org.pmiops.workbench.institution;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
-import org.pmiops.workbench.model.TierEmailDomains;
 
 /** Utilities for RW institution related functionalities. */
 public class InstitutionUtils {
@@ -36,8 +34,7 @@ public class InstitutionUtils {
     return institution.getTierEmailDomains().stream()
         .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
         .flatMap(
-            tea ->
-                tea.getEmailDomains() == null ? Stream.empty() : tea.getEmailDomains().stream())
+            tea -> tea.getEmailDomains() == null ? Stream.empty() : tea.getEmailDomains().stream())
         .collect(Collectors.toSet());
   }
 
