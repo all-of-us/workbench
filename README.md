@@ -422,16 +422,10 @@ ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
 
 ## Running test cases
 
-To run both api and common api unit tests, in the api dir run:
+To run unit tests, in the api dir run:
 
 ```
 ./project.rb test
-```
-
-To run just api unit tests, run:
-
-```
-./project.rb test-api
 ```
 
 To run bigquery tests (which run slowly and actually

@@ -328,27 +328,16 @@ Common.register_command({
 })
 
 
-def run_api_tests(cmd_name, args)
+def run_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle :test} + args
 end
 
 Common.register_command({
-  :invocation => "test-api",
-  :description => "Runs API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_api_tests("test-api", args) }
-})
-
-def run_all_tests(cmd_name, args)
-  run_api_tests(cmd_name, args)
-end
-
-Common.register_command({
   :invocation => "test",
-  :description => "Runs all tests (api). To run a single test, add (for example) " \
+  :description => "Runs all unit tests. To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_all_tests("test", args) }
+  :fn => ->(*args) { run_tests("test", args) }
 })
 
 def run_integration_tests(cmd_name, *args)
@@ -377,22 +366,6 @@ Common.register_command({
   :invocation => "bigquerytest",
   :description => "Runs bigquerytest tests.",
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
-})
-
-def run_rainforest_tests(cmd_name, *args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  # The bucket is hardcoded to staging, because that is currently the only
-  # environment we can run tests in. There is, however, an identical key in
-  # each of the other environments.
-  token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
-  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
-end
-
-Common.register_command({
-  :invocation => "rainforesttest",
-  :description => "Runs rainforest tests.",
-  :fn => ->(*args) { run_rainforest_tests("rainforesttest", *args) }
 })
 
 def run_gradle(cmd_name, args)
