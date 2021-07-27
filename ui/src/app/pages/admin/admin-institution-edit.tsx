@@ -366,8 +366,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
                   {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
                   {errors.tierRequirements && <li>Agreement Type should not be empty</li>}
-                  {!errors.tierRequirements && errors.tierEmailDomains && <li>Email Domain should not be empty</li>}
-                  {!errors.tierRequirements && errors.tierEmailAddresses && <li>Email Address should not be empty</li>}
+                  {!errors.tierRequirements && errors.tierEmailDomains && <li>Email Domains should not be empty</li>}
+                  {!errors.tierRequirements && errors.tierEmailAddresses && <li>Email Addresses should not be empty</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
