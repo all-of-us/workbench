@@ -153,6 +153,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const [testAccessTokenOverride, setTestAccessTokenOverride] = useState(undefined);
   const [signInMounted, setSignInMounted] = useState(false);
   const [doSignOut, setDoSignOut] = useState(false);
+  const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
+  const [overriddenUrl, setOverriddenUrl] = useState('');
 
   // TODO angular2react - does this work?
   const onSignIn = (): void => {
@@ -183,6 +185,37 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       profileImage: profileImage(),
     });
   };
+
+  useEffect(() => {
+    // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
+    // TODO angular2react - this actually isn't working right now, just renders an empty page
+    // but this bug is also on test right now so it isn't a regression
+    setIsCookiesEnabled(cookiesEnabled());
+
+    if (isCookiesEnabled) {
+      try {
+        setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
+
+        window['setAllOfUsApiUrl'] = (url: string) => {
+          if (url) {
+            if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+              throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+            }
+            setOverriddenUrl(url);
+            localStorage.setItem(LOCAL_STORAGE_API_OVERRIDE_KEY, url);
+          } else {
+            setOverriddenUrl(null);
+            localStorage.removeItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
+          }
+          window.location.reload();
+        };
+        console.log('To override the API URLs, try:\n' +
+          'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+      } catch (err) {
+        console.log('Error setting urls: ' + err);
+      }
+    }
+  }, [isCookiesEnabled]);
 
   useEffect(() => {
     checkBrowserSupport();
@@ -430,46 +463,73 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
-    <AppRouter>
-      {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-      {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-      {/* It should be noted that the reason this is currently working is because Switch only */}
-      {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-      {/* that they are a Route or a subclass of Route. */}
-      <Switch>
-        <AppRoute
-            path='/cookie-policy'
-            component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-        />
-        <AppRoute
-            path='/login'
-            component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-        />
-        <AppRoute
-            path='/session-expired'
-            component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-        />
-        <AppRoute
-            path='/sign-in-again'
-            component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-        />
-        <AppRoute
-            path='/user-disabled'
-            component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-        />
-        <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-          <AppRoute
-              path=''
-              exact={false}
-              component={() => <SignedInPage
-                  intermediaryRoute={true}
-                  routeData={{}}
-                  subscribeToInactivitySignOut={subscribeToInactivitySignOut} // TODO angular2react - I think I might be able to just sign out and ignore this field
-                  signOut={signOut}
-              />}
-          />
-        </ProtectedRoutes>
-      </Switch>
-    </AppRouter>
+    {
+      isCookiesEnabled && <AppRouter>
+        {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+        {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+        {/* It should be noted that the reason this is currently working is because Switch only */}
+        {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+        {/* that they are a Route or a subclass of Route. */}
+          <Switch>
+              <AppRoute
+                  path='/cookie-policy'
+                  component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
+              />
+              <AppRoute
+                  path='/login'
+                  component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
+              />
+              <AppRoute
+                  path='/session-expired'
+                  component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+              />
+              <AppRoute
+                  path='/sign-in-again'
+                  component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
+              />
+              <AppRoute
+                  path='/user-disabled'
+                  component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
+              />
+              <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
+                  <AppRoute
+                      path=''
+                      exact={false}
+                      component={() => <SignedInPage
+                        intermediaryRoute={true}
+                        routeData={{}}
+                        subscribeToInactivitySignOut={subscribeToInactivitySignOut} // TODO angular2react - I think I might be able to just sign out and ignore this field
+                        signOut={signOut}
+                      />}
+                  />
+              </ProtectedRoutes>
+          </Switch>
+      </AppRouter>
+    }
+    {
+     overriddenUrl && <div style={{position: "absolute", top: 0, left: '1rem'}}>
+      <span style={{fontSize: "80%", color: "darkred"}}>
+        API URL: {overriddenUrl}
+      </span>
+     </div>
+    }
+    {
+      !isCookiesEnabled &&
+      <div>
+        <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
+          <div>
+              <img alt="logo" src="/assets/images/all-of-us-logo.svg" width="155px"/>
+          </div>
+          <div style={{fontSize: "20pt", color: "#2F2E7E", padding: "1rem 0 1rem 0"}}>Cookies are Disabled</div>
+          <div style={{fontSize: "14pt", color: "#000000"}}>
+          For full functionality of this site it is necessary to enable cookies.
+          Here are the <a href="https://support.google.com/accounts/answer/61416" style={{color: "#2691D0"}} target="_blank" rel="noopener noreferrer">
+          instructions how to enable cookies in your web browser</a>.
+          </div>
+        </div>
+      </div>
+    }
+
+    <div id="outdated"/> {/* for outdated-browser-rework */}
   </React.Fragment>;
 };
