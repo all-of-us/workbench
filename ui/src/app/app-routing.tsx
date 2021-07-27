@@ -1,6 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import * as fp from 'lodash/fp';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
@@ -25,7 +25,7 @@ import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
-import {currentWorkspaceStore, nextWorkspaceWarmupStore, urlParamsStore} from './utils/navigation';
+import {currentWorkspaceStore, nextWorkspaceWarmupStore, signInStore, urlParamsStore} from './utils/navigation';
 
 declare const gapi: any;
 
@@ -55,9 +55,35 @@ interface RoutingProps {
   signOut: () => void;
 }
 
+function clearIdToken(): void {
+  // Using the full page redirect puts a long "id_token" parameter in the
+  // window hash; clear this after gapi has consumed it.
+  window.location.hash = '';
+}
+
+function profileImage() {
+  if (!gapi.auth2) {
+    return null;
+  } else {
+    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
+  }
+}
+
+function signOut(): void {
+  gapi.auth2.getAuthInstance().signOut();
+}
+
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, subscribeToInactivitySignOut, signOut}) => {
   const {authLoaded = false} = useStore(authStore);
   const isUserDisabled = useIsUserDisabled();
+  const [pollAborter, setPollAborter] = useState(new AbortController());
+
+  const nextSignInStore = () => {
+    signInStore.next({
+      signOut: () => signOut(),
+      profileImage: profileImage(),
+    });
+  };
 
   const subscribeToAuth2User = (): void => {
     // The listen below only fires on changes, so we need an initial
@@ -83,16 +109,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     //   });
     // });
 
-
     const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
     authStore.set({...authStore.get(), authLoaded: true, isSignedIn: isSignedIn});
     setLoggedInState(isSignedIn);
 
+    // TODO angular2react - move this API client setup code somewhere else
     const conf = new Configuration({
       basePath: getApiBaseUrl(),
       accessToken: () => currentAccessToken()
     });
-
     bindApiClients(conf);
     notebooksBindApiClients(conf);
 
@@ -101,16 +126,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     // TODO - stuff about isSignedIn subscribable
 
     // TODO - for subscribing
-    // gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
-    //   authStore.set({...authStore.get(), isSignedIn});
-    //   this.zone.run(() => {
-    //     this.isSignedIn.next(isSignedIn);
-    //     if (isSignedIn) {
-    //       this.nextSignInStore();
-    //       this.clearIdToken();
-    //     }
-    //   });
-    // });
+    gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
+      authStore.set({...authStore.get(), isSignedIn});
+      this.isSignedIn.next(isSignedIn);
+      if (isSignedIn) {
+        nextSignInStore();
+        clearIdToken();
+      }
+    });
   };
 
   const makeAuth2 = (config: ConfigResponse): Promise<any> => {
@@ -128,7 +151,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         resolve(gapi.auth2);
       });
     });
-  }
+  };
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
 
@@ -192,7 +215,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   };
 
   useEffect(() => {
-    urlParamsStore
+    const sub = urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(async({ns, wsid}) => {
@@ -233,12 +256,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         }
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-        this.pollAborter.abort();
-        this.pollAborter = new AbortController();
+        pollAborter.abort();
+        setPollAborter(new AbortController());
         try {
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: workspace.namespace,
-            pollAbortSignal: this.pollAborter.signal,
+            pollAbortSignal: pollAborter.signal,
             maxCreateCount: 0,
             maxDeleteCount: 0,
             maxResumeCount: 0
@@ -252,6 +275,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           }
         }
       });
+
+    return sub.unsubscribe;
   }, []);
 
   console.log("Rendering AppRouting: ", authLoaded, isUserDisabled);

@@ -142,6 +142,7 @@ export class SignInService {
     });
   }
 
+  // angular2react - done
   public get currentAccessToken() {
     if (this.testAccessTokenOverride) {
       return this.testAccessTokenOverride;

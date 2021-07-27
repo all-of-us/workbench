@@ -131,65 +131,65 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       }));
 
-    this.subscriptions.push(urlParamsStore
-      .map(({ns, wsid}) => ({ns, wsid}))
-      .distinctUntilChanged(fp.isEqual)
-      .switchMap(async({ns, wsid}) => {
-        currentWorkspaceStore.next(null);
-
-        // This needs to happen for testing because we seed the urlParamsStore with {}.
-        // Otherwise it tries to make an api call with undefined, because the component
-        // initializes before we have access to the route.
-        if (!ns || !wsid) {
-          return null;
-        }
-
-        // In a handful of situations - namely on workspace creation/clone,
-        // the application will preload the next workspace to avoid a redundant
-        // refetch here.
-        const nextWs = nextWorkspaceWarmupStore.getValue();
-        nextWorkspaceWarmupStore.next(undefined);
-        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-          return nextWs;
-        }
-
-        // Hack to ensure auth is loaded before a workspaces API call.
-        await this.signInService.isSignedIn$.first().toPromise();
-
-        return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
-          return {
-            ...wsResponse.workspace,
-            accessLevel: wsResponse.accessLevel
-          };
-        });
-      })
-      .subscribe(async(workspace) => {
-        if (workspace === null) {
-          // This handles the empty urlParamsStore story.
-          return;
-        }
-        currentWorkspaceStore.next(workspace);
-        runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-        this.pollAborter.abort();
-        this.pollAborter = new AbortController();
-        try {
-          await LeoRuntimeInitializer.initialize({
-            workspaceNamespace: workspace.namespace,
-            pollAbortSignal: this.pollAborter.signal,
-            maxCreateCount: 0,
-            maxDeleteCount: 0,
-            maxResumeCount: 0
-          });
-        } catch (e) {
-          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-          // initialization here.
-          if (!(e instanceof ExceededActionCountError)) {
-            throw e;
-          }
-        }
-      })
-    );
+    // this.subscriptions.push(urlParamsStore
+    //   .map(({ns, wsid}) => ({ns, wsid}))
+    //   .distinctUntilChanged(fp.isEqual)
+    //   .switchMap(async({ns, wsid}) => {
+    //     currentWorkspaceStore.next(null);
+    //
+    //     // This needs to happen for testing because we seed the urlParamsStore with {}.
+    //     // Otherwise it tries to make an api call with undefined, because the component
+    //     // initializes before we have access to the route.
+    //     if (!ns || !wsid) {
+    //       return null;
+    //     }
+    //
+    //     // In a handful of situations - namely on workspace creation/clone,
+    //     // the application will preload the next workspace to avoid a redundant
+    //     // refetch here.
+    //     const nextWs = nextWorkspaceWarmupStore.getValue();
+    //     nextWorkspaceWarmupStore.next(undefined);
+    //     if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+    //       return nextWs;
+    //     }
+    //
+    //     // Hack to ensure auth is loaded before a workspaces API call.
+    //     await this.signInService.isSignedIn$.first().toPromise();
+    //
+    //     return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+    //       return {
+    //         ...wsResponse.workspace,
+    //         accessLevel: wsResponse.accessLevel
+    //       };
+    //     });
+    //   })
+    //   .subscribe(async(workspace) => {
+    //     if (workspace === null) {
+    //       // This handles the empty urlParamsStore story.
+    //       return;
+    //     }
+    //     currentWorkspaceStore.next(workspace);
+    //     runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+    //     this.pollAborter.abort();
+    //     this.pollAborter = new AbortController();
+    //     try {
+    //       await LeoRuntimeInitializer.initialize({
+    //         workspaceNamespace: workspace.namespace,
+    //         pollAbortSignal: this.pollAborter.signal,
+    //         maxCreateCount: 0,
+    //         maxDeleteCount: 0,
+    //         maxResumeCount: 0
+    //       });
+    //     } catch (e) {
+    //       // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+    //       // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+    //       // initialization here.
+    //       if (!(e instanceof ExceededActionCountError)) {
+    //         throw e;
+    //       }
+    //     }
+    //   })
+    // );
 
     await this.loadConfig();
     this.loadErrorReporter();
