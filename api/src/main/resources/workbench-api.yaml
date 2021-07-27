@@ -2989,11 +2989,11 @@ paths:
           description: The Participant Chart data
           schema:
             "$ref": "#/definitions/ParticipantChartDataListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/charts/{domain}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/charts/{domain}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
     - "$ref": "#/parameters/workspaceId"
-    - "$ref": "#/parameters/cohortId"
+    - "$ref": "#/parameters/cohortReviewId"
     get:
       tags:
       - cohortReview

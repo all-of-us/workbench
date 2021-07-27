@@ -122,6 +122,4 @@ public interface CohortReviewService {
 
   /** Find list of {@link Vocabulary}.* */
   List<Vocabulary> findVocabularies();
-
-  Long participationCount(DbCohort dbCohort);
 }
