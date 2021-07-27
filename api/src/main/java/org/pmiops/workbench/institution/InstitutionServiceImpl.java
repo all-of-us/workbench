@@ -219,8 +219,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     // to pull RT short name from config or database.
     Optional<InstitutionTierRequirement> rtRequirement =
         getTierRequirement(institution, REGISTERED_TIER_SHORT_NAME);
-    // If the Institution's registered tier agreement requires email addresses, that is restricted
-    // just to few researchers. Confirm if the email address is in the allowed email list
+
+    // If the Institution's registered tier agreement requires email addresses confirm if the email
+    // address is in the allowed email list.
     if (rtRequirement.isPresent()
         && rtRequirement.get().getMembershipRequirement()
             == InstitutionMembershipRequirement.ADDRESSES) {
