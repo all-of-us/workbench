@@ -6474,7 +6474,7 @@ definitions:
         description: Whether eRA commons is required for members in the institution for this tier.
   TierEmailDomains:
     type: object
-    description: A list of email domains which can access each tiers for an institution.
+    description: A list of email domains which can access each tier for an institution.
     required:
       - accessTierShortName
     properties:
@@ -6487,7 +6487,7 @@ definitions:
           type: string
   TierEmailAddresses:
     type: object
-    description: A list of email addresses which can access each tiers for an institution.
+    description: A list of email addresses which can access each tier for an institution.
     required:
       - accessTierShortName
     properties:

@@ -4,14 +4,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="ericsong" id="changelog-174-backfill-institution-tier-requirements">
+    <changeSet author="yonghao" id="changelog-174-backfill-institution-tier-requirements">
         <sql>
             DELETE from institution_tier_requirement WHERE true
         </sql>
         <addUniqueConstraint tableName="institution_tier_requirement"
           columnNames="institution_id, access_tier_id"
           constraintName="institution_tier_requirement_unique_per_inst_per_tier"/>
-        <!--Back fill institution_tier_requirement table for DuaType is MASTER -->
+        <!--Back fill institution_tier_requirement table for DuaType is MASTER or null -->
         <sql>
             INSERT INTO institution_tier_requirement
             (institution_id, access_tier_id, requirement_enum, era_required)

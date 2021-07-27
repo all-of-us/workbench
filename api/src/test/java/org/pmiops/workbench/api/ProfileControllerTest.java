@@ -411,26 +411,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateAccount_Success_NULLDUA() {
-    final Institution broad =
-        new Institution()
-            .shortName("Broad")
-            .displayName("The Broad Institute")
-            .addTierEmailDomainsItem(
-                rtTierEmailDomains.emailDomains(Collections.singletonList("example.com")))
-            .addTierRequirementsItem(rtDomainsRequirement)
-            .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
-    institutionService.createInstitution(broad);
-
-    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName("Broad")
-            .institutionalRoleEnum(InstitutionalRole.STUDENT);
-    createAccountRequest.getProfile().contactEmail("bob@example.com");
-    createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
-  }
-
-  @Test
   public void testCreateAccount_success() {
     createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));

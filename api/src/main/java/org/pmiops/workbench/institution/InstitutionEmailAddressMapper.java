@@ -55,9 +55,9 @@ public interface InstitutionEmailAddressMapper {
 
   default List<TierEmailAddresses> dbAddressesToTierEmailAddresses(
       final Set<DbInstitutionEmailAddress> dbAddresses) {
-    // Iterate dbDomains to get tier name to domains list map. Each of map's entry is a
+    // Iterate dbAddresss to get tier name to addresss list map. Each of map's entry is a
     // TierEmailAddresses
-    Map<String, Set<String>> tierToDomainMap =
+    Map<String, Set<String>> tierToAddressMap =
         dbAddresses.stream()
             .collect(
                 Collectors.groupingBy(
@@ -65,13 +65,12 @@ public interface InstitutionEmailAddressMapper {
                     Collectors.mapping(
                         DbInstitutionEmailAddress::getEmailAddress,
                         Collectors.toCollection(TreeSet::new))));
-    List<TierEmailAddresses> result = new ArrayList<>();
-    tierToDomainMap.forEach(
-        (key, value) ->
-            result.add(
+    return tierToAddressMap.entrySet().stream()
+        .map(
+            e ->
                 new TierEmailAddresses()
-                    .accessTierShortName(key)
-                    .emailAddresses(new ArrayList<>(value))));
-    return result;
+                    .accessTierShortName(e.getKey())
+                    .emailAddresses(new ArrayList<>(e.getValue())))
+        .collect(Collectors.toList());
   }
 }

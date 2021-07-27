@@ -235,7 +235,6 @@ public class InstitutionServiceImpl implements InstitutionService {
       return validated;
     }
 
-    // If Agreement Type is NULL assume MembershipRequirement is DOMAINS
     // If the Institution's registered tier agreement requires email domains, confirm if the contact
     // email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
