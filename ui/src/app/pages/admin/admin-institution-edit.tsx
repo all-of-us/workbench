@@ -8,6 +8,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
+import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
@@ -24,7 +25,6 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {
   getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
   getRegisteredTierRequirement,

@@ -8,7 +8,6 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getTierRequireme
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.db.DbRetryUtils;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
@@ -37,7 +35,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
