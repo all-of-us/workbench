@@ -2388,27 +2388,6 @@ Common.register_command({
   :fn => ->(*args) { update_cdr_config_local("update-cdr-config-local", *args)}
 })
 
-def update_review_demographics(cmd_name, *args)
-  ensure_docker cmd_name, args
-  op = update_cdr_config_options(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-
-  with_cloud_proxy_and_db(gcc) do
-      common = Common.new
-      common.run_inline %W{
-        gradle updateReviewDemographics
-        -PappArgs=[#{op.opts.dry_run}]}
-  end
-end
-
-Common.register_command({
-  :invocation => "update-review-demographics",
-  :description => "Update demographics concept ids",
-  :fn => ->(*args) { update_review_demographics("update-review-demographics", *args)}
-})
-
 def get_test_service_account()
   ServiceAccountContext.new(TEST_PROJECT).run do
     print "Service account key is now in sa-key.json"
