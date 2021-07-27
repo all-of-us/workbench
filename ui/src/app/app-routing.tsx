@@ -6,6 +6,7 @@ import {Redirect} from 'react-router';
 import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import {Switch, useHistory} from 'react-router-dom';
 
+import 'rxjs/Rx';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -36,7 +37,10 @@ declare global {
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const signInGuard: Guard = {
-  allowed: (): boolean => authStore.get().isSignedIn,
+  allowed: (): boolean => {
+    console.log(authStore.get().isSignedIn);
+    return authStore.get().isSignedIn;
+  },
   redirectPath: '/login'
 };
 
@@ -137,7 +141,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // this might run before if react hooks run useEffect on the initial value, otherwise, we should be ok
     // The main thing this affects in the value of authLoaded being true. The rest of the fields make sense
     // with both values of isSignedIn
-    authStore.set({...authStore.get(), authLoaded: true, isSignedIn});
+    console.log("Running useEffect authLoaded ", authLoaded, isSignedIn);
+    authStore.set({...authStore.get(), isSignedIn});
     if (isSignedIn) {
       nextSignInStore();
       clearIdToken();
@@ -165,8 +170,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           scope: 'https://www.googleapis.com/auth/plus.login openid profile'
             + (config.enableBillingUpgrade ? ' https://www.googleapis.com/auth/cloud-billing' : '')
         }).then(() => {
+          authStore.set({
+            authLoaded: true,
+            isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()
+          });
           setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
 
+          console.log("Setting up gapi auth listener", gapi.auth2.getAuthInstance().isSignedIn.get());
           gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
             setIsSignedIn(nextIsSignedIn);
           });
@@ -207,15 +217,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     makeAuth2(config);
   };
 
-  if (serverConfigStore.get().config) {
-    this.serverConfigStoreCallback(serverConfigStore.get().config);
-  } else {
-    const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
-      unsubscribe();
-      this.serverConfigStoreCallback(configStore.config);
-    });
-  }
-
   useEffect(() => {
     // We only want to run this callback once. Either run it now or subscribe and run it later when we
     // get the config.
@@ -238,17 +239,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
 
   useEffect(() => {
     loadConfig();
-  }, []);
-
-  useEffect(() => {
-    if (serverConfigStore.get().config) {
-      serverConfigStoreCallback(serverConfigStore.get().config);
-    } else {
-      const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
-        unsubscribe();
-        serverConfigStoreCallback(configStore.config);
-      });
-    }
   }, []);
 
   const currentAccessToken = () => {

@@ -73,7 +73,7 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subscriptions = [];
-    subscriptions.push(props.subscribeToInactivitySignOut());
+    props.subscribeToInactivitySignOut();
     // This handles detection of Angular-based routing data.
     subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);

@@ -65,11 +65,14 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
   const routeParams = useParams();
   const routeHistory = useHistory();
 
+  console.log(guards);
+
   return <Route exact={exact} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+      console.log(redirectPath);
       return redirectPath
-        ? <NavRedirect path={redirectPath}/>
+        ? <Redirect to={redirectPath}/>
         : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
     }}>
   </Route>;
