@@ -114,6 +114,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         return emailAddress !== '' || !!emailAddress;
       });
 
+    // TODO(RW-6933): Implement new institution admin UI with CT support.
     this.setState(fp.set(['institution', 'tierEmailAddresses'],
         [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: updatedEmailAddress}]));
     updatedEmailAddress.map(emailAddress => {
@@ -141,6 +142,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailDomains = getRegisteredTierEmailDomains(this.state.institution);
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
+    // TODO(RW-6933): Implement new institution admin UI with CT support.
     this.setState(fp.set(['institution', 'tierEmailDomains'],
         [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailDomainsWithNoEmptyString}]));
 
@@ -164,6 +166,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   setTierRequirement(membershipRequirement, attribute) {
+    // TODO(RW-6933): Implement new institution admin UI with CT support.
     this.setState(fp.set(['institution', attribute],
       [{accessTierShortName: AccessTierShortNames.Registered,
         membershipRequirement: membershipRequirement.value, eRARequired: true}]));
@@ -189,7 +192,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   // Check if the fields have not been edited
-  fieldsNotEdited() {
+  fieldsEdited() {
     return (this.isAddInstitutionMode && !this.fieldsNotEditedAddInstitution)
         || (institutionToEdit && this.fieldsNotEditedEditInstitution);
   }
@@ -214,11 +217,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         institution.organizationTypeOtherText === institutionToEdit.organizationTypeOtherText;
   }
 
-  validateRequiredFields() {
+  hasInvalidFields() {
     const {institution} = this.state;
     let emailValid = true;
     if (!institution.tierRequirements) {
-      // It is not expect to not having empty tier requirement
+      // It is not expected for a tier requirement to be empty
       return false;
     }
     const rtRequirement = getRegisteredTierRequirement(institution);
@@ -237,7 +240,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
-    return this.validateRequiredFields() || errors || this.fieldsNotEdited()
+    return this.hasInvalidFields() || errors || this.fieldsEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
 
@@ -250,9 +253,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       } else if (rtRequirement.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         institution.tierEmailDomains = [{accessTierShortName: AccessTierShortNames.Registered}];
       }
-      if (institution.organizationTypeEnum !== OrganizationType.OTHER) {
-        institution.organizationTypeOtherText = null;
-      }
+    }
+    if (institution.organizationTypeEnum !== OrganizationType.OTHER) {
+      institution.organizationTypeOtherText = null;
     }
 
     if (institutionMode === InstitutionMode.EDIT) {
@@ -280,7 +283,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backButton() {
-    if (!this.fieldsNotEdited()) {
+    if (!this.fieldsEdited()) {
       this.setState({showBackButtonWarning: true});
     } else {
       this.backNavigate();
@@ -293,18 +296,28 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    const rtEmailAddresses = getRegisteredTierEmailAddresses(institution);
-    return institution.tierRequirements && institution.tierEmailAddresses &&
-        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-        || rtEmailAddresses && rtEmailAddresses.length > 0;
+    if (!institution.tierRequirements || institution.tierEmailAddresses) {
+      return false;
+    }
+    if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+      const rtEmailAddresses = getRegisteredTierEmailAddresses(institution);
+      return rtEmailAddresses && rtEmailAddresses.length > 0;
+    } else {
+      return true;
+    }
   }
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
-    const rtEmailDomains = getRegisteredTierEmailDomains(institution);
-    return institution.tierRequirements && institution.tierEmailDomains &&
-        getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ||
-        rtEmailDomains && rtEmailDomains.length > 0;
+    if (!institution.tierRequirements || institution.tierEmailDomains) {
+      return false;
+    }
+    if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+      const rtEmailDomains = getRegisteredTierEmailDomains(institution);
+      return rtEmailDomains && rtEmailDomains.length > 0;
+    } else {
+      return true;
+    }
   }
 
   get buttonText() {
