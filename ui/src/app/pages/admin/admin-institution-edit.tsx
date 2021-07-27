@@ -296,7 +296,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    if (!institution.tierRequirements || institution.tierEmailAddresses) {
+    if (!institution.tierRequirements) {
       return false;
     }
     if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
@@ -309,7 +309,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
-    if (!institution.tierRequirements || institution.tierEmailDomains) {
+    if (!institution.tierRequirements) {
       return false;
     }
     if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
