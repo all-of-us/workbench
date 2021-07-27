@@ -3,9 +3,10 @@ package org.pmiops.workbench.institution;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
-import org.pmiops.workbench.model.TierEmailAddresses;
 import org.pmiops.workbench.model.TierEmailDomains;
 
 /** Utilities for RW institution related functionalities. */
@@ -18,14 +19,12 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailAddressesByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    Optional<TierEmailAddresses> tierEmailAddresses =
-        institution.getTierEmailAddresses().stream()
-            .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-            .findFirst();
-    if (!tierEmailAddresses.isPresent() || tierEmailAddresses.get().getEmailAddresses() == null) {
-      return new HashSet<>();
-    }
-    return new HashSet<>(tierEmailAddresses.get().getEmailAddresses());
+    return institution.getTierEmailAddresses().stream()
+        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
+        .flatMap(
+            tea ->
+                tea.getEmailAddresses() == null ? Stream.empty() : tea.getEmailAddresses().stream())
+        .collect(Collectors.toSet());
   }
 
   /**

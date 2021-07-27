@@ -16,7 +16,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.TierEmailDomaines;
 import org.pmiops.workbench.model.TierEmailDomains;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 

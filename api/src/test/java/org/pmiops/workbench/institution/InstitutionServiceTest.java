@@ -581,27 +581,6 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_nullTierRequirement_incorrectEmailDomain() {
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .tierEmailDomains(
-                    ImmutableList.of(
-                        rtTierEmailDomains.emailDomains(
-                            ImmutableList.of("broad.org", "google.com"))))
-                .tierEmailAddresses(
-                    ImmutableList.of(
-                        rtTierEmailAddress.emailAddresses(
-                            ImmutableList.of("joel@broad.org", "joel@google.com"))))
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
-
-    final DbUser user = createUser("hack@broadinstitute.org");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
-  }
-
-  @Test
   public void test_emailValidation_changedShortName() {
     final String oldShortName = "Broad";
     final String newShortName = "TheBroad";

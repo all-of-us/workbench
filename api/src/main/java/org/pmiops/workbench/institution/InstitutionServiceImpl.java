@@ -6,7 +6,6 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddresse
 import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierRequirement;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,6 +34,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierRequirement;
@@ -386,8 +386,10 @@ public class InstitutionServiceImpl implements InstitutionService {
       final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
     // Make sure the delete success.
-    Preconditions.checkArgument(
-        institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty());
+    if (institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
+      throw new ServerErrorException(
+          "Failed to cleanup existing tier requirements before replacing them");
+    }
     institutionTierRequirementMapper
         .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
         .forEach(institutionTierRequirementDao::save);
@@ -421,9 +423,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     // All tier need to be present in API if tier requirement is present.
     if (institutionRequest.getTierRequirements() != null) {
       List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
-      List<InstitutionTierRequirement> institutionTierRequirements =
-          institutionRequest.getTierRequirements();
-      for (InstitutionTierRequirement tierRequirement : institutionTierRequirements) {
+      for (InstitutionTierRequirement tierRequirement : institutionRequest.getTierRequirements()) {
         // All tier need to be present in API if tier requirement is present.
         getAccessTierByShortNameOrThrow(dbAccessTiers, tierRequirement.getAccessTierShortName());
         // Each Email address in all tiers is valid.
