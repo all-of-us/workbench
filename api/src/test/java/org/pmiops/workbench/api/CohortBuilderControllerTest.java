@@ -32,7 +32,6 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -90,8 +89,6 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   @BeforeEach
   public void setUp() {
-    ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
     CohortBuilderService cohortBuilderService =
         new CohortBuilderServiceImpl(
@@ -107,8 +104,7 @@ public class CohortBuilderControllerTest extends SpringTest {
             cohortBuilderMapper,
             mySQLStopWordsProvider);
     controller =
-        new CohortBuilderController(
-            elasticSearchService, configProvider, cohortBuilderService, workspaceAuthService);
+        new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
