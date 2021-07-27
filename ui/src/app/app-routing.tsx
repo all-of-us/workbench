@@ -13,11 +13,8 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
-import {SignInService} from 'app/services/sign-in.service';
-import {ReactWrapperBase} from 'app/utils';
 import {useIsUserDisabled} from 'app/utils/access-utils';
 import {authStore, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {Subscription} from 'rxjs/Subscription';
 import {environment} from '../environments/environment';
 import {ConfigResponse, Configuration} from '../generated/fetch';
 import {NotificationModal} from './components/modals';
@@ -76,24 +73,37 @@ function profileImage() {
   }
 }
 
-function signIn(): void {
-  gapi.auth2.getAuthInstance().signIn({
-    'prompt': 'select_account',
-    'ux_mode': 'redirect',
-    'redirect_uri': `${window.location.protocol}//${window.location.host}`
-  });
-}
-
-function signOut(): void {
-  gapi.auth2.getAuthInstance().signOut();
-}
-
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn, subscribeToInactivitySignOut, signOut}) => {
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const {authLoaded = false} = useStore(authStore);
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [testAccessTokenOverride, setTestAccessTokenOverride] = useState(undefined);
+  const [signInMounted, setSignInMounted] = useState(false);
+  const [doSignOut, setDoSignOut] = useState(false);
+
+  // TODO angular2react - does this work?
+  const onSignIn = (): void => {
+    setSignInMounted(true);
+  };
+
+  const signIn = (): void => {
+    AnalyticsTracker.Registration.SignIn();
+
+    gapi.auth2.getAuthInstance().signIn({
+      'prompt': 'select_account',
+      'ux_mode': 'redirect',
+      'redirect_uri': `${window.location.protocol}//${window.location.host}`
+    });
+  };
+
+  const signOut = (): void => {
+    gapi.auth2.getAuthInstance().signOut();
+  };
+
+  const subscribeToInactivitySignOut = () => {
+    setDoSignOut(true);
+  };
 
   const nextSignInStore = () => {
     signInStore.next({
@@ -131,6 +141,17 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     if (isSignedIn) {
       nextSignInStore();
       clearIdToken();
+
+      // TODO angular2react - does this work?
+      if (signInMounted) {
+        console.log("Calling redirect to root");
+        <Redirect to='/'/>;
+      }
+    } else {
+      // TODO angular2react - do I really need to check this? when would I ever want to not sign out here
+      if (doSignOut) {
+        signOut();
+      }
     }
     setLoggedInState(isSignedIn);
   }, [isSignedIn]);
@@ -198,7 +219,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
   useEffect(() => {
     // We only want to run this callback once. Either run it now or subscribe and run it later when we
     // get the config.
-    const serverConfig = useStore(serverConfigStore);
+    const serverConfig = serverConfigStore.get();
     if (serverConfig.config) {
       serverConfigStoreCallback(serverConfig.config);
     } else {
@@ -349,7 +370,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               component={() => <SignedInPage
                   intermediaryRoute={true}
                   routeData={{}}
-                  subscribeToInactivitySignOut={() => {}} // Add subscription to sign out maybe?
+                  subscribeToInactivitySignOut={subscribeToInactivitySignOut} // TODO angular2react - I think I might be able to just sign out and ignore this field
                   signOut={signOut}
               />}
           />
@@ -358,41 +379,3 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     </AppRouter>
   </React.Fragment>;
 };
-
-@AComponent({
-  template: '<div #root style="display: inline;"></div>'
-})
-export class AppRouting extends ReactWrapperBase {
-  constructor(private signInService: SignInService) {
-    super(AppRoutingComponent, ['onSignIn', 'signIn', 'subscribeToInactivitySignOut', 'signOut']);
-    this.onSignIn = this.onSignIn.bind(this);
-    this.signIn = this.signIn.bind(this);
-    this.subscribeToInactivitySignOut = this.subscribeToInactivitySignOut.bind(this);
-    this.signOut = this.signOut.bind(this);
-  }
-
-  onSignIn(): void {
-    this.signInService.isSignedIn$.subscribe((signedIn) => {
-      if (signedIn) {
-        return <Redirect to='/'/>;
-      }
-    });
-  }
-
-  signIn(): void {
-    AnalyticsTracker.Registration.SignIn();
-    signIn();
-  }
-
-  subscribeToInactivitySignOut(): Subscription {
-    return this.signInService.isSignedIn$.subscribe(signedIn => {
-      if (!signedIn) {
-        this.signOut();
-      }
-    });
-  }
-
-  signOut(): void {
-    signOut();
-  }
-}

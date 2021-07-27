@@ -41,28 +41,6 @@ export const signInStore =
     profileImage: {} as string,
   });
 
-/**
- * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This
- * strategy requires identical params for route reuse, in addition to route
- * config matching.
- *
- * This avoid bugs from invalid parameter assumptions in views and for the most
- * part should not affect performance, based on parameter usage in the
- * application.
- */
-export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
-  // The following methods are copied from Angular's DefaultRouteReuseStrategy.
-  shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
-  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void {}
-  shouldAttach(route: ActivatedRouteSnapshot): boolean { return false; }
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle|null { return null; }
-
-  shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    return future.routeConfig === curr.routeConfig
-      && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
-  }
-}
-
 export const useNavigation = () => {
   const history = useHistory();
 

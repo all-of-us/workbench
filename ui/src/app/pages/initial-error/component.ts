@@ -2,6 +2,8 @@ import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {NavigationError, Router} from '@angular/router';
 
+// TODO angular2react - looks like this needs to be ported
+
 // Mostly borrowed from the Job Manager.
 @Component({
   selector: 'app-initial-error',
