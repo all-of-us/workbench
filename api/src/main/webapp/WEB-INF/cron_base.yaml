@@ -13,13 +13,6 @@ cron:
   timezone: UTC
   target: api
 - description: >
-    Daily sync of eRA Commons linkage status (via FireCloud API). Records changes in the log,
-    but currently does not drive any downstream processes.
-  url: /v1/cron/bulkSyncEraCommonsStatus
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
-- description: >
     Update our database cache of users' two-factor authentication settings on their GSuite accounts
     via Google Directory Service.
   url: /v1/cron/bulkSyncTwoFactorAuthStatus
