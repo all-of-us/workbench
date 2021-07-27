@@ -7,10 +7,11 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {NavigationProps, urlParamsStore, withNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -64,7 +65,7 @@ const actionCards = [
   },
 ];
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
 }
 
@@ -73,7 +74,7 @@ interface State {
   cohortLoading: boolean;
 }
 
-export const CohortActions = withCurrentWorkspace()(
+export const CohortActions = fp.flow(withCurrentWorkspace(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -90,7 +91,7 @@ export const CohortActions = withCurrentWorkspace()(
           if (c) {
             this.setState({cohort: c, cohortLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+            this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts']);
           }
         });
       }
@@ -116,7 +117,7 @@ export const CohortActions = withCurrentWorkspace()(
         case 'newCohort':
           url += `data/cohorts/build`;
       }
-      navigateByUrl(url);
+      this.props.navigateByUrl(url);
     }
 
     render() {

@@ -11,14 +11,14 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 import {ExportDatasetModal} from './export-dataset-modal';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -35,7 +35,8 @@ interface State {
 export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay()
+  withSpinnerOverlay(),
+  withNavigation
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -66,7 +67,7 @@ export const DatasetResourceCard = fp.flow(
         displayName: 'Edit',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenEditPage('From Card Snowman');
-          navigate(['workspaces',
+          this.props.navigate(['workspaces',
             resource.workspaceNamespace,
             resource.workspaceFirecloudName,
             'data', 'data-sets', resource.dataSet.id]);

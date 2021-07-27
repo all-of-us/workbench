@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {navigate, queryParamsStore} from 'app/utils/navigation';
+import {NavigationProps, queryParamsStore, withNavigation} from 'app/utils/navigation';
 
 import {
   Clickable, StyledAnchorTag,
@@ -71,7 +71,7 @@ export const styles = reactStyles({
   },
 });
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -99,7 +99,7 @@ interface State {
   videoId: string;
 }
 
-export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
+export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
   private quickTourResourcesDiv: HTMLDivElement;
@@ -190,10 +190,14 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
+  getRegistrationTasksMap() {
+    return getRegistrationTasksMap(this.props.navigate);
+  }
+
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
-        trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
+        trainingCompleted: !!(this.getRegistrationTasksMap()['complianceTraining']
           .completionTimestamp(result))
       });
     }).catch(err => {
@@ -202,7 +206,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
-        twoFactorAuthCompleted: !!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
+        twoFactorAuthCompleted: !!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
@@ -233,10 +237,10 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
       this.setState({
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
-            (() => !!(getRegistrationTasksMap()['eraCommons']
+            (() => !!(this.getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
-          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
+          (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
@@ -364,13 +368,13 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                   style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
                                   onClick={() => {
                                     AnalyticsTracker.Workspaces.OpenCreatePage();
-                                    navigate(['workspaces/build']);
+                                    this.props.navigate(['workspaces/build']);
                                   }}
                                 />
                               </FlexRow>
                               <span
                                 style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                onClick={() => navigate(['workspaces'])}
+                                onClick={() => this.props.navigate(['workspaces'])}
                               >
                                 See all workspaces
                               </span>

@@ -27,10 +27,10 @@ import {
 import {
   conceptSetUpdating,
   currentConceptSetStore,
-  currentConceptStore, navigate,
-  NavStore,
+  currentConceptStore,
+  NavigationProps,
   queryParamsStore,
-  setSidebarActiveIconStore
+  setSidebarActiveIconStore, withNavigation
 } from 'app/utils/navigation';
 import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -99,7 +99,7 @@ function sortAndStringify(concepts) {
   return JSON.stringify(concepts.sort((a, b) => a.id - b.id));
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   cohortContext: any;
   concept: Array<Criteria>;
   workspace: WorkspaceData;
@@ -125,7 +125,7 @@ interface State {
   conceptSetUpdating: boolean;
 }
 
-export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withUrlParams())
+export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withUrlParams(), withNavigation)
   (class extends React.Component<Props, State> {
     resolveUnsavedModal: Function;
     subscription: Subscription;
@@ -226,7 +226,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
-        navigate(['workspaces', ns, wsid, 'data', 'concepts']);
+        this.props.navigate(['workspaces', ns, wsid, 'data', 'concepts']);
       } catch (error) {
         console.error(error);
         this.setState({error: true, errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
@@ -376,7 +376,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
               </FlexColumn>
             }
           </React.Fragment>}
-          {!loading && <CriteriaSearch backFn={() => NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
+          {!loading && <CriteriaSearch backFn={() => this.props.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
                           cohortContext={this.searchContext}
                           conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}/>}
           <Button style={{float: 'right', marginBottom: '2rem'}}

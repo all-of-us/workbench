@@ -52,6 +52,7 @@ export const RouteLink = ({path, style = {}, children}): React.ReactElement => <
 // We will utilize a redirect component that uses the Angular navigation.
 // Upon completing the migration this can be replaced with a react-router Redirect component.
 // Exported for testing.
+// TODO angular2react - not sure what to do about this
 export const NavRedirect = ({path}) => {
   navigate([path]);
   return null;

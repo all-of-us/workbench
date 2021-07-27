@@ -10,7 +10,7 @@ import {queryResultSizeStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortReviewStore, navigate} from 'app/utils/navigation';
+import {currentCohortReviewStore, NavigationProps, withNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
@@ -47,7 +47,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props {
+interface Props extends NavigationProps {
   canceled: Function;
   cohort: Cohort;
   cohortReview: CohortReview;
@@ -61,7 +61,7 @@ interface State {
   numberOfParticipants: string;
 }
 
-export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
+export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
   class extends React.Component<Props, State> {
 
     constructor(props: any) {
@@ -89,7 +89,7 @@ export const CreateReviewModal = fp.flow(withCurrentCohortReview(), withCurrentW
           queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({creating: false});
           this.props.created(true);
-          navigate(['workspaces', namespace, id, 'data', 'cohorts', cohort.id, 'review', 'participants']);
+          this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts', cohort.id, 'review', 'participants']);
         });
     }
 

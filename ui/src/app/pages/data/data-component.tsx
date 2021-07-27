@@ -11,7 +11,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
@@ -86,6 +86,7 @@ interface Props extends WithSpinnerOverlayProps {
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
+  const [navigate, ] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

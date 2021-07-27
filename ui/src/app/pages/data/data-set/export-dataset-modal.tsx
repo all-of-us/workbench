@@ -13,7 +13,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
+import {encodeURIComponentStrict, useNavigation} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -62,6 +62,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     const [codePreview, setCodePreview] = useState(null);
     const [loadingNotebook, setIsLoadingNotebook] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
+    const [, navigateByUrl] = useNavigation();
 
     async function exportDataset() {
       AnalyticsTracker.DatasetBuilder.Export(kernelType);

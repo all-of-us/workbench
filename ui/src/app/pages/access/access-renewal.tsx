@@ -23,7 +23,7 @@ import {
   withStyle
 } from 'app/utils';
 import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
-import {navigateByUrl} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {RenewableAccessModuleStatus} from 'generated/fetch';
 import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
@@ -230,6 +230,7 @@ export const AccessRenewal = fp.flow(
   const reportId = useId();
   const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [, navigateByUrl] = useNavigation();
 
 
   // onMount - as we move between pages, let's make sure we have the latest profile

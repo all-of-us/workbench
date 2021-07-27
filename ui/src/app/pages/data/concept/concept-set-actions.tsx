@@ -7,10 +7,16 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {
+  conceptSetUpdating,
+  NavigationProps,
+  urlParamsStore,
+  withNavigation
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -64,11 +70,11 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = withCurrentWorkspace()(
+export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -89,7 +95,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'data', 'concepts']);
+            this.props.navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
@@ -113,7 +119,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           url += `data/data-sets`;
           break;
       }
-      navigateByUrl(url);
+      this.props.navigateByUrl(url);
     }
 
     render() {

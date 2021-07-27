@@ -9,11 +9,11 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
-import {navigateByUrl} from 'app/utils/navigation';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
 import {DataSet, WorkspaceResource} from 'generated/fetch';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -29,6 +29,7 @@ export const CohortResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
+  withNavigation
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -66,13 +67,13 @@ export const CohortResourceCard = fp.flow(
       {
         icon: 'pencil',
         displayName: 'Edit',
-        onClick: () => navigateByUrl(getResourceUrl(resource)),
+        onClick: () => this.props.navigateByUrl(getResourceUrl(resource)),
         disabled: !canWrite(resource)
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
-        onClick: () => navigateByUrl(this.reviewUrlForCohort),
+        onClick: () => this.props.navigateByUrl(this.reviewUrlForCohort),
         disabled: !canWrite(resource)
       },
       {

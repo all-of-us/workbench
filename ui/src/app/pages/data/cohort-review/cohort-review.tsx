@@ -9,7 +9,12 @@ import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-sta
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {currentCohortReviewStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentCohortReviewStore,
+  currentWorkspaceStore,
+  NavigationProps,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -20,13 +25,15 @@ const styles = reactStyles({
   },
 });
 
+interface Props extends WithSpinnerOverlayProps, NavigationProps {}
+
 interface State {
   reviewPresent: boolean;
   cohort: Cohort;
   readonly: boolean;
 }
 
-export class CohortReview extends React.Component<WithSpinnerOverlayProps, State> {
+export class CohortReview extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -53,7 +60,7 @@ export class CohortReview extends React.Component<WithSpinnerOverlayProps, State
       const reviewPresent = cohortReview.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});
       if (reviewPresent) {
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+        this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));

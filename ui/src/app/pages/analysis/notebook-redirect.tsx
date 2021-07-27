@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {navigate, urlParamsStore} from 'app/utils/navigation';
+import {NavigationProps, urlParamsStore, withNavigation} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -212,7 +212,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -228,6 +228,7 @@ export const NotebookRedirect = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withQueryParams(),
+  withNavigation
 )(
   class extends React.Component<Props, State> {
 
@@ -316,7 +317,7 @@ export const NotebookRedirect = fp.flow(
       const isLoaded = this.state.progress === Progress.Loaded;
       if (isLoaded && prevStatus === RuntimeStatus.Running &&
           runtime !== undefined && (runtime === null || runtime.status !== RuntimeStatus.Running)) {
-        navigate([
+        this.props.navigate([
           'workspaces', workspace.namespace, workspace.id,
           // navigate will encode the notebook name automatically
           'notebooks', 'preview', this.getFullNotebookName()

@@ -6,7 +6,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigateByUrl} from 'app/utils/navigation';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {Institution} from 'generated/fetch';
 import {DuaType, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -46,13 +46,16 @@ const styles = reactStyles({
   }
 });
 
+interface Props extends WithSpinnerOverlayProps, NavigationProps {}
+
 interface State {
   loadingInstitutions: boolean;
   institutions: Array<Institution>;
   institutionLoadError: boolean;
 }
 
-export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, State> {
+export const AdminInstitution = fp.flow(withNavigation)(
+  class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -123,7 +126,7 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
           <label>Institution admin table</label>
               <Button type='secondaryLight'
                       style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                      onClick={() => navigateByUrl('admin/institution/add')}
+                      onClick={() => this.props.navigateByUrl('admin/institution/add')}
                       data-test-id='add-institution'>
                 <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
               </Button>
