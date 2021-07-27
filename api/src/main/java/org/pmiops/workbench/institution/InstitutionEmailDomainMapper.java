@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.TierEmailDomaines;
 import org.pmiops.workbench.model.TierEmailDomains;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -65,13 +66,12 @@ public interface InstitutionEmailDomainMapper {
                     Collectors.mapping(
                         DbInstitutionEmailDomain::getEmailDomain,
                         Collectors.toCollection(TreeSet::new))));
-    List<TierEmailDomains> result = new ArrayList<>();
-    tierToDomainMap.forEach(
-        (key, value) ->
-            result.add(
+    return tierToDomainMap.entrySet().stream()
+        .map(
+            e ->
                 new TierEmailDomains()
-                    .accessTierShortName(key)
-                    .emailDomains(new ArrayList<>(value))));
-    return result;
+                    .accessTierShortName(e.getKey())
+                    .emailDomains(new ArrayList<>(e.getValue())))
+        .collect(Collectors.toList());
   }
 }
