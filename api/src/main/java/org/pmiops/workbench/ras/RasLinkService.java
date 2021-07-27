@@ -15,13 +15,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -83,6 +87,7 @@ import org.springframework.stereotype.Service;
 public class RasLinkService {
   private static final Logger log = Logger.getLogger(RasLinkService.class.getName());
 
+  private final AccessModuleService accessModuleService;
   private final UserService userService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
@@ -121,7 +126,16 @@ public class RasLinkService {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
     }
-    return userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+
+    // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
+    // information. TODO(RW-7108): Make eRA optional
+    DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+    Optional<AccessModuleStatus> eRAModuleStatus = accessModuleService.getClientAccessModuleStatus(user).stream().filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS).findFirst();
+    if(eRAModuleStatus.isPresent() && (eRAModuleStatus.get().getCompletionEpochMillis() != null || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
+      return user;
+    } else {
+      return userService.updateRasLinkEraStatus()
+    }
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */

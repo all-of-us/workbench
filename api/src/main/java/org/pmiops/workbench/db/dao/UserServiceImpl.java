@@ -1081,6 +1081,24 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         Agent.asUser(dbUser));
   }
 
+  @Override
+  public DbUser updateRasLinkEraStatus(String eRACommonsUsername) {
+    DbUser dbUser = userProvider.get();
+
+    return updateUserWithRetries(
+        user -> {
+          // user.setEraCommonsCompletionTime() will be replaced by
+          // accessModuleService.updateCompletionTime()
+          Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          user.setEraCommonsLinkedNihUsername(eRACommonsUsername);
+          user.setEraCommonsCompletionTime(timestamp);
+          accessModuleService.updateCompletionTime(user, AccessModuleName.ERA_COMMONS, timestamp);
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
+  }
+
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   @Override
   public DbUser confirmProfile(DbUser dbUser) {
