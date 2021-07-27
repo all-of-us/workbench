@@ -100,9 +100,6 @@ public interface UserService {
 
   DbUser syncEraCommonsStatus();
 
-  DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
-      throws IOException, org.pmiops.workbench.firecloud.ApiException;
-
   /**
    * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
    * database and the gsuite directory API. This may affect the user's enabled access tiers. This

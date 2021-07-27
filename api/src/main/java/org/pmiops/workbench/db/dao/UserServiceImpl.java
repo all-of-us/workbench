@@ -901,39 +901,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
   }
 
-  /**
-   * Syncs the eraCommons access module status for an arbitrary user.
-   *
-   * <p>This uses impersonated credentials and should only be called in the context of a cron job or
-   * a request from a user with elevated privileges.
-   *
-   * <p>Returns the updated User object.
-   */
-  @Override
-  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
-      throws IOException, org.pmiops.workbench.firecloud.ApiException {
-    if (isServiceAccount(user)) {
-      // Skip sync for service account user rows.
-      return user;
-    }
-
-    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getUsername());
-    NihApi api = new NihApi(apiClient);
-    try {
-      FirecloudNihStatus nihStatus = api.nihStatus();
-      return setEraCommonsStatus(user, nihStatus, agent);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-        // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
-        // eRA Commons linkage.
-        log.info(String.format("NIH Status not found for user %s", user.getUsername()));
-        return user;
-      } else {
-        throw e;
-      }
-    }
-  }
-
   @Override
   public void syncTwoFactorAuthStatus() {
     DbUser user = userProvider.get();

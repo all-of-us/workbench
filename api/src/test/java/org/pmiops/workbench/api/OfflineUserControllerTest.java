@@ -160,34 +160,4 @@ public class OfflineUserControllerTest extends SpringTest {
     }
     verify(mockUserService, times(2)).syncTwoFactorAuthStatus(any(), any(), eq(false));
   }
-
-  @Test
-  public void testBulkSyncEraCommonsStatus()
-      throws IOException, org.pmiops.workbench.firecloud.ApiException {
-    doAnswer(i -> i.getArgument(0))
-        .when(mockUserService)
-        .syncEraCommonsStatusUsingImpersonation(any(), any());
-    offlineUserController.bulkSyncEraCommonsStatus();
-    verify(mockUserService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
-  }
-
-  @Test
-  public void testBulkSyncEraCommonsStatusWithSingleUserError()
-      throws ApiException, NotFoundException, IOException,
-          org.pmiops.workbench.firecloud.ApiException {
-    assertThrows(
-        ServerErrorException.class,
-        () -> {
-          doAnswer(i -> i.getArgument(0))
-              .when(mockUserService)
-              .syncEraCommonsStatusUsingImpersonation(any(), any());
-          doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
-              .when(mockUserService)
-              .syncEraCommonsStatusUsingImpersonation(
-                  argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
-          offlineUserController.bulkSyncEraCommonsStatus();
-          // Even when a single call throws an exception, we call the service for all users.
-          verify(mockUserService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
-        });
-  }
 }

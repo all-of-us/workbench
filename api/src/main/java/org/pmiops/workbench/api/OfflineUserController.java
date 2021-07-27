@@ -100,58 +100,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   }
 
   /**
-   * Updates eRA Commons information for all users in the database.
-   *
-   * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
-   */
-  @Override
-  public ResponseEntity<Void> bulkSyncEraCommonsStatus() {
-    int errorCount = 0;
-    int userCount = 0;
-    int completionChangeCount = 0;
-    int accessLevelChangeCount = 0;
-
-    for (DbUser user : userService.getAllUsersExcludingDisabled()) {
-      userCount++;
-      try {
-        // User accounts are registered with Terra on first sign-in. Users who have never signed in
-        // are therefore unusable for impersonated calls to Terra to check on their eRA commons
-        // status.
-        if (user.getFirstSignInTime() == null) {
-          continue;
-        }
-
-        Timestamp oldTime = user.getEraCommonsCompletionTime();
-        List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
-
-        DbUser updatedUser =
-            userService.syncEraCommonsStatusUsingImpersonation(user, Agent.asSystem());
-
-        Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
-        List<String> newTiers = accessTierService.getAccessTierShortNamesForUser(user);
-
-        completionChangeCount +=
-            logCompletionChange(user, oldTime, newTime, AccessModule.ERA_COMMONS);
-        accessLevelChangeCount += logAccessTierChange(user, oldTiers, newTiers);
-      } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        errorCount++;
-        logSyncError(user, e, AccessModule.ERA_COMMONS);
-      } catch (IOException e) {
-        errorCount++;
-        log.severe(
-            String.format(
-                "Error fetching impersonated creds for user %s: %s",
-                user.getUsername(), e.getMessage()));
-      }
-    }
-
-    logChangeTotals(userCount, completionChangeCount, accessLevelChangeCount);
-    throwIfErrors(errorCount, AccessModule.ERA_COMMONS);
-
-    return ResponseEntity.noContent().build();
-  }
-
-  /**
    * Updates 2FA information for all users in the database.
    *
    * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
