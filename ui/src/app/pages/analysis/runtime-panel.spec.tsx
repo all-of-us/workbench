@@ -570,7 +570,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should warn user about reboot if there are updates that require one - number of workers',
+  it('should not warn user for updates where not needed - number of workers',
     async() => {
       const runtime = {
         ...runtimeApiStub.runtime,
@@ -585,10 +585,10 @@ describe('RuntimePanel', () => {
       await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
       await mustClickButton(wrapper, 'Next');
 
-      expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+      expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
     });
 
-  it('should warn user about reboot if there are updates that require one - number of preemptible workers', async() => {
+  it('should not warn user for updates where not needed - number of preemptibles', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
@@ -597,7 +597,7 @@ describe('RuntimePanel', () => {
     await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
     await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
   });
 
   it('should warn user about reboot if there are updates that require one - CPU', async() => {
