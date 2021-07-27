@@ -16,7 +16,6 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -215,7 +214,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
-      String workspaceNamespace, String workspaceId, Long cohortId, String domain, Integer limit) {
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      String domain,
+      Integer limit) {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
@@ -223,20 +226,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
+
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DbCohort dbCohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
-
-    Optional<DbCohortReview> dbCohortReview = dbCohort.getCohortReviews().stream().findFirst();
-    long count =
-        dbCohortReview.isPresent()
-            ? dbCohortReview.get().getMatchedParticipantCount()
-            : cohortReviewService.participationCount(dbCohort);
-
+    CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    DbCohort dbCohort =
+        cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortReview.getCohortId());
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
-            .count(count)
+            .count(cohortReview.getMatchedParticipantCount())
             .items(
                 cohortReviewService.findCohortChartData(
                     dbCohort, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));

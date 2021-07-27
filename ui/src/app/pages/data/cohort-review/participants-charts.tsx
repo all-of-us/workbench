@@ -125,7 +125,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
 
     componentDidMount() {
       const {domain, review, workspace: {id, namespace}} = this.props;
-      cohortReviewApi().getCohortChartData(namespace, id, review.cohortId, domain, 10)
+      cohortReviewApi().getCohortChartData(namespace, id, review.cohortReviewId, domain, 10)
         .then(resp => {
           const data = resp.items.map(item => {
             this.nameRefs.push(React.createRef());
