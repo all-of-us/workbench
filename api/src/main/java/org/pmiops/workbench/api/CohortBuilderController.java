@@ -1,12 +1,8 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -19,7 +15,6 @@ import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuListResponse;
 import org.pmiops.workbench.model.CriteriaRequest;
-import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
@@ -28,8 +23,6 @@ import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -306,22 +299,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .items(
                 cohortBuilderService.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
                     surveyConceptId, questionConceptId, answerConceptId)));
-  }
-
-  /**
-   * This method helps determine what request can only be approximated by elasticsearch and must
-   * fallback to the BQ implementation.
-   */
-  protected boolean isApproximate(SearchRequest request) {
-    List<SearchGroup> allGroups =
-        ImmutableList.copyOf(Iterables.concat(request.getIncludes(), request.getExcludes()));
-    List<SearchParameter> allParams =
-        allGroups.stream()
-            .flatMap(sg -> sg.getItems().stream())
-            .flatMap(sgi -> sgi.getSearchParameters().stream())
-            .collect(Collectors.toList());
-    return allGroups.stream().anyMatch(SearchGroup::getTemporal)
-        || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
   private void validateDomain(String domain) {

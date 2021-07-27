@@ -27,10 +27,7 @@ import org.pmiops.workbench.model.SearchRequest;
 
 /**
  * This lookup utility extracts all criteria groups in the given search request and produces a
- * lookup map from group parameter to set of matching child concept ids. This class was implemented
- * to consolidate logic between the CB query builders and elastic search filters. The ElasticFilters
- * class will need to be refactored to use this lookup util going forward:
- * TODO:https://precisionmedicineinitiative.atlassian.net/browse/RW-2875
+ * lookup map from group parameter to set of matching child concept ids.
  */
 public final class CriteriaLookupUtil {
 
