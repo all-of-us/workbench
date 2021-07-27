@@ -33,14 +33,12 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailDomainsByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    Optional<TierEmailDomains> tierEmailDomains =
-        institution.getTierEmailDomains().stream()
-            .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-            .findFirst();
-    if (!tierEmailDomains.isPresent() || tierEmailDomains.get().getEmailDomains() == null) {
-      return new HashSet<>();
-    }
-    return new HashSet<>(tierEmailDomains.get().getEmailDomains());
+    return institution.getTierEmailDomains().stream()
+        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
+        .flatMap(
+            tea ->
+                tea.getEmailDomains() == null ? Stream.empty() : tea.getEmailDomains().stream())
+        .collect(Collectors.toSet());
   }
 
   /**
