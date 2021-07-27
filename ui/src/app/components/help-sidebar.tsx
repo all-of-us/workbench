@@ -37,7 +37,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
   currentConceptStore, NavigationProps,
-  NavStore,
   setSidebarActiveIconStore, withNavigation
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';

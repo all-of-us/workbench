@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
@@ -12,7 +13,10 @@ import {
   withRouteConfigData,
   withUrlParams
 } from 'app/utils';
-import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {
+  BreadcrumbType,
+  useNavigation
+} from 'app/utils/navigation';
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
@@ -138,13 +142,7 @@ export const getTrail = (
 };
 
 const BreadcrumbLink = ({href, ...props}) => {
-  return <a
-    href={href}
-    onClick={e => {
-      navigateAndPreventDefaultIfNoKeysPressed(e, href);
-    }}
-    {...props}
-  />;
+  return <RouterLink to={href} {...props}/>;
 };
 
 interface Props {

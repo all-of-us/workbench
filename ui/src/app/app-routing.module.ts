@@ -5,7 +5,6 @@ import {AppRouting} from './app-routing';
 
 import {environment} from 'environments/environment';
 import {NavigationGuard} from './guards/navigation-guard';
-import {NavStore} from './utils/navigation';
 
 
 declare let gtag: Function;

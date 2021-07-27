@@ -25,7 +25,10 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   useEffect(() => {
     if (!intermediaryRoute) {
       routeConfigDataStore.next(routeData);
-      routeDataStore.set(routeData);
+
+      if (!fp.isEqual(routeDataStore.get(), routeData)) {
+        routeDataStore.set(routeData);
+      }
     }
   }, [routeData]);
 

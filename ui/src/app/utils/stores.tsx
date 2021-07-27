@@ -20,6 +20,7 @@ export interface RouteDataStore {
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
   contentFullHeightOverride?: boolean;
+  workspaceNavBarTab?: string;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});

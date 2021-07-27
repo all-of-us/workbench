@@ -6,15 +6,9 @@ import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generat
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useEffect} from 'react';
 import {useLocation} from 'react-router';
-import {useHistory, useParams} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {routeDataStore} from './stores';
-
-export const NavStore = {
-  navigateByUrl: undefined
-};
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It
@@ -69,16 +63,12 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
   }
 }
 
-export const navigateByUrl = (...args) => {
-  return NavStore.navigateByUrl(...args);
-};
-
 export const useNavigation = () => {
   const history = useHistory();
 
   // TODO angular2react - handle extras
   // TODO angular2react - rename back to non 2 version
-  const navigate2 = (commands, extras?) => {
+  const navigate = (commands, extras?: NavigateExtras) => {
     // url should always lead with a slash so that the given url replaces the current one
     const url = '/' + commands.join('/').replace(/^\//, '');
     history.push({
@@ -88,19 +78,36 @@ export const useNavigation = () => {
   };
 
   // TODO angular2react - refactor this with navigate
-  const navigateByUrl2 = (url, extras?) => {
+  // TODO angular2react - add type to extras
+  const navigateByUrl = (url, extras?: NavigateExtras) => {
+    url = '/' + url.replace(/^\//, '');
+
+    const preventDefaultIfNoKeysPressed = extras && extras.preventDefaultIfNoKeysPressed && !!extras.event;
+
+    // if modifier keys are pressed (like shift or cmd) use the href
+    // if no keys are pressed, prevent default behavior and route using navigateByUrl
+    if (preventDefaultIfNoKeysPressed && !(extras.event.shiftKey || extras.event.altKey || extras.event.ctrlKey || extras.event.metaKey)) {
+      extras.event.preventDefault();
+    }
+
     history.push({
       pathname: url,
       search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
     });
   };
 
-  return [navigate2, navigateByUrl2];
+  return [navigate, navigateByUrl];
 };
 
+interface NavigateExtras {
+  queryParams?: object;
+  preventDefaultIfNoKeysPressed?: boolean;
+  event?: React.MouseEvent;
+}
+
 export interface NavigationProps {
-  navigate: (commands, extras?) => void;
-  navigateByUrl: (commands, extras?) => void;
+  navigate: (commands, extras?: NavigateExtras) => void;
+  navigateByUrl: (commands, extras?: NavigateExtras) => void;
 }
 
 export const withNavigation = WrappedComponent => ({...props}) => {
@@ -120,15 +127,6 @@ export const encodeURIComponentStrict = (uri: string): string => {
   return encodeURIComponent(uri).replace(/[!'()*]/g, (c) => {
     return '%' + c.charCodeAt(0).toString(16);
   });
-};
-
-// if modifier keys are pressed (like shift or cmd) use the href
-// if no keys are pressed, prevent default behavior and route using navigateByUrl
-export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, url: string) => {
-  if (!(e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    navigateByUrl(url);
-  }
 };
 
 export const navigateSignOut = (continuePath: string = '/login') => {

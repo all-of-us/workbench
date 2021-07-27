@@ -6,20 +6,22 @@ import {WorkspaceRoutes} from 'app/workspace-app-routing';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
+import {routeDataStore, useStore} from '../../utils/stores';
 
 export const WorkspaceWrapper = fp.flow(
-  withCurrentWorkspace(),
-  withRouteConfigData()
+  withCurrentWorkspace()
 )(({workspace, routeConfigData, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
+  const routeData = useStore(routeDataStore);
+
   console.log("Rendering WorkspaceWrapper", workspace);
 
   return <React.Fragment>
     {workspace
         ? <React.Fragment>
-          {!routeConfigData.minimizeChrome && <WorkspaceNavBar tabPath={routeConfigData.workspaceNavBarTab}/>}
-          <HelpSidebar pageKey={routeConfigData.pageKey}/>
-          <div style={{marginRight: '45px', height: !routeConfigData.contentFullHeightOverride ? 'auto' : '100%'}}>
+          {!routeData.minimizeChrome && <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab}/>}
+          <HelpSidebar pageKey={routeData.pageKey}/>
+          <div style={{marginRight: '45px', height: !routeData.contentFullHeightOverride ? 'auto' : '100%'}}>
             <WorkspaceRoutes/>
           </div>
         </React.Fragment>

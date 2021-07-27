@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 import {CSSProperties, PropsWithChildren} from 'react';
 
 import {Clickable} from 'app/components/buttons';
@@ -8,7 +9,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {
   getDescription,
   getDisplayName,
@@ -102,6 +103,7 @@ interface NavProps extends PropsWithChildren<any> {
 const ResourceNavigation = (props: NavProps) => {
   const {resource, linkTestId, style = styles.resourceName, children} = props;
   const url = getResourceUrl(resource);
+  const [, navigateByUrl] = useNavigation();
 
   function canNavigate(): boolean {
     // can always navigate to notebooks
@@ -114,16 +116,11 @@ const ResourceNavigation = (props: NavProps) => {
     }
   }
 
+  // TODO angular2react - navigating to a new page should auto scroll to the top?
   return <Clickable disabled={!canNavigate()}>
-    <a style={style}
-       data-test-id={linkTestId}
-       href={url}
-       onClick={e => {
-         onNavigate();
-         navigateAndPreventDefaultIfNoKeysPressed(e, url);
-       }}>
+    <RouterLink to={url} style={style} data-test-id={linkTestId}>
       {...children}
-    </a>
+    </RouterLink>
   </Clickable>;
 };
 

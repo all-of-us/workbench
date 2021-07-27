@@ -25,7 +25,7 @@ import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
-import {currentWorkspaceStore, NavStore, nextWorkspaceWarmupStore, urlParamsStore} from './utils/navigation';
+import {currentWorkspaceStore, nextWorkspaceWarmupStore, urlParamsStore} from './utils/navigation';
 
 declare const gapi: any;
 

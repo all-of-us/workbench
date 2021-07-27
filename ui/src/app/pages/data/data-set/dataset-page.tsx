@@ -32,7 +32,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   currentWorkspaceStore,
-  navigateAndPreventDefaultIfNoKeysPressed
+  useNavigation
 } from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
@@ -356,14 +356,21 @@ export class ValueListItem extends React.Component<
   }
 }
 
-const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
+const PlusLink = ({dataTestId, path, disable}: {dataTestId: string, path: string, disable?: boolean}) => {
+  const [, navigateByUrl] = useNavigation();
+
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
                          content='Requires Owner or Writer permission'>
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
-            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
-    <ClrIcon shape='plus-circle' class='is-solid' size={16}
-             style={stylesFunction.plusIconColor(disable)}/>
-  </Clickable></TooltipTrigger>;
+               onClick={e => {
+                 navigateByUrl(path, {
+                   preventDefaultIfNoKeysPressed: true,
+                   event: e
+                 });
+               }}>
+      <ClrIcon shape='plus-circle' class='is-solid' size={16}
+               style={stylesFunction.plusIconColor(disable)}/>
+    </Clickable></TooltipTrigger>;
 };
 
 const StepNumber = ({step, style = {}}) => {
@@ -1153,7 +1160,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             <div style={{width: '33%', height: '80%', minWidth: styles.selectBoxHeader.minWidth}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader step='1' header='Select Cohorts' subHeader='Participants'>
-                  {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
+                  <PlusLink dataTestId='cohorts-link' path={cohortsPath} disable={!this.canWrite}/>
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -1180,7 +1187,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
                     <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
+                      <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>

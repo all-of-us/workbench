@@ -17,7 +17,7 @@ import {
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
-import {NavStore, useNavigation} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';

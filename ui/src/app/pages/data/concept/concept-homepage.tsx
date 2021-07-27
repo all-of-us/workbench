@@ -22,7 +22,6 @@ import {
   currentCohortSearchContextStore,
   currentConceptStore,
   NavigationProps,
-  NavStore,
   withNavigation
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';

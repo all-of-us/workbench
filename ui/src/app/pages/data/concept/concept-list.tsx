@@ -16,7 +16,6 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  NavStore,
   setSidebarActiveIconStore, withNavigation
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
