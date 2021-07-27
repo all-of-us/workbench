@@ -392,7 +392,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     // Make sure the delete success.
     Preconditions.checkArgument(
         institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty());
-    institutionTierRequirementMapperß
+    institutionTierRequirementMapper
         .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
         .forEach(institutionTierRequirementDao::save);
   }
