@@ -386,7 +386,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
     // Make sure the delete success.
-    if (institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
+    if (!institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
       throw new ServerErrorException(
           "Failed to cleanup existing tier requirements before replacing them");
     }

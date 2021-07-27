@@ -5,16 +5,15 @@ import {
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
-  InstitutionApi, InstitutionMembershipRequirement,
+  InstitutionApi,
+  InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {
-  getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
-  getTierEmailAddresses,
-  getTierEmailDomains
-} from "app/pages/admin/institution-utils";
-import {AccessTierShortNames} from "app/utils/access-tiers";
+  getRegisteredTierEmailAddresses,
+  getRegisteredTierEmailDomains,
+} from "app/utils/institutions";
 
 export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',

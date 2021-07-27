@@ -8,6 +8,11 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {
+  getRegisteredTierRequirement,
+  getTierEmailAddresses,
+  getTierEmailDomains
+} from 'app/utils/institutions';
 import {navigateByUrl} from 'app/utils/navigation';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
@@ -15,11 +20,6 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {
-  getRegisteredTierRequirement,
-  getTierEmailAddresses,
-  getTierEmailDomains
-} from './institution-utils';
 
 
 const styles = reactStyles({
@@ -100,6 +100,7 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
   }
 
   renderDuaType(row, col) {
+    // TODO(yonghao): Handle NO_ACCESS
     return (getRegisteredTierRequirement(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
         'Individual' : 'Master';
   }

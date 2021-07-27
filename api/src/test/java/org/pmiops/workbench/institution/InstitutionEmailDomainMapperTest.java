@@ -86,6 +86,8 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
 
   @Test
   public void test_modelToDb_tierNotFound() {
+    // The target domains to convert is CT's tier, while the model only contain RT email domains.
+    // Expect to get empty CT domains list.
     TierEmailDomains rtEmailDomains =
         new TierEmailDomains().emailDomains(ImmutableList.of()).accessTierShortName(RT_SHORT_NAME);
     final Institution modelInst =
@@ -97,7 +99,7 @@ public class InstitutionEmailDomainMapperTest extends SpringTest {
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailDomain
     final DbInstitution dbInst = new DbInstitution();
     final Set<DbInstitutionEmailDomain> dbDomains =
-        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+        mapper.modelToDb(modelInst, dbInst, CONTROLLED_ACCESS_TIER);
 
     assertThat(dbDomains).isNotNull();
     assertThat(dbDomains).isEmpty();

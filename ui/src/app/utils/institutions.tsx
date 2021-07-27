@@ -1,7 +1,14 @@
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {
+  Institution,
+  InstitutionalRole,
+  InstitutionMembershipRequirement,
+  InstitutionTierRequirement,
+  PublicInstitutionDetails
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {isAbortError} from './errors';
@@ -58,3 +65,45 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
       availableRoles.includes(option.value)
   );
 };
+
+export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
+  return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
+}
+
+export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
+  if (institution.tierEmailAddresses) {
+    const tierEmailAddresses = institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier);
+    if (tierEmailAddresses) {
+      return institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier).emailAddresses;
+    }
+  }
+  return [];
+}
+
+export function getRegisteredTierEmailDomains(institution: Institution): Array<string> {
+  return getTierEmailDomains(institution, AccessTierShortNames.Registered);
+}
+
+export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
+  if (institution.tierEmailDomains) {
+    const tierEmailDomains = institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier);
+    if (tierEmailDomains) {
+      return institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier).emailDomains;
+    }
+  }
+  return [];
+}
+
+export function getRegisteredTierRequirement(institution: Institution): InstitutionTierRequirement {
+  return getTierRequirement(institution, AccessTierShortNames.Registered);
+}
+
+function getTierRequirement(institution: Institution, accessTier: string): InstitutionTierRequirement {
+  if (!institution.tierRequirements) {
+    return {
+      accessTierShortName: accessTier,
+      membershipRequirement: InstitutionMembershipRequirement.NOACCESS
+    };
+  }
+  return institution.tierRequirements.find(t => t.accessTierShortName === accessTier);
+}

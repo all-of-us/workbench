@@ -14,6 +14,11 @@ import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
+import {
+  getRegisteredTierEmailAddresses,
+  getRegisteredTierEmailDomains,
+  getRegisteredTierRequirement
+} from 'app/utils/institutions';
 import {navigate} from 'app/utils/navigation';
 import {
   DuaType,
@@ -25,10 +30,6 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {
-  getRegisteredTierEmailAddresses, getRegisteredTierEmailDomains,
-  getRegisteredTierRequirement,
-} from './institution-utils';
 
 const styles = reactStyles({
   label: {

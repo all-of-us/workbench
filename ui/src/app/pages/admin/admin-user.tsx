@@ -16,8 +16,8 @@ import {formatFreeCreditsUSD, isBlank, reactStyles, withUrlParams} from 'app/uti
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {getRegisteredTierRequirement} from 'app/pages/admin/institution-utils';
 import {
+  getRegisteredTierRequirement,
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
@@ -101,7 +101,7 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
         // Institution has signed Restricted agreement and the email is not in allowed emails list
         return <RestrictedDuaEmailMismatchErrorMessage/>;
       } else {
-        // Institution has MASTER or NULL agreement and the domain is not in the allowed list
+        // Institution has DOMAINS for registered tier requirement and the domain is not in the allowed list
         return <MasterDuaEmailMismatchErrorMessage/>;
       }
     }

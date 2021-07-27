@@ -88,6 +88,8 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
 
   @Test
   public void test_modelToDb_tierNotFound() {
+    // The target addresses to convert is CT's tier, while the model only contain RT email
+    // addresses. Expect to get empty CT addresses list.
     TierEmailAddresses rtEmailAddresses =
         new TierEmailAddresses()
             .emailAddresses(ImmutableList.of())
@@ -101,7 +103,7 @@ public class InstitutionEmailAddressMapperTest extends SpringTest {
     // does not need to match the modelInst; it is simply attached to the DbInstitutionEmailAddress
     final DbInstitution dbInst = new DbInstitution();
     final Set<DbInstitutionEmailAddress> dbAddresses =
-        mapper.modelToDb(modelInst, dbInst, REGISTERED_ACCESS_TIER);
+        mapper.modelToDb(modelInst, dbInst, CONTROLLED_ACCESS_TIER);
 
     assertThat(dbAddresses).isNotNull();
     assertThat(dbAddresses).isEmpty();
