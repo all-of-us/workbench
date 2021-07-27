@@ -9,6 +9,7 @@ import * as React from 'react';
 import {useLocation} from 'react-router';
 import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {URLSearchParams} from 'url';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It

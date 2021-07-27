@@ -1,6 +1,12 @@
-import {routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  queryParamsStore,
+  reactRouterUrlSearchParams,
+  routeConfigDataStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
+import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
@@ -17,10 +23,16 @@ export const usePath = () => {
   return path;
 };
 
+const useQuery = () => {
+  const searchString = useLocation().search.replace(/^\?/, '');
+  return querystring.parse(searchString);
+};
+
 // TODO angular2react: This isn't really the right place to be making the store updates but it's the
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
+  const query = useQuery();
 
   useEffect(() => {
     if (!intermediaryRoute) {
@@ -34,10 +46,16 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
+
+  useEffect(() => {
+    if (!intermediaryRoute) {
+      console.log(query);
+      queryParamsStore.next(query);
+    }
+  }, [query]);
 
   return <WrappedComponent {...props}/>;
 };

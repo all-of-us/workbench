@@ -140,6 +140,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     initCohort(cid: number) {
+      console.log(cid);
       const {workspace: {id, namespace}} = this.props;
       const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
       const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
@@ -147,6 +148,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       if (cid) {
         this.setState({loading: true});
         cohortsApi().getCohort(namespace, id, cid).then(cohort => {
+          console.log(cohort);
           this.setState({cohort, loading: false});
           currentCohortStore.next(cohort);
           if (existingCohort && existingCohort.workspaceId === id && existingCohort.cohortId === +cid) {
@@ -243,7 +245,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                   </FlexRowWrap>
                 </div>
                 <div style={colStyle('33.33333')}>
-                  {overview && <ListOverview
+                  {!!cohort && overview && <ListOverview
                       cohort={cohort}
                       cohortChanged={cohortChanged}
                       searchRequest={criteria}

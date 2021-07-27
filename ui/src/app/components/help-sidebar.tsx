@@ -10,7 +10,7 @@ import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
-import {CSSProperties} from 'react';
+import {CSSProperties, useEffect} from 'react';
 import * as React from 'react';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
@@ -398,7 +398,8 @@ export const HelpSidebar = fp.flow(
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(setSidebarActiveIconStore.getValue());
+      // TODO angular2react - fix bug where last opened panel closes on load
+      this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
       this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
       this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
         this.setState({activeIcon});

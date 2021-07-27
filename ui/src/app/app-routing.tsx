@@ -1,4 +1,5 @@
 import {Component as AComponent} from '@angular/core';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
@@ -16,16 +17,30 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {authStore, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {
+  authStore,
+  routeDataStore,
+  runtimeStore,
+  serverConfigStore,
+  stackdriverErrorReporterStore,
+  useStore
+} from 'app/utils/stores';
 import {environment} from '../environments/environment';
 import {ConfigResponse, Configuration} from '../generated/fetch';
+import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from './components/help-sidebar';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
-import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
+import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from './utils/analytics';
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from './utils/cookies';
 import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
-import {currentWorkspaceStore, nextWorkspaceWarmupStore, signInStore, urlParamsStore} from './utils/navigation';
+import {
+  currentWorkspaceStore,
+  nextWorkspaceWarmupStore,
+  setSidebarActiveIconStore,
+  signInStore,
+  urlParamsStore
+} from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
 
 declare const gapi: any;
@@ -110,7 +125,25 @@ const checkBrowserSupport = () => {
       }
     }
   });
-}
+};
+
+const loadErrorReporter = () => {
+  // We don't report to stackdriver on local servers.
+  if (environment.debug) {
+    return;
+  }
+  const reporter = new StackdriverErrorReporter();
+  const {config} = serverConfigStore.get();
+  if (!config.publicApiKeyForErrorReports) {
+    return;
+  }
+  reporter.start({
+    key: config.publicApiKeyForErrorReports,
+    projectId: config.projectId,
+  });
+
+  stackdriverErrorReporterStore.set(reporter);
+};
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const {authLoaded = false} = useStore(authStore);
@@ -178,9 +211,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   useEffect(() => {
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
-    if (environment.shouldShowDisplayTag) {
-      document.title = buildPageTitleForEnvironment();
-    }
+    document.title = buildPageTitleForEnvironment();
+    routeDataStore.subscribe(({title}) => {
+      document.title = buildPageTitleForEnvironment(title);
+    });
   }, []);
 
   useEffect(() => {
@@ -285,7 +319,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   };
 
   useEffect(() => {
-    loadConfig();
+    const load = async() => {
+      await loadConfig();
+      loadErrorReporter();
+      initializeAnalytics();
+    };
+
+    load();
   }, []);
 
   const currentAccessToken = () => {
