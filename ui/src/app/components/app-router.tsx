@@ -51,26 +51,13 @@ export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{chi
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-// To compensate for Angular, while keeping true to the declarative/componentized nature of the router
-// We will utilize a redirect component that uses the Angular navigation.
-// Upon completing the migration this can be replaced with a react-router Redirect component.
-// Exported for testing.
-// TODO angular2react - not sure what to do about this
-export const NavRedirect = ({path}) => {
-//  navigate([path]);
-  return null;
-};
-
 export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
 
-  console.log(guards);
-
   return <Route exact={exact} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-      console.log(redirectPath);
       return redirectPath
         ? <Redirect to={redirectPath}/>
         : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;

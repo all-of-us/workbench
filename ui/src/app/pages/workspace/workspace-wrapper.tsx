@@ -11,7 +11,14 @@ import {routeDataStore, useStore} from '../../utils/stores';
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace()
 )(({workspace, routeConfigData, hideSpinner}) => {
-  useEffect(() => hideSpinner(), []);
+  useEffect(() => {
+    console.log("Mounting WorkspaceWrapper");
+    hideSpinner();
+
+    return () => {
+      console.log("Unmounting WorkspaceWrapper");
+    }
+  }, []);
   const routeData = useStore(routeDataStore);
 
   console.log("Rendering WorkspaceWrapper", workspace);

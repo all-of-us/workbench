@@ -52,8 +52,6 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.checkBrowserSupport();
-
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
     if (this.cookiesEnabled) {
@@ -77,12 +75,6 @@ export class AppComponent implements OnInit, OnDestroy {
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }
-    }
-
-    // Pick up the global site title from HTML, and (for non-prod) add a tag
-    // naming the current environment.
-    if (environment.shouldShowDisplayTag) {
-      this.titleService.setTitle(buildPageTitleForEnvironment());
     }
 
     this.subscriptions.push(this.router.events.subscribe((e: RouterEvent) => {
@@ -114,20 +106,6 @@ export class AppComponent implements OnInit, OnDestroy {
         setSidebarActiveIconStore.next(null);
       }
     }));
-
-    this.subscriptions.push(urlParamsStore
-      .map(({ns, wsid}) => ({ns, wsid}))
-      .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
-      // due to urlParamsStore being updated multiple times while rendering a route.
-      // What we really want to subscribe to here is an event that triggers on navigation start or end
-      // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
-      // since multiple update recent workspace requests (from the same page) within the span of 1 second should
-      // almost always be for the same workspace and extremely rarely for different workspaces
-      .subscribe(({ns, wsid}) => {
-        if (ns && wsid) {
-          workspacesApi().updateRecentWorkspaces(ns, wsid);
-        }
-      }));
 
     await this.loadConfig();
     this.loadErrorReporter();
@@ -175,37 +153,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  private checkBrowserSupport() {
-    const minChromeVersion = 67;
 
-    outdatedBrowserRework({
-      browserSupport: {
-        Chrome: minChromeVersion, // Includes Chrome for mobile devices
-        Edge: false,
-        Safari: false,
-        'Mobile Safari': false,
-        Opera: false,
-        Firefox: false,
-        Vivaldi: false,
-        IE: false
-      },
-      isUnknownBrowserOK: false,
-      messages: {
-        en: {
-          outOfDate: 'Researcher Workbench may not function correctly in this browser.',
-          update: {
-            web: `If you experience issues, please install Google Chrome \
-            version ${minChromeVersion} or greater.`,
-            googlePlay: 'Please install Chrome from Google Play',
-            appStore: 'Please install Chrome from the App Store'
-          },
-          url: 'https://www.google.com/chrome/',
-          callToAction: 'Download Chrome now',
-          close: 'Close'
-        }
-      }
-    });
-  }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());

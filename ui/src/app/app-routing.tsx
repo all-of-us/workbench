@@ -1,5 +1,6 @@
 import {Component as AComponent} from '@angular/core';
 import * as fp from 'lodash/fp';
+import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
@@ -22,8 +23,10 @@ import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, setLoggedInState} from './utils/analytics';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from './utils/cookies';
 import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
 import {currentWorkspaceStore, nextWorkspaceWarmupStore, signInStore, urlParamsStore} from './utils/navigation';
+import {buildPageTitleForEnvironment} from './utils/title';
 
 declare const gapi: any;
 
@@ -77,6 +80,38 @@ function profileImage() {
   }
 }
 
+const checkBrowserSupport = () => {
+  const minChromeVersion = 67;
+
+  outdatedBrowserRework({
+    browserSupport: {
+      Chrome: minChromeVersion, // Includes Chrome for mobile devices
+      Edge: false,
+      Safari: false,
+      'Mobile Safari': false,
+      Opera: false,
+      Firefox: false,
+      Vivaldi: false,
+      IE: false
+    },
+    isUnknownBrowserOK: false,
+    messages: {
+      en: {
+        outOfDate: 'Researcher Workbench may not function correctly in this browser.',
+        update: {
+          web: `If you experience issues, please install Google Chrome \
+            version ${minChromeVersion} or greater.`,
+          googlePlay: 'Please install Chrome from Google Play',
+          appStore: 'Please install Chrome from the App Store'
+        },
+        url: 'https://www.google.com/chrome/',
+        callToAction: 'Download Chrome now',
+        close: 'Close'
+      }
+    }
+  });
+}
+
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const {authLoaded = false} = useStore(authStore);
   const isUserDisabled = useIsUserDisabled();
@@ -116,6 +151,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     });
   };
 
+  useEffect(() => {
+    checkBrowserSupport();
+  }, []);
+
   // TODO angular2react - this might need to go into main.ts now since useEffect runs fairly late
   useEffect(() => {
     // Set this as early as possible in the application boot-strapping process,
@@ -133,6 +172,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
         }
       };
+    }
+  }, []);
+
+  useEffect(() => {
+    // Pick up the global site title from HTML, and (for non-prod) add a tag
+    // naming the current environment.
+    if (environment.shouldShowDisplayTag) {
+      document.title = buildPageTitleForEnvironment();
     }
   }, []);
 
@@ -319,6 +366,23 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       });
 
     return sub.unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    return urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
+      // due to urlParamsStore being updated multiple times while rendering a route.
+      // What we really want to subscribe to here is an event that triggers on navigation start or end
+      // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
+      // since multiple update recent workspace requests (from the same page) within the span of 1 second should
+      // almost always be for the same workspace and extremely rarely for different workspaces
+      .subscribe(({ns, wsid}) => {
+        console.log("Runnign update recent workspace ", ns);
+        if (ns && wsid) {
+          workspacesApi().updateRecentWorkspaces(ns, wsid);
+        }
+      }).unsubscribe;
   }, []);
 
   console.log("Rendering AppRouting: ", authLoaded, isUserDisabled);
