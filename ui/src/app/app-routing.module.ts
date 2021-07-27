@@ -347,12 +347,13 @@ const routes: Routes = [
 export class AppRoutingModule {
 
   constructor(private router: Router, zone: NgZone) {
-    NavStore.navigate = (commands, extras) => {
+    // TODO angular2react - delete
+/*    NavStore.navigate = (commands, extras) => {
       zone.run(() => this.router.navigate(commands, extras));
     };
     NavStore.navigateByUrl = (url, extras) => {
       zone.run(() => this.router.navigateByUrl(url, extras));
-    };
+    };*/
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });

@@ -17,7 +17,7 @@ import {
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
-import {NavStore} from 'app/utils/navigation';
+import {NavStore, useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
@@ -92,6 +92,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
 
   const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(dismissedInLocalStorage());
   const [showModal, setShowModal] = useState(false);
+  const [navigate, ] = useNavigation();
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() =>
@@ -117,7 +118,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {showModal && <CdrVersionUpgradeModal
         defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
-        upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
+        upgrade={() => navigate(['/workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;
 };
@@ -142,6 +143,7 @@ export const WorkspaceNavBar = fp.flow(
 )(props => {
   const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+  const [navigate, ] = useNavigation();
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
@@ -154,7 +156,7 @@ export const WorkspaceNavBar = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+        onClick={() => navigate(fp.compact(['/workspaces', namespace, id, link]))}
       >
         {name}
       </Clickable>

@@ -1,4 +1,4 @@
-import {navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -54,7 +54,7 @@ export const RouteLink = ({path, style = {}, children}): React.ReactElement => <
 // Exported for testing.
 // TODO angular2react - not sure what to do about this
 export const NavRedirect = ({path}) => {
-  navigate([path]);
+//  navigate([path]);
   return null;
 };
 

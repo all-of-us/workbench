@@ -11,7 +11,14 @@ import {LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-sea
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentConcept, withCurrentConceptSet, withCurrentWorkspace} from 'app/utils';
-import {conceptSetUpdating, currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  conceptSetUpdating,
+  currentConceptSetStore,
+  currentConceptStore,
+  NavigationProps,
+  NavStore,
+  setSidebarActiveIconStore, withNavigation
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 
@@ -67,7 +74,7 @@ const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsT
   }, []);
 };
 
-interface Props {
+interface Props extends NavigationProps {
   workspace: WorkspaceData;
   concept: Array<any>;
   conceptSet: ConceptSet;
@@ -77,7 +84,7 @@ interface State {
   conceptAddModalOpen: boolean;
   updating: boolean;
 }
-export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet())(
+export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -103,7 +110,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       try {
         const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
         currentConceptSetStore.next(updatedConceptSet);
-        NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+        this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
       } catch (error) {
         console.error(error);
       }
@@ -117,7 +124,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     afterConceptsSaved(conceptSet: ConceptSet) {
       const {namespace, id} = this.props.workspace;
-      NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
+      this.props.navigate(['workspaces', namespace, id, 'data', 'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
     get disableSaveConceptButton() {

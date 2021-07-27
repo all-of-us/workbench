@@ -13,7 +13,6 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {routeDataStore} from './stores';
 
 export const NavStore = {
-  navigate: undefined,
   navigateByUrl: undefined
 };
 
@@ -69,13 +68,6 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
       && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
   }
 }
-
-// NOTE: Because these are wired up directly to the router component,
-// all navigation done from here will effectively use absolute paths.
-// TODO angular2react - delete
-export const navigate = (...args) => {
-  return NavStore.navigate(...args);
-};
 
 export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);

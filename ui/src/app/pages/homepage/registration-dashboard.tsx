@@ -459,4 +459,4 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       </Modal>}
     </FlexColumn>;
   }
-}
+});
