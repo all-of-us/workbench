@@ -14,19 +14,20 @@ import {
 import {environment} from 'environments/environment';
 
 
+// TODO angular2react - I think these can be removed
 // "Configuration" means Swagger API Client configuration.
-export function getConfiguration(signInService: SignInService): Configuration {
-  return new Configuration({
-    basePath: getApiBaseUrl(),
-    accessToken: () => signInService.currentAccessToken
-  });
+export function getConfiguration(signInService: SignInService) {
+  // return new Configuration({
+  //   basePath: getApiBaseUrl(),
+  //   accessToken: () => signInService.currentAccessToken
+  // });
 }
 
-export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
-  return new LeoConfiguration({
-    basePath: environment.leoApiUrl,
-    accessToken: () => signInService.currentAccessToken
-  });
+export function getLeoConfiguration(signInService: SignInService) {
+  // return new LeoConfiguration({
+  //   basePath: environment.leoApiUrl,
+  //   accessToken: () => signInService.currentAccessToken
+  // });
 }
 
 /**
