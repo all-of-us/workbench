@@ -392,17 +392,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     // Make sure the delete success.
     Preconditions.checkArgument(
         institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty());
-    try {
-      DbRetryUtils.executeAndRetry(
-          () ->
-              institutionTierRequirementDao.saveAll(
-                  institutionTierRequirementMapper.modelToDb(
-                      modelInstitution, dbInstitution, dbAccessTiers)),
-          Duration.ofSeconds(1),
-          5);
-    } catch (InterruptedException e) {
-      throw new ServerErrorException("Failed to update InstitutionTierRequirement table", e);
-    }
+    institutionTierRequirementMapperß
+        .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
+        .forEach(institutionTierRequirementDao::save);
   }
 
   // Take first 76 characters from display Name (with no spaces) and append 3 random number
