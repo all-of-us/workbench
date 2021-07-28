@@ -10,8 +10,8 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {NavigationProps, urlParamsStore, withNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles({
   cohortsHeader: {

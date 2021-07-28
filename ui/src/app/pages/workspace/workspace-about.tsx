@@ -110,7 +110,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   componentDidMount() {
-    console.log("Workspace about mounting");
+    console.log('Workspace about mounting');
 
     this.props.hideSpinner();
     this.setVisits();

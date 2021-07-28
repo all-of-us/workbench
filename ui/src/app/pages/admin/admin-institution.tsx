@@ -56,102 +56,102 @@ interface State {
 
 export const AdminInstitution = fp.flow(withNavigation)(
   class extends React.Component<Props, State> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loadingInstitutions: true,
-      institutions: [],
-      institutionLoadError: false
-    };
-  }
-
-  async componentDidMount() {
-    this.props.hideSpinner();
-    try {
-      const details = await institutionApi().getInstitutions();
-      this.setState({
-        loadingInstitutions: false,
-        institutions: details.institutions
-      });
-    } catch (e) {
-      this.setState({
-        loadingInstitutions: false,
-        institutionLoadError: true
-      });
+    constructor(props) {
+      super(props);
+      this.state = {
+        loadingInstitutions: true,
+        institutions: [],
+        institutionLoadError: false
+      };
     }
-  }
 
-  renderInstitutionName(row, col) {
-    const link = 'admin/institution/edit/' + row['shortName'];
-    return <a href={link}> {row['displayName']}</a>;
-  }
-
-  renderOrganizationType(row, col) {
-    // This should fail if the organization value is not in list
-    const organizationLabel = OrganizationTypeOptions
-      .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
-    if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-      return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+    async componentDidMount() {
+      this.props.hideSpinner();
+      try {
+        const details = await institutionApi().getInstitutions();
+        this.setState({
+          loadingInstitutions: false,
+          institutions: details.institutions
+        });
+      } catch (e) {
+        this.setState({
+          loadingInstitutions: false,
+          institutionLoadError: true
+        });
+      }
     }
-    return organizationLabel;
-  }
 
-  renderDuaType(row, col) {
-    return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
-  }
+    renderInstitutionName(row, col) {
+      const link = 'admin/institution/edit/' + row['shortName'];
+      return <a href={link}> {row['displayName']}</a>;
+    }
+
+    renderOrganizationType(row, col) {
+      // This should fail if the organization value is not in list
+      const organizationLabel = OrganizationTypeOptions
+        .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
+      if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
+        return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+      }
+      return organizationLabel;
+    }
+
+    renderDuaType(row, col) {
+      return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
+    }
 
   // If email domain list has more than 4 entries show top 4 and replace others with ...
-  renderEmailDomain(row, col) {
-    const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
-    if (row['emailDomains'] && row['emailDomains'].length > 4) {
-      return emailDomain + '...';
+    renderEmailDomain(row, col) {
+      const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
+      if (row['emailDomains'] && row['emailDomains'].length > 4) {
+        return emailDomain + '...';
+      }
+      return emailDomain;
     }
-    return emailDomain;
-  }
 
   // If email address list has more than 4 entries show top 4 and replace others with ...
-  renderEmailAddress(row, col) {
-    const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
-    if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
-      return emailAddresses + '...';
+    renderEmailAddress(row, col) {
+      const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
+      if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
+        return emailAddresses + '...';
+      }
+      return emailAddresses;
     }
-    return emailAddresses;
-  }
 
-  render() {
-    const {institutions, institutionLoadError, loadingInstitutions} = this.state;
-    return <div>
-      <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
-        <SemiBoldHeader style={styles.pageHeader}>
-          <label>Institution admin table</label>
-              <Button type='secondaryLight'
-                      style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                      onClick={() => this.props.navigateByUrl('admin/institution/add')}
-                      data-test-id='add-institution'>
-                <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
-              </Button>
-        </SemiBoldHeader>
-        {institutionLoadError && <div style={{color: colors.danger}}>
-          Error while loading Institution. Please try again later</div>}
-        <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                   rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
-                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
-                   currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-          <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
-                  bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
-          <Column field='organizationTypeEnum' header='Institution Type'
-                  body={this.renderOrganizationType} bodyStyle={styles.text}
-                  headerStyle={styles.header}/>
-          <Column field='duaTypeEnum' header='Agreement Type' body={this.renderDuaType}
-                  bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='emailDomains' header='Accepted Domain List' body={this.renderEmailDomain}
-                  bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
-                  bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
-                  headerStyle={{...styles.header, width: '5rem'}}/>
-        </DataTable>
-      </FadeBox>
-    </div>;
-  }
-});
+    render() {
+      const {institutions, institutionLoadError, loadingInstitutions} = this.state;
+      return <div>
+        <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
+          <SemiBoldHeader style={styles.pageHeader}>
+            <label>Institution admin table</label>
+                <Button type='secondaryLight'
+                        style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+                        onClick={() => this.props.navigateByUrl('admin/institution/add')}
+                        data-test-id='add-institution'>
+                  <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
+                </Button>
+          </SemiBoldHeader>
+          {institutionLoadError && <div style={{color: colors.danger}}>
+            Error while loading Institution. Please try again later</div>}
+          <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
+                     rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
+                     paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+                     currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+            <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
+                    bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
+            <Column field='organizationTypeEnum' header='Institution Type'
+                    body={this.renderOrganizationType} bodyStyle={styles.text}
+                    headerStyle={styles.header}/>
+            <Column field='duaTypeEnum' header='Agreement Type' body={this.renderDuaType}
+                    bodyStyle={styles.text} headerStyle={styles.header}/>
+            <Column field='emailDomains' header='Accepted Domain List' body={this.renderEmailDomain}
+                    bodyStyle={styles.text} headerStyle={styles.header}/>
+            <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
+                    bodyStyle={styles.text} headerStyle={styles.header}/>
+            <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
+                    headerStyle={{...styles.header, width: '5rem'}}/>
+          </DataTable>
+        </FadeBox>
+      </div>;
+    }
+  });

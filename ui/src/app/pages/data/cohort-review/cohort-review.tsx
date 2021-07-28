@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -12,13 +12,10 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   currentCohortReviewStore,
-  currentWorkspaceStore,
-  NavigationProps,
-  urlParamsStore, withNavigation
+  NavigationProps, withNavigation
 } from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
-import {withStore} from '../../../utils/stores';
-import {WorkspaceData} from '../../../utils/workspace-data';
 
 const styles = reactStyles({
   title: {
@@ -99,7 +96,9 @@ export const CohortReview = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      if (prevProps.urlParams.ns !== this.props.urlParams.ns || prevProps.urlParams.wsid !== this.props.urlParams.wsid || prevProps.urlParams.cid !== this.props.urlParams.cid) {
+      if (prevProps.urlParams.ns !== this.props.urlParams.ns
+        || prevProps.urlParams.wsid !== this.props.urlParams.wsid
+        || prevProps.urlParams.cid !== this.props.urlParams.cid) {
         this.loadCohort();
       }
     }

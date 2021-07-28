@@ -2,7 +2,6 @@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useLocation} from 'react-router';

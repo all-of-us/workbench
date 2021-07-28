@@ -1,6 +1,5 @@
 import {
   queryParamsStore,
-  reactRouterUrlSearchParams,
   routeConfigDataStore,
   urlParamsStore
 } from 'app/utils/navigation';
@@ -86,7 +85,7 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
-  console.log("Rendering Protected Routes");
+  console.log('Rendering Protected Routes');
 
   // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
   const guardedChildren = fp.flow(

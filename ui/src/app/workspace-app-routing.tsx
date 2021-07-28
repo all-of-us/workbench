@@ -43,7 +43,7 @@ const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEd
 // rendering over and over again on page load, rendering (hah) the app unusable.
 // We should be able to refactor this once we are driving the entire app through React router.
 export const WorkspaceRoutes = () => {
-  const { path, url } = useRouteMatch();
+  const { path, } = useRouteMatch();
 
   return <React.Fragment>
     <AppRoute

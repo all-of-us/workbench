@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';

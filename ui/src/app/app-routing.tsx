@@ -1,13 +1,11 @@
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
-import {Redirect} from 'react-router';
-import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import {Switch} from 'react-router-dom';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import 'rxjs/Rx';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -24,9 +22,9 @@ import {
   stackdriverErrorReporterStore,
   useStore
 } from 'app/utils/stores';
-import {environment} from '../environments/environment';
-import {ConfigResponse, Configuration} from '../generated/fetch';
-import {LOCAL_STORAGE_KEY_SIDEBAR_STATE} from './components/help-sidebar';
+import {environment} from 'environments/environment';
+import {ConfigResponse, Configuration} from 'generated/fetch';
+import 'rxjs/Rx';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
@@ -36,7 +34,6 @@ import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runti
 import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
-  setSidebarActiveIconStore,
   signInStore,
   urlParamsStore
 } from './utils/navigation';
@@ -254,16 +251,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // this might run before if react hooks run useEffect on the initial value, otherwise, we should be ok
     // The main thing this affects in the value of authLoaded being true. The rest of the fields make sense
     // with both values of isSignedIn
-    console.log("Running useEffect authLoaded ", authLoaded, isSignedIn);
+    console.log('Running useEffect authLoaded ', authLoaded, isSignedIn);
     authStore.set({...authStore.get(), isSignedIn});
     if (isSignedIn) {
       nextSignInStore();
       clearIdToken();
 
-      // TODO angular2react - does this work?
+      // TODO angular2react - does this work? or rather, do we even need this?
       if (signInMounted) {
-        console.log("Calling redirect to root");
-        <Redirect to='/'/>;
+        console.log('Calling redirect to root');
+        // <Redirect to='/'/>;
       }
     } else {
       // TODO angular2react - do I really need to check this? when would I ever want to not sign out here
@@ -289,7 +286,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           });
           setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
 
-          console.log("Setting up gapi auth listener", gapi.auth2.getAuthInstance().isSignedIn.get());
+          console.log('Setting up gapi auth listener', gapi.auth2.getAuthInstance().isSignedIn.get());
           gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
             setIsSignedIn(nextIsSignedIn);
           });
@@ -297,6 +294,21 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         resolve(gapi.auth2);
       });
     });
+  };
+
+  const currentAccessToken = () => {
+    if (testAccessTokenOverride) {
+      return testAccessTokenOverride;
+    } else if (!gapi.auth2) {
+      return null;
+    } else {
+      const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
+      if (authResponse !== null) {
+        return authResponse.access_token;
+      } else {
+        return null;
+      }
+    }
   };
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
@@ -360,28 +372,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     load();
   }, []);
 
-  const currentAccessToken = () => {
-    if (testAccessTokenOverride) {
-      return testAccessTokenOverride;
-    } else if (!gapi.auth2) {
-      return null;
-    } else {
-      const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
-      if (authResponse !== null) {
-        return authResponse.access_token;
-      } else {
-        return null;
-      }
-    }
-  };
-
   useEffect(() => {
     const sub = urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(async({ns, wsid}) => {
         currentWorkspaceStore.next(null);
-        console.log("Running urlParamsStore sub to get workspace", ns, wsid)
+        console.log('Running urlParamsStore sub to get workspace', ns, wsid);
 
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
@@ -450,14 +447,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       // since multiple update recent workspace requests (from the same page) within the span of 1 second should
       // almost always be for the same workspace and extremely rarely for different workspaces
       .subscribe(({ns, wsid}) => {
-        console.log("Runnign update recent workspace ", ns);
+        console.log('Runnign update recent workspace ', ns);
         if (ns && wsid) {
           workspacesApi().updateRecentWorkspaces(ns, wsid);
         }
       }).unsubscribe;
   }, []);
 
-  console.log("Rendering AppRouting: ", authLoaded, isUserDisabled);
+  console.log('Rendering AppRouting: ', authLoaded, isUserDisabled);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
@@ -498,7 +495,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                       component={() => <SignedInPage
                         intermediaryRoute={true}
                         routeData={{}}
-                        subscribeToInactivitySignOut={subscribeToInactivitySignOut} // TODO angular2react - I think I might be able to just sign out and ignore this field
+                        // TODO angular2react - I think I might be able to just sign out and ignore this field
+                        subscribeToInactivitySignOut={subscribeToInactivitySignOut}
                         signOut={signOut}
                       />}
                   />
@@ -507,8 +505,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       </AppRouter>
     }
     {
-     overriddenUrl && <div style={{position: "absolute", top: 0, left: '1rem'}}>
-      <span style={{fontSize: "80%", color: "darkred"}}>
+     overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
+      <span style={{fontSize: '80%', color: 'darkred'}}>
         API URL: {overriddenUrl}
       </span>
      </div>
@@ -518,18 +516,21 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
-              <img alt="logo" src="/assets/images/all-of-us-logo.svg" width="155px"/>
+              <img alt='logo' src='/assets/images/all-of-us-logo.svg' width='155px'/>
           </div>
-          <div style={{fontSize: "20pt", color: "#2F2E7E", padding: "1rem 0 1rem 0"}}>Cookies are Disabled</div>
-          <div style={{fontSize: "14pt", color: "#000000"}}>
+          <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
+          <div style={{fontSize: '14pt', color: '#000000'}}>
           For full functionality of this site it is necessary to enable cookies.
-          Here are the <a href="https://support.google.com/accounts/answer/61416" style={{color: "#2691D0"}} target="_blank" rel="noopener noreferrer">
+          Here are the <a href='https://support.google.com/accounts/answer/61416'
+                          style={{color: '#2691D0'}}
+                          target='_blank'
+                          rel='noopener noreferrer'>
           instructions how to enable cookies in your web browser</a>.
           </div>
         </div>
       </div>
     }
 
-    <div id="outdated"/> {/* for outdated-browser-rework */}
+    <div id='outdated'/> {/* for outdated-browser-rework */}
   </React.Fragment>;
 };

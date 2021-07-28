@@ -11,7 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withUserProfile} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';

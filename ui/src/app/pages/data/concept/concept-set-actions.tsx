@@ -15,8 +15,8 @@ import {
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles({
   conceptSetsHeader: {

@@ -15,7 +15,6 @@ import {
 import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, profileStore, withStore} from './stores';

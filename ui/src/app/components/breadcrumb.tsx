@@ -14,8 +14,7 @@ import {
   withUrlParams
 } from 'app/utils';
 import {
-  BreadcrumbType,
-  useNavigation
+  BreadcrumbType
 } from 'app/utils/navigation';
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';

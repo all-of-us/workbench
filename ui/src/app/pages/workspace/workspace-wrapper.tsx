@@ -1,27 +1,27 @@
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {Spinner} from 'app/components/spinners';
 import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
-import {withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
+import {routeDataStore, useStore} from 'app/utils/stores';
 import {WorkspaceRoutes} from 'app/workspace-app-routing';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {routeDataStore, useStore} from '../../utils/stores';
 
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace()
 )(({workspace, routeConfigData, hideSpinner}) => {
   useEffect(() => {
-    console.log("Mounting WorkspaceWrapper");
+    console.log('Mounting WorkspaceWrapper');
     hideSpinner();
 
     return () => {
-      console.log("Unmounting WorkspaceWrapper");
-    }
+      console.log('Unmounting WorkspaceWrapper');
+    };
   }, []);
   const routeData = useStore(routeDataStore);
 
-  console.log("Rendering WorkspaceWrapper", workspace);
+  console.log('Rendering WorkspaceWrapper', workspace);
 
   return <React.Fragment>
     {workspace

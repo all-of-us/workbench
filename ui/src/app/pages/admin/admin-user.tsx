@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 
-import {Link as RouterLink} from 'react-router-dom';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -18,6 +17,7 @@ import {
   reactStyles,
   withUrlParams
 } from 'app/utils';
+import {Link as RouterLink} from 'react-router-dom';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';

@@ -18,10 +18,9 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
+import {NavigationProps, withNavigation} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import {withRouter} from 'react-router-dom';
-import {NavigationProps, withNavigation} from '../utils/navigation';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
 

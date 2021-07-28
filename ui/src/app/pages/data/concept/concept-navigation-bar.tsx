@@ -54,9 +54,9 @@ const tooltipContent = [
 export const ConceptNavigationBar: React.FunctionComponent<
   {ns: string, wsId: string, showConcepts: boolean}> =
   ({ns, wsId, showConcepts}) => {
-  const [navigate, ] = useNavigation();
+    const [navigate, ] = useNavigation();
 
-  return <FlexRow>
+    return <FlexRow>
     <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
                onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
                data-test-id='concepts-link'>
@@ -73,4 +73,4 @@ export const ConceptNavigationBar: React.FunctionComponent<
       <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
     </TooltipTrigger>
   </FlexRow>;
-};
+  };
