@@ -317,7 +317,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public Long findDomainCount(String domain, String term) {
-    Domain domainToCount = Domain.valueOf(domain);
     Long count = cbCriteriaDao.findDomainCountOnCode(term, domain);
     return count == 0 ? cbCriteriaDao.findDomainCount(modifyTermMatch(term), domain) : count;
   }
