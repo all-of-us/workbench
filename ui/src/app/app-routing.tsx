@@ -1,4 +1,3 @@
-import {Component as AComponent} from '@angular/core';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -6,7 +5,7 @@ import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
-import {Switch, useHistory} from 'react-router-dom';
+import {Switch} from 'react-router-dom';
 
 import 'rxjs/Rx';
 import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';

@@ -1,4 +1,3 @@
-import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -158,41 +157,6 @@ type ReactStyles<T> = {
  */
 export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: T): ReactStyles<T> {
   return t;
-}
-
-/**
- * Helper base class for defining an Angular-wrapped React component. This is a
- * stop-gap for React migration.
- *
- * Requirements:
- *  - Component template must contain a div labeled "#root".
- *  - React propNames must exactly match instance property names on the subclass
- *    (usually these are also annotated as Angular @Inputs)
- */
-export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
-  @ViewChild('root') rootElement: ElementRef;
-
-  constructor(private WrappedComponent: React.ComponentType, private propNames: string[]) {}
-
-  ngOnInit(): void {
-    this.renderComponent();
-  }
-
-  ngOnChanges(): void {
-    this.renderComponent();
-  }
-
-  ngOnDestroy(): void {
-    ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
-  }
-
-  renderComponent(): void {
-    const {WrappedComponent, propNames} = this;
-    ReactDOM.render(
-      <WrappedComponent {...fp.fromPairs(propNames.map(name => [name, this[name]]))} />,
-      this.rootElement.nativeElement
-    );
-  }
 }
 
 export function decamelize(str: string, separator: string) {
