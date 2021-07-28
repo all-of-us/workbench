@@ -4,10 +4,13 @@ import * as React from 'react';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi, CriteriaType, Domain} from 'generated/fetch';
+import {Router} from 'react-router';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {HelpSidebar} from '../../components/help-sidebar';
 import {CohortSearch} from './cohort-search.component';
+import { createMemoryHistory } from 'history';
 
 const searchContextStubs = [
   {
@@ -25,34 +28,67 @@ const searchContextStubs = [
   }
 ];
 
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({
+    push: jest.fn()
+  })
+}));
+
+jest.mock('react-router-dom', () => {
+  return {
+    useHistory: () => ({
+      push: jest.fn(),
+    })
+  };
+});
+
 describe('CohortSearch', () => {
+
+  const component = () => {
+    const history = createMemoryHistory();
+    const c = mount(
+      <Router history={history}>
+        <CohortSearch setUnsavedChanges={() => {}}/>
+      </Router>
+    );
+    return c;
+  };
+
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
+
   it('should render', () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
-    const wrapper = mount(<CohortSearch setUnsavedChanges={() => {}}/>);
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should render CriteriaSearch component for any domain except Person', () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
-    const wrapper = mount(<CohortSearch setUnsavedChanges={() => {}}/>);
+    const wrapper = component();
     expect(wrapper.find('[id="criteria-search-container"]').length).toBe(1);
     expect(wrapper.find('[data-test-id="demographics"]').length).toBe(0);
   });
 
   it('should render Demographics component for Person domain', () => {
     currentCohortSearchContextStore.next(searchContextStubs[1]);
-    const wrapper = mount(<CohortSearch setUnsavedChanges={() => {}}/>);
+    const wrapper = component();
     expect(wrapper.find('[id="criteria-search-container"]').length).toBe(0);
     expect(wrapper.find('[data-test-id="demographics"]').length).toBe(1);
   });
 
   it('should show warning modal for unsaved demographics selections', async() => {
     currentCohortSearchContextStore.next(searchContextStubs[1]);
-    const wrapper = mount(<CohortSearch setUnsavedChanges={() => {}}/>);
+    const wrapper = component();
     expect(wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length).toBe(0);
     const selection = {...CriteriaStubVariables[1], parameterId: 'test param id'};
     currentCohortCriteriaStore.next([selection]);
