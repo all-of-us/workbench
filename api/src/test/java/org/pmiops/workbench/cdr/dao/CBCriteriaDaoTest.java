@@ -170,18 +170,16 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findIdByDomainAndName() {
-    assertThat(cbCriteriaDao.findIdByDomainAndName(Domain.SURVEY.toString(), "The Basics"))
-        .isEqualTo(surveyCriteria.getId());
+  public void findSurveyId() {
+    assertThat(cbCriteriaDao.findSurveyId("The Basics")).isEqualTo(surveyCriteria.getId());
   }
 
   @Test
-  public void findSurveyQuestionCriteriaByDomainAndIdAndFullText() {
+  public void findSurveyQuestionByPathAndTerm() {
     PageRequest pageRequest = PageRequest.of(0, 100);
     assertThat(
             cbCriteriaDao
-                .findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-                    Domain.SURVEY.toString(), surveyCriteria.getId(), "term", pageRequest)
+                .findSurveyQuestionByPathAndTerm(surveyCriteria.getId(), "term", pageRequest)
                 .getContent()
                 .get(0))
         .isEqualTo(surveyCriteria);

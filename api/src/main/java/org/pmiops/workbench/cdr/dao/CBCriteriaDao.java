@@ -76,48 +76,42 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "                     where c.domainId = 'SURVEY' "
+              + "                       and match(c.fullText, concat(:term, '+[SURVEY_rank1]')) > 0 "
               + "                       and match(c.path, :id) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-      @Param("domain") String domain,
-      @Param("id") Long id,
-      @Param("term") String term,
-      Pageable page);
+  Page<DbCriteria> findSurveyQuestionByPathAndTerm(
+      @Param("id") Long id, @Param("term") String term, Pageable page);
 
   @Query(
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0) "
+              + "                     where c.domainId = 'SURVEY' "
+              + "                       and match(c.fullText, concat(:term, '+[SURVEY_rank1]')) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndFullText(
-      @Param("domain") String domain, @Param("term") String term, Pageable page);
+  Page<DbCriteria> findSurveyQuestionByTerm(@Param("term") String term, Pageable page);
 
   @Query(
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "                     where c.domainId = 'SURVEY' "
               + "                       and match(c.path, :id) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-      @Param("domain") String domain, @Param("id") Long id, Pageable page);
+  Page<DbCriteria> findSurveyQuestionByPath(@Param("id") Long id, Pageable page);
 
   @Query(
       value =
@@ -174,8 +168,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
 
-  @Query(value = "select c.id from DbCriteria c where domainId = :domainId and name = :name")
-  Long findIdByDomainAndName(@Param("domainId") String domainId, @Param("name") String name);
+  @Query(value = "select c.id from DbCriteria c where domainId = 'SURVEY' and name = :name")
+  Long findSurveyId(@Param("name") String name);
 
   @Query(
       value =
