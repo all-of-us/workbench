@@ -94,7 +94,7 @@ public class DbUser {
 
   private Timestamp publicationsLastConfirmedTime;
 
-  @VisibleForTesting static final int PROJECT_BILLING_ID_SIZE = 8;
+  @VisibleForTesting static final int PD_UUID_PREFIX_SIZE = 4;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
@@ -546,7 +546,7 @@ public class DbUser {
         Hashing.sha256()
             .hashUnencodedChars(UUID.randomUUID().toString())
             .toString()
-            .substring(0, PROJECT_BILLING_ID_SIZE);
+            .substring(0, PD_UUID_PREFIX_SIZE);
     return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }

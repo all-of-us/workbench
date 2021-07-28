@@ -15,13 +15,17 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRegistryEnum;
+import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
@@ -52,6 +56,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
+  private final Provider<DisksApi> diskApiProvider;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
@@ -66,6 +71,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
+      @Qualifier(NotebooksConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
@@ -76,6 +82,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
+    this.diskApiProvider = diskApiProvider;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
@@ -284,6 +291,34 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     ProxyApi proxyApi = proxyApiProvider.get();
     return notebooksRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
+  }
+  @Override
+  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    try {
+      return leonardoRetryHandler.runAndThrowChecked(
+          (context) -> disksApi.getDisk(googleProject, diskName));
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertLeonardoException(e);
+    }
+  }
+
+  @Override
+  public void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+    DisksApi disksApi = diskApiProvider.get();
+    leonardoRetryHandler.run(
+        (context) -> {
+          disksApi.deleteDisk(googleProject, diskName);
+          return null;
+        });
+  }
+
+  @Override
+  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(String googleProject,
+      boolean includeDeleted) {
+    DisksApi disksApi = diskApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) -> disksApi.listDisksByProject(googleProject, null, includeDeleted));
   }
 
   @Override

@@ -789,6 +789,45 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
+  "/v1/disks/{workspaceNamespace}":
+    get:
+      summary: Get the user's workspace runtime.
+      description: "Returns the current user's runtime, if any, which has been created
+        for the given workspace."
+      operationId: getDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The runtime for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a workspace runtime.
+      description: 'TODO(RW-3695): updateRuntime should be added as a PATCH endpoint
+        here.'
+      operationId: deleteDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No runtime exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+
   "/v1/workspaces":
     get:
       tags:
@@ -4258,6 +4297,29 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+  Disk:
+    description: The configuration of a persistent disk, returned in runtime responses
+    type: object
+    required:
+      - name
+      - size
+      - diskType
+      - blockSize
+    properties:
+      name:
+        type: string
+        description: Name of the persistent disk
+      #      status:
+      #        "$ref": "#/definitions/DiskStatus"
+      #        description: Runtime status. Read only.
+      size:
+        type: integer
+        description: Size of persistent disk in GB
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: Block size of persistent disk in bytes
   WorkspaceListResponse:
     type: object
     required:
