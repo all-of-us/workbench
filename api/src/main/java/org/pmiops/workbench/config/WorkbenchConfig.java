@@ -20,7 +20,6 @@ public class WorkbenchConfig {
   public ServerConfig server;
   public AdminConfig admin;
   public MandrillConfig mandrill;
-  public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -43,7 +42,6 @@ public class WorkbenchConfig {
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.cdr = new CdrConfig();
-    config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
@@ -204,14 +202,6 @@ public class WorkbenchConfig {
   public static class MandrillConfig {
     public String fromEmail;
     public int sendRetries;
-  }
-
-  // TODO(RW-7112): remove
-  @Deprecated
-  public static class ElasticsearchConfig {
-    public String baseUrl;
-    public boolean enableBasicAuth;
-    public boolean enableElasticsearchBackend;
   }
 
   public static class MoodleConfig {
