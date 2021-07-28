@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,6 +88,8 @@ public class DbUser {
   private Timestamp profileLastConfirmedTime;
 
   private Timestamp publicationsLastConfirmedTime;
+
+  @VisibleForTesting static final int PROJECT_BILLING_ID_SIZE = 8;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
@@ -528,12 +531,17 @@ public class DbUser {
   /** Returns a name for the VM / cluster to be created for this user. */
   @Transient
   public String getRuntimeName() {
-    return RUNTIME_NAME_PREFIX + getUserId() + "-" + UUID.randomUUID().toString();
+    return RUNTIME_NAME_PREFIX + getUserId();
   }
 
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
-  public String getPDName() {
-    return PD_NAME_PREFIX + getUserId() + "-" + UUID.randomUUID().toString();
+  public String generatePDName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
+    return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }

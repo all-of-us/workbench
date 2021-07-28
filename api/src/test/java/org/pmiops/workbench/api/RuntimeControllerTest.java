@@ -404,8 +404,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody())
-        .isEqualTo(testRuntime);
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody()).isEqualTo(testRuntime);
   }
 
   @Test
@@ -419,7 +418,7 @@ public class RuntimeControllerTest extends SpringTest {
                         new LeonardoClusterError().errorCode(1).errorMessage("foo"),
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
@@ -428,7 +427,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
@@ -439,11 +438,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(
-            runtimeController
-                .getRuntime(WORKSPACE_NS, getRuntimeName())
-                .getBody()
-                .getConfigurationType())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
         .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
   }
 
@@ -454,11 +449,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(
-            runtimeController
-                .getRuntime(WORKSPACE_NS, getRuntimeName())
-                .getBody()
-                .getConfigurationType())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
         .isEqualTo(RuntimeConfigurationType.HAILGENOMICANALYSIS);
   }
 
@@ -469,11 +460,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(
-            runtimeController
-                .getRuntime(WORKSPACE_NS, getRuntimeName())
-                .getBody()
-                .getConfigurationType())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
         .isEqualTo(RuntimeConfigurationType.GENERALANALYSIS);
   }
 
@@ -484,11 +471,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(
-            runtimeController
-                .getRuntime(WORKSPACE_NS, getRuntimeName())
-                .getBody()
-                .getConfigurationType())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getConfigurationType())
         .isEqualTo(RuntimeConfigurationType.USEROVERRIDE);
   }
 
@@ -499,9 +482,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(Collections.emptyList());
 
-    assertThrows(
-        NotFoundException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -520,7 +501,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody();
+    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getRuntimeName()).isEqualTo("expected-runtime");
     assertThat(runtime.getGoogleProject()).isEqualTo("google-project");
@@ -541,9 +522,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .runtimeConfig(dataprocConfigObj)
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    assertThrows(
-        NotFoundException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -560,7 +539,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody();
+    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getGceConfig()).isEqualTo(gceConfig);
     assertThat(runtime.getDataprocConfig()).isNull();
@@ -590,7 +569,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody();
+    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getDataprocConfig().getMasterDiskSize()).isEqualTo(50);
     assertThat(runtime.getDataprocConfig().getMasterMachineType()).isEqualTo("n1-standard-4");
@@ -621,8 +600,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(
-            runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getRuntimeName())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
   }
 
@@ -643,8 +621,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .runtimeName("default-runtime")
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(
-            runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getRuntimeName())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
   }
 
@@ -666,8 +643,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(null))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(
-            runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getRuntimeName())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
   }
 
@@ -689,8 +665,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(""))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(
-            runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getRuntimeName())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("expected-runtime");
   }
 
@@ -713,9 +688,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThrows(
-        NotFoundException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -736,9 +709,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThrows(
-        NotFoundException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -755,8 +726,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
 
-    assertThat(
-            runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getRuntimeName())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("preset-runtime");
   }
 
@@ -765,7 +735,7 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
   }
 
@@ -782,7 +752,7 @@ public class RuntimeControllerTest extends SpringTest {
                         .blockSize(100)
                         .size(100)));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody();
+    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getDiskConfig().getDiskType()).isEqualTo(DiskType.SSD);
     assertThat(runtime.getDiskConfig().getName()).isEqualTo("pd");
@@ -795,13 +765,13 @@ public class RuntimeControllerTest extends SpringTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(null));
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()).getBody().getStatus())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getStatus())
         .isEqualTo(RuntimeStatus.UNKNOWN);
   }
 
   @Test
   public void testGetRuntime_NullBillingProject() {
-    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null, null));
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(null));
   }
 
   @Test
@@ -904,7 +874,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     assertThrows(
         BadRequestException.class,
-        () -> runtimeController.createRuntime(WORKSPACE_NS, new Runtime(), getRuntimeName()));
+        () -> runtimeController.createRuntime(WORKSPACE_NS, new Runtime()));
   }
 
   @Test
@@ -920,8 +890,7 @@ public class RuntimeControllerTest extends SpringTest {
                 WORKSPACE_NS,
                 new Runtime()
                     .dataprocConfig(new DataprocConfig().masterMachineType("standard"))
-                    .gceConfig(new GceConfig().machineType("standard")),
-                getRuntimeName()));
+                    .gceConfig(new GceConfig().machineType("standard"))));
   }
 
   @Test
@@ -941,8 +910,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .numberOfWorkerLocalSSDs(1)
                     .numberOfPreemptibleWorkers(3)
                     .masterDiskSize(100)
-                    .masterMachineType("standard")),
-        getRuntimeName());
+                    .masterMachineType("standard")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -978,8 +946,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")),
-        getRuntimeName());
+        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1020,8 +987,7 @@ public class RuntimeControllerTest extends SpringTest {
                         new PersistentDiskRequest()
                             .diskType(DiskType.SSD)
                             .name(getPdName())
-                            .size(500))),
-        getRuntimeName());
+                            .size(500))));
 
     verify(userRuntimesApi)
         .createRuntime(
@@ -1057,8 +1023,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     BadRequestException e =
         assertThrows(
-            BadRequestException.class,
-            () -> runtimeController.createRuntime(WORKSPACE_NS, null, getRuntimeName()));
+            BadRequestException.class, () -> runtimeController.createRuntime(WORKSPACE_NS, null));
 
     assertThat(e)
         .hasMessageThat()
@@ -1074,7 +1039,7 @@ public class RuntimeControllerTest extends SpringTest {
     BadRequestException e =
         assertThrows(
             BadRequestException.class,
-            () -> runtimeController.createRuntime(WORKSPACE_NS, new Runtime(), getRuntimeName()));
+            () -> runtimeController.createRuntime(WORKSPACE_NS, new Runtime()));
 
     assertThat(e)
         .hasMessageThat()
@@ -1091,8 +1056,7 @@ public class RuntimeControllerTest extends SpringTest {
         WORKSPACE_NS,
         new Runtime()
             .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
-            .dataprocConfig(testRuntime.getDataprocConfig()),
-        getRuntimeName());
+            .dataprocConfig(testRuntime.getDataprocConfig()));
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -1112,8 +1076,7 @@ public class RuntimeControllerTest extends SpringTest {
         WORKSPACE_NS,
         new Runtime()
             .configurationType(RuntimeConfigurationType.GENERALANALYSIS)
-            .dataprocConfig(dataprocConfig),
-        getRuntimeName());
+            .dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -1133,8 +1096,7 @@ public class RuntimeControllerTest extends SpringTest {
         WORKSPACE_NS,
         new Runtime()
             .configurationType(RuntimeConfigurationType.USEROVERRIDE)
-            .dataprocConfig(dataprocConfig),
-        getRuntimeName());
+            .dataprocConfig(dataprocConfig));
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
@@ -1150,7 +1112,6 @@ public class RuntimeControllerTest extends SpringTest {
 
     runtimeController.updateRuntime(
         WORKSPACE_NS,
-        getRuntimeName(),
         new UpdateRuntimeRequest()
             .runtime(
                 new Runtime()
@@ -1180,7 +1141,7 @@ public class RuntimeControllerTest extends SpringTest {
 
   @Test
   public void testDeleteRuntime() throws ApiException {
-    runtimeController.deleteRuntime(WORKSPACE_NS, getRuntimeName(), false);
+    runtimeController.deleteRuntime(WORKSPACE_NS, false);
     verify(userRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
   }
 
@@ -1191,8 +1152,7 @@ public class RuntimeControllerTest extends SpringTest {
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp =
-        runtimeController.localize(WORKSPACE_NS, getRuntimeName(), req).getBody();
+    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
 
     verify(proxyApi)
@@ -1243,8 +1203,7 @@ public class RuntimeControllerTest extends SpringTest {
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(true);
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp =
-        runtimeController.localize(WORKSPACE_NS, getRuntimeName(), req).getBody();
+    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
     verify(proxyApi)
         .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
@@ -1279,8 +1238,7 @@ public class RuntimeControllerTest extends SpringTest {
             .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     stubGetWorkspace("other-proj", GOOGLE_PROJECT_ID_2, "myotherworkspace", LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp =
-        runtimeController.localize("other-proj", getRuntimeName(), req).getBody();
+    RuntimeLocalizeResponse resp = runtimeController.localize("other-proj", req).getBody();
     verify(proxyApi)
         .welderLocalize(eq(GOOGLE_PROJECT_ID_2), eq(getRuntimeName()), welderReqCaptor.capture());
 
@@ -1323,8 +1281,7 @@ public class RuntimeControllerTest extends SpringTest {
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp =
-        runtimeController.localize(WORKSPACE_NS, getRuntimeName(), req).getBody();
+    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
     verify(proxyApi)
         .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
 
@@ -1348,9 +1305,7 @@ public class RuntimeControllerTest extends SpringTest {
         .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    assertThrows(
-        ForbiddenException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -1359,9 +1314,7 @@ public class RuntimeControllerTest extends SpringTest {
         .when(mockWorkspaceAuthService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
-    assertThrows(
-        ForbiddenException.class,
-        () -> runtimeController.getRuntime(WORKSPACE_NS, getRuntimeName()));
+    assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
     verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 
@@ -1372,9 +1325,7 @@ public class RuntimeControllerTest extends SpringTest {
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
-    assertThrows(
-        ForbiddenException.class,
-        () -> runtimeController.localize(WORKSPACE_NS, getRuntimeName(), req));
+    assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
   }
 
   @Test
@@ -1385,9 +1336,7 @@ public class RuntimeControllerTest extends SpringTest {
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
 
-    assertThrows(
-        ForbiddenException.class,
-        () -> runtimeController.localize(WORKSPACE_NS, getRuntimeName(), req));
+    assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
     verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 
