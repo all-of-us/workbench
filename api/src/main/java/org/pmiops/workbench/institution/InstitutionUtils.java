@@ -20,8 +20,7 @@ public class InstitutionUtils {
     return institution.getTierEmailAddresses().stream()
         .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
         .flatMap(
-            tea ->
-                tea.getEmailAddresses() == null ? Stream.empty() : tea.getEmailAddresses().stream())
+            t -> t.getEmailAddresses() == null ? Stream.empty() : t.getEmailAddresses().stream())
         .collect(Collectors.toSet());
   }
 
@@ -33,8 +32,7 @@ public class InstitutionUtils {
       Institution institution, String accessTierShortName) {
     return institution.getTierEmailDomains().stream()
         .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-        .flatMap(
-            tea -> tea.getEmailDomains() == null ? Stream.empty() : tea.getEmailDomains().stream())
+        .flatMap(t -> t.getEmailDomains() == null ? Stream.empty() : t.getEmailDomains().stream())
         .collect(Collectors.toSet());
   }
 

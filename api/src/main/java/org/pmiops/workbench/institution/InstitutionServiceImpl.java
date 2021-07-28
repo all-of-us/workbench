@@ -217,14 +217,13 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
-    Optional<InstitutionTierRequirement> rtRequirement =
-        getTierRequirement(institution, REGISTERED_TIER_SHORT_NAME);
+    InstitutionTierRequirement rtRequirement =
+        getTierRequirement(institution, REGISTERED_TIER_SHORT_NAME)
+            .orElseThrow(() -> new ServerErrorException("Registered tier requirement not found"));
 
     // If the Institution's registered tier agreement requires email addresses confirm if the email
     // address is in the allowed email list.
-    if (rtRequirement.isPresent()
-        && rtRequirement.get().getMembershipRequirement()
-            == InstitutionMembershipRequirement.ADDRESSES) {
+    if (rtRequirement.getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
       final boolean validated =
           getEmailAddressesByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME)
               .contains(contactEmail);
@@ -386,7 +385,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       final DbInstitution dbInstitution,
       final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
-    // Make sure the delete success.
+    // Make sure the delete succeeds.
     if (!institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
       throw new ServerErrorException(
           "Failed to cleanup existing tier requirements before replacing them");

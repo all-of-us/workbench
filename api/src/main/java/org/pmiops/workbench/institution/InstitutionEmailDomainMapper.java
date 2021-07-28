@@ -1,7 +1,5 @@
 package org.pmiops.workbench.institution;
 
-import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +31,8 @@ public interface InstitutionEmailDomainMapper {
       return new HashSet<>();
     }
     return emailDomainsToDb(
-        getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
+        InstitutionUtils.getEmailDomainsByTierOrEmptySet(
+            modelInstitution, dbAccessTier.getShortName()),
         dbInstitution,
         dbAccessTier);
   }
