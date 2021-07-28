@@ -28,27 +28,6 @@ const searchContextStubs = [
   }
 ];
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-  }),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: jest.fn()
-  })
-}));
-
-jest.mock('react-router-dom', () => {
-  return {
-    useHistory: () => ({
-      push: jest.fn(),
-    })
-  };
-});
-
 describe('CohortSearch', () => {
 
   const component = () => {
