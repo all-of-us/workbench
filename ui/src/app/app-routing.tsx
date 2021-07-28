@@ -469,6 +469,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* It should be noted that the reason this is currently working is because Switch only */}
         {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
         {/* that they are a Route or a subclass of Route. */}
+        {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
               <AppRoute
                   path='/cookie-policy'
