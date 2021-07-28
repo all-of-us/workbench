@@ -675,6 +675,11 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: query
+        name: runtimeName
+        description: The runtime name
+        required: false
+        type: string
       responses:
         200:
           description: The runtime for this user and workspace.
@@ -694,6 +699,11 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: query
+        name: runtimeName
+        description: The runtime name. Default to a unique UUID if not specified
+        required: false
+        type: string
       - in: body
         name: runtime
         description: notebooks runtime definition
@@ -717,6 +727,11 @@ paths:
       - runtime
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: runtimeName
+          description: The runtime name
+          required: true
+          type: string
         - in: body
           name: runtime
           schema:
@@ -743,6 +758,11 @@ paths:
       - runtime
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: path
+        name: runtimeName
+        description: The runtime name
+        required: true
+        type: string
       - in: query
         name: deleteDisk
         description: Whether or not disk should be deleted if the runtime is using persistent disk. Default to false if not specified
@@ -771,6 +791,11 @@ paths:
       - application/json
       parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: path
+        name: runtimeName
+        description: The runtime name
+        required: true
+        type: string
       - in: body
         name: body
         description: Localization request.

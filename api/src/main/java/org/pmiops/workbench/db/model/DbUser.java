@@ -2,11 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -532,12 +528,12 @@ public class DbUser {
   /** Returns a name for the VM / cluster to be created for this user. */
   @Transient
   public String getRuntimeName() {
-    return RUNTIME_NAME_PREFIX + getUserId();
+    return RUNTIME_NAME_PREFIX + getUserId() + "-" + UUID.randomUUID().toString();
   }
 
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
   public String getPDName() {
-    return PD_NAME_PREFIX + getUserId();
+    return PD_NAME_PREFIX + getUserId() + "-" + UUID.randomUUID().toString();
   }
 }

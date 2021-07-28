@@ -3,11 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,16 +31,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
-import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeLocalizeRequest;
-import org.pmiops.workbench.model.RuntimeLocalizeResponse;
-import org.pmiops.workbench.model.RuntimeStatus;
-import org.pmiops.workbench.model.UpdateRuntimeRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -65,6 +56,8 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
   private static final String DELOC_PATTERN = "\\.ipynb$";
+
+  private static final String runtimeCreatedDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
 
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
@@ -161,7 +154,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
+  public ResponseEntity<Runtime> getRuntime(String workspaceNamespace, String runtimeName) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     String googleProject = dbWorkspace.getGoogleProject();
@@ -170,9 +163,41 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     try {
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      LeonardoGetRuntimeResponse leoRuntimeResponse;
+      if (runtimeName != null) {
+        leoRuntimeResponse = leonardoNotebooksClient.getRuntime(googleProject, runtimeName);
+
+      } else {
+
+        List<LeonardoListRuntimeResponse> responseList =
+            leonardoNotebooksClient.listRuntimesByProject(googleProject, false);
+        responseList.sort(
+            new Comparator<LeonardoListRuntimeResponse>() {
+              @Override
+              public int compare(LeonardoListRuntimeResponse t1, LeonardoListRuntimeResponse t2) {
+                DateFormat df1 = new SimpleDateFormat(runtimeCreatedDateFormat);
+                try {
+                  return df1.parse(t1.getAuditInfo().getCreatedDate())
+                      .compareTo(df1.parse(t2.getAuditInfo().getCreatedDate()));
+                } catch (ParseException e) {
+                  log.warning(
+                      String.format(
+                          "Observed Leonardo runtime createdDate parse error:\n%s",
+                          e.getMessage()));
+                }
+                return 0;
+              }
+            });
+
+        leoRuntimeResponse =
+            !responseList.isEmpty()
+                ? leonardoNotebooksClient.getRuntime(
+                    googleProject, responseList.get(0).getRuntimeName())
+                : null;
+      }
+
+      if (leoRuntimeResponse != null
+          && LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
                 "Observed Leonardo runtime with unexpected error status:\n%s",
@@ -247,11 +272,22 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> createRuntime(String workspaceNamespace, Runtime runtime) {
+  public ResponseEntity<EmptyResponse> createRuntime(
+      String workspaceNamespace, Runtime runtime, String runtimeName) {
     if (runtime == null) {
       runtime = new Runtime();
     }
+    if (runtimeName == null) {
+      runtimeName = userProvider.get().getRuntimeName();
+    }
 
+    GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
+    if (gceWithPdConfig != null) {
+      PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
+      if (persistentDiskRequest != null && persistentDiskRequest.getName().isEmpty()) {
+        persistentDiskRequest.setName(userProvider.get().getPDName());
+      }
+    }
     long configCount =
         Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
             .filter(c -> c != null)
@@ -261,10 +297,6 @@ public class RuntimeController implements RuntimeApiDelegate {
           "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
     }
 
-    if (runtime.getGceWithPdConfig() != null) {
-      runtime.getGceWithPdConfig().getPersistentDisk().setName(userProvider.get().getPDName());
-    }
-
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
@@ -272,7 +304,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     runtime.setGoogleProject(dbWorkspace.getGoogleProject());
-    runtime.setRuntimeName(userProvider.get().getRuntimeName());
+    runtime.setRuntimeName(runtimeName);
 
     leonardoNotebooksClient.createRuntime(runtime, workspaceNamespace, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
@@ -280,7 +312,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> updateRuntime(
-      String workspaceNamespace, UpdateRuntimeRequest runtimeRequest) {
+      String workspaceNamespace, String runtimeName, UpdateRuntimeRequest runtimeRequest) {
     if (runtimeRequest == null || runtimeRequest.getRuntime() == null) {
       throw new BadRequestException("Runtime cannot be empty for an update request");
     }
@@ -302,7 +334,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     runtimeRequest.getRuntime().setGoogleProject(dbWorkspace.getGoogleProject());
-    runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
+    runtimeRequest.getRuntime().setRuntimeName(runtimeName);
 
     leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
 
@@ -311,22 +343,20 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(
-      String workspaceNamespace, Boolean deleteDisk) {
+      String workspaceNamespace, String runtimeName, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(
-        dbWorkspace.getGoogleProject(),
-        userProvider.get().getRuntimeName(),
-        Optional.ofNullable(deleteDisk).orElse(false));
+        dbWorkspace.getGoogleProject(), runtimeName, Optional.ofNullable(deleteDisk).orElse(false));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<RuntimeLocalizeResponse> localize(
-      String workspaceNamespace, RuntimeLocalizeRequest body) {
+      String workspaceNamespace, String runtimeName, RuntimeLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     workspaceAuthService.enforceWorkspaceAccessLevel(
         dbWorkspace.getWorkspaceNamespace(),
@@ -372,7 +402,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.createStorageLink(
         googleProjectId,
-        userProvider.get().getRuntimeName(),
+        runtimeName,
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
             .localBaseDirectory(editDir)
@@ -397,8 +427,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                       name -> targetDir + "/" + name, name -> gcsNotebooksDir + "/" + name)));
     }
     log.info(localizeMap.toString());
-    leonardoNotebooksClient.localize(
-        googleProjectId, userProvider.get().getRuntimeName(), localizeMap);
+    leonardoNotebooksClient.localize(googleProjectId, runtimeName, localizeMap);
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
