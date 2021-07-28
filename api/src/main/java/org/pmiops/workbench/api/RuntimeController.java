@@ -3,7 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -28,8 +32,18 @@ import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeLocalizeRequest;
+import org.pmiops.workbench.model.RuntimeLocalizeResponse;
+import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.UpdateRuntimeRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -53,9 +67,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
   private static final String DELOC_PATTERN = "\\.ipynb$";
-
-  private static final String runtimeCreatedDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
-
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
