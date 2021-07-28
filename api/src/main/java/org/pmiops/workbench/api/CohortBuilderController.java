@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
@@ -183,11 +182,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String genderOrSex,
       String age,
       SearchRequest request) {
-    DbCdrVersion cdrVersion =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER)
-            .getCdrVersion();
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     GenderOrSexType genderOrSexType = validateGenderOrSexType(genderOrSex);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
