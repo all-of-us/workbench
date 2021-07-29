@@ -186,7 +186,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailList = emailInput.split(/[,\n]+/);
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      emailAddresses: emailList.map(email => email.trim()).filter((item) => item !== '')
+      emailAddresses: emailList.map(email => email.trim())
     };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
@@ -194,9 +194,13 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setDomains(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
+    console.log("~~~~~~~emailInput")
+    console.log(emailInput)
+    console.log("~~~~~~~emailList")
+    console.log(emailList)
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      emailDomains: emailList.map(email => email.trim()).filter((item) => item !== '')
+      emailDomains: emailList.map(email => email.trim())
     };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
