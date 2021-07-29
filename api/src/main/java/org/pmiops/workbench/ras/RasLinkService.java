@@ -81,14 +81,14 @@ import org.springframework.stereotype.Service;
  *       "login.gov":{
  *          "firstname":"",
  *          "lastname":"",
- *          "userid":"c1324de1-38c1-4df4-ab3b-caa3ffe3c531",
- *          "mail":"yonghaotest1@gmail.com"
+ *          "userid":"12345",
+ *          "mail":"foo@gmail.com"
  *       },
  *       "era":{
- *          "mail":"yonghao@verily.com",
+ *          "mail":"bar@email.com",
  *          "firstname":"Y",
- *          "lastname":"yonghao",
- *          "userid":"yonghao_pi"
+ *          "lastname":"yyu",
+ *          "userid":"yyu_pi"
  *       }
  *    }
  *  ]
