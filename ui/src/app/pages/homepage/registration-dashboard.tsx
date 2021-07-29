@@ -143,6 +143,20 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     },
     onClick: redirectToTwoFactorSetup
   }, {
+    key: 'rasLoginGov',
+    completionPropsKey: 'rasLoginGovLinked',
+    loadingPropsKey: 'rasLoginGovLoading',
+    title: 'Connect Your Login.Gov Account',
+    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
+    description: 'Connect your Researcher Workbench account to your login.gov account. ',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
+    },
+    onClick: redirectToRas
+  },
+  {
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
@@ -156,19 +170,6 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
-  }, {
-    key: 'rasLoginGov',
-    completionPropsKey: 'rasLoginGovLinked',
-    loadingPropsKey: 'rasLoginGovLoading',
-    title: 'Connect Your Login.Gov Account',
-    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
-    description: 'Connect your Researcher Workbench account to your login.gov account. ',
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
-    },
-    onClick: redirectToRas
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
