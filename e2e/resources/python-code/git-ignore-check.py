@@ -17,6 +17,8 @@
 
 actual = !cd /tmp/workbench-snippets/; git status
 
+print(actual)
+
 assert(any('should_be_visible' in s for s in actual))
 assert(not any('should_be_ignored' in s for s in actual))
 
