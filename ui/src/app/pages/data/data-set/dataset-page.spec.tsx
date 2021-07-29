@@ -16,15 +16,14 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
-import {mockUseNavigation, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {navigateByUrlSpy} from 'testing/navigation-mock';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-
-const [, navigateByUrlSpy] = mockUseNavigation();
 
 describe('DataSetPage', () => {
   let datasetApiStub;
@@ -47,7 +46,7 @@ describe('DataSetPage', () => {
 
   const component = () => {
     return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} />);
-  }
+  };
 
   it('should render', async() => {
     const wrapper = component();
@@ -267,6 +266,7 @@ describe('DataSetPage', () => {
 
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
+
     expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
       preventDefaultIfNoKeysPressed: true,
       event: expect.anything()
