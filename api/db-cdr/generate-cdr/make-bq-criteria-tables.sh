@@ -6653,6 +6653,36 @@ FROM
     ) y
 WHERE x.id = y.id"
 
+echo "FULL_TEXT and SYNONYMS - adding update for survey answers"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET   x.full_text = y.full_text
+    , x.synonyms = y.full_text
+FROM
+    (
+        SELECT
+              a.id
+            , CASE
+                WHEN (STRING_AGG(REPLACE(b.concept_name,'|','||'),'|') is null OR a.concept_id = 0) THEN a.name
+                ELSE STRING_AGG(REPLACE(b.concept_name,'|','||'),'|')
+              END as full_text
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
+        LEFT JOIN
+            (
+                SELECT concept_id, concept_synonym_name as concept_name
+                FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\`
+                WHERE NOT REGEXP_CONTAINS(concept_synonym_name, r'\p{Han}') --remove items with Chinese characters
+                UNION DISTINCT
+                SELECT concept_id, concept_name
+                FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+                WHERE concept_id is not null
+            ) b on a.value = CAST(b.concept_id as STRING)
+            where a.domain_id = 'SURVEY'
+            and a.subtype = 'ANSWER'
+        GROUP BY a.id, a.name, a.concept_id, a.domain_id
+    ) y
+WHERE x.id = y.id"
+
 # add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
 echo "FULL_TEXT - add [rank1]"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \

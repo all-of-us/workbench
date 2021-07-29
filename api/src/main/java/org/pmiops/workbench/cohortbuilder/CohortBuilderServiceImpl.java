@@ -438,9 +438,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domain, String surveyName, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage;
     if (isSurveyDomain(domain)) {
-      Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
-      dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(domain, id, pageRequest);
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
     } else {
       dbCriteriaPage = cbCriteriaDao.findCriteriaTopCounts(domain, pageRequest);
     }
@@ -456,14 +455,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domain, String surveyName, PageRequest pageRequest, String modifiedSearchTerm) {
     Page<DbCriteria> dbCriteriaPage;
     if (surveyName.equals("All")) {
-      dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndFullText(
-              domain, modifiedSearchTerm, pageRequest);
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByTerm(modifiedSearchTerm, pageRequest);
     } else {
-      Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
       dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-              domain, id, modifiedSearchTerm, pageRequest);
+          cbCriteriaDao.findSurveyQuestionByPathAndTerm(id, modifiedSearchTerm, pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(
