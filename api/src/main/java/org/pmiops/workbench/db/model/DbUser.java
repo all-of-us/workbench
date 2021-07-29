@@ -36,6 +36,7 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
+  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -93,8 +94,6 @@ public class DbUser {
   private Timestamp profileLastConfirmedTime;
 
   private Timestamp publicationsLastConfirmedTime;
-
-  @VisibleForTesting static final int PROJECT_BILLING_ID_SIZE = 8;
 
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
@@ -546,7 +545,7 @@ public class DbUser {
         Hashing.sha256()
             .hashUnencodedChars(UUID.randomUUID().toString())
             .toString()
-            .substring(0, PROJECT_BILLING_ID_SIZE);
+            .substring(0, PD_UUID_SUFFIX_SIZE);
     return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }
