@@ -17,9 +17,9 @@
 ! touch /tmp/workbench-snippets/should_be_visible.rst
 ! touch /tmp/workbench-snippets/LICENSE.should_be_visible
 ! mkdir -p /tmp/workbench-snippets/some_directory/
-! cd /tmp/workbench-snippets/; git add some_directory
 ! touch /tmp/workbench-snippets/some_directory/should_be_ignored.CSV
 ! touch /tmp/workbench-snippets/some_directory/should_be_visible.sh
+! cd /tmp/workbench-snippets/; git add some_directory
 
 actual = !cd /tmp/workbench-snippets/; git status --porcelain
 
