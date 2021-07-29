@@ -116,8 +116,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       });
 
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    this.setState(fp.set(['institution', 'tierEmailAddresses'],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: updatedEmailAddress}]));
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailAddresses: updatedEmailAddress
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
     updatedEmailAddress.map(emailAddress => {
       const errors = validate({
         emailAddress
@@ -144,8 +147,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    this.setState(fp.set(['institution', 'tierEmailDomains'],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailDomainsWithNoEmptyString}]));
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailDomains: emailDomainsWithNoEmptyString
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
 
     emailDomainsWithNoEmptyString.map(emailDomain => {
       const testAddress = 'test@' + emailDomain;
@@ -194,10 +200,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setDomains(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
-    console.log("~~~~~~~emailInput")
-    console.log(emailInput)
-    console.log("~~~~~~~emailList")
-    console.log(emailList)
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       emailDomains: emailList.map(email => email.trim())
