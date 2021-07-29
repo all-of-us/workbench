@@ -2,13 +2,11 @@ package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
 
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -52,9 +50,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -899,39 +895,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
     return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
-  }
-
-  /**
-   * Syncs the eraCommons access module status for an arbitrary user.
-   *
-   * <p>This uses impersonated credentials and should only be called in the context of a cron job or
-   * a request from a user with elevated privileges.
-   *
-   * <p>Returns the updated User object.
-   */
-  @Override
-  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
-      throws IOException, org.pmiops.workbench.firecloud.ApiException {
-    if (isServiceAccount(user)) {
-      // Skip sync for service account user rows.
-      return user;
-    }
-
-    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getUsername());
-    NihApi api = new NihApi(apiClient);
-    try {
-      FirecloudNihStatus nihStatus = api.nihStatus();
-      return setEraCommonsStatus(user, nihStatus, agent);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-        // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
-        // eRA Commons linkage.
-        log.info(String.format("NIH Status not found for user %s", user.getUsername()));
-        return user;
-      } else {
-        throw e;
-      }
-    }
   }
 
   @Override

@@ -328,27 +328,16 @@ Common.register_command({
 })
 
 
-def run_api_tests(cmd_name, args)
+def run_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle :test} + args
 end
 
 Common.register_command({
-  :invocation => "test-api",
-  :description => "Runs API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_api_tests("test-api", args) }
-})
-
-def run_all_tests(cmd_name, args)
-  run_api_tests(cmd_name, args)
-end
-
-Common.register_command({
   :invocation => "test",
-  :description => "Runs all tests (api). To run a single test, add (for example) " \
+  :description => "Runs all unit tests. To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => ->(*args) { run_all_tests("test", args) }
+  :fn => ->(*args) { run_tests("test", args) }
 })
 
 def run_integration_tests(cmd_name, *args)
@@ -377,22 +366,6 @@ Common.register_command({
   :invocation => "bigquerytest",
   :description => "Runs bigquerytest tests.",
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
-})
-
-def run_rainforest_tests(cmd_name, *args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  # The bucket is hardcoded to staging, because that is currently the only
-  # environment we can run tests in. There is, however, an identical key in
-  # each of the other environments.
-  token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
-  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
-end
-
-Common.register_command({
-  :invocation => "rainforesttest",
-  :description => "Runs rainforest tests.",
-  :fn => ->(*args) { run_rainforest_tests("rainforesttest", *args) }
 })
 
 def run_gradle(cmd_name, args)
@@ -432,7 +405,7 @@ Common.register_command({
 def docker_clean()
   common = Common.new
 
-  # --volumes clears out any cached data between runs, e.g. MySQL database or Elasticsearch.
+  # --volumes clears out any cached data between runs, e.g. the MySQL database
   # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
   #   still be cached and this is fast.
   common.run_inline %W{docker-compose down --volumes --rmi local}
@@ -1726,69 +1699,6 @@ Common.register_command({
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
 })
 
-def populate_user_affiliations(cmd_name, *args)
-  common = Common.new
-  ensure_docker(cmd_name, args)
-
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
-  op.opts.project = TEST_PROJECT
-
-  op.add_typed_option(
-      "--dry_run=[dry_run]",
-      TrueClass,
-      ->(opts, v) { opts.dry_run = v},
-      "When true, print debug lines instead of performing writes. Defaults to true.")
-
-  op.add_typed_option(
-      "--import-filename [import-filename]",
-      String,
-      ->(opts, v) { opts.importFilename = v},
-      "CSV File containing list of users to apply affiliations")
-
-  op.add_typed_option(
-      "--user-type [user-type]",
-      String,
-      ->(opts, v) { opts.userType = v},
-      "Which user type to populate: OPS or RESEARCHERS")
-
-  op.add_validator ->(opts) { raise ArgumentError unless (opts.importFilename and opts.userType)}
-
-  # Create a cloud context and apply the DB connection variables to the environment.
-  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate()
-
-  if op.opts.dry_run
-    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
-  end
-
-  gradle_args = ([
-      ["--import-filename", op.opts.importFilename],
-      ["--user-type", op.opts.userType]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  if op.opts.dry_run
-    gradle_args += ["--dry-run"]
-  end
-  # Gradle args need to be single-quote wrapped.
-  gradle_args.map! { |f| "'#{f}'" }
-
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        gradle populateUserAffiliations
-       -PappArgs=[#{gradle_args.join(',')}]}
-  end
-end
-
-POPULATE_USER_AFFILIATIONS_CMD = "populate-user-affiliations"
-
-Common.register_command({
-    :invocation => POPULATE_USER_AFFILIATIONS_CMD,
-    :description => "Populate the institutional affiliations for the users in the specified CSV file.",
-    :fn => ->(*args) {populate_user_affiliations(POPULATE_USER_AFFILIATIONS_CMD, *args)}
-})
-
 def delete_workspaces(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
@@ -2262,79 +2172,6 @@ Common.register_command({
   :fn => ->(*args) { list_runtimes("list-runtimes", *args) }
 })
 
-def load_es_index(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-
-  op.opts.env = "local"
-  op.add_option(
-    "--environment [ENV]",
-    ->(opts, v) { opts.env = v},
-    "Environment to load into; 'local' or a GCP project name, e.g. " +
-    "'all-of-us-workbench-test'")
-  op.add_validator ->(opts) { raise ArgumentError unless ENVIRONMENTS.has_key? opts.env }
-
-  op.add_option(
-    "--cdr-version [VERSION]",
-    ->(opts, v) { opts.cdr_version = v},
-    "CDR version, e.g. 'synth_r_2019q1_2', used to name the index. Value " +
-    "should eventually match elasticIndexBaseName in the cdr_config_*.json " +
-    "configurations. Defaults to 'cdr' for local runs")
-
-  # TODO(RW-2213): Generalize this subsampling approach for all local development work.
-  op.add_option(
-      "--participant-inclusion-inverse-prob [DENOMINATOR]",
-      ->(opts, v) { opts.inverse_prob = v},
-      "The inverse probabilty to index a participant, used to index a " +
-      "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
-      "target dataset. Defaults to 1K for local loads (~1K participants on the " +
-      "1M participant synthetic CDR), defaults to 1 for any other GCP project.")
-  op.parse.validate
-
-  if op.opts.inverse_prob.nil?
-    op.opts.inverse_prob = op.opts.env == "local" ? 1000 : 1
-  end
-  if op.opts.cdr_version.nil?
-    raise ArgumentError unless op.opts.env == "local"
-    op.opts.cdr_version = 'cdr'
-  end
-
-  unless Workbench.in_docker?
-    ensure_docker_sync()
-    exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
-  end
-
-  base_url = get_es_base_url(op.opts.env)
-  auth_project = op.opts.env == "local" ? nil : op.opts.env
-
-  common = Common.new
-  # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
-  # to work against the synthetic CDR into a local ES (using test Workbench).
-  create_flags = (([
-    ['--query-project-id', 'all-of-us-ehr-dev'],
-    ['--es-base-url', base_url],
-    # Matches cdr_config_local.json
-    ['--cdr-version', op.opts.cdr_version],
-    ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
-    ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
-    ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
-    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
-  ] + (auth_project.nil? ? [] : [
-    ['--es-auth-project', auth_project]
-  ])).map { |kv| "#{kv[0]}=#{kv[1]}" } + [
-    '--delete-indices'
-    # Gradle args need to be single-quote wrapped.
-  ]).map { |f| "'#{f}'" }
-  ServiceAccountContext.new((auth_project or TEST_PROJECT)).run do
-    common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
-  end
-end
-
-Common.register_command({
-  :invocation => "load-es-index",
-  :description => "Create Elasticsearch index",
-  :fn => ->(*args) { load_es_index("load-es-index", *args) }
-})
-
 def update_cdr_config_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
@@ -2386,27 +2223,6 @@ Common.register_command({
   :invocation => "update-cdr-config-local",
   :description => "Update CDR config (tiers and versions) in the local environment",
   :fn => ->(*args) { update_cdr_config_local("update-cdr-config-local", *args)}
-})
-
-def update_review_demographics(cmd_name, *args)
-  ensure_docker cmd_name, args
-  op = update_cdr_config_options(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-
-  with_cloud_proxy_and_db(gcc) do
-      common = Common.new
-      common.run_inline %W{
-        gradle updateReviewDemographics
-        -PappArgs=[#{op.opts.dry_run}]}
-  end
-end
-
-Common.register_command({
-  :invocation => "update-review-demographics",
-  :description => "Update demographics concept ids",
-  :fn => ->(*args) { update_review_demographics("update-review-demographics", *args)}
 })
 
 def get_test_service_account()
@@ -2666,11 +2482,6 @@ end
 
 def get_firecloud_base_url(project)
   return get_fc_config(project)["baseUrl"]
-end
-
-def get_es_base_url(env)
-  config_json = must_get_env_value(env, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))["elasticsearch"]["baseUrl"]
 end
 
 def load_config(project, dry_run = false)

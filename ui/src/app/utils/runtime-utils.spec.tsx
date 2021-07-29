@@ -1,6 +1,6 @@
 import {act} from 'react-dom/test-utils';
 import {mount} from 'enzyme';
-import {useCustomRuntime} from 'app/utils/runtime-utils';
+import {useCustomRuntime, RuntimeDiffState, findMostSevereDiffState} from 'app/utils/runtime-utils';
 import {runtimeStore} from 'app/utils/stores';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
@@ -76,5 +76,45 @@ describe('runtime-utils', () => {
     waitForFakeTimersAndUpdate(wrapper);
     expect(runtime('1').text()).toEqual('foo');
     expect(runtime('2').text()).toEqual('foo');
+  });
+
+  test.each([
+    [[], undefined],
+    [[RuntimeDiffState.NEEDS_DELETE], RuntimeDiffState.NEEDS_DELETE],
+    [
+      [
+        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        RuntimeDiffState.NEEDS_DELETE,
+        RuntimeDiffState.NO_CHANGE,
+        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+        RuntimeDiffState.NO_CHANGE,
+      ],
+      RuntimeDiffState.NEEDS_DELETE
+    ],
+    [
+      [
+        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        RuntimeDiffState.NO_CHANGE,
+        RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
+        RuntimeDiffState.CAN_UPDATE_IN_PLACE
+      ],
+      RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
+    ],
+    [
+      [
+        RuntimeDiffState.NO_CHANGE,
+        RuntimeDiffState.CAN_UPDATE_IN_PLACE,
+        RuntimeDiffState.NO_CHANGE
+      ],
+      RuntimeDiffState.CAN_UPDATE_IN_PLACE
+    ],
+    [
+      [
+        RuntimeDiffState.NO_CHANGE
+      ],
+      RuntimeDiffState.NO_CHANGE
+    ],
+  ])('findMostSevereDiffState(%s) = %s', (diffStates, want) => {
+    expect(findMostSevereDiffState(diffStates)).toEqual(want);
   });
 });

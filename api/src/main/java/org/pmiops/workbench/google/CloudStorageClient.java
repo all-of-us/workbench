@@ -42,8 +42,6 @@ public interface CloudStorageClient {
 
   String getCredentialsBucketString(String objectPath);
 
-  JSONObject getElasticCredentials();
-
   Map<String, String> getMetadata(String bucketName, String objectPath);
 
   Blob getBlob(String bucketName, String objectPath);

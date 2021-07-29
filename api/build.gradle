@@ -7,7 +7,6 @@ buildscript {
   // External properties on the default project. Values declared in ext blocks
   // outside of the buildscsript block aren't usable here.
   ext {
-    ELASTICSEARCH_VERSION = '6.8.3'
     GAE_VERSION = '1.9.64'
     GSON_VERSION = '2.8.5'
     JACKSON_DATABIND_VERSION = '2.11.3'
@@ -427,10 +426,6 @@ dependencies {
   compile "commons-codec:commons-codec:1.15"
   compile 'com.auth0:java-jwt:3.14.0'
 
-  // Elasticsearch client
-  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
-  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
-
   compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
   // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
@@ -662,16 +657,6 @@ def commandLineSpringProperties = [
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
-// See project.rb command: load-es-index
-task elasticSearchIndexer(type: JavaExec) {
-  classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
@@ -788,16 +773,6 @@ task updateCdrConfig(type: JavaExec) {
   }
 }
 
-// This should be run directly
-task updateReviewDemographics(type: JavaExec) {
-    classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
-    systemProperties = commandLineSpringProperties
-    if (project.hasProperty("appArgs")) {
-      args Eval.me(appArgs)
-    }
-}
-
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
@@ -822,16 +797,6 @@ task createTerraMethodSnapshot(type: JavaExec) {
 task loadInstitutions(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
   main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
-// See project.rb command: populate-user-affiliations
-task populateUserAffiliations(type: JavaExec) {
-  classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.institutions.PopulateUserAffiliations"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
