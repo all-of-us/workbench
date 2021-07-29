@@ -109,11 +109,9 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<PublicInstitutionDetails> getPublicInstitutionDetails() {
-    Stream<DbInstitution> allInstitutions =
-        StreamSupport.stream(institutionDao.findAll().spliterator(), false);
     Map<Long, MembershipRequirement> registeredTierRequirementMap =
         StreamSupport.stream(institutionTierRequirementDao.findAll().spliterator(), false)
-            .filter(t -> t.getAccessTier().getShortName() == REGISTERED_TIER_SHORT_NAME)
+            .filter(t -> t.getAccessTier().getShortName().equals(REGISTERED_TIER_SHORT_NAME))
             .collect(
                 Collectors.toMap(
                     t -> t.getInstitution().getInstitutionId(),
