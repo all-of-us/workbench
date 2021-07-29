@@ -421,21 +421,21 @@ public class InstitutionServiceTest extends SpringTest {
   @Test
   public void test_emailValidation_address() {
     final Institution inst =
-        service
-            .createInstitution(
-                new Institution()
-                    .shortName("Broad")
-                    .displayName("The Broad Institute")
-                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-            .tierConfigs(
-                ImmutableList.of(
-                    rtTierConfig
-                        .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                        .eraRequired(false)
-                        .accessTierShortName(registeredTier.getShortName())
-                        .emailDomains(ImmutableList.of("broad.org", "verily.com"))
-                        .emailAddresses(
-                            ImmutableList.of("external-researcher@sanger.uk", "science@aol.com")))));
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
     assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isTrue();
     // Fail even when domain matches, because the requirement is ADDRESSES.
     assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();

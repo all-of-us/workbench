@@ -600,9 +600,7 @@ public class ProfileControllerTest extends BaseControllerTest {
               new Institution()
                   .shortName("Broad")
                   .displayName("The Broad Institute")
-                  .addTierConfigsItem(
-                      rtAddressesConfig
-                          .emailAddresses(ImmutableList.of()))
+                  .addTierConfigsItem(rtAddressesConfig.emailAddresses(ImmutableList.of()))
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =

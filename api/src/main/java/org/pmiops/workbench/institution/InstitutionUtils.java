@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 public class InstitutionUtils {
   private InstitutionUtils() {}
 
-  /** Finds {@link InstitutionTierConfig} which from a {@link Institution}' by given tier. */
+  /** Finds {@link InstitutionTierConfig} which from a {@link Institution} by given tier. */
   public static Optional<InstitutionTierConfig> getTierConfigByTier(
       Institution institution, String accessTierShortName) {
     if (institution.getTierConfigs() == null) {

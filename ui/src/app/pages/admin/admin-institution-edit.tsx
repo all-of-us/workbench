@@ -168,9 +168,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setTierRequirement(membershipRequirement) {
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
-    rtTierConfig.membershipRequirement = membershipRequirement.value;
-    rtTierConfig.eraRequired = true;
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      membershipRequirement: membershipRequirement.value,
+      eraRequired: true
+    };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
 
@@ -182,16 +184,20 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setEmails(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
-    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
-    rtTierConfig.emailAddresses = emailList.map(email => email.trim()).filter((item) => item != '');
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailAddresses: emailList.map(email => email.trim()).filter((item) => item !== '')
+    };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
 
   setDomains(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
-    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
-    rtTierConfig.emailDomains = emailList.map(email => email.trim()).filter((item) => item != '');
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailDomains: emailList.map(email => email.trim()).filter((item) => item !== '')
+    };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
