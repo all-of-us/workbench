@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -31,6 +32,8 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -106,8 +109,20 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<PublicInstitutionDetails> getPublicInstitutionDetails() {
+    Stream<DbInstitution> allInstitutions =
+        StreamSupport.stream(institutionDao.findAll().spliterator(), false);
+    Map<Long, MembershipRequirement> registeredTierRequirementMap =
+        StreamSupport.stream(institutionTierRequirementDao.findAll().spliterator(), false)
+            .filter(t -> t.getAccessTier().getShortName() == REGISTERED_TIER_SHORT_NAME)
+            .collect(
+                Collectors.toMap(
+                    t -> t.getInstitution().getInstitutionId(),
+                    DbInstitutionTierRequirement::getMembershipRequirement));
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(publicInstitutionDetailsMapper::dbToModel)
+        .map(
+            i ->
+                publicInstitutionDetailsMapper.dbToModel(
+                    i, registeredTierRequirementMap.get(i.getInstitutionId())))
         .collect(Collectors.toList());
   }
 

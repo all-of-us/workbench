@@ -6329,6 +6329,10 @@ definitions:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
           enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
+      registeredTierMembershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: 'Type of Registered tier requirement the institution has signed, email domains
+         or restricted to a defined set of specific researchers'
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
