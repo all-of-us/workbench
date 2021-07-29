@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
-import static org.pmiops.workbench.ras.RasLinkService.getEraUserId;
 import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.auth0.jwt.JWT;
@@ -76,7 +75,9 @@ public class RasLinkServiceTest extends SpringTest {
   private static final String USER_INFO_JSON_ERA =
       "{\"preferred_username\":\"" + ERA_COMMONS_USERNAME + "\",\"email\":\"foo2@gmail.com\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV_WITH_ERA =
-      "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\","
+      "{\"preferred_username\":\""
+          + LOGIN_GOV_USERNAME
+          + "\",\"email\":\"foo@gmail.com\","
           + "\"federated_identities\":"
           + "{\"identities\":"
           + "[{\"login.gov\":"
@@ -214,7 +215,8 @@ public class RasLinkServiceTest extends SpringTest {
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
         .isEqualTo(LOGIN_GOV_USERNAME);
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
-    assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername()).isEqualTo("eraUserId");
+    assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
+        .isEqualTo("eraUserId");
     assertModuleCompletionTime(AccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(AccessModuleName.ERA_COMMONS, NOW);
   }
@@ -258,11 +260,10 @@ public class RasLinkServiceTest extends SpringTest {
   }
 
   private void assertModuleCompletionTime(AccessModuleName module, Timestamp timestamp) {
-    Optional<DbUserAccessModule> dbAccessModule = userAccessModuleDao
-        .getByUserAndAccessModule(
-            currentUser,
-            accessModuleDao.findOneByName(module).get());
-    if(!dbAccessModule.isPresent()) {
+    Optional<DbUserAccessModule> dbAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(
+            currentUser, accessModuleDao.findOneByName(module).get());
+    if (!dbAccessModule.isPresent()) {
       assertThat(timestamp).isNull();
     } else {
       assertThat(dbAccessModule.get().getCompletionTime()).isEqualTo(timestamp);

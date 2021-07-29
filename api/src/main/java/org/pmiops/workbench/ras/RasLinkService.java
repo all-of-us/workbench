@@ -115,7 +115,8 @@ public class RasLinkService {
 
   @Autowired
   public RasLinkService(
-      AccessModuleService accessModuleService, UserService userService,
+      AccessModuleService accessModuleService,
+      UserService userService,
       @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
     this.accessModuleService = accessModuleService;
     this.userService = userService;
@@ -154,11 +155,16 @@ public class RasLinkService {
     // TODO(RW-7108): Make eRA optional
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
     Optional<String> eRaUserId = getEraUserId(userInfoResponse);
-    Optional<AccessModuleStatus> eRAModuleStatus = accessModuleService.getClientAccessModuleStatus(user).stream().filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS).findFirst();
-    if(eRAModuleStatus.isPresent() && (eRAModuleStatus.get().getCompletionEpochMillis() != null || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
+    Optional<AccessModuleStatus> eRAModuleStatus =
+        accessModuleService.getClientAccessModuleStatus(user).stream()
+            .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
+            .findFirst();
+    if (eRAModuleStatus.isPresent()
+        && (eRAModuleStatus.get().getCompletionEpochMillis() != null
+            || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
       return user;
-    } else if (eRaUserId.isPresent()){
-        return userService.updateRasLinkEraStatus(eRaUserId.get());
+    } else if (eRaUserId.isPresent()) {
+      return userService.updateRasLinkEraStatus(eRaUserId.get());
     }
     return user;
   }
@@ -191,7 +197,14 @@ public class RasLinkService {
    */
   public static Optional<String> getEraUserId(JsonNode userInfo) {
     try {
-      String eRAUserId = userInfo.get(FEDERATED_IDENTITIES).get(IDENTITIES).get(0).get(ERA_COMMONS_PROVIDER_NAME).get(IDENTITY_USERID).asText();
+      String eRAUserId =
+          userInfo
+              .get(FEDERATED_IDENTITIES)
+              .get(IDENTITIES)
+              .get(0)
+              .get(ERA_COMMONS_PROVIDER_NAME)
+              .get(IDENTITY_USERID)
+              .asText();
       return Optional.of(eRAUserId).filter(v -> !v.isEmpty());
     } catch (NullPointerException e) {
       log.info(String.format("User does not have valid eRA, acrClaim: %s", userInfo));
