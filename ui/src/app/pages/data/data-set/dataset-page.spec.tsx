@@ -6,7 +6,7 @@ import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {
   CdrVersionsApi,
@@ -16,13 +16,15 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {mockUseNavigation, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+
+const [, navigateByUrlSpy] = mockUseNavigation();
 
 describe('DataSetPage', () => {
   let datasetApiStub;
@@ -263,17 +265,19 @@ describe('DataSetPage', () => {
     const wrapper = component();
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
-    // Mock out navigateByUrl
-    const navSpy = jest.fn();
-    NavStore.navigateByUrl = navSpy;
-
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build');
+    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
+      preventDefaultIfNoKeysPressed: true,
+      event: expect.anything()
+    });
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/concepts');
+    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/concepts', {
+      preventDefaultIfNoKeysPressed: true,
+      event: expect.anything()
+    });
   });
 
   it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {

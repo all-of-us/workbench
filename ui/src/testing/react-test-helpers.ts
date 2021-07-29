@@ -47,3 +47,15 @@ export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wr
 export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
   return (node.name() === null && fp.includes(text, node.text()));
 }));
+
+export const mockUseNavigation = () => {
+  const navigate = jest.fn();
+  const navigateByUrl = jest.fn();
+
+  jest.mock('app/utils/navigation', () => ({
+    ...jest.requireActual('app/utils/navigation'),
+    useNavigation: () => [navigate, navigateByUrl],
+  }));
+
+  return [navigate, navigateByUrl];
+};
