@@ -17,7 +17,7 @@ import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
-  getRegisteredTierRequirement,
+  getRegisteredTierConfig,
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
@@ -97,7 +97,7 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
         institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
         verifiedInstitutionOptions
       );
-      if (getRegisteredTierRequirement(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+      if (getRegisteredTierConfig(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         // Institution has signed Restricted agreement and the email is not in allowed emails list
         return <RestrictedDuaEmailMismatchErrorMessage/>;
       } else {

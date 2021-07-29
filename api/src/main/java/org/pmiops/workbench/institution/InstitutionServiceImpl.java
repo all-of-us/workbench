@@ -391,7 +391,9 @@ public class InstitutionServiceImpl implements InstitutionService {
       final DbInstitution dbInstitution,
       final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
-    // Make sure the delete succeeds.
+    // Make sure the delete succeeds. This is needed because delete record in db table seems not
+    // cleanup the per_institution_per_tier constraint right away. Make one extra get call flushed
+    // all pending writes including the constraint to be deleted.
     if (!institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
       throw new ServerErrorException(
           "Failed to cleanup existing tier requirements before replacing them");

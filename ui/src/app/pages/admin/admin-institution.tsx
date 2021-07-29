@@ -9,7 +9,7 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
-  getRegisteredTierRequirement,
+  getRegisteredTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains
 } from 'app/utils/institutions';
@@ -101,7 +101,7 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
 
   renderDuaType(row, col) {
     // TODO(yonghao): Handle NO_ACCESS
-    return (getRegisteredTierRequirement(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
+    return (getRegisteredTierConfig(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
         'Individual' : 'Master';
   }
 

@@ -52,6 +52,7 @@ interface InstitutionEditState {
   apiErrorMsg: string;
   institutionMode: InstitutionMode;
   institution: Institution;
+  institutionToEdit: Institution;
   invalidEmailAddress: boolean;
   invalidEmailAddressMsg: string;
   invalidEmailDomain: boolean;
@@ -59,11 +60,8 @@ interface InstitutionEditState {
   showOtherInstitutionTextBox: boolean;
   showBackButtonWarning: boolean;
   showApiError: boolean;
+  title: string;
 }
-
-// TODO(RW-7127): Remove static state
-let title = 'Add new Institution';
-let institutionToEdit: Institution;
 
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
@@ -78,13 +76,15 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         displayName: '',
         organizationTypeEnum: null
       },
+      institutionToEdit: null,
       invalidEmailAddress: false,
       invalidEmailAddressMsg: '',
       invalidEmailDomain: false,
       invalidEmailDomainsMsg: '',
       showOtherInstitutionTextBox: false,
       showBackButtonWarning: false,
-      showApiError: false
+      showApiError: false,
+      title: '',
     };
   }
 
@@ -92,16 +92,16 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
     if (this.props.urlParams.institutionId) {
-      institutionToEdit = await institutionApi().getInstitution(this.props.urlParams.institutionId);
-      title = institutionToEdit.displayName;
+      const loadedInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
       this.setState({
         institutionMode: InstitutionMode.EDIT,
-        institution: institutionToEdit,
-        showOtherInstitutionTextBox: institutionToEdit.organizationTypeEnum === OrganizationType.OTHER
+        institution: loadedInstitution,
+        institutionToEdit: loadedInstitution,
+        showOtherInstitutionTextBox: loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
+        title: loadedInstitution.displayName
       });
     } else {
-      title = 'Add new Institution';
-      this.setState({institutionMode: InstitutionMode.ADD});
+      this.setState({institutionMode: InstitutionMode.ADD, title: 'Add new Institution'});
     }
   }
 
@@ -198,21 +198,19 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   // Check if the fields have not been edited
   fieldsNotEdited() {
-    return (this.isAddInstitutionMode && !this.fieldsNotEditedAddInstitution)
-        || (institutionToEdit && this.fieldsNotEditedEditInstitution);
+    return (this.isAddInstitutionMode && !this.fieldsEditedAddInstitution)
+        || (this.state.institutionToEdit && !this.fieldsEditedEditInstitution);
   }
 
-  get fieldsNotEditedAddInstitution() {
+  get fieldsEditedAddInstitution() {
     const {institution} = this.state;
     return institution.displayName || institution.userInstructions ||
       institution.organizationTypeEnum || institution.tierConfigs;
   }
 
-  get fieldsNotEditedEditInstitution() {
-    const {institution} = this.state;
-    const strip = fp.flow(
-      fp.pick(['displayName', 'organizationTypeEnum', 'userInstructions', 'tierConfigs', 'organizationTypeOtherText']));
-    return fp.isEqual(strip(institution), strip(institutionToEdit));
+  get fieldsEditedEditInstitution() {
+    const {institution, institutionToEdit} = this.state;
+    return institution !== institutionToEdit
   }
 
   hasInvalidFields() {
@@ -237,6 +235,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
+    console.log("~~~~disableSavevdisableSave~ ERROR ")
+    console.log(errors)
+    console.log("~~~~disableSavevdisableSave~ booleans ")
+    console.log(this.hasInvalidFields())
+    console.log(this.fieldsNotEdited())
     return this.hasInvalidFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
@@ -320,7 +323,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   render() {
-    const {institution, showOtherInstitutionTextBox} = this.state;
+    const {institution, showOtherInstitutionTextBox, title} = this.state;
     const {
       displayName, organizationTypeEnum, tierConfigs
     } = institution;
@@ -333,7 +336,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
-      tierRequirements: {presence: {allowEmpty: false}},
+      tierConfigs: {presence: {allowEmpty: false}},
       tierEmailAddresses: {truthiness: true},
       tierEmailDomain: {truthiness: true}
     });
