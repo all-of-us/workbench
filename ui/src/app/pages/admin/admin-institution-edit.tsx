@@ -183,7 +183,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   setEmails(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
     const rtTierConfig = getRegisteredTierConfig(this.state.institution);
-    rtTierConfig.emailAddresses = emailList.map(email => email.trim());
+    rtTierConfig.emailAddresses = emailList.map(email => email.trim()).filter((item) => item != '');
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
@@ -191,7 +191,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   setDomains(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
     const rtTierConfig = getRegisteredTierConfig(this.state.institution);
-    rtTierConfig.emailDomains = emailList.map(email => email.trim());
+    rtTierConfig.emailDomains = emailList.map(email => email.trim()).filter((item) => item != '');
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
@@ -210,7 +210,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   get fieldsEditedEditInstitution() {
     const {institution, institutionToEdit} = this.state;
-    return institution !== institutionToEdit
+    return institution !== institutionToEdit;
   }
 
   hasInvalidFields() {
@@ -235,11 +235,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
-    console.log("~~~~disableSavevdisableSave~ ERROR ")
-    console.log(errors)
-    console.log("~~~~disableSavevdisableSave~ booleans ")
-    console.log(this.hasInvalidFields())
-    console.log(this.fieldsNotEdited())
     return this.hasInvalidFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }

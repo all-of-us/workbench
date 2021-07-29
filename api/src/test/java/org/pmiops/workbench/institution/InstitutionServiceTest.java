@@ -66,7 +66,6 @@ public class InstitutionServiceTest extends SpringTest {
   private DbAccessTier registeredTier;
 
   private InstitutionTierConfig rtTierConfig;
-  private InstitutionTierConfig ctTierConfig;
 
   @BeforeEach
   public void setUp() {
@@ -427,7 +426,7 @@ public class InstitutionServiceTest extends SpringTest {
                 new Institution()
                     .shortName("Broad")
                     .displayName("The Broad Institute")
-                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION))
+                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
             .tierConfigs(
                 ImmutableList.of(
                     rtTierConfig
@@ -436,7 +435,7 @@ public class InstitutionServiceTest extends SpringTest {
                         .accessTierShortName(registeredTier.getShortName())
                         .emailDomains(ImmutableList.of("broad.org", "verily.com"))
                         .emailAddresses(
-                            ImmutableList.of("external-researcher@sanger.uk", "science@aol.com"))));
+                            ImmutableList.of("external-researcher@sanger.uk", "science@aol.com")))));
     assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isTrue();
     // Fail even when domain matches, because the requirement is ADDRESSES.
     assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
@@ -449,6 +448,7 @@ public class InstitutionServiceTest extends SpringTest {
             new Institution()
                 .shortName("Broad")
                 .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
                 .tierConfigs(
                     ImmutableList.of(
                         rtTierConfig

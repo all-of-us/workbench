@@ -602,8 +602,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .displayName("The Broad Institute")
                   .addTierConfigsItem(
                       rtAddressesConfig
-                          .emailAddresses(ImmutableList.of(CONTACT_EMAIL))
-                          .emailDomains(ImmutableList.of()))
+                          .emailAddresses(ImmutableList.of()))
                   .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
           institutionService.createInstitution(broad);
           final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
