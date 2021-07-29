@@ -6,13 +6,14 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {Institution} from 'generated/fetch';
 import {DuaType, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {withNavigation} from '../../utils/navigation-wrapper';
 import {OrganizationTypeOptions} from './admin-institution-options';
 
 

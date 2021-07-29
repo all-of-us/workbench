@@ -15,7 +15,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {useNavigation, withNavigation} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
@@ -23,6 +23,7 @@ import {
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   editIcon: {

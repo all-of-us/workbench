@@ -14,8 +14,7 @@ import {
   currentCohortReviewStore,
   currentWorkspaceStore,
   NavigationProps,
-  urlParamsStore,
-  withNavigation
+  urlParamsStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -27,6 +26,7 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';

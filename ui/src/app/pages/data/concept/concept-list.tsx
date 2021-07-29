@@ -16,10 +16,11 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  setSidebarActiveIconStore, withNavigation
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   sectionTitle: {

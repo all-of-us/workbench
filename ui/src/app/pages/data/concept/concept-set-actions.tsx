@@ -10,13 +10,13 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   conceptSetUpdating,
   NavigationProps,
-  urlParamsStore,
-  withNavigation
+  urlParamsStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   conceptSetsHeader: {

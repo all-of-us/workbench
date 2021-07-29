@@ -1,13 +1,14 @@
 import {Button} from 'app/components/buttons';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {withCurrentWorkspace, withUserProfile} from 'app/utils';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 interface Props extends NavigationProps {
   workspace: WorkspaceData;

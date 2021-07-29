@@ -30,14 +30,13 @@ import {
   reactStyles, switchCase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
-  withCurrentWorkspace,
-  withUserProfile
+  withCurrentWorkspace, withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
   currentConceptStore, NavigationProps,
-  setSidebarActiveIconStore, withNavigation
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
@@ -70,6 +69,7 @@ import {
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {withNavigation} from '../utils/navigation-wrapper';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 

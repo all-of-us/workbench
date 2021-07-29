@@ -12,7 +12,7 @@ import {
   routeConfigDataStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {Domain, } from 'generated/fetch';
+import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -572,3 +572,4 @@ export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T)
     }
   }
 };
+

@@ -2,23 +2,17 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {
-  registerApiClient, workspacesApi,
+  registerApiClient
 } from 'app/services/swagger-fetch-clients';
-import {navigate} from 'app/utils/navigation';
 import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {navigateSpy} from '../../../testing/navigation-mock';
 import {WorkspaceList} from './workspace-list';
 import {profileStore, serverConfigStore} from "app/utils/stores";
-
-// Mock the navigate function but not userProfileStore
-jest.mock('app/utils/navigation', () => ({
-  ...(jest.requireActual('app/utils/navigation')),
-  navigate: jest.fn()
-}));
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -63,7 +57,7 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');
-    expect(navigate).toHaveBeenCalledWith(
+    expect(navigateSpy).toHaveBeenCalledWith(
       ['workspaces', workspace.namespace, workspace.id, 'data']);
   });
 

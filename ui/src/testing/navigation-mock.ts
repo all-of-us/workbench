@@ -5,3 +5,5 @@ jest.mock('app/utils/navigation', () => ({
   ...jest.requireActual('app/utils/navigation'),
   useNavigation: () => [navigateSpy, navigateByUrlSpy],
 }));
+
+console.log("this ran");

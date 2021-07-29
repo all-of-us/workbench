@@ -1,4 +1,3 @@
-
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
@@ -43,8 +42,6 @@ export const signInStore =
 export const useNavigation = () => {
   const history = useHistory();
 
-  // TODO angular2react - handle extras
-  // TODO angular2react - rename back to non 2 version
   const navigate = (commands, extras?: NavigateExtras) => {
     // url should always lead with a slash so that the given url replaces the current one
     const url = '/' + commands.join('/').replace(/^\//, '');
@@ -86,14 +83,6 @@ export interface NavigationProps {
   navigate: (commands, extras?: NavigateExtras) => void;
   navigateByUrl: (commands, extras?: NavigateExtras) => void;
 }
-
-export const withNavigation = WrappedComponent => ({...props}) => {
-  const [navigate, navigateByUrl] = useNavigation();
-
-  return <WrappedComponent navigate={navigate}
-                           navigateByUrl={navigateByUrl}
-                           {...props}/>;
-};
 
 /**
  * Strict variant of URI encoding to satisfy Angular routing, specifically for

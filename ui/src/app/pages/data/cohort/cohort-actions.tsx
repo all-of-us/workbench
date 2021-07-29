@@ -7,11 +7,12 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {NavigationProps, urlParamsStore, withNavigation} from 'app/utils/navigation';
+import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   cohortsHeader: {

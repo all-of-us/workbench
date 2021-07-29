@@ -10,10 +10,11 @@ import {queryResultSizeStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortReviewStore, NavigationProps, withNavigation} from 'app/utils/navigation';
+import {currentCohortReviewStore, NavigationProps} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   title: {

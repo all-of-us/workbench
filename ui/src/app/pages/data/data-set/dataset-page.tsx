@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CreateModal} from 'app/components/create-modal';
@@ -21,7 +16,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  reactStyles, switchCase,
+  reactStyles,
+  switchCase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
@@ -30,10 +26,7 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentWorkspaceStore,
-  useNavigation
-} from 'app/utils/navigation';
+import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -46,15 +39,21 @@ import {
   DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
-  DataSetPreviewValueList, DataSetRequest,
+  DataSetPreviewValueList,
+  DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile, ResourceType,
+  Profile,
+  ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -1394,3 +1393,4 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       </React.Fragment>;
     }
   });
+

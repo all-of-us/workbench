@@ -2,6 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
+import {MemoryRouter} from 'react-router';
 
 
 describe('CohortResourceCard', () => {
@@ -10,7 +11,9 @@ describe('CohortResourceCard', () => {
       cohort: {}
     };
 
-    return mount(<CohortResourceCard resource={props} onUpdate={() => {}}/>);
+    return mount(<MemoryRouter>
+      <CohortResourceCard resource={props} onUpdate={() => {}}/>
+    </MemoryRouter>);
   };
 
   it('should render', () => {

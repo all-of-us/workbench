@@ -26,16 +26,16 @@ import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
-  lensOnProps,
-  withUserProfile
+  lensOnProps, withUserProfile
 } from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 
 // validators for validate.js

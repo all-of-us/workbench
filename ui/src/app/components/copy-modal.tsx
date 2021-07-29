@@ -18,9 +18,10 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {withNavigation} from '../utils/navigation-wrapper';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
 
@@ -32,7 +33,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');
 
-export interface Props extends NavigationProps {
+export interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
@@ -44,6 +45,8 @@ export interface Props extends NavigationProps {
   resourceType: ResourceType;
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
+
+interface HocProps extends Props, NavigationProps {}
 
 interface WorkspaceOptions {
   label: string;
@@ -126,8 +129,8 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
 </div>;
 
 const CopyModal = fp.flow(withNavigation, withCdrVersions())
-(class extends React.Component<Props, State> {
-  constructor(props: Props) {
+(class extends React.Component<HocProps, State> {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       workspaceOptions: [],
@@ -327,6 +330,7 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
   }
 
   validateAndSetDestination(destination: Workspace) {
+    console.log("destination ", destination)
     const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
 
     this.clearCopyError();
@@ -336,6 +340,11 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
     const accessTierMismatch: boolean = fromAccessTierShortName !== destination.accessTierShortName;
     const isNotebook: boolean = resourceType === ResourceType.NOTEBOOK;
     const isConceptSet: boolean = resourceType === ResourceType.CONCEPTSET;
+
+    console.log(accessTierMismatch);
+    console.log(cdrVersionMismatch);
+    console.log(cdrVersionMismatch && isConceptSet);
+    console.log(accessTierMismatch && isNotebook);
 
     cond([accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
         [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],

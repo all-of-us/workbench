@@ -5,7 +5,7 @@ import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore, urlParamsStore, NavStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -17,6 +17,7 @@ import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {navigateSpy} from '../../../testing/navigation-mock';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 
@@ -212,9 +213,6 @@ describe('NotebookRedirect', () => {
   });
 
   it('should navigate away after runtime transitions to deleting', async() => {
-    const navSpy = jest.fn();
-    NavStore.navigate = navSpy;
-
     queryParamsStore.next({
       kernelType: Kernels.R,
       creating: false
@@ -232,7 +230,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(navSpy).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
     act(() => {
@@ -244,6 +242,6 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(navSpy).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalled();
   });
 });

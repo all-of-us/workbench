@@ -12,10 +12,11 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   currentCohortReviewStore,
-  NavigationProps, withNavigation
+  NavigationProps
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   title: {

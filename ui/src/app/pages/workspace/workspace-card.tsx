@@ -17,9 +17,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, NavigationProps, useNavigation, withNavigation} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 const EVENT_CATEGORY = 'Workspace list';
 

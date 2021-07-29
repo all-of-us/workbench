@@ -9,9 +9,10 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
 import {DataSet, WorkspaceResource} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   resource: WorkspaceResource;

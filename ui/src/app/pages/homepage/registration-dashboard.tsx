@@ -15,10 +15,11 @@ import {reactStyles} from 'app/utils';
 import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessModule, Profile} from 'generated/fetch';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   mainHeader: {
@@ -220,7 +221,7 @@ export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(naviga
   return acc;
 }, {});
 
-export interface RegistrationDashboardProps extends NavigationProps {
+export interface RegistrationDashboardProps {
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
@@ -233,6 +234,8 @@ export interface RegistrationDashboardProps extends NavigationProps {
   dataUserCodeOfConductCompleted: boolean;
 }
 
+interface HocProps extends RegistrationDashboardProps, NavigationProps {}
+
 interface State {
   showRefreshButton: boolean;
   trainingWarningOpen: boolean;
@@ -243,8 +246,8 @@ interface State {
 }
 
 
-export const RegistrationDashboard = fp.flow(withNavigation)(class extends React.Component<RegistrationDashboardProps, State> {
-  constructor(props: RegistrationDashboardProps) {
+export const RegistrationDashboard = fp.flow(withNavigation)(class extends React.Component<HocProps, State> {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,

@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {NavigationProps, queryParamsStore, withNavigation} from 'app/utils/navigation';
+import {NavigationProps, queryParamsStore} from 'app/utils/navigation';
 
 import {
   Clickable, StyledAnchorTag,
@@ -30,6 +30,7 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 export const styles = reactStyles({
   bottomBanner: {

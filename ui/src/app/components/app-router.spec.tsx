@@ -1,8 +1,7 @@
 import * as React from "react";
-import {AppRoute, AppRouter, Guard, NavRedirect, ProtectedRoutes} from "app/components/app-router";
+import {AppRoute, AppRouter, Guard, ProtectedRoutes} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
-import {NavStore} from "app/utils/navigation";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -13,8 +12,6 @@ jest.mock('react-router-dom', () => {
     BrowserRouter: ({ children }) => <div>{children}</div>,
   }
 });
-
-NavStore.navigate = jest.fn();
 
 describe('AppRouter', () => {
   const component = (initialEntries: string[], initialIndex: number) => {
@@ -48,11 +45,11 @@ describe('AppRouter', () => {
   it('renders for nested protectedRoutes', () => {
     const wrapper = component(['/nested-protected-route'], 0);
     expect(wrapper.find('span').first().text()).toEqual('Nested Protected Route')
-  })
+  });
 
   it('punts on failed nested protected route', () => {
     const wrapper = component(['/nested-unreachable-path'], 0);
-    // don't want to pull all of angular into a test of react routerto test that a redirect is
+    // don't want to pull all of angular into a test of react router to test that a redirect is
     // happening, so we'll check that the router is telling it to redirect to the right place
     expect(wrapper.find(NavRedirect).first().props().path).toEqual('/punting');
   });

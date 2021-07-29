@@ -40,8 +40,7 @@ import {
   reactStyles,
   sliceByHalfLength,
   withCdrVersions,
-  withCurrentWorkspace,
-  withUserProfile
+  withCurrentWorkspace, withUserProfile
 } from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -52,7 +51,7 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore, withNavigation} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -72,6 +71,7 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {withNavigation} from '../../utils/navigation-wrapper';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({

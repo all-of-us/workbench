@@ -15,7 +15,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {profileStore, RuntimeStore} from 'app/utils/stores';
@@ -23,6 +23,7 @@ import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 
 const styles = reactStyles({

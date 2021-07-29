@@ -10,8 +10,7 @@ import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   currentCohortReviewStore,
   NavigationProps,
-  urlParamsStore,
-  withNavigation
+  urlParamsStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -27,6 +26,7 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const css = `
   .stats-left-padding {

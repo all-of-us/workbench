@@ -12,12 +12,13 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {DuaType, Institution, OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {withNavigation} from '../../utils/navigation-wrapper';
 import {DuaTypes, OrganizationTypeOptions} from './admin-institution-options';
 
 const styles = reactStyles({

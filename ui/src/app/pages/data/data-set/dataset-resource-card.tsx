@@ -11,11 +11,12 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 import {ExportDatasetModal} from './export-dataset-modal';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {

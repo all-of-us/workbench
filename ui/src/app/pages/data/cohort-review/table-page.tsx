@@ -24,8 +24,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
   NavigationProps,
-  urlParamsStore,
-  withNavigation
+  urlParamsStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -38,6 +37,7 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},

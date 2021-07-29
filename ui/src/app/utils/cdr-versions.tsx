@@ -19,6 +19,7 @@ function hasDefaultCdrVersion(workspace: Workspace, cdrTiers: CdrVersionTiersRes
 
 // does not consider tier; IDs are globally unique, enforced by the API DB
 function findCdrVersion(cdrVersionId: string, cdrTiers: CdrVersionTiersResponse): CdrVersion {
+  console.log(cdrVersionId, cdrTiers);
   const allTiersVersions = fp.flatMap(tier => tier.versions, cdrTiers.tiers);
   return allTiersVersions.find(v => v.cdrVersionId === cdrVersionId);
 }

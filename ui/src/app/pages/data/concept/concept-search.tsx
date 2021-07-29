@@ -21,8 +21,7 @@ import {
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
-  withCurrentWorkspace,
-  withUrlParams
+  withCurrentWorkspace, withUrlParams
 } from 'app/utils';
 import {
   conceptSetUpdating,
@@ -30,12 +29,13 @@ import {
   currentConceptStore,
   NavigationProps,
   queryParamsStore,
-  setSidebarActiveIconStore, withNavigation
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   conceptSetHeader: {

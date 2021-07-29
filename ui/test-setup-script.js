@@ -12,3 +12,5 @@ global.afterEach(() => {
     document.body.removeChild(document.getElementById('root'));
     document.body.removeChild(document.getElementById('popup-root'));
 });
+
+console.log("this also ran")

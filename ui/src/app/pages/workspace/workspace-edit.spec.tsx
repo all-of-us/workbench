@@ -3,7 +3,7 @@ import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   DisseminateResearchEnum, ProfileApi,
@@ -28,12 +28,8 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {navigateSpy} from '../../../testing/navigation-mock';
 import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
-
-jest.mock('app/utils/navigation', () => ({
-  ...(jest.requireActual('app/utils/navigation')),
-  navigate: jest.fn()
-}));
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -240,7 +236,7 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
@@ -382,7 +378,7 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('supports waiting on access delays', async () => {
@@ -401,18 +397,18 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(15e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.OWNER});
     };
     jest.advanceTimersByTime(10e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalled();
 
     jest.useRealTimers();
   });
@@ -445,11 +441,11 @@ describe('WorkspaceEdit', () => {
     if (!aclDelayBtn.exists()) {
       fail('failed to find a rendered acl delay modal button after many timer increments');
     }
-    expect(navigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     aclDelayBtn.simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigate).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalled();
 
     jest.useRealTimers();
   });

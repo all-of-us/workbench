@@ -16,8 +16,9 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {NavigationProps, withNavigation} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
+import {withNavigation} from '../../utils/navigation-wrapper';
 
 
 const styles = reactStyles({

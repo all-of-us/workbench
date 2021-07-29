@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {NavigationProps, urlParamsStore, withNavigation} from 'app/utils/navigation';
+import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -19,8 +19,7 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  withCurrentWorkspace,
-  withQueryParams,
+  withCurrentWorkspace, withQueryParams,
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
@@ -28,6 +27,7 @@ import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils'
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import {withNavigation} from '../../utils/navigation-wrapper';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum Progress {

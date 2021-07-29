@@ -21,12 +21,12 @@ import {
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
-  NavigationProps,
-  withNavigation
+  NavigationProps
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
+import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   searchBar: {
