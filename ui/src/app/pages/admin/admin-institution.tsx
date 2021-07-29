@@ -7,16 +7,13 @@ import {OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
+  getControlledTierConfig,
   getRegisteredTierConfig,
-  getTierEmailAddresses,
-  getTierEmailDomains
 } from 'app/utils/institutions';
 import {navigateByUrl} from 'app/utils/navigation';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
@@ -99,30 +96,15 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
     return organizationLabel;
   }
 
-  renderDuaType(row, col) {
-    // TODO(yonghao): Handle NO_ACCESS
-    return (getRegisteredTierConfig(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
-        'Individual' : 'Master';
-  }
-
-  // If email domain list has more than 4 entries show top 4 and replace others with ...
-  renderEmailDomain(row, col) {
-    const rawEmailDomains = getTierEmailDomains(row, AccessTierShortNames.Registered);
-    const emailDomain = fp.take(4, rawEmailDomains).join('\n') ;
-    if (rawEmailDomains && rawEmailDomains.length > 4) {
-      return emailDomain + '...';
+  renderAccessTiers(row, col) {
+    let tiers = '';
+    if(getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += 'Registered'
     }
-    return emailDomain;
-  }
-
-  // If email address list has more than 4 entries show top 4 and replace others with ...
-  renderEmailAddress(row, col) {
-    const rawEmailAddresses = getTierEmailAddresses(row, AccessTierShortNames.Registered);
-    const emailAddresses = fp.take(4, rawEmailAddresses).join('\n') ;
-    if (rawEmailAddresses && rawEmailAddresses.length > 4) {
-      return emailAddresses + '...';
+    if(getControlledTierConfig(row) && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += ',Controlled'
     }
-    return emailAddresses;
+    return tiers;
   }
 
   render() {
@@ -149,11 +131,7 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
           <Column field='organizationTypeEnum' header='Institution Type'
                   body={this.renderOrganizationType} bodyStyle={styles.text}
                   headerStyle={styles.header}/>
-          <Column field='duaTypeEnum' header='Agreement Type' body={this.renderDuaType}
-                  bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='emailDomains' header='Accepted Domain List' body={this.renderEmailDomain}
-                  bodyStyle={styles.text} headerStyle={styles.header}/>
-          <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
+          <Column field='duaTypeEnum' header='Data access tiers' body={this.renderAccessTiers}
                   bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
                   headerStyle={{...styles.header, width: '5rem'}}/>

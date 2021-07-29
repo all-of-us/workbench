@@ -67,13 +67,14 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
 };
 
 function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
-  if (!institution.tierConfigs) {
-    return {
-      accessTierShortName: accessTier,
-      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
-      emailAddresses: [],
-      emailDomains: []
-    };
+  const defaultTierConfig : InstitutionTierConfig = {
+    accessTierShortName: accessTier,
+        membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+        emailAddresses: [],
+        emailDomains: []
+  }
+  if (!institution.tierConfigs || !institution.tierConfigs.find(t => t.accessTierShortName === accessTier)) {
+    return defaultTierConfig
   }
   return institution.tierConfigs.find(t => t.accessTierShortName === accessTier);
 }
@@ -82,8 +83,16 @@ export function getRegisteredTierConfig(institution: Institution): InstitutionTi
   return getTierConfig(institution, AccessTierShortNames.Registered);
 }
 
+export function getControlledTierConfig(institution: Institution): InstitutionTierConfig {
+  return getTierConfig(institution, AccessTierShortNames.Controlled);
+}
+
 export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
   return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
+}
+
+export function getControlledTierEmailAddresses(institution: Institution): Array<string> {
+  return getTierEmailAddresses(institution, AccessTierShortNames.Controlled);
 }
 
 export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
@@ -96,6 +105,10 @@ export function getTierEmailAddresses(institution: Institution, accessTier: stri
 
 export function getRegisteredTierEmailDomains(institution: Institution): Array<string> {
   return getTierEmailDomains(institution, AccessTierShortNames.Registered);
+}
+
+export function getControlledTierEmailDomains(institution: Institution): Array<string> {
+  return getTierEmailDomains(institution, AccessTierShortNames.Controlled);
 }
 
 export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
