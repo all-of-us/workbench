@@ -27,6 +27,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
@@ -309,6 +310,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     leonardoRetryHandler.run(
         (context) -> {
           disksApi.deleteDisk(googleProject, diskName);
+          return null;
+        });
+  }
+
+  @Override
+  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize) throws WorkbenchException{
+    DisksApi disksApi = diskApiProvider.get();
+    leonardoRetryHandler.run(
+        (context) -> {
+          disksApi.updateDisk(googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
           return null;
         });
   }

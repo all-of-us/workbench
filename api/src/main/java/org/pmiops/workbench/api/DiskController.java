@@ -21,6 +21,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,10 +67,9 @@ public class DiskController implements DiskApiDelegate{
           new Comparator<LeonardoListPersistentDiskResponse>() {
             @Override
             public int compare(LeonardoListPersistentDiskResponse t1, LeonardoListPersistentDiskResponse t2) {
-              return t1.getId().compareTo(t2.getId());
+              return -1*t1.getId().compareTo(t2.getId());
             }
           });
-
       response =
           !responseList.isEmpty()
               ? leonardoNotebooksClient.getPersistentDisk(
@@ -103,8 +103,20 @@ public class DiskController implements DiskApiDelegate{
 //        workspaceAuthService.enforceWorkspaceAccessLevel(
 //                workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
+    ResponseEntity<Disk> responseEntity = getDisk(workspaceNamespace);
+
     leonardoNotebooksClient.deletePersistentDisk(
-        dbWorkspace.getGoogleProject(), DISK_NAME_PREFIX + userProvider.get().getUserId());
+        dbWorkspace.getGoogleProject(), responseEntity.getBody().getName());
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> updateDisk(String workspaceNamespace,
+      String diskName,
+      Integer diskSize) {
+
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    leonardoNotebooksClient.updatePersistentDisk(dbWorkspace.getGoogleProject(), diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

@@ -285,6 +285,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> updateRuntime(
       String workspaceNamespace, UpdateRuntimeRequest runtimeRequest) {
+    log.info("updateRuntime: "+workspaceNamespace+","+runtimeRequest);
     if (runtimeRequest == null || runtimeRequest.getRuntime() == null) {
       throw new BadRequestException("Runtime cannot be empty for an update request");
     }

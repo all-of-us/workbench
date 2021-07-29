@@ -1,9 +1,16 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
-import {runtimeApi} from 'app/services/swagger-fetch-clients';
+import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, useStore} from 'app/utils/stores';
+import {
+  compoundRuntimeOpStore,
+  diskStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  useStore
+} from 'app/utils/stores';
 
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -181,7 +188,14 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
-      diskSize: runtime.gceConfig.diskSize,
+      diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize : diskStore.get().disk.size,
+      dataprocConfig: null
+    };
+  } else if (runtime.gceWithPdConfig) {
+    return {
+      computeType: ComputeType.Standard,
+      machine: findMachineByName(runtime.gceWithPdConfig.machineType),
+      diskSize: runtime.gceWithPdConfig.persistentDisk.size,
       dataprocConfig: null
     };
   } else if (runtime.dataprocConfig) {
@@ -262,12 +276,13 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, keepPD: boolean) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
+  useDisk(currentWorkspaceNamespace);
 
   useEffect(() => {
     // Additional status changes can be put here
@@ -297,10 +312,11 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     initializePolling();
   }, [runtimeStatus]);
 
-  const setStatusRequest = async(req) => {
+  const setStatusRequest = async(req, keepPD) => {
     await switchCase(req,
       [RuntimeStatusRequest.Delete, () => {
-        return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
+        console.log('setStatusRequest: ', !keepPD);
+        return runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepPD);
       }],
       [RuntimeStatusRequest.Start, () => {
         return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
@@ -319,6 +335,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
 // all runtime state.
 export const useCustomRuntime = (currentWorkspaceNamespace):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
+
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
@@ -326,6 +343,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
+  useDisk(currentWorkspaceNamespace);
 
   useEffect(() => {
     let mounted = true;
@@ -336,16 +354,26 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       // to reach a terminal status before attempting deletion.
       try {
         if (runtime) {
+
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
+          console.log('useCustomRuntime :', runtime, requestedRuntime, runtimeDiffTypes);
+          console.log('runtimeDiffTypes :', runtimeDiffTypes);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
+            console.log('runtime.status', runtime.status);
             if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
+                signal: aborter.signal
+              });
+            } else {
+              console.log('deleteRuntime with PD');
+              await disksApi().deleteDisk(currentWorkspaceNamespace, {
                 signal: aborter.signal
               });
             }
           } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
             if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
+              console.log('update runtime:', currentWorkspaceNamespace, requestedRuntime) ;
               await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
               // Calling updateRuntime will not immediately set the Runtime status to not Running so the
               // default initializer will resolve on its first call. The polling below first checks for the
@@ -357,6 +385,20 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
+            } else if (runtime.status === RuntimeStatus.Deleted) {
+              console.log('increase pd and recreate runtime:', currentWorkspaceNamespace, requestedRuntime) ;
+              await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().disk.name,
+                requestedRuntime.gceWithPdConfig.persistentDisk.size);
+              // await runtimeApi().createRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
+
+              await LeoRuntimeInitializer.initialize({
+                workspaceNamespace,
+                targetRuntime: requestedRuntime,
+                resolutionCondition: r => r.status !== RuntimeStatus.Running,
+                pollAbortSignal: aborter.signal,
+                overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
+              });
+              console.log('increase pd and recreate runtime 2:') ;
             }
           } else {
             // There are no differences, no extra requests needed
@@ -395,6 +437,49 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
   }, [requestedRuntime]);
 
   return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];
+};
+
+// useDisk hook is a simple hook to populate the disk store.
+// This is only used by other disk hooks
+export const useDisk = (currentWorkspaceNamespace) => {
+  // No cleanup is being handled at the moment.
+  // When the user initiates a runtime change we want that change to take place even if they navigate away
+  console.log('useDisk ???');
+  useEffect(() => {
+    if (!currentWorkspaceNamespace) {
+      return;
+    }
+    const getDisk = withAsyncErrorHandling(
+      () => diskStore.set({workspaceNamespace: null, disk: null}),
+      async() => {
+
+        let pd;
+        try {
+          console.log('useDisk !!!');
+          pd = await disksApi().getDisk(currentWorkspaceNamespace);
+          diskStore.set({
+            workspaceNamespace: currentWorkspaceNamespace,
+            disk: pd
+          });
+          console.log('useDisk :', currentWorkspaceNamespace, diskStore.get().workspaceNamespace, pd );
+        } catch (e) {
+          if (!(e instanceof Response && e.status === 404)) {
+            throw e;
+          }
+            // null on the runtime store indicates no existing runtime
+          pd = null;
+        }
+
+          // if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
+          //   console.log("useDisk 3",pd)
+          //   diskStore.set({
+          //     workspaceNamespace: currentWorkspaceNamespace,
+          //     disk: pd
+          //   });
+          // }
+      });
+    getDisk();
+  }, [currentWorkspaceNamespace]);
 };
 
 export const withRuntimeStore = () => WrappedComponent => {

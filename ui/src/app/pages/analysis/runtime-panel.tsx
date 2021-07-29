@@ -36,10 +36,10 @@ import {
   RuntimeConfig,
   RuntimeDiffState,
   RuntimeStatusRequest,
-  useCustomRuntime,
+  useCustomRuntime, useDisk,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {serverConfigStore} from 'app/utils/stores';
+import {diskStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
@@ -48,7 +48,7 @@ import {
   BillingAccountType,
   BillingStatus,
   CdrVersionTiersResponse,
-  DataprocConfig,
+  DataprocConfig, DiskType,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus
@@ -185,6 +185,7 @@ export interface Props {
 // Exported for testing only.
 export const ConfirmDelete = ({onCancel, onConfirm}) => {
   const [deleting, setDeleting] = useState(false);
+  const [selectedkeepPD, setKeepPD] = useState(true);
   return <Fragment>
     <div style={styles.confirmWarning}>
       <div style={{display: 'flex', justifyContent: 'center'}}>
@@ -200,6 +201,10 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
         environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
         editing and running notebooks will require you to create a new cloud environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 4}}>
+        <label > <input type= 'radio' checked={selectedkeepPD === true} onChange={() => setKeepPD(true)}/>Keep PD</label><br/>
+        <label > <input type= 'radio' checked={selectedkeepPD === false} onChange={() => setKeepPD(false)}/>Not Keep PD</label>
       </p>
     </div>
     <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -466,7 +471,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime running, click to pause',
         iconShape: 'compute-running',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, false); }
       })
     ],
     [
@@ -497,7 +502,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime paused, click to resume',
         iconShape: 'compute-stopped',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, false); }
       })
     ],
     [
@@ -795,6 +800,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
   </React.Fragment>;
 };
 
+
 export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
@@ -807,6 +813,10 @@ export const RuntimePanel = fp.flow(
   const {hasWgsData: allowDataproc} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasWgsData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
+  useDisk(namespace);
+  const {disk, workspaceNamespace} = useStore(diskStore);
+  // console.log("print disk",disk);
+
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
   if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
     currentRuntime = applyPresetOverride(currentRuntime);
@@ -816,10 +826,15 @@ export const RuntimePanel = fp.flow(
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
   const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
-  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : disk ? disk.size : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
+  const existPD = disk !== null;
+  const keepPD = true;
+  const [selectedkeepPD, setKeepPD] = useState(keepPD);
+
+  console.log('print diskSize', diskSize, machineName, disk, existPD);
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -845,6 +860,7 @@ export const RuntimePanel = fp.flow(
   // the source of truth for these values are selectedMachine, and selectedDiskSize, as
   // these UI components are used for both Dataproc and standard VMs.
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
+
 
   const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
       validLeoGceMachineTypes : validLeoDataprocMasterMachineTypes;
@@ -876,6 +892,7 @@ export const RuntimePanel = fp.flow(
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
+  const pdReduced = existPD && selectedDiskSize < diskSize;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
 
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
@@ -896,7 +913,46 @@ export const RuntimePanel = fp.flow(
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
+  const createStandardRuntimeRequest = (runtime: RuntimeConfig) => {
+    if (pdReduced) {
+      return {
+        gceWithPdConfig: {
+          bootDiskSize: 50,
+          machineType: runtime.machine.name,
+          persistentDisk: {
+            name: '',
+            size: runtime.diskSize,
+            diskType: DiskType.Standard,
+            labels: {}
 
+          }
+        }
+      };
+    } else {
+      if (!runtimeExists) {
+        return {
+          gceWithPdConfig: {
+            bootDiskSize: 50,
+            machineType: runtime.machine.name,
+            persistentDisk: {
+              name: disk.name,
+              size: runtime.diskSize,
+              diskType: DiskType.Standard,
+              labels: {}
+
+            }
+          }
+        };
+      } else {
+        return {
+          gceConfig: {
+            machineType: runtime.machine.name,
+            diskSize: runtime.diskSize
+          }
+        };
+      }
+    }
+  };
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
       dataprocConfig: {
@@ -904,12 +960,7 @@ export const RuntimePanel = fp.flow(
         masterMachineType: runtime.machine.name,
         masterDiskSize: runtime.diskSize
       }
-    } : runtime.computeType === ComputeType.Standard ? {
-      gceConfig: {
-        machineType: runtime.machine.name,
-        diskSize: runtime.diskSize
-      }
-    } : null;
+    } : runtime.computeType === ComputeType.Standard ? createStandardRuntimeRequest(runtime) :  null;
 
     // If the selected runtime matches a preset, plumb through the appropriate configuration type.
     runtimeRequest.configurationType = fp.get(
@@ -1030,7 +1081,7 @@ export const RuntimePanel = fp.flow(
   const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
-      disabled={!runtimeCanBeUpdated}
+      disabled={!runtimeCanBeUpdated && !pdReduced}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onClose();
@@ -1054,7 +1105,7 @@ export const RuntimePanel = fp.flow(
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
-      disabled={!runtimeCanBeUpdated}
+      disabled={!runtimeCanBeUpdated && !pdReduced}
       onClick={() => {
         setPanelContent(PanelContent.Confirm);
       }}>
@@ -1080,7 +1131,7 @@ export const RuntimePanel = fp.flow(
       ],
       [PanelContent.Delete, () => <ConfirmDelete
             onConfirm={async() => {
-              await setRuntimeStatus(RuntimeStatusRequest.Delete);
+              await setRuntimeStatus(RuntimeStatusRequest.Delete, selectedkeepPD);
               onClose();
             }}
             onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -1165,7 +1216,7 @@ export const RuntimePanel = fp.flow(
                aria-label='Delete Environment'
                disabled={disableControls || !runtimeExists}
                onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-               {!runtimeExists ? renderCreateButton() : renderNextButton()}
+               {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
            </FlexRow>
          </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}

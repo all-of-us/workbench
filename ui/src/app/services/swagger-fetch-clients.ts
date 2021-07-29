@@ -44,6 +44,7 @@ import {
   UserMetricsApi,
   WorkspaceAdminApi,
   WorkspacesApi,
+  DiskApi,
 } from 'generated/fetch';
 
 import * as portableFetch from 'portable-fetch';
@@ -104,6 +105,7 @@ export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
+export const disksApi = bindCtor(DiskApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {
