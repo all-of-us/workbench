@@ -6,7 +6,7 @@ import {
   Institution,
   InstitutionalRole,
   InstitutionMembershipRequirement,
-  InstitutionTierRequirement,
+  InstitutionTierConfig,
   PublicInstitutionDetails
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -66,16 +66,30 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
   );
 };
 
+function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
+  if (!institution.tierConfigs) {
+    return {
+      accessTierShortName: accessTier,
+      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+      emailAddresses: [],
+      emailDomains: []
+    };
+  }
+  return institution.tierConfigs.find(t => t.accessTierShortName === accessTier);
+}
+
+export function getRegisteredTierConfig(institution: Institution): InstitutionTierConfig {
+  return getTierConfig(institution, AccessTierShortNames.Registered);
+}
+
 export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
   return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
 }
 
 export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
-  if (institution.tierEmailAddresses) {
-    const tierEmailAddresses = institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier);
-    if (tierEmailAddresses) {
-      return institution.tierEmailAddresses.find(t => t.accessTierShortName === accessTier).emailAddresses;
-    }
+  const tierConfig = getTierConfig(institution, accessTier);
+  if (tierConfig.emailAddresses) {
+    return tierConfig.emailAddresses;
   }
   return [];
 }
@@ -85,25 +99,9 @@ export function getRegisteredTierEmailDomains(institution: Institution): Array<s
 }
 
 export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
-  if (institution.tierEmailDomains) {
-    const tierEmailDomains = institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier);
-    if (tierEmailDomains) {
-      return institution.tierEmailDomains.find(t => t.accessTierShortName === accessTier).emailDomains;
-    }
+  const tierConfig = getTierConfig(institution, accessTier);
+  if (tierConfig.emailDomains) {
+    return tierConfig.emailDomains;
   }
   return [];
-}
-
-export function getRegisteredTierRequirement(institution: Institution): InstitutionTierRequirement {
-  return getTierRequirement(institution, AccessTierShortNames.Registered);
-}
-
-function getTierRequirement(institution: Institution, accessTier: string): InstitutionTierRequirement {
-  if (!institution.tierRequirements) {
-    return {
-      accessTierShortName: accessTier,
-      membershipRequirement: InstitutionMembershipRequirement.NOACCESS
-    };
-  }
-  return institution.tierRequirements.find(t => t.accessTierShortName === accessTier);
 }

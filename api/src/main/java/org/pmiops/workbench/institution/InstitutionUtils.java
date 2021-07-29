@@ -1,15 +1,25 @@
 package org.pmiops.workbench.institution;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionTierRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
 
 /** Utilities for RW institution related functionalities. */
 public class InstitutionUtils {
   private InstitutionUtils() {}
+
+  /** Finds {@link InstitutionTierConfig} which from a {@link Institution}' by given tier. */
+  public static Optional<InstitutionTierConfig> getTierConfigByTier(
+      Institution institution, String accessTierShortName) {
+    if (institution.getTierConfigs() == null) {
+      return Optional.empty();
+    }
+    return institution.getTierConfigs().stream()
+        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
+        .findFirst();
+  }
 
   /**
    * Finds the list of email addresses which from a {@link Institution}'s tier requirement by given
@@ -17,11 +27,12 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailAddressesByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    return institution.getTierEmailAddresses().stream()
-        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-        .flatMap(
-            t -> t.getEmailAddresses() == null ? Stream.empty() : t.getEmailAddresses().stream())
-        .collect(Collectors.toSet());
+    Optional<InstitutionTierConfig> tierConfig =
+        getTierConfigByTier(institution, accessTierShortName);
+    if (!tierConfig.isPresent() || tierConfig.get().getEmailAddresses() == null) {
+      return new HashSet<>();
+    }
+    return new HashSet<>(tierConfig.get().getEmailAddresses());
   }
 
   /**
@@ -30,20 +41,11 @@ public class InstitutionUtils {
    */
   public static Set<String> getEmailDomainsByTierOrEmptySet(
       Institution institution, String accessTierShortName) {
-    return institution.getTierEmailDomains().stream()
-        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-        .flatMap(t -> t.getEmailDomains() == null ? Stream.empty() : t.getEmailDomains().stream())
-        .collect(Collectors.toSet());
-  }
-
-  /**
-   * Finds {@link InstitutionTierRequirement} which from a {@link Institution}'s tier requirement by
-   * given tier.
-   */
-  public static Optional<InstitutionTierRequirement> getTierRequirement(
-      Institution institution, String accessTierShortName) {
-    return institution.getTierRequirements().stream()
-        .filter(t -> t.getAccessTierShortName().equals(accessTierShortName))
-        .findFirst();
+    Optional<InstitutionTierConfig> tierConfig =
+        getTierConfigByTier(institution, accessTierShortName);
+    if (!tierConfig.isPresent() || tierConfig.get().getEmailDomains() == null) {
+      return new HashSet<>();
+    }
+    return new HashSet<>(tierConfig.get().getEmailDomains());
   }
 }

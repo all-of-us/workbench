@@ -6311,26 +6311,14 @@ definitions:
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
         description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
-      tierEmailAddresses:
-        description: A list of email addresses which can be validated as members of
-          this Institution for each access tier.
-        type: array
-        items:
-          "$ref": "#/definitions/TierEmailAddresses"
-      tierEmailDomains:
-        description: A list of email domains which can be validated as members of
-          this Institution for each access tier.
-        type: array
-        items:
-          "$ref": "#/definitions/TierEmailDomains"
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
-      tierRequirements:
+      tierConfigs:
         type: array
         description: List of requirements on how members can get access for each tier.
         items:
-          "$ref": "#/definitions/InstitutionTierRequirement"
+          "$ref": "#/definitions/InstitutionTierConfig"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6456,9 +6444,9 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
-  InstitutionTierRequirement:
+  InstitutionTierConfig:
     type: object
-    description: Institution-specific access tier membership requirement.
+    description: Institution-specific access tier membership requirement and configs.
     required:
       - accessTierShortName
       - membershipRequirement
@@ -6472,28 +6460,10 @@ definitions:
       eraRequired:
         type: boolean
         description: Whether eRA commons is required for members in the institution for this tier.
-  TierEmailDomains:
-    type: object
-    description: A list of email domains which can access each tier for an institution.
-    required:
-      - accessTierShortName
-    properties:
-      accessTierShortName:
-        type: string
-        description: The short unique name for the access tier.
       emailDomains:
         type: array
         items:
           type: string
-  TierEmailAddresses:
-    type: object
-    description: A list of email addresses which can access each tier for an institution.
-    required:
-      - accessTierShortName
-    properties:
-      accessTierShortName:
-        type: string
-        description: The short unique name for the access tier.
       emailAddresses:
         type: array
         items:

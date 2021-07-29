@@ -25,12 +25,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
-import org.pmiops.workbench.model.InstitutionTierRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
-import org.pmiops.workbench.model.TierEmailAddresses;
-import org.pmiops.workbench.model.TierEmailDomains;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -42,9 +40,7 @@ import org.springframework.context.annotation.Import;
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
-  InstitutionEmailDomainMapperImpl.class,
-  InstitutionEmailAddressMapperImpl.class,
-  InstitutionTierRequirementMapperImpl.class,
+  InstitutionTierConfigMapperImpl.class,
 })
 public class InstitutionServiceTest extends SpringTest {
 
@@ -64,35 +60,20 @@ public class InstitutionServiceTest extends SpringTest {
       new Institution()
           .shortName(testInst.getShortName())
           .displayName(testInst.getDisplayName())
-          .tierEmailDomains(Collections.emptyList())
-          .tierEmailAddresses(Collections.emptyList())
-          .tierRequirements(Collections.emptyList())
+          .tierConfigs(Collections.emptyList())
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
 
   private DbAccessTier registeredTier;
-  private InstitutionTierRequirement rtAddressRequirement;
-  private InstitutionTierRequirement rtDomainsRequirement;
-  private TierEmailAddresses rtTierEmailAddress;
-  private TierEmailDomains rtTierEmailDomains;
+
+  private InstitutionTierConfig rtTierConfig;
+  private InstitutionTierConfig ctTierConfig;
 
   @BeforeEach
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    rtAddressRequirement =
-        new InstitutionTierRequirement()
-            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-            .eraRequired(false)
-            .accessTierShortName(registeredTier.getShortName());
-    rtDomainsRequirement =
-        new InstitutionTierRequirement()
-            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-            .eraRequired(false)
-            .accessTierShortName(registeredTier.getShortName());
-    rtTierEmailAddress =
-        new TierEmailAddresses().accessTierShortName(registeredTier.getShortName());
-    rtTierEmailDomains = new TierEmailDomains().accessTierShortName(registeredTier.getShortName());
+    rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
   }
 
   @Test
@@ -103,9 +84,7 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("otherInst")
             .displayName("An Institution for Testing")
-            .tierEmailDomains(Collections.emptyList())
-            .tierEmailAddresses(Collections.emptyList())
-            .tierRequirements(Collections.emptyList())
+            .tierConfigs(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
 
@@ -120,14 +99,11 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("otherInst")
             .displayName("An Institution for Testing")
-            .tierEmailDomains(Collections.emptyList())
-            .tierEmailAddresses(Collections.emptyList())
-            .tierRequirements(
-                ImmutableList.of(
-                    new InstitutionTierRequirement()
-                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                        .eraRequired(false)
-                        .accessTierShortName(registeredTier.getShortName())))
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
     assertThat(service.createInstitution(anotherInst)).isEqualTo(anotherInst);
@@ -178,9 +154,7 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("otherInst")
             .displayName("The Institution of testing")
-            .tierEmailDomains(Collections.emptyList())
-            .tierEmailAddresses(Collections.emptyList())
-            .tierRequirements(Collections.emptyList())
+            .tierConfigs(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     service.createInstitution(otherInst);
     assertThat(service.getInstitutions()).containsExactly(roundTrippedTestInst, otherInst);
@@ -218,9 +192,7 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("otherInst")
             .displayName("The Institution of testing")
-            .tierEmailAddresses(Collections.emptyList())
-            .tierEmailDomains(Collections.emptyList())
-            .tierRequirements(Collections.emptyList())
+            .tierConfigs(Collections.emptyList())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     service.createInstitution(otherInst);
     assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
@@ -253,14 +225,13 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("hasEmails")
             .displayName("another test")
-            .addTierRequirementsItem(rtDomainsRequirement)
-            .tierEmailDomains(
-                ImmutableList.of(
-                    rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))
-            .tierEmailAddresses(
-                ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(
-                        ImmutableList.of("joel@broad.org", "joel@google.com"))))
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName())
+                    .emailDomains(ImmutableList.of("broad.org", "google.com"))
+                    .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com")))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     final Institution instWithEmailsRoundTrip = service.createInstitution(instWithEmails);
     assertThat(instWithEmailsRoundTrip).isEqualTo(instWithEmails);
@@ -269,26 +240,31 @@ public class InstitutionServiceTest extends SpringTest {
 
     final Institution instWithNewEmails =
         instWithEmails
-            .tierEmailDomains(
+            .tierConfigs(
                 ImmutableList.of(
-                    rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "verily.com"))))
-            .tierEmailAddresses(
-                ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(
-                        ImmutableList.of("joel@broad.org", "joel@verily.com"))));
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())
+                        .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                        .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"))))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
     final Institution instWithNewEmailsRoundTrip =
         service.updateInstitution(instWithEmails.getShortName(), instWithNewEmails).get();
     assertThat(instWithNewEmailsRoundTrip).isEqualTo(instWithNewEmails);
 
     // clear both
     final Institution instWithoutEmails =
-        instWithEmails
-            .tierEmailDomains(Collections.emptyList())
-            .tierEmailAddresses(Collections.emptyList());
+        instWithEmails.tierConfigs(
+            ImmutableList.of(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName())
+                    .emailAddresses(ImmutableList.of())));
     final Institution instWithoutEmailsRoundTrip =
         service.updateInstitution(instWithEmails.getShortName(), instWithoutEmails).get();
-    assertThat(instWithoutEmailsRoundTrip.getTierEmailAddresses()).isEmpty();
-    assertThat(instWithoutEmailsRoundTrip.getTierEmailDomains()).isEmpty();
+    assertThat(instWithoutEmailsRoundTrip.getTierConfigs().get(0).getEmailAddresses()).isNull();
   }
 
   @Test
@@ -297,17 +273,21 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("test_updateInstitution_tierRequirement")
             .displayName("test_updateInstitution_tierRequirement")
-            .tierEmailAddresses(Collections.emptyList())
-            .tierEmailDomains(Collections.emptyList())
-            .tierRequirements(ImmutableList.of(rtAddressRequirement))
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
     assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
 
     final Institution instWithNewTierRequirement =
-        existingInst.tierRequirements(
+        existingInst.tierConfigs(
             ImmutableList.of(
-                rtAddressRequirement.membershipRequirement(
-                    InstitutionMembershipRequirement.NO_ACCESS)));
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName())));
     assertThat(
             service
                 .updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)
@@ -315,13 +295,12 @@ public class InstitutionServiceTest extends SpringTest {
         .isEqualTo(instWithNewTierRequirement);
 
     // clear
-    final Institution instWithoutTierRequirements =
-        instWithNewTierRequirement.tierRequirements(Collections.emptyList());
+    final Institution instWithoutTierRequirements = instWithNewTierRequirement.tierConfigs(null);
     assertThat(
             service
                 .updateInstitution(existingInst.getShortName(), instWithoutTierRequirements)
                 .get()
-                .getTierRequirements())
+                .getTierConfigs())
         .isEmpty();
   }
 
@@ -332,31 +311,31 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("test2")
             .displayName("another test")
-            .tierEmailDomains(
-                ImmutableList.of(
-                    rtTierEmailDomains.emailDomains(
-                        ImmutableList.of("broad.org", "broad.org", "google.com"))))
-            .tierEmailAddresses(
-                ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(
-                        ImmutableList.of("joel@broad.org", "joel@broad.org", "joel@google.com"))))
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName())
+                    .emailDomains(ImmutableList.of("broad.org", "broad.org", "google.com"))
+                    .emailAddresses(
+                        ImmutableList.of("joel@broad.org", "joel@broad.org", "joel@google.com")))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
     final Set<String> uniquifiedEmailDomains =
-        Sets.newHashSet(instWithDupes.getTierEmailDomains().get(0).getEmailDomains());
+        Sets.newHashSet(instWithDupes.getTierConfigs().get(0).getEmailDomains());
     final Set<String> uniquifiedEmailAddresses =
-        Sets.newHashSet(instWithDupes.getTierEmailAddresses().get(0).getEmailAddresses());
+        Sets.newHashSet(instWithDupes.getTierConfigs().get(0).getEmailAddresses());
 
     final Institution uniquifiedInst = service.createInstitution(instWithDupes);
 
-    assertThat(instWithDupes.getTierEmailDomains().get(0).getEmailDomains().size())
+    assertThat(instWithDupes.getTierConfigs().get(0).getEmailDomains().size())
         .isNotEqualTo(uniquifiedEmailDomains.size());
-    assertThat(uniquifiedInst.getTierEmailDomains().get(0).getEmailDomains())
+    assertThat(uniquifiedInst.getTierConfigs().get(0).getEmailDomains())
         .containsExactlyElementsIn(uniquifiedEmailDomains);
 
-    assertThat(instWithDupes.getTierEmailAddresses().get(0).getEmailAddresses().size())
+    assertThat(instWithDupes.getTierConfigs().get(0).getEmailAddresses().size())
         .isNotEqualTo(uniquifiedEmailAddresses.size());
-    assertThat(uniquifiedInst.getTierEmailAddresses().get(0).getEmailAddresses())
+    assertThat(uniquifiedInst.getTierConfigs().get(0).getEmailAddresses())
         .containsExactlyElementsIn(uniquifiedEmailAddresses);
   }
 
@@ -367,23 +346,21 @@ public class InstitutionServiceTest extends SpringTest {
         new Institution()
             .shortName("hasEmails")
             .displayName("another test")
-            .tierEmailDomains(
+            .tierConfigs(
                 ImmutableList.of(
-                    rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "google.com"))))
-            .tierEmailAddresses(
-                ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(
-                        ImmutableList.of("joel@broad.org", "joel@google.com"))))
-            .addTierRequirementsItem(rtDomainsRequirement)
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())
+                        .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                        .emailAddresses(ImmutableList.of("joel@broad.org", "joel@verily.com"))))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
     final Institution similarInst =
         new Institution()
             .shortName("otherInst")
             .displayName("The University of Elsewhere")
-            .tierEmailDomains(instWithEmails.getTierEmailDomains())
-            .tierEmailAddresses(instWithEmails.getTierEmailAddresses())
-            .addTierRequirementsItem(rtDomainsRequirement)
+            .tierConfigs(instWithEmails.getTierConfigs())
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
     final Institution instWithEmailsViaDb = service.createInstitution(instWithEmails);
@@ -392,10 +369,11 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(instWithEmailsViaDb.getShortName()).isNotEqualTo(similarInstViaDb.getShortName());
     assertThat(instWithEmailsViaDb.getDisplayName())
         .isNotEqualTo(similarInstViaDb.getDisplayName());
-    assertThat(instWithEmailsViaDb.getTierEmailDomains())
-        .containsExactlyElementsIn(similarInstViaDb.getTierEmailDomains());
-    assertThat(instWithEmailsViaDb.getTierEmailAddresses())
-        .containsExactlyElementsIn(similarInstViaDb.getTierEmailAddresses());
+    assertThat(instWithEmailsViaDb.getTierConfigs().size()).isEqualTo(1);
+    assertThat(instWithEmailsViaDb.getTierConfigs().get(0).getEmailDomains())
+        .containsExactlyElementsIn(similarInstViaDb.getTierConfigs().get(0).getEmailDomains());
+    assertThat(instWithEmailsViaDb.getTierConfigs().get(0).getEmailAddresses())
+        .containsExactlyElementsIn(similarInstViaDb.getTierConfigs().get(0).getEmailAddresses());
   }
 
   @Test
@@ -449,20 +427,19 @@ public class InstitutionServiceTest extends SpringTest {
                 new Institution()
                     .shortName("Broad")
                     .displayName("The Broad Institute")
-                    .tierEmailDomains(
-                        ImmutableList.of(
-                            rtTierEmailDomains.emailDomains(
-                                ImmutableList.of("broad.org", "google.com"))))
-                    .tierEmailAddresses(
-                        ImmutableList.of(
-                            rtTierEmailAddress.emailAddresses(
-                                ImmutableList.of(
-                                    "external-researcher@sanger.uk", "science@aol.com"))))
                     .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION))
-            .addTierRequirementsItem(rtAddressRequirement);
-
-    final DbUser user = createUser("external-researcher@sanger.uk");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
+            .tierConfigs(
+                ImmutableList.of(
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())
+                        .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                        .emailAddresses(
+                            ImmutableList.of("external-researcher@sanger.uk", "science@aol.com"))));
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isTrue();
+    // Fail even when domain matches, because the requirement is ADDRESSES.
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
   }
 
   @Test
@@ -472,18 +449,22 @@ public class InstitutionServiceTest extends SpringTest {
             new Institution()
                 .shortName("Broad")
                 .displayName("The Broad Institute")
-                .tierEmailDomains(
+                .tierConfigs(
                     ImmutableList.of(
-                        rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "mit.edu"))))
-                .tierEmailAddresses(
-                    ImmutableList.of(
-                        rtTierEmailAddress.emailAddresses(
-                            ImmutableList.of("external-researcher@sanger.uk", "science@aol.com"))))
-                .addTierRequirementsItem(rtDomainsRequirement)
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
 
-    final DbUser user = createUser("external-researcher@broad.org");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isTrue();
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isTrue();
+    // malformed
+    assertThat(service.validateInstitutionalEmail(inst, "yy@hacker@verily.org")).isFalse();
+    // Fail even when domain matches, because the requirement is DOMAINS.
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
   }
 
   @Test
@@ -500,66 +481,6 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_mismatch() {
-    final Institution inst =
-        service
-            .createInstitution(
-                new Institution()
-                    .shortName("Broad")
-                    .displayName("The Broad Institute")
-                    .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION))
-            .tierEmailDomains(
-                ImmutableList.of(
-                    rtTierEmailDomains.emailDomains(ImmutableList.of("broad.org", "mit.edu"))))
-            .tierEmailAddresses(
-                ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(ImmutableList.of("email@domain.org"))))
-            .addTierRequirementsItem(rtDomainsRequirement);
-
-    final DbUser user = createUser("external-researcher@sanger.uk");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
-  }
-
-  @Test
-  public void test_emailValidation_malformed() {
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .tierEmailDomains(
-                    ImmutableList.of(
-                        rtTierEmailDomains.emailDomains(
-                            ImmutableList.of("broad.org", "lab.broad.org"))))
-                .addTierRequirementsItem(rtDomainsRequirement)
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
-
-    final DbUser user = createUser("user@hacker@broad.org");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
-  }
-
-  @Test
-  public void test_emailValidation_address_mismatch() {
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .tierEmailDomains(
-                    ImmutableList.of(
-                        rtTierEmailDomains.emailDomains(
-                            ImmutableList.of("broad.org", "lab.broad.org"))))
-                .tierEmailAddresses(
-                    ImmutableList.of(
-                        rtTierEmailAddress.emailAddresses(ImmutableList.of("testing@broad.org"))))
-                .addTierRequirementsItem(rtAddressRequirement)
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
-
-    final DbUser user = createUser("hack@broad.org");
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
-  }
-
-  @Test
   public void test_emailValidation_changedShortName() {
     final String oldShortName = "Broad";
     final String newShortName = "TheBroad";
@@ -570,11 +491,13 @@ public class InstitutionServiceTest extends SpringTest {
                 .shortName(oldShortName)
                 .displayName("The Broad Institute")
                 .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                .addTierRequirementsItem(rtDomainsRequirement)
-                .tierEmailDomains(
+                .tierConfigs(
                     ImmutableList.of(
-                        rtTierEmailDomains.emailDomains(
-                            ImmutableList.of("broad.org", "lab.broad.org")))));
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "lab.broad.org")))));
 
     final DbUser user = createUser("user@broad.org");
     final DbVerifiedInstitutionalAffiliation affiliation =
@@ -709,10 +632,7 @@ public class InstitutionServiceTest extends SpringTest {
           Institution institution_NoOrgType =
               new Institution()
                   .displayName("No Organization")
-                  .addTierRequirementsItem(rtDomainsRequirement)
-                  .tierEmailAddresses(Collections.emptyList())
-                  .tierEmailDomains(Collections.emptyList())
-                  .tierRequirements(Collections.emptyList())
+                  .tierConfigs(Collections.emptyList())
                   .userInstructions("Should throw exception");
           service.createInstitution(institution_NoOrgType);
         });
@@ -726,12 +646,15 @@ public class InstitutionServiceTest extends SpringTest {
           Institution institution_EmailAddress =
               new Institution()
                   .displayName("No Organization")
-                  .tierEmailAddresses(
+                  .tierConfigs(
                       ImmutableList.of(
-                          rtTierEmailAddress.emailAddresses(
-                              ImmutableList.of(
-                                  "CorrectEmailAddress@domain.com, incorrectEmail.com"))))
-                  .addTierRequirementsItem(rtAddressRequirement)
+                          rtTierConfig
+                              .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                              .eraRequired(false)
+                              .accessTierShortName(registeredTier.getShortName())
+                              .emailAddresses(
+                                  ImmutableList.of(
+                                      "CorrectEmailAddress@domain.com, incorrectEmail.com"))))
                   .organizationTypeEnum(OrganizationType.INDUSTRY);
           service.createInstitution(institution_EmailAddress);
         });
@@ -745,12 +668,12 @@ public class InstitutionServiceTest extends SpringTest {
           Institution institution_withOtherOrganizationType =
               new Institution()
                   .displayName("     ")
-                  .tierEmailAddresses(
+                  .tierConfigs(
                       ImmutableList.of(
-                          rtTierEmailAddress.emailAddresses(
-                              ImmutableList.of(
-                                  "CorrectEmailAddress@domain.com, incorrectEmail.com"))))
-                  .tierRequirements(Collections.emptyList())
+                          rtTierConfig
+                              .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                              .eraRequired(false)
+                              .accessTierShortName(registeredTier.getShortName())))
                   .organizationTypeEnum(OrganizationType.OTHER);
           service.createInstitution(institution_withOtherOrganizationType);
         });
@@ -761,13 +684,12 @@ public class InstitutionServiceTest extends SpringTest {
     Institution institution_withOtherOrganizationType =
         new Institution()
             .displayName("     ")
-            .addTierRequirementsItem(rtAddressRequirement)
-            .tierEmailAddresses(
+            .tierConfigs(
                 ImmutableList.of(
-                    rtTierEmailAddress.emailAddresses(
-                        ImmutableList.of("CorrectEmailAddress@domain.com"))))
-            .tierEmailDomains(Collections.emptyList())
-            .tierRequirements(Collections.emptyList())
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.OTHER)
             .organizationTypeOtherText("Some text");
     assertThat(service.createInstitution(institution_withOtherOrganizationType))
@@ -779,10 +701,12 @@ public class InstitutionServiceTest extends SpringTest {
     Institution institution_WithUserInstructions =
         new Institution()
             .displayName("No Organization")
-            .addTierRequirementsItem(rtAddressRequirement)
-            .tierEmailAddresses(Collections.emptyList())
-            .tierEmailDomains(Collections.emptyList())
-            .tierRequirements(Collections.emptyList())
+            .tierConfigs(
+                ImmutableList.of(
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .eraRequired(false)
+                        .accessTierShortName(registeredTier.getShortName())))
             .organizationTypeEnum(OrganizationType.INDUSTRY)
             .userInstructions("Some user instructions");
     Institution createdInstitution = service.createInstitution(institution_WithUserInstructions);

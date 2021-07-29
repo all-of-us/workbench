@@ -1,7 +1,9 @@
 import {InstitutionMembershipRequirement, OrganizationType} from 'generated/fetch';
 
-export const MembershipRequirements =  [{label: 'Master', value: InstitutionMembershipRequirement.DOMAINS},
-  {label: 'Individual', value: InstitutionMembershipRequirement.ADDRESSES}];
+export const MembershipRequirements = [
+  {label: 'Master', value: InstitutionMembershipRequirement.DOMAINS},
+  {label: 'Individual', value: InstitutionMembershipRequirement.ADDRESSES}
+];
 export const OrganizationTypeOptions = [
   {label: 'Industry', value: OrganizationType.INDUSTRY},
   {label: 'Academic Research Institution', value: OrganizationType.ACADEMICRESEARCHINSTITUTION},

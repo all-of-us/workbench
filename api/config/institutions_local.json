@@ -2,78 +2,54 @@
 	"shortName": "VUMC",
 	"displayName": "Vanderbilt University Medical Center",
 	"organizationTypeEnum": "HEALTH_CENTER_NON_PROFIT",
-	"tierEmailDomains": [
+	"tierConfigs": [
 		{
 			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["vumc.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["vumc.org"]
-		}
-	],
-	"tierRequirements": [
-		{
-			"accessTierShortName": "registered",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
-		},
-		{
-			"accessTierShortName": "controlled",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
 		}
 	]
 }, {
 	"shortName": "Broad",
 	"displayName": "Broad Institute",
 	"organizationTypeEnum": "ACADEMIC_RESEARCH_INSTITUTION",
-	"tierEmailDomains": [
+	"tierConfigs": [
 		{
 			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["broadinstitute.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["broadinstitute.org"]
-		}
-	],
-	"tierRequirements": [
-		{
-			"accessTierShortName": "registered",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
-		},
-		{
-			"accessTierShortName": "controlled",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
 		}
 	]
 }, {
 	"shortName": "Verily",
 	"displayName": "Verily LLC",
 	"organizationTypeEnum": "INDUSTRY",
-	"tierEmailDomains": [
+	"tierConfigs": [
 		{
 			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["verily.com", "google.com"]
 		},
 		{
 			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["verily.com", "google.com"]
-		}
-	],
-	"tierRequirements": [
-		{
-			"accessTierShortName": "registered",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
-		},
-		{
-			"accessTierShortName": "controlled",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
 		}
 	]
 }, {
@@ -81,26 +57,18 @@
 	"displayName": "Legacy Research Accounts",
 	"organizationTypeEnum": "OTHER",
 	"organizationTypeOtherText": "Legacy dev accounts with backfilled contact emails",
-	"tierEmailDomains": [
+	"tierConfigs": [
 		{
 			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["fake-research-aou.org"]
 		},
 		{
 			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
 			"emailDomains": ["fake-research-aou.org"]
-		}
-	],
-	"tierRequirements": [
-		{
-			"accessTierShortName": "registered",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
-		},
-		{
-			"accessTierShortName": "controlled",
-			"membershipRequirement": "DOMAINS",
-			"eraRequired": true
 		}
 	]
 }]

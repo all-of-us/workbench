@@ -15,9 +15,9 @@ import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
+  getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains,
-  getRegisteredTierRequirement
+  getRegisteredTierEmailDomains
 } from 'app/utils/institutions';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -61,6 +61,7 @@ interface InstitutionEditState {
   showApiError: boolean;
 }
 
+// TODO(RW-7127): Remove static state
 let title = 'Add new Institution';
 let institutionToEdit: Institution;
 
@@ -165,11 +166,13 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     return;
   }
 
-  setTierRequirement(membershipRequirement, attribute) {
+  setTierRequirement(membershipRequirement) {
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    this.setState(fp.set(['institution', attribute],
-      [{accessTierShortName: AccessTierShortNames.Registered,
-        membershipRequirement: membershipRequirement.value, eRARequired: true}]));
+    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
+    rtTierConfig.membershipRequirement = membershipRequirement.value;
+    rtTierConfig.eraRequired = true;
+    // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
 
     // Dual write DuaTypeEnum for now. Because account creation flow still uses that field.
     const duaType = membershipRequirement.value === InstitutionMembershipRequirement.ADDRESSES
@@ -177,22 +180,24 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     this.setState(fp.set(['institution', 'duaTypeEnum'], duaType));
   }
 
-  setEmails(emailInput, attribute) {
+  setEmails(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
+    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
+    rtTierConfig.emailAddresses = emailList.map(email => email.trim());
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    this.setState(fp.set(['institution', attribute],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: emailList.map(email => email.trim())}]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
 
-  setDomains(emailInput, attribute) {
+  setDomains(emailInput) {
     const emailList = emailInput.split(/[,\n]+/);
+    const rtTierConfig = getRegisteredTierConfig(this.state.institution);
+    rtTierConfig.emailDomains = emailList.map(email => email.trim());
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    this.setState(fp.set(['institution', attribute],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailList.map(email => email.trim())}]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
   }
 
   // Check if the fields have not been edited
-  fieldsEdited() {
+  fieldsNotEdited() {
     return (this.isAddInstitutionMode && !this.fieldsNotEditedAddInstitution)
         || (institutionToEdit && this.fieldsNotEditedEditInstitution);
   }
@@ -200,35 +205,27 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   get fieldsNotEditedAddInstitution() {
     const {institution} = this.state;
     return institution.displayName || institution.userInstructions ||
-      institution.organizationTypeEnum || institution.tierRequirements
-        || institution.duaTypeEnum || institution.tierEmailDomains
-        || institution.tierEmailAddresses;
+      institution.organizationTypeEnum || institution.tierConfigs;
   }
 
   get fieldsNotEditedEditInstitution() {
     const {institution} = this.state;
-    return institution.displayName === institutionToEdit.displayName &&
-        institution.organizationTypeEnum === institutionToEdit.organizationTypeEnum &&
-        institution.duaTypeEnum === institutionToEdit.duaTypeEnum &&
-        institution.tierEmailAddresses === institutionToEdit.tierEmailAddresses &&
-        institution.tierEmailDomains === institutionToEdit.tierEmailDomains &&
-        institution.tierRequirements === institutionToEdit.tierRequirements &&
-        institution.userInstructions === institutionToEdit.userInstructions &&
-        institution.organizationTypeOtherText === institutionToEdit.organizationTypeOtherText;
+    const strip = fp.flow(
+      fp.pick(['displayName', 'organizationTypeEnum', 'userInstructions', 'tierConfigs', 'organizationTypeOtherText']));
+    return fp.isEqual(strip(institution), strip(institutionToEdit));
   }
 
   hasInvalidFields() {
     const {institution} = this.state;
     let emailValid = true;
-    if (!institution.tierRequirements) {
+    if (!institution.tierConfigs) {
       // It is not expected for a tier requirement to be empty
-      return false;
+      return true;
     }
-    const rtRequirement = getRegisteredTierRequirement(institution);
-    if (rtRequirement && rtRequirement.membershipRequirement
-        && rtRequirement.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-      emailValid = rtRequirement.membershipRequirement === InstitutionMembershipRequirement.DOMAINS ?
-          institution.tierEmailDomains !== undefined : institution.tierEmailAddresses !== undefined;
+    const rtConfig = getRegisteredTierConfig(institution);
+    if (rtConfig.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      emailValid = rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS ?
+          rtConfig.emailDomains !== undefined : rtConfig.emailAddresses !== undefined;
     }
     return !emailValid || !institution.displayName || !institution.organizationTypeEnum ||
         (institution.organizationTypeEnum === OrganizationType.OTHER &&
@@ -240,21 +237,21 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   // b) email address/Domain are not valid
   // c) Required fields are not empty
   disableSave(errors) {
-    return this.hasInvalidFields() || errors || this.fieldsEdited()
+    return this.hasInvalidFields() || errors || this.fieldsNotEdited()
       || this.state.invalidEmailAddress || this.state.invalidEmailDomain;
   }
 
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
-    const rtRequirement = getRegisteredTierRequirement(institution);
-    if (institution && rtRequirement) {
-      if (rtRequirement.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
-        institution.tierEmailAddresses = [{accessTierShortName: AccessTierShortNames.Registered}];
-      } else if (rtRequirement.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-        institution.tierEmailDomains = [{accessTierShortName: AccessTierShortNames.Registered}];
+    const rtConfig = getRegisteredTierConfig(institution);
+    if (institution && rtConfig) {
+      if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+        rtConfig.emailAddresses = [];
+      } else if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+        rtConfig.emailDomains = [];
       }
     }
-    if (institution.organizationTypeEnum !== OrganizationType.OTHER) {
+    if (institution && institution.organizationTypeEnum !== OrganizationType.OTHER) {
       institution.organizationTypeOtherText = null;
     }
 
@@ -283,7 +280,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backButton() {
-    if (!this.fieldsEdited()) {
+    if (!this.fieldsNotEdited()) {
       this.setState({showBackButtonWarning: true});
     } else {
       this.backNavigate();
@@ -296,10 +293,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailAddressPresence() {
     const {institution} = this.state;
-    if (!institution.tierRequirements) {
-      return false;
-    }
-    if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
       const rtEmailAddresses = getRegisteredTierEmailAddresses(institution);
       return rtEmailAddresses && rtEmailAddresses.length > 0;
     } else {
@@ -309,10 +303,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailDomainPresence() {
     const {institution} = this.state;
-    if (!institution.tierRequirements) {
-      return false;
-    }
-    if (getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
       const rtEmailDomains = getRegisteredTierEmailDomains(institution);
       return rtEmailDomains && rtEmailDomains.length > 0;
     } else {
@@ -331,14 +322,14 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   render() {
     const {institution, showOtherInstitutionTextBox} = this.state;
     const {
-      displayName, organizationTypeEnum, tierRequirements
+      displayName, organizationTypeEnum, tierConfigs
     } = institution;
     const errors = validate({
       displayName,
       'tierEmailAddresses': this.validateEmailAddressPresence(),
       'tierEmailDomain': this.validateEmailDomainPresence(),
       organizationTypeEnum,
-      tierRequirements
+      tierConfigs
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
@@ -409,27 +400,27 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
             <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
                       placeholder='Your Agreement'
                       options={MembershipRequirements}
-                      value={getRegisteredTierRequirement(institution).membershipRequirement}
-                      onChange={(v) => this.setTierRequirement(v, 'tierRequirements')}/>
-            {getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
+                      value={getRegisteredTierConfig(institution).membershipRequirement}
+                      onChange={(v) => this.setTierRequirement(v)}/>
+            {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
             <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
               <label style={styles.label}>Accepted Email Addresses</label>
               <TextArea value={getRegisteredTierEmailAddresses(institution)
               && getRegisteredTierEmailAddresses(institution).join(',\n')}
                         data-test-id='emailAddressInput'
                         onBlur={(v) => this.validateEmailAddresses()}
-                  onChange={(v) => this.setEmails(v, 'tierEmailAddresses')}/>
+                  onChange={(v) => this.setEmails(v)}/>
               {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
                 {this.state.invalidEmailAddressMsg}
                 </div>}
             </FlexColumn>}
-            {getRegisteredTierRequirement(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+            {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
             && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
               <label style={styles.label}>Accepted Email Domains</label>
               <TextArea value={getRegisteredTierEmailDomains(institution) &&
               getRegisteredTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
                         data-test-id='emailDomainInput'
-                        onChange={(v) => this.setDomains(v, 'tierEmailDomains')}/>
+                        onChange={(v) => this.setDomains(v)}/>
               {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
                 {this.state.invalidEmailDomainsMsg}
                 </div>}
