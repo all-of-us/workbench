@@ -3,6 +3,10 @@ package org.pmiops.workbench.ras;
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_2_IDENTIFIER;
+import static org.pmiops.workbench.ras.RasLinkConstants.ERA_COMMONS_PROVIDER_NAME;
+import static org.pmiops.workbench.ras.RasLinkConstants.FEDERATED_IDENTITIES;
+import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITIES;
+import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITY_USERID;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
@@ -71,6 +75,24 @@ import org.springframework.stereotype.Service;
  * "preferred_username":"user1@Login.Gov",
  * "userId":"user1"
  * "email":"foo@gmail.com"
+ * "federated_identities":{
+ *    "identities":[
+ *    {
+ *       "login.gov":{
+ *          "firstname":"",
+ *          "lastname":"",
+ *          "userid":"c1324de1-38c1-4df4-ab3b-caa3ffe3c531",
+ *          "mail":"yonghaotest1@gmail.com"
+ *       },
+ *       "era":{
+ *          "mail":"yonghao@verily.com",
+ *          "firstname":"Y",
+ *          "lastname":"yonghao",
+ *          "userid":"yonghao_pi"
+ *       }
+ *    }
+ *  ]
+ *  }
  * }</pre>
  *
  * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
@@ -93,8 +115,9 @@ public class RasLinkService {
 
   @Autowired
   public RasLinkService(
-      UserService userService,
+      AccessModuleService accessModuleService, UserService userService,
       @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
+    this.accessModuleService = accessModuleService;
     this.userService = userService;
     this.rasOidcClientProvider = rasOidcClientProvider;
   }
@@ -121,21 +144,23 @@ public class RasLinkService {
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
-
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
     }
 
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
-    // information. TODO(RW-7108): Make eRA optional
+    // information.
+    // TODO(RW-7108): Make eRA optional
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+    Optional<String> eRaUserId = getEraUserId(userInfoResponse);
     Optional<AccessModuleStatus> eRAModuleStatus = accessModuleService.getClientAccessModuleStatus(user).stream().filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS).findFirst();
     if(eRAModuleStatus.isPresent() && (eRAModuleStatus.get().getCompletionEpochMillis() != null || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
       return user;
-    } else {
-      return userService.updateRasLinkEraStatus()
+    } else if (eRaUserId.isPresent()){
+        return userService.updateRasLinkEraStatus(eRaUserId.get());
     }
+    return user;
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
@@ -156,6 +181,22 @@ public class RasLinkService {
               preferredUsername));
     }
     return preferredUsername;
+  }
+
+  /**
+   * Extracts user's eRA commons user id account from UserInfo response if has. See class javadoc
+   * for an example of eRA identity.
+   *
+   * <p>Returns empty if eRA is invalid or not linked.
+   */
+  public static Optional<String> getEraUserId(JsonNode userInfo) {
+    try {
+      String eRAUserId = userInfo.get(FEDERATED_IDENTITIES).get(IDENTITIES).get(0).get(ERA_COMMONS_PROVIDER_NAME).get(IDENTITY_USERID).asText();
+      return Optional.of(eRAUserId).filter(v -> !v.isEmpty());
+    } catch (NullPointerException e) {
+      log.info(String.format("User does not have valid eRA, acrClaim: %s", userInfo));
+    }
+    return Optional.empty();
   }
 
   /** Decode an encoded url */

@@ -104,7 +104,7 @@ function redirectToRas(): void {
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
+      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
   window.open(url, '_blank');
 }
 
