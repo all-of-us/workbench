@@ -29,29 +29,31 @@ describe('AppRouter', () => {
     const wrapper = component(['/unreachable-path'], 0);
     // don't want to pull all of angular into a test of react routerto test that a redirect is
     // happening, so we'll check that the router is telling it to redirect to the right place
-    expect(wrapper.find(NavRedirect).first().props().path).toEqual('/punting');
+
+    expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 
   it('renders when user passes guard', () => {
     const wrapper = component(['/protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual('Protected Route')
+    expect(wrapper.find('span').first().text()).toEqual('Protected Route');
   });
 
   it('renders for sibling routes under a guard', () => {
     const wrapper = component(['/other-protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual('Other Protected Route')
+    expect(wrapper.find('span').first().text()).toEqual('Other Protected Route');
   });
 
   it('renders for nested protectedRoutes', () => {
     const wrapper = component(['/nested-protected-route'], 0);
-    expect(wrapper.find('span').first().text()).toEqual('Nested Protected Route')
+    expect(wrapper.find('span').first().text()).toEqual('Nested Protected Route');
   });
 
   it('punts on failed nested protected route', () => {
     const wrapper = component(['/nested-unreachable-path'], 0);
     // don't want to pull all of angular into a test of react router to test that a redirect is
     // happening, so we'll check that the router is telling it to redirect to the right place
-    expect(wrapper.find(NavRedirect).first().props().path).toEqual('/punting');
+
+    expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 });
 

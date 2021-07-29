@@ -34,7 +34,6 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.DATASET, 'data');
 
 export interface Props {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
@@ -46,7 +45,9 @@ export interface Props {
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
-interface HocProps extends Props, NavigationProps {}
+interface HocProps extends Props, NavigationProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+}
 
 interface WorkspaceOptions {
   label: string;
@@ -151,6 +152,7 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 
   cdrName(cdrVersionId: string): string {
     const {cdrVersionTiersResponse} = this.props;
+    console.log(this.props);
     const version = findCdrVersion(cdrVersionId, cdrVersionTiersResponse);
     return version ? version.name : '[CDR version not found]';
   }
@@ -309,6 +311,8 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 
   // OK to copy a notebook with a mismatch, but show a warning message
   setNotebookCdrMismatchWarning(destination: Workspace, fromCdrVersionId: string) {
+    console.log("Running notebook", destination.cdrVersionId);
+    console.log(this.cdrName(destination.cdrVersionId));
     const warningMsg = `The selected destination workspace uses a different dataset version ` +
         `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
         'Edits may be required to ensure your analysis is functional and accurate.';
@@ -344,7 +348,9 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
     console.log(accessTierMismatch);
     console.log(cdrVersionMismatch);
     console.log(cdrVersionMismatch && isConceptSet);
-    console.log(accessTierMismatch && isNotebook);
+    console.log(cdrVersionMismatch && isNotebook);
+    console.log(resourceType);
+    console.log(resourceType === ResourceType.NOTEBOOK);
 
     cond([accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
         [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],

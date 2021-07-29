@@ -11,6 +11,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore} from '../utils/stores';
 
 import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
@@ -130,7 +131,6 @@ describe('CopyModalComponent', () => {
     registerApiClient(WorkspacesApi, wsApiStub);
 
     props = {
-      cdrVersionTiersResponse: cdrVersionTiersResponse,
       fromWorkspaceNamespace: fromWorkspaceNamespace,
       fromWorkspaceFirecloudName: fromWorkspaceFirecloudName,
       fromResourceName: fromResourceName,
@@ -147,6 +147,8 @@ describe('CopyModalComponent', () => {
     wsApiStub.workspaceAccess.set(workspaces[3].id, WorkspaceAccessLevel.NOACCESS);
     wsApiStub.workspaceAccess.set(workspaces[4].id, WorkspaceAccessLevel.WRITER);
     wsApiStub.workspaceAccess.set(workspaces[5].id, WorkspaceAccessLevel.OWNER);
+
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', async() => {

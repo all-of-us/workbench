@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
+import {MemoryRouter} from 'react-router';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 import {Homepage} from './homepage';
@@ -20,7 +21,7 @@ describe('HomepageComponent', () => {
   let profileApi: ProfileApiStub;
 
   const component = () => {
-    return mount(<Homepage hideSpinner={() => {}} />);
+    return mount(<MemoryRouter><Homepage hideSpinner={() => {}} /></MemoryRouter>);
   };
 
   const load = jest.fn();
