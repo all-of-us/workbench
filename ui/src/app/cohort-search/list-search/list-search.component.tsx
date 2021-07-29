@@ -450,7 +450,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     getConceptLink(conceptId) {
       return environment.publicUiUrl + '/ehr/' +
-        domainToTitle(this.props.searchContext.domain).toLowerCase() + '?search=' + conceptId;
+        domainToTitle(this.props.searchContext.domain).toLowerCase() + '/' + conceptId;
     }
 
     renderRow(row: any, child: boolean, elementId: string) {
