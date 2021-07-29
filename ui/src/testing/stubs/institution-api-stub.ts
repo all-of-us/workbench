@@ -6,29 +6,55 @@ import {
   GetPublicInstitutionDetailsResponse,
   Institution,
   InstitutionApi,
+  InstitutionMembershipRequirement,
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import {
+  getRegisteredTierConfig,
+  getRegisteredTierEmailAddresses,
+  getRegisteredTierEmailDomains,
+} from "app/utils/institutions";
 
 export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
   organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
-  emailDomains: ['vumc.org'],
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ["vumc.org"]
+    }
+  ],
   duaTypeEnum: DuaType.MASTER,
   userInstructions: 'Vanderbilt User Instruction'
 }, {
   shortName: 'Broad',
   displayName: 'Broad Institute',
   organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
-  emailDomains: [],
-  emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org'],
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
+      eraRequired: true,
+      emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
+    }
+  ],
   duaTypeEnum: DuaType.RESTRICTED
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
   organizationTypeEnum: OrganizationType.INDUSTRY,
-  emailDomains: ['verily.com', 'google.com'],
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ['verily.com', 'google.com']
+    }
+  ],
   userInstructions: 'Verily User Instruction'
 }];
 
@@ -110,9 +136,11 @@ export class InstitutionApiStub extends InstitutionApi {
     const response: CheckEmailResponse = {
       isValidMember: false
     };
-    if (institution.emailAddresses && institution.emailAddresses.includes(contactEmail)) {
+    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES
+        && getRegisteredTierEmailAddresses(institution).includes(contactEmail)) {
       response.isValidMember = true;
-    } else if (institution.emailDomains && institution.emailDomains.includes(domain)) {
+    } else if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+        && getRegisteredTierEmailDomains(institution).includes(domain)) {
       response.isValidMember = true;
     }
     return response;

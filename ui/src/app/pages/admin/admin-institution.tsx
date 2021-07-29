@@ -3,17 +3,23 @@ import {FadeBox} from 'app/components/containers';
 import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {
+  getRegisteredTierConfig,
+  getTierEmailAddresses,
+  getTierEmailDomains
+} from 'app/utils/institutions';
 import {navigateByUrl} from 'app/utils/navigation';
-import {Institution} from 'generated/fetch';
-import {DuaType, OrganizationType} from 'generated/fetch';
+import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
+import {OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {OrganizationTypeOptions} from './admin-institution-options';
 
 
 const styles = reactStyles({
@@ -94,13 +100,16 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
   }
 
   renderDuaType(row, col) {
-    return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
+    // TODO(yonghao): Handle NO_ACCESS
+    return (getRegisteredTierConfig(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
+        'Individual' : 'Master';
   }
 
   // If email domain list has more than 4 entries show top 4 and replace others with ...
   renderEmailDomain(row, col) {
-    const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
-    if (row['emailDomains'] && row['emailDomains'].length > 4) {
+    const rawEmailDomains = getTierEmailDomains(row, AccessTierShortNames.Registered);
+    const emailDomain = fp.take(4, rawEmailDomains).join('\n') ;
+    if (rawEmailDomains && rawEmailDomains.length > 4) {
       return emailDomain + '...';
     }
     return emailDomain;
@@ -108,8 +117,9 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
 
   // If email address list has more than 4 entries show top 4 and replace others with ...
   renderEmailAddress(row, col) {
-    const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
-    if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
+    const rawEmailAddresses = getTierEmailAddresses(row, AccessTierShortNames.Registered);
+    const emailAddresses = fp.take(4, rawEmailAddresses).join('\n') ;
+    if (rawEmailAddresses && rawEmailAddresses.length > 4) {
       return emailAddresses + '...';
     }
     return emailAddresses;

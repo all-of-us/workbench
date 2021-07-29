@@ -223,10 +223,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,
-    profile: {
-      contactEmail,
-      verifiedInstitutionalAffiliation: {institutionShortName}
-    }} = this.state;
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }} = this.state;
 
     // No error if we haven't entered an email or chosen an institution.
     if (!institutionShortName || isBlank(contactEmail)) {
@@ -410,7 +410,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
                           placeholder={getRoleOptions(institutions, institutionShortName) ?
-                            '' : 'First select an institution above'}
+                              '' : 'First select an institution above'}
                           options={getRoleOptions(institutions, institutionShortName)}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
