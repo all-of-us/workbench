@@ -62,17 +62,23 @@ describe('Create python kernel notebook', () => {
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
     expect(cell2OutputText.endsWith('success')).toBeTruthy();
 
-    await notebook.runCodeCell(3, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    const cell3OutputText = await notebook.runCodeCell(3, {
+      codeFile: 'resources/python-code/git-ignore-check.py',
+      markdownWorkaround: true
+    });
+    expect(cell3OutputText.endsWith('success')).toBeTruthy();
+
+    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(3);
+    const cell = notebook.findCell(4);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
     const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(4, { code: codeSnippet });
-    expect(codeSnippetOutput).toEqual(expect.stringContaining('/usr/local/share/jupyter/kernels/python3'));
+    const codeSnippetOutput = await notebook.runCodeCell(5, { code: codeSnippet });
+    expect(codeSnippetOutput).toEqual(expect.stringContaining('python3'));
 
     // Save, exit notebook then come back from Analysis page.
     await notebook.save();
