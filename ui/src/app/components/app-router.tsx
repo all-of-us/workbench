@@ -72,14 +72,15 @@ export const RouteLink = ({path, style = {}, children}): React.ReactElement => <
 export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
-  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  return <Route exact={exact} path={path}>
-    {redirectPath
-        ? <Redirect to={redirectPath}/>
-        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
-    }
-  </Route>;
+  return <Route exact={exact} path={path} render={
+    () => {
+      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+      return redirectPath
+          ? <Redirect to={redirectPath}/>
+          : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
+    }}>;
+  </Route>
 };
 
 export const GuardedRoute = ({path, guards = [], exact=true, children}): React.ReactElement => {
