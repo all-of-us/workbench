@@ -23,9 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
 
-  private CohortAnnotationDefinitionService cohortAnnotationDefinitionService;
-  private CohortReviewService cohortReviewService;
-  private WorkspaceAuthService workspaceAuthService;
+  private final CohortAnnotationDefinitionService cohortAnnotationDefinitionService;
+  private final CohortReviewService cohortReviewService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   private static final Logger log =
       Logger.getLogger(CohortAnnotationDefinitionController.class.getName());

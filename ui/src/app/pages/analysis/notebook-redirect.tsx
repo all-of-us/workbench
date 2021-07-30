@@ -51,6 +51,14 @@ export const progressStrings: Map<Progress, string> = new Map([
   [Progress.Redirecting, 'Redirecting to the notebook server'],
 ]);
 
+// Statuses during which the user can interact with the Runtime UIs, e.g. via
+// an iframe. When the runtime is in other states, requests to the runtime host
+// are likely to fail.
+const interactiveRuntimeStatuses = new Set<RuntimeStatus>([
+  RuntimeStatus.Running,
+  RuntimeStatus.Updating
+]);
+
 const styles = reactStyles({
   main: {
     display: 'flex', flexDirection: 'column', marginLeft: '3rem', paddingTop: '1rem', width: '780px'
@@ -311,12 +319,12 @@ export const NotebookRedirect = fp.flow(
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
-      // runtime transitions out of the "running" state, navigate back to
+      // runtime transitions out of an interactive state, navigate back to
       // the preview page as the iframe will start erroring.
+      const isLoaded = runtime !== undefined && this.state.progress === Progress.Loaded;
       const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
-      const isLoaded = this.state.progress === Progress.Loaded;
-      if (isLoaded && prevStatus === RuntimeStatus.Running &&
-          runtime !== undefined && (runtime === null || runtime.status !== RuntimeStatus.Running)) {
+      const {status: curStatus = null} = runtime || {};
+      if (isLoaded && interactiveRuntimeStatuses.has(prevStatus) && !interactiveRuntimeStatuses.has(curStatus)) {
         this.props.navigate([
           'workspaces', workspace.namespace, workspace.id,
           // navigate will encode the notebook name automatically

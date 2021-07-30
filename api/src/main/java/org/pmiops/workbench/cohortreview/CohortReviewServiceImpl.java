@@ -375,17 +375,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public CohortReview initializeCohortReview(Long cdrVersionId, DbCohort dbCohort) {
-    SearchRequest request = new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
-
-    TableResult result =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-    List<FieldValue> row = result.iterateAll().iterator().next();
-    long cohortCount = bigQueryService.getLong(row, rm.get("count"));
-
-    return createNewCohortReview(dbCohort, cdrVersionId, cohortCount);
+    return createNewCohortReview(dbCohort, cdrVersionId, participationCount(dbCohort));
   }
 
   @Override
@@ -502,6 +492,19 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
               .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
     }
     return vocabularies;
+  }
+
+  @Override
+  public Long participationCount(DbCohort dbCohort) {
+    SearchRequest request = new Gson().fromJson(getCohortDefinition(dbCohort), SearchRequest.class);
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    List<FieldValue> row = result.iterateAll().iterator().next();
+    long cohortCount = bigQueryService.getLong(row, rm.get("count"));
+    return cohortCount;
   }
 
   private DbCohortAnnotationDefinition findDbCohortAnnotationDefinition(

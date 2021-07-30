@@ -286,12 +286,12 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
       const created = !!cohort ? moment(cohort.creationTime).format('YYYY-MM-DD') : null;
       return <React.Fragment>
         <style>{css}</style>
-        <button
+        {cohortReview && cohortReview.cohortReviewId && <button
           style={styles.backBtn}
           type='button'
           onClick={() => this.goBack()}>
           Back to review set
-        </button>
+        </button>}
         {reviewLoading && <SpinnerOverlay/>}
         {cohortReview && <div style={styles.reportBackground}>
           <div style={styles.container}>

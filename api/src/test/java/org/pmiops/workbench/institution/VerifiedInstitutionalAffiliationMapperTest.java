@@ -27,9 +27,8 @@ import org.springframework.test.annotation.DirtiesContext;
   InstitutionMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
-  InstitutionEmailDomainMapperImpl.class,
-  InstitutionEmailAddressMapperImpl.class,
-  InstitutionTierRequirementMapperImpl.class,
+  InstitutionTierConfigMapperImpl.class,
+  InstitutionTierConfigMapperImpl.class,
 })
 @MockBean({
   AccessTierService.class,

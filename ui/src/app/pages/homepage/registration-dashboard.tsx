@@ -105,7 +105,7 @@ function redirectToRas(): void {
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
+      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
   window.open(url, '_blank');
 }
 
@@ -148,6 +148,20 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     },
     onClick: redirectToTwoFactorSetup
   }, {
+    key: 'rasLoginGov',
+    completionPropsKey: 'rasLoginGovLinked',
+    loadingPropsKey: 'rasLoginGovLoading',
+    title: 'Connect Your Login.Gov Account',
+    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
+    description: 'Connect your Researcher Workbench account to your login.gov account. ',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
+    },
+    onClick: redirectToRas
+  },
+  {
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
@@ -161,19 +175,6 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
-  }, {
-    key: 'rasLoginGov',
-    completionPropsKey: 'rasLoginGovLinked',
-    loadingPropsKey: 'rasLoginGovLoading',
-    title: 'Connect Your Login.Gov Account',
-    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
-    description: 'Connect your Researcher Workbench account to your login.gov account. ',
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
-    },
-    onClick: redirectToRas
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',

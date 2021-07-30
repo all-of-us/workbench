@@ -8,16 +8,34 @@ set -x
 # API server and its path is passed in as jupyterUserScriptUri during notebook
 # runtime creation.
 
-# As of initial Workbench launch, we will not be offering or have a need for
-# Spark on notebooks runtimes. Disable the kernels to avoid presenting spurious
-# kernel options to researchers. See https://github.com/DataBiosphere/leonardo/issues/321.
-jupyter kernelspec uninstall -f pyspark2
-jupyter kernelspec uninstall -f pyspark3
-
 # Enable any built-in extensions. Snippets menu is used for AoU-specific code
 # snippet insertion, see README.md for more details.
-jupyter nbextension enable snippets_menu/main
+# Note: keep the command line invocation here in-sync with how Leo installs its
+# own default extensions: https://github.com/DataBiosphere/terra-docker/blob/master/terra-jupyter-base/scripts/extension/install_jupyter_contrib_nbextensions.sh
+sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable snippets_menu/main
 
 # Section represents the jupyter page to which the extension will be applied to
-jupyter nbextension enable aou-upload-policy-extension/main --section=tree
+sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-upload-policy-extension/main --section=tree
 
+# Setup gitignore to avoid accidental checkin of data on AoU. Ideally this would be
+# configured on the image, per https://github.com/DataBiosphere/terra-docker/pull/234
+# but that's no longer possible as the home directory is mounted at runtime.
+ignore_file=/home/jupyter/gitignore_global
+cat <<EOF > ${ignore_file}
+# By default, all files should be ignored by git.
+# We want to be sure to exclude files containing data such as CSVs and images such as PNGs.
+*.*
+# Now, allow the file types that we do want to track via source control.
+!*.ipynb
+!*.py
+!*.r
+!*.R
+!*.wdl
+!*.sh
+# Allow documentation files.
+!*.md
+!*.rst
+!LICENSE*
+EOF
+chown jupyter:users ${ignore_file}
+git config --global core.excludesfile ${ignore_file}
