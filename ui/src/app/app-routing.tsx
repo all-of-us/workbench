@@ -1,4 +1,3 @@
-import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
@@ -6,7 +5,18 @@ import * as React from 'react';
 import {Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
+import {Redirect} from 'react-router';
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
+
+import 'rxjs/Rx';
+import {
+  AppRoute,
+  AppRouter,
+  Guard,
+  GuardedRoute,
+  ProtectedRoutes,
+  withRouteData
+} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -52,7 +62,7 @@ const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const signInGuard: Guard = {
   allowed: (): boolean => {
-    console.log(authStore.get().isSignedIn);
+    // console.log(authStore.get().isSignedIn);
     return authStore.get().isSignedIn;
   },
   redirectPath: '/login'
@@ -186,6 +196,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
     // TODO angular2react - this actually isn't working right now, just renders an empty page
     // but this bug is also on test right now so it isn't a regression
+    console.log("isCookiesEnabled useEffect");
     setIsCookiesEnabled(cookiesEnabled());
 
     if (isCookiesEnabled) {
@@ -466,7 +477,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }).unsubscribe;
   }, []);
 
-  console.log('Rendering AppRouting: ', authLoaded, isUserDisabled);
+  console.log("Rendering AppRouting. AuthLoaded: " + authLoaded + " IsUserDisabled: " + isUserDisabled);
+  useEffect(() => {
+    console.log("Mounting AppRouting (ish)");
+
+    return () => console.log("Unmounting AppRouting");
+  }, []);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
@@ -501,17 +517,17 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                   component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
               />
               <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-                  <AppRoute
+                  <GuardedRoute
                       path=''
-                      exact={false}
-                      component={() => <SignedInPage
+                      exact={false}>
+                    <SignedInPage
                         intermediaryRoute={true}
                         routeData={{}}
                         // TODO angular2react - I think I might be able to just sign out and ignore this field
                         subscribeToInactivitySignOut={subscribeToInactivitySignOut}
                         signOut={signOut}
-                      />}
-                  />
+                    />
+                  </GuardedRoute>
               </ProtectedRoutes>
           </Switch>
       </AppRouter>

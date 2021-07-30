@@ -2,6 +2,7 @@ import * as React from "react";
 import {AppRoute, AppRouter, Guard, ProtectedRoutes} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
+import {Redirect} from "react-router-dom";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -29,7 +30,6 @@ describe('AppRouter', () => {
     const wrapper = component(['/unreachable-path'], 0);
     // don't want to pull all of angular into a test of react routerto test that a redirect is
     // happening, so we'll check that the router is telling it to redirect to the right place
-
     expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 
@@ -52,7 +52,6 @@ describe('AppRouter', () => {
     const wrapper = component(['/nested-unreachable-path'], 0);
     // don't want to pull all of angular into a test of react router to test that a redirect is
     // happening, so we'll check that the router is telling it to redirect to the right place
-
     expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 });

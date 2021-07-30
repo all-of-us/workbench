@@ -85,6 +85,7 @@ interface Props extends WithSpinnerOverlayProps {
 
 export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
+  useEffect(() => {console.log("Mounting DataComponent"); return () => console.log("Unmounting DataComponent");}, []);
 
   const [navigate, ] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);

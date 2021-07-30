@@ -1,5 +1,5 @@
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
-import {AppRoute, withRouteData} from 'app/components/app-router';
+import {AppRoute, GuardedRoute, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -21,6 +21,7 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
+import {useEffect} from "react";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -42,9 +43,15 @@ const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEd
 // TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
 // rendering over and over again on page load, rendering (hah) the app unusable.
 // We should be able to refactor this once we are driving the entire app through React router.
-export const WorkspaceRoutes = () => {
-  const { path, } = useRouteMatch();
+export const WorkspaceRoutes = React.memo(() => {
+  const { path } = useRouteMatch();
 
+  console.log("Rendering WorkspaceRoutes");
+  useEffect(() => {
+    console.log("Mounting WorkspaceRoutes (ish)");
+
+    return () => console.log("Unmounting WorkspaceRoutes");
+  }, []);
   return <React.Fragment>
     <AppRoute
       path={`${path}/about`}
@@ -112,15 +119,25 @@ export const WorkspaceRoutes = () => {
         minimizeChrome: true
       }}/>}
     />
-    <AppRoute
-      path={`${path}/data`}
-      component={() => <DataComponentPage routeData={{
+    {/*<AppRoute*/}
+    {/*  path={`${path}/data`}*/}
+    {/*  component={() => <DataComponentPage routeData={{*/}
+    {/*    title: 'Data Page',*/}
+    {/*    breadcrumb: BreadcrumbType.Workspace,*/}
+    {/*    workspaceNavBarTab: 'data',*/}
+    {/*    pageKey: 'data'*/}
+    {/*  }}/>}*/}
+    {/*/>*/}
+    <GuardedRoute
+        path={`${path}/data`}
+    >
+      <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
         workspaceNavBarTab: 'data',
         pageKey: 'data'
-      }}/>}
-    />
+      }}/>
+    </GuardedRoute>
     <AppRoute
       path={`${path}/data/data-sets`}
       component={() => <DataSetComponentPage routeData={{
@@ -230,4 +247,4 @@ export const WorkspaceRoutes = () => {
       }}/>}
     />
   </React.Fragment>;
-};
+});

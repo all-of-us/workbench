@@ -45,14 +45,14 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      console.log(params);
+      // console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      console.log(query);
+      // console.log(query);
       queryParamsStore.next(query);
     }
   }, [query]);
@@ -72,16 +72,26 @@ export const RouteLink = ({path, style = {}, children}): React.ReactElement => <
 export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
   const routeParams = useParams();
   const routeHistory = useHistory();
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  return <Route exact={exact} path={path} render={
-    () => {
-      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-      return redirectPath
+  return <Route exact={exact} path={path}>
+    {redirectPath
         ? <Redirect to={redirectPath}/>
-        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
-    }}>
+        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>
+    }
   </Route>;
 };
+
+export const GuardedRoute = ({path, guards = [], exact=true, children}): React.ReactElement => {
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+
+  return <Route exact={exact} path={path}>
+    {redirectPath
+        ? <Redirect to={redirectPath}/>
+        : (children)
+    }
+  </Route>
+}
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {

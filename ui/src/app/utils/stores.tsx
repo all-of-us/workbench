@@ -75,7 +75,7 @@ export const profileStore = atom<ProfileStore>({
       console.error(e);
     }
     const newProfile = await profileApi().getMe();
-    console.log(newProfile);
+    // console.log(newProfile);
     profileStore.get().updateCache(newProfile);
     return profileStore.get().profile;
   },
