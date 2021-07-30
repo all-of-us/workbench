@@ -66,7 +66,7 @@ describe('Create python kernel notebook', () => {
       codeFile: 'resources/python-code/git-ignore-check.py',
       markdownWorkaround: true
     });
-    expect(cell3OutputText.endsWith('success')).toBeTruthy();
+    // TODO(RW-7044): Reintroduce success check after 8/1/21, to allow image upgrade to phase in.
 
     await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
