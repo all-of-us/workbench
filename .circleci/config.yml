@@ -450,10 +450,6 @@ jobs:
           working_directory: ~/workbench/ui
           command: yarn codegen
       - run:
-          name: Run Angular tests
-          working_directory: ~/workbench/ui
-          command: yarn test --no-watch --no-progress --browsers=ChromeHeadless
-      - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
           command: yarn test-react --detectOpenHandles --forceExit --runInBand
