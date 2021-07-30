@@ -152,7 +152,6 @@ public class RasLinkService {
 
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.
-    // TODO(RW-7108): Make eRA optional
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
     Optional<String> eRaUserId = getEraUserId(userInfoResponse);
     Optional<AccessModuleStatus> eRAModuleStatus =
@@ -163,8 +162,10 @@ public class RasLinkService {
         && (eRAModuleStatus.get().getCompletionEpochMillis() != null
             || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
       return user;
-    } else if (eRaUserId.isPresent()) {
+    } else if (eRaUserId.isPresent() && !eRaUserId.get().isEmpty()) {
       return userService.updateRasLinkEraStatus(eRaUserId.get());
+    } else {
+      log.info(String.format("User does not have valid eRA %s", userInfoResponse));
     }
     return user;
   }
@@ -196,20 +197,13 @@ public class RasLinkService {
    * <p>Returns empty if eRA is invalid or not linked.
    */
   public static Optional<String> getEraUserId(JsonNode userInfo) {
-    try {
-      String eRAUserId =
-          userInfo
-              .get(FEDERATED_IDENTITIES)
-              .get(IDENTITIES)
-              .get(0)
-              .get(ERA_COMMONS_PROVIDER_NAME)
-              .get(IDENTITY_USERID)
-              .asText();
-      return Optional.of(eRAUserId).filter(v -> !v.isEmpty());
-    } catch (NullPointerException e) {
-      log.info(String.format("User does not have valid eRA, acrClaim: %s", userInfo));
-    }
-    return Optional.empty();
+    return Optional.of(userInfo)
+        .map(u -> u.get(FEDERATED_IDENTITIES))
+        .map(u -> u.get(IDENTITIES))
+        .map(u -> u.get(0))
+        .map(u -> u.get(ERA_COMMONS_PROVIDER_NAME))
+        .map(u -> u.get(IDENTITY_USERID))
+        .map(JsonNode::asText);
   }
 
   /** Decode an encoded url */
