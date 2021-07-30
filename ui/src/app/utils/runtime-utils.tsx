@@ -82,6 +82,10 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
   let desc = 'Disk Size';
   let diffType;
 
+  if (oldRuntime.diskSize == null) {
+    oldRuntime.diskSize = newRuntime.diskSize;
+  }
+
   if (newRuntime.diskSize < oldRuntime.diskSize) {
     desc = 'Decease ' + desc;
     diffType = RuntimeDiffState.NEEDS_DELETE;
@@ -184,11 +188,13 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
 };
 
 const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
+  console.log('toRuntimeConfig:',runtime);
   if (runtime.gceConfig) {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
-      diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize : diskStore.get().disk.size,
+      diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize :
+          diskStore.get().disk != null ? diskStore.get().disk.size : null,
       dataprocConfig: null
     };
   } else if (runtime.gceWithPdConfig) {
@@ -276,7 +282,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, keepPD: boolean) => Promise<void>]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, keepPD: boolean, deletePDOnly: boolean) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
 
@@ -312,11 +318,12 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     initializePolling();
   }, [runtimeStatus]);
 
-  const setStatusRequest = async(req, keepPD) => {
+  const setStatusRequest = async(req, keepPD, deletePDOnly) => {
     await switchCase(req,
       [RuntimeStatusRequest.Delete, () => {
-        console.log('setStatusRequest: ', !keepPD);
-        return runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepPD);
+        console.log('setStatusRequest: ', !keepPD, deletePDOnly);
+        return deletePDOnly ? disksApi().deleteDisk(currentWorkspaceNamespace) :
+        runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepPD);
       }],
       [RuntimeStatusRequest.Start, () => {
         return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
@@ -366,7 +373,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 signal: aborter.signal
               });
             } else {
-              console.log('deleteRuntime with PD');
+              console.log('delete reduced PD');
               await disksApi().deleteDisk(currentWorkspaceNamespace, {
                 signal: aborter.signal
               });

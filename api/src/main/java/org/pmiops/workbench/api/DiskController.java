@@ -63,6 +63,8 @@ public class DiskController implements DiskApiDelegate{
       LeonardoGetPersistentDiskResponse response;
       List<LeonardoListPersistentDiskResponse> responseList =
           leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
+
+      log.info("LeonardoListPersistentDiskResponse list"+responseList.size());
       responseList.sort(
           new Comparator<LeonardoListPersistentDiskResponse>() {
             @Override
@@ -82,14 +84,21 @@ public class DiskController implements DiskApiDelegate{
                 "Observed Leonardo runtime with unexpected error status:\n%s",
                 response.getStatus()));
       }
-      Disk disk = new Disk();
-      disk.name(response.getName());
-      disk.diskType(DiskType.fromValue(response.getDiskType().toString()));
-      disk.blockSize(response.getBlockSize());
-      disk.size(response.getSize());
+
+      if (response != null){
+        Disk disk = new Disk();
+        disk.name(response.getName());
+        disk.diskType(DiskType.fromValue(response.getDiskType().toString()));
+        disk.blockSize(response.getBlockSize());
+        disk.size(response.getSize());
 //            disk.status(DiskStatus.valueOf(response.getStatus().toString()));
 
-      return ResponseEntity.ok(disk);
+        return ResponseEntity.ok(disk);
+
+      }else{
+        return ResponseEntity.ok(null);
+      }
+
 //            return ResponseEntity.ok(leonardoMapper.toApiRuntime(response));
     } catch (NotFoundException e) {
       return (ResponseEntity<Disk>) ResponseEntity.notFound();

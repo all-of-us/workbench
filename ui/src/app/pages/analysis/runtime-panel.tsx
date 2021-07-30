@@ -6,7 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {disksApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
@@ -185,7 +185,7 @@ export interface Props {
 // Exported for testing only.
 export const ConfirmDelete = ({onCancel, onConfirm}) => {
   const [deleting, setDeleting] = useState(false);
-  const [selectedkeepPD, setKeepPD] = useState(true);
+  const [selectedKeepPD, setKeepPD] = useState(true);
   return <Fragment>
     <div style={styles.confirmWarning}>
       <div style={{display: 'flex', justifyContent: 'center'}}>
@@ -203,8 +203,8 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         editing and running notebooks will require you to create a new cloud environment.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 4}}>
-        <label > <input type= 'radio' checked={selectedkeepPD === true} onChange={() => setKeepPD(true)}/>Keep PD</label><br/>
-        <label > <input type= 'radio' checked={selectedkeepPD === false} onChange={() => setKeepPD(false)}/>Not Keep PD</label>
+        <label > <input type= 'radio' checked={selectedKeepPD === true} onChange={() => setKeepPD(true)}/>Keep PD</label><br/>
+        <label > <input type= 'radio' checked={selectedKeepPD === false} onChange={() => setKeepPD(false)}/>Not Keep PD</label>
       </p>
     </div>
     <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -222,12 +222,52 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         onClick={async() => {
           setDeleting(true);
           try {
-            await onConfirm();
+            await onConfirm(selectedKeepPD);
           } catch (err) {
             setDeleting(false);
             throw err;
           }
         }}>
+        Delete
+      </Button>
+    </FlexRow>
+  </Fragment>;
+};
+
+export const ConfirmDeletePD = ({onConfirm, onCancel, workspace}) => {
+  const [deleting, setDeleting] = useState(false);
+  return <Fragment>
+    <div style={styles.confirmWarning}>
+      <div style={{display: 'flex', justifyContent: 'center'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+      </div>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete your environment</h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 2}}>
+        You’re about to delete your cloud analysis environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
+        Any in-memory state and local file modifications will be erased.&nbsp;
+        Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
+        environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
+        editing and running notebooks will require you to create a new cloud environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 4}}>
+        <label > <input type= 'radio' checked={deleting === true} onChange={() => setDeleting(true)}/>Delete PD</label>
+      </p>
+    </div>
+    <FlexRow style={{justifyContent: 'flex-end'}}>
+      <Button
+          type='secondaryLight'
+          aria-label={'Cancel'}
+          style={{marginRight: '.6rem'}}
+          onClick={() => onCancel()}>
+        Cancel
+      </Button>
+      <Button
+          aria-label={'Delete'}
+          disabled={!deleting}
+          onClick={() => onConfirm()}>
         Delete
       </Button>
     </FlexRow>
@@ -471,7 +511,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime running, click to pause',
         iconShape: 'compute-running',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, false); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, false, false); }
       })
     ],
     [
@@ -502,7 +542,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime paused, click to resume',
         iconShape: 'compute-stopped',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, false); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, false, false); }
       })
     ],
     [
@@ -831,8 +871,6 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const existPD = disk !== null;
-  const keepPD = true;
-  const [selectedkeepPD, setKeepPD] = useState(keepPD);
 
   console.log('print diskSize', diskSize, machineName, disk, existPD);
 
@@ -914,7 +952,7 @@ export const RuntimePanel = fp.flow(
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
   const createStandardRuntimeRequest = (runtime: RuntimeConfig) => {
-    if (pdReduced) {
+    if (!existPD || pdReduced) {
       return {
         gceWithPdConfig: {
           bootDiskSize: 50,
@@ -1129,9 +1167,18 @@ export const RuntimePanel = fp.flow(
               </FlexRow>
             </Fragment>
       ],
-      [PanelContent.Delete, () => <ConfirmDelete
-            onConfirm={async() => {
-              await setRuntimeStatus(RuntimeStatusRequest.Delete, selectedkeepPD);
+      [PanelContent.Delete, () => (!runtimeExists && existPD) ?
+          <ConfirmDeletePD
+              onConfirm={async(value) => {
+                await setRuntimeStatus(RuntimeStatusRequest.Delete, value, true);
+                onClose();
+              }}
+              onCancel={() => setPanelContent(PanelContent.Customize)}
+              workspace = {workspace.googleProject}
+          /> :
+          <ConfirmDelete
+            onConfirm={async(value) => {
+              await setRuntimeStatus(RuntimeStatusRequest.Delete, value, false);
               onClose();
             }}
             onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -1207,17 +1254,30 @@ export const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-           <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-             <Link
-               style={{...styles.deleteLink, ...(
-                 (disableControls || !runtimeExists) ?
-                 {color: colorWithWhiteness(colors.dark, .4)} : {}
-               )}}
-               aria-label='Delete Environment'
-               disabled={disableControls || !runtimeExists}
-               onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-               {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
-           </FlexRow>
+
+        {!runtimeExists && existPD ? <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+          <Link
+              style={{...styles.deleteLink, ...(
+                    (disableControls) ?
+                        {color: colorWithWhiteness(colors.dark, .4)} : {}
+                )}}
+              aria-label='Delete Environment'
+              disabled={disableControls}
+              onClick={() => setPanelContent(PanelContent.Delete)}>Delete PD</Link>
+          {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
+        </FlexRow> :
+            <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+              <Link
+                  style={{...styles.deleteLink, ...(
+                        (disableControls || !runtimeExists) ?
+                            {color: colorWithWhiteness(colors.dark, .4)} : {}
+                    )}}
+                  aria-label='Delete Environment'
+                  disabled={disableControls || !runtimeExists}
+                  onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
+              {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
+            </FlexRow>
+        }
          </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
                                                            newRuntimeConfig={newRuntimeConfig}
