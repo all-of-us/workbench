@@ -17,7 +17,7 @@ import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {navigateSpy} from '../../../testing/navigation-mock';
+import {navigateSpy} from 'testing/navigation-mock';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 
@@ -248,7 +248,6 @@ describe('NotebookRedirect', () => {
 
   it('should not navigate after runtime transitions to updating', async() => {
     const navSpy = jest.fn();
-    NavStore.navigate = navSpy;
 
     queryParamsStore.next({
       kernelType: Kernels.R,
@@ -267,7 +266,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(navSpy).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
     act(() => {
@@ -279,6 +278,6 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(navSpy).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

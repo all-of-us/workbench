@@ -17,8 +17,8 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
 import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Profile} from 'generated/fetch';
-import {withNavigation} from '../../utils/navigation-wrapper';
 
 
 const styles = reactStyles({

@@ -23,10 +23,10 @@ import {
   currentConceptStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   searchBar: {

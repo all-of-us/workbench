@@ -28,8 +28,8 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {navigateSpy} from '../../../testing/navigation-mock';
-import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
+import {navigateSpy} from 'testing/navigation-mock';
+import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 

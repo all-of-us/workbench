@@ -19,7 +19,7 @@ import {
   getRegisteredTierEmailDomains
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   DuaType,
   Institution,

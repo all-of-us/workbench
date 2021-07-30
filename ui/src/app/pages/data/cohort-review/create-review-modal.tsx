@@ -11,10 +11,10 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, summarizeErrors, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortReviewStore, NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   title: {

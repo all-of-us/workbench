@@ -18,8 +18,8 @@ import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
 import {NavigationProps} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, Profile} from 'generated/fetch';
-import {withNavigation} from '../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   mainHeader: {

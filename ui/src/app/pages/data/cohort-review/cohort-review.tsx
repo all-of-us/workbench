@@ -14,9 +14,9 @@ import {
   currentCohortReviewStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   title: {

@@ -15,8 +15,8 @@ import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 import {ExportDatasetModal} from './export-dataset-modal';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {

@@ -6,7 +6,7 @@ import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
-import {navigateSpy} from '../../../testing/navigation-mock';
+import {navigateSpy} from 'testing/navigation-mock';
 
 describe('WorkspaceNavBar', () => {
 

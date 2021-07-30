@@ -20,8 +20,8 @@ import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import {withNavigation} from '../utils/navigation-wrapper';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
 
@@ -311,7 +311,7 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 
   // OK to copy a notebook with a mismatch, but show a warning message
   setNotebookCdrMismatchWarning(destination: Workspace, fromCdrVersionId: string) {
-    console.log("Running notebook", destination.cdrVersionId);
+    console.log('Running notebook', destination.cdrVersionId);
     console.log(this.cdrName(destination.cdrVersionId));
     const warningMsg = `The selected destination workspace uses a different dataset version ` +
         `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
@@ -334,7 +334,7 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
   }
 
   validateAndSetDestination(destination: Workspace) {
-    console.log("destination ", destination)
+    console.log('destination ', destination);
     const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
 
     this.clearCopyError();

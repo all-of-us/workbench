@@ -32,10 +32,10 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {withNavigation} from '../../utils/navigation-wrapper';
 
 
 // validators for validate.js

@@ -21,9 +21,9 @@ import {
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {withNavigation} from '../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   editIcon: {

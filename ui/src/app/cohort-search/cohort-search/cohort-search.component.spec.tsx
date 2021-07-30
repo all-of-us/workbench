@@ -8,7 +8,7 @@ import {Router} from 'react-router';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
-import {HelpSidebar} from '../../components/help-sidebar';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {CohortSearch} from './cohort-search.component';
 import { createMemoryHistory } from 'history';
 

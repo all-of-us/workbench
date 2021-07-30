@@ -32,10 +32,10 @@ import {
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {navigationGuardStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   conceptSetHeader: {

@@ -12,11 +12,11 @@ import {
   NavigationProps,
   urlParamsStore
 } from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   conceptSetsHeader: {

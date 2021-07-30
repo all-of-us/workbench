@@ -18,6 +18,7 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -28,7 +29,6 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {withNavigation} from '../../utils/navigation-wrapper';
 
 const COHORT_TYPE = 'AoU_Discover';
 

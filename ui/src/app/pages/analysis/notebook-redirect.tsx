@@ -24,10 +24,10 @@ import {
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
-import {withNavigation} from '../../utils/navigation-wrapper';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum Progress {

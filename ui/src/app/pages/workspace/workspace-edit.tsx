@@ -53,6 +53,7 @@ import {
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -71,7 +72,6 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
-import {withNavigation} from '../../utils/navigation-wrapper';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({

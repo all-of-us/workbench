@@ -18,9 +18,9 @@ import {
   NavigationProps,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const styles = reactStyles({
   sectionTitle: {

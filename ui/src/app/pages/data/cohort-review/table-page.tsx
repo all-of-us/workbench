@@ -26,6 +26,7 @@ import {
   NavigationProps,
   urlParamsStore
 } from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -37,7 +38,6 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},

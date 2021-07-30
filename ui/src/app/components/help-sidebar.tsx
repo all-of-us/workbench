@@ -61,6 +61,7 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
@@ -69,7 +70,6 @@ import {
   RuntimeStatus, TerraJobStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {withNavigation} from '../utils/navigation-wrapper';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 

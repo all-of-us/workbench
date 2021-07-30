@@ -11,8 +11,8 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {DataSet, WorkspaceResource} from 'generated/fetch';
-import {withNavigation} from '../../../utils/navigation-wrapper';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   resource: WorkspaceResource;

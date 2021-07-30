@@ -14,7 +14,7 @@ import {
   getTierEmailDomains
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
