@@ -1063,7 +1063,7 @@ Common.register_command({
   :fn => ->(*args) { generate_cb_criteria_tables("generate_cb_criteria_tables", *args) }
 })
 
-def generate_private_cdr_counts(cmd_name, *args)
+def import_cdr_indices_to_cloudsql(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -1094,17 +1094,17 @@ def generate_private_cdr_counts(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
+      common.run_inline %W{./generate-cdr/import-cdr-indices-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "generate-private-cdr-counts",
-  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
+  :invocation => "import-cdr-indices-to-cloudsql",
+  :description => "import-cdr-indices-to-cloudsql --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
  --cdr-version=<VERSION> --bucket <BUCKET>
-Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
+Imports CB related tables to mysql/cloudsql to be used by workbench.",
+  :fn => ->(*args) { import_cdr_indices_to_cloudsql("import-cdr-indices-to-cloudsql", *args) }
 })
 
 def copy_bq_tables(cmd_name, *args)
@@ -1196,7 +1196,7 @@ end
 Common.register_command({
   :invocation => "generate-local-cdr-db",
   :description => "generate-cloudsql-cdr --cdr-version <synth_r_20XXqX_X> --cdr-db-prefix <cdr> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-private-cdr-counts.",
+Creates and populates local mysql database from data in bucket made by import-cdr-indices-to-cloudsql.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
 
@@ -1209,7 +1209,7 @@ end
 Common.register_command({
   :invocation => "generate-local-count-dbs",
   :description => "generate-local-count-dbs --cdr-version <synth_r_20XXqX_X> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> from data in bucket made by generate-private-cdr-counts.",
+Creates and populates local mysql databases cdr<VERSION> from data in bucket made by import-cdr-indices-to-cloudsql.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 

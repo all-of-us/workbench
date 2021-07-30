@@ -11,7 +11,7 @@ WORKBENCH_DATASET=$CDR_VERSION
 BUCKET="all-of-us-workbench-private-cloudsql"
 
 startDate=$(date)
-echo $(date) " Starting generate-private-cdr-counts $startDate"
+echo $(date) " Starting import-cdr-indices-to-cloudsql $startDate"
 
 ## Make workbench cdr count data
 echo "Making BigQuery cdr dataset"
@@ -64,5 +64,5 @@ fi
 
 stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
-echo $(date) " Finished generate-private-cdr-counts"
+echo $(date) " Finished import-cdr-indices-to-cloudsql"
 
