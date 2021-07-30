@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
   AppRoute,
-  Guard, GuardedRoute,
+  Guard,
   ProtectedRoutes,
   withFullHeight,
   withRouteData
@@ -76,121 +76,83 @@ export const SignedInRoutes = React.memo(() => {
   }, []);
   return <React.Fragment>
     <ProtectedRoutes guards={[expiredGuard]}>
-      <AppRoute
-          path='/'
-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
-      />
+      <AppRoute path='/'>
+        <HomepagePage routeData={{title: 'Homepage'}}/>
+      </AppRoute>
     </ProtectedRoutes>
-    <AppRoute
-        path='/access-renewal'
-        component={() => <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>}
-    />
-    <AppRoute
-        path='/admin/banner'
-        component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
-    />
-    <AppRoute
-        path='/admin/institution'
-        component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/institution/add'
-        component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/institution/edit/:institutionId'
-        component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/user' // included for backwards compatibility
-        component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
-    />
-    <AppRoute
-        path='/admin/review-workspace'
-        component={() => <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>}
-    />
-    <AppRoute
-        path='/admin/users'
-        component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
-    />
-    <AppRoute
-        path='/admin/users/:usernameWithoutGsuiteDomain'
-        component={() => <UserAdminPage routeData={{title: 'User Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/user-audit'
-        component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
-    />
-    <AppRoute
-        path='/admin/user-audit/:username'
-        component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
-    />
-    <AppRoute
-        path='/admin/workspaces'
-        component={() => <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/workspaces/:workspaceNamespace'
-        component={() => <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>}
-    />
-    <AppRoute
-        path='/admin/workspace-audit'
-        component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
-    />
-    <AppRoute
-        path='/admin/workspace-audit/:workspaceNamespace'
-        component={() => <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>}
-    />
-    <AppRoute
-        path='/admin/workspaces/:workspaceNamespace/:nbName'
-        component={() => <AdminNotebookViewPage routeData={{
-          pathElementForTitle: 'nbName',
-          minimizeChrome: true
-        }}/>}
-    />
-    <AppRoute
-        path='/data-code-of-conduct'
-        component={() => <DataUserCodeOfConductPage routeData={{
-          title: 'Data User Code of Conduct',
-          minimizeChrome: true
-        }} />}
-    />
-    <AppRoute path='/profile' component={() => <ProfilePage routeData={{title: 'Profile'}}/>}/>
-    <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-    <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
-
+    <AppRoute path='/access-renewal'>
+      <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/banner'>
+      <AdminBannerPage routeData={{title: 'Create Banner'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/institution'>
+      <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/institution/add'>
+      <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/institution/edit/:institutionId'>
+      <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/user'> // included for backwards compatibility
+      <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/review-workspace'>
+      <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/users'>
+      <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/users/:usernameWithoutGsuiteDomain'>
+      <UserAdminPage routeData={{title: 'User Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/user-audit'>
+      <UserAuditPage routeData={{title: 'User Audit'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/user-audit/:username'>
+      <UserAuditPage routeData={{title: 'User Audit'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/workspaces'>
+      <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/workspaces/:workspaceNamespace'>
+      <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/workspace-audit'>
+      <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/workspace-audit/:workspaceNamespace'>
+      <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
+    </AppRoute>
+    <AppRoute path='/admin/workspaces/:workspaceNamespace/:nbName'>
+      <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
+    </AppRoute>
+    <AppRoute path='/data-code-of-conduct'>
+      <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
+    </AppRoute>
+    <AppRoute path='/profile'>
+      <ProfilePage routeData={{title: 'Profile'}}/>
+    </AppRoute>
+    <AppRoute path='/nih-callback'>
+      <HomepagePage routeData={{title: 'Homepage'}}/>
+    </AppRoute>
+    <AppRoute path='/ras-callback'>
+      <HomepagePage routeData={{title: 'Homepage'}}/>
+    </AppRoute>
     <ProtectedRoutes guards={[expiredGuard, registrationGuard]}>
-      <AppRoute
-          path='/library'
-          component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-      />
-      <AppRoute
-          path='/workspaces'
-          component={() => <WorkspaceListPage
-              routeData={{
-                title: 'View Workspaces',
-                breadcrumb: BreadcrumbType.Workspaces
-              }}
-          />}
-      />
-      <AppRoute
-          path='/workspaces/build'
-          component={() => <WorkspaceEditPage
-              routeData={{title: 'Create Workspace'}}
-              workspaceEditMode={WorkspaceEditMode.Create}
-          />}
-      />
-      {/*<AppRoute*/}
-      {/*    path='/workspaces/:ns/:wsid'*/}
-      {/*    exact={false}*/}
-      {/*    component={() => <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>}*/}
-      {/*/>*/}
-      <GuardedRoute
-        path='/workspaces/:ns/:wsid'
-        exact={false}
-      >
+      <AppRoute path='/library'>
+        <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
+      </AppRoute>
+      <AppRoute path='/workspaces'>
+        <WorkspaceListPage routeData={{title: 'View Workspaces', breadcrumb: BreadcrumbType.Workspaces}}/>
+      </AppRoute>
+      <AppRoute path='/workspaces/build'>
+        <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
+      </AppRoute>
+      <AppRoute path='/workspaces/:ns/:wsid' exact={false}>
         <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
-      </GuardedRoute>
+      </AppRoute>
     </ProtectedRoutes>
   </React.Fragment>;
 });

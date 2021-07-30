@@ -13,7 +13,6 @@ import {
   AppRoute,
   AppRouter,
   Guard,
-  GuardedRoute,
   ProtectedRoutes,
   withRouteData
 } from 'app/components/app-router';
@@ -496,28 +495,23 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute
-                  path='/cookie-policy'
-                  component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-              />
-              <AppRoute
-                  path='/login'
-                  component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/session-expired'
-                  component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/sign-in-again'
-                  component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/user-disabled'
-                  component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-              />
+              <AppRoute path='/cookie-policy'>
+                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+              </AppRoute>
+              <AppRoute path='/login'>
+                <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/session-expired'>
+                <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/sign-in-again'>
+                <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/user-disabled'>
+                <UserDisabledPage routeData={{title: 'Disabled'}}/>
+              </AppRoute>
               <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-                  <GuardedRoute
+                  <AppRoute
                       path=''
                       exact={false}>
                     <SignedInPage
@@ -527,7 +521,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                         subscribeToInactivitySignOut={subscribeToInactivitySignOut}
                         signOut={signOut}
                     />
-                  </GuardedRoute>
+                  </AppRoute>
               </ProtectedRoutes>
           </Switch>
       </AppRouter>
