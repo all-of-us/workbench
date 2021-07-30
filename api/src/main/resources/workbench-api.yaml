@@ -6324,7 +6324,8 @@ definitions:
           University Medical Center'
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
-        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
+        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed, 
+          Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
