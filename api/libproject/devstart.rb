@@ -825,7 +825,7 @@ Common.register_command({
   :fn => ->(*args) { make_prep_ppi_csv_files("make-prep-ppi-csv-files", *args) }
 })
 
-def make_bq_denormalized_tables(cmd_name, *args)
+def build_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -868,14 +868,14 @@ def make_bq_denormalized_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cdr-indices.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-denormalized-tables",
-  :description => "Generates big query denormalized tables for search/review/datasets.",
-  :fn => ->(*args) { make_bq_denormalized_tables("make-bq-denormalized-tables", *args) }
+  :invocation => "build-cdr-indices",
+  :description => "Kicks of build for CDR indices",
+  :fn => ->(*args) { build_cdr_indices("build-cdr-indices", *args) }
 })
 
 def make_bq_denormalized_review(cmd_name, *args)
