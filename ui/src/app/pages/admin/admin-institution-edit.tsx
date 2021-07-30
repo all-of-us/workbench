@@ -12,7 +12,6 @@ import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/a
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
   getRegisteredTierConfig,
