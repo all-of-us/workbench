@@ -77,10 +77,10 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component, ex
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
       return redirectPath
-          ? <Redirect to={redirectPath}/>
-          : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
-    }}>;
-  </Route>
+        ? <Redirect to={redirectPath}/>
+        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
+    }}>
+  </Route>;
 };
 
 export const GuardedRoute = ({path, guards = [], exact=true, children}): React.ReactElement => {
