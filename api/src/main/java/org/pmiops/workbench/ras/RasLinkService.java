@@ -157,8 +157,9 @@ public class RasLinkService {
         accessModuleService.getClientAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
             .findFirst();
-    if (eRAModuleStatus.get().getCompletionEpochMillis() != null
-        || eRAModuleStatus.get().getBypassEpochMillis() != null) {
+    if (eRAModuleStatus.isPresent()
+        && (eRAModuleStatus.get().getCompletionEpochMillis() != null
+            || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
       return user;
     }
     Optional<String> eRaUserId = getEraUserId(userInfoResponse);
