@@ -62,7 +62,7 @@ public class ManageLeonardoRuntimes {
     apiClient.setBasePath(apiUrl);
     apiClient.setAccessToken(
         ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(BILLING_SCOPES)));
-    apiClient.setDebugging(true);
+    apiClient.setReadTimeout(60 * 1000);
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
