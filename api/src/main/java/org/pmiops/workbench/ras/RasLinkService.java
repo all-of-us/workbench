@@ -153,16 +153,16 @@ public class RasLinkService {
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
-    Optional<String> eRaUserId = getEraUserId(userInfoResponse);
     Optional<AccessModuleStatus> eRAModuleStatus =
         accessModuleService.getClientAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
             .findFirst();
-    if (eRAModuleStatus.isPresent()
-        && (eRAModuleStatus.get().getCompletionEpochMillis() != null
-            || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
+    if (eRAModuleStatus.get().getCompletionEpochMillis() != null
+        || eRAModuleStatus.get().getBypassEpochMillis() != null) {
       return user;
-    } else if (eRaUserId.isPresent() && !eRaUserId.get().isEmpty()) {
+    }
+    Optional<String> eRaUserId = getEraUserId(userInfoResponse);
+    if (eRaUserId.isPresent() && !eRaUserId.get().isEmpty()) {
       return userService.updateRasLinkEraStatus(eRaUserId.get());
     } else {
       log.info(String.format("User does not have valid eRA %s", userInfoResponse));
