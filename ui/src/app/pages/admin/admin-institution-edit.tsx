@@ -12,7 +12,6 @@ import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/a
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
   getRegisteredTierConfig,
@@ -116,8 +115,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       });
 
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    this.setState(fp.set(['institution', 'tierEmailAddresses'],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailAddresses: updatedEmailAddress}]));
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailAddresses: updatedEmailAddress
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
     updatedEmailAddress.map(emailAddress => {
       const errors = validate({
         emailAddress
@@ -144,8 +146,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
     // TODO(RW-6933): Implement new institution admin UI with CT support.
-    this.setState(fp.set(['institution', 'tierEmailDomains'],
-        [{accessTierShortName: AccessTierShortNames.Registered, emailDomains: emailDomainsWithNoEmptyString}]));
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailDomains: emailDomainsWithNoEmptyString
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
 
     emailDomainsWithNoEmptyString.map(emailDomain => {
       const testAddress = 'test@' + emailDomain;
@@ -186,7 +191,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailList = emailInput.split(/[,\n]+/);
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      emailAddresses: emailList.map(email => email.trim()).filter((item) => item !== '')
+      emailAddresses: emailList.map(email => email.trim())
     };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
@@ -196,7 +201,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     const emailList = emailInput.split(/[,\n]+/);
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      emailDomains: emailList.map(email => email.trim()).filter((item) => item !== '')
+      emailDomains: emailList.map(email => email.trim())
     };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
