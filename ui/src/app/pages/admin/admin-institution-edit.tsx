@@ -8,13 +8,18 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
-import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
+import {
+  MembershipRequirements,
+  OrganizationTypeOptions
+} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {
-  getControlledTierConfig, getControlledTierEmailAddresses, getControlledTierEmailDomains,
+  getControlledTierConfig,
+  getControlledTierEmailAddresses,
+  getControlledTierEmailDomains,
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
   getRegisteredTierEmailDomains
@@ -30,7 +35,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {RegisteredTierBadge, ControlledTierBadge} from "../../components/icons";
+import {ControlledTierBadge, RegisteredTierBadge} from "../../components/icons";
 import Switch from "react-switch";
 
 const styles = reactStyles({
@@ -50,13 +55,14 @@ const styles = reactStyles({
     lineHeight: '17px',
     color: '#333F52',
     marginTop: '0.8rem',
-    marginBottom: '1.5rem'
+    marginBottom: '1rem'
   },
   tierConfigContainer: {
     width: '31rem',
-    height: '29rem',
+    height: '20rem',
     borderRadius: '0.31rem',
-    backgroundColor: 'rgba(33,111,180,0.1)'
+    backgroundColor: 'rgba(33,111,180,0.1)',
+    marginBottom: '1rem'
   }
 });
 
@@ -132,7 +138,6 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         return emailAddress !== '' || !!emailAddress;
       });
 
-    // TODO(RW-6933): Implement new institution admin UI with CT support.
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       emailAddresses: updatedEmailAddress
@@ -158,17 +163,16 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   // Filter out empty line or empty email addresses like <email1>,,<email2>
   // Confirm each email domain matches with regex
-  validateEmailDomains() {
+  validateRtEmailDomains() {
     const invalidEmailDomain = [];
     const emailDomains = getRegisteredTierEmailDomains(this.state.institution);
     const emailDomainsWithNoEmptyString =
       emailDomains.filter(emailDomain => emailDomain.trim() !== '');
-    // TODO(RW-6933): Implement new institution admin UI with CT support.
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       emailDomains: emailDomainsWithNoEmptyString
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
 
     emailDomainsWithNoEmptyString.map(emailDomain => {
       const testAddress = 'test@' + emailDomain;
@@ -189,8 +193,38 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     return;
   }
 
-  setTierRequirement(membershipRequirement) {
+  validateCtEmailDomains() {
+    const invalidEmailDomain = [];
+    const emailDomains = getControlledTierEmailDomains(this.state.institution);
+    const emailDomainsWithNoEmptyString =
+        emailDomains.filter(emailDomain => emailDomain.trim() !== '');
     // TODO(RW-6933): Implement new institution admin UI with CT support.
+    const ctTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailDomains: emailDomainsWithNoEmptyString
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+
+    emailDomainsWithNoEmptyString.map(emailDomain => {
+      const testAddress = 'test@' + emailDomain;
+      const errors = validate({
+        testAddress
+      }, {
+        testAddress: {email: true}
+      });
+      if (errors && errors.testAddress && errors.testAddress.length > 0) {
+        invalidEmailDomain.push(emailDomain);
+      }
+    });
+    this.setState({invalidEmailDomain: invalidEmailDomain.length > 0});
+    if (invalidEmailDomain.length > 0) {
+      const errMessage = 'Following Email Domains are not valid : ' + invalidEmailDomain.join(' , ');
+      this.setState({invalidEmailDomainsMsg: errMessage});
+    }
+    return;
+  }
+
+  setRegisteredTierRequirement(membershipRequirement) {
     const rtTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       membershipRequirement: membershipRequirement.value,
@@ -205,24 +239,66 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     this.setState(fp.set(['institution', 'duaTypeEnum'], duaType));
   }
 
-  setEmails(emailInput) {
-    const emailList = emailInput.split(/[,\n]+/);
-    const rtTierConfig = {
-      ...getRegisteredTierConfig(this.state.institution),
-      emailAddresses: emailList.map(email => email.trim())
+  setControlledTierRequirement(membershipRequirement) {
+    const ctTierConfig = {
+      ...getControlledTierConfig(this.state.institution),
+      membershipRequirement: membershipRequirement.value,
+      eraRequired: true
     };
-    // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
-  setDomains(emailInput) {
-    const emailList = emailInput.split(/[,\n]+/);
-    const rtTierConfig = {
-      ...getRegisteredTierConfig(this.state.institution),
-      emailDomains: emailList.map(email => email.trim())
+  setEnableControlledTier(enableCtAccess) {
+    console.log("setEnableControlledTier")
+    console.log(enableCtAccess)
+    console.log(getControlledTierConfig(this.state.institution))
+    // When switch from disable to enabled, set tier requirement from NOACCESS to DOMAINS with empty domain list.
+    const ctTierConfig = {
+      ...getControlledTierConfig(this.state.institution),
+      membershipRequirement: enableCtAccess === true ? InstitutionMembershipRequirement.ADDRESSES : InstitutionMembershipRequirement.NOACCESS,
+      eraRequired: true
     };
     // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+  }
+
+  setRegisteredTierEmails(emailInput) {
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailAddresses: this.formatEmail(emailInput)
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
+  }
+
+  setControlledTierEmails(emailInput) {
+    const ctTierConfig = {
+      ...getControlledTierConfig(this.state.institution),
+      emailAddresses: this.formatEmail(emailInput)
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+  }
+
+  setRegisteredTierDomains(emailInput) {
+    console.log("~~~~setRegisteredTierDomains")
+    console.log(emailInput)
+    console.log(this.formatEmail(emailInput))
+    const rtTierConfig = {
+      ...getRegisteredTierConfig(this.state.institution),
+      emailDomains: this.formatEmail(emailInput)
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
+  }
+
+  setControlledTierDomains(emailInput) {
+    const ctTierConfig = {
+      ...getControlledTierConfig(this.state.institution),
+      emailDomains: this.formatEmail(emailInput)
+    };
+    this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
+  }
+
+  formatEmail(emailInput) {
+    return emailInput.split(/[,\n]+/).map(email => email.trim())
   }
 
   // Check if the fields have not been edited
@@ -413,20 +489,20 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               />
             </FlexColumn>
         </FlexRow>
-        <SemiBoldHeader style={{fontSize: '18px', lineHeight: '22px', marginTop: '4rem'}}>
+        <SemiBoldHeader style={{fontSize: '18px', lineHeight: '22px', marginTop: '2rem'}}>
           Data access tiers
         </SemiBoldHeader>
         <hr style={{border: '1px solid #A9B6CB'}}/>
         <FlexRow style={{gap: '2rem'}}>
           <FlexRow style={styles.tierConfigContainer}>
             <FlexColumn>
-              <RegisteredTierBadge style={{marginTop: '0.6rem', marginLeft: '0.3rem'}}/>
+              <RegisteredTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>
             </FlexColumn>
             <FlexColumn style={{marginLeft: '0.4rem'}}>
               <label style={styles.tierLabel}>Registered tier access</label>
               <FlexRow style={{gap: '0.3rem'}}>
                 <Switch
-                    onChange={(v) => this.setTierRequirement(v)}
+                    onChange={(v) => this.setRegisteredTierRequirement(v)}
                     checked={false}
                     checkedIcon={true}
                     disabled={true}
@@ -435,74 +511,111 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                 />
                 eRA account required
               </FlexRow>
-              <label style={styles.label}>A user is considered part of this institution and eligible
-                to access registered tier data if:</label>
-              <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
-                        placeholder='Select type'
-                        options={MembershipRequirements}
-                        value={getRegisteredTierConfig(institution).membershipRequirement}
-                        onChange={(v) => this.setTierRequirement(v)}/>
-              {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
-              <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
-                <label style={styles.label}>Accepted Email Addresses</label>
-                <TextArea value={getRegisteredTierEmailAddresses(institution)
-                && getRegisteredTierEmailAddresses(institution).join(',\n')}
-                          data-test-id='emailAddressInput'
-                          onBlur={(v) => this.validateEmailAddresses()}
-                          onChange={(v) => this.setEmails(v)}/>
-                {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
-                  {this.state.invalidEmailAddressMsg}
-                </div>}
-              </FlexColumn>}
-              {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-              && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
-                <label style={styles.label}>Accepted Email Domains</label>
-                <TextArea value={getRegisteredTierEmailDomains(institution) &&
-                getRegisteredTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
-                          data-test-id='emailDomainInput'
-                          onChange={(v) => this.setDomains(v)}/>
-                {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
-                  {this.state.invalidEmailDomainsMsg}
-                </div>}
-              </FlexColumn>}
-              <p style={{color: colors.primary}}>
-                Enter one domain per line. <br/>
-                Note that subdomains are not included, so “university.edu” <br/>
-                matches alice@university.edu but not bob@med.university.edu.
-              </p>
+              <div style={{marginTop: '1rem'}}>
+                <label style={styles.label}>A user is considered part of this institution and eligible <br/>
+                  to access registered tier data if:</label>
+                <Dropdown style={{width: '16rem'}} data-test-id='rt-agreement-dropdown'
+                          placeholder='Select type'
+                          options={MembershipRequirements}
+                          value={getRegisteredTierConfig(institution).membershipRequirement}
+                          onChange={(v) => this.setRegisteredTierRequirement(v)}/>
+                {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
+                <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
+                  <label style={styles.label}>Accepted Email Addresses</label>
+                  <TextArea value={getRegisteredTierEmailAddresses(institution)
+                  && getRegisteredTierEmailAddresses(institution).join(',\n')}
+                            data-test-id='emailAddressInput'
+                            onBlur={(v) => this.validateEmailAddresses()}
+                            onChange={(v) => this.setRegisteredTierEmails(v)}/>
+                  {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
+                    {this.state.invalidEmailAddressMsg}
+                  </div>}
+                </FlexColumn>}
+                {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+                && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
+                  <label style={styles.label}>Accepted Email Domains</label>
+                  <TextArea value={getRegisteredTierEmailDomains(institution) &&
+                  getRegisteredTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateRtEmailDomains()}
+                            data-test-id='emailDomainInput'
+                            onChange={(v) => this.setRegisteredTierDomains(v)}/>
+                  {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
+                    {this.state.invalidEmailDomainsMsg}
+                  </div>}
+                </FlexColumn>}
+                <p style={{color: colors.primary, fontSize:'12px', lineHeight:'18px'}}>
+                  Enter one domain per line. <br/>
+                  Note that subdomains are not included, so “university.edu” <br/>
+                  matches alice@university.edu but not bob@med.university.edu.
+                </p>
+              </div>
             </FlexColumn>
           </FlexRow>
-          <FlexColumn style={styles.tierConfigContainer}>
-            <label style={styles.label}>Controlled tier access</label>
-            <Dropdown style={{width: '16rem'}} data-test-id='agreement-dropdown'
-                      placeholder='Select type'
-                      options={MembershipRequirements}
-                      value={getControlledTierConfig(institution).membershipRequirement}
-                      onChange={(v) => this.setTierRequirement(v)}/>
-            {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
-            <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
-              <label style={styles.label}>Accepted Email Addresses</label>
-              <TextArea value={getControlledTierEmailAddresses(institution)
-              && getControlledTierEmailAddresses(institution).join(',\n')}
-                        data-test-id='emailAddressInput'
-                        onBlur={(v) => this.validateEmailAddresses()}
-                        onChange={(v) => this.setEmails(v)}/>
-              {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
-                {this.state.invalidEmailAddressMsg}
+          <FlexRow style={styles.tierConfigContainer}>
+            <FlexColumn>
+              <ControlledTierBadge style={{marginTop: '0.6rem', marginLeft: '0.6rem'}}/>
+            </FlexColumn>
+            <FlexColumn style={{marginLeft: '0.4rem'}}>
+              <label style={styles.tierLabel}>Controlled tier access</label>
+              <FlexRow style={{gap: '0.3rem'}}>
+                <Switch
+                    onChange={(v) => this.setRegisteredTierRequirement(v)}
+                    checked={false}
+                    checkedIcon={true}
+                    disabled={true}
+                    height={18}
+                    width={33}
+                />
+                eRA account required
+                <Switch
+                    onChange={(v) => this.setEnableControlledTier(v)}
+                    checked={getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
+                    checkedIcon={true}
+                    disabled={false}
+                    height={18}
+                    width={33}
+                />
+                Controlled tier enabled
+              </FlexRow>
+              {getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS &&
+              <div style={{marginTop: '1rem'}}>
+                <label style={styles.label}>A user is considered part of this institution and eligible <br/>
+                  to access registered tier data if:</label>
+                <Dropdown style={{width: '16rem'}} data-test-id='ct-agreement-dropdown'
+                          placeholder='Select type'
+                          options={MembershipRequirements}
+                          value={getControlledTierConfig(institution).membershipRequirement}
+                          onChange={(v) => this.setControlledTierRequirement(v)}/>
+                {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
+                <FlexColumn data-test-id='emailAddress' style={{width: '16rem'}}>
+                  <label style={styles.label}>Accepted Email Addresses</label>
+                  <TextArea value={getControlledTierEmailAddresses(institution)
+                  && getControlledTierEmailAddresses(institution).join(',\n')}
+                            data-test-id='emailAddressInput'
+                            onBlur={(v) => this.validateEmailAddresses()}
+                            onChange={(v) => this.setControlledTierEmails(v)}/>
+                  {this.state.invalidEmailAddress && <div data-test-id='emailAddressError' style={{color: colors.danger}}>
+                    {this.state.invalidEmailAddressMsg}
+                  </div>}
+                </FlexColumn>}
+                {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
+                && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
+                  <label style={styles.label}>Accepted Email Domains</label>
+                  <TextArea value={getControlledTierEmailDomains(institution) &&
+                  getControlledTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateRtEmailDomains()}
+                            data-test-id='emailDomainInput'
+                            onChange={(v) => this.setControlledTierDomains(v)}/>
+                  {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
+                    {this.state.invalidEmailDomainsMsg}
+                  </div>}
+                </FlexColumn>}
+                <p style={{color: colors.primary, fontSize:'12px', lineHeight:'18px'}}>
+                  Enter one domain per line. <br/>
+                  Note that subdomains are not included, so “university.edu” <br/>
+                  matches alice@university.edu but not bob@med.university.edu.
+                </p>
               </div>}
-            </FlexColumn>}
-            {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
-            && <FlexColumn data-test-id='emailDomain' style={{width: '16rem'}}>
-              <label style={styles.label}>Accepted Email Domains</label>
-              <TextArea value={getControlledTierEmailDomains(institution) &&
-              getControlledTierEmailDomains(institution).join(',\n')} onBlur={(v) => this.validateEmailDomains()}
-                        data-test-id='emailDomainInput'
-                        onChange={(v) => this.setDomains(v)}/>
-              {this.state.invalidEmailDomain && <div data-test-id='emailDomainError' style={{color: colors.danger}}>
-                {this.state.invalidEmailDomainsMsg}
-              </div>}
-            </FlexColumn>}
-          </FlexColumn>
+            </FlexColumn>
+          </FlexRow>
         </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>

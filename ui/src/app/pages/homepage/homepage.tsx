@@ -176,6 +176,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
+        if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
+          this.setState({eraCommonsLinked: true});
+        }
       } catch (e) {
         this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
         this.setState({rasLoginGovLoading: false});
@@ -230,8 +233,10 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
+      console.log("~~~~~~");
+      console.log(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile));
       this.setState({
+
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
