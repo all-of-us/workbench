@@ -6,10 +6,11 @@ The Researcher Workbench publishes a number of subtables to the CDR for internal
 
 ##Adding a new denormalized table:
 First, make sure it needs to be a new table in the CDR. If not, probably best to store it elsewhere. If it does need to be part of the CDR/part of our published set of tables. If so, follow the following steps:
- 1) Write the shell script (See another shell script for an example)
- 2) Add the script to `build-cdr-indices.sh`
- 3) Add the ruby endpoint in `devstart.rb`
- 4) Add documentation of the shell script to the README
+1. Write the shell script (See another shell script for an example)
+2. Add the script to `build-cdr-indices.sh`
+3. Add the ruby endpoint in `devstart.rb`
+4. Add documentation of the shell script to the README
+
 
 ## Before building a brand new CDR indices we have to build pre-requisite prep tables 
 
