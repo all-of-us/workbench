@@ -3,6 +3,10 @@ package org.pmiops.workbench.ras;
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_2_IDENTIFIER;
+import static org.pmiops.workbench.ras.RasLinkConstants.ERA_COMMONS_PROVIDER_NAME;
+import static org.pmiops.workbench.ras.RasLinkConstants.FEDERATED_IDENTITIES;
+import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITIES;
+import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITY_USERID;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
@@ -15,13 +19,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -67,6 +75,24 @@ import org.springframework.stereotype.Service;
  * "preferred_username":"user1@Login.Gov",
  * "userId":"user1"
  * "email":"foo@gmail.com"
+ * "federated_identities":{
+ *    "identities":[
+ *    {
+ *       "login.gov":{
+ *          "firstname":"",
+ *          "lastname":"",
+ *          "userid":"12345",
+ *          "mail":"foo@gmail.com"
+ *       },
+ *       "era":{
+ *          "mail":"bar@email.com",
+ *          "firstname":"Y",
+ *          "lastname":"yyu",
+ *          "userid":"yyu_pi"
+ *       }
+ *    }
+ *  ]
+ *  }
  * }</pre>
  *
  * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
@@ -83,13 +109,16 @@ import org.springframework.stereotype.Service;
 public class RasLinkService {
   private static final Logger log = Logger.getLogger(RasLinkService.class.getName());
 
+  private final AccessModuleService accessModuleService;
   private final UserService userService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
   @Autowired
   public RasLinkService(
+      AccessModuleService accessModuleService,
       UserService userService,
       @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
+    this.accessModuleService = accessModuleService;
     this.userService = userService;
     this.rasOidcClientProvider = rasOidcClientProvider;
   }
@@ -116,12 +145,30 @@ public class RasLinkService {
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
-
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
     }
-    return userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+
+    // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
+    // information.
+    DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+    Optional<AccessModuleStatus> eRAModuleStatus =
+        accessModuleService.getClientAccessModuleStatus(user).stream()
+            .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
+            .findFirst();
+    if (eRAModuleStatus.isPresent()
+        && (eRAModuleStatus.get().getCompletionEpochMillis() != null
+            || eRAModuleStatus.get().getBypassEpochMillis() != null)) {
+      return user;
+    }
+    Optional<String> eRaUserId = getEraUserId(userInfoResponse);
+    if (eRaUserId.isPresent() && !eRaUserId.get().isEmpty()) {
+      return userService.updateRasLinkEraStatus(eRaUserId.get());
+    } else {
+      log.info(String.format("User does not have valid eRA %s", userInfoResponse));
+    }
+    return user;
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
@@ -142,6 +189,22 @@ public class RasLinkService {
               preferredUsername));
     }
     return preferredUsername;
+  }
+
+  /**
+   * Extracts user's eRA commons user id account from UserInfo response if has. See class javadoc
+   * for an example of eRA identity.
+   *
+   * <p>Returns empty if eRA is invalid or not linked.
+   */
+  public static Optional<String> getEraUserId(JsonNode userInfo) {
+    return Optional.of(userInfo)
+        .map(u -> u.get(FEDERATED_IDENTITIES))
+        .map(u -> u.get(IDENTITIES))
+        .map(u -> u.get(0))
+        .map(u -> u.get(ERA_COMMONS_PROVIDER_NAME))
+        .map(u -> u.get(IDENTITY_USERID))
+        .map(JsonNode::asText);
   }
 
   /** Decode an encoded url */
