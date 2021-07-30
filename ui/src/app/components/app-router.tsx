@@ -8,7 +8,7 @@ import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
-import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, Switch, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 const {Fragment} = React;
 
@@ -69,7 +69,7 @@ export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{chi
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-export const AppRoute = ({path, guards = [], exact=true, children}): React.ReactElement => {
+export const AppRoute = ({path, guards = [], exact= true, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return <Route exact={exact} path={path}>
@@ -77,8 +77,8 @@ export const AppRoute = ({path, guards = [], exact=true, children}): React.React
         ? <Redirect to={redirectPath}/>
         : (children)
     }
-  </Route>
-}
+  </Route>;
+};
 
 export const ProtectedRoutes = (
   {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {

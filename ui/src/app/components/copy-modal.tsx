@@ -19,6 +19,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/navigation-wrapper';
 import {toDisplay} from 'app/utils/resources';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';

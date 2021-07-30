@@ -31,6 +31,7 @@ import {
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/navigation-wrapper';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {InstitutionalRole, Profile} from 'generated/fetch';

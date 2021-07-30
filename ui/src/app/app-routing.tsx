@@ -1,12 +1,10 @@
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 import {Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
-
-import {Redirect} from 'react-router';
-import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 
 import 'rxjs/Rx';
 import {
@@ -195,7 +193,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
     // TODO angular2react - this actually isn't working right now, just renders an empty page
     // but this bug is also on test right now so it isn't a regression
-    console.log("isCookiesEnabled useEffect");
+    console.log('isCookiesEnabled useEffect');
     setIsCookiesEnabled(cookiesEnabled());
 
     if (isCookiesEnabled) {
@@ -476,11 +474,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }).unsubscribe;
   }, []);
 
-  console.log("Rendering AppRouting. AuthLoaded: " + authLoaded + " IsUserDisabled: " + isUserDisabled);
+  console.log('Rendering AppRouting. AuthLoaded: ' + authLoaded + ' IsUserDisabled: ' + isUserDisabled);
   useEffect(() => {
-    console.log("Mounting AppRouting (ish)");
+    console.log('Mounting AppRouting (ish)');
 
-    return () => console.log("Unmounting AppRouting");
+    return () => console.log('Unmounting AppRouting');
   }, []);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>

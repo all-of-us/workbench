@@ -2,6 +2,7 @@ import {Button} from 'app/components/buttons';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/navigation-wrapper';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';

@@ -52,6 +52,7 @@ import {
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/navigation-wrapper';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';

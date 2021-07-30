@@ -22,6 +22,7 @@ import {
   withCurrentWorkspace, withQueryParams,
   withUserProfile
 } from 'app/utils';
+import {withNavigation} from 'app/utils/navigation-wrapper';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
 import {withNavigation} from 'app/utils/with-navigation-hoc';

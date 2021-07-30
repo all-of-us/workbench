@@ -3,6 +3,7 @@ import {AppRoute, withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect} from 'react';
 import {useRouteMatch} from 'react-router-dom';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
@@ -21,7 +22,6 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
-import {useEffect} from "react";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -46,11 +46,11 @@ const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEd
 export const WorkspaceRoutes = React.memo(() => {
   const { path } = useRouteMatch();
 
-  console.log("Rendering WorkspaceRoutes");
+  console.log('Rendering WorkspaceRoutes');
   useEffect(() => {
-    console.log("Mounting WorkspaceRoutes (ish)");
+    console.log('Mounting WorkspaceRoutes (ish)');
 
-    return () => console.log("Unmounting WorkspaceRoutes");
+    return () => console.log('Unmounting WorkspaceRoutes');
   }, []);
   return <React.Fragment>
     <AppRoute path={`${path}/about`}>

@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect} from 'react';
 import {
   AppRoute,
   Guard,
@@ -30,7 +31,6 @@ import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {BreadcrumbType} from './utils/navigation';
 import {profileStore} from './utils/stores';
-import {useEffect} from "react";
 
 const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
@@ -68,11 +68,11 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
  *  We should be able to refactor this once we are driving the entire app through React router.
  */
 export const SignedInRoutes = React.memo(() => {
-  console.log("Rendering SignedInRoutes");
+  console.log('Rendering SignedInRoutes');
   useEffect(() => {
-    console.log("Mounting SignedInRoutes (ish)");
+    console.log('Mounting SignedInRoutes (ish)');
 
-    return () => console.log("Unmounting SignedInRoutes");
+    return () => console.log('Unmounting SignedInRoutes');
   }, []);
   return <React.Fragment>
     <ProtectedRoutes guards={[expiredGuard]}>
