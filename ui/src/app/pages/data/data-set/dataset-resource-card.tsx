@@ -12,7 +12,6 @@ import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';

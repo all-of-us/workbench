@@ -10,7 +10,6 @@ import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-mod
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {DataSet, WorkspaceResource} from 'generated/fetch';

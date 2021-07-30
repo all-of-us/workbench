@@ -31,7 +31,6 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
 import {navigationGuardStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';

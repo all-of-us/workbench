@@ -16,7 +16,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {useNavigation} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems

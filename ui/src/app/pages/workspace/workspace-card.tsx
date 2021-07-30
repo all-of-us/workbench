@@ -18,7 +18,6 @@ import {displayDate, reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, NavigationProps, useNavigation} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/navigation-wrapper';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
