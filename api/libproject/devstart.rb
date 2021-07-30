@@ -874,7 +874,7 @@ end
 
 Common.register_command({
   :invocation => "build-cdr-indices",
-  :description => "Kicks of build for CDR indices",
+  :description => "Kicks off build for CDR indices",
   :fn => ->(*args) { build_cdr_indices("build-cdr-indices", *args) }
 })
 
