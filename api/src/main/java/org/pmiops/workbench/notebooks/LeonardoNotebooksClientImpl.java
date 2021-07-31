@@ -293,8 +293,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     return notebooksRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
   }
+
   @Override
-  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
+      throws WorkbenchException {
     DisksApi disksApi = diskApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
@@ -305,7 +307,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException {
+  public void deletePersistentDisk(String googleProject, String diskName)
+      throws WorkbenchException {
     DisksApi disksApi = diskApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
@@ -315,18 +318,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize) throws WorkbenchException{
+  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
+      throws WorkbenchException {
     DisksApi disksApi = diskApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          disksApi.updateDisk(googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
+          disksApi.updateDisk(
+              googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
           return null;
         });
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(String googleProject,
-      boolean includeDeleted) {
+  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+      String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
     return leonardoRetryHandler.run(
         (context) -> disksApi.listDisksByProject(googleProject, null, includeDeleted));

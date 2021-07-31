@@ -26,7 +26,7 @@ public class NotebooksConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
   public static final String SERVICE_RUNTIMES_API = "svcRuntimesApi";
 
-  public static final String USER_DISKS_API =  "userDisksApi";
+  public static final String USER_DISKS_API = "userDisksApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";

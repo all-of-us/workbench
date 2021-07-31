@@ -59,7 +59,8 @@ public interface LeonardoNotebooksClient {
   /** Deletes a notebook runtime */
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
 
-  void updatePersistentDisk(String googleProject, String diskName, Integer diskSize) throws WorkbenchException;
+  void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
+      throws WorkbenchException;
 
   List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
       String googleProject, boolean includeDeleted);
