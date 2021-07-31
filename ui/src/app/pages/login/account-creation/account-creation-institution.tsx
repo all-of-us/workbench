@@ -28,8 +28,8 @@ import {
 } from 'app/utils/institutions';
 import {
   CheckEmailResponse,
-  DuaType,
   InstitutionalRole,
+  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
@@ -253,7 +253,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     // Finally, we distinguish between the two types of DUAs in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
-    if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
+    if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
       // Institution has signed Restricted agreement and the email is not in allowed emails list
       return <RestrictedDuaEmailMismatchErrorMessage/>;
     } else {
