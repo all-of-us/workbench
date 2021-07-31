@@ -34,17 +34,17 @@ import java.util.logging.Logger;
 @RestController
 public class DiskController implements DiskApiDelegate{
   private static final Logger log = Logger.getLogger(DiskController.class.getName());
-  private static final String DISK_NAME_PREFIX = "all-of-us-pd-";
-  private static final String runtimeCreatedDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceAuthService workspaceAuthService;
   private final LeonardoMapper leonardoMapper;
 
   @Autowired
-  public DiskController(LeonardoNotebooksClient leonardoNotebooksClient, Provider<DbUser> userProvider, WorkspaceDao workspaceDao, LeonardoMapper leonardoMapper){
+  public DiskController(LeonardoNotebooksClient leonardoNotebooksClient, Provider<DbUser> userProvider, WorkspaceAuthService workspaceAuthService, WorkspaceDao workspaceDao, LeonardoMapper leonardoMapper){
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
+    this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.leonardoMapper = leonardoMapper;
   }
@@ -63,8 +63,6 @@ public class DiskController implements DiskApiDelegate{
       LeonardoGetPersistentDiskResponse response;
       List<LeonardoListPersistentDiskResponse> responseList =
           leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
-
-      log.info("LeonardoListPersistentDiskResponse list"+responseList.size());
       responseList.sort(
           new Comparator<LeonardoListPersistentDiskResponse>() {
             @Override
@@ -91,8 +89,6 @@ public class DiskController implements DiskApiDelegate{
         disk.diskType(DiskType.fromValue(response.getDiskType().toString()));
         disk.blockSize(response.getBlockSize());
         disk.size(response.getSize());
-//            disk.status(DiskStatus.valueOf(response.getStatus().toString()));
-
         return ResponseEntity.ok(disk);
 
       }else{
@@ -108,14 +104,20 @@ public class DiskController implements DiskApiDelegate{
   @Override
   public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-//        String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
-//        workspaceAuthService.enforceWorkspaceAccessLevel(
-//                workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+        String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+        workspaceAuthService.enforceWorkspaceAccessLevel(
+                workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    Disk disk = getDisk(workspaceNamespace).getBody();
+    if(disk != null){
+      leonardoNotebooksClient.deletePersistentDisk(
+          dbWorkspace.getGoogleProject(), disk.getName());
+    }else{
+      log.warning(
+          String.format(
+              "No existing persistent disk could be deleted in workspace \n%s",
+              workspaceNamespace));
+    }
 
-    ResponseEntity<Disk> responseEntity = getDisk(workspaceNamespace);
-
-    leonardoNotebooksClient.deletePersistentDisk(
-        dbWorkspace.getGoogleProject(), responseEntity.getBody().getName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -123,7 +125,6 @@ public class DiskController implements DiskApiDelegate{
   public ResponseEntity<EmptyResponse> updateDisk(String workspaceNamespace,
       String diskName,
       Integer diskSize) {
-
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     leonardoNotebooksClient.updatePersistentDisk(dbWorkspace.getGoogleProject(), diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());

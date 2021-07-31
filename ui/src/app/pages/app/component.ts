@@ -182,7 +182,7 @@ export class AppComponent implements OnInit, OnDestroy {
         }
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-        diskStore.set({workspaceNamespace: workspace.namespace, disk: undefined});
+        diskStore.set({workspaceNamespace: workspace.namespace, persistentDisk: undefined});
         this.pollAborter.abort();
         this.pollAborter = new AbortController();
         try {
