@@ -6,7 +6,6 @@ import * as React from 'react';
 import {Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import 'rxjs/Rx';
 import {
   AppRoute,
   AppRouter,
@@ -31,6 +30,7 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
+import 'rxjs/Rx';
 import 'rxjs/Rx';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
