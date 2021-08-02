@@ -495,19 +495,19 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute path='/cookie-policy'>
+              <AppRoute exact path='/cookie-policy'>
                 <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
               </AppRoute>
-              <AppRoute path='/login'>
+              <AppRoute exact path='/login'>
                 <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
               </AppRoute>
-              <AppRoute path='/session-expired'>
+              <AppRoute exact path='/session-expired'>
                 <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
               </AppRoute>
-              <AppRoute path='/sign-in-again'>
+              <AppRoute exact path='/sign-in-again'>
                 <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
               </AppRoute>
-              <AppRoute path='/user-disabled'>
+              <AppRoute exact path='/user-disabled'>
                 <UserDisabledPage routeData={{title: 'Disabled'}}/>
               </AppRoute>
               <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
@@ -523,7 +523,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                     />
                   </AppRoute>
               </ProtectedRoutes>
-            <AppRoute path="*">
+            <AppRoute exact path="*">
               <SignedOutNotFoundPage routeData={{title: 'Not Found'}}/>
             </AppRoute>
           </Switch>
