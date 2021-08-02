@@ -435,11 +435,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         currentWorkspaceStore.next(workspace);
         runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
         pollAborter.abort();
-        setPollAborter(new AbortController());
+        const newPollAborter = new AbortController();
+        setPollAborter(newPollAborter);
         try {
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: workspace.namespace,
-            pollAbortSignal: pollAborter.signal,
+            pollAbortSignal: newPollAborter.signal,
             maxCreateCount: 0,
             maxDeleteCount: 0,
             maxResumeCount: 0
