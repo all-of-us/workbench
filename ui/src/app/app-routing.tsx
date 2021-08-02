@@ -6,7 +6,13 @@ import * as React from 'react';
 import {Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import {AppRoute, AppRouter, Guard, ProtectedRoutes, withRouteData} from 'app/components/app-router';
+import {
+  AppRoute,
+  AppRouter,
+  Guard,
+  ProtectedRoutes,
+  withRouteData
+} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
 import {SessionExpired} from 'app/pages/session-expired';
@@ -24,6 +30,7 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
+import 'rxjs/Rx';
 import 'rxjs/Rx';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
@@ -52,7 +59,7 @@ const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const signInGuard: Guard = {
   allowed: (): boolean => {
-    console.log(authStore.get().isSignedIn);
+    // console.log(authStore.get().isSignedIn);
     return authStore.get().isSignedIn;
   },
   redirectPath: '/login'
@@ -146,7 +153,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [testAccessTokenOverride, setTestAccessTokenOverride] = useState(undefined);
+  const [, setTestAccessTokenOverride] = useState(undefined);
   const [signInMounted, setSignInMounted] = useState(false);
   const [doSignOut, setDoSignOut] = useState(false);
   const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
@@ -186,6 +193,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
     // TODO angular2react - this actually isn't working right now, just renders an empty page
     // but this bug is also on test right now so it isn't a regression
+    console.log('isCookiesEnabled useEffect');
     setIsCookiesEnabled(cookiesEnabled());
 
     if (isCookiesEnabled) {
@@ -328,7 +336,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     });
     bindApiClients(conf);
     notebooksBindApiClients(conf);
-    console.log("API Clients bound");
+    console.log('API Clients bound');
 
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
@@ -466,7 +474,12 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }).unsubscribe;
   }, []);
 
-  console.log('Rendering AppRouting: ', authLoaded, isUserDisabled);
+  console.log('Rendering AppRouting. AuthLoaded: ' + authLoaded + ' IsUserDisabled: ' + isUserDisabled);
+  useEffect(() => {
+    console.log('Mounting AppRouting (ish)');
+
+    return () => console.log('Unmounting AppRouting');
+  }, []);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
@@ -480,38 +493,33 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute
-                  path='/cookie-policy'
-                  component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
-              />
-              <AppRoute
-                  path='/login'
-                  component={() => <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/session-expired'
-                  component={() => <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/sign-in-again'
-                  component={() => <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>}
-              />
-              <AppRoute
-                  path='/user-disabled'
-                  component={() => <UserDisabledPage routeData={{title: 'Disabled'}}/>}
-              />
+              <AppRoute path='/cookie-policy'>
+                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+              </AppRoute>
+              <AppRoute path='/login'>
+                <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/session-expired'>
+                <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/sign-in-again'>
+                <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              </AppRoute>
+              <AppRoute path='/user-disabled'>
+                <UserDisabledPage routeData={{title: 'Disabled'}}/>
+              </AppRoute>
               <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
                   <AppRoute
                       path=''
-                      exact={false}
-                      component={() => <SignedInPage
+                      exact={false}>
+                    <SignedInPage
                         intermediaryRoute={true}
                         routeData={{}}
                         // TODO angular2react - I think I might be able to just sign out and ignore this field
                         subscribeToInactivitySignOut={subscribeToInactivitySignOut}
                         signOut={signOut}
-                      />}
-                  />
+                    />
+                  </AppRoute>
               </ProtectedRoutes>
           </Switch>
       </AppRouter>
