@@ -33,6 +33,8 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   const params = useParams();
   const query = useQuery();
 
+  console.log(params);
+
   useEffect(() => {
     if (!intermediaryRoute) {
       routeConfigDataStore.next(routeData);
@@ -44,8 +46,24 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   }, [routeData]);
 
   useEffect(() => {
-    if (!intermediaryRoute) {
-      // console.log(params);
+    if (intermediaryRoute) {
+      // TODO angular2react: this is also pretty hacky but here goes
+      // 1. WorkspaceWrapper needs the <WorkspaceWrapperPage> to set the workspace namespace and ID in order to render
+      // 2. Flipping `intermediaryRoute` to false will fix that issue but another one surfaces
+      // 3. If the intermediary route (WorkspaceWrapper) AND the final route both set values to the store, the values
+      // in the intermediary route will overwrite the ones from the final route because of the order of resolving
+      // useEffect (children first)
+      //
+      // As a result, urlParam values specified in the final route will be lost from the store. This applies to any
+      // page within WorkspaceWrapper that specifies additional urlParam values that are not just `ns` and `wsid` which
+      // are defined in the WorkspaceWrapper route. One specific example is the `nbName` parameter in read only notebooks.
+      //
+      // As a workaround, I changed the behavior of `intermediaryRoute` to only upsert its values instad of overwriting.
+      // This does fix the issue but the definition and behavior of `intermediaryRoute` is getting a bit hard to understand
+      // so we should revisit.
+      urlParamsStore.next({...urlParamsStore.getValue(), ...params});
+    } else {
+      console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);

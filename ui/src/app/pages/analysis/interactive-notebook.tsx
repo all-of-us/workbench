@@ -150,6 +150,8 @@ export const InteractiveNotebook = fp.flow(
     componentDidMount(): void {
       const {hideSpinner} = this.props;
       hideSpinner();
+
+      console.log(this.props.urlParams);
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
@@ -159,6 +161,7 @@ export const InteractiveNotebook = fp.flow(
         return;
       }
 
+      console.log(ns, wsid, nbName);
       if (!ns || !wsid || !nbName) {
         return;
       }
