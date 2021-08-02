@@ -78,7 +78,6 @@ mkdir $TEMP_FILE_DIR
 if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
 then
   for file in ${ALL_FILES[@]}; do
-    # Check to see if table exists
     tableName=${file%.*}
     loadCSVFile $file $tableName
   done
