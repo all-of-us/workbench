@@ -1,6 +1,5 @@
 import { ensureDir, writeFile } from 'fs-extra';
 import { Page } from 'puppeteer';
-import { logger } from 'libs/logger';
 
 /**
  * Save Html source to a file in logs/html directory. Useful for test failure troubleshooting.
@@ -14,10 +13,10 @@ export const savePageToFile = async (page: Page, fileName: string): Promise<bool
   return new Promise((resolve, reject) => {
     writeFile(`${dir}/${fileName}`, htmlContent, 'utf8', (error) => {
       if (error) {
-        logger.error(`Failed to save html file. ERROR: ${error}`);
+        console.error(`Failed to save html file. ERROR: ${error}`);
         reject(false);
       } else {
-        logger.info(`Saved html file: ${fileName}`);
+        console.log(`Saved html file: ${fileName}`);
         resolve(true);
       }
     });
@@ -33,7 +32,7 @@ export const takeScreenshot = async (page: Page, fileName: string): Promise<void
   const dir = 'logs/screenshot';
   await ensureDir(dir);
   await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
-  logger.info(`Saved screenshot file: ${fileName}`);
+  console.log(`Saved screenshot file: ${fileName}`);
 };
 
 /**
@@ -45,5 +44,5 @@ export const savePageToPdf = async (page: Page, fileName: string): Promise<void>
   const dir = 'logs/screenshot';
   await ensureDir(dir);
   await page.pdf({ format: 'A4', path: `${dir}/${fileName}` });
-  logger.info(`Saved pdf file: ${fileName}`);
+  console.log(`Saved pdf file: ${fileName}`);
 };

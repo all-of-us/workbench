@@ -1,3 +1,5 @@
+import {Page} from "puppeteer";
+
 export interface ICredentialConfig {
   USER_NAME: string;
   PASSWORD: string;

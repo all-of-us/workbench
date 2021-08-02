@@ -32,10 +32,8 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
-  const navigationPromise = page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
   await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
-  await navigationPromise;
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.

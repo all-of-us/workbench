@@ -10,12 +10,8 @@ import {
 } from './page-events-helper';
 import { logger } from './logger';
 import { defaultLaunchOptions } from './page-options';
-import fs from 'fs-extra';
 import { signInWithAccessToken } from 'utils/test-utils';
-import { savePageToFile, takeScreenshot } from 'utils/save-file-utils';
 
-const failScreenshotDir = 'logs/screenshot';
-const failHtmlDir = 'logs/html';
 const { CIRCLE_BUILD_NUM } = process.env;
 const userAgent =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) ' +
@@ -80,11 +76,6 @@ export const withPageTest = (launchOpts?: LaunchOptions) => async (
         logger.error(err.message);
         logger.error(err.stack);
       }
-      // Take screenshot and save html contents immediately after failure.
-      await fs.ensureDir(failScreenshotDir);
-      await fs.ensureDir(failHtmlDir);
-      await takeScreenshot(incognitoPage, `${__SPEC_NAME__}.png`);
-      await savePageToFile(incognitoPage, `${__SPEC_NAME__}.html`);
       throw err;
     } finally {
       await incognitoPage

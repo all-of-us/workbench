@@ -4,8 +4,11 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { signInWithAccessToken, signOut } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { waitForDocumentTitle } from 'utils/waits-utils';
+import {Page} from "puppeteer";
 
 describe('Sidebar Navigation', () => {
+  let page: Page = global.page;
+
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

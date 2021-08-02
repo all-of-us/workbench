@@ -13,13 +13,13 @@ module.exports = {
     node: true,
     jest: true,
     es6: true,
-    browser: true
+    browser: true,
+    commonjs: true,
   },
   globals: {
     page: true,
     browser: true,
     context: true,
-    jestPuppeteer: true
   },
   parserOptions: {
     project: './tsconfig.json',

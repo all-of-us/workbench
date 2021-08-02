@@ -1,12 +1,11 @@
-// const NodeEnvironment = require('jest-environment-node');
-const PuppeteerEnvironment = require('jest-environment-puppeteer');
+const NodeEnvironment = require('jest-environment-node');
+const puppeteer = require("puppeteer");
 const fs = require('fs-extra');
 const path = require('path');
-
+const util = require('./utils/save-file-utils');
 require('jest-circus');
 
-// TODO Replace PuppeteerEnvironment with NodeEnvironment: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
-class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
+export class PuppeteerCustomEnvironment extends NodeEnvironment {
   screenshotDir = 'logs/screenshot';
   htmlDir = 'logs/html';
   failedTestSuites = {};
@@ -17,11 +16,17 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     this.global.__SPEC_NAME__ = path.parse(this.testPath).name;
   }
 
-  async setup() {
+  async setup(): Promise<void> {
     await super.setup();
+    this.global.browser = await puppeteer.launch({
+      headless: false,
+      slowMo: 100
+    })
+    this.global.page = await this.global.browser.newPage()
   }
 
-  async teardown() {
+  async teardown(): Promise<void> {
+    await this.global.browser.close();
     await super.teardown();
   }
 
@@ -29,7 +34,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     return super.getVmContext();
   }
 
-  getNames(parent) {
+  getNames(parent): string[] {
     if (!parent || parent.name === 'ROOT_DESCRIBE_BLOCK') {
       return [];
     }
@@ -52,45 +57,18 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     if (['hook_failure', 'test_fn_failure'].includes(name)) {
       const describeBlockName = this.global.__TEST_NAMES__[0];
       this.failedTestSuites[describeBlockName] = true;
-      // TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
       await fs.ensureDir(this.screenshotDir);
       await fs.ensureDir(this.htmlDir);
       const screenshotFile = `${this.global.__SPEC_NAME__}.png`;
       const htmlFile = `${this.global.__SPEC_NAME__}.html`;
       const [activePage] = (await this.global.browser.pages()).slice(-1);
-      await takeScreenshot(activePage, screenshotFile);
-      await savePageToFile(activePage, htmlFile);
+      await util.takeScreenshot(activePage, screenshotFile);
+      await util.savePageToFile(activePage, htmlFile);
     }
     if (super.handleTestEvent) {
       super.handleTestEvent(event, state);
     }
   }
 }
-
-// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
-const takeScreenshot = async (page, fileName) => {
-  const dir = 'logs/screenshot';
-  await fs.ensureDir(dir);
-  await page.screenshot({ type: 'png', path: `${dir}/${fileName}`, fullPage: true });
-  console.info(`Saved screenshot file: ${fileName}`);
-};
-
-// TODO Remove: https://precisionmedicineinitiative.atlassian.net/browse/RW-6967
-const savePageToFile = async (page, fileName) => {
-  const dir = 'logs/html';
-  await fs.ensureDir(dir);
-  const htmlContent = await page.content();
-  return new Promise((resolve, reject) => {
-    fs.writeFile(`${dir}/${fileName}`, htmlContent, 'utf8', (error) => {
-      if (error) {
-        console.error('Failed to save html file. ' + error);
-        reject(false);
-      } else {
-        console.info(`Saved html file: ${fileName}`);
-        resolve(true);
-      }
-    });
-  });
-};
 
 module.exports = PuppeteerCustomEnvironment;

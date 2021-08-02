@@ -7,5 +7,4 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await page.setRequestInterception(false);
-  await jestPuppeteer.resetBrowser();
 });
