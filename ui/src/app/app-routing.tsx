@@ -45,6 +45,7 @@ import {
   urlParamsStore
 } from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
+import {SignedOutNotFound} from "app/pages/not-found";
 
 declare const gapi: any;
 
@@ -71,6 +72,7 @@ const disabledGuard = (userDisabled: boolean): Guard => ({
 });
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
+const SignedOutNotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(SignedOutNotFound);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
@@ -521,6 +523,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
                     />
                   </AppRoute>
               </ProtectedRoutes>
+            <AppRoute path="*">
+              <SignedOutNotFoundPage routeData={{title: 'Not Found'}}/>
+            </AppRoute>
           </Switch>
       </AppRouter>
     }

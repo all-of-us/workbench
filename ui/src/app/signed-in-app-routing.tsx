@@ -31,6 +31,7 @@ import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {BreadcrumbType} from './utils/navigation';
 import {profileStore} from './utils/stores';
+import {NotFound} from "app/pages/not-found";
 
 const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
@@ -50,6 +51,7 @@ const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRou
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
+const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
@@ -154,5 +156,8 @@ export const SignedInRoutes = React.memo(() => {
         <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
       </AppRoute>
     </ProtectedRoutes>
+    <AppRoute path="*">
+      <NotFoundPage routeData={{title: 'Not Found'}}/>
+    </AppRoute>
   </React.Fragment>;
 });
