@@ -10,7 +10,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -77,18 +76,12 @@ public class DiskController implements DiskApiDelegate {
       }
 
       if (response != null) {
-        Disk disk = new Disk();
-        disk.name(response.getName());
-        disk.diskType(DiskType.fromValue(response.getDiskType().toString()));
-        disk.blockSize(response.getBlockSize());
-        disk.size(response.getSize());
-        return ResponseEntity.ok(disk);
+        return ResponseEntity.ok(leonardoMapper.toApiDisk(response));
 
       } else {
         return ResponseEntity.ok(null);
       }
 
-      //            return ResponseEntity.ok(leonardoMapper.toApiRuntime(response));
     } catch (NotFoundException e) {
       return (ResponseEntity<Disk>) ResponseEntity.notFound();
     }
