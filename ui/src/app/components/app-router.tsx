@@ -8,7 +8,7 @@ import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
-import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, Switch, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 const {Fragment} = React;
 
@@ -45,14 +45,14 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      console.log(params);
+      // console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      console.log(query);
+      // console.log(query);
       queryParamsStore.next(query);
     }
   }, [query]);
@@ -69,17 +69,14 @@ export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{chi
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-export const AppRoute = ({path, data = {}, guards = [], component: Component, exact = true}): React.ReactElement => {
-  const routeParams = useParams();
-  const routeHistory = useHistory();
+export const AppRoute = ({path, guards = [], exact= true, children}): React.ReactElement => {
+  const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
-  return <Route exact={exact} path={path} render={
-    () => {
-      const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-      return redirectPath
+  return <Route exact={exact} path={path}>
+    {redirectPath
         ? <Redirect to={redirectPath}/>
-        : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
-    }}>
+        : (children)
+    }
   </Route>;
 };
 
