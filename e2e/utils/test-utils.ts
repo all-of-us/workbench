@@ -27,6 +27,7 @@ export async function signOut(page: Page): Promise<void> {
 export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
+  console.log("Printing access token ", token);
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);
 

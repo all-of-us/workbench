@@ -230,6 +230,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         // invoking this function.
         if (token) {
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+          location.replace('/');
         } else {
           window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
         }
@@ -297,8 +298,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   };
 
   const currentAccessToken = () => {
-    if (testAccessTokenOverride) {
-      return testAccessTokenOverride;
+    const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+
+    // TODO angular2react - this used to be a setState() variable but I had to switch it to read from
+    // localStorage because testAccessTokenOverride would not be set yet in the first run of this and
+    // configure the API clients incorrectly. this should fix the issue but I want to think more about
+    // what the correct solution is. Getting rid of the state variable and only reading from localStorage
+    // could be the way to go.
+    if (tokenOverride) {
+      return tokenOverride;
     } else if (!gapi.auth2) {
       return null;
     } else {
@@ -312,6 +320,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   };
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
+    // TODO angular2react - is this the right place for this?
+    console.log(currentAccessToken());
+    const conf = new Configuration({
+      basePath: getApiBaseUrl(),
+      accessToken: () => currentAccessToken()
+    });
+    bindApiClients(conf);
+    notebooksBindApiClients(conf);
+    console.log("API Clients bound");
+
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
@@ -331,13 +349,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }
     }
 
-    // TODO angular2react - is this the right place for this?
-    const conf = new Configuration({
-      basePath: getApiBaseUrl(),
-      accessToken: () => currentAccessToken()
-    });
-    bindApiClients(conf);
-    notebooksBindApiClients(conf);
+
 
     makeAuth2(config);
   };
