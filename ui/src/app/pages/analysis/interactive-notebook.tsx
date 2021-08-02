@@ -148,19 +148,31 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidMount(): void {
-      const {urlParams: {ns, wsid, nbName}, hideSpinner} = this.props;
+      const {hideSpinner} = this.props;
       hideSpinner();
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      const {urlParams: {ns, wsid, nbName}} = this.props;
+
+      if (prevProps.urlParams.ns === ns && prevProps.urlParams.wsid === wsid && prevProps.urlParams.nbName === nbName) {
+        return;
+      }
+
+      if (!ns || !wsid || !nbName) {
+        return;
+      }
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
       }).catch((e) => {
         let previewErrorMode = PreviewErrorMode.ERROR;
         let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +
-            'please try reloading or opening the notebook in edit or playground mode.';
+          'please try reloading or opening the notebook in edit or playground mode.';
         if (e.status === 412) {
           previewErrorMode = PreviewErrorMode.INVALID;
           previewErrorMessage = 'Notebook is too large to display in preview mode, please use edit mode or ' +
-              'playground mode to view this notebook.';
+            'playground mode to view this notebook.';
         }
         this.setState({previewErrorMode, previewErrorMessage});
       });
