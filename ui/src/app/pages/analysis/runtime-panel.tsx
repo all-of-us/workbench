@@ -196,9 +196,9 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         You’re about to delete your cloud analysis environment.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
-        Any in-memory state and local file modifications will be erased.&nbsp;
-        Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
-        environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
+        Any in-memory state and local file modifications will be erased.
+        Data stored in workspace buckets is never affected by changes to your cloud
+        environment. You’ll still be able to view notebooks in this workspace, but
         editing and running notebooks will require you to create a new cloud environment.
       </p>
     </div>
