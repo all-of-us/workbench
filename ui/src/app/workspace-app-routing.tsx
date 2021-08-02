@@ -22,6 +22,7 @@ import {DatasetPage} from './pages/data/data-set/dataset-page';
 import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
+import {NotFound} from "app/pages/not-found";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -35,6 +36,7 @@ const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
 const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
 const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
+const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
@@ -216,6 +218,9 @@ export const WorkspaceRoutes = React.memo(() => {
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSetActions'
       }}/>
+    </AppRoute>
+    <AppRoute path="*">
+      <NotFoundPage routeData={{title: 'Not Found'}}/>
     </AppRoute>
   </React.Fragment>;
 });
