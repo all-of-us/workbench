@@ -14,7 +14,7 @@ echo "Dumping tables to csv from $BUCKET"
 # Note tables larger than 1 G need to be dumped into more than one file.
 # Naming scheme is table_name.*.csv.gz
 
-tables=(cb_survey_attribute cb_survey_version cb_criteria_relationship cb_criteria cb_criteria_attribute ds_linking ds_data_dictionary domain_info survey_module cb_criteria_ancestor cb_person cb_data_filter)
+tables=(cb_survey_attribute cb_survey_version cb_criteria_relationship cb_criteria cb_criteria_attribute ds_linking ds_data_dictionary domain_info survey_module cb_criteria_ancestor cb_person cb_data_filter cb_criteria_menu cb_menu)
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"

@@ -11,13 +11,10 @@ export DATA_BROWSER=$4      # data browser flag
 BUCKET="all-of-us-workbench-private-cloudsql"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
-CRITERIA_MENU="cb_criteria_menu.csv"
 CB_SURVEY_VERSION="cb_survey_version.csv"
 PREP_SURVEY="prep_survey.csv"
-NON_PREP_FILES=($CRITERIA_MENU
-           $CB_SURVEY_VERSION)
-PREP_FILES=($PREP_SURVEY)
-ALL_FILES=("${NON_PREP_FILES[@]}" "${PREP_FILES[@]}")
+ALL_FILES=($CB_SURVEY_VERSION
+            $PREP_SURVEY)
 DEPENDENT_TABLES=("activity_summary"
             "concept"
             "concept_ancestor"
@@ -77,24 +74,13 @@ fi
 rm -rf $TEMP_FILE_DIR
 mkdir $TEMP_FILE_DIR
 
-# Process all tables with full validation
+# Process all tables
 if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
 then
   for file in ${ALL_FILES[@]}; do
-    case $file in
-      $CRITERIA_MENU)
-        echo "Processing $file"
-        gzip $TEMP_FILE_DIR/$file
-        # Copy it back to bucket
-        gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CDR_VERSION/
-      ;;
-    $CB_SURVEY_VERSION | \
-    $PREP_SURVEY)
-      # Check to see if table exists
-      tableName=${file%.*}
-      loadCSVFile $file $tableName
-    ;;
-    esac
+    # Check to see if table exists
+    tableName=${file%.*}
+    loadCSVFile $file $tableName
   done
 fi
 
