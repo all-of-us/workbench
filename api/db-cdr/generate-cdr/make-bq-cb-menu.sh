@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This generates the big query de-normalized tables for dataset builder.
+# This generates the cb menu for cohort builder.
 
 set -ex
 
