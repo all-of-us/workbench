@@ -153,7 +153,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [testAccessTokenOverride, setTestAccessTokenOverride] = useState(undefined);
+  const [, setTestAccessTokenOverride] = useState(undefined);
   const [signInMounted, setSignInMounted] = useState(false);
   const [doSignOut, setDoSignOut] = useState(false);
   const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
@@ -336,7 +336,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     });
     bindApiClients(conf);
     notebooksBindApiClients(conf);
-    console.log("API Clients bound");
+    console.log('API Clients bound');
 
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
