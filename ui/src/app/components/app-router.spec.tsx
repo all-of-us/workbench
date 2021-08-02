@@ -73,19 +73,19 @@ const otherAlwaysTrueGuard: Guard = {
 
 const makeAppRouter = () => {
   return <AppRouter>
-    <AppRoute path='/unprotected-route' component={() => <TestComponent text={'Unprotected Route'}/>}/>
-    <AppRoute path='/punting' component={() => <TestComponent text={'Punting'}/>}/>
+    <AppRoute path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
+    <AppRoute path='/punting'><TestComponent text={'Punting'}/></AppRoute>
     <ProtectedRoutes guards={[alwaysFalseGuard]}>
-      <AppRoute path='/unreachable-path' component={() => <TestComponent text={'Unreachable Path'}/>}/>
+      <AppRoute path='/unreachable-path'><TestComponent text={'Unreachable Path'}/></AppRoute>
     </ProtectedRoutes>
     <ProtectedRoutes guards={[alwaysTrueGuard]}>
-      <AppRoute path='/protected-route' component={() => <TestComponent text={'Protected Route'}/>}/>
-      <AppRoute path='/other-protected-route' component={() => <TestComponent text={'Other Protected Route'}/>}/>
+      <AppRoute path='/protected-route'><TestComponent text={'Protected Route'}/></AppRoute>
+      <AppRoute path='/other-protected-route'><TestComponent text={'Other Protected Route'}/></AppRoute>
       <ProtectedRoutes guards={[otherAlwaysTrueGuard]}>
-        <AppRoute path='/nested-protected-route' component={() => <TestComponent text={'Nested Protected Route'}/>}/>
+        <AppRoute path='/nested-protected-route'><TestComponent text={'Nested Protected Route'}/></AppRoute>
       </ProtectedRoutes>
       <ProtectedRoutes guards={[alwaysFalseGuard]}>
-        <AppRoute path='/nested-unreachable-path' component={() => <TestComponent text={'Unreachable Path'}/>}/>
+        <AppRoute path='/nested-unreachable-path'><TestComponent text={'Unreachable Path'}/></AppRoute>
       </ProtectedRoutes>
     </ProtectedRoutes>
   </AppRouter>
