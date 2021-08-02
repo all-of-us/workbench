@@ -56,6 +56,16 @@ then
   fi
 
   echo ""
+  echo 'Making menu table'
+  if ./generate-cdr/make-bq-cb-menu.sh $BQ_PROJECT $BQ_DATASET
+  then
+      echo "Making menu table complete"
+  else
+      echo "Making menu table failed!"
+      exit 1
+  fi
+
+  echo ""
   echo "Making denormalized review tables"
   if ./generate-cdr/make-bq-denormalized-review.sh $BQ_PROJECT $BQ_DATASET
   then
