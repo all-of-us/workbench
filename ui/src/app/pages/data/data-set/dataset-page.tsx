@@ -522,7 +522,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     async componentDidMount() {
       this.props.hideSpinner();
-      console.log("dataset-page mounting");
+      console.log('dataset-page mounting');
 
       // TODO angular2react - refactor
       if (this.props.workspace.namespace && this.props.workspace.id && this.props.cdrVersionTiersResponse) {
@@ -548,7 +548,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (this.props.workspace.namespace && this.props.workspace.id) {
         const resourcesPromise = this.loadResources();
 
-        console.log("dataSetId: ", this.props.urlParams.dataSetId);
+        console.log('dataSetId: ', this.props.urlParams.dataSetId);
         if (this.props.urlParams.dataSetId) {
           console.log('running dataset update');
 
@@ -609,12 +609,15 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       }
 
       console.log('Checking props for resource loading');
-      if (hasNewValidProps(this.props, prevProps, [(props) => props.workspace.namespace, (props) => props.workspace.id, (props) => props.urlParams.dataSetId])) {
+      if (hasNewValidProps(this.props, prevProps, [
+        (props) => props.workspace.namespace,
+        (props) => props.workspace.id,
+        (props) => props.urlParams.dataSetId])) {
         console.log('running workspace update');
 
         const resourcesPromise = this.loadResources();
 
-        console.log("dataSetId: ", this.props.urlParams.dataSetId);
+        console.log('dataSetId: ', this.props.urlParams.dataSetId);
         if (hasNewValidProps(this.props, prevProps, [(props) => props.urlParams.dataSetId])) {
           console.log('running dataset update');
 

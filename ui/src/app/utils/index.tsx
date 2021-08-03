@@ -377,7 +377,7 @@ export function sliceByHalfLength(obj) {
 
 export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
   for (const fieldGetter of fieldsToCompare) {
-    console.log("prop compare: ", fieldGetter(currProps), fieldGetter(prevProps));
+    console.log('prop compare: ', fieldGetter(currProps), fieldGetter(prevProps));
     if (!fieldGetter(currProps)) {
       return false;
     }

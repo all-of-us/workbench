@@ -88,7 +88,7 @@ export const CohortActions = fp.flow(
     }
 
     componentDidMount(): void {
-      console.log("Mounting CohortActions");
+      console.log('Mounting CohortActions');
       this.props.hideSpinner();
 
     }
@@ -98,7 +98,9 @@ export const CohortActions = fp.flow(
         return;
       }
 
-      if (this.props.workspace.namespace === prevProps.workspace.namespace && this.props.workspace.id === prevProps.workspace.id && this.props.urlParams.cid === prevProps.urlParams.cid) {
+      if (this.props.workspace.namespace === prevProps.workspace.namespace
+        && this.props.workspace.id === prevProps.workspace.id
+        && this.props.urlParams.cid === prevProps.urlParams.cid) {
         return;
       }
 
@@ -137,7 +139,7 @@ export const CohortActions = fp.flow(
     }
 
     render() {
-      console.log("Rendering CohortActions");
+      console.log('Rendering CohortActions');
 
       const {cohort, cohortLoading} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
