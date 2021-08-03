@@ -9,7 +9,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -114,7 +113,7 @@ public class DiskController implements DiskApiDelegate {
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace)
-      throws org.pmiops.workbench.exceptions.NotFoundException {
+      throws NotFoundException {
     return workspaceDao
         .getByNamespace(workspaceNamespace)
         .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
