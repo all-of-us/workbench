@@ -1,6 +1,6 @@
-import {Guard} from "../components/app-router";
-import {authStore, profileStore} from "../utils/stores";
-import {hasRegisteredAccess} from "../utils/access-tiers";
+import {Guard} from 'app/components/app-router';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {authStore, profileStore} from 'app/utils/stores';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {

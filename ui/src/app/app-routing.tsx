@@ -9,12 +9,11 @@ import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import {
   AppRoute,
   AppRouter,
-  Guard,
-  ProtectedRoutes,
   withRouteData
 } from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
+import {NotFound} from 'app/pages/not-found';
 import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
@@ -34,6 +33,7 @@ import 'rxjs/Rx';
 import 'rxjs/Rx';
 import {NotificationModal} from './components/modals';
 import {SignIn} from './pages/login/sign-in';
+import {disabledGuard, signInGuard} from './routing/guards';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
 import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from './utils/analytics';
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from './utils/cookies';
@@ -45,8 +45,6 @@ import {
   urlParamsStore
 } from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
-import {NotFound} from "app/pages/not-found";
-import {disabledGuard, signInGuard} from "./routing/guards";
 
 declare const gapi: any;
 

@@ -1,10 +1,9 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
+import {Redirect, Switch} from 'react-router-dom';
 import {
   AppRoute,
-  Guard,
-  ProtectedRoutes,
   withFullHeight,
   withRouteData
 } from './components/app-router';
@@ -28,12 +27,8 @@ import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
 import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
-import {hasRegisteredAccess} from './utils/access-tiers';
+import {expiredGuard, registrationGuard} from './routing/guards';
 import {BreadcrumbType} from './utils/navigation';
-import {profileStore} from './utils/stores';
-import {NotFound} from "app/pages/not-found";
-import {expiredGuard, registrationGuard} from "./routing/guards";
-import {Redirect, Switch} from "react-router-dom";
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -143,7 +138,7 @@ export const SignedInRoutes = React.memo(() => {
     <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]}>
       <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
     </AppRoute>
-    <AppRoute exact path="*">
+    <AppRoute exact path='*'>
       <Redirect to={'/not-found'}/>
     </AppRoute>
   </Switch>;
