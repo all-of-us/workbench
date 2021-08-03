@@ -70,6 +70,7 @@ function getTierConfig(institution: Institution, accessTier: string): Institutio
   const defaultTierConfig : InstitutionTierConfig = {
     accessTierShortName: accessTier,
         membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+        eraRequired: true,
         emailAddresses: [],
         emailDomains: []
   }
@@ -117,4 +118,40 @@ export function getTierEmailDomains(institution: Institution, accessTier: string
     return tierConfig.emailDomains;
   }
   return [];
+}
+
+// Update User register tier email addresses and return the new tier configs.
+export function updateRtEmailAddresses(institution: Institution, emailAddresses: Array<string>): Array<InstitutionTierConfig> {
+  const rtTierConfig = {
+    ...getRegisteredTierConfig(institution),
+    emailAddresses: emailAddresses
+  };
+  return [rtTierConfig, getControlledTierConfig(institution)];
+}
+
+// Update User controlled tier email addresses and return the new tier configs.
+export function updateCtEmailAddresses(institution: Institution, emailAddresses: Array<string>): Array<InstitutionTierConfig> {
+  const ctConfig = {
+    ...getControlledTierConfig(institution),
+    emailAddresses: emailAddresses
+  };
+  return [getRegisteredTierConfig(institution), ctConfig];
+}
+
+// Update User register tier email domains and return the new tier configs.
+export function updateRtEmailDomains(institution: Institution, emailDomains: Array<string>): Array<InstitutionTierConfig> {
+  const rtTierConfig = {
+    ...getRegisteredTierConfig(institution),
+    emailDomains: emailDomains
+  };
+  return [rtTierConfig, getControlledTierConfig(institution)];
+}
+
+// Update User controlled tier email domains and return the new tier configs.
+export function updateCtEmailDomains(institution: Institution, emailDomains: Array<string>): Array<InstitutionTierConfig> {
+  const ctConfig = {
+    ...getControlledTierConfig(institution),
+    emailDomains: emailDomains
+  };
+  return [getRegisteredTierConfig(institution), ctConfig];
 }
