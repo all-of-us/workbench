@@ -113,7 +113,7 @@
     "enableFireCloudV2Billing" : false,
     "enableAccessModuleRewrite" : false,
     "enableStandardSourceDomains": false,
-    "enablePersistentDisk": false
+    "enablePersistentDisk": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

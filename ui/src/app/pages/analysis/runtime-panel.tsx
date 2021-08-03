@@ -1000,7 +1000,6 @@ export const RuntimePanel = fp.flow(
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const pdReduced = pdExists && selectedDiskSize < diskSize;
-  const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
