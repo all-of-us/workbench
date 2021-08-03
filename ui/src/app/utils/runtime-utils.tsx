@@ -8,7 +8,7 @@ import {
   diskStore,
   markCompoundRuntimeOperationCompleted,
   registerCompoundRuntimeOperation,
-  runtimeStore,
+  runtimeStore, serverConfigStore,
   useStore
 } from 'app/utils/stores';
 
@@ -279,11 +279,12 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, keepRuntimePD: boolean, keepUnattachedPD: boolean) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
-
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
-  useDisk(currentWorkspaceNamespace);
-
+  if (enablePD) {
+    useDisk(currentWorkspaceNamespace);
+  }
 
   useEffect(() => {
     // Additional status changes can be put here
@@ -316,8 +317,12 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   const setStatusRequest = async(req, keepRuntimePD, keepUnattachedPD ) => {
     await switchCase(req,
       [RuntimeStatusRequest.Delete, () => {
-        return !keepUnattachedPD ? disksApi().deleteDisk(currentWorkspaceNamespace) :
-        runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepRuntimePD);
+        if (enablePD) {
+          return !keepUnattachedPD ? disksApi().deleteDisk(currentWorkspaceNamespace) :
+              runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepRuntimePD);
+        } else {
+          return runtimeApi().deleteRuntime(currentWorkspaceNamespace, false);
+        }
       }],
       [RuntimeStatusRequest.Start, () => {
         return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
@@ -342,10 +347,13 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
-  useDisk(currentWorkspaceNamespace);
+  if (enablePD) {
+    useDisk(currentWorkspaceNamespace);
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -363,7 +371,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
               await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
                 signal: aborter.signal
               });
-            } else {
+            } else if (enablePD) {
               await disksApi().deleteDisk(currentWorkspaceNamespace, {
                 signal: aborter.signal
               });
@@ -381,10 +389,10 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
-            } else if (runtime.status === RuntimeStatus.Deleted) {
+            } else if (runtime.status === RuntimeStatus.Deleted && enablePD) {
               if (persistentDisk) {
                 await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
-                    requestedRuntime.gceWithPdConfig.persistentDisk.size);
+                  requestedRuntime.gceWithPdConfig.persistentDisk.size);
                 // await runtimeApi().createRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
                 await LeoRuntimeInitializer.initialize({
                   workspaceNamespace,
@@ -469,10 +477,12 @@ export const useDisk = (currentWorkspaceNamespace) => {
 export const withRuntimeStore = () => WrappedComponent => {
   return (props) => {
     const value = useStore(runtimeStore);
-
+    const enablePD = serverConfigStore.get().config.enablePersistentDisk;
     // Ensure that a runtime gets initialized, if it hasn't already been.
     useRuntime(value.workspaceNamespace);
-    useDisk(value.workspaceNamespace);
+    if (enablePD) {
+      useDisk(value.workspaceNamespace);
+    }
 
     return <WrappedComponent {...props} runtimeStore={value} />;
   };

@@ -4196,6 +4196,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show separate source and standard domains
+      enablePersistentDisk:
+        type: boolean
+        default: false
+        description: Whether to persistent disk as the notebook storage
       rasHost:
         type: string
         description: The RAS base host name.

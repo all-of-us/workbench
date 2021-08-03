@@ -42,6 +42,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableGenomicExtraction(config.featureFlags.enableGenomicExtraction)
             .enableAccessModuleRewrite(config.featureFlags.enableAccessModuleRewrite)
             .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)
+            .enablePersistentDisk(config.featureFlags.enablePersistentDisk)
             .rasHost(config.ras.host)
             .rasClientId(config.ras.clientId)
             .runtimeImages(

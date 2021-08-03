@@ -183,9 +183,8 @@ export interface Props {
 }
 
 // Exported for testing only.
-export const ConfirmDelete = ({onCancel, onConfirm, pdExists}) => {
+export const ConfirmDelete = ({onCancel, onConfirm}) => {
   const [deleting, setDeleting] = useState(false);
-  const [selectedKeepPD, setKeepPD] = useState(true);
   return <Fragment>
     <div style={styles.confirmWarning}>
       <div style={{display: 'flex', justifyContent: 'center'}}>
@@ -202,10 +201,6 @@ export const ConfirmDelete = ({onCancel, onConfirm, pdExists}) => {
         environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
         editing and running notebooks will require you to create a new cloud environment.
       </p>
-      {pdExists ? <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 4}}>
-        <label > <input type= 'radio' checked={selectedKeepPD === true} onChange={() => setKeepPD(true)}/>Keep PD</label><br/>
-        <label > <input type= 'radio' checked={selectedKeepPD === false} onChange={() => setKeepPD(false)}/>Not Keep PD</label>
-      </p> : null}
     </div>
     <FlexRow style={{justifyContent: 'flex-end'}}>
       <Button
@@ -222,7 +217,7 @@ export const ConfirmDelete = ({onCancel, onConfirm, pdExists}) => {
         onClick={async() => {
           setDeleting(true);
           try {
-            await onConfirm(selectedKeepPD);
+            await onConfirm();
           } catch (err) {
             setDeleting(false);
             throw err;
@@ -943,7 +938,8 @@ export const RuntimePanel = fp.flow(
 
   const {hasWgsData: allowDataproc} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasWgsData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
-  const {persistentDisk} = useStore(diskStore);
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
+  const {persistentDisk} = enablePD ? useStore(diskStore) : null;
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
   if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
     currentRuntime = applyPresetOverride(currentRuntime);
@@ -1038,23 +1034,25 @@ export const RuntimePanel = fp.flow(
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
-    // The logic here is tricky to be compatible for old runtime without PD
-    if (!pdExists || pdExists && pdReduced) {
+    // The logic here is tricky to be compatible
+    if (enablePD && (!pdExists || pdExists && pdReduced)) {
       return {
         gceWithPdConfig: {
-          bootDiskSize: 50,
-          machineType: runtime.machine.name,
-          persistentDisk: {
-            name: '',
-            size: runtime.diskSize,
-            diskType: DiskType.Standard,
-            labels: {}
+          gceWithPdConfig: {
+            bootDiskSize: 50,
+            machineType: runtime.machine.name,
+            persistentDisk: {
+              name: '',
+              size: runtime.diskSize,
+              diskType: DiskType.Standard,
+              labels: {}
 
+            }
           }
         }
       };
     } else {
-      if (!runtimeExists) {
+      if (enablePD && !runtimeExists) {
         return {
           gceWithPdConfig: {
             bootDiskSize: 50,
@@ -1254,14 +1252,14 @@ export const RuntimePanel = fp.flow(
               </FlexRow>
             </Fragment>
       ],
-      [PanelContent.Delete, () => (!runtimeExists && pdExists) ?
+      [PanelContent.Delete, () => (enablePD && !runtimeExists && pdExists) ?
           <ConfirmDeleteUnattachedPD
               onConfirm={async(value) => {
                 await setRuntimeStatus(RuntimeStatusRequest.Delete, true, value);
                 onClose();
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
-          /> : (runtimeExists && pdExists) ?
+          /> : (enablePD && runtimeExists && pdExists) ?
               <ConfirmDeleteRuntimeWithPD
                   onConfirm={async(value) => {
                     await setRuntimeStatus(RuntimeStatusRequest.Delete, value, true);
@@ -1275,7 +1273,6 @@ export const RuntimePanel = fp.flow(
               onClose();
             }}
             onCancel={() => setPanelContent(PanelContent.Customize)}
-            pdExists={pdExists}
           />],
       [PanelContent.Customize, () => <Fragment>
             <div style={styles.controlSection}>
@@ -1306,7 +1303,7 @@ export const RuntimePanel = fp.flow(
                   onChange={(value) => setSelectedMachine(value)}
                   validMachineTypes={validMainMachineTypes}
                   machineType={machineName}/>
-                {(runtimeExists && !pdExists) ?
+                {(!enablePD && runtimeExists && !pdExists) ?
                     <DiskSizeSelector
                         idPrefix='runtime'
                         selectedDiskSize={selectedDiskSize}
@@ -1339,7 +1336,7 @@ export const RuntimePanel = fp.flow(
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              {!(runtimeExists && !pdExists) ?
+              {enablePD && !(runtimeExists && !pdExists) ?
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
@@ -1368,7 +1365,7 @@ export const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {!runtimeExists && pdExists ?
+        {enablePD && !runtimeExists && pdExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(

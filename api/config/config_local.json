@@ -112,7 +112,8 @@
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
     "enableAccessModuleRewrite" : false,
-    "enableStandardSourceDomains": false
+    "enableStandardSourceDomains": false,
+    "enablePersistentDisk": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
