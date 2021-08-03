@@ -6,29 +6,29 @@ import {
   AppRoute,
   withFullHeight,
   withRouteData
-} from './components/app-router';
-import {withRoutingSpinner} from './components/with-routing-spinner';
-import {AccessRenewal} from './pages/access/access-renewal';
-import {AdminBanner} from './pages/admin/admin-banner';
-import {AdminInstitution} from './pages/admin/admin-institution';
-import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
-import {AdminNotebookView} from './pages/admin/admin-notebook-view';
-import {AdminReviewWorkspace} from './pages/admin/admin-review-workspace';
-import {AdminUser} from './pages/admin/admin-user';
-import {AdminUsers} from './pages/admin/admin-users';
-import {AdminWorkspace} from './pages/admin/admin-workspace';
-import {WorkspaceAudit} from './pages/admin/admin-workspace-audit';
-import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
-import {UserAudit} from './pages/admin/user-audit';
-import {Homepage} from './pages/homepage/homepage';
-import {DataUserCodeOfConduct} from './pages/profile/data-user-code-of-conduct';
-import {ProfileComponent} from './pages/profile/profile-component';
-import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibrary} from './pages/workspace/workspace-library';
-import {WorkspaceList} from './pages/workspace/workspace-list';
-import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
-import {expiredGuard, registrationGuard} from './routing/guards';
-import {BreadcrumbType} from './utils/navigation';
+} from '../components/app-router';
+import {withRoutingSpinner} from '../components/with-routing-spinner';
+import {AccessRenewal} from '../pages/access/access-renewal';
+import {AdminBanner} from '../pages/admin/admin-banner';
+import {AdminInstitution} from '../pages/admin/admin-institution';
+import {AdminInstitutionEdit} from '../pages/admin/admin-institution-edit';
+import {AdminNotebookView} from '../pages/admin/admin-notebook-view';
+import {AdminReviewWorkspace} from '../pages/admin/admin-review-workspace';
+import {AdminUser} from '../pages/admin/admin-user';
+import {AdminUsers} from '../pages/admin/admin-users';
+import {AdminWorkspace} from '../pages/admin/admin-workspace';
+import {WorkspaceAudit} from '../pages/admin/admin-workspace-audit';
+import {AdminWorkspaceSearch} from '../pages/admin/admin-workspace-search';
+import {UserAudit} from '../pages/admin/user-audit';
+import {Homepage} from '../pages/homepage/homepage';
+import {DataUserCodeOfConduct} from '../pages/profile/data-user-code-of-conduct';
+import {ProfileComponent} from '../pages/profile/profile-component';
+import {WorkspaceEdit, WorkspaceEditMode} from '../pages/workspace/workspace-edit';
+import {WorkspaceLibrary} from '../pages/workspace/workspace-library';
+import {WorkspaceList} from '../pages/workspace/workspace-list';
+import {WorkspaceWrapper} from '../pages/workspace/workspace-wrapper';
+import {expiredGuard, registrationGuard} from './guards';
+import {BreadcrumbType} from '../utils/navigation';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);

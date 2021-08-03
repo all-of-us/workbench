@@ -7,7 +7,7 @@ import {ZendeskWidget} from 'app/components/zendesk-widget';
 import {INACTIVITY_CONFIG, InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
 import {NavBar} from 'app/pages/signed-in/nav-bar';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
-import {SignedInRoutes} from 'app/signed-in-app-routing';
+import {SignedInRoutes} from 'app/routing/signed-in-app-routing';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';

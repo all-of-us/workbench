@@ -31,20 +31,20 @@ import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import 'rxjs/Rx';
-import {NotificationModal} from './components/modals';
-import {SignIn} from './pages/login/sign-in';
-import {disabledGuard, signInGuard} from './routing/guards';
-import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
-import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from './utils/analytics';
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from './utils/cookies';
-import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
+import {NotificationModal} from '../components/modals';
+import {SignIn} from '../pages/login/sign-in';
+import {disabledGuard, signInGuard} from './guards';
+import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from '../services/swagger-fetch-clients';
+import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from '../utils/analytics';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from '../utils/cookies';
+import {ExceededActionCountError, LeoRuntimeInitializer} from '../utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   signInStore,
   urlParamsStore
-} from './utils/navigation';
-import {buildPageTitleForEnvironment} from './utils/title';
+} from '../utils/navigation';
+import {buildPageTitleForEnvironment} from '../utils/title';
 
 declare const gapi: any;
 

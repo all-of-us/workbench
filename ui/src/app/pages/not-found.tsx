@@ -9,7 +9,7 @@ import * as React from 'react';
 export const NotFound = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  return<PublicLayout>
+  return <PublicLayout>
     <BoldHeader>Page Not Found</BoldHeader>
     <section style={{color: colors.primary, fontSize: '18px', marginTop: '.5rem'}}>
       Please try navigating to the <RouteLink path='/'>home page</RouteLink>.
