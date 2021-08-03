@@ -250,8 +250,8 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
     document.title = buildPageTitleForEnvironment();
-    routeDataStore.subscribe(({title}) => {
-      document.title = buildPageTitleForEnvironment(title);
+    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+      document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
     });
   }, []);
 
