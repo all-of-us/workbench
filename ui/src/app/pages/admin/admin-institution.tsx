@@ -131,7 +131,7 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
           <Column field='organizationTypeEnum' header='Institution Type'
                   body={this.renderOrganizationType} bodyStyle={styles.text}
                   headerStyle={styles.header}/>
-          <Column field='duaTypeEnum' header='Data access tiers' body={this.renderAccessTiers}
+          <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
                   bodyStyle={styles.text} headerStyle={styles.header}/>
           <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
                   headerStyle={{...styles.header, width: '5rem'}}/>
