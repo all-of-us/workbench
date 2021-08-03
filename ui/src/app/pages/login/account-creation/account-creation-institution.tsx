@@ -28,8 +28,8 @@ import {
 } from 'app/utils/institutions';
 import {
   CheckEmailResponse,
-  DuaType,
   InstitutionalRole,
+  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
@@ -223,10 +223,10 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,
-    profile: {
-      contactEmail,
-      verifiedInstitutionalAffiliation: {institutionShortName}
-    }} = this.state;
+      profile: {
+        contactEmail,
+        verifiedInstitutionalAffiliation: {institutionShortName}
+      }} = this.state;
 
     // No error if we haven't entered an email or chosen an institution.
     if (!institutionShortName || isBlank(contactEmail)) {
@@ -253,7 +253,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     // Finally, we distinguish between the two types of DUAs in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
-    if (selectedInstitutionObj.duaTypeEnum === DuaType.RESTRICTED) {
+    if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
       // Institution has signed Restricted agreement and the email is not in allowed emails list
       return <RestrictedDuaEmailMismatchErrorMessage/>;
     } else {
@@ -410,7 +410,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 <Dropdown data-test-id='role-dropdown'
                           style={styles.wideInputSize}
                           placeholder={getRoleOptions(institutions, institutionShortName) ?
-                            '' : 'First select an institution above'}
+                              '' : 'First select an institution above'}
                           options={getRoleOptions(institutions, institutionShortName)}
                           value={institutionalRoleEnum}
                           onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>

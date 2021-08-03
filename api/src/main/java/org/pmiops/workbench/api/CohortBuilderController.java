@@ -1,21 +1,11 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
-import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
@@ -24,7 +14,6 @@ import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuListResponse;
 import org.pmiops.workbench.model.CriteriaRequest;
-import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
@@ -33,8 +22,6 @@ import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SurveyCount;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -52,18 +39,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
 
-  private final ElasticSearchService elasticSearchService;
   private final Provider<WorkbenchConfig> configProvider;
   private final CohortBuilderService cohortBuilderService;
   private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   CohortBuilderController(
-      ElasticSearchService elasticSearchService,
       Provider<WorkbenchConfig> configProvider,
       CohortBuilderService cohortBuilderService,
       WorkspaceAuthService workspaceAuthService) {
-    this.elasticSearchService = elasticSearchService;
     this.configProvider = configProvider;
     this.cohortBuilderService = cohortBuilderService;
     this.workspaceAuthService = workspaceAuthService;
@@ -126,20 +110,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<Long> countParticipants(
       String workspaceNamespace, String workspaceId, SearchRequest request) {
-    DbCdrVersion cdrVersion =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER)
-            .getCdrVersion();
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend
-        && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
-        && !isApproximate(request)) {
-      try {
-        return ResponseEntity.ok(elasticSearchService.count(request));
-      } catch (IOException e) {
-        log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
-      }
-    }
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(cohortBuilderService.countParticipants(request));
   }
 
@@ -210,28 +182,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String genderOrSex,
       String age,
       SearchRequest request) {
-    DbCdrVersion cdrVersion =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER)
-            .getCdrVersion();
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     GenderOrSexType genderOrSexType = validateGenderOrSexType(genderOrSex);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
-    }
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend
-        && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
-        && !isApproximate(request)) {
-      try {
-        return ResponseEntity.ok(
-            response.items(
-                elasticSearchService.demoChartInfo(
-                    new ParticipantCriteria(request, genderOrSexType, ageType))));
-      } catch (IOException e) {
-        log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
-      }
     }
     return ResponseEntity.ok(
         response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
@@ -338,22 +295,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .items(
                 cohortBuilderService.findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
                     surveyConceptId, questionConceptId, answerConceptId)));
-  }
-
-  /**
-   * This method helps determine what request can only be approximated by elasticsearch and must
-   * fallback to the BQ implementation.
-   */
-  protected boolean isApproximate(SearchRequest request) {
-    List<SearchGroup> allGroups =
-        ImmutableList.copyOf(Iterables.concat(request.getIncludes(), request.getExcludes()));
-    List<SearchParameter> allParams =
-        allGroups.stream()
-            .flatMap(sg -> sg.getItems().stream())
-            .flatMap(sgi -> sgi.getSearchParameters().stream())
-            .collect(Collectors.toList());
-    return allGroups.stream().anyMatch(SearchGroup::getTemporal)
-        || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
   private void validateDomain(String domain) {

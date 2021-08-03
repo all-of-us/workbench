@@ -146,6 +146,9 @@ public interface UserService {
 
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 
+  /** Link eRA commons account in RW using RAS as source of truth. */
+  DbUser updateRasLinkEraStatus(String eRACommonsUsername);
+
   /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
   DbUser confirmProfile(DbUser u);
 

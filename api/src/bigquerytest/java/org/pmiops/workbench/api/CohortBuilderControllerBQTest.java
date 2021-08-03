@@ -38,10 +38,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
@@ -86,7 +83,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
-    CloudStorageClientImpl.class,
     CohortQueryBuilder.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
@@ -111,8 +107,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private CohortBuilderController controller;
 
   @Autowired private BigQueryService bigQueryService;
-
-  @Autowired private CloudStorageClient cloudStorageClient;
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
@@ -178,18 +172,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @BeforeEach
   public void setUp() {
     WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
-    testConfig.elasticsearch.enableElasticsearchBackend = false;
 
     when(configProvider.get()).thenReturn(testConfig);
 
     when(firecloudService.isUserMemberOfGroupWithCache(anyString(), anyString())).thenReturn(true);
 
-    ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
-
     controller =
-        new CohortBuilderController(
-            elasticSearchService, configProvider, cohortBuilderService, workspaceAuthService);
+        new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);

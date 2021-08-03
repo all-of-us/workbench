@@ -2,9 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,67 +20,6 @@ import org.springframework.data.repository.query.Param;
  */
 public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
-  /**
-   * This query returns the parents in addition to the criteria ancestors for each leave in order to
-   * allow the client to determine the relationship between the returned Criteria. Since we use
-   * the @Id annotation in the entity, JPA will treat those rows with the given id as a unique
-   * element. For example if you have 3 rows where this @Id annotated field is the same, JPA will
-   * use the first result elements and just duplicate them.
-   *
-   * <p>select statement returns:
-   *
-   * <p>id: 111, concept_id : 111
-   *
-   * <p>id: 111, concept_id : 222
-   *
-   * <p>id: 111, concept_id : 333
-   *
-   * <p>The result will be 3 rows retrieved by JPA:
-   *
-   * <p>id: 111 concept_id: 111
-   *
-   * <p>id: 111 concept_id: 111
-   *
-   * <p>id: 111 concept_id: 111
-   *
-   * <p>So to keep this from happening we use the descendant_id from cb_criteria_ancestor as the
-   * unique id. Please do not use this method if you need proper cb_criteria ids, we don't in the
-   * current use case.
-   */
-  @Query(
-      value =
-          "select distinct c.concept_id as conceptId, c2.id as parentId from ( "
-              + "select distinct ca.descendant_id as concept_id,path "
-              + "from cb_criteria_ancestor ca "
-              + "   join (select a.* "
-              + "           from cb_criteria a "
-              + "           join (select concat('%.', id, '%') as path "
-              + "                   from cb_criteria "
-              + "                  where domain_id = :domain "
-              + "                    and type = :type "
-              + "                    and is_group = :group "
-              + "                    and is_selectable = 1 "
-              + "                    and concept_id in (:parentConceptIds)) b "
-              + "             on (a.path like b.path) "
-              + "          where domain_id = :domain "
-              + "            and is_group = 0  "
-              + "            and is_selectable = 1 "
-              + "            and type = 'RXNORM') c "
-              + "    on (ca.ancestor_id = c.concept_id) "
-              + "union "
-              + "select a.concept_id,a.path "
-              + "  from cb_criteria a "
-              + "  where a.domain_id = :domain "
-              + "   and a.type = :type "
-              + "   and a.concept_id in (:parentConceptIds)) c "
-              + "join (select id from cb_criteria where concept_id in (:parentConceptIds)) c2 on c.path like concat('%', c2.id, '%') ",
-      nativeQuery = true)
-  List<DbCriteriaLookup> findCriteriaAncestors(
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("group") Boolean group,
-      @Param("parentConceptIds") Set<String> parentConceptIds);
-
   @Query(
       value =
           "select c from DbCriteria c where standard = :standard and conceptId in (:conceptIds) and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
@@ -90,41 +27,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       @Param("domainId") String domainId,
       @Param("standard") Boolean standard,
       @Param("conceptIds") Collection<String> conceptIds);
-
-  /** This query returns all parents matching the parentConceptIds. */
-  @Query(
-      value =
-          "select c from DbCriteria c where conceptId in (:parentConceptIds) and domainId = :domain and type = :type and standard = :standard and "
-              + "match(fullText, concat('+[', :domain, '_rank1]')) > 0")
-  List<DbCriteria> findCriteriaParentsByDomainAndTypeAndParentConceptIds(
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("standard") Boolean isStandard,
-      @Param("parentConceptIds") Set<String> parentConceptIds);
-
-  @Query(
-      value =
-          "select distinct c.concept_id as conceptId, c2.id as parentId "
-              + "from cb_criteria c "
-              + "join (select id from cb_criteria where id in (:conceptIds)) c2 on c.path like concat('%', c2.id, '%') "
-              + "where match(c.path) against(:path)",
-      nativeQuery = true)
-  List<DbCriteriaLookup> findCriteriaLeavesAndParentsByPath(
-      @Param("conceptIds") List<Long> conceptIds, @Param("path") String path);
-
-  @Query(
-      value =
-          "select distinct c.concept_id as conceptId, c2.id as parentId "
-              + "from cb_criteria c join (select id from cb_criteria where id in (:parentIds)) c2 on c.path like concat('%', c2.id, '%') "
-              + "where c.domain_id = :domain "
-              + "and c.type = :type "
-              + "and c.parent_id in (:parentIds) "
-              + "or c.id in (:parentIds)",
-      nativeQuery = true)
-  List<DbCriteriaLookup> findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("parentIds") List<Long> parentIds);
 
   @Query(
       value = "select concept_id_2 from cb_criteria_relationship where concept_id_1 = :conceptId",
@@ -174,48 +76,42 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 "
+              + "                     where c.domainId = 'SURVEY' "
+              + "                       and match(c.fullText, concat(:term, '+[SURVEY_rank1]')) > 0 "
               + "                       and match(c.path, :id) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-      @Param("domain") String domain,
-      @Param("id") Long id,
-      @Param("term") String term,
-      Pageable page);
+  Page<DbCriteria> findSurveyQuestionByPathAndTerm(
+      @Param("id") Long id, @Param("term") String term, Pageable page);
 
   @Query(
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0) "
+              + "                     where c.domainId = 'SURVEY' "
+              + "                       and match(c.fullText, concat(:term, '+[SURVEY_rank1]')) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndFullText(
-      @Param("domain") String domain, @Param("term") String term, Pageable page);
+  Page<DbCriteria> findSurveyQuestionByTerm(@Param("term") String term, Pageable page);
 
   @Query(
       value =
           "select c1 "
               + "from DbCriteria c1 "
-              + "where c1.domainId = :domain "
+              + "where c1.domainId = 'SURVEY' "
               + "and c1.subtype = 'QUESTION' "
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
-              + "                     where c.domainId = :domain "
-              + "                       and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
+              + "                     where c.domainId = 'SURVEY' "
               + "                       and match(c.path, :id) > 0) "
               + "order by c1.count desc")
-  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-      @Param("domain") String domain, @Param("id") Long id, Pageable page);
+  Page<DbCriteria> findSurveyQuestionByPath(@Param("id") Long id, Pageable page);
 
   @Query(
       value =
@@ -272,8 +168,8 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
   List<DbCriteria> findByDomainIdAndType(
       @Param("domainId") String domainId, @Param("type") String type, Sort sort);
 
-  @Query(value = "select c.id from DbCriteria c where domainId = :domainId and name = :name")
-  Long findIdByDomainAndName(@Param("domainId") String domainId, @Param("name") String name);
+  @Query(value = "select c.id from DbCriteria c where domainId = 'SURVEY' and name = :name")
+  Long findSurveyId(@Param("name") String name);
 
   @Query(
       value =

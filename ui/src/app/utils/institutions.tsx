@@ -1,7 +1,14 @@
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {InstitutionalRole, PublicInstitutionDetails} from 'generated/fetch';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {
+  Institution,
+  InstitutionalRole,
+  InstitutionMembershipRequirement,
+  InstitutionTierConfig,
+  PublicInstitutionDetails
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {isAbortError} from './errors';
@@ -58,3 +65,43 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
       availableRoles.includes(option.value)
   );
 };
+
+function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
+  if (!institution.tierConfigs) {
+    return {
+      accessTierShortName: accessTier,
+      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+      emailAddresses: [],
+      emailDomains: []
+    };
+  }
+  return institution.tierConfigs.find(t => t.accessTierShortName === accessTier);
+}
+
+export function getRegisteredTierConfig(institution: Institution): InstitutionTierConfig {
+  return getTierConfig(institution, AccessTierShortNames.Registered);
+}
+
+export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
+  return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
+}
+
+export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
+  const tierConfig = getTierConfig(institution, accessTier);
+  if (tierConfig.emailAddresses) {
+    return tierConfig.emailAddresses;
+  }
+  return [];
+}
+
+export function getRegisteredTierEmailDomains(institution: Institution): Array<string> {
+  return getTierEmailDomains(institution, AccessTierShortNames.Registered);
+}
+
+export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
+  const tierConfig = getTierConfig(institution, accessTier);
+  if (tierConfig.emailDomains) {
+    return tierConfig.emailDomains;
+  }
+  return [];
+}

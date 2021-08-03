@@ -2,25 +2,73 @@
 	"shortName": "VUMC",
 	"displayName": "Vanderbilt University Medical Center",
 	"organizationTypeEnum": "HEALTH_CENTER_NON_PROFIT",
-	"emailAddresses": [],
-	"emailDomains": ["vumc.org"]
+	"tierConfigs": [
+		{
+			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["vumc.org"]
+		},
+		{
+			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["vumc.org"]
+		}
+	]
 }, {
 	"shortName": "Broad",
 	"displayName": "Broad Institute",
 	"organizationTypeEnum": "ACADEMIC_RESEARCH_INSTITUTION",
-	"emailAddresses": [],
-	"emailDomains": ["broadinstitute.org"]
+	"tierConfigs": [
+		{
+			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["broadinstitute.org"]
+		},
+		{
+			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["broadinstitute.org"]
+		}
+	]
 }, {
 	"shortName": "Verily",
 	"displayName": "Verily LLC",
 	"organizationTypeEnum": "INDUSTRY",
-	"emailAddresses": [],
-	"emailDomains": ["verily.com", "google.com"]
+	"tierConfigs": [
+		{
+			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["verily.com", "google.com"]
+		},
+		{
+			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["verily.com", "google.com"]
+		}
+	]
 }, {
 	"shortName": "Legacy",
 	"displayName": "Legacy Research Accounts",
 	"organizationTypeEnum": "OTHER",
 	"organizationTypeOtherText": "Legacy dev accounts with backfilled contact emails",
-	"emailAddresses": [],
-	"emailDomains": ["fake-research-aou.org"]
+	"tierConfigs": [
+		{
+			"accessTierShortName": "registered",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["fake-research-aou.org"]
+		},
+		{
+			"accessTierShortName": "controlled",
+			"membershipRequirement": "DOMAINS",
+			"eraRequired": true,
+			"emailDomains": ["fake-research-aou.org"]
+		}
+	]
 }]

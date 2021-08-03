@@ -176,6 +176,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
+        if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
+          this.setState({eraCommonsLinked: true});
+        }
       } catch (e) {
         this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
         this.setState({rasLoginGovLoading: false});

@@ -1,13 +1,19 @@
 package org.pmiops.workbench.institution;
 
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessUtils.getAccessTierByShortNameOrThrow;
+import static org.pmiops.workbench.institution.InstitutionUtils.getEmailAddressesByTierOrEmptySet;
+import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsByTierOrEmptySet;
+import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,15 +29,20 @@ import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
+import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InstitutionTierRequirement;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
@@ -57,10 +68,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   private final InstitutionMapper institutionMapper;
-  private final InstitutionEmailDomainMapper institutionEmailDomainMapper;
-  private final InstitutionEmailAddressMapper institutionEmailAddressMapper;
   private final InstitutionUserInstructionsMapper institutionUserInstructionsMapper;
-  private final InstitutionTierRequirementMapper institutionTierRequirementMapper;
+  private final InstitutionTierConfigMapper institutionTierConfigMapper;
   private final PublicInstitutionDetailsMapper publicInstitutionDetailsMapper;
 
   @Autowired
@@ -73,10 +82,8 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionTierRequirementDao institutionTierRequirementDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       InstitutionMapper institutionMapper,
-      InstitutionEmailDomainMapper institutionEmailDomainMapper,
-      InstitutionEmailAddressMapper institutionEmailAddressMapper,
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
-      InstitutionTierRequirementMapper institutionTierRequirementMapper,
+      InstitutionTierConfigMapper institutionTierConfigMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
     this.accessTierDao = accessTierDao;
     this.institutionDao = institutionDao;
@@ -86,10 +93,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     this.institutionTierRequirementDao = institutionTierRequirementDao;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
     this.institutionMapper = institutionMapper;
-    this.institutionEmailDomainMapper = institutionEmailDomainMapper;
-    this.institutionEmailAddressMapper = institutionEmailAddressMapper;
     this.institutionUserInstructionsMapper = institutionUserInstructionsMapper;
-    this.institutionTierRequirementMapper = institutionTierRequirementMapper;
+    this.institutionTierConfigMapper = institutionTierConfigMapper;
     this.publicInstitutionDetailsMapper = publicInstitutionDetailsMapper;
   }
 
@@ -103,8 +108,18 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<PublicInstitutionDetails> getPublicInstitutionDetails() {
+    Map<Long, MembershipRequirement> registeredTierRequirementMap =
+        StreamSupport.stream(institutionTierRequirementDao.findAll().spliterator(), false)
+            .filter(t -> t.getAccessTier().getShortName().equals(REGISTERED_TIER_SHORT_NAME))
+            .collect(
+                Collectors.toMap(
+                    t -> t.getInstitution().getInstitutionId(),
+                    DbInstitutionTierRequirement::getMembershipRequirement));
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(publicInstitutionDetailsMapper::dbToModel)
+        .map(
+            i ->
+                publicInstitutionDetailsMapper.dbToModel(
+                    i, registeredTierRequirementMap.get(i.getInstitutionId())))
         .collect(Collectors.toList());
   }
 
@@ -175,7 +190,8 @@ public class InstitutionServiceImpl implements InstitutionService {
               });
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
-          "DataIntegrityException: Please check that you are not creating an Institute which already exists");
+          "DataIntegrityException: Please check that you are not creating an Institute which already exists",
+          ex);
     }
   }
 
@@ -206,55 +222,41 @@ public class InstitutionServiceImpl implements InstitutionService {
       return false;
     }
 
-    // If the Institution has DUA Agreement that is restricted just to few researchers
-    // Confirm if the email address is in the allowed email list
-    if (institution.getDuaTypeEnum() != null
-        && institution.getDuaTypeEnum().equals(DuaType.RESTRICTED)) {
-      final boolean validated = institution.getEmailAddresses().contains(contactEmail);
+    // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
+    // to pull RT short name from config or database.
+    InstitutionTierConfig rtConfig =
+        getTierConfigByTier(institution, REGISTERED_TIER_SHORT_NAME)
+            .orElseThrow(() -> new ServerErrorException("Registered tier requirement not found"));
+
+    // If the Institution's registered tier agreement requires email addresses confirm if the email
+    // address is in the allowed email list.
+    if (rtConfig.getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
+      final boolean validated =
+          getEmailAddressesByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME)
+              .contains(contactEmail);
       log.info(
           String.format(
-              "Contact email '%s' validated against RESTRICTED-DUA institution '%s': address %s",
+              "Contact email '%s' validated against registered tier with ADDRESSES requirement: "
+                  + "'%s': address %s",
               contactEmail, institution.getShortName(), validated ? "MATCHED" : "DID NOT MATCH"));
       return validated;
     }
 
-    // If Agreement Type is NULL assume DUA Agreement is MASTER
-    // If Institution agreement type is master confirm if the contact email has valid/allowed domain
+    // If the Institution's registered tier agreement requires email domains, confirm if the contact
+    // email has valid/allowed domain
     final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    final boolean validated = institution.getEmailDomains().contains(contactEmailDomain);
+    final boolean validated =
+        getEmailDomainsByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME)
+            .contains(contactEmailDomain);
     log.info(
         String.format(
-            "Contact email '%s' validated against MASTER-DUA institution '%s': domain %s %s",
+            "Contact email '%s' validated against registered tier with DOMAINS requirement '%s': "
+                + "domain %s %s",
             contactEmail,
             institution.getShortName(),
             contactEmailDomain,
             validated ? "MATCHED" : "DID NOT MATCH"));
     return validated;
-  }
-
-  @Override
-  public List<String> getEmailDomains(String institutionShortName) {
-    return new ArrayList<>(
-        institutionEmailDomainMapper.dbDomainsToStrings(
-            institutionEmailDomainDao.getByInstitution(
-                getDbInstitutionOrThrow(institutionShortName))));
-  }
-
-  @Override
-  public List<String> getEmailAddresses(String institutionShortName) {
-    return new ArrayList<>(
-        institutionEmailAddressMapper.dbAddressesToStrings(
-            institutionEmailAddressDao.getByInstitution(
-                getDbInstitutionOrThrow(institutionShortName))));
-  }
-
-  @Override
-  public List<InstitutionTierRequirement> getTierRequirements(String institutionShortName) {
-    return new ArrayList<>(
-        institutionTierRequirementMapper.dbToModel(
-            new ArrayList<>(
-                institutionTierRequirementDao.getByInstitution(
-                    getDbInstitutionOrThrow(institutionShortName)))));
   }
 
   @Override
@@ -306,15 +308,46 @@ public class InstitutionServiceImpl implements InstitutionService {
         .map(dbi -> institutionMapper.dbToModel(dbi, this));
   }
 
+  @Override
+  public List<InstitutionTierConfig> getTierConfigs(String institutionShortName) {
+    DbInstitution dbInstitution = getDbInstitutionOrThrow(institutionShortName);
+    Map<String, Set<String>> emailDomainMapByTier =
+        institutionEmailDomainDao.getByInstitution(dbInstitution).stream()
+            .collect(
+                Collectors.groupingBy(
+                    d -> d.getAccessTier().getShortName(),
+                    Collectors.mapping(
+                        DbInstitutionEmailDomain::getEmailDomain,
+                        Collectors.toCollection(TreeSet::new))));
+    Map<String, Set<String>> emailAddressMapByTier =
+        institutionEmailAddressDao.getByInstitution(dbInstitution).stream()
+            .collect(
+                Collectors.groupingBy(
+                    d -> d.getAccessTier().getShortName(),
+                    Collectors.mapping(
+                        DbInstitutionEmailAddress::getEmailAddress,
+                        Collectors.toCollection(TreeSet::new))));
+
+    return institutionTierRequirementDao.getByInstitution(dbInstitution).stream()
+        .map(
+            t ->
+                institutionTierConfigMapper.dbToTierConfigModel(
+                    t,
+                    emailAddressMapByTier.get(t.getAccessTier().getShortName()),
+                    emailDomainMapByTier.get(t.getAccessTier().getShortName())))
+        .collect(Collectors.toList());
+  }
+
   private Institution toModel(DbInstitution dbInstitution) {
     return institutionMapper.dbToModel(dbInstitution, this);
   }
 
   private void populateAuxTables(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
-    setInstitutionEmailDomains(modelInstitution, dbInstitution);
-    setInstitutionEmailAddresses(modelInstitution, dbInstitution);
-    setInstitutionTierRequirement(modelInstitution, dbInstitution);
+    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
+    setInstitutionEmailDomains(modelInstitution, dbInstitution, dbAccessTiers);
+    setInstitutionEmailAddresses(modelInstitution, dbInstitution, dbAccessTiers);
+    setInstitutionTierRequirement(modelInstitution, dbInstitution, dbAccessTiers);
 
     final String userInstructions = modelInstitution.getUserInstructions();
     if (!Strings.isNullOrEmpty(userInstructions)) {
@@ -334,29 +367,52 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   // note that this replaces all email domains for this institution with the passed-in domains
   private void setInstitutionEmailDomains(
-      final Institution modelInstitution, final DbInstitution dbInstitution) {
+      final Institution modelInstitution,
+      final DbInstitution dbInstitution,
+      final List<DbAccessTier> dbAccessTiers) {
     institutionEmailDomainDao.deleteByInstitution(dbInstitution);
-    institutionEmailDomainMapper
-        .modelToDb(modelInstitution, dbInstitution)
-        .forEach(institutionEmailDomainDao::save);
+    for (DbAccessTier dbAccessTier : dbAccessTiers) {
+      institutionTierConfigMapper
+          .emailDomainsToDb(
+              getEmailDomainsByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
+              dbInstitution,
+              dbAccessTier)
+          .forEach(institutionEmailDomainDao::save);
+    }
   }
 
   // note that this replaces all email addresses for this institution with the passed-in addresses
   private void setInstitutionEmailAddresses(
-      final Institution modelInstitution, final DbInstitution dbInstitution) {
+      final Institution modelInstitution,
+      final DbInstitution dbInstitution,
+      final List<DbAccessTier> dbAccessTiers) {
     institutionEmailAddressDao.deleteByInstitution(dbInstitution);
-    institutionEmailAddressMapper
-        .modelToDb(modelInstitution, dbInstitution)
-        .forEach(institutionEmailAddressDao::save);
+    for (DbAccessTier dbAccessTier : dbAccessTiers) {
+      institutionTierConfigMapper
+          .emailAddressesToDb(
+              getEmailAddressesByTierOrEmptySet(modelInstitution, dbAccessTier.getShortName()),
+              dbInstitution,
+              dbAccessTier)
+          .forEach(institutionEmailAddressDao::save);
+    }
   }
 
   // note that this replaces all requirements for this institution with the passed-in requirements
   private void setInstitutionTierRequirement(
-      final Institution modelInstitution, final DbInstitution dbInstitution) {
-    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
+      final Institution modelInstitution,
+      final DbInstitution dbInstitution,
+      final List<DbAccessTier> dbAccessTiers) {
     institutionTierRequirementDao.deleteByInstitution(dbInstitution);
-    institutionTierRequirementMapper
-        .modelToDb(modelInstitution, dbInstitution, dbAccessTiers)
+    // Make sure the delete succeeds. This is needed because delete record in db table seems not
+    // cleanup the per_institution_per_tier constraint right away. Make one extra get call flushed
+    // all pending writes including the constraint to be deleted.
+    if (!institutionTierRequirementDao.getByInstitution(dbInstitution).isEmpty()) {
+      throw new ServerErrorException(
+          "Failed to cleanup existing tier requirements before replacing them");
+    }
+    institutionTierConfigMapper
+        .tierConfigsToDbTierRequirements(
+            modelInstitution.getTierConfigs(), dbInstitution, dbAccessTiers)
         .forEach(institutionTierRequirementDao::save);
   }
 
@@ -377,10 +433,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (Strings.isNullOrEmpty(institutionRequest.getShortName())) {
       institutionRequest.setShortName(generateShortName(institutionRequest.getDisplayName()));
     }
-    if (institutionRequest.getDuaTypeEnum() == null) {
-      // For Existing Institutions
-      institutionRequest.setDuaTypeEnum(DuaType.MASTER);
-    }
     if (institutionRequest.getOrganizationTypeEnum() == null) {
       throw new BadRequestException("Organization type cannot be null");
     }
@@ -389,27 +441,21 @@ public class InstitutionServiceImpl implements InstitutionService {
       throw new BadRequestException("If organization type is OTHER, additional text is needed");
     }
 
-    // If Agreement type is Restricted confirm Each Email address in list is valid
-    if (institutionRequest.getDuaTypeEnum().equals(DuaType.RESTRICTED)
-        && !institutionRequest.getEmailAddresses().isEmpty()) {
-      institutionRequest
-          .getEmailAddresses()
-          .forEach(
-              emailAddress -> {
-                try {
-                  new InternetAddress(emailAddress).validate();
-                } catch (AddressException | NullPointerException ex) {
-                  throw new BadRequestException("Email Address is not valid");
-                }
-              });
-    }
-
     // All tier need to be present in API if tier requirement is present.
-    if (institutionRequest.getTierRequirements() != null) {
+    if (institutionRequest.getTierConfigs() != null) {
       List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
-      institutionRequest
-          .getTierRequirements()
-          .forEach(a -> getAccessTierByShortNameOrThrow(dbAccessTiers, a.getAccessTierShortName()));
+      for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
+        // All tier need to be present in API if tier requirement is present.
+        getAccessTierByShortNameOrThrow(
+            dbAccessTiers, institutionTierConfig.getAccessTierShortName());
+        // Each Email address in all tiers is valid.
+        if (institutionTierConfig.getMembershipRequirement()
+            == InstitutionMembershipRequirement.ADDRESSES) {
+          validateEmailAddressOrThrow(
+              getEmailAddressesByTierOrEmptySet(
+                  institutionRequest, institutionTierConfig.getAccessTierShortName()));
+        }
+      }
     }
   }
 
@@ -417,5 +463,17 @@ public class InstitutionServiceImpl implements InstitutionService {
     return getInstitutions().stream()
         .filter(institution -> validateInstitutionalEmail(institution, contactEmail))
         .findFirst();
+  }
+
+  /** Validates list of email addresses, and throw {@link BadRequestException} if not valid. */
+  private static void validateEmailAddressOrThrow(Set<String> emailAddresses) {
+    emailAddresses.forEach(
+        emailAddress -> {
+          try {
+            new InternetAddress(emailAddress).validate();
+          } catch (AddressException | NullPointerException ex) {
+            throw new BadRequestException("Email Address is not valid");
+          }
+        });
   }
 }
