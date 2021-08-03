@@ -448,9 +448,17 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       return this.props.searchContext.domain === Domain.SURVEY;
     }
 
+    dataBrowserDomainTitle() {
+      const domain = this.props.searchContext.domain;
+      if (domain === Domain.DRUG) {
+        return 'drug-exposures';
+      } else if (domain === Domain.MEASUREMENT) {
+        return 'labs-and-measurements';
+      }
+      return domainToTitle(this.props.searchContext.domain).toLowerCase();
+    }
     getConceptLink(conceptId) {
-      return environment.publicUiUrl + '/ehr/' +
-        domainToTitle(this.props.searchContext.domain).toLowerCase() + '?search=' + conceptId;
+      return environment.publicUiUrl + '/ehr/' + this.dataBrowserDomainTitle() + '/' + conceptId;
     }
 
     renderRow(row: any, child: boolean, elementId: string) {

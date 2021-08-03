@@ -153,6 +153,8 @@ public class DbCdrVersion {
     this.cdrDbName = cdrDbName;
   }
 
+  // TODO(RW-7112): remove
+  @Deprecated
   @Column(name = "elastic_index_base_name")
   public String getElasticIndexBaseName() {
     return elasticIndexBaseName;

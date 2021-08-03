@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -214,6 +215,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  @Transactional
   public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
       String workspaceNamespace, String workspaceId, Long cohortId, String domain, Integer limit) {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
@@ -223,6 +225,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
+
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);

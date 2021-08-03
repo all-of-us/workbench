@@ -9,12 +9,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.institution.InstitutionEmailAddressMapperImpl;
-import org.pmiops.workbench.institution.InstitutionEmailDomainMapperImpl;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
-import org.pmiops.workbench.institution.InstitutionTierRequirementMapperImpl;
+import org.pmiops.workbench.institution.InstitutionTierConfigMapperImpl;
 import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
@@ -31,9 +29,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   InstitutionMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
-  InstitutionEmailDomainMapperImpl.class,
-  InstitutionEmailAddressMapperImpl.class,
-  InstitutionTierRequirementMapperImpl.class,
+  InstitutionTierConfigMapperImpl.class,
+  InstitutionTierConfigMapperImpl.class,
 })
 @EnableTransactionManagement
 public class LoadInstitutions {

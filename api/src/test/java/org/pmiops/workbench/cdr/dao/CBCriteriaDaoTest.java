@@ -3,7 +3,6 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.util.HashSet;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -171,18 +170,16 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
-  public void findIdByDomainAndName() {
-    assertThat(cbCriteriaDao.findIdByDomainAndName(Domain.SURVEY.toString(), "The Basics"))
-        .isEqualTo(surveyCriteria.getId());
+  public void findSurveyId() {
+    assertThat(cbCriteriaDao.findSurveyId("The Basics")).isEqualTo(surveyCriteria.getId());
   }
 
   @Test
-  public void findSurveyQuestionCriteriaByDomainAndIdAndFullText() {
+  public void findSurveyQuestionByPathAndTerm() {
     PageRequest pageRequest = PageRequest.of(0, 100);
     assertThat(
             cbCriteriaDao
-                .findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-                    Domain.SURVEY.toString(), surveyCriteria.getId(), "term", pageRequest)
+                .findSurveyQuestionByPathAndTerm(surveyCriteria.getId(), "term", pageRequest)
                 .getContent()
                 .get(0))
         .isEqualTo(surveyCriteria);
@@ -278,16 +275,6 @@ public class CBCriteriaDaoTest extends SpringTest {
             cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(
                 Domain.CONDITION.toString(), false, ImmutableList.of("1")))
         .containsExactly(icd10Criteria);
-  }
-
-  @Test
-  public void findCriteriaParentsByDomainAndTypeAndParentConceptIds() {
-    HashSet<String> parentConceptIds = new HashSet<>();
-    parentConceptIds.add("1");
-    List<DbCriteria> results =
-        cbCriteriaDao.findCriteriaParentsByDomainAndTypeAndParentConceptIds(
-            Domain.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, parentConceptIds);
-    assertThat(results).containsExactly(standardCriteria);
   }
 
   @Test

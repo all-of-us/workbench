@@ -1,6 +1,6 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
-import {switchCase, withAsyncErrorHandling} from 'app/utils';
+import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
 import {
@@ -32,8 +32,10 @@ export interface RuntimeDiff {
 }
 
 export enum RuntimeDiffState {
+  // Arranged in order of increasing severity. We depend on this ordering below.
   NO_CHANGE,
-  CAN_UPDATE,
+  CAN_UPDATE_IN_PLACE,
+  CAN_UPDATE_WITH_REBOOT,
   NEEDS_DELETE
 }
 
@@ -43,6 +45,41 @@ export interface RuntimeConfig {
   diskSize: number;
   dataprocConfig: DataprocConfig;
 }
+
+export interface UpdateMessaging {
+  applyAction: string;
+  warn?: string;
+  warnMore?: string;
+}
+
+// Visible for testing only.
+export const findMostSevereDiffState = (states: RuntimeDiffState[]): RuntimeDiffState => {
+  return fp.last([...states].sort());
+};
+
+export const diffsToUpdateMessaging = (diffs: RuntimeDiff[]): UpdateMessaging => {
+  const diffType = findMostSevereDiffState(diffs.map(({differenceType}) => differenceType));
+  return switchCase(
+    diffType,
+    [RuntimeDiffState.NEEDS_DELETE, () => ({
+      applyAction: 'APPLY & RECREATE',
+      warn: 'These changes require deletion and re-creation of your cloud ' +
+            'environment to take effect.',
+      warnMore: 'Any in-memory state and local file modifications will be ' +
+                'erased. Data stored in workspace buckets is never affected ' +
+                'by changes to your cloud environment.'
+    })],
+    [RuntimeDiffState.CAN_UPDATE_WITH_REBOOT, () => ({
+      applyAction: 'APPLY & REBOOT',
+      warn: 'These changes require a reboot of your cloud environment to take effect.',
+      warnMore: 'Any in-memory state will be erased, but local file ' +
+                'modifications will be preserved. Data stored in workspace ' +
+                'buckets is never affected by changes to your cloud environment.'
+    })],
+    [DEFAULT, () => ({
+      applyAction: 'APPLY'
+    })]);
+};
 
 const compareComputeTypes = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   return {
@@ -62,7 +99,7 @@ const compareMachineCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig)
     desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
-    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
+    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
   };
 };
 
@@ -74,7 +111,7 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
     desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
-    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
+    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
   };
 };
 
@@ -86,7 +123,7 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
     diffType = RuntimeDiffState.NEEDS_DELETE;
   } else if (newRuntime.diskSize > oldRuntime.diskSize) {
     desc = 'Increase ' + desc;
-    diffType = RuntimeDiffState.CAN_UPDATE;
+    diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
   } else {
     diffType = RuntimeDiffState.NO_CHANGE;
   }
@@ -161,7 +198,7 @@ const compareDataprocNumberOfPreemptibleWorkers = (oldRuntime: RuntimeConfig, ne
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_IN_PLACE
   };
 };
 
@@ -178,7 +215,7 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_IN_PLACE
   };
 };
 
@@ -376,7 +413,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 signal: aborter.signal
               });
             }
-          } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE)) {
+          } else if (runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE_WITH_REBOOT) ||
+              runtimeDiffTypes.includes(RuntimeDiffState.CAN_UPDATE_IN_PLACE)) {
             if (runtime.status === RuntimeStatus.Running || runtime.status === RuntimeStatus.Stopped) {
               await runtimeApi().updateRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
               // Calling updateRuntime will not immediately set the Runtime status to not Running so the

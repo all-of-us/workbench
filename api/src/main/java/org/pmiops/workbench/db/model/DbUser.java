@@ -36,6 +36,7 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
+  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -546,7 +547,7 @@ public class DbUser {
         Hashing.sha256()
             .hashUnencodedChars(UUID.randomUUID().toString())
             .toString()
-            .substring(0, PD_UUID_PREFIX_SIZE);
+            .substring(0, PD_UUID_SUFFIX_SIZE);
     return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }

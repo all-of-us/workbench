@@ -32,9 +32,9 @@ import {
 import {formatUsd} from 'app/utils/numbers';
 import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {
+  diffsToUpdateMessaging,
   getRuntimeConfigDiffs,
   RuntimeConfig,
-  RuntimeDiffState,
   RuntimeStatusRequest,
   useCustomRuntime,
   useRuntimeStatus
@@ -196,9 +196,9 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
         You’re about to delete your cloud analysis environment.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 2, gridRow: 3}}>
-        Any in-memory state and local file modifications will be erased.&nbsp;
-        Data stored in workspace buckets is never affected by changes to your cloud&nbsp;
-        environment. You’ll still be able to view notebooks in this workspace, but&nbsp;
+        Any in-memory state and local file modifications will be erased.
+        Data stored in workspace buckets is never affected by changes to your cloud
+        environment. You’ll still be able to view notebooks in this workspace, but
         editing and running notebooks will require you to create a new cloud environment.
       </p>
     </div>
@@ -856,7 +856,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
 
 const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton}) => {
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
-  const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
+  const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
   return <React.Fragment>
     <div style={styles.controlSection}>
@@ -890,28 +890,15 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       </FlexRow>
     </div>
 
-    <WarningMessage iconSize={30} iconPosition={'center'}>
-      <TextColumn>
-        {needsDelete ? <React.Fragment>
-          <div>
-            You've made changes that can only take effect upon deletion and re-creation of
-            your cloud environment.
-          </div>
-          <div style={{marginTop: '0.5rem'}}>
-            Any in-memory state and local file modifications will be erased. Data stored in
-            workspace buckets is never affected by changes to your cloud environment.
-          </div>
-        </React.Fragment> : <React.Fragment>
-          <div>
-            These changes require a reboot of your environment to take effect.
-          </div>
-          <div style={{marginTop: '0.5rem'}}>
-            Any in-memory state will be erased, but local file modifications will be preserved.
-            Data stored in workspace buckets is never affected by changes to your cloud environment.
-          </div>
-        </React.Fragment>}
-      </TextColumn>
-    </WarningMessage>
+    {updateMessaging.warn &&
+     <WarningMessage iconSize={30} iconPosition={'center'}>
+       <TextColumn>
+         <React.Fragment>
+           <div>{updateMessaging.warn}</div>
+           <div style={{marginTop: '0.5rem'}}>{updateMessaging.warnMore}</div>
+         </React.Fragment>
+       </TextColumn>
+     </WarningMessage>}
 
     <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
       <Button
@@ -1014,6 +1001,8 @@ export const RuntimePanel = fp.flow(
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const pdReduced = pdExists && selectedDiskSize < diskSize;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
+  const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
+
 
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
   useEffect(() => {
@@ -1207,7 +1196,7 @@ export const RuntimePanel = fp.flow(
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onClose();
       }}>
-      {needsDelete ? 'APPLY & RECREATE' : 'APPLY & REBOOT'}
+      {updateMessaging.applyAction}
     </Button>;
   };
 
@@ -1350,7 +1339,7 @@ export const RuntimePanel = fp.flow(
             </div>
            {runtimeExists && runtimeChanged &&
              <WarningMessage iconSize={30} iconPosition={'center'}>
-                <div>You've made changes that require recreating your environment to take effect.</div>
+                <div>{updateMessaging.warn}</div>
              </WarningMessage>
            }
            {getErrorMessageContent().length > 0 &&

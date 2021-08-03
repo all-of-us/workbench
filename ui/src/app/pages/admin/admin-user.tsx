@@ -11,17 +11,13 @@ import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {
-  formatFreeCreditsUSD,
-  isBlank,
-  reactStyles,
-  withUrlParams
-} from 'app/utils';
+import {formatFreeCreditsUSD, isBlank, reactStyles, withUrlParams} from 'app/utils';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
+  getRegisteredTierConfig,
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
@@ -32,8 +28,8 @@ import {serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,
-  DuaType,
   InstitutionalRole,
+  InstitutionMembershipRequirement,
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
@@ -101,11 +97,11 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
         institution => institution.shortName === verifiedInstitutionalAffiliation.institutionShortName,
         verifiedInstitutionOptions
       );
-      if (selectedInstitution.duaTypeEnum === DuaType.RESTRICTED) {
+      if (getRegisteredTierConfig(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         // Institution has signed Restricted agreement and the email is not in allowed emails list
         return <RestrictedDuaEmailMismatchErrorMessage/>;
       } else {
-        // Institution has MASTER or NULL agreement and the domain is not in the allowed list
+        // Institution has DOMAINS for registered tier requirement and the domain is not in the allowed list
         return <MasterDuaEmailMismatchErrorMessage/>;
       }
     }

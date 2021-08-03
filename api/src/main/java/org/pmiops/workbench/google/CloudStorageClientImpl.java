@@ -109,11 +109,6 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     return new JSONObject(getCredentialsBucketString(objectPath));
   }
 
-  @Override
-  public JSONObject getElasticCredentials() {
-    return getCredentialsBucketJSON("elastic-cloud.json");
-  }
-
   private String readBlobAsString(Blob blob) {
     return new String(blob.getContent()).trim();
   }

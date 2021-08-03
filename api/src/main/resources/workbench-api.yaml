@@ -6412,26 +6412,14 @@ definitions:
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
         description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
-      emailAddresses:
-        type: array
-        description: A list of email addresses which can be validated as members of
-          this Institution
-        items:
-          type: string
-      emailDomains:
-        type: array
-        description: A list of email domains which can be validated as members of
-          this Institution
-        items:
-          type: string
       userInstructions:
         description: Institution-specific instructions for users to be sent in email
         type: string
-      tierRequirements:
+      tierConfigs:
         type: array
         description: List of requirements on how members can get access for each tier.
         items:
-          "$ref": "#/definitions/InstitutionTierRequirement"
+          "$ref": "#/definitions/InstitutionTierConfig"
   PublicInstitutionDetails:
     type: object
     description: 'Represents an institution which has been approved to validate researchers
@@ -6452,11 +6440,16 @@ definitions:
           University Medical Center'
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
-        description: 'Type of Data Use Agreement Institution has signed, Master or restricted to a defined set of specific researchers'
+        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed, 
+          Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
         description: 'The Organization Type of this institution if it is one of the
           enumerated OrganizationTypes, or OrganizationType.OTHER if it is not'
+      registeredTierMembershipRequirement:
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+        description: 'Type of Registered tier requirement the institution has signed, email domains
+         or restricted to a defined set of specific researchers'
   InstitutionUserInstructions:
     type: object
     description: Institution-specific instructions for users to perform after registration.
@@ -6557,9 +6550,9 @@ definitions:
         type: string
         description: 'The user''s detailed Institutional Role at this Institution,
           as text, if its enumerated type is OTHER'
-  InstitutionTierRequirement:
+  InstitutionTierConfig:
     type: object
-    description: Institution-specific access tier membership requirement.
+    description: Institution-specific access tier membership requirement and configs.
     required:
       - accessTierShortName
       - membershipRequirement
@@ -6573,6 +6566,14 @@ definitions:
       eraRequired:
         type: boolean
         description: Whether eRA commons is required for members in the institution for this tier.
+      emailDomains:
+        type: array
+        items:
+          type: string
+      emailAddresses:
+        type: array
+        items:
+          type: string
   WorkspaceAdminView:
     description: Admin-visible metadata about a workspace.
     type: object

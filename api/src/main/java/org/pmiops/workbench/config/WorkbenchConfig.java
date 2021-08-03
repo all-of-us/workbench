@@ -206,6 +206,8 @@ public class WorkbenchConfig {
     public int sendRetries;
   }
 
+  // TODO(RW-7112): remove
+  @Deprecated
   public static class ElasticsearchConfig {
     public String baseUrl;
     public boolean enableBasicAuth;
