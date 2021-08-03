@@ -45,7 +45,7 @@ import {
   urlParamsStore
 } from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
-import {SignedOutNotFound} from "app/pages/not-found";
+import {NotFound} from "app/pages/not-found";
 import {disabledGuard, signInGuard} from "./routing/guards";
 
 declare const gapi: any;
@@ -60,7 +60,7 @@ declare global {
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
-const SignedOutNotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(SignedOutNotFound);
+const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
@@ -513,6 +513,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
             </AppRoute>
             <AppRoute exact path='/user-disabled'>
               <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute exact path='/not-found'>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
             </AppRoute>
             <AppRoute
                 path=''

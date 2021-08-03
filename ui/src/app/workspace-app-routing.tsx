@@ -4,7 +4,7 @@ import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {Switch, useRouteMatch} from 'react-router-dom';
+import {Redirect, Switch, useRouteMatch} from 'react-router-dom';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
@@ -36,7 +36,6 @@ const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(withRouteData, withRoutingSpinner)(InteractiveNotebook);
 const NotebookListPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookList);
 const NotebookRedirectPage = fp.flow(withRouteData, withRoutingSpinner)(NotebookRedirect);
-const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const ParticipantsTablePage = fp.flow(withRouteData, withRoutingSpinner)(ParticipantsTable);
 const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
@@ -219,8 +218,8 @@ export const WorkspaceRoutes = React.memo(() => {
         pageKey: 'conceptSetActions'
       }}/>
     </AppRoute>
-    <AppRoute exact path="*">
-      <NotFoundPage routeData={{title: 'Workspace Wrapper Not Found'}}/>
+    <AppRoute exact={false} path={`${path}`}>
+      <Redirect to={'/not-found'}/>
     </AppRoute>
   </Switch>;
 });

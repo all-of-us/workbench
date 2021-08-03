@@ -33,7 +33,7 @@ import {BreadcrumbType} from './utils/navigation';
 import {profileStore} from './utils/stores';
 import {NotFound} from "app/pages/not-found";
 import {expiredGuard, registrationGuard} from "./routing/guards";
-import {Switch} from "react-router-dom";
+import {Redirect, Switch} from "react-router-dom";
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -43,7 +43,6 @@ const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRou
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
 const InstitutionEditAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitutionEdit);
-const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const ProfilePage = fp.flow(withRouteData, withRoutingSpinner)(ProfileComponent);
 const UserAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUser);
 const UsersAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminUsers);
@@ -145,7 +144,7 @@ export const SignedInRoutes = React.memo(() => {
       <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
     </AppRoute>
     <AppRoute exact path="*">
-      <NotFoundPage routeData={{title: 'Not Found'}}/>
+      <Redirect to={'/not-found'}/>
     </AppRoute>
   </Switch>;
 });
