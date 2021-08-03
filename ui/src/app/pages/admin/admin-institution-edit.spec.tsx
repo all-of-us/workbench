@@ -231,7 +231,7 @@ describe('AdminInstitutionEditSpec', () => {
 
     let rtEmailAddressError = wrapper.find('[data-test-id="rtEmailAddressError"]');
     expect(rtEmailAddressError.length).toBe(0);
-    const agreementTypeDropDown = wrapper.find('[data-test-id="rt-rt-agreement-dropdown"]').instance() as Dropdown;
+    const agreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
       {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
         target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
