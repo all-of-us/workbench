@@ -457,16 +457,18 @@ export const useDisk = (currentWorkspaceNamespace) => {
         let pd;
         try {
           pd = await disksApi().getDisk(currentWorkspaceNamespace);
-          diskStore.set({
-            workspaceNamespace: currentWorkspaceNamespace,
-            persistentDisk: pd
-          });
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;
           }
-            // null on the runtime store indicates no existing runtime
+          // null on the disk store indicates no existing persistent disk
           pd = null;
+        }
+        if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
+          diskStore.set({
+            workspaceNamespace: currentWorkspaceNamespace,
+            persistentDisk: pd
+          });
         }
 
       });

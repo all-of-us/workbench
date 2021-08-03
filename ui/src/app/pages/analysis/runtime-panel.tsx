@@ -36,7 +36,7 @@ import {
   RuntimeConfig,
   RuntimeDiffState,
   RuntimeStatusRequest,
-  useCustomRuntime, useDisk,
+  useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
 import {diskStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -1038,16 +1038,14 @@ export const RuntimePanel = fp.flow(
     if (enablePD && (!pdExists || pdExists && pdReduced)) {
       return {
         gceWithPdConfig: {
-          gceWithPdConfig: {
-            bootDiskSize: 50,
-            machineType: runtime.machine.name,
-            persistentDisk: {
-              name: '',
-              size: runtime.diskSize,
-              diskType: DiskType.Standard,
-              labels: {}
+          bootDiskSize: 50,
+          machineType: runtime.machine.name,
+          persistentDisk: {
+            name: '',
+            size: runtime.diskSize,
+            diskType: DiskType.Standard,
+            labels: {}
 
-            }
           }
         }
       };

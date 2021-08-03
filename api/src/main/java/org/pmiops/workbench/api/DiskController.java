@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,17 +41,14 @@ public class DiskController implements DiskApiDelegate {
     this.leonardoMapper = leonardoMapper;
   }
 
-  private DbWorkspace lookupWorkspace(String workspaceNamespace)
-      throws org.pmiops.workbench.exceptions.NotFoundException {
-    return workspaceDao
-        .getByNamespace(workspaceNamespace)
-        .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
-  }
-
   @Override
   public ResponseEntity<Disk> getDisk(String workspaceNamespace) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     String googleProject = dbWorkspace.getGoogleProject();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
     try {
       LeonardoGetPersistentDiskResponse response;
       List<LeonardoListPersistentDiskResponse> responseList =
@@ -62,28 +61,22 @@ public class DiskController implements DiskApiDelegate {
               return -1 * t1.getId().compareTo(t2.getId());
             }
           });
-      response =
-          !responseList.isEmpty()
-              ? leonardoNotebooksClient.getPersistentDisk(
-                  googleProject, responseList.get(0).getName())
-              : null;
 
-      if (response != null && LeonardoRuntimeStatus.ERROR.equals(response.getStatus())) {
-        log.warning(
-            String.format(
-                "Observed Leonardo runtime with unexpected error status:\n%s",
-                response.getStatus()));
-      }
-
-      if (response != null) {
+      if (!responseList.isEmpty()){
+        response = leonardoNotebooksClient.getPersistentDisk(
+            googleProject, responseList.get(0).getName());
+        if (LeonardoDiskStatus.FAILED.equals(response.getStatus())) {
+          log.warning(
+              String.format(
+                  "Observed Leonardo persistent disk with unexpected failed status:\n%s",
+                  response.getStatus()));
+        }
         return ResponseEntity.ok(leonardoMapper.toApiDisk(response));
-
       } else {
-        return ResponseEntity.ok(null);
+        return ResponseEntity.notFound().build();
       }
-
     } catch (NotFoundException e) {
-      return (ResponseEntity<Disk>) ResponseEntity.notFound();
+      return ResponseEntity.notFound().build();
     }
   }
 
@@ -93,8 +86,9 @@ public class DiskController implements DiskApiDelegate {
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    Disk disk = getDisk(workspaceNamespace).getBody();
-    if (disk != null) {
+    ResponseEntity<Disk> response = getDisk(workspaceNamespace);
+    if (response.getStatusCode() != HttpStatus.NOT_FOUND) {
+      Disk disk = getDisk(workspaceNamespace).getBody();
       leonardoNotebooksClient.deletePersistentDisk(dbWorkspace.getGoogleProject(), disk.getName());
     } else {
       log.warning(
@@ -110,8 +104,19 @@ public class DiskController implements DiskApiDelegate {
   public ResponseEntity<EmptyResponse> updateDisk(
       String workspaceNamespace, String diskName, Integer diskSize) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
     leonardoNotebooksClient.updatePersistentDisk(
         dbWorkspace.getGoogleProject(), diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private DbWorkspace lookupWorkspace(String workspaceNamespace)
+      throws org.pmiops.workbench.exceptions.NotFoundException {
+    return workspaceDao
+        .getByNamespace(workspaceNamespace)
+        .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
   }
 }
