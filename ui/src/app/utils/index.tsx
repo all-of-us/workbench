@@ -374,6 +374,22 @@ export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
 
+
+export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
+  for (const fieldGetter of fieldsToCompare) {
+    console.log("prop compare: ", fieldGetter(currProps), fieldGetter(prevProps));
+    if (!fieldGetter(currProps)) {
+      return false;
+    }
+
+    if (fieldGetter(currProps) !== fieldGetter(prevProps)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 // Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
