@@ -6,8 +6,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
@@ -68,6 +68,7 @@ const actionCards = [
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
+  urlParams: any;
 }
 
 interface State {
@@ -75,7 +76,11 @@ interface State {
   cohortLoading: boolean;
 }
 
-export const CohortActions = fp.flow(withCurrentWorkspace(), withNavigation)(
+export const CohortActions = fp.flow(
+  withCurrentWorkspace(),
+  withUrlParams(),
+  withNavigation
+)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -83,19 +88,29 @@ export const CohortActions = fp.flow(withCurrentWorkspace(), withNavigation)(
     }
 
     componentDidMount(): void {
+      console.log("Mounting CohortActions");
       this.props.hideSpinner();
-      const cid = urlParamsStore.getValue().cid;
-      this.setState({cohortLoading: true});
-      if (cid) {
-        const {namespace, id} = this.props.workspace;
-        cohortsApi().getCohort(namespace, id, cid).then(c => {
-          if (c) {
-            this.setState({cohort: c, cohortLoading: false});
-          } else {
-            this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts']);
-          }
-        });
+
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      if (!this.props.workspace.namespace || !this.props.workspace.id || !this.props.urlParams.cid) {
+        return;
       }
+
+      if (this.props.workspace.namespace === prevProps.workspace.namespace && this.props.workspace.id === prevProps.workspace.id && this.props.urlParams.cid === prevProps.urlParams.cid) {
+        return;
+      }
+
+      this.setState({cohortLoading: true});
+      const {namespace, id} = this.props.workspace;
+      cohortsApi().getCohort(namespace, id, this.props.urlParams.cid).then(c => {
+        if (c) {
+          this.setState({cohort: c, cohortLoading: false});
+        } else {
+          this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+        }
+      });
     }
 
     navigateTo(action: string): void {
@@ -122,6 +137,8 @@ export const CohortActions = fp.flow(withCurrentWorkspace(), withNavigation)(
     }
 
     render() {
+      console.log("Rendering CohortActions");
+
       const {cohort, cohortLoading} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {cohortLoading && <SpinnerOverlay />}

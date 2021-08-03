@@ -33,7 +33,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   const params = useParams();
   const query = useQuery();
 
-  console.log(params);
+  console.log(routeData);
 
   useEffect(() => {
     if (!intermediaryRoute) {
