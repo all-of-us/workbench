@@ -330,12 +330,18 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
     // TODO angular2react - is this the right place for this?
     console.log(currentAccessToken());
-    const conf = new Configuration({
-      basePath: getApiBaseUrl(),
-      accessToken: () => currentAccessToken()
-    });
-    bindApiClients(conf);
-    notebooksBindApiClients(conf);
+    bindApiClients(
+      new Configuration({
+        basePath: getApiBaseUrl(),
+        accessToken: () => currentAccessToken()
+      })
+    );
+    notebooksBindApiClients(
+      new Configuration({
+        basePath: environment.leoApiUrl,
+        accessToken: () => currentAccessToken()
+      })
+    );
     console.log('API Clients bound');
 
     // Enable test access token override via local storage. Intended to support
