@@ -31,6 +31,8 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
+import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -106,8 +108,18 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public List<PublicInstitutionDetails> getPublicInstitutionDetails() {
+    Map<Long, MembershipRequirement> registeredTierRequirementMap =
+        StreamSupport.stream(institutionTierRequirementDao.findAll().spliterator(), false)
+            .filter(t -> t.getAccessTier().getShortName().equals(REGISTERED_TIER_SHORT_NAME))
+            .collect(
+                Collectors.toMap(
+                    t -> t.getInstitution().getInstitutionId(),
+                    DbInstitutionTierRequirement::getMembershipRequirement));
     return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
-        .map(publicInstitutionDetailsMapper::dbToModel)
+        .map(
+            i ->
+                publicInstitutionDetailsMapper.dbToModel(
+                    i, registeredTierRequirementMap.get(i.getInstitutionId())))
         .collect(Collectors.toList());
   }
 

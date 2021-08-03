@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Configuration;
 public class ManageLeonardoRuntimes {
 
   private static final Logger log = Logger.getLogger(ManageLeonardoRuntimes.class.getName());
-  private static final String[] BILLING_SCOPES =
+  private static final String[] LEO_SCOPES =
       new String[] {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
@@ -61,8 +61,8 @@ public class ManageLeonardoRuntimes {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
     apiClient.setAccessToken(
-        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(BILLING_SCOPES)));
-    apiClient.setDebugging(true);
+        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(LEO_SCOPES)));
+    apiClient.setReadTimeout(60 * 1000);
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
