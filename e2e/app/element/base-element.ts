@@ -146,23 +146,25 @@ export default class BaseElement {
       while (Date.now() - startTime < 30 * 1000) {
         const viewport = await element.isIntersectingViewport();
         if (viewport) {
-          const box = await element.boundingBox();
-          const x = box.x + box.width / 2;
-          const y = box.y + box.height / 2;
-          if (previousX !== undefined && previousY !== undefined) {
-            // tslint:disable:triple-equals
-            if (
-              parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
-              parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
-            ) {
-              break;
+          const boundingBox = await element.boundingBox();
+          const boxModel = await element.boxModel();
+          if (boundingBox && boxModel) {
+            const x = boundingBox.x + boundingBox.width / 2;
+            const y = boundingBox.y + boundingBox.height / 2;
+            if (previousX !== undefined && previousY !== undefined) {
+              if (
+                parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
+                parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
+              ) {
+                break;
+              }
             }
+            previousX = x;
+            previousY = y;
           }
-          previousX = x;
-          previousY = y;
         }
         await element.hover();
-        await this.page.waitForTimeout(200);
+        await this.page.waitForTimeout(500);
       }
       return element.click(options);
     });
@@ -321,7 +323,7 @@ export default class BaseElement {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(timeout: number = 2 * 60 * 1000): Promise<void> {
+  async clickAndWait(timeout = 2 * 60 * 1000): Promise<void> {
     try {
       const navigationPromise = this.page.waitForNavigation({
         waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
@@ -374,9 +376,9 @@ export default class BaseElement {
     return this.waitForXPath(waitOptions);
   }
 
-  async exists(): Promise<boolean> {
+  async exists(timeout = 2000): Promise<boolean> {
     return this.page
-      .waitForXPath(this.xpath, { visible: true, timeout: 2000 })
+      .waitForXPath(this.xpath, { visible: true, timeout })
       .then(() => {
         return true;
       })
