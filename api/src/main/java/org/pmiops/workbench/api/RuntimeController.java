@@ -67,6 +67,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
   private static final String DELOC_PATTERN = "\\.ipynb$";
+
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;

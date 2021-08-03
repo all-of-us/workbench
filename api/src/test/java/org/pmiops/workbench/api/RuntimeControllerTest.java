@@ -396,7 +396,7 @@ public class RuntimeControllerTest extends SpringTest {
   }
 
   private String getPdName() {
-    return "all-of-us-pd".concat(Long.toString(user.getUserId()));
+    return "all-of-us-pd-".concat(Long.toString(user.getUserId()));
   }
 
   @Test
