@@ -46,6 +46,7 @@ import {
 } from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
 import {SignedOutNotFound} from "app/pages/not-found";
+import {disabledGuard, signInGuard} from "./routing/guards";
 
 declare const gapi: any;
 
@@ -57,19 +58,6 @@ declare global {
 }
 
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
-
-const signInGuard: Guard = {
-  allowed: (): boolean => {
-    // console.log(authStore.get().isSignedIn);
-    return authStore.get().isSignedIn;
-  },
-  redirectPath: '/login'
-};
-
-const disabledGuard = (userDisabled: boolean): Guard => ({
-  allowed: (): boolean => !userDisabled,
-  redirectPath: '/user-disabled'
-});
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
 const SignedOutNotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(SignedOutNotFound);
@@ -511,36 +499,33 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute exact path='/cookie-policy'>
-                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-              </AppRoute>
-              <AppRoute exact path='/login'>
-                <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/session-expired'>
-                <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/sign-in-again'>
-                <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/user-disabled'>
-                <UserDisabledPage routeData={{title: 'Disabled'}}/>
-              </AppRoute>
-              <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-                  <AppRoute
-                      path=''
-                      exact={false}>
-                    <SignedInPage
-                        intermediaryRoute={true}
-                        routeData={{}}
-                        // TODO angular2react - I think I might be able to just sign out and ignore this field
-                        subscribeToInactivitySignOut={subscribeToInactivitySignOut}
-                        signOut={signOut}
-                    />
-                  </AppRoute>
-              </ProtectedRoutes>
-            <AppRoute exact path="*">
-              <SignedOutNotFoundPage routeData={{title: 'Not Found'}}/>
+            <AppRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </AppRoute>
+            <AppRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute
+                path=''
+                exact={false}
+                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+            >
+              <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+                  // TODO angular2react - I think I might be able to just sign out and ignore this field
+                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                  signOut={signOut}
+              />
             </AppRoute>
           </Switch>
       </AppRouter>

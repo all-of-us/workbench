@@ -70,7 +70,6 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      // console.log(query);
       queryParamsStore.next(query);
     }
   }, [query]);
@@ -87,7 +86,7 @@ export const AppRouter = ({children}): React.ReactElement => <BrowserRouter>{chi
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-export const AppRoute = ({path, guards = [], exact= true, children}): React.ReactElement => {
+export const AppRoute = ({path, guards = [], exact, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return <Route exact={exact} path={path}>
