@@ -2,8 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
 import {
-  AppRoute,
-  Guard,
   ProtectedRoutes,
   withFullHeight,
   withRouteData
@@ -32,16 +30,9 @@ import {hasRegisteredAccess} from './utils/access-tiers';
 import {BreadcrumbType} from './utils/navigation';
 import {profileStore} from './utils/stores';
 import {NotFound} from "app/pages/not-found";
-
-const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
-  redirectPath: '/'
-};
-
-const expiredGuard: Guard = {
-  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
-  redirectPath: '/access-renewal'
-};
+import {Switch} from "react-router-dom";
+import {RouteAccess} from "./routing/guards";
+import {GuardedRoute} from "react-router-guards";
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -76,88 +67,98 @@ export const SignedInRoutes = React.memo(() => {
 
     return () => console.log('Unmounting SignedInRoutes');
   }, []);
-  return <React.Fragment>
-    <ProtectedRoutes guards={[expiredGuard]}>
-      <AppRoute path='/'>
-        <HomepagePage routeData={{title: 'Homepage'}}/>
-      </AppRoute>
-    </ProtectedRoutes>
-    <AppRoute path='/access-renewal'>
+  return <Switch>
+    <GuardedRoute exact path='/' meta={{
+      [RouteAccess.UNEXPIRED_ONLY]: true
+    }}>
+      <HomepagePage routeData={{title: 'Homepage'}}/>
+    </GuardedRoute>
+    <GuardedRoute exact path='/access-renewal'>
       <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/banner'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/banner'>
       <AdminBannerPage routeData={{title: 'Create Banner'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/institution'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/institution'>
       <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/institution/add'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/institution/add'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/institution/edit/:institutionId'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/institution/edit/:institutionId'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/user'> // included for backwards compatibility
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/user'> // included for backwards compatibility
       <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/review-workspace'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/review-workspace'>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/users'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/users'>
       <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/users/:usernameWithoutGsuiteDomain'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'>
       <UserAdminPage routeData={{title: 'User Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/user-audit'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/user-audit'>
       <UserAuditPage routeData={{title: 'User Audit'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/user-audit/:username'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/user-audit/:username'>
       <UserAuditPage routeData={{title: 'User Audit'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/workspaces'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/workspaces'>
       <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/workspaces/:workspaceNamespace'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/workspaces/:workspaceNamespace'>
       <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/workspace-audit'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/workspace-audit'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/workspace-audit/:workspaceNamespace'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/workspace-audit/:workspaceNamespace'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
-    </AppRoute>
-    <AppRoute path='/admin/workspaces/:workspaceNamespace/:nbName'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/admin/workspaces/:workspaceNamespace/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
-    </AppRoute>
-    <AppRoute path='/data-code-of-conduct'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
-    </AppRoute>
-    <AppRoute path='/profile'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/profile'>
       <ProfilePage routeData={{title: 'Profile'}}/>
-    </AppRoute>
-    <AppRoute path='/nih-callback'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/nih-callback'>
       <HomepagePage routeData={{title: 'Homepage'}}/>
-    </AppRoute>
-    <AppRoute path='/ras-callback'>
+    </GuardedRoute>
+    <GuardedRoute exact path='/ras-callback'>
       <HomepagePage routeData={{title: 'Homepage'}}/>
-    </AppRoute>
-    <ProtectedRoutes guards={[expiredGuard, registrationGuard]}>
-      <AppRoute path='/library'>
-        <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
-      </AppRoute>
-      <AppRoute path='/workspaces'>
-        <WorkspaceListPage routeData={{title: 'View Workspaces', breadcrumb: BreadcrumbType.Workspaces}}/>
-      </AppRoute>
-      <AppRoute path='/workspaces/build'>
-        <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
-      </AppRoute>
-      <AppRoute path='/workspaces/:ns/:wsid' exact={false}>
-        <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
-      </AppRoute>
-    </ProtectedRoutes>
-    <AppRoute path="*">
+    </GuardedRoute>
+    <GuardedRoute exact path='/library' meta={{
+      [RouteAccess.UNEXPIRED_ONLY]: true,
+      [RouteAccess.REGISTERED_ONLY]: true
+    }}>
+      <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
+    </GuardedRoute>
+    <GuardedRoute exact path='/workspaces' meta={{
+      [RouteAccess.UNEXPIRED_ONLY]: true,
+      [RouteAccess.REGISTERED_ONLY]: true
+    }}>
+      <WorkspaceListPage routeData={{title: 'View Workspaces', breadcrumb: BreadcrumbType.Workspaces}}/>
+    </GuardedRoute>
+    <GuardedRoute exact path='/workspaces/build' meta={{
+      [RouteAccess.UNEXPIRED_ONLY]: true,
+      [RouteAccess.REGISTERED_ONLY]: true
+    }}>
+      <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
+    </GuardedRoute>
+    <GuardedRoute path='/workspaces/:ns/:wsid' exact={false} meta={{
+      [RouteAccess.UNEXPIRED_ONLY]: true,
+      [RouteAccess.REGISTERED_ONLY]: true
+    }}>
+      <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
+    </GuardedRoute>
+    <GuardedRoute>
       <NotFoundPage routeData={{title: 'Not Found'}}/>
-    </AppRoute>
-  </React.Fragment>;
+    </GuardedRoute>
+  </Switch>;
 });

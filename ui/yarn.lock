@@ -8556,6 +8556,13 @@ react-router-dom@^5.1.2:
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
 
+react-router-guards@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-router-guards/-/react-router-guards-1.0.2.tgz#2e6d36c50bc2c8927dc366dc204c45fbfb11ae85"
+  integrity sha512-RuNR+1sa7M96Jc3/hQxYw1E1ItYRUGFn+MKSoHSYCoWm6/JneA0z7C5spC9211FlkVXm79nonNtGy7exHSyKbA==
+  dependencies:
+    tiny-invariant "^1.0.4"
+
 react-router@5.1.2, react-router@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.1.2.tgz#6ea51d789cb36a6be1ba5f7c0d48dd9e817d3418"
@@ -10258,7 +10265,7 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
-tiny-invariant@^1.0.2:
+tiny-invariant@^1.0.2, tiny-invariant@^1.0.4:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
   integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==

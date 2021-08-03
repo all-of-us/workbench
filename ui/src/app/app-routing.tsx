@@ -7,10 +7,7 @@ import {Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {
-  AppRoute,
   AppRouter,
-  Guard,
-  ProtectedRoutes,
   withRouteData
 } from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
@@ -45,7 +42,14 @@ import {
   urlParamsStore
 } from './utils/navigation';
 import {buildPageTitleForEnvironment} from './utils/title';
-import {SignedOutNotFound} from "app/pages/not-found";
+import {GuardedRoute, GuardProvider} from "react-router-guards";
+import {
+  disabledGuard,
+  expiredGuard, RouteAccess,
+  registrationGuard,
+  signInGuard
+} from "./routing/guards";
+import {NotFound} from "./pages/not-found";
 
 declare const gapi: any;
 
@@ -58,21 +62,8 @@ declare global {
 
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
-const signInGuard: Guard = {
-  allowed: (): boolean => {
-    // console.log(authStore.get().isSignedIn);
-    return authStore.get().isSignedIn;
-  },
-  redirectPath: '/login'
-};
-
-const disabledGuard = (userDisabled: boolean): Guard => ({
-  allowed: (): boolean => !userDisabled,
-  redirectPath: '/user-disabled'
-});
-
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
-const SignedOutNotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(SignedOutNotFound);
+const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
@@ -488,6 +479,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     <NotificationModal/>
     {
       isCookiesEnabled && <AppRouter>
+        <GuardProvider guards={[signInGuard, disabledGuard, registrationGuard, expiredGuard]} error={NotFoundPage}>
         {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
         {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
         {/* It should be noted that the reason this is currently working is because Switch only */}
@@ -495,38 +487,44 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute exact path='/cookie-policy'>
-                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-              </AppRoute>
-              <AppRoute exact path='/login'>
-                <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/session-expired'>
-                <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/sign-in-again'>
-                <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute exact path='/user-disabled'>
-                <UserDisabledPage routeData={{title: 'Disabled'}}/>
-              </AppRoute>
-              <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-                  <AppRoute
-                      path=''
-                      exact={false}>
-                    <SignedInPage
-                        intermediaryRoute={true}
-                        routeData={{}}
-                        // TODO angular2react - I think I might be able to just sign out and ignore this field
-                        subscribeToInactivitySignOut={subscribeToInactivitySignOut}
-                        signOut={signOut}
-                    />
-                  </AppRoute>
-              </ProtectedRoutes>
-            <AppRoute exact path="*">
-              <SignedOutNotFoundPage routeData={{title: 'Not Found'}}/>
-            </AppRoute>
+            <GuardedRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </GuardedRoute>
+            <GuardedRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+            </GuardedRoute>
+            <GuardedRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </GuardedRoute>
+            <GuardedRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </GuardedRoute>
+            <GuardedRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </GuardedRoute>
+            <GuardedRoute
+                path='/'
+                exact={false}
+                meta={{
+                  [RouteAccess.SIGNED_IN_ONLY]: true,
+                  userSignedIn: authStore.get().isSignedIn,
+                  [RouteAccess.ENABLED_ONLY]: true,
+                  userDisabled: isUserDisabled
+                }}
+            >
+              <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+                  // TODO angular2react - I think I might be able to just sign out and ignore this field
+                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                  signOut={signOut}
+              />
+            </GuardedRoute>
+            <GuardedRoute>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
+            </GuardedRoute>
           </Switch>
+        </GuardProvider>
       </AppRouter>
     }
     {

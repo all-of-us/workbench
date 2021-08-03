@@ -19,6 +19,7 @@
     "module": "es2015",
     "baseUrl": "./src",
     "jsx": "react",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   }
 }

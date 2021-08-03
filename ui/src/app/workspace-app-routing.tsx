@@ -1,10 +1,10 @@
 import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
-import {AppRoute, withRouteData} from 'app/components/app-router';
+import {withRouteData} from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {useRouteMatch} from 'react-router-dom';
+import {Switch, useRouteMatch} from 'react-router-dom';
 import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
@@ -23,6 +23,7 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {BreadcrumbType} from './utils/navigation';
 import {NotFound} from "app/pages/not-found";
+import {GuardedRoute} from "react-router-guards";
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(withRouteData, withRoutingSpinner)(CohortActions);
@@ -54,8 +55,8 @@ export const WorkspaceRoutes = React.memo(() => {
 
     return () => console.log('Unmounting WorkspaceRoutes');
   }, []);
-  return <React.Fragment>
-    <AppRoute path={`${path}/about`}>
+  return <Switch>
+    <GuardedRoute exact path={`${path}/about`}>
       <WorkspaceAboutPage
           routeData={{
             title: 'View Workspace Details',
@@ -64,8 +65,8 @@ export const WorkspaceRoutes = React.memo(() => {
             pageKey: 'about'
           }}
       />
-    </AppRoute>
-    <AppRoute path={`${path}/duplicate`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/duplicate`}>
       <WorkspaceEditPage
           routeData={{
             title: 'Duplicate Workspace',
@@ -74,8 +75,8 @@ export const WorkspaceRoutes = React.memo(() => {
           }}
           workspaceEditMode={WorkspaceEditMode.Duplicate}
       />
-    </AppRoute>
-    <AppRoute path={`${path}/edit`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/edit`}>
       <WorkspaceEditPage
           routeData={{
             title: 'Edit Workspace',
@@ -84,16 +85,16 @@ export const WorkspaceRoutes = React.memo(() => {
           }}
           workspaceEditMode={WorkspaceEditMode.Edit}
       />
-    </AppRoute>
-    <AppRoute path={`${path}/notebooks`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/notebooks`}>
       <NotebookListPage routeData={{
         title: 'View Notebooks',
         pageKey: 'notebooks',
         workspaceNavBarTab: 'notebooks',
         breadcrumb: BreadcrumbType.Workspace
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/notebooks/preview/:nbName`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/notebooks/preview/:nbName`}>
       <InteractiveNotebookPage routeData={{
         pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
@@ -101,8 +102,8 @@ export const WorkspaceRoutes = React.memo(() => {
         workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/notebooks/:nbName`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/notebooks/:nbName`}>
       <NotebookRedirectPage routeData={{
         pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
         breadcrumb: BreadcrumbType.Notebook,
@@ -114,113 +115,113 @@ export const WorkspaceRoutes = React.memo(() => {
         workspaceNavBarTab: 'notebooks',
         minimizeChrome: true
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data`}>
       <DataComponentPage routeData={{
         title: 'Data Page',
         breadcrumb: BreadcrumbType.Workspace,
         workspaceNavBarTab: 'data',
         pageKey: 'data'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/data-sets`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/data-sets`}>
       <DataSetComponentPage routeData={{
         title: 'Dataset Page',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/data-sets/:dataSetId`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/data-sets/:dataSetId`}>
       <DataSetComponentPage routeData={{
         title: 'Edit Dataset',
         breadcrumb: BreadcrumbType.Dataset,
         workspaceNavBarTab: 'data',
         pageKey: 'datasetBuilder'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/build`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/build`}>
       <CohortPagePage routeData={{
         title: 'Build Cohort Criteria',
         breadcrumb: BreadcrumbType.CohortAdd,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/:cid/actions`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/:cid/actions`}>
       <CohortActionsPage routeData={{
         title: 'Cohort Actions',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortBuilder'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/:cid/review/participants`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/:cid/review/participants`}>
       <ParticipantsTablePage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/:cid/review/participants/:pid`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/:cid/review/participants/:pid`}>
       <DetailPagePage routeData={{
         title: 'Participant Detail',
         breadcrumb: BreadcrumbType.Participant,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipantDetail'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/:cid/review/cohort-description`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/:cid/review/cohort-description`}>
       <QueryReportPage routeData={{
         title: 'Review Cohort Description',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'cohortDescription'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/cohorts/:cid/review`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/cohorts/:cid/review`}>
       <CohortReviewPage routeData={{
         title: 'Review Cohort Participants',
         breadcrumb: BreadcrumbType.Cohort,
         workspaceNavBarTab: 'data',
         pageKey: 'reviewParticipants'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/concepts`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/concepts`}>
       <ConceptHomepagePage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
         pageKey: 'searchConceptSets'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/concepts/sets/:csid`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/concepts/sets/:csid`}>
       <ConceptSearchPage routeData={{
         title: 'Concept Set',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/concepts/:domain`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/concepts/:domain`}>
       <ConceptSearchPage routeData={{
         title: 'Search Concepts',
         breadcrumb: BreadcrumbType.SearchConcepts,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSets'
       }}/>
-    </AppRoute>
-    <AppRoute path={`${path}/data/concepts/sets/:csid/actions`}>
+    </GuardedRoute>
+    <GuardedRoute exact path={`${path}/data/concepts/sets/:csid/actions`}>
       <ConceptSetActionsPage routeData={{
         title: 'Concept Set Actions',
         breadcrumb: BreadcrumbType.ConceptSet,
         workspaceNavBarTab: 'data',
         pageKey: 'conceptSetActions'
       }}/>
-    </AppRoute>
-    <AppRoute path="*">
+    </GuardedRoute>
+    <GuardedRoute>
       <NotFoundPage routeData={{title: 'Not Found'}}/>
-    </AppRoute>
-  </React.Fragment>;
+    </GuardedRoute>
+  </Switch>;
 });
