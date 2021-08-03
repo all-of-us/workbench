@@ -22,7 +22,7 @@ export default class ShareModal extends Modal {
 
   async shareWithUser(userName: string, level: WorkspaceAccessLevel): Promise<void> {
     const timeout = 5000;
-    const findCollaboratorAddIcon = (name) => {
+    const findCollaboratorAddIcon = (name: string) => {
       return ClrIconLink.findByName(
         this.page,
         { type: ElementType.Icon, iconShape: 'plus-circle', containsText: name, ancestorLevel: 2 },
@@ -32,7 +32,7 @@ export default class ShareModal extends Modal {
     const addIcon = findCollaboratorAddIcon(userName);
 
     const dropDownXpath = this.getXpath() + '//*[@data-test-id="drop-down"][.//clr-icon[@shape="plus-circle"]]';
-    const existsDropDown = async (timeout): Promise<boolean> => {
+    const existsDropDown = async (timeout: number): Promise<boolean> => {
       return this.page
         .waitForXPath(dropDownXpath, { visible: true, timeout })
         .then(() => {
@@ -43,12 +43,12 @@ export default class ShareModal extends Modal {
         });
     };
 
-    const waitForDropDownClose = async () => {
+    const waitForDropDownClose = async (): Promise<void> => {
       await waitWhileLoading(this.page);
       await this.page.waitForXPath(dropDownXpath, { hidden: true });
     };
 
-    const pickUserRole = async (name) => {
+    const pickUserRole = async (name: string): Promise<void> => {
       const roleInput = await this.waitForRoleSelectorForUser(name);
       await roleInput.click();
       const ownerOpt = await this.waitForRoleOption(level);
