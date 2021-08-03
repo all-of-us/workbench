@@ -98,25 +98,6 @@ export const AppRoute = ({path, guards = [], exact, children}): React.ReactEleme
   </Route>;
 };
 
-export const ProtectedRoutes = (
-  {guards, children}: {guards: Guard[], children: React.ReactElement | React.ReactElement[] }): React.ReactElement => {
-  console.log('Rendering Protected Routes');
-
-  // Pass the guards to the individual routes. Be sure not to overwrite any existing guards
-  const guardedChildren = fp.flow(
-    fp.flatten,
-    fp.toPairs,
-    fp.map(
-      ([key, element]: [string, React.ReactElement]) => {
-        const {guards: elementGuards = []} = element.props;
-        return React.cloneElement(element, {key, guards: [...guards, ...elementGuards ]});
-      }
-    )
-  )([children]); // Make sure children is an array - a single child will not be in an array
-
-  return <Fragment>{guardedChildren}</Fragment>;
-};
-
 export const Navigate = ({to}): React.ReactElement => {
   const location = useLocation();
   return <Redirect to={{pathname: to, state: {from: location}}}/>;

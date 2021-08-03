@@ -1,8 +1,9 @@
 import * as React from "react";
-import {AppRoute, AppRouter, Guard, ProtectedRoutes} from "app/components/app-router";
+import {AppRoute, AppRouter, Guard} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
-import {Redirect} from "react-router-dom";
+import {Redirect, Switch} from "react-router-dom";
+import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -54,6 +55,12 @@ describe('AppRouter', () => {
     // happening, so we'll check that the router is telling it to redirect to the right place
     expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
+
+  it('redirects to not found page on nonsense route', () => {
+    const wrapper = component(['/wharrgarbl'], 0);
+    waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('span').first().text()).toEqual('Not Found');
+  });
 });
 
 const alwaysFalseGuard: Guard = {
@@ -73,21 +80,17 @@ const otherAlwaysTrueGuard: Guard = {
 
 const makeAppRouter = () => {
   return <AppRouter>
-    <AppRoute path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
-    <AppRoute path='/punting'><TestComponent text={'Punting'}/></AppRoute>
-    <ProtectedRoutes guards={[alwaysFalseGuard]}>
-      <AppRoute path='/unreachable-path'><TestComponent text={'Unreachable Path'}/></AppRoute>
-    </ProtectedRoutes>
-    <ProtectedRoutes guards={[alwaysTrueGuard]}>
-      <AppRoute path='/protected-route'><TestComponent text={'Protected Route'}/></AppRoute>
-      <AppRoute path='/other-protected-route'><TestComponent text={'Other Protected Route'}/></AppRoute>
-      <ProtectedRoutes guards={[otherAlwaysTrueGuard]}>
-        <AppRoute path='/nested-protected-route'><TestComponent text={'Nested Protected Route'}/></AppRoute>
-      </ProtectedRoutes>
-      <ProtectedRoutes guards={[alwaysFalseGuard]}>
-        <AppRoute path='/nested-unreachable-path'><TestComponent text={'Unreachable Path'}/></AppRoute>
-      </ProtectedRoutes>
-    </ProtectedRoutes>
+    <Switch>
+      <AppRoute exact path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
+      <AppRoute exact path='/punting'><TestComponent text={'Punting'}/></AppRoute>
+      <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
+      <AppRoute exact path='/protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Protected Route'}/></AppRoute>
+      <AppRoute exact path='/other-protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Other Protected Route'}/></AppRoute>
+      <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}><TestComponent text={'Nested Protected Route'}/></AppRoute>
+      <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
+      <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
+      <AppRoute exact={false} path='*'><Redirect to='/not-found'/></AppRoute>
+    </Switch>
   </AppRouter>
 }
 
