@@ -70,6 +70,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
   useEffect(() => {
     if (!intermediaryRoute) {
+      // console.log(query);
       queryParamsStore.next(query);
     }
   }, [query]);
