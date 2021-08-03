@@ -2,6 +2,7 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
+import {ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 import {TextArea, TextInputWithLabel} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -16,7 +17,6 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
-import {serverConfigStore} from 'app/utils/stores';
 import {
   getControlledTierConfig,
   getControlledTierEmailAddresses,
@@ -29,6 +29,7 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {
   Institution,
   InstitutionMembershipRequirement,
@@ -36,10 +37,9 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {ControlledTierBadge, RegisteredTierBadge} from "../../components/icons";
-import {InputSwitch} from 'primereact/inputswitch';
 
 const styles = reactStyles({
   label: {
@@ -71,9 +71,21 @@ const styles = reactStyles({
     width: '2rem',
     height: '1.125rem',
     borderRadius: '0.31rem',
-    onColor:'#080',
+    onColor: '#080',
   },
 });
+
+const css = `
+  body .p-inputswitch {
+    height: 18px;
+    width: 33px;
+    border-radius: 15px;
+    font-size:11px;
+  }
+  body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+    background-color: #659F3D;
+ }
+`;
 
 enum InstitutionMode {
   ADD,
@@ -165,9 +177,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   validateRtEmailAddresses() {
     const emailAddresses = getRegisteredTierEmailAddresses(this.state.institution);
     const updatedEmailAddress = emailAddresses.filter(
-        emailAddress => {
-          return emailAddress !== '' || !!emailAddress;
-        });
+      emailAddress => emailAddress !== '' || !!emailAddress);
     const invalidRtEmailAddress = this.getInvalidEmailAddresses(updatedEmailAddress);
 
     this.setState(fp.set(['institution', 'tierConfigs'], updateRtEmailAddresses(this.state.institution, updatedEmailAddress)));
@@ -184,9 +194,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   validateCtEmailAddresses() {
     const emailAddresses = getControlledTierEmailAddresses(this.state.institution);
     const updatedEmailAddress = emailAddresses.filter(
-        emailAddress => {
-          return emailAddress !== '' || !!emailAddress;
-        });
+      emailAddress => emailAddress !== '' || !!emailAddress);
     const invalidCtEmailAddress = this.getInvalidEmailAddresses(updatedEmailAddress);
 
     this.setState(fp.set(['institution', 'tierConfigs'], updateCtEmailAddresses(this.state.institution, updatedEmailAddress)));
@@ -284,10 +292,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     // When switch from disable to enabled, set tier requirement from NOACCESS to DOMAINS with empty domain list.
     const ctTierConfig = {
       ...getControlledTierConfig(this.state.institution),
-      membershipRequirement: enableCtAccess.value === true ? InstitutionMembershipRequirement.ADDRESSES : InstitutionMembershipRequirement.NOACCESS,
+      membershipRequirement: enableCtAccess.value === true ?
+          InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
       eraRequired: true
     };
-    // For now, only RT requirement is supported, so fine to set tierEmailAddresses to an single element array.
     this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
@@ -308,7 +316,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   formatEmail(emailInput) {
-    return emailInput.split(/[,\n]+/).map(email => email.trim())
+    return emailInput.split(/[,\n]+/).map(email => email.trim());
   }
 
   // Check if the fields have not been edited
@@ -453,6 +461,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       tierEmailDomain: {truthiness: true}
     });
     return <div>
+      <style>{css}</style>
       <FadeBox style={{marginTop: '1rem', marginLeft: '1rem', width: '1239px'}}>
          <FlexRow>
            <Scroll
@@ -552,7 +561,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                     {this.state.invalidRtEmailDomainsMsg}
                   </div>}
                 </FlexColumn>}
-                <p style={{color: colors.primary, fontSize:'12px', lineHeight:'18px'}}>
+                <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
                   Enter one domain per line. <br/>
                   Note that subdomains are not included, so “university.edu” <br/>
                   matches alice@university.edu but not bob@med.university.edu.
@@ -614,7 +623,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                     {this.state.invalidCtEmailDomainsMsg}
                   </div>}
                 </FlexColumn>}
-                <p style={{color: colors.primary, fontSize:'12px', lineHeight:'18px'}}>
+                <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
                   Enter one domain per line. <br/>
                   Note that subdomains are not included, so “university.edu” <br/>
                   matches alice@university.edu but not bob@med.university.edu.

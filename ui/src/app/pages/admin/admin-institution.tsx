@@ -98,11 +98,11 @@ export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, S
 
   renderAccessTiers(row, col) {
     let tiers = '';
-    if(getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-      tiers += 'Registered'
+    if (getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += 'Registered';
     }
-    if(getControlledTierConfig(row) && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-      tiers += ',Controlled'
+    if (getControlledTierConfig(row) && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += ',Controlled';
     }
     return tiers;
   }

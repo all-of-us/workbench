@@ -67,15 +67,15 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
 };
 
 function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
-  const defaultTierConfig : InstitutionTierConfig = {
+  const defaultTierConfig: InstitutionTierConfig = {
     accessTierShortName: accessTier,
-        membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
-        eraRequired: true,
-        emailAddresses: [],
-        emailDomains: []
-  }
+    membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+    eraRequired: true,
+    emailAddresses: [],
+    emailDomains: []
+  };
   if (!institution.tierConfigs || !institution.tierConfigs.find(t => t.accessTierShortName === accessTier)) {
-    return defaultTierConfig
+    return defaultTierConfig;
   }
   return institution.tierConfigs.find(t => t.accessTierShortName === accessTier);
 }
