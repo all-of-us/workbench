@@ -34,8 +34,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
@@ -252,6 +254,13 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
+    GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
+    if (gceWithPdConfig != null) {
+      PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
+      if (persistentDiskRequest != null && persistentDiskRequest.getName().isEmpty()) {
+        persistentDiskRequest.setName(userProvider.get().generatePDName());
+      }
+    }
     long configCount =
         Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
             .filter(c -> c != null)
@@ -259,10 +268,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (configCount != 1) {
       throw new BadRequestException(
           "Exactly one of GceConfig or DataprocConfig or GceWithPdConfig must be provided");
-    }
-
-    if (runtime.getGceWithPdConfig() != null) {
-      runtime.getGceWithPdConfig().getPersistentDisk().setName(userProvider.get().getPDName());
     }
 
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);

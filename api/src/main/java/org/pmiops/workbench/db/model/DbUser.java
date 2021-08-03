@@ -1,12 +1,14 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -34,6 +36,7 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
+  @VisibleForTesting static final int PD_UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
 
@@ -537,7 +540,12 @@ public class DbUser {
 
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
-  public String getPDName() {
-    return PD_NAME_PREFIX + getUserId();
+  public String generatePDName() {
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PD_UUID_SUFFIX_SIZE);
+    return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }
