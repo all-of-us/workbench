@@ -11,14 +11,26 @@ import {
   AppRouter,
   withRouteData
 } from 'app/components/app-router';
+import {NotificationModal} from 'app/components/modals';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
+import {SignIn} from 'app/pages/login/sign-in';
 import {NotFound} from 'app/pages/not-found';
 import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
+import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
+import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from 'app/utils/analytics';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {
+  currentWorkspaceStore,
+  nextWorkspaceWarmupStore,
+  signInStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {
   authStore,
   routeDataStore,
@@ -27,24 +39,12 @@ import {
   stackdriverErrorReporterStore,
   useStore
 } from 'app/utils/stores';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import 'rxjs/Rx';
-import {NotificationModal} from '../components/modals';
-import {SignIn} from '../pages/login/sign-in';
 import {disabledGuard, signInGuard} from './guards';
-import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from '../services/swagger-fetch-clients';
-import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from '../utils/analytics';
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from '../utils/cookies';
-import {ExceededActionCountError, LeoRuntimeInitializer} from '../utils/leo-runtime-initializer';
-import {
-  currentWorkspaceStore,
-  nextWorkspaceWarmupStore,
-  signInStore,
-  urlParamsStore
-} from '../utils/navigation';
-import {buildPageTitleForEnvironment} from '../utils/title';
 
 declare const gapi: any;
 
