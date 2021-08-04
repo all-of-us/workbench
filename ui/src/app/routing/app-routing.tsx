@@ -9,17 +9,28 @@ import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import {
   AppRoute,
   AppRouter,
-  Guard,
-  ProtectedRoutes,
   withRouteData
 } from 'app/components/app-router';
+import {NotificationModal} from 'app/components/modals';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
+import {SignIn} from 'app/pages/login/sign-in';
+import {NotFound} from 'app/pages/not-found';
 import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
+import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
+import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from 'app/utils/analytics';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {
+  currentWorkspaceStore,
+  nextWorkspaceWarmupStore,
+  signInStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {
   authStore,
   routeDataStore,
@@ -28,23 +39,12 @@ import {
   stackdriverErrorReporterStore,
   useStore
 } from 'app/utils/stores';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import 'rxjs/Rx';
-import {NotificationModal} from './components/modals';
-import {SignIn} from './pages/login/sign-in';
-import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from './services/swagger-fetch-clients';
-import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from './utils/analytics';
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from './utils/cookies';
-import {ExceededActionCountError, LeoRuntimeInitializer} from './utils/leo-runtime-initializer';
-import {
-  currentWorkspaceStore,
-  nextWorkspaceWarmupStore,
-  signInStore,
-  urlParamsStore
-} from './utils/navigation';
-import {buildPageTitleForEnvironment} from './utils/title';
+import {disabledGuard, signInGuard} from './guards';
 
 declare const gapi: any;
 
@@ -57,20 +57,8 @@ declare global {
 
 const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
-const signInGuard: Guard = {
-  allowed: (): boolean => {
-    // console.log(authStore.get().isSignedIn);
-    return authStore.get().isSignedIn;
-  },
-  redirectPath: '/login'
-};
-
-const disabledGuard = (userDisabled: boolean): Guard => ({
-  allowed: (): boolean => !userDisabled,
-  redirectPath: '/user-disabled'
-});
-
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
+const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
 const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
@@ -509,34 +497,37 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* that they are a Route or a subclass of Route. */}
         {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
-              <AppRoute path='/cookie-policy'>
-                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-              </AppRoute>
-              <AppRoute path='/login'>
-                <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute path='/session-expired'>
-                <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute path='/sign-in-again'>
-                <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
-              </AppRoute>
-              <AppRoute path='/user-disabled'>
-                <UserDisabledPage routeData={{title: 'Disabled'}}/>
-              </AppRoute>
-              <ProtectedRoutes guards={[signInGuard, disabledGuard(isUserDisabled)]}>
-                  <AppRoute
-                      path=''
-                      exact={false}>
-                    <SignedInPage
-                        intermediaryRoute={true}
-                        routeData={{}}
-                        // TODO angular2react - I think I might be able to just sign out and ignore this field
-                        subscribeToInactivitySignOut={subscribeToInactivitySignOut}
-                        signOut={signOut}
-                    />
-                  </AppRoute>
-              </ProtectedRoutes>
+            <AppRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </AppRoute>
+            <AppRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+            </AppRoute>
+            <AppRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute exact path='/not-found'>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
+            </AppRoute>
+            <AppRoute
+                path=''
+                exact={false}
+                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+            >
+              <SignedInPage
+                  intermediaryRoute={true}
+                  routeData={{}}
+                  // TODO angular2react - I think I might be able to just sign out and ignore this field
+                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
+                  signOut={signOut}
+              />
+            </AppRoute>
           </Switch>
       </AppRouter>
     }

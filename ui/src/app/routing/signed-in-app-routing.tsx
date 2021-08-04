@@ -1,46 +1,34 @@
+import {
+  AppRoute,
+  withFullHeight,
+  withRouteData
+} from 'app/components/app-router';
+import {withRoutingSpinner} from 'app/components/with-routing-spinner';
+import {AccessRenewal} from 'app/pages/access/access-renewal';
+import {AdminBanner} from 'app/pages/admin/admin-banner';
+import {AdminInstitution} from 'app/pages/admin/admin-institution';
+import {AdminInstitutionEdit} from 'app/pages/admin/admin-institution-edit';
+import {AdminNotebookView} from 'app/pages/admin/admin-notebook-view';
+import {AdminReviewWorkspace} from 'app/pages/admin/admin-review-workspace';
+import {AdminUser} from 'app/pages/admin/admin-user';
+import {AdminUsers} from 'app/pages/admin/admin-users';
+import {AdminWorkspace} from 'app/pages/admin/admin-workspace';
+import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
+import {AdminWorkspaceSearch} from 'app/pages/admin/admin-workspace-search';
+import {UserAudit} from 'app/pages/admin/user-audit';
+import {Homepage} from 'app/pages/homepage/homepage';
+import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
+import {ProfileComponent} from 'app/pages/profile/profile-component';
+import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {WorkspaceLibrary} from 'app/pages/workspace/workspace-library';
+import {WorkspaceList} from 'app/pages/workspace/workspace-list';
+import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
+import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {
-  AppRoute,
-  Guard,
-  ProtectedRoutes,
-  withFullHeight,
-  withRouteData
-} from './components/app-router';
-import {withRoutingSpinner} from './components/with-routing-spinner';
-import {AccessRenewal} from './pages/access/access-renewal';
-import {AdminBanner} from './pages/admin/admin-banner';
-import {AdminInstitution} from './pages/admin/admin-institution';
-import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
-import {AdminNotebookView} from './pages/admin/admin-notebook-view';
-import {AdminReviewWorkspace} from './pages/admin/admin-review-workspace';
-import {AdminUser} from './pages/admin/admin-user';
-import {AdminUsers} from './pages/admin/admin-users';
-import {AdminWorkspace} from './pages/admin/admin-workspace';
-import {WorkspaceAudit} from './pages/admin/admin-workspace-audit';
-import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
-import {UserAudit} from './pages/admin/user-audit';
-import {Homepage} from './pages/homepage/homepage';
-import {DataUserCodeOfConduct} from './pages/profile/data-user-code-of-conduct';
-import {ProfileComponent} from './pages/profile/profile-component';
-import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceLibrary} from './pages/workspace/workspace-library';
-import {WorkspaceList} from './pages/workspace/workspace-list';
-import {WorkspaceWrapper} from './pages/workspace/workspace-wrapper';
-import {hasRegisteredAccess} from './utils/access-tiers';
-import {BreadcrumbType} from './utils/navigation';
-import {profileStore} from './utils/stores';
-
-const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
-  redirectPath: '/'
-};
-
-const expiredGuard: Guard = {
-  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
-  redirectPath: '/access-renewal'
-};
+import {Redirect, Switch} from 'react-router-dom';
+import {expiredGuard, registrationGuard} from './guards';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -74,85 +62,84 @@ export const SignedInRoutes = React.memo(() => {
 
     return () => console.log('Unmounting SignedInRoutes');
   }, []);
-  return <React.Fragment>
-    <ProtectedRoutes guards={[expiredGuard]}>
-      <AppRoute path='/'>
-        <HomepagePage routeData={{title: 'Homepage'}}/>
-      </AppRoute>
-    </ProtectedRoutes>
-    <AppRoute path='/access-renewal'>
+  return <Switch>
+    <AppRoute exact path='/' guards={[expiredGuard]}>
+      <HomepagePage routeData={{title: 'Homepage'}}/>
+    </AppRoute>
+    <AppRoute exact path='/access-renewal'>
       <AccessRenewalPage routeData={{title: 'Access Renewal'}}/>
     </AppRoute>
-    <AppRoute path='/admin/banner'>
+    <AppRoute exact path='/admin/banner'>
       <AdminBannerPage routeData={{title: 'Create Banner'}}/>
     </AppRoute>
-    <AppRoute path='/admin/institution'>
+    <AppRoute exact path='/admin/institution'>
       <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/institution/add'>
+    <AppRoute exact path='/admin/institution/add'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/institution/edit/:institutionId'>
+    <AppRoute exact path='/admin/institution/edit/:institutionId'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/user'> // included for backwards compatibility
+    <AppRoute exact path='/admin/user'> // included for backwards compatibility
       <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
     </AppRoute>
-    <AppRoute path='/admin/review-workspace'>
+    <AppRoute exact path='/admin/review-workspace'>
       <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>
     </AppRoute>
-    <AppRoute path='/admin/users'>
+    <AppRoute exact path='/admin/users'>
       <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
     </AppRoute>
-    <AppRoute path='/admin/users/:usernameWithoutGsuiteDomain'>
+    <AppRoute exact path='/admin/users/:usernameWithoutGsuiteDomain'>
       <UserAdminPage routeData={{title: 'User Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/user-audit'>
+    <AppRoute exact path='/admin/user-audit'>
       <UserAuditPage routeData={{title: 'User Audit'}}/>
     </AppRoute>
-    <AppRoute path='/admin/user-audit/:username'>
+    <AppRoute exact path='/admin/user-audit/:username'>
       <UserAuditPage routeData={{title: 'User Audit'}}/>
     </AppRoute>
-    <AppRoute path='/admin/workspaces'>
+    <AppRoute exact path='/admin/workspaces'>
       <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/workspaces/:workspaceNamespace'>
+    <AppRoute exact path='/admin/workspaces/:workspaceNamespace'>
       <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>
     </AppRoute>
-    <AppRoute path='/admin/workspace-audit'>
+    <AppRoute exact path='/admin/workspace-audit'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
     </AppRoute>
-    <AppRoute path='/admin/workspace-audit/:workspaceNamespace'>
+    <AppRoute exact path='/admin/workspace-audit/:workspaceNamespace'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
     </AppRoute>
-    <AppRoute path='/admin/workspaces/:workspaceNamespace/:nbName'>
+    <AppRoute exact path='/admin/workspaces/:workspaceNamespace/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute path='/data-code-of-conduct'>
+    <AppRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute path='/profile'>
+    <AppRoute exact path='/profile'>
       <ProfilePage routeData={{title: 'Profile'}}/>
     </AppRoute>
-    <AppRoute path='/nih-callback'>
+    <AppRoute exact path='/nih-callback'>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
-    <AppRoute path='/ras-callback'>
+    <AppRoute exact path='/ras-callback'>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
-    <ProtectedRoutes guards={[expiredGuard, registrationGuard]}>
-      <AppRoute path='/library'>
-        <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
-      </AppRoute>
-      <AppRoute path='/workspaces'>
-        <WorkspaceListPage routeData={{title: 'View Workspaces', breadcrumb: BreadcrumbType.Workspaces}}/>
-      </AppRoute>
-      <AppRoute path='/workspaces/build'>
-        <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
-      </AppRoute>
-      <AppRoute path='/workspaces/:ns/:wsid' exact={false}>
-        <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>
-      </AppRoute>
-    </ProtectedRoutes>
-  </React.Fragment>;
+    <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
+      <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
+    </AppRoute>
+    <AppRoute exact path='/workspaces' guards={[expiredGuard, registrationGuard]}>
+      <WorkspaceListPage routeData={{title: 'View Workspaces', breadcrumb: BreadcrumbType.Workspaces}}/>
+    </AppRoute>
+    <AppRoute exact path='/workspaces/build' guards={[expiredGuard, registrationGuard]}>
+      <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
+    </AppRoute>
+    <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]}>
+      <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
+    </AppRoute>
+    <AppRoute exact path='*'>
+      <Redirect to={'/not-found'}/>
+    </AppRoute>
+  </Switch>;
 });
