@@ -9,6 +9,7 @@ import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {useEffect, useRef, useState} from 'react';
+
 import {QuickTourReact} from './quick-tour-modal';
 
 export const styles = reactStyles({
@@ -81,7 +82,8 @@ export const QuickTourAndVideos = (props: Props) => {
   // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
   // should be ~1128px
   const quickTourResourcesDiv = useRef<HTMLDivElement>(null);
-  const limit = () => quickTourResourcesDiv.current ? Math.floor(quickTourResourcesDiv.current.offsetWidth / 276) : 4;
+  const limit = () => quickTourResourcesDiv.current ?
+      Math.max(4, Math.floor(quickTourResourcesDiv.current.offsetWidth / 276)) : 4;
 
   return <React.Fragment>
       {showQuickTour && <QuickTourReact closeFunction={() => setShowQuickTour(false)} />}
@@ -114,20 +116,22 @@ export const QuickTourAndVideos = (props: Props) => {
                     {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit()).map((thumbnail, i) => {
                       return <React.Fragment key={i}>
                             <Clickable onClick={thumbnail.onClick}
-                                       data-test-id={'quick-tour-resource-' + i}>
+                                       data-test-id={'quick-tour-resource-' + (i + quickTourResourceOffset)}>
                                 <img style={{width: '11rem', marginRight: '0.5rem'}}
                                      src={thumbnail.src}/>
                             </Clickable>
                         </React.Fragment>;
                     })}
                     {quickTourResourceOffset > 0 && <Scroll
+                        data-test-id='scroll-left'
                         dir='left'
                         onClick={() => setQuickTourResourceOffset(quickTourResourceOffset - 1)}
                         style={{left: 0, marginTop: '2rem', position: 'absolute'}}
                     />}
                     {quickTourResourceOffset + limit() < quickTourResources.length && <Scroll
+                        data-test-id='scroll-right'
                         dir='right'
-                        onClick={() => setQuickTourResourceOffset(quickTourResourceOffset - 1)}
+                        onClick={() => setQuickTourResourceOffset(quickTourResourceOffset + 1)}
                         style={{marginTop: '2rem', position: 'absolute', right: 0}}
                     />}
                 </FlexRow>
