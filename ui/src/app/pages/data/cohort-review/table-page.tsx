@@ -424,7 +424,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      this.props.navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
+      this.props.navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build`, {queryParams: {cohortId: cid}});
     }
 
     onRowClick = (event: any) => {

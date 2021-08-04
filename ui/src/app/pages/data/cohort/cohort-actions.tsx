@@ -119,9 +119,12 @@ export const CohortActions = fp.flow(
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
+      let queryParams;
+
       switch (action) {
         case 'cohort':
-          url += `data/cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build`;
+          queryParams = {cohortId: cohort.id};
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;
@@ -135,7 +138,7 @@ export const CohortActions = fp.flow(
         case 'newCohort':
           url += `data/cohorts/build`;
       }
-      this.props.navigateByUrl(url);
+      this.props.navigateByUrl(url, {queryParams});
     }
 
     render() {

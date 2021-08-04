@@ -71,7 +71,7 @@ function getResourceUrl(resource: WorkspaceResource): string {
   const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
   return fp.cond([
-      [isCohort, r => `${workspacePrefix}/data/cohorts/build?cohortId=${r.cohort.id}`],
+      [isCohort, r => `${workspacePrefix}/data/cohorts/build?cohortId=${r.cohort.id}`], // TODO angular2react - this should use a queryParam object
       [isCohortReview, r => `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`],
       [isConceptSet, r => `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`],
       [isDataSet, r => `${workspacePrefix}/data/data-sets/${r.dataSet.id}`],

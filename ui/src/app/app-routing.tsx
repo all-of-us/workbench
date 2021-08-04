@@ -236,6 +236,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         // Disclaimer: console.log statements here are unlikely to captured by
         // Puppeteer, since it typically reloads the page immediately after
         // invoking this function.
+        console.log('token: ', token)
         if (token) {
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
           location.replace('/');

@@ -302,7 +302,7 @@ export const AccessRenewal = fp.flow(
         <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.ProfileConfirmation))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
-          onClick={() => navigateByUrl('profile?renewal=1')}
+          onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}
           wasBypassed={wasBypassed(ModuleNameEnum.ProfileConfirmation)} />
       </RenewalCard>
       {/* Publications */}
@@ -384,7 +384,7 @@ export const AccessRenewal = fp.flow(
         <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(ModuleNameEnum.DataUseAgreement))}
           actionButtonText='View & Sign'
           completedButtonText='Completed'
-          onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
+          onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}
           wasBypassed={wasBypassed(ModuleNameEnum.DataUseAgreement)}/>
       </RenewalCard>
     </div>

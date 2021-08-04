@@ -267,10 +267,8 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       const {namespace, id} = this.props.workspace;
       currentCohortSearchContextStore.next({domain: domain, searchTerms: this.state.currentSearchString, surveyName});
       let url = `/workspaces/${namespace}/${id}/data/concepts/${domain}`;
-      if (surveyName) {
-        url += `?survey=${encodeURIComponent(surveyName)}`;
-      }
-      this.props.navigateByUrl(url);
+
+      this.props.navigateByUrl(url, surveyName ? {queryParams: {survey: surveyName}} : {});
     }
 
     errorMessage() {
