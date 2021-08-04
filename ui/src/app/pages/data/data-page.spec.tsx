@@ -33,7 +33,6 @@ describe('DataPage', () => {
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
   });
-  
   const component = () => {
     return mount(<DataComponent hideSpinner={() => {}}
                                 showSpinner={() => {}}/>);
