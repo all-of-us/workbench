@@ -119,16 +119,18 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     };
 
     if (resources && wsMap) {
-      setTableData(resources.map(r => {
-        return {
-          menu: renderResourceMenu(r),
-          resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
-          resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
-          workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
-          formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
-          cdrVersionName: getCdrVersionName(r),
-        };
-      }));
+      setTableData(resources
+        .filter(r => wsMap.has(r.workspaceFirecloudName))
+        .map(r => {
+          return {
+            menu: renderResourceMenu(r),
+            resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
+            resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
+            workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
+            formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
+            cdrVersionName: getCdrVersionName(r),
+          };
+        }));
     }
   }, [resources, wsMap]);
 
