@@ -442,6 +442,27 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
+  public void test_emailValidation_null_address() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
+    assertThat(service.validateInstitutionalEmail(inst, null)).isFalse();
+  }
+
+  @Test
   public void test_emailValidation_domain() {
     final Institution inst =
         service.createInstitution(
@@ -468,7 +489,31 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_null() {
+  public void test_emailValidation_no_access() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
+
+    // fail even if address or domain matches
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_null_requirement() {
     final Institution inst =
         service.createInstitution(
             new Institution()
@@ -476,8 +521,7 @@ public class InstitutionServiceTest extends SpringTest {
                 .displayName("The Broad Institute")
                 .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
 
-    final DbUser user = userDao.save(new DbUser());
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
   }
 
   @Test
