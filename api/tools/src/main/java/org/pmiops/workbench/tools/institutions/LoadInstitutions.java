@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
-  InstitutionTierConfigMapperImpl.class,
 })
 @EnableTransactionManagement
 public class LoadInstitutions {

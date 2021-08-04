@@ -76,7 +76,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   /**
    * Note: this API is publicly-accessible since it is called during account creation.
    *
-   * @return Returns whether the email is a valid institutional member.
+   * @return Returns whether the email has valid institutional membership for the registered tier.
    */
   @Override
   public ResponseEntity<CheckEmailResponse> checkEmail(

@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
@@ -442,6 +443,27 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
+  public void test_emailValidation_null_address() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
+    assertThat(service.validateInstitutionalEmail(inst, null)).isFalse();
+  }
+
+  @Test
   public void test_emailValidation_domain() {
     final Institution inst =
         service.createInstitution(
@@ -468,16 +490,42 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
-  public void test_emailValidation_null() {
+  public void test_emailValidation_no_access() {
     final Institution inst =
         service.createInstitution(
             new Institution()
                 .shortName("Broad")
                 .displayName("The Broad Institute")
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
 
-    final DbUser user = userDao.save(new DbUser());
-    assertThat(service.validateInstitutionalEmail(inst, user.getContactEmail())).isFalse();
+    // fail even if address or domain matches
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_null_requirement() {
+    assertThrows(
+        ServerErrorException.class,
+        () -> {
+          final Institution inst =
+              service.createInstitution(
+                  new Institution()
+                      .shortName("Broad")
+                      .displayName("The Broad Institute")
+                      .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
+          service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk");
+        });
   }
 
   @Test

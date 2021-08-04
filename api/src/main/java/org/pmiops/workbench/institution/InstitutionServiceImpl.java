@@ -224,38 +224,66 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
-    InstitutionTierConfig rtConfig =
-        getTierConfigByTier(institution, REGISTERED_TIER_SHORT_NAME)
-            .orElseThrow(() -> new ServerErrorException("Registered tier requirement not found"));
+    final String accessTierShortName = REGISTERED_TIER_SHORT_NAME;
+    final InstitutionTierConfig tierConfig =
+        getTierConfigByTier(institution, accessTierShortName)
+            .orElseThrow(
+                () -> {
+                  String errMsg =
+                      String.format(
+                          "Institutional tier config not found for institution '%s' and tier '%s'",
+                          institution.getShortName(), accessTierShortName);
+                  return new ServerErrorException(errMsg);
+                });
 
-    // If the Institution's registered tier agreement requires email addresses confirm if the email
-    // address is in the allowed email list.
-    if (rtConfig.getMembershipRequirement() == InstitutionMembershipRequirement.ADDRESSES) {
-      final boolean validated =
-          getEmailAddressesByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME)
-              .contains(contactEmail);
-      log.info(
-          String.format(
-              "Contact email '%s' validated against registered tier with ADDRESSES requirement: "
-                  + "'%s': address %s",
-              contactEmail, institution.getShortName(), validated ? "MATCHED" : "DID NOT MATCH"));
-      return validated;
+    final boolean validated;
+    final String logMsg;
+    switch (tierConfig.getMembershipRequirement()) {
+      case NO_ACCESS:
+        validated = false;
+        logMsg =
+            String.format(
+                "Cannot validate email because the membership requirement for institution '%s' and tier '%s' is NO_ACCESS",
+                institution.getShortName(), accessTierShortName);
+        break;
+      case ADDRESSES:
+        validated =
+            getEmailAddressesByTierOrEmptySet(institution, accessTierShortName)
+                .contains(contactEmail);
+        logMsg =
+            String.format(
+                "Contact email '%s' validated against '%s' tier with ADDRESSES requirement: "
+                    + "'%s': address %s",
+                contactEmail,
+                accessTierShortName,
+                institution.getShortName(),
+                validated ? "MATCHED" : "DID NOT MATCH");
+        break;
+      case DOMAINS:
+        final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
+        validated =
+            getEmailDomainsByTierOrEmptySet(institution, accessTierShortName)
+                .contains(contactEmailDomain);
+        logMsg =
+            String.format(
+                "Contact email '%s' validated against '%s' tier with DOMAINS requirement '%s': "
+                    + "domain %s %s",
+                contactEmail,
+                accessTierShortName,
+                institution.getShortName(),
+                contactEmailDomain,
+                validated ? "MATCHED" : "DID NOT MATCH");
+        break;
+      default:
+        validated = false;
+        logMsg =
+            String.format(
+                "Cannot validate email because institution '%s' does not have a membership requirement for tier '%s'",
+                institution.getShortName(), accessTierShortName);
+        break;
     }
 
-    // If the Institution's registered tier agreement requires email domains, confirm if the contact
-    // email has valid/allowed domain
-    final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-    final boolean validated =
-        getEmailDomainsByTierOrEmptySet(institution, REGISTERED_TIER_SHORT_NAME)
-            .contains(contactEmailDomain);
-    log.info(
-        String.format(
-            "Contact email '%s' validated against registered tier with DOMAINS requirement '%s': "
-                + "domain %s %s",
-            contactEmail,
-            institution.getShortName(),
-            contactEmailDomain,
-            validated ? "MATCHED" : "DID NOT MATCH"));
+    log.info(logMsg);
     return validated;
   }
 
