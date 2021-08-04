@@ -1051,49 +1051,6 @@ export const RuntimePanel = fp.flow(
   }
 
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
-    let runtimeRequest: Runtime;
-
-    if(runtime.computeType === ComputeType.Dataproc) {
-      runtimeRequest = {
-        dataprocConfig: {
-          ...runtime.dataprocConfig,
-          masterMachineType: runtime.machine.name,
-          masterDiskSize: runtime.diskSize
-        }
-      }
-    } else if(!enablePD) {
-      runtimeRequest = {
-        gceConfig: {
-          machineType: runtime.machine.name,
-          diskSize: runtime.diskSize
-        }
-        }
-      } else {
-      runtimeRequest = {
-        gceWithPdConfig: {
-          bootDiskSize: 50,
-          machineType: runtime.machine.name,
-          persistentDisk: {
-            name: pdExists ? persistentDisk.name : '',
-            size: runtime.diskSize,
-            diskType: DiskType.Standard,
-            labels: {}
-          }
-        }
-      };
-
-    // If the selected runtime matches a preset, plumb through the appropriate configuration type.
-    runtimeRequest.configurationType = fp.get(
-        'runtimeTemplate.configurationType',
-        fp.find(
-            ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
-            runtimePresets)
-    ) || RuntimeConfigurationType.UserOverride;
-
-    return runtimeRequest;
-  };
-
-  const updateRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
       dataprocConfig: {
         ...runtime.dataprocConfig,
@@ -1112,7 +1069,6 @@ export const RuntimePanel = fp.flow(
 
     return runtimeRequest;
   };
-
 
   // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
