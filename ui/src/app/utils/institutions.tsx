@@ -29,14 +29,14 @@ export async function validateEmail(contactEmail: string, institutionShortName: 
   }
 }
 
-export const RestrictedDuaEmailMismatchErrorMessage = () => {
+export const EmailAddressMismatchErrorMessage = () => {
   return <div data-test-id='email-error-message' style={{color: colors.danger}}>
     The institution has authorized access only to select members.<br/>
     Please <a href='https://www.researchallofus.org/institutional-agreements' target='_blank'>
     click here</a> to request to be added to the institution</div>;
 };
 
-export const MasterDuaEmailMismatchErrorMessage = () => {
+export const EmailDomainMismatchErrorMessage = () => {
   return <div data-test-id='email-error-message' style={{color: colors.danger}}>
     Your email does not match your institution</div>;
 };
