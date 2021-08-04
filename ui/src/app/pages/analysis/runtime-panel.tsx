@@ -999,7 +999,8 @@ export const RuntimePanel = fp.flow(
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
-  const pdReduced = pdExists && selectedDiskSize < diskSize;
+  const pdSizeReduced = pdExists && selectedDiskSize < diskSize;
+  const pdSizeIncrease = pdExists && selectedDiskSize > diskSize;
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
@@ -1021,48 +1022,78 @@ export const RuntimePanel = fp.flow(
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
   }
+
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
-    // The logic here is tricky to be compatible
-    if (enablePD && (!pdExists || pdExists && pdReduced)) {
+    // Use gceConfig when PD feature is not enabled OR reduce PD size OR update an existing runtime with no PD attached.
+    // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up post launch PD when all existing running Runtime shutdonw.
+    if(!enablePD || pdSizeIncrease || (runtimeExists && !pdExists)) {
+      return {
+        gceConfig: {
+          machineType: runtime.machine.name,
+          diskSize: runtime.diskSize
+        }
+      };
+    } else {
       return {
         gceWithPdConfig: {
           bootDiskSize: 50,
           machineType: runtime.machine.name,
           persistentDisk: {
-            name: '',
+            // When reducing PD size, passing empty name to backend then API will create a new PD
+            name: pdSizeReduced ? '' : persistentDisk.name,
             size: runtime.diskSize,
             diskType: DiskType.Standard,
             labels: {}
+          }
+        }
+      }
+    }
+  }
 
+  const createRuntimeRequest = (runtime: RuntimeConfig) => {
+    let runtimeRequest: Runtime;
+
+    if(runtime.computeType === ComputeType.Dataproc) {
+      runtimeRequest = {
+        dataprocConfig: {
+          ...runtime.dataprocConfig,
+          masterMachineType: runtime.machine.name,
+          masterDiskSize: runtime.diskSize
+        }
+      }
+    } else if(!enablePD) {
+      runtimeRequest = {
+        gceConfig: {
+          machineType: runtime.machine.name,
+          diskSize: runtime.diskSize
+        }
+        }
+      } else {
+      runtimeRequest = {
+        gceWithPdConfig: {
+          bootDiskSize: 50,
+          machineType: runtime.machine.name,
+          persistentDisk: {
+            name: pdExists ? persistentDisk.name : '',
+            size: runtime.diskSize,
+            diskType: DiskType.Standard,
+            labels: {}
           }
         }
       };
-    } else {
-      if (enablePD && !runtimeExists) {
-        return {
-          gceWithPdConfig: {
-            bootDiskSize: 50,
-            machineType: runtime.machine.name,
-            persistentDisk: {
-              name: persistentDisk.name,
-              size: runtime.diskSize,
-              diskType: DiskType.Standard,
-              labels: {}
 
-            }
-          }
-        };
-      } else {
-        return {
-          gceConfig: {
-            machineType: runtime.machine.name,
-            diskSize: runtime.diskSize
-          }
-        };
-      }
-    }
+    // If the selected runtime matches a preset, plumb through the appropriate configuration type.
+    runtimeRequest.configurationType = fp.get(
+        'runtimeTemplate.configurationType',
+        fp.find(
+            ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
+            runtimePresets)
+    ) || RuntimeConfigurationType.UserOverride;
+
+    return runtimeRequest;
   };
-  const createRuntimeRequest = (runtime: RuntimeConfig) => {
+
+  const updateRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
       dataprocConfig: {
         ...runtime.dataprocConfig,
@@ -1073,14 +1104,15 @@ export const RuntimePanel = fp.flow(
 
     // If the selected runtime matches a preset, plumb through the appropriate configuration type.
     runtimeRequest.configurationType = fp.get(
-      'runtimeTemplate.configurationType',
-      fp.find(
-        ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
-        runtimePresets)
+        'runtimeTemplate.configurationType',
+        fp.find(
+            ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
+            runtimePresets)
     ) || RuntimeConfigurationType.UserOverride;
 
     return runtimeRequest;
   };
+
 
   // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
@@ -1361,7 +1393,7 @@ export const RuntimePanel = fp.flow(
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
                     onClick={() => setPanelContent(PanelContent.Delete)}>Delete Persistent Disk</Link>
-                {!pdReduced ? renderCreateButton() : renderNextButton()}
+                {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
               <Link
@@ -1372,7 +1404,7 @@ export const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-              {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
+              {!runtimeExists && !pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow>
         }
          </Fragment>],
