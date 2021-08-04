@@ -10,7 +10,6 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
@@ -78,7 +77,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<WorkbenchConfig> configProvider;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
-  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @TestConfiguration
   @Import({CohortBuilderMapperImpl.class})
@@ -104,8 +102,7 @@ public class CohortBuilderControllerTest extends SpringTest {
             personDao,
             surveyModuleDao,
             cohortBuilderMapper,
-            mySQLStopWordsProvider,
-            workbenchConfigProvider);
+            mySQLStopWordsProvider);
     controller =
         new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
@@ -125,7 +122,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   public void findCriteriaMenu() {
     WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
     mockConfig.featureFlags.enableStandardSourceDomains = false;
-    Mockito.when(workbenchConfigProvider.get()).thenReturn(mockConfig);
 
     DbCriteriaMenu dbCriteriaMenu =
         criteriaMenuDao.save(
@@ -139,7 +135,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .build());
     assertThat(
             controller
-                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .findCriteriaMenuOld(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
                 .getBody()
                 .getItems()
                 .get(0))
@@ -149,9 +145,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   //  TODO: Clean up name once feature flag enableStandardSourceDomains is removed
   @Test
   public void findCriteriaMenuStandardFeatureFlagTrue() {
-    WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
-    mockConfig.featureFlags.enableStandardSourceDomains = true;
-    Mockito.when(workbenchConfigProvider.get()).thenReturn(mockConfig);
     DbCBMenu dbCBMenu =
         cbMenuDao.save(
             DbCBMenu.builder()
