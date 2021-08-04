@@ -25,7 +25,6 @@ import {
   currentCohortStore,
   queryParamsStore
 } from 'app/utils/navigation';
-import {navigationGuardStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 import {Prompt} from 'react-router';
