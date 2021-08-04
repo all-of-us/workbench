@@ -9,4 +9,5 @@
     <runningAs username="liquibase"/>
   </preConditions>
   <include file="changelog-schema/db.changelog-v2-1.xml"/>
+  <include file="changelog-schema/db.changelog-v2-2-cb_menu.xml"/>
 </databaseChangeLog>
