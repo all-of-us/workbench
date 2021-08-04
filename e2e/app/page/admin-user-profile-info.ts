@@ -34,17 +34,17 @@ export const LabelAlias = {
 };
 
 export const FreeCreditSelectValue = {
-  300: '$300.00',
-  350: '$350.00',
-  400: '$400.00',
-  450: '$450.00',
-  500: '$500.00',
-  550: '$550.00',
-  600: '$600.00',
-  650: '$650.00',
-  700: '$700.00',
-  750: '$750.00',
-  800: '$800.00'
+  three: '$300.00',
+  three1: '$350.00',
+  four: '$400.00',
+  four1: '$450.00',
+  five: '$500.00',
+  five1: '$550.00',
+  six: '$600.00',
+  six1: '$650.00',
+  seven: '$700.00',
+  seven1: '$750.00',
+  eight: '$800.00'
 };
 
 export const InstitutionRoleSelectValue = {
@@ -168,5 +168,29 @@ export default class UserProfileInfo extends AuthenticatedPage {
   async selectVerifiedInstitution(selectTextValue: string): Promise<void> {
     const dropdown = SelectMenu.findByName(this.page, FieldSelector.VerifiedInstitutionSelect.textOption);
     return dropdown.select(selectTextValue);
+  }
+
+  // select a new Free credit value
+  async selectFreeCredits(selectTextValue: string): Promise<void> {
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.FreeCreditLimitSelect.textOption);
+    return dropdown.select(selectTextValue);
+  }
+
+   // verify that the updated free credit reflects in the FreeCreditUsed field
+   async updateFreeCredits(): Promise<void> {
+    await this.selectFreeCredits(FreeCreditSelectValue.six);
+    await this.getFreeCreditsLimitValue();
+    await this.getFreeCreditMaxValue();
+    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
+    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
+  }
+
+  // verify that when a different institute is selected an error message displays and the save button remains disabled
+  async updateVerifiedInstitute(): Promise<void> {
+    await this.selectVerifiedInstitution(FreeCreditSelectValue.six);
+    await this.getFreeCreditsLimitValue();
+    await this.getFreeCreditMaxValue();
+    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
+    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 }
