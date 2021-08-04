@@ -280,6 +280,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             String.format(
                 "Cannot validate email because institution '%s' does not have a membership requirement for tier '%s'",
                 institution.getShortName(), accessTierShortName);
+        break;
     }
 
     log.info(logMsg);
