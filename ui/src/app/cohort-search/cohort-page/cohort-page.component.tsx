@@ -103,7 +103,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     componentDidMount() {
       const {workspace: {id}, hideSpinner} = this.props;
       hideSpinner();
-      console.log("Mounting cohort page");
+      console.log('Mounting cohort page');
       this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
@@ -131,7 +131,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentWillUnmount() {
-      console.log("Unmounting cohort page");
+      console.log('Unmounting cohort page');
       this.subscription.unsubscribe();
       idsInUse.next(new Set());
       currentCohortStore.next(undefined);
@@ -215,7 +215,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     render() {
-      console.log("rendering cohort page");
+      console.log('rendering cohort page');
       const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, updateCount, updateGroupListsCount} = this.state;
       return <React.Fragment>
         <div style={{minHeight: '28rem', padding: '0.5rem'}}>
