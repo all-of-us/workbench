@@ -3,27 +3,32 @@ import * as React from 'react';
 
 import {navigate, queryParamsStore} from 'app/utils/navigation';
 
+import {
+  StyledAnchorTag,
+} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {SemiBoldHeader} from 'app/components/headers';
+import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/lists';
 import {Spinner} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors, from 'app/styles/colors';
+import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
+import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-import {WelcomeHeader} from './welcome-header';
-import {GettingStarted} from "./getting-started";
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -52,7 +57,62 @@ export const styles = reactStyles({
   pageWrapper: {
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
+  welcomeMessageIcon: {
+    height: '2.25rem', width: '2.75rem'
+  },
 });
+
+const WelcomeHeader = () => {
+  return <FlexRow style={{marginLeft: '3%'}}>
+    <FlexColumn style={{width: '50%'}}>
+      <FlexRow>
+        <FlexColumn>
+          <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
+            Welcome to the</Header>
+          <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
+            Researcher Workbench</Header>
+        </FlexColumn>
+        <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
+          <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
+          <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
+          <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
+        </FlexRow>
+      </FlexRow>
+      <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
+        The secure platform to analyze <i>All of Us</i> data</SmallHeader>
+    </FlexColumn>
+    <div/>
+  </FlexRow>;
+};
+
+const GettingStarted = () => {
+  return <div data-test-id='getting-started'
+              style={{
+                backgroundColor: addOpacity(colors.primary, .1).toString(),
+                color: colors.primary,
+                borderRadius: 10,
+                margin: '2em 0em'}}>
+    <div style={{margin: '1em 2em'}}>
+      <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+      <CustomBulletList>
+        <CustomBulletListItem bullet='→'>
+          Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
+                                    target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
+          Workbench Google account. This will keep your workbench browser sessions isolated from
+          your other Google accounts.
+        </CustomBulletListItem>
+        <CustomBulletListItem bullet='→'>
+          Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+          the left hand panel to browse through example workspaces.
+        </CustomBulletListItem>
+        <CustomBulletListItem bullet='→'>
+          Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
+                                              target='_blank'>support materials</StyledAnchorTag> and forum topics.
+        </CustomBulletListItem>
+      </CustomBulletList>
+    </div>
+  </div>;
+};
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
