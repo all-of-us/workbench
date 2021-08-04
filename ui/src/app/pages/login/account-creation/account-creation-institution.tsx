@@ -21,9 +21,9 @@ import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {
+  EmailAddressMismatchErrorMessage,
+  EmailDomainMismatchErrorMessage,
   getRoleOptions,
-  MasterDuaEmailMismatchErrorMessage,
-  RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
 import {
@@ -80,7 +80,6 @@ export interface Props {
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
 }
-
 
 interface State {
   profile: Profile;
@@ -216,10 +215,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
   }
 
   /**
-   * Returns a DOM fragment explaining to the user why institutional email verification has
-   * failed. This may be due to (1) restricted DUA which requires users to have an
-   * exact email address match, (2) email domain not matching a master DUA list of domains or
-   * emails, or (3) a server error when making the checkEmail request.
+   * Returns a DOM fragment explaining to the user why institutional email verification has failed. This may be due to
+   * (1) failing an exact email address match, (2) failing to match the email domain against a list of domains, or
+   * (3) a server error when making the checkEmail request.
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,
@@ -233,7 +231,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       return '';
     }
 
-    // Institution email Address is either being verified or researcher has just enter it and not change focus
+    // Institution email Address is either being verified or researcher has just entered it and has not changed focus
     if (!checkEmailResponse && !checkEmailError) {
       return '';
     }
@@ -250,15 +248,15 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       </ErrorDiv>;
     }
 
-    // Finally, we distinguish between the two types of DUAs in terms of user messaging.
+    // Finally, we distinguish between the two types of InstitutionMembershipRequirements in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-      // Institution has signed Restricted agreement and the email is not in allowed emails list
-      return <RestrictedDuaEmailMismatchErrorMessage/>;
+      // Institution requires an exact email address match and the email is not in allowed emails list
+      return <EmailAddressMismatchErrorMessage/>;
     } else {
-      // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-      return <MasterDuaEmailMismatchErrorMessage/>;
+      // Institution requires email domain matching and the domain is not in the allowed list
+      return <EmailDomainMismatchErrorMessage/>;
     }
   }
 
