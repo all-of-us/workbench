@@ -7593,6 +7593,7 @@ definitions:
     - domainId
     - name
     - group
+    - standard
     - sortOrder
     properties:
       id:
@@ -7617,6 +7618,10 @@ definitions:
         type: string
       group:
         description: Is this a parent
+        type: boolean
+        default: false
+      standard:
+        description: True if standard, false for source
         type: boolean
         default: false
       sortOrder:

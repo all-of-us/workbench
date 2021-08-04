@@ -10,15 +10,18 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CBMenuDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cdr.model.DbCBMenu;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
@@ -66,6 +69,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private CriteriaMenuDao criteriaMenuDao;
+  @Autowired private CBMenuDao cbMenuDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
@@ -74,6 +78,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<WorkbenchConfig> configProvider;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
+  @Mock private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @TestConfiguration
   @Import({CohortBuilderMapperImpl.class})
@@ -93,12 +98,14 @@ public class CohortBuilderControllerTest extends SpringTest {
             cbCriteriaAttributeDao,
             cbCriteriaDao,
             criteriaMenuDao,
+            cbMenuDao,
             cbDataFilterDao,
             domainInfoDao,
             personDao,
             surveyModuleDao,
             cohortBuilderMapper,
-            mySQLStopWordsProvider);
+            mySQLStopWordsProvider,
+            workbenchConfigProvider);
     controller =
         new CohortBuilderController(configProvider, cohortBuilderService, workspaceAuthService);
 
@@ -113,6 +120,7 @@ public class CohortBuilderControllerTest extends SpringTest {
     dbWorkspace.setCdrVersion(cdrVersion);
   }
 
+  //  TODO: Remove this test once feature flag enableStandardSourceDomains is removed
   @Test
   public void findCriteriaMenu() {
     DbCriteriaMenu dbCriteriaMenu =
@@ -132,6 +140,32 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .getItems()
                 .get(0))
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
+  }
+
+//  TODO: Clean up name once feature flag enableStandardSourceDomains is removed
+  @Test
+  public void findCriteriaMenuStandardFeatureFlagTrue() {
+    WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
+    mockConfig.featureFlags.enableStandardSourceDomains = true;
+    Mockito.when(workbenchConfigProvider.get()).thenReturn(mockConfig);
+    DbCBMenu dbCBMenu =
+        cbMenuDao.save(
+            DbCBMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Condition")
+                .addGroup(true)
+                .addName("Condition")
+                .addIsStandard(true)
+                .addSortOrder(2L)
+                .build());
+    assertThat(
+            controller
+                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .getBody()
+                .getItems()
+                .get(0))
+        .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCBMenu));
   }
 
   @Test
