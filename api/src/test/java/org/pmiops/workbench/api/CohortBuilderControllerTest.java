@@ -123,6 +123,10 @@ public class CohortBuilderControllerTest extends SpringTest {
   //  TODO: Remove this test once feature flag enableStandardSourceDomains is removed
   @Test
   public void findCriteriaMenu() {
+    WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
+    mockConfig.featureFlags.enableStandardSourceDomains = false;
+    Mockito.when(workbenchConfigProvider.get()).thenReturn(mockConfig);
+
     DbCriteriaMenu dbCriteriaMenu =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
