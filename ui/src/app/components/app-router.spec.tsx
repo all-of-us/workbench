@@ -56,7 +56,7 @@ describe('AppRouter', () => {
     expect(wrapper.find('span').first().text()).toEqual('Punting');
   });
 
-  it('redirects to not found page on nonsense route', () => {
+  it('redirects to not found page when no route is matched', () => {
     const wrapper = component(['/wharrgarbl'], 0);
     waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('span').first().text()).toEqual('Not Found');
@@ -89,7 +89,7 @@ const makeAppRouter = () => {
       <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}><TestComponent text={'Nested Protected Route'}/></AppRoute>
       <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
       <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
-      <AppRoute exact={false} path='*'><Redirect to='/not-found'/></AppRoute>
+      <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
     </Switch>
   </AppRouter>
 }
