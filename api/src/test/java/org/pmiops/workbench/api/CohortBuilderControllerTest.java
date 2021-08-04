@@ -119,10 +119,7 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   //  TODO: Remove this test once feature flag enableStandardSourceDomains is removed
   @Test
-  public void findCriteriaMenu() {
-    WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
-    mockConfig.featureFlags.enableStandardSourceDomains = false;
-
+  public void findCriteriaMenuOld() {
     DbCriteriaMenu dbCriteriaMenu =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
@@ -142,9 +139,8 @@ public class CohortBuilderControllerTest extends SpringTest {
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
   }
 
-  //  TODO: Clean up name once feature flag enableStandardSourceDomains is removed
   @Test
-  public void findCriteriaMenuStandardFeatureFlagTrue() {
+  public void findCriteriaMenu() {
     DbCBMenu dbCBMenu =
         cbMenuDao.save(
             DbCBMenu.builder()
