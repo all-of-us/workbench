@@ -175,7 +175,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   };
 
   const signOut = (): void => {
-    gapi.auth2.getAuthInstance().signOut();
+    // If we're in puppeteer, we never call gapi.auth2.init, so we can't sign out normally.
+    // Instead, we revoke all the access tokens and reset all the state.
+    if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
+      authStore.set({...authStore.get(), authLoaded: true, isSignedIn: false});
+      setIsSignedIn(false);
+      window.setTestAccessTokenOverride("");
+    } else {
+      gapi.auth2.getAuthInstance().signOut();
+    }
   };
 
   const subscribeToInactivitySignOut = () => {
