@@ -146,7 +146,7 @@ public class CohortBuilderControllerTest extends SpringTest {
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
   }
 
-//  TODO: Clean up name once feature flag enableStandardSourceDomains is removed
+  //  TODO: Clean up name once feature flag enableStandardSourceDomains is removed
   @Test
   public void findCriteriaMenuStandardFeatureFlagTrue() {
     WorkbenchConfig mockConfig = WorkbenchConfig.createEmptyConfig();
