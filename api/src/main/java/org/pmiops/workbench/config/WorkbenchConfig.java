@@ -240,8 +240,6 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, users can be expired on the system, losing access
-    public boolean enableAccessRenewal;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
   }

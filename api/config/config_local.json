@@ -100,7 +100,6 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
-    "enableAccessRenewal": true,
     "enableRasLoginGovLinking": true
   },
   "featureFlags": {
