@@ -36,9 +36,9 @@ echo ""
 echo "Creating cb_survey_version table"
 if ./generate-cdr/make-bq-cb-survey-version.sh "$BQ_PROJECT" "$BQ_DATASET"
 then
-    echo "Prep table creation is complete"
+    echo "cb_survey_version table creation is complete"
 else
-    echo "Prep table creation failed!"
+    echo "cb_survey_version table creation failed!"
     exit 1
 fi
 
