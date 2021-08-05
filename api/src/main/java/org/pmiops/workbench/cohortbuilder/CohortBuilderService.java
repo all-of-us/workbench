@@ -14,6 +14,7 @@ import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainInfoDeprecate;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
@@ -73,6 +74,8 @@ public interface CohortBuilderService {
       GenderOrSexType genderOrSexType, AgeType ageType, SearchRequest request);
 
   Long findDomainCount(String domain, String term);
+
+  List<DomainInfoDeprecate> findDomainInfosDepreciate();
 
   List<DomainInfo> findDomainInfos();
 

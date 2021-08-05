@@ -3284,7 +3284,7 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfoDepreciate":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3293,6 +3293,21 @@ paths:
       - cohortBuilder
       description: 'Returns information on the domains of data in the workspace''s
         CDR version along with participant and concept counts'
+      operationId: findDomainInfosDepreciate
+      responses:
+        200:
+          description: information on the domains
+          schema:
+            "$ref": "#/definitions/DomainInfoDeprecateResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns information on the domains of data in the workspace''s
+          CDR version along with participant and concept counts'
       operationId: findDomainInfos
       responses:
         200:
@@ -3939,7 +3954,7 @@ definitions:
         description:
           Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
           Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
-  DomainInfo:
+  DomainInfoDeprecate:
     type: object
     required:
     - domain
@@ -3969,6 +3984,45 @@ definitions:
       participantCount:
         description: number of participants with data in the CDR for a concept in
           this domain
+        type: integer
+        format: int64
+  DomainInfo:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - conceptCount
+      - participantCount
+      - category
+    properties:
+      category:
+        description: Category of the domain
+        type: string
+      domain:
+        description: the domain ID
+        "$ref": "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      conceptCount:
+        description: number of concept count in this domain
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in
+          this domain
+        type: integer
+        format: int64
+      standard:
+        description: Identifies if the concept is standard or source
+        type: boolean
+        default: false
+      sortOrder:
+        description: Sort order for the domain
         type: integer
         format: int64
   DataFiltersResponse:
@@ -5229,6 +5283,15 @@ definitions:
         type: array
         items:
           type: string
+  DomainInfoDeprecateResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DomainInfoDeprecate"
   DomainInfoResponse:
     type: object
     required:

@@ -28,6 +28,7 @@
     <delete tableName="cb_survey_version"/>
     <delete tableName="cb_criteria_menu"/>
     <delete tableName="ds_data_dictionary"/>
+    <delete tableName="domain_card"/>
 
     <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
@@ -384,5 +385,16 @@
       <column name="sort_order" type="NUMERIC"/>
     </loadData>
 
+    <loadData tableName="domain_card" file="csv/domain_card.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="category" type="STRING"/>
+      <column name="domain" type="NUMERIC"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="concept_count" type="NUMERIC"/>
+      <column name="participant_count" type="NUMERIC"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="sort_order" type="NUMERIC"/>
+    </loadData>
   </changeSet>
 </databaseChangeLog>

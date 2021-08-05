@@ -11,6 +11,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
+import org.pmiops.workbench.cdr.model.DbDomainCard;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
@@ -20,6 +21,7 @@ import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainInfoDeprecate;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -55,7 +57,10 @@ public interface CohortBuilderMapper {
   SurveyVersion dbModelToClient(DbSurveyVersion source);
 
   @Mapping(target = "domain", source = "domainEnum")
-  DomainInfo dbModelToClient(DbDomainInfo source);
+  DomainInfoDeprecate dbModelToClient(DbDomainInfo source);
+
+  @Mapping(target = "domain", source = "domainEnum")
+  DomainInfo dbModelToClient(DbDomainCard source);
 
   SurveyModule dbModelToClient(DbSurveyModule source);
 

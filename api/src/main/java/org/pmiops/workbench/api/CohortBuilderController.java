@@ -19,6 +19,7 @@ import org.pmiops.workbench.model.DataFiltersResponse;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.DomainInfoDeprecateResponse;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -218,12 +219,21 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<DomainInfoDeprecateResponse> findDomainInfosDepreciate(
+      String workspaceNamespace, String workspaceId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    return ResponseEntity.ok(
+        new DomainInfoDeprecateResponse().items(cohortBuilderService.findDomainInfosDepreciate()));
+  }
+
+  @Override
   public ResponseEntity<DomainInfoResponse> findDomainInfos(
       String workspaceNamespace, String workspaceId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
-        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
+        new DomainInfoResponse().items(cohortBuilderService.findDomainCards()));
   }
 
   @Override

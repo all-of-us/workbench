@@ -402,7 +402,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
   }
 
-  findDomainInfos(): Promise<DomainInfoResponse> {
+  findDomainInfosDepreciate(): Promise<DomainInfoResponse> {
     return new Promise<DomainInfoResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
   }
 
