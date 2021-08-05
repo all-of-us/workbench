@@ -11,8 +11,17 @@ import {useEffect} from 'react';
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace()
 )(({workspace, routeConfigData, hideSpinner}) => {
-  useEffect(() => hideSpinner(), []);
+  useEffect(() => {
+    console.log('Mounting WorkspaceWrapper');
+    hideSpinner();
+
+    return () => {
+      console.log('Unmounting WorkspaceWrapper');
+    };
+  }, []);
   const routeData = useStore(routeDataStore);
+
+  console.log('Rendering WorkspaceWrapper', workspace);
 
   return <React.Fragment>
     {workspace

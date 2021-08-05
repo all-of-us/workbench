@@ -345,7 +345,6 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         }
         this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
-        console.log(err);
         this.setState({apiError: true});
       } finally {
         this.setState({loading: false, sourceMatch});

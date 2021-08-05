@@ -478,6 +478,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       }).unsubscribe;
   }, []);
 
+  console.log('Rendering AppRouting. AuthLoaded: ' + authLoaded + ' IsUserDisabled: ' + isUserDisabled);
+  useEffect(() => {
+    console.log('Mounting AppRouting (ish)');
+
+    return () => console.log('Unmounting AppRouting');
+  }, []);
+
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
