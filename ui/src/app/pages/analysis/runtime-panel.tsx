@@ -266,7 +266,15 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
       <Button
           aria-label={'Delete'}
           disabled={!deleting}
-          onClick={() => onConfirm(!deleting)}>
+          onClick={async() => {
+            setDeleting(true);
+            try {
+              await onConfirm();
+            } catch (err) {
+              setDeleting(false);
+              throw err;
+            }
+          }}>
         Delete
       </Button>
     </FlexRow>
@@ -331,7 +339,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm}) => {
           onClick={async() => {
             setDeleting(true);
             try {
-              await onConfirm(selectedKeepPD);
+              await onConfirm(!selectedKeepPD);
             } catch (err) {
               setDeleting(false);
               throw err;
@@ -597,7 +605,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime running, click to pause',
         iconShape: 'compute-running',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, true, true); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, false); }
       })
     ],
     [
@@ -628,7 +636,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime paused, click to resume',
         iconShape: 'compute-stopped',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, true, true); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, false); }
       })
     ],
     [
@@ -999,7 +1007,10 @@ export const RuntimePanel = fp.flow(
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
-  const pdReduced = pdExists && selectedDiskSize < diskSize;
+  const pdSizeReduced = pdExists && selectedDiskSize < diskSize;
+  const runtimeExistsWithoutPD = runtimeExists && !pdExists;
+
+
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
@@ -1023,43 +1034,30 @@ export const RuntimePanel = fp.flow(
   }
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
     // The logic here is tricky to be compatible
-    if (enablePD && (!pdExists || pdExists && pdReduced)) {
+    // Use gceConfig when PD feature is not enabled OR reduce PD size OR update an existing runtime with no PD attached.
+    // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
+    // post launch PD when all existing running Runtime shutdown.
+    if (!enablePD || (!pdSizeReduced && runtimeExists) || runtimeExistsWithoutPD) {
+      return {
+        gceConfig: {
+          machineType: runtime.machine.name,
+          diskSize: runtime.diskSize
+        }
+      };
+    } else {
       return {
         gceWithPdConfig: {
           bootDiskSize: 50,
           machineType: runtime.machine.name,
           persistentDisk: {
-            name: '',
+            // When reducing PD size, passing empty name to backend then API will create a new PD
+            name: !pdExists || pdSizeReduced ? '' : persistentDisk.name,
             size: runtime.diskSize,
             diskType: DiskType.Standard,
             labels: {}
-
           }
         }
       };
-    } else {
-      if (enablePD && !runtimeExists) {
-        return {
-          gceWithPdConfig: {
-            bootDiskSize: 50,
-            machineType: runtime.machine.name,
-            persistentDisk: {
-              name: persistentDisk.name,
-              size: runtime.diskSize,
-              diskType: DiskType.Standard,
-              labels: {}
-
-            }
-          }
-        };
-      } else {
-        return {
-          gceConfig: {
-            machineType: runtime.machine.name,
-            diskSize: runtime.diskSize
-          }
-        };
-      }
     }
   };
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
@@ -1190,7 +1188,7 @@ export const RuntimePanel = fp.flow(
   const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
-      disabled={!runtimeCanBeUpdated}
+      disabled={!(runtimeCanBeUpdated || pdSizeReduced)}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onClose();
@@ -1214,7 +1212,7 @@ export const RuntimePanel = fp.flow(
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
-      disabled={!runtimeCanBeUpdated}
+      disabled={!(runtimeCanBeUpdated || pdSizeReduced)}
       onClick={() => {
         setPanelContent(PanelContent.Confirm);
       }}>
@@ -1238,24 +1236,24 @@ export const RuntimePanel = fp.flow(
               </FlexRow>
             </Fragment>
       ],
-      [PanelContent.Delete, () => (enablePD && !runtimeExists && pdExists) ?
+      [PanelContent.Delete, () => (enablePD && selectedCompute === ComputeType.Standard && !runtimeExists && pdExists) ?
           <ConfirmDeleteUnattachedPD
-              onConfirm={async(value) => {
-                await setRuntimeStatus(RuntimeStatusRequest.Delete, true, value);
+              onConfirm={async() => {
+                await disksApi().deleteDisk(namespace);
                 onClose();
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
-          /> : (enablePD && runtimeExists && pdExists) ?
+          /> : (enablePD && selectedCompute === ComputeType.Standard && runtimeExists && pdExists) ?
               <ConfirmDeleteRuntimeWithPD
-                  onConfirm={async(value) => {
-                    await setRuntimeStatus(RuntimeStatusRequest.Delete, value, true);
+                  onConfirm={async(keepPD) => {
+                    await setRuntimeStatus(RuntimeStatusRequest.Delete, keepPD);
                     onClose();
                   }}
                   onCancel={() => setPanelContent(PanelContent.Customize)}
               /> :
           <ConfirmDelete
             onConfirm={async() => {
-              await setRuntimeStatus(RuntimeStatusRequest.Delete, false, true);
+              await setRuntimeStatus(RuntimeStatusRequest.Delete, false);
               onClose();
             }}
             onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -1289,7 +1287,7 @@ export const RuntimePanel = fp.flow(
                   onChange={(value) => setSelectedMachine(value)}
                   validMachineTypes={validMainMachineTypes}
                   machineType={machineName}/>
-                {(!enablePD && runtimeExists && !pdExists) ?
+                {(!enablePD && runtimeExistsWithoutPD || selectedCompute !== ComputeType.Standard) ?
                     <DiskSizeSelector
                         idPrefix='runtime'
                         selectedDiskSize={selectedDiskSize}
@@ -1322,7 +1320,7 @@ export const RuntimePanel = fp.flow(
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              {enablePD && !(runtimeExists && !pdExists) ?
+              {enablePD && selectedCompute === ComputeType.Standard && !runtimeExistsWithoutPD ?
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
@@ -1351,7 +1349,7 @@ export const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {enablePD && !runtimeExists && pdExists ?
+        {enablePD && selectedCompute === ComputeType.Standard && !runtimeExists && pdExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(
@@ -1361,7 +1359,7 @@ export const RuntimePanel = fp.flow(
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
                     onClick={() => setPanelContent(PanelContent.Delete)}>Delete Persistent Disk</Link>
-                {!pdReduced ? renderCreateButton() : renderNextButton()}
+                {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
               <Link
@@ -1372,7 +1370,7 @@ export const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-              {!runtimeExists && !pdReduced ? renderCreateButton() : renderNextButton()}
+              {!runtimeExists && !pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow>
         }
          </Fragment>],

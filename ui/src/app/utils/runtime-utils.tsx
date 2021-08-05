@@ -224,8 +224,9 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
-      diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize :
-          diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null,
+      // diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize :
+      //     diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null,
+      diskSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : runtime.gceConfig.diskSize,
       dataprocConfig: null
     };
   } else if (runtime.gceWithPdConfig) {
@@ -313,7 +314,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, keepRuntimePD: boolean, keepUnattachedPD: boolean) => Promise<void>]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, deletePD: boolean) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   const enablePD = serverConfigStore.get().config.enablePersistentDisk;
@@ -351,12 +352,11 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     initializePolling();
   }, [runtimeStatus]);
 
-  const setStatusRequest = async(req, keepRuntimePD, keepUnattachedPD ) => {
+  const setStatusRequest = async(req, deletePD) => {
     await switchCase(req,
       [RuntimeStatusRequest.Delete, () => {
         if (enablePD) {
-          return !keepUnattachedPD ? disksApi().deleteDisk(currentWorkspaceNamespace) :
-              runtimeApi().deleteRuntime(currentWorkspaceNamespace, !keepRuntimePD);
+          return runtimeApi().deleteRuntime(currentWorkspaceNamespace, deletePD);
         } else {
           return runtimeApi().deleteRuntime(currentWorkspaceNamespace, false);
         }
@@ -402,13 +402,15 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       try {
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
+          const pdExists = persistentDisk !== null;
+          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).diskSize < persistentDisk.size);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, pdSizeReduced, {
                 signal: aborter.signal
               });
-            } else if (enablePD) {
+            } else if (enablePD && pdSizeReduced) {
               await disksApi().deleteDisk(currentWorkspaceNamespace, {
                 signal: aborter.signal
               });
@@ -431,17 +433,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
               if (persistentDisk) {
                 await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                   requestedRuntime.gceWithPdConfig.persistentDisk.size);
-                // await runtimeApi().createRuntime(currentWorkspaceNamespace, {runtime: requestedRuntime});
-                await LeoRuntimeInitializer.initialize({
-                  workspaceNamespace,
-                  targetRuntime: requestedRuntime,
-                  resolutionCondition: r => r.status !== RuntimeStatus.Running,
-                  pollAbortSignal: aborter.signal,
-                  overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
-                });
-
               }
-
             }
           } else {
             // There are no differences, no extra requests needed

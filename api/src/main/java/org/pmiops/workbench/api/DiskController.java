@@ -2,8 +2,13 @@ package org.pmiops.workbench.api;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
@@ -27,16 +32,19 @@ public class DiskController implements DiskApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceAuthService workspaceAuthService;
   private final LeonardoMapper leonardoMapper;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   public DiskController(
       LeonardoNotebooksClient leonardoNotebooksClient,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
+      Provider<DbUser> userProvider,
       LeonardoMapper leonardoMapper) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
+    this.userProvider = userProvider;
     this.leonardoMapper = leonardoMapper;
   }
 
@@ -50,17 +58,13 @@ public class DiskController implements DiskApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
     try {
       LeonardoGetPersistentDiskResponse response;
+      String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
       List<LeonardoListPersistentDiskResponse> responseList =
-          leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
-      responseList.sort(
-          new Comparator<LeonardoListPersistentDiskResponse>() {
-            @Override
-            public int compare(
-                LeonardoListPersistentDiskResponse t1, LeonardoListPersistentDiskResponse t2) {
-              return -1 * t1.getId().compareTo(t2.getId());
-            }
-          });
-
+          leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false)
+              .stream()
+              .filter(r -> r.getName().startsWith(pdNamePrefix))
+              .sorted((r1,r2) -> -1 * r1.getId().compareTo(r2.getId()))
+              .collect(Collectors.toList());
       if (!responseList.isEmpty()){
         response = leonardoNotebooksClient.getPersistentDisk(
             googleProject, responseList.get(0).getName());
