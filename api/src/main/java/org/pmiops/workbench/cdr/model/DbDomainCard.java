@@ -22,8 +22,6 @@ public class DbDomainCard {
   private boolean standard;
   private long sortOrder;
 
-  public DbDomainCard() {}
-
   @Id
   @Column(name = "id")
   public long getId() {
