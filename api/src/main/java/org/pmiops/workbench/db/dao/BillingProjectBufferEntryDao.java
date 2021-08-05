@@ -80,17 +80,4 @@ public interface BillingProjectBufferEntryDao
 
   @Query(value = "SELECT RELEASE_LOCK('" + ASSIGNING_LOCK + "')", nativeQuery = true)
   int releaseAssigningLock();
-
-  @Query(
-      "SELECT p.fireCloudProjectName "
-          + "FROM DbBillingProjectBufferEntry p "
-          + "JOIN DbWorkspace w "
-          + "ON w.workspaceNamespace = p.fireCloudProjectName "
-          + "AND p.status = :billingStatus "
-          + "AND w.activeStatus = :workspaceStatus "
-          + "AND w.billingMigrationStatus = :migrationStatus")
-  List<String> findByStatusAndActiveStatusAndBillingMigrationStatus(
-      @Param("billingStatus") short billingStatus,
-      @Param("workspaceStatus") short workspaceStatus,
-      @Param("migrationStatus") short migrationStatus);
 }
