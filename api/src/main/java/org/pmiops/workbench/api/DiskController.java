@@ -24,19 +24,16 @@ public class DiskController implements DiskApiDelegate {
   private static final Logger log = Logger.getLogger(DiskController.class.getName());
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final WorkspaceDao workspaceDao;
-  private final WorkspaceAuthService workspaceAuthService;
   private final LeonardoMapper leonardoMapper;
   private final Provider<DbUser> userProvider;
 
   @Autowired
   public DiskController(
       LeonardoNotebooksClient leonardoNotebooksClient,
-      WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       Provider<DbUser> userProvider,
       LeonardoMapper leonardoMapper) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
-    this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.userProvider = userProvider;
     this.leonardoMapper = leonardoMapper;
