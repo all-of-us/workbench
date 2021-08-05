@@ -3,6 +3,7 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
+//import HomePage from 'app/page/home-page'; 
 
 describe('Admin', () => {
   const userEmail = 'admin_test';
@@ -21,7 +22,7 @@ describe('Admin', () => {
     await userAdminPage.waitForLoad();
 
     //Verify table column names match.
-    const columns = ['Status', 'Institution', 'User Name', 'Contact Email', 'User Lockout', 'First Sign-in', '2FA', 'Training', 'eRA Commons', 'DUCC', 'Bypass','Audit'];
+    const columns = ['Status', 'Institution', 'User Name', 'Contact Email', 'User Lockout', 'First Sign-in', '2FA', 'Training', 'eRA Commons', 'DUCC', 'RAS Login.gov Link', 'Bypass','Audit'];
 
     const adminTable = new AdminTable(page);
     const columnNames = await adminTable.getColumnNames();
@@ -40,7 +41,7 @@ describe('Admin', () => {
     const bypassPopup = await userAdminPage.clickBypassLink(1, bypassColIndex);
 
     // Verify toggle option names match.
-    const toggleOptions = ['Compliance Training', 'eRA Commons Linking', 'Two Factor Auth', 'Data User Code of Conduct'];
+    const toggleOptions = ['Compliance Training', 'eRA Commons Linking', 'Two Factor Auth', 'Data User Code of Conduct', 'RAS Login.gov Link'];
 
     const toggleTexts = await bypassPopup.getAllToggleTexts();
     expect(toggleTexts.sort()).toEqual(toggleOptions.sort());
@@ -50,6 +51,7 @@ describe('Admin', () => {
     const eraCommToggleStatus = await bypassPopup.getAccessModuleStatus('eRA Commons Linking');
     const twoFAToggleStatus = await bypassPopup.getAccessModuleStatus('Two Factor Auth');
     const dUCCToggleStatus = await bypassPopup.getAccessModuleStatus('Data User Code of Conduct');
+    const rASloginToggleStatus = await bypassPopup.getAccessModuleStatus('RAS Login.gov Link');
 
     //get the name column index separately since it is a frozen column
     const nameColIndex = await adminTable.getNameColindex();
@@ -64,15 +66,17 @@ describe('Admin', () => {
     const trainingToggle2 = await userProfileInfo.getEachBypassStatus('complianceTrainingBypassToggle');
     const eraCommToggleStatus2 = await userProfileInfo.getEachBypassStatus('eraCommonsBypassToggle');
     const dUCCToggleStatus2 = await userProfileInfo.getEachBypassStatus('dataUseAgreementBypassToggle');
+    const rASloginToggleStatus2 = await userProfileInfo.getEachBypassStatus('rasLinkLoginGovBypassToggle');
 
     //verify all the modules status on user-admin-table page and admin-user-profile page match
     expect(twoFAToggleStatus2).toEqual(twoFAToggleStatus);
     expect(trainingToggle2).toEqual(trainingToggleStatus);
     expect(eraCommToggleStatus2).toEqual(eraCommToggleStatus);
-    expect(dUCCToggleStatus2).toEqual(dUCCToggleStatus);            
+    expect(dUCCToggleStatus2).toEqual(dUCCToggleStatus); 
+    expect(rASloginToggleStatus2).toEqual(rASloginToggleStatus);           
   });
 
-  test('Verify all the fields on the admin-user-profile page', async () => {
+  test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {
     const userAdminPage = new UserAdminPage(page);
     await userAdminPage.waitForLoad();
 
@@ -146,12 +150,17 @@ describe('Admin', () => {
     //verify the credit limit value matches the max value in the free credits used field
     const freeCreditLimit = await userProfileInfo.getFreeCreditsLimitValue();
     const freeCreditMaxValue = await userProfileInfo.getFreeCreditMaxValue();
+    console.log(`newcredit1: ${freeCreditMaxValue}`);
     expect(freeCreditLimit).toEqual(freeCreditMaxValue);
-  
+
+    // verify the admin is able to update the free credit
+    await userProfileInfo.updateFreeCredits();
+    await userProfileInfo.selectFreeCredits(freeCreditLimit);
     });
 
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
+
     await userAdminPage.waitForLoad();
 
     //look up for the user
