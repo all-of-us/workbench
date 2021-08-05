@@ -13,6 +13,7 @@ import DeleteConfirmationModal from 'app/modal/delete-confirmation-modal';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import { TabLabels } from 'app/page/workspace-base';
+import waitForExpect from 'wait-for-expect';
 
 // 30 minutes. Test involves starting of notebook that could take a long time to create.
 jest.setTimeout(30 * 60 * 1000);
@@ -73,7 +74,9 @@ describe('Export dataset to notebook tests', () => {
 
     // Associated dataset is gone after delete cohort.
     await dataPage.openTab(TabLabels.Datasets, { waitPageChange: false });
-    expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
+    await waitForExpect(async () => {
+      expect(await new DataResourceCard(page).cardExists(datasetName, ResourceCard.Dataset)).toBe(false);
+    });
   });
 
   /**
