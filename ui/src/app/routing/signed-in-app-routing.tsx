@@ -136,7 +136,7 @@ export const SignedInRoutes = React.memo(() => {
       <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
     </AppRoute>
     <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]}>
-      <WorkspaceWrapperPage intermediaryRoute={false} routeData={{}}/>
+      <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>
     </AppRoute>
     <AppRoute exact path='*'>
       <Redirect to={'/not-found'}/>
