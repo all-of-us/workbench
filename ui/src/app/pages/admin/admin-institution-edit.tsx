@@ -548,6 +548,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {this.state.invalidRtEmailAddress && <div data-test-id='rtEmailAddressError' style={{color: colors.danger}}>
                     {this.state.invalidRtEmailAddressMsg}
                   </div>}
+                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                    Enter one email address per line.  <br/>
+                    Note that subdomains are not included, so “university.edu” <br/>
+                    matches alice@university.edu but not bob@med.university.edu.
+                  </p>
                 </FlexColumn>}
                 {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
                 && <FlexColumn data-test-id='rtEmailDomain' style={{width: '16rem'}}>
@@ -559,12 +564,12 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {this.state.invalidRtEmailDomain && <div data-test-id='rtEmailDomainError' style={{color: colors.danger}}>
                     {this.state.invalidRtEmailDomainsMsg}
                   </div>}
+                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                    Enter one domain per line. <br/>
+                    Note that subdomains are not included, so “university.edu” <br/>
+                    matches alice@university.edu but not bob@med.university.edu.
+                  </p>
                 </FlexColumn>}
-                <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                  Enter one domain per line. <br/>
-                  Note that subdomains are not included, so “university.edu” <br/>
-                  matches alice@university.edu but not bob@med.university.edu.
-                </p>
               </div>
             </FlexColumn>
           </FlexRow>
@@ -611,6 +616,11 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {this.state.invalidCtEmailAddress && <div data-test-id='ctEmailAddressError' style={{color: colors.danger}}>
                     {this.state.invalidCtEmailAddressMsg}
                   </div>}
+                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                    Enter one email address per line. <br/>
+                    Note that subdomains are not included, so “university.edu” <br/>
+                    matches alice@university.edu but not bob@med.university.edu.
+                  </p>
                 </FlexColumn>}
                 {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS
                 && <FlexColumn data-test-id='ctEmailDomain' style={{width: '16rem'}}>
@@ -622,12 +632,12 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {this.state.invalidCtEmailDomain && <div data-test-id='ctEmailDomainError' style={{color: colors.danger}}>
                     {this.state.invalidCtEmailDomainsMsg}
                   </div>}
+                  <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
+                    Enter one domain per line. <br/>
+                    Note that subdomains are not included, so “university.edu” <br/>
+                    matches alice@university.edu but not bob@med.university.edu.
+                  </p>
                 </FlexColumn>}
-                <p style={{color: colors.primary, fontSize: '12px', lineHeight: '18px'}}>
-                  Enter one domain per line. <br/>
-                  Note that subdomains are not included, so “university.edu” <br/>
-                  matches alice@university.edu but not bob@med.university.edu.
-                </p>
               </div>}
             </FlexColumn>
           </FlexRow>
