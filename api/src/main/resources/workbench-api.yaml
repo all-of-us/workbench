@@ -791,7 +791,7 @@ paths:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/disks/{workspaceNamespace}":
     get:
-      summary: Get the user's workspace runtime.
+      summary: Get the user's workspace persistent disk.
       description: Returns the current user's latest created persistent disk, if any, which has been created
         for the given workspace.
       operationId: getDisk
@@ -816,6 +816,11 @@ paths:
         - disk
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: diskName
+          description: diskName
+          type: string
+          required: true
       responses:
         200:
           description: Success
@@ -5823,6 +5828,7 @@ definitions:
       - Ready
       - Deleting
       - Deleted
+      - Unknown
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
