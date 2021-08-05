@@ -44,6 +44,7 @@ export interface RuntimeConfig {
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
+  pdSize: number;
 }
 
 export interface UpdateMessaging {
@@ -136,6 +137,27 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
   };
 };
 
+const comparePdSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+  let desc = 'Disk Size';
+  let diffType;
+  if (newRuntime.pdSize < oldRuntime.pdSize) {
+    desc = 'Decease ' + desc;
+    diffType = RuntimeDiffState.NEEDS_DELETE;
+  } else if (newRuntime.pdSize > oldRuntime.pdSize) {
+    desc = 'Increase ' + desc;
+    diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
+  } else {
+    diffType = RuntimeDiffState.NO_CHANGE;
+  }
+
+  return {
+    desc: desc,
+    previous: oldRuntime.pdSize && oldRuntime.pdSize.toString() + ' GB',
+    new: newRuntime.pdSize && newRuntime.pdSize.toString() + ' GB',
+    differenceType: diffType
+  };
+};
+
 const compareWorkerCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
@@ -224,24 +246,25 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
-      // diskSize: runtime.gceConfig.diskSize != null ? runtime.gceConfig.diskSize :
-      //     diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null,
-      diskSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : runtime.gceConfig.diskSize,
-      dataprocConfig: null
+      diskSize: runtime.gceConfig.diskSize,
+      dataprocConfig: null,
+      pdSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null
     };
   } else if (runtime.gceWithPdConfig) {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceWithPdConfig.machineType),
-      diskSize: runtime.gceWithPdConfig.persistentDisk.size,
-      dataprocConfig: null
+      diskSize: null,
+      dataprocConfig: null,
+      pdSize: runtime.gceWithPdConfig.persistentDisk.size
     };
   } else if (runtime.dataprocConfig) {
     return {
       computeType: ComputeType.Dataproc,
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
       diskSize: runtime.dataprocConfig.masterDiskSize,
-      dataprocConfig: runtime.dataprocConfig
+      dataprocConfig: runtime.dataprocConfig,
+      pdSize: null
     };
   }
 };
@@ -249,7 +272,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize, comparePdSize]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
@@ -402,8 +425,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       try {
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
-          const pdExists = persistentDisk !== null;
-          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).diskSize < persistentDisk.size);
+          const pdExists = persistentDisk;
+          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).pdSize < persistentDisk.size);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
@@ -429,11 +452,9 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
-            } else if (runtime.status === RuntimeStatus.Deleted && enablePD) {
-              if (persistentDisk) {
-                await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
-                  requestedRuntime.gceWithPdConfig.persistentDisk.size);
-              }
+            } else if (runtime.status === RuntimeStatus.Deleted && pdExists && enablePD) {
+              await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
+                requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
           } else {
             // There are no differences, no extra requests needed

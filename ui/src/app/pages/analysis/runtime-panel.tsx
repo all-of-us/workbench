@@ -155,6 +155,7 @@ const styles = reactStyles({
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 50;
+const defaultPdSize = 50;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
@@ -944,12 +945,12 @@ export const RuntimePanel = fp.flow(
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
   const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
-  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize :
-      (persistentDisk ? persistentDisk.size : (gceConfig.diskSize ? gceConfig.diskSize : defaultDiskSize));
+  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const pdExists = persistentDisk !== null;
+  const pdExists = persistentDisk;
+  const pdSize = pdExists ? persistentDisk.size : defaultPdSize;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -975,6 +976,7 @@ export const RuntimePanel = fp.flow(
   // the source of truth for these values are selectedMachine, and selectedDiskSize, as
   // these UI components are used for both Dataproc and standard VMs.
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
+  const [selectedPdSize, setSelectedPdSize] = useState(pdSize);
 
 
   const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
@@ -995,19 +997,21 @@ export const RuntimePanel = fp.flow(
     computeType: initialCompute,
     machine: initialMasterMachine,
     diskSize: diskSize,
-    dataprocConfig: dataprocConfig
+    dataprocConfig: dataprocConfig,
+    pdSize: pdSize
   };
 
   const newRuntimeConfig = {
     computeType: selectedCompute,
     machine: selectedMachine,
     diskSize: selectedDiskSize,
-    dataprocConfig: selectedDataprocConfig
+    dataprocConfig: selectedDataprocConfig,
+    pdSize: selectedPdSize
   };
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
-  const pdSizeReduced = pdExists && selectedDiskSize < diskSize;
+  const pdSizeReduced = pdExists && selectedPdSize < pdSize;
   const runtimeExistsWithoutPD = runtimeExists && !pdExists;
 
 
@@ -1034,14 +1038,15 @@ export const RuntimePanel = fp.flow(
   }
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
     // The logic here is tricky to be compatible
-    // Use gceConfig when PD feature is not enabled OR reduce PD size OR update an existing runtime with no PD attached.
+    // Use gceConfig when (PD feature is not enabled) OR (increase PD size or update machineType of an existing runtime with PD attached)
+    // OR (update an existing runtime with no PD attached).
     // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
     // post launch PD when all existing running Runtime shutdown.
     if (!enablePD || (!pdSizeReduced && runtimeExists) || runtimeExistsWithoutPD) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,
-          diskSize: runtime.diskSize
+          diskSize: !pdExists ? runtime.diskSize : runtime.pdSize
         }
       };
     } else {
@@ -1052,7 +1057,7 @@ export const RuntimePanel = fp.flow(
           persistentDisk: {
             // When reducing PD size, passing empty name to backend then API will create a new PD
             name: !pdExists || pdSizeReduced ? '' : persistentDisk.name,
-            size: runtime.diskSize,
+            size: runtime.pdSize,
             diskType: DiskType.Standard,
             labels: {}
           }
@@ -1139,6 +1144,11 @@ export const RuntimePanel = fp.flow(
   const standardDiskValidator = {
     selectedDiskSize: diskSizeValidatorWithMessage('standard')
   };
+
+  const standardPdValidator = {
+    selectedPdSize: diskSizeValidatorWithMessage('standard')
+  };
+
   const runningCostValidator = {
     currentRunningCost: runningCostValidatorWithMessage()
   };
@@ -1151,6 +1161,7 @@ export const RuntimePanel = fp.flow(
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
   const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
+  const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
@@ -1160,6 +1171,9 @@ export const RuntimePanel = fp.flow(
     const errorDivs = [];
     if (standardDiskErrors) {
       errorDivs.push(summarizeErrors(standardDiskErrors));
+    }
+    if (standardPdErrors) {
+      errorDivs.push(summarizeErrors(standardPdErrors));
     }
     if (dataprocErrors) {
       errorDivs.push(summarizeErrors(dataprocErrors));
@@ -1324,12 +1338,12 @@ export const RuntimePanel = fp.flow(
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
-                      selectedDiskSize={selectedDiskSize}
+                      selectedDiskSize={selectedPdSize}
                       onChange={(value) => {
-                        setSelectedDiskSize(value);
+                        setSelectedPdSize(value);
                       }}
                       disabled={disableControls}
-                      diskSize={diskSize}
+                      diskSize={pdSize}
                   /> </div> : null
               }
             </FlexRow>
