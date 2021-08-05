@@ -74,6 +74,7 @@ public class CBCriteriaDaoTest extends SpringTest {
                 .addType(CriteriaType.ICD9CM.toString())
                 .addCount(100L)
                 .addStandard(false)
+                .addSelectable(true)
                 .addCode("120")
                 .addConceptId("12")
                 .addFullText("term[CONDITION_rank1]")
@@ -87,6 +88,7 @@ public class CBCriteriaDaoTest extends SpringTest {
                 .addHierarchy(true)
                 .addConceptId("1")
                 .addStandard(true)
+                .addSelectable(true)
                 .addCode("120")
                 .addFullText("myMatch[CONDITION_rank1]")
                 .build());
@@ -204,6 +206,23 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndTypeAndCodeAndStandard() {
+    PageRequest page = PageRequest.of(0, 10);
+    List<DbCriteria> criteriaList =
+        cbCriteriaDao
+            .findCriteriaByDomainAndTypeAndCodeAndStandard(
+                Domain.CONDITION.toString(), "00", true, page)
+            .getContent();
+    assertThat(criteriaList).isEmpty();
+    criteriaList =
+        cbCriteriaDao
+            .findCriteriaByDomainAndTypeAndCodeAndStandard(
+                Domain.CONDITION.toString(), "00", false, page)
+            .getContent();
+    assertThat(criteriaList).containsExactly(icd9Criteria);
+  }
+
+  @Test
   public void findCriteriaByDomainAndFullText() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =
@@ -214,11 +233,43 @@ public class CBCriteriaDaoTest extends SpringTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndFullTextAndStandard() {
+    PageRequest page = PageRequest.of(0, 10);
+    List<DbCriteria> measurements =
+        cbCriteriaDao
+            .findCriteriaByDomainAndFullTextAndStandard(
+                Domain.MEASUREMENT.toString(), "001", false, page)
+            .getContent();
+    assertThat(measurements).isEmpty();
+    measurements =
+        cbCriteriaDao
+            .findCriteriaByDomainAndFullTextAndStandard(
+                Domain.MEASUREMENT.toString(), "001", true, page)
+            .getContent();
+    assertThat(measurements).containsExactly(measurementCriteria);
+  }
+
+  @Test
   public void findCriteriaTopCounts() {
     PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao.findCriteriaTopCounts(Domain.MEASUREMENT.toString(), page).getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
+  }
+
+  @Test
+  public void findCriteriaTopCountsByStandard() {
+    PageRequest page = PageRequest.of(0, 10);
+    List<DbCriteria> conditions =
+        cbCriteriaDao
+            .findCriteriaTopCountsByStandard(Domain.CONDITION.toString(), true, page)
+            .getContent();
+    assertThat(conditions).containsExactly(standardCriteria);
+    conditions =
+        cbCriteriaDao
+            .findCriteriaTopCountsByStandard(Domain.CONDITION.toString(), false, page)
+            .getContent();
+    assertThat(conditions).containsExactly(sourceCriteria);
   }
 
   @Test
