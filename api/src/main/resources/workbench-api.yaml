@@ -789,6 +789,69 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/disks/{workspaceNamespace}":
+    get:
+      summary: Get the user's workspace runtime.
+      description: Returns the current user's latest created persistent disk, if any, which has been created
+        for the given workspace.
+      operationId: getDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: The persistent disk for this user and workspace.
+          schema:
+            "$ref": "#/definitions/Disk"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    delete:
+      summary: Delete a persistent disk.
+      description: Delete the current user's latest created persistent disk
+      operationId: deleteDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        404:
+          description: No persistent disk exists for this user and workspace.
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+    patch:
+      summary: Updates the configuration of a persistent disk
+      description: In order to update the configuration of a persistent disk, it must first be ready
+      operationId: updateDisk
+      tags:
+        - disk
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: diskName
+          description: diskName
+          type: string
+          required: true
+        - in: query
+          name: diskSize
+          type: integer
+          description: Update disk disk Size
+          required: true
+      responses:
+        "200":
+          description: Persistent disk update request accepted
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
+        "404":
+          description: Bad Request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   "/v1/workspaces":
     get:
       tags:
@@ -4279,6 +4342,29 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+  Disk:
+    description: The configuration of a persistent disk, returned in disk responses
+    type: object
+    required:
+      - name
+      - size
+      - diskType
+      - blockSize
+    properties:
+      name:
+        type: string
+        description: Name of the persistent disk
+      status:
+        "$ref": "#/definitions/DiskStatus"
+        description: Persistent disk status. Read only.
+      size:
+        type: integer
+        description: Size of persistent disk in GB
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: Block size of persistent disk in bytes
   WorkspaceListResponse:
     type: object
     required:
@@ -5728,6 +5814,15 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  DiskStatus:
+    type: string
+    enum:
+      - Creating
+      - Restoring
+      - Failed
+      - Ready
+      - Deleting
+      - Deleted
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
@@ -6345,7 +6440,7 @@ definitions:
           University Medical Center'
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
-        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed, 
+        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed,
           Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
