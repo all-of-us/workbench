@@ -50,6 +50,12 @@ export const defaultInstitutions: Array<Institution> = [{
       membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
       eraRequired: true,
       emailDomains: ['verily.com', 'google.com']
+    },
+    {
+      accessTierShortName: "controlled",
+      membershipRequirement: InstitutionMembershipRequirement.ADDRESSES,
+      eraRequired: true,
+      emailAddresses: ['foo@verily.com']
     }
   ],
   userInstructions: 'Verily User Instruction'

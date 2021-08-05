@@ -233,10 +233,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-      console.log('~~~~~~');
-      console.log(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile));
       this.setState({
-
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),

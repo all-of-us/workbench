@@ -1,6 +1,7 @@
 import {ReactWrapper} from 'enzyme';
 import {act} from 'react-dom/test-utils';
 import * as fp from 'lodash/fp';
+import {InputSwitch} from "primereact/inputswitch";
 
 // This file is necessary because angular imports complain if there
 // is no zone, regardless of whether the imports are used.
@@ -47,3 +48,14 @@ export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wr
 export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
   return (node.name() === null && fp.includes(text, node.text()));
 }));
+
+
+export async function simulateSwitchToggle(wrapper: ReactWrapper, inputSwitch: InputSwitch) {
+  const previousState = inputSwitch.props.checked
+  inputSwitch.props.onChange({
+    originalEvent: undefined,
+    value: !previousState,
+    target: {name: 'name', id: '', value: !previousState}
+  });
+  await waitOneTickAndUpdate(wrapper);
+}

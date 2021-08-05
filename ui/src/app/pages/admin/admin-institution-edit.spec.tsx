@@ -7,7 +7,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {simulateSwitchToggle, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 import {InputSwitch} from "primereact/inputswitch";
@@ -45,63 +45,97 @@ describe('AdminInstitutionEditSpec', () => {
       .toContain('Display name must be 80 characters or less');
   });
 
-  it('should default DOMAINS to ADDRESSES in Registered Tier requirement', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-
-    const rtAgreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]');
-
-    expect(rtAgreementTypeDropDown.first().props().value).toBe(InstitutionMembershipRequirement.DOMAINS);
-  });
-
-  it('should default DOMAINS to ADDRESSES in Controlled Tier requirement', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
-
-    const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]');
-    expect(ctAgreementTypeDropDown.first().props().value).toBe(InstitutionMembershipRequirement.DOMAINS);
-  });
-
   it('should hide/show controlled card when controlled tier disabled/enabled', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const testInput = fp.repeat(81, 'a');
 
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle);
     expect(ctEnabledToggle.props.checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
+  });
+
+  it('should show CT card when institution has controlled tier access enabled', async() => {
+    urlParamsStore.next({
+      institutionId: 'Verily'
+    });
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
+  });
+
+  it('should not change eRA Required and tier enabled switch when changing tier requirement ', async() => {
+    urlParamsStore.next({
+      institutionId: 'Verily'
+    });
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    const rtEraToggle = wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch;
+    const ctEraToggle = wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch;
+    const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
+
+    expect(rtEraToggle.props.checked).toBeTruthy();
+    expect(ctEraToggle.props.checked).toBeTruthy();
+    expect(ctEnabledToggle.props.checked).toBeTruthy();
+
+    const agreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
+    agreementTypeDropDown.props.onChange({
+      originalEvent: undefined,
+      value: InstitutionMembershipRequirement.DOMAINS,
+      target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(rtEraToggle.props.checked).toBeTruthy();
+    expect(ctEraToggle.props.checked).toBeTruthy();
+    expect(ctEnabledToggle.props.checked).toBeTruthy();
+  });
+
+
+  it('should update and save institution tier requirement', async() => {
+    urlParamsStore.next({
+      institutionId: 'Verily'
+    });
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+
+    // Value before test.
+    expect(wrapper.find('[data-test-id="rtEmailDomainInput"]').first().prop('value'))
+    .toBe('verily.com,\ngoogle.com');
+    expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').first().prop('value'))
+    .toBe('foo@verily.com');
+
+    const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
+    ctAgreementTypeDropDown.props.onChange({
+      originalEvent: undefined,
+      value: InstitutionMembershipRequirement.DOMAINS,
+      target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}
+    });
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
+    .simulate('change', {target: {value: 'domain.com'}});
+
+    wrapper.find('[data-test-id="save-institution-button"]').first().simulate('click');
+    // RT no change
+    expect(wrapper.find('[data-test-id="rtEmailDomainInput"]').first().prop('value'))
+    .toBe('verily.com,\n' + 'google.com');
+    // CT changed to email domains
+    expect(wrapper.find('[data-test-id="ctEmailDomainInput"]').first().prop('value'))
+    .toBe('domain.com');
+    // CT email addressed become empty
+    expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').length).toBe(0);
   });
 
   it('should show appropriate section after changing agreement type in Registered Tier requirement', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const testInput = fp.repeat(81, 'a');
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({
@@ -141,15 +175,9 @@ describe('AdminInstitutionEditSpec', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const testInput = fp.repeat(81, 'a');
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle);
 
     const rtAgreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
@@ -180,15 +208,9 @@ describe('AdminInstitutionEditSpec', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const testInput = fp.repeat(81, 'a');
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({
@@ -277,12 +299,7 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle);
 
     let ctEmailAddressError = wrapper.find('[data-test-id="ctEmailAddressError"]');
     expect(ctEmailAddressError.length).toBe(0);
@@ -420,7 +437,6 @@ describe('AdminInstitutionEditSpec', () => {
     .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
         'justSomeText , broadinstitute.org#wrongTest');
 
-
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
     .simulate('change', {target: {value: 'domain.com'}});
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
@@ -452,12 +468,7 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    ctEnabledToggle.props.onChange({
-      originalEvent: undefined,
-      value: true,
-      target: {name: 'name', id: '', value: true}
-    });
-    await waitOneTickAndUpdate(wrapper);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(

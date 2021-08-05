@@ -24,7 +24,8 @@ import {
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
   getRegisteredTierEmailDomains,
-  updateCtEmailAddresses, updateCtEmailDomains,
+  updateCtEmailAddresses,
+  updateCtEmailDomains,
   updateRtEmailAddresses,
   updateRtEmailDomains,
 } from 'app/utils/institutions';
@@ -32,7 +33,7 @@ import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {
   Institution,
-  InstitutionMembershipRequirement,
+  InstitutionMembershipRequirement, InstitutionTierConfig,
   OrganizationType
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -255,25 +256,23 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   setRegisteredTierRequirement(membershipRequirement) {
-    const rtTierConfig = {
+    const rtTierConfig: InstitutionTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       membershipRequirement: membershipRequirement.value,
-      eraRequired: true
     };
-    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig]));
+    this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
   }
 
   setControlledTierRequirement(membershipRequirement) {
-    const ctTierConfig = {
+    const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
       membershipRequirement: membershipRequirement.value,
-      eraRequired: true
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
   setRtRequireEra(eRAEnabled) {
-    const rtTierConfig = {
+    const rtTierConfig: InstitutionTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
       eraRequired: eRAEnabled.value
     };
@@ -281,7 +280,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   setCtRequireEra(eRAEnabled) {
-    const ctTierConfig = {
+    const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
       eraRequired: eRAEnabled.value
     };
@@ -290,7 +289,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   setEnableControlledTier(enableCtAccess) {
     // When switch from disable to enabled, set tier requirement from NOACCESS to DOMAINS with empty domain list.
-    const ctTierConfig = {
+    const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
       membershipRequirement: enableCtAccess.value === true ?
           InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
@@ -343,7 +342,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       // It is not expected for a tier requirement to be empty
       return true;
     }
-    const rtConfig = getRegisteredTierConfig(institution);
+    const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
     if (rtConfig.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
       emailValid = rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS ?
           rtConfig.emailDomains !== undefined : rtConfig.emailAddresses !== undefined;
@@ -365,7 +364,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
-    const rtConfig = getRegisteredTierConfig(institution);
+    const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
     if (institution && rtConfig) {
       if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
         rtConfig.emailAddresses = [];
@@ -501,7 +500,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               onBlur={v => this.setState(fp.set(['institution', 'organizationTypeOtherText'], v.trim()))}
               inputStyle={{width: '16rem', marginTop: '0.8rem'}}/>}
           </FlexColumn>
-              <FlexColumn style={{width: '50%', marginRight: '1rem'}}>
+          <FlexColumn style={{width: '50%', marginRight: '1rem'}}>
             <label style={{...styles.label, marginTop: '0rem'}}>User Email Instructions Text (Optional)</label>
               <TextArea
                 id={'userEmailInstructions'}
@@ -580,7 +579,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                     data-test-id='ct-era-required-switch'
                     onChange={(v) => this.setCtRequireEra(v)}
                     checked={getControlledTierConfig(institution).eraRequired}
-                    disabled={!enableRasLoginGovLinking}
+                    disabled={!enableRasLoginGovLinking ||
+                    getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
                 />
                 eRA account required
                 <InputSwitch
@@ -646,7 +646,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
-              <Button type='primary' disabled={this.disableSave(errors)} onClick={() => this.saveInstitution()}>
+              <Button type='primary' data-test-id='save-institution-button' disabled={this.disableSave(errors)}
+                      onClick={() => this.saveInstitution()}>
                 {this.buttonText}
               </Button>
             </TooltipTrigger>

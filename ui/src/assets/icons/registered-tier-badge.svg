@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Group 2</title>
-    <g id="OLD" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="HP-1.1" transform="translate(-70.000000, -251.000000)">
-            <g id="Group-2" transform="translate(70.000000, 251.000000)">
+    <g id="Registered-user" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="RT" transform="translate(-70.000000, -251.000000)">
+            <g id="Registered-tier" transform="translate(70.000000, 251.000000)">
                 <rect id="Rectangle" stroke="#FFFFFF" stroke-width="1.5" fill="#A27BD7" x="0.75" y="0.75" width="22.5" height="22.5" rx="3"></rect>
                 <path d="M6.618,16 L7.003,14.064 L7.641,14.064 L8.73,16 L11.425,16 L10.138,13.756 C11.447,13.261 12.217,12.205 12.217,10.83 C12.217,9.235 11.051,8.3 9.016,8.3 L5.562,8.3 L4.022,16 L6.618,16 Z M8.455,12.106 L7.388,12.106 L7.751,10.302 L8.62,10.302 C9.214,10.302 9.588,10.533 9.588,11.083 C9.588,11.732 9.17,12.106 8.455,12.106 Z M16.485,16 L17.618,10.313 L19.873,10.313 L20.28,8.3 L13.174,8.3 L12.767,10.313 L15.022,10.313 L13.889,16 L16.485,16 Z" id="RT" fill="#FFFFFF" fill-rule="nonzero"></path>
             </g>

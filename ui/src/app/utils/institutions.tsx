@@ -74,10 +74,12 @@ function getTierConfig(institution: Institution, accessTier: string): Institutio
     emailAddresses: [],
     emailDomains: []
   };
-  if (!institution.tierConfigs || !institution.tierConfigs.find(t => t.accessTierShortName === accessTier)) {
+
+  if (!institution.tierConfigs) {
     return defaultTierConfig;
   }
-  return institution.tierConfigs.find(t => t.accessTierShortName === accessTier);
+  return institution.tierConfigs.find(t => t.accessTierShortName === accessTier) || defaultTierConfig;
+
 }
 
 export function getRegisteredTierConfig(institution: Institution): InstitutionTierConfig {
