@@ -24,7 +24,8 @@ const DataTestIdAlias = {
   TwoFactorAuth: 'twoFactorAuthBypassToggle',
   ComplianceTraining: 'complianceTrainingBypassToggle',
   EraCommons: 'eRA Commons',
-  DataUserCodeOfConduct: 'dataUseAgreementBypassToggle'
+  DataUserCodeOfConduct: 'dataUseAgreementBypassToggle',
+  rasLinkLoginGov: 'rasLinkLoginGovBypassToggle'
 };
 
 export const LabelAlias = {
@@ -176,21 +177,17 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return dropdown.select(selectTextValue);
   }
 
-   // verify that the updated free credit reflects in the FreeCreditUsed field
+   // update free credit 
    async updateFreeCredits(): Promise<void> {
     await this.selectFreeCredits(FreeCreditSelectValue.six);
-    await this.getFreeCreditsLimitValue();
-    await this.getFreeCreditMaxValue();
-    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
-    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
+    const creditValue = await this.getFreeCreditsLimitValue();
+    const newfreeCreditMaxValue = await this.getFreeCreditMaxValue();
+    expect(creditValue).toEqual(newfreeCreditMaxValue);
+    await this.waitForSaveButton(true);
   }
 
-  // verify that when a different institute is selected an error message displays and the save button remains disabled
-  async updateVerifiedInstitute(): Promise<void> {
-    await this.selectVerifiedInstitution(FreeCreditSelectValue.six);
-    await this.getFreeCreditsLimitValue();
-    await this.getFreeCreditMaxValue();
-    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
-    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
-  }
+
+ 
+
+
 }
