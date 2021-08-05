@@ -53,7 +53,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateSwitchToggle(wrapper, ctEnabledToggle);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
     expect(ctEnabledToggle.props.checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
   });
@@ -174,7 +174,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateSwitchToggle(wrapper, ctEnabledToggle);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
 
     const rtAgreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
@@ -207,7 +207,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
 
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateSwitchToggle(wrapper, ctEnabledToggle);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({
@@ -296,7 +296,7 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateSwitchToggle(wrapper, ctEnabledToggle);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
 
     let ctEmailAddressError = wrapper.find('[data-test-id="ctEmailAddressError"]');
     expect(ctEmailAddressError.length).toBe(0);
@@ -465,7 +465,7 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    await simulateSwitchToggle(wrapper, ctEnabledToggle);
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(

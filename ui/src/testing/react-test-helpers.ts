@@ -50,12 +50,11 @@ export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) =>
 }));
 
 
-export async function simulateSwitchToggle(wrapper: ReactWrapper, inputSwitch: InputSwitch) {
-  const previousState = inputSwitch.props.checked
+export async function simulateSwitchToggle(wrapper: ReactWrapper, inputSwitch: InputSwitch, expectedValue: boolean) {
   inputSwitch.props.onChange({
     originalEvent: undefined,
-    value: !previousState,
-    target: {name: 'name', id: '', value: !previousState}
+    value: expectedValue,
+    target: {name: 'name', id: '', value: expectedValue}
   });
   await waitOneTickAndUpdate(wrapper);
 }
