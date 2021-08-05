@@ -629,11 +629,8 @@ workflows:
       - wait_until_previous_workflow_done:
           <<: *filter-master-branch
           requires:
-            - api-local-test
             - api-unit-test
             - ui-unit-test
-            - api-bigquery-test
-            - api-integration-test
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
       - api-local-test
