@@ -23,6 +23,16 @@ else
 fi
 
 echo ""
+echo '/Creating static prep tables'
+if ./generate-cdr/make-bq-static-prep-tables.sh $BQ_PROJECT $BQ_DATASET
+then
+    echo "Prep table creation is complete"
+else
+    echo "Prep table creation failed!"
+    exit 1
+fi
+
+echo ""
 echo 'Making denormalized search events table'
 if ./generate-cdr/make-bq-denormalized-search-events.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER
 then
