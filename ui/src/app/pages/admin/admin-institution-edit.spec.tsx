@@ -50,9 +50,10 @@ describe('AdminInstitutionEditSpec', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
+    const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
+    await simulateSwitchToggle(wrapper, ctEnabledToggle, false);
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
 
-    const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
     await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
     expect(ctEnabledToggle.props.checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
