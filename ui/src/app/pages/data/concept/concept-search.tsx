@@ -22,7 +22,8 @@ import {
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
-  withCurrentWorkspace, withUrlParams
+  withCurrentWorkspace,
+  withUrlParams
 } from 'app/utils';
 import {
   conceptSetUpdating,
@@ -155,7 +156,6 @@ export const ConceptSearch = fp.flow(
   componentDidMount() {
     this.props.hideSpinner();
 
-    console.log("componentDidMount - loading: " + this.state.loading + ", isDetailPage: " + this.isDetailPage);
     if (!this.isDetailPage && !currentConceptStore.getValue()) {
       currentConceptStore.next([]);
     }
@@ -167,15 +167,19 @@ export const ConceptSearch = fp.flow(
     this.subscription.add(conceptSetUpdating.subscribe(updating => this.setState({conceptSetUpdating: updating})));
   }
 
-  componentDidUpdate() {
-    console.log("componentDidUpdate - isDetailPage: " + this.isDetailPage + ", currentConceptSetStore: " + !!currentConceptSetStore.getValue());
-    if (this.isDetailPage && !currentConceptSetStore.getValue()) {
-      console.log("getting concept set");
-      this.getConceptSet();
+  componentDidUpdate(prevProps, prevState) {
+    if (this.isDetailPage) {
+      if (currentConceptSetStore.getValue()) {
+        if (!this.state.conceptSet) {
+          this.setState({conceptSet: currentConceptSetStore.getValue()});
+        }
+        if (this.state.loading) {
+          this.setState({loading: false});
+        }
+      } else {
+        this.getConceptSet();
+      }
     }
-    // else if (!currentConceptSetStore.getValue() && this.state.loading) {
-    //   this.setState({loading: false});
-    // }
   }
 
   componentWillUnmount() {
@@ -186,7 +190,6 @@ export const ConceptSearch = fp.flow(
   }
 
   checkUnsavedConceptChanges(currentConcepts) {
-    console.log("check unsaved concept changes");
     const currentConceptSet = currentConceptSetStore.getValue();
     const currentConceptsMap = currentConcepts.map(concept => {
       ['attributes', 'parameterId'].forEach(prop => delete concept[prop]);
@@ -194,7 +197,7 @@ export const ConceptSearch = fp.flow(
     });
     const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0) ||
       (!!currentConceptSet && sortAndStringify(currentConceptSet.criteriums) !== sortAndStringify(currentConceptsMap));
-    this.setState({unsavedChanges});
+    this.setState({unsavedChanges: unsavedChanges});
   }
 
   async getConceptSet() {
@@ -204,7 +207,6 @@ export const ConceptSearch = fp.flow(
       if (resp.domain === Domain.SURVEY) {
         resp.criteriums = resp.criteriums.filter((survey) => survey.parentCount !== 0);
       }
-      console.log("get concept set");
       this.setState({conceptSet: resp, editName: resp.name, editDescription: resp.description, loading: false});
       currentConceptSetStore.next(JSON.parse(JSON.stringify(resp)));
       currentConceptStore.next(resp.criteriums);
@@ -216,14 +218,12 @@ export const ConceptSearch = fp.flow(
   }
 
   async copyConceptSet(copyRequest: CopyRequest) {
-    console.log("copy concept set");
     const {urlParams: {ns, wsid, csid}} = this.props;
     this.setState({copySaving: true});
     return conceptSetsApi().copyConceptSet(ns, wsid, csid, copyRequest);
   }
 
   async submitEdits() {
-    console.log("submit edits");
     const {urlParams: {ns, wsid, csid}} = this.props;
     const {conceptSet, editName, editDescription} = this.state;
     try {
@@ -238,7 +238,6 @@ export const ConceptSearch = fp.flow(
   }
 
   async onDeleteConceptSet() {
-    console.log("delete concept set");
     const {urlParams: {ns, wsid, csid}} = this.props;
     try {
       await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
@@ -260,6 +259,7 @@ export const ConceptSearch = fp.flow(
     return (conceptSet.domain === Domain.PHYSICALMEASUREMENT ||
       conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS) ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
   }
+
 
   showUnsavedChangesWarning() {
     return !this.state.conceptSetUpdating && this.state.unsavedChanges;
@@ -305,7 +305,6 @@ export const ConceptSearch = fp.flow(
       {editDescription, editName},
       {editName: {presence: {allowEmpty: false}}, editDescription: {length: {maximum: 1000}}}
     );
-    console.log("isDetailPage: " + this.isDetailPage + ", conceptSet: " + conceptSet + ", loading: " + loading);
     return <React.Fragment>
       <Prompt
         when={this.showUnsavedChangesWarning()}
