@@ -229,11 +229,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .sortOrder(3));
 
     DomainInfo domainInfo =
-        controller
-            .findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID)
-            .getBody()
-            .getItems()
-            .get(0);
+        controller.findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
     assertThat(domainInfo.getName()).isEqualTo(dbDomainCard.getName());
     assertThat(domainInfo.getDescription()).isEqualTo(dbDomainCard.getDescription());
     assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainCard.getParticipantCount());
