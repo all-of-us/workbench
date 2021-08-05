@@ -256,45 +256,44 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     return;
   }
 
-  setRegisteredTierRequirement(membershipRequirement) {
+  setRegisteredTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
     const rtTierConfig: InstitutionTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      membershipRequirement: membershipRequirement.value,
+      membershipRequirement: membershipRequirement,
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
   }
 
-  setControlledTierRequirement(membershipRequirement) {
+  setControlledTierRequirement(membershipRequirement: InstitutionMembershipRequirement) {
     const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
-      membershipRequirement: membershipRequirement.value,
+      membershipRequirement: membershipRequirement,
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
-  setRtRequireEra(eRAEnabled) {
+  setRtRequireEra(eRAEnabled: boolean) {
     const rtTierConfig: InstitutionTierConfig = {
       ...getRegisteredTierConfig(this.state.institution),
-      eraRequired: eRAEnabled.value
+      eraRequired: eRAEnabled
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [rtTierConfig, getControlledTierConfig(this.state.institution)]));
   }
 
-  setCtRequireEra(eRAEnabled) {
+  setCtRequireEra(eRAEnabled: boolean) {
     const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
-      eraRequired: eRAEnabled.value
+      eraRequired: eRAEnabled
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
 
-  setEnableControlledTier(enableCtAccess) {
+  setEnableControlledTier(enableCtAccess: boolean) {
     // When switch from disable to enabled, set tier requirement from NOACCESS to DOMAINS with empty domain list.
     const ctTierConfig: InstitutionTierConfig = {
       ...getControlledTierConfig(this.state.institution),
-      membershipRequirement: enableCtAccess.value === true ?
+      membershipRequirement: enableCtAccess === true ?
           InstitutionMembershipRequirement.DOMAINS : InstitutionMembershipRequirement.NOACCESS,
-      eraRequired: true
     };
     this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution), ctTierConfig]));
   }
@@ -524,7 +523,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               <FlexRow style={{gap: '0.3rem'}}>
                 <InputSwitch
                     data-test-id='rt-era-required-switch'
-                    onChange={(v) => this.setRtRequireEra(v)}
+                    onChange={(v) => this.setRtRequireEra(v.value)}
                     checked={getRegisteredTierConfig(institution).eraRequired}
                     disabled={!enableRasLoginGovLinking}
                 />
@@ -537,7 +536,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                           placeholder='Select type'
                           options={MembershipRequirements}
                           value={getRegisteredTierConfig(institution).membershipRequirement}
-                          onChange={(v) => this.setRegisteredTierRequirement(v)}/>
+                          onChange={(v) => this.setRegisteredTierRequirement(v.value)}/>
                 {getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
                 <FlexColumn data-test-id='rtEmailAddress' style={{width: '16rem'}}>
                   <label style={styles.label}>Accepted Email Addresses</label>
@@ -578,7 +577,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
               <FlexRow style={{gap: '0.3rem'}}>
                 <InputSwitch
                     data-test-id='ct-era-required-switch'
-                    onChange={(v) => this.setCtRequireEra(v)}
+                    onChange={(v) => this.setCtRequireEra(v.value)}
                     checked={getControlledTierConfig(institution).eraRequired}
                     disabled={!enableRasLoginGovLinking ||
                     getControlledTierConfig(institution).membershipRequirement == InstitutionMembershipRequirement.NOACCESS}
@@ -586,7 +585,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                 eRA account required
                 <InputSwitch
                     data-test-id='ct-enabled-switch'
-                    onChange={(v) => this.setEnableControlledTier(v)}
+                    onChange={(v) => this.setEnableControlledTier(v.value)}
                     checked={getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
                     disabled={false}
                 />
@@ -600,7 +599,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                           placeholder='Select type'
                           options={MembershipRequirements}
                           value={getControlledTierConfig(institution).membershipRequirement}
-                          onChange={(v) => this.setControlledTierRequirement(v)}/>
+                          onChange={(v) => this.setControlledTierRequirement(v.value)}/>
                 {getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES &&
                 <FlexColumn data-test-id='ctEmailAddress' style={{width: '16rem'}}>
                   <label style={styles.label}>Accepted Email Addresses</label>

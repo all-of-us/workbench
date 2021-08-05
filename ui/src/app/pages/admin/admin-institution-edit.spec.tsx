@@ -467,6 +467,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper).toBeTruthy();
     const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
     await simulateSwitchToggle(wrapper, ctEnabledToggle, true);
+    await waitOneTickAndUpdate(wrapper);
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
