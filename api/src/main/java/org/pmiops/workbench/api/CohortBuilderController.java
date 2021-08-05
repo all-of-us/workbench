@@ -233,7 +233,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
-        new DomainInfoResponse().items(cohortBuilderService.findDomainCards()));
+        new DomainInfoResponse().items(cohortBuilderService.findDomainInfos()));
   }
 
   @Override
