@@ -3,11 +3,13 @@ package org.pmiops.workbench.billing;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,10 +20,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -89,16 +93,27 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    return billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
-        .map(
-            projects ->
-                MeasurementBundle.builder()
-                    .addMeasurement(
-                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
-                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, projects.getStatusEnum().toString())
-                    .addTag(
-                        MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
-                    .build())
+    // retrieve those combinations of access tier and buffer status with at least 1 current project
+    final Map<Pair<DbAccessTier, BufferEntryStatus>, Long> counts =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
+            .collect(
+                Collectors.toMap(
+                    c -> Pair.of(c.getAccessTier(), c.getStatusEnum()),
+                    ProjectCountByStatusAndTier::getNumProjects));
+
+    // iterate through ALL combinations of access tier and buffer status, counting 0 projects where
+    // this combination does not appear in `counts`
+    return Streams.zip(
+            accessTierService.getAllTiers().stream(),
+            Arrays.stream(BufferEntryStatus.values()),
+            (tier, status) -> {
+              final long numProjects = counts.getOrDefault(Pair.of(tier, status), 0L);
+              return MeasurementBundle.builder()
+                  .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, numProjects)
+                  .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
+                  .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, tier.getShortName())
+                  .build();
+            })
         .collect(Collectors.toList());
   }
 
