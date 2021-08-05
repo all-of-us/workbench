@@ -13,7 +13,7 @@ export CDR_VERSION=$6       # CDR version
 export DATA_BROWSER=$7      # data browser flag
 
 echo ""
-echo 'Validating that all prerequisites exist'
+echo "Validating that all prerequisites exist"
 if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION $DATA_BROWSER
 then
     echo "Validation is complete"
@@ -23,7 +23,7 @@ else
 fi
 
 echo ""
-echo '/Creating static prep tables'
+echo "Creating static prep tables"
 if ./generate-cdr/make-bq-static-prep-tables.sh $BQ_PROJECT $BQ_DATASET
 then
     echo "Prep table creation is complete"
@@ -33,7 +33,7 @@ else
 fi
 
 echo ""
-echo 'Making denormalized search events table'
+echo "Making denormalized search events table"
 if ./generate-cdr/make-bq-denormalized-search-events.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER
 then
     echo "Making denormalized search table complete"
@@ -56,7 +56,7 @@ if [ "$DATA_BROWSER" == false ]
 then
 
   echo ""
-  echo 'Making denormalized search person table'
+  echo "Making denormalized search person table"
   if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET $WGV_TABLE
   then
       echo "Making denormalized search person table complete"
@@ -66,7 +66,7 @@ then
   fi
 
   echo ""
-  echo 'Making menu table'
+  echo "Making menu table"
   if ./generate-cdr/make-bq-cb-menu.sh $BQ_PROJECT $BQ_DATASET
   then
       echo "Making menu table complete"
