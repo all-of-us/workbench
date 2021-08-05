@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Create tables from all the csv files in gs://all-of-us-workbench-private-cloudsql/static_prep_tables
 set -ex
 
 export BQ_PROJECT=$1        # project
