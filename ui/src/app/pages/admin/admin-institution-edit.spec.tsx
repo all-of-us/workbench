@@ -68,7 +68,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
   });
 
-  it('should not change eRA Required and tier enabled switch when changing tier requirement ', async() => {
+  it('should not change eRA Required and tier enabled switches when changing tier requirement ', async() => {
     urlParamsStore.next({
       institutionId: 'Verily'
     });
@@ -91,9 +91,12 @@ describe('AdminInstitutionEditSpec', () => {
     });
     await waitOneTickAndUpdate(wrapper);
 
-    expect(rtEraToggle.props.checked).toBeTruthy();
-    expect(ctEraToggle.props.checked).toBeTruthy();
-    expect(ctEnabledToggle.props.checked).toBeTruthy();
+    const updatedRtEraToggle = wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch;
+    const updatedCtEraToggle = wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch;
+    const updatedCtEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
+    expect(updatedRtEraToggle.props.checked).toBeTruthy();
+    expect(updatedCtEraToggle.props.checked).toBeTruthy();
+    expect(updatedCtEnabledToggle.props.checked).toBeTruthy();
   });
 
 
