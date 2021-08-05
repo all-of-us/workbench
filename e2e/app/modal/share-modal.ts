@@ -59,7 +59,12 @@ export default class ShareModal extends Modal {
       const nameWithoutDomain = name.split('@')[0];
       for (const char of nameWithoutDomain) {
         const input = await this.waitForSearchBox().asElementHandle();
-        await input.type(char, { delay: 20 });
+        const waitForResponsePromise = this.page.waitForResponse((response) => {
+          return response.url().includes('/userSearch/registered/') && response.request().method() === 'GET'
+        });
+        await input.type(char);
+        // Wait for GET /userSearch request to finish. Sometimes it takes several seconds.
+        await waitForResponsePromise;
         const foundDropdown = await existsDropDown(timeout);
         const foundAddIcon = await addIcon.exists(timeout);
         if (foundDropdown && foundAddIcon) {
