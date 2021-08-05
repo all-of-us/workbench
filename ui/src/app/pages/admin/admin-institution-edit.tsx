@@ -581,7 +581,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                     onChange={(v) => this.setCtRequireEra(v)}
                     checked={getControlledTierConfig(institution).eraRequired}
                     disabled={!enableRasLoginGovLinking ||
-                    getControlledTierConfig(institution).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS}
+                    getControlledTierConfig(institution).membershipRequirement == InstitutionMembershipRequirement.NOACCESS}
                 />
                 eRA account required
                 <InputSwitch
