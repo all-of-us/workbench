@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Prompt} from 'react-router';
 import {Subscription} from 'rxjs/Subscription';
 import * as validate from 'validate.js';
 
@@ -31,7 +32,6 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {navigationGuardStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -120,7 +120,6 @@ interface State {
   loading: boolean;
   showMoreDescription: boolean;
   // Show if trying to navigate away with unsaved changes
-  showUnsavedModal: boolean;
   unsavedChanges: boolean;
   conceptSetUpdating: boolean;
 }
@@ -132,7 +131,6 @@ export const ConceptSearch = fp.flow(
   withUrlParams(),
   withNavigation)
 (class extends React.Component<Props, State> {
-  resolveUnsavedModal: Function;
   subscription: Subscription;
   constructor(props: any) {
     super(props);
@@ -149,7 +147,6 @@ export const ConceptSearch = fp.flow(
       deleting: false,
       loading: this.isDetailPage,
       showMoreDescription: false,
-      showUnsavedModal: false,
       unsavedChanges: false,
       conceptSetUpdating: false
     };
@@ -168,7 +165,6 @@ export const ConceptSearch = fp.flow(
       }
     });
     this.subscription.add(conceptSetUpdating.subscribe(updating => this.setState({conceptSetUpdating: updating})));
-    navigationGuardStore.set({component: this});
   }
 
   componentWillUnmount() {
@@ -176,7 +172,6 @@ export const ConceptSearch = fp.flow(
     currentConceptStore.next(undefined);
     currentConceptSetStore.next(undefined);
     this.subscription.unsubscribe();
-    navigationGuardStore.set(null);
   }
 
   checkUnsavedConceptChanges(currentConcepts) {
@@ -250,18 +245,8 @@ export const ConceptSearch = fp.flow(
       conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS) ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
   }
 
-  async showUnsavedModal() {
-    this.setState({showUnsavedModal: true});
-    return await new Promise<boolean>((resolve => this.resolveUnsavedModal = resolve));
-  }
-
-  canDeactivate(): Promise<boolean> | boolean {
-    return !this.state.unsavedChanges || this.state.conceptSetUpdating || this.showUnsavedModal();
-  }
-
-  getModalResponse(res: boolean) {
-    this.setState({showUnsavedModal: false});
-    this.resolveUnsavedModal(res);
+  showUnsavedChangesWarning() {
+    return !this.state.conceptSetUpdating && this.state.unsavedChanges;
   }
 
   get disableFinishButton() {
@@ -295,12 +280,18 @@ export const ConceptSearch = fp.flow(
   render() {
     const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace, accessTierShortName}} = this.props;
     const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading,
-      showMoreDescription, showUnsavedModal} = this.state;
+      showMoreDescription} = this.state;
     const errors = validate(
       {editDescription, editName},
       {editName: {presence: {allowEmpty: false}}, editDescription: {length: {maximum: 1000}}}
     );
     return <React.Fragment>
+      <Prompt
+        when={this.showUnsavedChangesWarning()}
+        message={'Your concept set has not been saved. If you’d like to save your concepts, please click CANCEL ' +
+        'and save your changes in the right sidebar.'}
+      />
+
       <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
         {this.isDetailPage && <React.Fragment>
           {loading ? <SpinnerOverlay/> :
@@ -410,17 +401,6 @@ export const ConceptSearch = fp.flow(
                              onCopy={() => this.setState({copySaving: false})}
                              saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
       }
-      {showUnsavedModal && <Modal>
-        <ModalTitle>Warning! </ModalTitle>
-        <ModalBody>
-          Your concept set has not been saved. If you’d like to save your concepts, please click CANCEL
-          and save your changes in the right sidebar.
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => this.getModalResponse(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => this.getModalResponse(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>}
     </React.Fragment>;
   }
 });

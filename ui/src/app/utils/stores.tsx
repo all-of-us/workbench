@@ -153,12 +153,6 @@ export interface CanComponentDeactivate {
   canDeactivate: () => Promise<boolean> | boolean;
 }
 
-export interface NavigationGuardStore {
-  component?: CanComponentDeactivate;
-}
-
-export const navigationGuardStore = atom<NavigationGuardStore>({});
-
 /**
  * @name useStore
  * @description React hook that will trigger a render when the corresponding store's value changes
