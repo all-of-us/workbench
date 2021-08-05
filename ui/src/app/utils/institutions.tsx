@@ -66,7 +66,7 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
   );
 };
 
-function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
+export function getTierConfig(institution: Institution, accessTier: string): InstitutionTierConfig {
   const defaultTierConfig: InstitutionTierConfig = {
     accessTierShortName: accessTier,
     membershipRequirement: InstitutionMembershipRequirement.NOACCESS,

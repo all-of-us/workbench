@@ -23,7 +23,9 @@ import {
   getControlledTierEmailDomains,
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains,
+  getRegisteredTierEmailDomains, getTierConfig,
+  getTierEmailAddresses,
+  getTierEmailDomains,
   updateCtEmailAddresses,
   updateCtEmailDomains,
   updateRtEmailAddresses,
@@ -42,6 +44,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   label: {
@@ -412,21 +415,21 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     navigate(['admin/institution']);
   }
 
-  validateEmailAddressPresence() {
+  validateEmailAddressPresence(tier: AccessTierShortNames) {
     const {institution} = this.state;
-    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-      const rtEmailAddresses = getRegisteredTierEmailAddresses(institution);
-      return rtEmailAddresses && rtEmailAddresses.length > 0;
+    if (getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+      const emailAddresses = getTierEmailAddresses(institution, tier);
+      return emailAddresses && emailAddresses.length > 0;
     } else {
       return true;
     }
   }
 
-  validateEmailDomainPresence() {
+  validateEmailDomainPresence(tier: AccessTierShortNames) {
     const {institution} = this.state;
-    if (getRegisteredTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
-      const rtEmailDomains = getRegisteredTierEmailDomains(institution);
-      return rtEmailDomains && rtEmailDomains.length > 0;
+    if (getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+      const emailDomains = getTierEmailDomains(institution, tier);
+      return emailDomains && emailDomains.length > 0;
     } else {
       return true;
     }
@@ -448,16 +451,20 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     } = institution;
     const errors = validate({
       displayName,
-      'tierEmailAddresses': this.validateEmailAddressPresence(),
-      'tierEmailDomain': this.validateEmailDomainPresence(),
+      'rtTierEmailAddresses': this.validateEmailAddressPresence(AccessTierShortNames.Registered),
+      'ctTierEmailAddresses': this.validateEmailAddressPresence(AccessTierShortNames.Controlled),
+      'rtTierEmailDomain': this.validateEmailDomainPresence(AccessTierShortNames.Registered),
+      'ctTierEmailDomain': this.validateEmailDomainPresence(AccessTierShortNames.Controlled),
       organizationTypeEnum,
       tierConfigs
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
       tierConfigs: {presence: {allowEmpty: false}},
-      tierEmailAddresses: {truthiness: true},
-      tierEmailDomain: {truthiness: true}
+      rtTierEmailAddresses: {truthiness: true},
+      ctTierEmailAddresses: {truthiness: true},
+      rtTierEmailDomains: {truthiness: true},
+      ctTierEmailDomains: {truthiness: true}
     });
     return <div>
       <style>{css}</style>
@@ -585,7 +592,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                     onChange={(v) => this.setCtRequireEra(v.value)}
                     checked={getControlledTierConfig(institution).eraRequired}
                     disabled={!enableRasLoginGovLinking ||
-                    getControlledTierConfig(institution).membershipRequirement == InstitutionMembershipRequirement.NOACCESS}
+                    getControlledTierConfig(institution).membershipRequirement === InstitutionMembershipRequirement.NOACCESS}
                 />
                 eRA account required
                 <InputSwitch
@@ -651,8 +658,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
                   {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
                   {errors.tierRequirements && <li>Agreement Type should not be empty</li>}
-                  {!errors.tierRequirements && errors.tierEmailDomains && <li>Email Domains should not be empty</li>}
-                  {!errors.tierRequirements && errors.tierEmailAddresses && <li>Email Addresses should not be empty</li>}
+                  {!errors.tierRequirements && (errors.rtTierEmailDomains || errors.ctTierEmailDomains) &&
+                  <li>Email Domains should not be empty</li>}
+                  {!errors.tierRequirements && (errors.rtTierEmailAddresses || errors.ctTierEmailAddresses)
+                  && <li>Email Addresses should not be empty</li>}
                 </BulletAlignedUnorderedList>
               </div>
             } disable={this.isAddInstitutionMode}>
