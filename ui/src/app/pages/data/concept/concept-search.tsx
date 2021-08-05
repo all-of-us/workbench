@@ -154,9 +154,8 @@ export const ConceptSearch = fp.flow(
 
   componentDidMount() {
     this.props.hideSpinner();
-    if (this.isDetailPage) {
-      this.getConceptSet();
-    } else if (!currentConceptStore.getValue()) {
+
+    if (!this.isDetailPage && !currentConceptStore.getValue()) {
       currentConceptStore.next([]);
     }
     this.subscription = currentConceptStore.subscribe(currentConcepts => {
@@ -165,6 +164,15 @@ export const ConceptSearch = fp.flow(
       }
     });
     this.subscription.add(conceptSetUpdating.subscribe(updating => this.setState({conceptSetUpdating: updating})));
+  }
+
+  componentDidUpdate() {
+    if (this.isDetailPage && !currentConceptSetStore.getValue()) {
+      this.getConceptSet();
+    }
+    // else if (!currentConceptSetStore.getValue() && this.state.loading) {
+    //   this.setState({loading: false});
+    // }
   }
 
   componentWillUnmount() {
@@ -261,8 +269,12 @@ export const ConceptSearch = fp.flow(
 
   get searchContext() {
     if (this.isDetailPage) {
-      const {conceptSet: {domain, survey}} = this.state;
-      return {domain, selectedSurvey: survey, source: 'conceptSetDetails'};
+      if (this.state.conceptSet) {
+        const {conceptSet: {domain, survey}} = this.state;
+        return {domain, selectedSurvey: survey, source: 'conceptSetDetails'};
+      } else {
+        return {}
+      }
     } else {
       const {urlParams: {domain}} = this.props;
       const selectedSurvey = queryParamsStore.getValue().survey;
@@ -293,7 +305,7 @@ export const ConceptSearch = fp.flow(
       />
 
       <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
-        {this.isDetailPage && <React.Fragment>
+        {this.isDetailPage && conceptSet && <React.Fragment>
           {loading ? <SpinnerOverlay/> :
             <FlexColumn>
               <div style={styles.conceptSetHeader}>
