@@ -75,13 +75,10 @@ describe('AdminInstitutionEditSpec', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-    const rtEraToggle = wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch;
-    const ctEraToggle = wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch;
-    const ctEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
 
-    expect(rtEraToggle.props.checked).toBeTruthy();
-    expect(ctEraToggle.props.checked).toBeTruthy();
-    expect(ctEnabledToggle.props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange({
@@ -91,12 +88,9 @@ describe('AdminInstitutionEditSpec', () => {
     });
     await waitOneTickAndUpdate(wrapper);
 
-    const updatedRtEraToggle = wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch;
-    const updatedCtEraToggle = wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch;
-    const updatedCtEnabledToggle = wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch;
-    expect(updatedRtEraToggle.props.checked).toBeTruthy();
-    expect(updatedCtEraToggle.props.checked).toBeTruthy();
-    expect(updatedCtEnabledToggle.props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="rt-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="ct-era-required-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
+    expect((wrapper.find('[data-test-id="ct-enabled-switch"]').first().instance() as InputSwitch).props.checked).toBeTruthy();
   });
 
 

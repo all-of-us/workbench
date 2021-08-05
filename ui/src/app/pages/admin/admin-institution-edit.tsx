@@ -33,7 +33,8 @@ import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {
   Institution,
-  InstitutionMembershipRequirement, InstitutionTierConfig,
+  InstitutionMembershipRequirement,
+  InstitutionTierConfig,
   OrganizationType
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';

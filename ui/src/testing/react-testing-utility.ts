@@ -1,7 +1,6 @@
 import {ComponentFixture} from '@angular/core/testing';
 import * as ReactTestUtils from 'react-dom/test-utils';
 import {updateAndTick} from './test-helpers';
-import {InputSwitch} from "primereact/inputswitch";
 
 export function simulateInput<C>(
   fixture: ComponentFixture<C>,
