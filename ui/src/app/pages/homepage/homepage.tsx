@@ -27,6 +27,7 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+
 import {QuickTourAndVideos} from './quick-tour-and-videos';
 
 export const styles = reactStyles({
@@ -60,6 +61,82 @@ export const styles = reactStyles({
     height: '2.25rem', width: '2.75rem'
   },
 });
+
+const WelcomeHeader = () => {
+  return <FlexColumn style={{marginLeft: '3%', width: '50%'}}>
+    <FlexRow>
+      <FlexColumn>
+        <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
+          Welcome to the</Header>
+        <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
+          Researcher Workbench</Header>
+      </FlexColumn>
+      <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
+        <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
+        <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
+        <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
+      </FlexRow>
+    </FlexRow>
+    <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
+      The secure platform to analyze <AoU/> data</SmallHeader>
+  </FlexColumn>;
+};
+
+const Workspaces = () => {
+  return <FlexColumn>
+    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+      <FlexRow style={{alignItems: 'center'}}>
+        <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+        <ClrIcon
+            shape='plus-circle'
+            size={30}
+            className={'is-solid'}
+            style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenCreatePage();
+              navigate(['workspaces/build']);
+            }}
+        />
+      </FlexRow>
+      <span
+          style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+          onClick={() => navigate(['workspaces'])}
+      >
+        See all workspaces
+      </span>
+    </FlexRow>
+    <RecentWorkspaces />
+  </FlexColumn>;
+};
+
+const GettingStarted = () => {
+  return <div data-test-id='getting-started'
+              style={{
+                backgroundColor: addOpacity(colors.primary, .1).toString(),
+                color: colors.primary,
+                borderRadius: 10,
+                margin: '2em 0em'}}>
+    <div style={{margin: '1em 2em'}}>
+      <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+      <CustomBulletList>
+        <CustomBulletListItem bullet='→'>
+          Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
+                                    target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
+          Workbench Google account. This will keep your workbench browser sessions isolated from
+          your other Google accounts.
+        </CustomBulletListItem>
+        <CustomBulletListItem bullet='→'>
+          Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+          the left hand panel to browse through example workspaces.
+        </CustomBulletListItem>
+        <CustomBulletListItem bullet='→'>
+          Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
+                                              target='_blank'>support materials</StyledAnchorTag> and forum topics.
+        </CustomBulletListItem>
+      </CustomBulletList>
+    </div>
+  </div>;
+};
 
 interface Props extends WithSpinnerOverlayProps {
   profileState: {
@@ -263,26 +340,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
     return <React.Fragment>
       <FlexColumn style={styles.pageWrapper}>
-        <FlexRow style={{marginLeft: '3%'}}>
-          <FlexColumn style={{width: '50%'}}>
-            <FlexRow>
-              <FlexColumn>
-                <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
-                  Welcome to the</Header>
-                <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
-                  Researcher Workbench</Header>
-              </FlexColumn>
-              <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
-                <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
-              </FlexRow>
-            </FlexRow>
-            <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-              The secure platform to analyze <i>All of Us</i> data</SmallHeader>
-          </FlexColumn>
-          <div></div>
-        </FlexRow>
+        <WelcomeHeader/>
         <FadeBox style={styles.fadeBox}>
           {/* The elements inside this fadeBox will be changed as part of ongoing
           homepage redesign work*/}
@@ -301,66 +359,13 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                             dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (
                         <React.Fragment>
-                          <FlexColumn>
-                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                              <FlexRow style={{alignItems: 'center'}}>
-                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-                                <ClrIcon
-                                  shape='plus-circle'
-                                  size={30}
-                                  className={'is-solid'}
-                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                  onClick={() => {
-                                    AnalyticsTracker.Workspaces.OpenCreatePage();
-                                    navigate(['workspaces/build']);
-                                  }}
-                                />
-                              </FlexRow>
-                              <span
-                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                onClick={() => navigate(['workspaces'])}
-                              >
-                                See all workspaces
-                              </span>
-                            </FlexRow>
-                            <RecentWorkspaces />
-                          </FlexColumn>
-                          <FlexColumn>
+                          <Workspaces/>
                             {userWorkspacesResponse &&
-
-                              <React.Fragment>
-                                {this.userHasWorkspaces() ?
-                                <RecentResources workspaces={userWorkspacesResponse.items}/> :
-
-                                <div data-test-id='getting-started'
-                                     style={{
-                                       backgroundColor: addOpacity(colors.primary, .1).toString(),
-                                       color: colors.primary,
-                                       borderRadius: 10,
-                                       margin: '2em 0em'}}>
-                                  <div style={{margin: '1em 2em'}}>
-                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
-                                    <CustomBulletList>
-                                      <CustomBulletListItem bullet='→'>
-                                        Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
-                                          target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
-                                        Workbench Google account. This will keep your workbench browser sessions isolated from
-                                        your other Google accounts.
-                                      </CustomBulletListItem>
-                                      <CustomBulletListItem bullet='→'>
-                                        Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
-                                        the left hand panel to browse through example workspaces.
-                                      </CustomBulletListItem>
-                                      <CustomBulletListItem bullet='→'>
-                                        Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
-                                          target='_blank'>support materials</StyledAnchorTag> and forum topics.
-                                      </CustomBulletListItem>
-                                    </CustomBulletList>
-                                  </div>
-                                </div>}
-                              </React.Fragment>
+                              (this.userHasWorkspaces() ?
+                                    <RecentResources workspaces={userWorkspacesResponse.items}/> :
+                                    <GettingStarted/>
+                              )
                             }
-                          </FlexColumn>
                         </React.Fragment>
                       )
                 ) :
