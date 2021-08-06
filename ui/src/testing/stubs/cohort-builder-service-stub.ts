@@ -9,8 +9,8 @@ import {
   DemoChartInfoListResponse,
   Domain,
   DomainCount,
-  DomainInfoDeprecate,
-  DomainInfoDeprecateResponse, DomainInfoResponse,
+  DomainInfo,
+  DomainInfoResponse,
   ParticipantDemographics,
   SurveyCount,
   SurveyModule,
@@ -49,7 +49,7 @@ export class SurveyStubVariables {
 }
 
 export class DomainStubVariables {
-  static STUB_DOMAINS: DomainInfoDeprecate[] = [
+  static STUB_DOMAINS: DomainInfo[] = [
     {
       domain: Domain.CONDITION,
       name: 'Condition',
