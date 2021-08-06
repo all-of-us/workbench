@@ -31,7 +31,7 @@ nb = {
 }
 
 with open('/tmp/workbench-snippets/notebook.ipynb', 'w') as f:
-  json.dump(nb, f)
+    json.dump(nb, f)
 
 ! cd /tmp/workbench-snippets; git add notebook.ipynb
 lines = !cd /tmp/workbench-snippets/; git diff --staged
