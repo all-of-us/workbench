@@ -173,7 +173,7 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
-    title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
+    title: <span><AoU/> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
       compliance requirements for using the <AoU/> dataset.</div>,
     buttonText: 'Complete training',
@@ -187,7 +187,7 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     key: 'dataUserCodeOfConduct',
     completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
-    description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
+    description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
     buttonText: 'View & Sign',
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {

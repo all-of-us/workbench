@@ -1382,7 +1382,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             Board (RAB) as a precaution. The RAB will provide feedback and, if needed, guidance for
             modifying your research purpose or scope. To learn more, please refer to the&nbsp;
             <TooltipTrigger content={toolTipTextStigmatization} style={{display: 'inline-block'}}>
-            <Link style={{display: 'inline-block'}}><i>All of Us</i> Stigmatizing Research Policy</Link>
+            <Link style={{display: 'inline-block'}}><AoU/> Stigmatizing Research Policy</Link>
             </TooltipTrigger>. If you
             request a review, you can expect to receive an initial response within five business days.
             During the RAB’s review, you may begin working in your workspace.</div>

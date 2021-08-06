@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -10,6 +11,7 @@ import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
   commonStyles,
@@ -33,7 +35,6 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -336,7 +337,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             Please complete Step 1 of 3
           </div>
           <div style={styles.institutionalDuaTextBox}>
-            For access to the <i>All of Us</i> Research Program data, your institution needs to have signed a Data Use Agreement
+            For access to the <AouTitle/> data, your institution needs to have signed a Data Use Agreement
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
             enables us to provide their researchers with access to the Researcher Workbench.
           </div>
