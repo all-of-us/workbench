@@ -13,8 +13,6 @@ import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 import * as ReactDOM from 'react-dom';
 
-const {Fragment} = React;
-
 export interface Guard {
   allowed: () => boolean;
   redirectPath: string;

@@ -168,7 +168,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
       authStore.set({...authStore.get(), authLoaded: true, isSignedIn: false});
       setIsSignedIn(false);
-      window.setTestAccessTokenOverride("");
+      window.setTestAccessTokenOverride('');
     } else {
       gapi.auth2.getAuthInstance().signOut();
     }

@@ -281,7 +281,7 @@ export const ConceptSearch = fp.flow(
         const {conceptSet: {domain, survey}} = this.state;
         return {domain, selectedSurvey: survey, source: 'conceptSetDetails'};
       } else {
-        return {}
+        return {};
       }
     } else {
       const {urlParams: {domain}} = this.props;
