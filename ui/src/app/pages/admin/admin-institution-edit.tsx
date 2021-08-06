@@ -80,6 +80,7 @@ const styles = reactStyles({
   },
 });
 
+// The easiest way to override primereact style.
 const css = `
   body .p-inputswitch {
     height: 18px;
