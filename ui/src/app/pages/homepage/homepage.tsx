@@ -78,7 +78,7 @@ const WelcomeHeader = () => {
       </FlexRow>
     </FlexRow>
     <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-      The secure platform to analyze <i>All of Us</i> data</SmallHeader>
+      The secure platform to analyze <AoU/> data</SmallHeader>
   </FlexColumn>;
 };
 
