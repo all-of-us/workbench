@@ -408,11 +408,11 @@ describe('DataSetPage', () => {
     datasetApiStub.getDatasetMock = {
       ...stubDataSet(),
       conceptSets: [{id: 345, domain: Domain.PERSON}],
-      cohorts: [{id: 0}],
+      cohorts: [{id: 1}],
       domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    urlParamsStore.next({dataSetId: 0});
+    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -428,11 +428,11 @@ describe('DataSetPage', () => {
         id: ConceptSetsApiStub.stubConceptSets().find(cs => cs.domain === Domain.WHOLEGENOMEVARIANT).id,
         domain: Domain.WHOLEGENOMEVARIANT
       }],
-      cohorts: [{id: 0}],
+      cohorts: [{id: 1}],
       domainValuePairs: [{domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
     };
-    urlParamsStore.next({dataSetId: 0});
+    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
