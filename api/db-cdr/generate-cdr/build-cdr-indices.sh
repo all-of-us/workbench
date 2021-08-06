@@ -33,6 +33,16 @@ else
 fi
 
 echo ""
+echo "Creating cb_survey_version table"
+if ./generate-cdr/make-bq-cb-survey-version.sh "$BQ_PROJECT" "$BQ_DATASET"
+then
+    echo "cb_survey_version table creation is complete"
+else
+    echo "cb_survey_version table creation failed!"
+    exit 1
+fi
+
+echo ""
 echo "Making denormalized search events table"
 if ./generate-cdr/make-bq-denormalized-search-events.sh "$BQ_PROJECT" "$BQ_DATASET" "$DATA_BROWSER"
 then
