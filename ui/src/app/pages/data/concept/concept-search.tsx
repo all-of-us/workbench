@@ -10,7 +10,7 @@ import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -22,7 +22,8 @@ import {
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
-  withCurrentWorkspace, withUrlParams
+  withCurrentWorkspace,
+  withUrlParams
 } from 'app/utils';
 import {
   conceptSetUpdating,
@@ -154,9 +155,8 @@ export const ConceptSearch = fp.flow(
 
   componentDidMount() {
     this.props.hideSpinner();
-    if (this.isDetailPage) {
-      this.getConceptSet();
-    } else if (!currentConceptStore.getValue()) {
+
+    if (!this.isDetailPage && !currentConceptStore.getValue()) {
       currentConceptStore.next([]);
     }
     this.subscription = currentConceptStore.subscribe(currentConcepts => {
@@ -165,6 +165,21 @@ export const ConceptSearch = fp.flow(
       }
     });
     this.subscription.add(conceptSetUpdating.subscribe(updating => this.setState({conceptSetUpdating: updating})));
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.isDetailPage) {
+      if (currentConceptSetStore.getValue()) {
+        if (!this.state.conceptSet) {
+          this.setState({conceptSet: currentConceptSetStore.getValue()});
+        }
+        if (this.state.loading) {
+          this.setState({loading: false});
+        }
+      } else {
+        this.getConceptSet();
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -182,7 +197,7 @@ export const ConceptSearch = fp.flow(
     });
     const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0) ||
       (!!currentConceptSet && sortAndStringify(currentConceptSet.criteriums) !== sortAndStringify(currentConceptsMap));
-    this.setState({unsavedChanges});
+    this.setState({unsavedChanges: unsavedChanges});
   }
 
   async getConceptSet() {
@@ -261,8 +276,12 @@ export const ConceptSearch = fp.flow(
 
   get searchContext() {
     if (this.isDetailPage) {
-      const {conceptSet: {domain, survey}} = this.state;
-      return {domain, selectedSurvey: survey, source: 'conceptSetDetails'};
+      if (this.state.conceptSet) {
+        const {conceptSet: {domain, survey}} = this.state;
+        return {domain, selectedSurvey: survey, source: 'conceptSetDetails'};
+      } else {
+        return {};
+      }
     } else {
       const {urlParams: {domain}} = this.props;
       const selectedSurvey = queryParamsStore.getValue().survey;
@@ -293,7 +312,7 @@ export const ConceptSearch = fp.flow(
       />
 
       <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
-        {this.isDetailPage && <React.Fragment>
+        {this.isDetailPage && conceptSet && <React.Fragment>
           {loading ? <SpinnerOverlay/> :
             <FlexColumn>
               <div style={styles.conceptSetHeader}>

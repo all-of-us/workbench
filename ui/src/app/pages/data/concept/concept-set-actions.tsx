@@ -87,9 +87,12 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)
     componentDidMount(): void {
       this.props.hideSpinner();
       conceptSetUpdating.next(false);
-      const csid = urlParamsStore.getValue().csid;
       this.setState({conceptSetLoading: true});
-      if (csid) {
+    }
+
+    componentDidUpdate() {
+      const csid = urlParamsStore.getValue().csid;
+      if (csid && this.state.conceptSetLoading) {
         const {namespace, id} = this.props.workspace;
         conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
           if (cs) {

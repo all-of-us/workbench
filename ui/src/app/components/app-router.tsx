@@ -8,12 +8,10 @@ import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
+import * as ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Redirect, Route, Switch, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import * as ReactDOM from 'react-dom';
-
-const {Fragment} = React;
 
 export interface Guard {
   allowed: () => boolean;
@@ -86,13 +84,13 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
 };
 
 const getUserConfirmation = (message, callback) => {
-  const modal = document.createElement('div')
-  document.body.appendChild(modal)
+  const modal = document.createElement('div');
+  document.body.appendChild(modal);
 
   const withCleanup = (answer) => {
-    ReactDOM.unmountComponentAtNode(modal)
-    document.body.removeChild(modal)
-    callback(answer)
+    ReactDOM.unmountComponentAtNode(modal);
+    document.body.removeChild(modal);
+    callback(answer);
   };
 
   ReactDOM.render(
@@ -106,10 +104,11 @@ const getUserConfirmation = (message, callback) => {
         <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
       </ModalFooter>
     </Modal>, modal);
-}
+};
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
-export const AppRouter = ({children}): React.ReactElement => <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
+export const AppRouter = ({children}): React.ReactElement =>
+    <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
