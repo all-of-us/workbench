@@ -1222,7 +1222,6 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       } = this.state;
       const exportError = !this.canWrite ? 'Requires Owner or Writer permission' :
         dataSetTouched ? 'Pending changes must be saved' : '';
-      debugger;
 
       return <React.Fragment>
         {this.state.savingDataset && <SpinnerOverlay opacity={0.3}/>}
