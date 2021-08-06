@@ -62,7 +62,7 @@ const libraryTabs = {
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
     description: <div>These workspaces demonstrate how computable electronic phenotypes can be implemented within
-      the <i>All of Us</i> dataset using examples of previously published phenotype algorithms. You can open the
+      the <AoU/> dataset using examples of previously published phenotype algorithms. You can open the
       workspaces to view them or “duplicate” the workspaces to edit and execute the algorithms.</div>,
     icon: '/assets/icons/phenotype-library.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
@@ -75,7 +75,7 @@ const libraryTabs = {
   TUTORIAL_WORKSPACES: {
     title: 'Tutorial Workspaces',
     description: <div>These workspaces provide instructions for key Researcher Workbench components and representations
-      of the <i>All of Us</i> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit
+      of the <AoU/> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit
       and execute them.</div>,
     icon: '/assets/icons/tutorial-workspaces.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {

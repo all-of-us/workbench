@@ -27,7 +27,6 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
-
 import {QuickTourAndVideos} from './quick-tour-and-videos';
 
 export const styles = reactStyles({

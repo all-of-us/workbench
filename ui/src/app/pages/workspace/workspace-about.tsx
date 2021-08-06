@@ -11,6 +11,7 @@ import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
@@ -90,7 +91,7 @@ const WorkspaceInfoTooltipText = () => {
     <br/>The date this workspace was last updated<br/>
     <u>Data Access Tier</u>
     <br/>To make sure data is accessed only by authorized users, users can request
-      and be granted access to data access tiers within the <i>All of Us</i> Research Program.
+      and be granted access to data access tiers within the <AouTitle/>.
       Currently there are 3 tiers  - “Public”, “Registered” and “Controlled”.<br/>
   </div>;
 };

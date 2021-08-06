@@ -28,6 +28,7 @@ import {FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 
 const styles = reactStyles( {
@@ -348,7 +349,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
               <label>Share {this.props.workspace.name}</label>
             </div>
             <TooltipTrigger content={<div style={styles.tooltipLabel}>
-              Search for a collaborator that has an <i>All of Us</i> research account. Collaborators can
+              Search for a collaborator that has an <AoU/> research account. Collaborators can
               be assigned different permissions within your Workspace.
               <ul>
                 <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
