@@ -46,13 +46,11 @@ export const QuickTourAndVideos = (props: Props) => {
 
   const [quickTourResourceOffset, setQuickTourResourceOffset] = useState(0);
 
-  const [videoId, setVideoId] = useState('');
-  const [showVideo, setShowVideo] = useState(false);
+  const [videoId, setVideoId] = useState<string>(null);
 
   const openVideo = (id: string) => {
     AnalyticsTracker.Registration.TutorialVideo();
     setVideoId(id);
-    setShowVideo(true);
   };
 
   // The videoId parameters below are the YouTube ids that get inserted into the src url of the iframe
@@ -87,10 +85,10 @@ export const QuickTourAndVideos = (props: Props) => {
 
   return <React.Fragment>
       {showQuickTour && <QuickTourReact closeFunction={() => setShowQuickTour(false)} />}
-      {showVideo && <Modal width={900}>
+      {videoId && <Modal width={900}>
         <div style={{display: 'flex'}}>
             <div style={{flexGrow: 1}}/>
-            <Clickable onClick={() => setShowVideo(false)}>
+            <Clickable onClick={() => setVideoId(null)}>
                 <ClrIcon
                     shape='times'
                     size='24'
