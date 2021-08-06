@@ -46,7 +46,7 @@ export const QuickTourAndVideos = (props: Props) => {
 
   const [quickTourResourceOffset, setQuickTourResourceOffset] = useState(0);
 
-  const [videoId, setVideoId] = useState<string>(null);
+  const [videoId, setVideoId] = useState(null);
 
   const openVideo = (id: string) => {
     AnalyticsTracker.Registration.TutorialVideo();
