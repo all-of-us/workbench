@@ -42,7 +42,7 @@ describe('Admin', () => {
     //navigate to admin-user-profile page
     await userProfileInfo.waitForLoad();
     const bypassUserProfile = await userProfileInfo.getBypassStatus();
-    expect(bypassUserProfile).toEqual(bypassUserAdmin);         
+    expect(bypassUserProfile).toEqual(bypassUserAdmin);
   });
 
   test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {
@@ -57,16 +57,16 @@ describe('Admin', () => {
     const usernameColIndex = await adminTable.getColumnIndex('User Name');
     //get the index of the User Lockout column
     const userLockoutColIndex = await adminTable.getColumnIndex('User Lockout');
-  
+
     // get the text in the User Lockout column
     const userLockout = await userAdminPage.getUserLockoutText(1, userLockoutColIndex);
-  
+
     //get the index of the Status column
     const statusColIndex = await adminTable.getColumnIndex('Status');
-  
+
     //get the text in the Status column to match the status on admin-user-profile page
     const status = await userAdminPage.getStatusText(1, statusColIndex);
-  
+
     //switch statement to validate that the status reflects the user lockout access
     switch (userLockout) {
       case 'DISABLE':
@@ -76,25 +76,25 @@ describe('Admin', () => {
         expect(status).toEqual('Disabled');
         break;
     }
-     //get the name column index separately since it is a frozen column
-     const nameColIndex = await adminTable.getNameColindex();
+    //get the name column index separately since it is a frozen column
+    const nameColIndex = await adminTable.getNameColindex();
 
-     //click on the name link to navigate to the admin-user-profile page
-     const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
- 
-     //navigate to admin-user-profile page
-     await userProfileInfo.waitForLoad();
-  
+    //click on the name link to navigate to the admin-user-profile page
+    const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
+
+    //navigate to admin-user-profile page
+    await userProfileInfo.waitForLoad();
+
     //get the usernameEmail to match with the username on the admin-user-profile page
     const userNameEmail = await userAdminPage.getUserNameEmail(1, usernameColIndex);
-  
+
     //verify that the save button is disabled
     expect(await userProfileInfo.getSaveButton().isCursorNotAllowed()).toBe(true);
-  
+
     // get the Account Access toggle status (true or false) and the text (enabled or disabled)
     const accountAccessToggle = userProfileInfo.getAccountAccessToggle();
     const accountAccessStatus = await userProfileInfo.getAccountAccessText();
-  
+
     //switch statement to validate that the Account Access text and toggle reflects the user lockout on user-admin-table.
     switch (userLockout) {
       case 'DISABLE':
@@ -106,16 +106,16 @@ describe('Admin', () => {
         expect(await accountAccessToggle.isChecked()).toBe(false);
         break;
     }
-  
+
     //verify that userfulName, username and FreeCreditsUsed input fields are disabled
     expect(await userProfileInfo.getNameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getUsernameInput().isCursorNotAllowed()).toBe(true);
     expect(await userProfileInfo.getFreeCreditsUsedInput().isCursorNotAllowed()).toBe(true);
-  
+
     // get the username field placeholder to verify the email on user-admin-table page and admin-user-profile page matches
     const userNamePlaceHolder = await userProfileInfo.getUserNamePlaceHolder();
     expect(userNameEmail).toEqual(userNamePlaceHolder);
-  
+
     //verify the credit limit value matches the max value in the free credits used field
     const freeCreditLimit = await userProfileInfo.getFreeCreditsLimitValue();
     const freeCreditMaxValue = await userProfileInfo.getFreeCreditMaxValue();
@@ -125,7 +125,7 @@ describe('Admin', () => {
     // verify the admin is able to update the free credit
     await userProfileInfo.updateFreeCredits();
     await userProfileInfo.selectFreeCredits(freeCreditLimit);
-    });
+  });
 
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
@@ -157,5 +157,4 @@ describe('Admin', () => {
     const userProfileInfo = new UserProfileInfo(page);
     await userProfileInfo.waitForLoad();
   });
-  
 });

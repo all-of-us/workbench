@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import BaseMenu from './base-menu';
 import Checkbox from 'app/element/checkbox';
-import { getPropValue } from 'utils/element-utils'
+import { getPropValue } from 'utils/element-utils';
 import AdminTable from './admin-table';
 
 const defaultXpath = '//*[@id="popup-root"]';
@@ -19,7 +19,6 @@ export default class BypassPopup extends BaseMenu {
     return this.getMenuItemTexts(selector);
   }
 
-  
   // xpath of the bypass-link-checkbox in user admin table
   getMenuItemXpath(accessModule: string): string {
     return `${this.getXpath()}//span[text()= "${accessModule}"]/preceding-sibling::div/input[@type='checkbox']`;
@@ -29,7 +28,7 @@ export default class BypassPopup extends BaseMenu {
   async getAccessModuleStatus(accessModule: string): Promise<boolean> {
     const selector = this.getMenuItemXpath(accessModule);
     const btn = new Checkbox(this.page, selector);
-    const accessModuleStatus =await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
+    const accessModuleStatus = await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
     return accessModuleStatus;
   }
 
@@ -52,22 +51,22 @@ export default class BypassPopup extends BaseMenu {
     await this.getAccessModuleStatus('Data User Code of Conduct');
     await this.getAccessModuleStatus('RAS Login.gov Link');
   }
- 
+
   async getBypassModuleStaging(): Promise<void> {
     await this.getAccessModuleStatus('Two Factor Auth');
     await this.getAccessModuleStatus('Two Factor Auth');
     await this.getAccessModuleStatus('Data User Code of Conduct');
   }
 
-  async getBypassModuleStatus(): Promise<void>{
+  async getBypassModuleStatus(): Promise<void> {
     //const userAdminPage = new UserAdminPage(page);
     const userAdminPage = new AdminTable(page);
     //const dataTable = userAdminPage.getUserAdminTable();
     const userTableTest = await userAdminPage.getColumnNames();
-    let testTable = ['Training', 'RAS Login.gov Link'];
-    if (testTable.some(i => userTableTest.includes(i))){
+    const testTable = ['Training', 'RAS Login.gov Link'];
+    if (testTable.some((i) => userTableTest.includes(i))) {
       return this.getBypassModuleTest();
-    }else{
+    } else {
       return this.getBypassModuleStaging();
     }
   }

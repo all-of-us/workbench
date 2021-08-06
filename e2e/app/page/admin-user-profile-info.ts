@@ -186,29 +186,29 @@ export default class UserProfileInfo extends AuthenticatedPage {
     expect(creditValue).toEqual(newfreeCreditMaxValue);
     await this.waitForSaveButton(true);
   }
-  
+
   async getBypassStatusTest(): Promise<void> {
     await this.getEachBypassStatus('twoFactorAuthBypassToggle');
     await this.getEachBypassStatus('complianceTrainingBypassToggle');
     await this.getEachBypassStatus('eraCommonsBypassToggle');
     await this.getEachBypassStatus('dataUseAgreementBypassToggle');
     await this.getEachBypassStatus('rasLinkLoginGovBypassToggle');
- }
- 
- async getBypassStatusStaging(): Promise<void> {
-   await this.getEachBypassStatus('twoFactorAuthBypassToggle');
-   await this.getEachBypassStatus('eraCommonsBypassToggle');
-   await this.getEachBypassStatus('dataUseAgreementBypassToggle');
   }
 
-async getBypassStatus(): Promise<void>{
+  async getBypassStatusStaging(): Promise<void> {
+    await this.getEachBypassStatus('twoFactorAuthBypassToggle');
+    await this.getEachBypassStatus('eraCommonsBypassToggle');
+    await this.getEachBypassStatus('dataUseAgreementBypassToggle');
+  }
+
+  async getBypassStatus(): Promise<void> {
     const userAdminPage = new UserAdminPage(page);
     const dataTable = userAdminPage.getUserAdminTable();
     const userTableTest = await dataTable.getColumnNames();
-    let testTable = ['Bypass', 'RAS Login.gov Link'];
-    if (testTable.some(i => userTableTest.includes(i))){
+    const testTable = ['Bypass', 'RAS Login.gov Link'];
+    if (testTable.some((i) => userTableTest.includes(i))) {
       return this.getBypassStatusTest();
-    }else{
+    } else {
       return this.getBypassStatusStaging();
     }
   }
