@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import BaseMenu from './base-menu';
 import Checkbox from 'app/element/checkbox';
 import { getPropValue } from 'utils/element-utils'
+import AdminTable from './admin-table';
 
 const defaultXpath = '//*[@id="popup-root"]';
 
@@ -44,4 +45,30 @@ export default class BypassPopup extends BaseMenu {
     await new Checkbox(this.page, xpath).click();
   }
 
+  async getBypassModuleTest(): Promise<void> {
+    await this.getAccessModuleStatus('Two Factor Auth');
+    await this.getAccessModuleStatus('Compliance Training');
+    await this.getAccessModuleStatus('Two Factor Auth');
+    await this.getAccessModuleStatus('Data User Code of Conduct');
+    await this.getAccessModuleStatus('RAS Login.gov Link');
+  }
+ 
+  async getBypassModuleStaging(): Promise<void> {
+    await this.getAccessModuleStatus('Two Factor Auth');
+    await this.getAccessModuleStatus('Two Factor Auth');
+    await this.getAccessModuleStatus('Data User Code of Conduct');
+  }
+
+  async getBypassModuleStatus(): Promise<void>{
+    //const userAdminPage = new UserAdminPage(page);
+    const userAdminPage = new AdminTable(page);
+    //const dataTable = userAdminPage.getUserAdminTable();
+    const userTableTest = await userAdminPage.getColumnNames();
+    let testTable = ['Training', 'RAS Login.gov Link'];
+    if (testTable.some(i => userTableTest.includes(i))){
+      return this.getBypassModuleTest();
+    }else{
+      return this.getBypassModuleStaging();
+    }
+  }
 }
