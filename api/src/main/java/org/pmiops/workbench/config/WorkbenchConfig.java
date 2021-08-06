@@ -115,8 +115,6 @@ public class WorkbenchConfig {
     public String samBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
-    public String notebookRuntimeDefaultMachineType;
-    public Integer notebookRuntimeDefaultDiskSizeGb;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
