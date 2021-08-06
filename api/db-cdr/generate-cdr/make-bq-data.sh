@@ -341,7 +341,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       where se.domain = 'Condition'
       and se.is_standard = 1) c
 where d.domain = 0
@@ -363,7 +363,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       where se.domain = 'Drug'
       and se.is_standard = 1) c
 where d.domain = 3
@@ -385,7 +385,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       where se.domain = 'Measurement'
       and se.is_standard = 1) c
 where d.domain = 4
@@ -407,7 +407,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       where se.domain = 'Observation'
       and se.is_standard = 1) c
 where d.domain = 5
@@ -429,7 +429,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       where se.domain = 'Procedure'
       and se.is_standard = 1) c
 where d.domain = 6
@@ -452,7 +452,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct co.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.condition_occurrence\` co
+      from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
       join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on c.concept_id = co.condition_source_concept_id
       where c.domain_id = 'CONDITION'
       and c.is_standard = 0
@@ -477,7 +477,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct po.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.procedure_occurrence\` po
+      from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
       join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on c.concept_id = po.procedure_source_concept_id
       where c.domain_id = 'PROCEDURE'
       and c.is_standard = 0
@@ -499,7 +499,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
 set d.participant_count = c.participant_count
 from (select count(distinct se.person_id) as participant_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_search_all_events\` se
+      from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
       join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on c.concept_id = se.concept_id
       where c.domain_id = 'PHYSICAL_MEASUREMENT_CSS') c
 where d.domain = 19"
