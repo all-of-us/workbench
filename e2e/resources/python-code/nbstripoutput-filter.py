@@ -4,7 +4,10 @@
 
 import json
 
-nb = {
+
+
+nb = '''
+{
   "cells": [
     {
       "cell_type": "code",
@@ -16,7 +19,7 @@ nb = {
           "name": "stdout",
           "output_type": "stream",
           "text": [
-            "my outputs\r\n"
+            "my outputs\\r\\n"
           ]
         }
       ],
@@ -29,9 +32,10 @@ nb = {
   "nbformat": 4,
   "nbformat_minor": 5
 }
+'''
 
 with open('/tmp/workbench-snippets/notebook.ipynb', 'w') as f:
-    json.dump(nb, f)
+  file.write(nb)
 
 ! cd /tmp/workbench-snippets; git add notebook.ipynb
 lines = !cd /tmp/workbench-snippets/; git diff --staged
