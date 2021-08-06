@@ -443,6 +443,29 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
+  public void test_emailValidation_address_ignoreCase() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "EXternal-rEsearcher@sanger.UK", "science@aol.com")))));
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isTrue();
+    // Fail even when domain matches, because the requirement is ADDRESSES.
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
+  }
+
+  @Test
   public void test_emailValidation_null_address() {
     final Institution inst =
         service.createInstitution(
@@ -478,6 +501,32 @@ public class InstitutionServiceTest extends SpringTest {
                             .eraRequired(false)
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
+
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isTrue();
+    // malformed
+    assertThat(service.validateInstitutionalEmail(inst, "yy@hacker@verily.org")).isFalse();
+    // Fail even when domain matches, because the requirement is DOMAINS.
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
+  }
+
+  @Test
+  public void test_emailValidation_domain_ignoreCase() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("BROAD.org", "verily.COM"))
                             .emailAddresses(
                                 ImmutableList.of(
                                     "external-researcher@sanger.uk", "science@aol.com")))));

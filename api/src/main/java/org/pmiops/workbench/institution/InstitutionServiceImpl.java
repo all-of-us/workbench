@@ -248,8 +248,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         break;
       case ADDRESSES:
         validated =
-            getEmailAddressesByTierOrEmptySet(institution, accessTierShortName)
-                .contains(contactEmail);
+            getEmailAddressesByTierOrEmptySet(institution, accessTierShortName).stream()
+                .anyMatch(contactEmail::equalsIgnoreCase);
         logMsg =
             String.format(
                 "Contact email '%s' validated against '%s' tier with ADDRESSES requirement: "
@@ -262,8 +262,8 @@ public class InstitutionServiceImpl implements InstitutionService {
       case DOMAINS:
         final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
         validated =
-            getEmailDomainsByTierOrEmptySet(institution, accessTierShortName)
-                .contains(contactEmailDomain);
+            getEmailDomainsByTierOrEmptySet(institution, accessTierShortName).stream()
+                .anyMatch(contactEmailDomain::equalsIgnoreCase);
         logMsg =
             String.format(
                 "Contact email '%s' validated against '%s' tier with DOMAINS requirement '%s': "
