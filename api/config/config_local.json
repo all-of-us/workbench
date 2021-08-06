@@ -85,11 +85,6 @@
   "zendesk": {
     "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
-  "elasticsearch": {
-    "baseUrl": "http:\/\/elastic:9200",
-    "enableBasicAuth": false,
-    "enableElasticsearchBackend": false
-  },
   "moodle": {
     "host": "aoudev.nnlm.gov",
     "enableMoodleBackend": true,
