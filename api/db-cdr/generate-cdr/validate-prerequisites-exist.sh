@@ -82,16 +82,3 @@ then
 fi
 
 rm -rf $TEMP_FILE_DIR
-
-# Validate that all survey version exist
-echo "Validating that all survey versions exist..."
-query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
-where survey_version_concept_id not in
-( select distinct survey_version_concept_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\`)"
-surveyVersionCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$query" | tr -dc '0-9')
-if [[ $surveyVersionCount != 0 ]];
-then
-  echo "Missing survey version in $BQ_PROJECT.$BQ_DATASET.cb_survey_version!"
-  exit 1
-fi
-echo "Survey versions are valid!"
