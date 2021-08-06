@@ -2,40 +2,36 @@
 # notebook images.
 ! [ -d /tmp/workbench-snippets/ ] || git clone https://github.com/all-of-us/workbench-snippets /tmp/workbench-snippets
 
-import json
-
-
-
-nb = '''
-{
-  "cells": [
-    {
-      "cell_type": "code",
-      "execution_count": 1,
-      "id": "97f5ae46",
-      "metadata": {},
-      "outputs": [
-        {
-          "name": "stdout",
-          "output_type": "stream",
-          "text": [
-            "my outputs\\r\\n"
-          ]
-        }
-      ],
-      "source": [
-        "!./script.sh my inputs"
-      ]
-    }
-  ],
-  "metadata": {},
-  "nbformat": 4,
-  "nbformat_minor": 5
-}
-'''
+# Jupyter is very finnicky with input formatting, even in Markdown mode.
+# Dictionaries and triple quotes both fail due to Markdown auto-indent.
+nb = ('{'
+'  "cells": ['
+'    {'
+'      "cell_type": "code",'
+'      "execution_count": 1,'
+'      "id": "97f5ae46",'
+'      "metadata": {},'
+'      "outputs": ['
+'        {'
+'          "name": "stdout",'
+'          "output_type": "stream",'
+'          "text": ['
+'            "my outputs\\r\\n"'
+'          ]'
+'        }'
+'      ],'
+'      "source": ['
+'        "!./script.sh my inputs"'
+'      ]'
+'    }'
+'  ],'
+'  "metadata": {},'
+'  "nbformat": 4,'
+'  "nbformat_minor": 5'
+'}')
 
 with open('/tmp/workbench-snippets/notebook.ipynb', 'w') as f:
-  file.write(nb)
+  f.write(nb)
 
 ! cd /tmp/workbench-snippets; git add notebook.ipynb
 lines = !cd /tmp/workbench-snippets/; git diff --staged
