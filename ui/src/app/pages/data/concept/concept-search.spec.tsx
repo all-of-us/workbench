@@ -15,6 +15,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
+import {MemoryRouter} from "react-router";
 
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
@@ -35,11 +36,11 @@ describe('ConceptSearch', () => {
   });
 
   const component = () => {
-    return mount(<ConceptSearch setConceptSetUpdating={() => {}}
+    return mount(<MemoryRouter><ConceptSearch setConceptSetUpdating={() => {}}
                                 setShowUnsavedModal={() => {}}
                                 setUnsavedConceptChanges={() => {}}
                                 hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
+                                showSpinner={() => {}}/></MemoryRouter>);
   }
 
   it('should render', () => {
