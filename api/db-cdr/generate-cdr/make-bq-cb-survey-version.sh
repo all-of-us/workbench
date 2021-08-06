@@ -24,7 +24,7 @@ SELECT survey_version_concept_id, survey_concept_id, display_name, ROW_NUMBER() 
 FROM (
   SELECT distinct o.survey_version_concept_id,
   (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` WHERE concept_class_id = 'Module' AND concept_code = 'cope') as survey_concept_id,
-  REPLACE (c.concept_name, "COPE Survey", "") as display_name
+  REPLACE (c.concept_name, 'COPE Survey', '') as display_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` o
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on c.concept_id = o.survey_version_concept_id
 WHERE o.survey_version_concept_id is not null) x"
