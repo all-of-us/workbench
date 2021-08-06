@@ -260,7 +260,6 @@ export const ConceptSearch = fp.flow(
       conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS) ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
   }
 
-
   showUnsavedChangesWarning() {
     return !this.state.conceptSetUpdating && this.state.unsavedChanges;
   }
