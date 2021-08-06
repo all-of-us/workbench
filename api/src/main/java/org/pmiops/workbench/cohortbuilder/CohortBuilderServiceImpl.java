@@ -48,8 +48,8 @@ import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainInfoDeprecate;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -338,7 +338,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<DomainInfoDeprecate> findDomainInfosDepreciate() {
+  public List<DomainInfo> findDomainInfos() {
     return domainInfoDao.findByOrderByDomainId().stream()
         .filter(dbDomainInfo -> dbDomainInfo.getAllConceptCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)
@@ -346,7 +346,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<DomainInfo> findDomainInfos() {
+  public List<DomainCard> findDomainCards() {
     return domainCardDao.findByOrderById().stream()
         .filter(dbDomainCard -> dbDomainCard.getConceptCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)

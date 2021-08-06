@@ -3284,7 +3284,7 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfoDepreciate":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3293,13 +3293,13 @@ paths:
       - cohortBuilder
       description: 'Returns information on the domains of data in the workspace''s
         CDR version along with participant and concept counts'
-      operationId: findDomainInfosDepreciate
+      operationId: findDomainInfos
       responses:
         200:
           description: information on the domains
           schema:
-            "$ref": "#/definitions/DomainInfoDeprecateResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
+            "$ref": "#/definitions/DomainInfoResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domainCard":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3308,12 +3308,12 @@ paths:
         - cohortBuilder
       description: 'Returns information on the domains of data in the workspace''s
           CDR version along with participant and concept counts'
-      operationId: findDomainInfos
+      operationId: findDomainCards
       responses:
         200:
           description: information on the domains
           schema:
-            "$ref": "#/definitions/DomainInfoResponse"
+            "$ref": "#/definitions/DomainCardResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo/{domain}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3954,7 +3954,7 @@ definitions:
         description:
           Milliseconds since the UNIX epoch. This timestamp is derived from the deid dataset name.
           Ex - deid_output_20191004 -> 2019-10-04 00:00:00Z
-  DomainInfoDeprecate:
+  DomainInfo:
     type: object
     required:
     - domain
@@ -3986,7 +3986,7 @@ definitions:
           this domain
         type: integer
         format: int64
-  DomainInfo:
+  DomainCard:
     type: object
     required:
       - domain
@@ -5283,15 +5283,6 @@ definitions:
         type: array
         items:
           type: string
-  DomainInfoDeprecateResponse:
-    type: object
-    required:
-    - items
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/DomainInfoDeprecate"
   DomainInfoResponse:
     type: object
     required:
@@ -5301,6 +5292,15 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/DomainInfo"
+  DomainCardResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DomainCard"
   ValueSet:
     type: object
     properties:

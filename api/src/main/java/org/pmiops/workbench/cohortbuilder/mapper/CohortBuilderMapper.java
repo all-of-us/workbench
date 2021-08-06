@@ -20,8 +20,8 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
+import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainInfoDeprecate;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -57,10 +57,10 @@ public interface CohortBuilderMapper {
   SurveyVersion dbModelToClient(DbSurveyVersion source);
 
   @Mapping(target = "domain", source = "domainEnum")
-  DomainInfoDeprecate dbModelToClient(DbDomainInfo source);
+  DomainInfo dbModelToClient(DbDomainInfo source);
 
   @Mapping(target = "domain", source = "domainEnum")
-  DomainInfo dbModelToClient(DbDomainCard source);
+  DomainCard dbModelToClient(DbDomainCard source);
 
   SurveyModule dbModelToClient(DbSurveyModule source);
 

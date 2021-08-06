@@ -44,8 +44,8 @@ import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainInfoDeprecate;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
@@ -168,7 +168,7 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   // Todo: Remove this test once the standardSource flag is true on all environment
   @Test
-  public void findDomainInfosDeprecate() {
+  public void findDomainInfos() {
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.CONDITION.toString())
@@ -191,12 +191,8 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .standardConceptCount(0)
                 .participantCount(1000));
 
-    DomainInfoDeprecate domainInfo =
-        controller
-            .findDomainInfosDepreciate(WORKSPACE_NAMESPACE, WORKSPACE_ID)
-            .getBody()
-            .getItems()
-            .get(0);
+    DomainInfo domainInfo =
+        controller.findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
     assertThat(domainInfo.getName()).isEqualTo(dbDomainInfo.getName());
     assertThat(domainInfo.getDescription()).isEqualTo(dbDomainInfo.getDescription());
     assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainInfo.getParticipantCount());
@@ -205,7 +201,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   }
 
   @Test
-  public void findDomainInfos() {
+  public void findDomainCards() {
     cbCriteriaDao.save(
         DbCriteria.builder()
             .addDomainId(Domain.CONDITION.toString())
@@ -228,14 +224,14 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .standard(false)
                 .sortOrder(3));
 
-    DomainInfo domainInfo =
-        controller.findDomainInfos(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
-    assertThat(domainInfo.getName()).isEqualTo(dbDomainCard.getName());
-    assertThat(domainInfo.getDescription()).isEqualTo(dbDomainCard.getDescription());
-    assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainCard.getParticipantCount());
-    assertThat(domainInfo.getConceptCount()).isEqualTo(10);
-    assertThat(domainInfo.getStandard()).isFalse();
-    assertThat(domainInfo.getSortOrder()).isEqualTo(3);
+    DomainCard domainCard =
+        controller.findDomainCards(WORKSPACE_NAMESPACE, WORKSPACE_ID).getBody().getItems().get(0);
+    assertThat(domainCard.getName()).isEqualTo(dbDomainCard.getName());
+    assertThat(domainCard.getDescription()).isEqualTo(dbDomainCard.getDescription());
+    assertThat(domainCard.getParticipantCount()).isEqualTo(dbDomainCard.getParticipantCount());
+    assertThat(domainCard.getConceptCount()).isEqualTo(10);
+    assertThat(domainCard.getStandard()).isFalse();
+    assertThat(domainCard.getSortOrder()).isEqualTo(3);
   }
 
   @Test

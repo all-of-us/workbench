@@ -20,7 +20,7 @@ import {
 } from 'app/utils';
 import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, Domain, DomainInfoDeprecate, SurveyModule} from 'generated/fetch';
+import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
@@ -70,7 +70,7 @@ const styles = reactStyles({
   }
 });
 
-const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfoDeprecate, browseInDomain: Function, updating: boolean}> =
+const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo, browseInDomain: Function, updating: boolean}> =
   ({conceptDomainInfo, browseInDomain, updating}) => {
     const conceptCount = conceptDomainInfo.allConceptCount.toLocaleString();
     return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
@@ -107,7 +107,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
     </DomainCardBase>;
   };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfoDeprecate,
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo,
   browsePhysicalMeasurements: Function, updating: boolean}> =
     ({physicalMeasurement, browsePhysicalMeasurements, updating}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
@@ -135,7 +135,7 @@ interface Props extends WithSpinnerOverlayProps {
 
 interface State {
   // Array of domains and their metadata
-  conceptDomainList: Array<DomainInfoDeprecate>;
+  conceptDomainList: Array<DomainInfo>;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
   // Current string in search box
@@ -184,7 +184,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     async loadDomainsAndSurveys() {
       const {cohortContext, workspace: {id, namespace}} = this.props;
-      const getDomainInfo = cohortBuilderApi().findDomainInfosDepreciate(namespace, id)
+      const getDomainInfo = cohortBuilderApi().findDomainInfos(namespace, id)
         .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
         .catch((e) => {
           this.setState({domainInfoError: true});

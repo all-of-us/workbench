@@ -10,7 +10,7 @@ import {
   Domain,
   DomainCount,
   DomainInfoDeprecate,
-  DomainInfoDeprecateResponse,
+  DomainInfoDeprecateResponse, DomainInfoResponse,
   ParticipantDemographics,
   SurveyCount,
   SurveyModule,
@@ -402,8 +402,8 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
   }
 
-  findDomainInfosDepreciate(): Promise<DomainInfoDeprecateResponse> {
-    return new Promise<DomainInfoDeprecateResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
+  findDomainInfos(): Promise<DomainInfoResponse> {
+    return new Promise<DomainInfoResponse>(resolve => resolve({items: DomainStubVariables.STUB_DOMAINS}));
   }
 
   findSurveyModules(): Promise<SurveysResponse> {
