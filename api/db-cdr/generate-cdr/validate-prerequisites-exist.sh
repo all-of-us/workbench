@@ -11,10 +11,8 @@ export DATA_BROWSER=$4      # data browser flag
 BUCKET="all-of-us-workbench-private-cloudsql"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
-CB_SURVEY_VERSION="cb_survey_version.csv"
 PREP_SURVEY="prep_survey.csv"
-ALL_FILES=($CB_SURVEY_VERSION
-            $PREP_SURVEY)
+ALL_FILES=($PREP_SURVEY)
 DEPENDENT_TABLES=("activity_summary"
             "concept"
             "concept_ancestor"
