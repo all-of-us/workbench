@@ -85,6 +85,33 @@ const WelcomeHeader = () => {
   </FlexRow>;
 };
 
+const Workspaces = () => {
+  return <FlexColumn>
+    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+      <FlexRow style={{alignItems: 'center'}}>
+        <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+        <ClrIcon
+            shape='plus-circle'
+            size={30}
+            className={'is-solid'}
+            style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenCreatePage();
+              navigate(['workspaces/build']);
+            }}
+        />
+      </FlexRow>
+      <span
+          style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+          onClick={() => navigate(['workspaces'])}
+      >
+        See all workspaces
+      </span>
+    </FlexRow>
+    <RecentWorkspaces />
+  </FlexColumn>;
+};
+
 const GettingStarted = () => {
   return <div data-test-id='getting-started'
               style={{
@@ -335,30 +362,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                             dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
                     ) : (
                         <React.Fragment>
-                          <FlexColumn>
-                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                              <FlexRow style={{alignItems: 'center'}}>
-                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-                                <ClrIcon
-                                  shape='plus-circle'
-                                  size={30}
-                                  className={'is-solid'}
-                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                  onClick={() => {
-                                    AnalyticsTracker.Workspaces.OpenCreatePage();
-                                    navigate(['workspaces/build']);
-                                  }}
-                                />
-                              </FlexRow>
-                              <span
-                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                onClick={() => navigate(['workspaces'])}
-                              >
-                                See all workspaces
-                              </span>
-                            </FlexRow>
-                            <RecentWorkspaces />
-                          </FlexColumn>
+                          <Workspaces/>
                           <FlexColumn>
                             {userWorkspacesResponse &&
                               <React.Fragment>
