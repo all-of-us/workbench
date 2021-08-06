@@ -3,7 +3,6 @@ import { signInWithAccessToken } from 'utils/test-utils';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
-//import HomePage from 'app/page/home-page'; 
 
 describe('Admin', () => {
   const userEmail = 'admin_test';
@@ -20,14 +19,7 @@ describe('Admin', () => {
     //look up the user
     await userAdminPage.searchUser(userEmail);
     await userAdminPage.waitForLoad();
-
-    //Verify table column names match.
-    const columns = ['Status', 'Institution', 'User Name', 'Contact Email', 'User Lockout', 'First Sign-in', '2FA', 'Training', 'eRA Commons', 'DUCC', 'RAS Login.gov Link', 'Bypass','Audit'];
-
     const adminTable = new AdminTable(page);
-    const columnNames = await adminTable.getColumnNames();
-    expect(columnNames.sort()).toEqual(columns.sort());
-
     const usernameColIndex = await adminTable.getColumnIndex('User Name');
 
     //get the User Name to verify the search result matches
@@ -39,19 +31,8 @@ describe('Admin', () => {
     const bypassColIndex = await adminTable.getColumnIndex('Bypass');
     //click on the bypass link
     const bypassPopup = await userAdminPage.clickBypassLink(1, bypassColIndex);
-
-    // Verify toggle option names match.
-    const toggleOptions = ['Compliance Training', 'eRA Commons Linking', 'Two Factor Auth', 'Data User Code of Conduct', 'RAS Login.gov Link'];
-
-    const toggleTexts = await bypassPopup.getAllToggleTexts();
-    expect(toggleTexts.sort()).toEqual(toggleOptions.sort());
-
-    // get status of each modules individually
-    const trainingToggleStatus = await bypassPopup.getAccessModuleStatus('Compliance Training');
-    const eraCommToggleStatus = await bypassPopup.getAccessModuleStatus('eRA Commons Linking');
-    const twoFAToggleStatus = await bypassPopup.getAccessModuleStatus('Two Factor Auth');
-    const dUCCToggleStatus = await bypassPopup.getAccessModuleStatus('Data User Code of Conduct');
-    const rASloginToggleStatus = await bypassPopup.getAccessModuleStatus('RAS Login.gov Link');
+    const bypassUserAdmin = await bypassPopup.getBypassModuleStatus();
+    await bypassPopup.clickCancelBypass();
 
     //get the name column index separately since it is a frozen column
     const nameColIndex = await adminTable.getNameColindex();
@@ -60,20 +41,8 @@ describe('Admin', () => {
     const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
     //navigate to admin-user-profile page
     await userProfileInfo.waitForLoad();
-
-    //get the bypass access status of all modules on admin-user-profile page
-    const twoFAToggleStatus2 = await userProfileInfo.getEachBypassStatus('twoFactorAuthBypassToggle');
-    const trainingToggle2 = await userProfileInfo.getEachBypassStatus('complianceTrainingBypassToggle');
-    const eraCommToggleStatus2 = await userProfileInfo.getEachBypassStatus('eraCommonsBypassToggle');
-    const dUCCToggleStatus2 = await userProfileInfo.getEachBypassStatus('dataUseAgreementBypassToggle');
-    const rASloginToggleStatus2 = await userProfileInfo.getEachBypassStatus('rasLinkLoginGovBypassToggle');
-
-    //verify all the modules status on user-admin-table page and admin-user-profile page match
-    expect(twoFAToggleStatus2).toEqual(twoFAToggleStatus);
-    expect(trainingToggle2).toEqual(trainingToggleStatus);
-    expect(eraCommToggleStatus2).toEqual(eraCommToggleStatus);
-    expect(dUCCToggleStatus2).toEqual(dUCCToggleStatus); 
-    expect(rASloginToggleStatus2).toEqual(rASloginToggleStatus);           
+    const bypassUserProfile = await userProfileInfo.getBypassStatus();
+    expect(bypassUserProfile).toEqual(bypassUserAdmin);         
   });
 
   test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {
@@ -160,7 +129,6 @@ describe('Admin', () => {
 
   test('Verify that the user-audit page UI renders correctly', async () => {
     const userAdminPage = new UserAdminPage(page);
-
     await userAdminPage.waitForLoad();
 
     //look up for the user
