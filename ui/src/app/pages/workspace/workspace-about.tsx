@@ -1,11 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
-
-import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -15,10 +10,13 @@ import {AouTitle} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   BillingAccountType,

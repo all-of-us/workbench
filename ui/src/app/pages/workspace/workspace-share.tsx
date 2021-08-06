@@ -1,5 +1,14 @@
+import {Select} from 'app/components/inputs';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
+import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
+import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -7,13 +16,9 @@ import {
   reactStyles,
   withUserProfile
 } from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-
-import {Select} from 'app/components/inputs';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {
   BillingAccountType,
   Profile,
@@ -22,14 +27,6 @@ import {
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
-
-import {Button} from 'app/components/buttons';
-import {FlexRow} from 'app/components/flex';
-import {ClrIcon, InfoIcon} from 'app/components/icons';
-import {TooltipTrigger} from 'app/components/popups';
-import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {AoU} from 'app/components/text-wrappers';
-import {AnalyticsTracker} from 'app/utils/analytics';
 
 const styles = reactStyles( {
   tooltipLabel: {
