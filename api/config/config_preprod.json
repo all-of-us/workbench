@@ -4,8 +4,6 @@
     "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 14,
     "notebookRuntimeIdleMaxAgeDays": 7,
-    "notebookRuntimeDefaultMachineType": "n1-highmem-4",
-    "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "preprod-AoU-RW",
