@@ -428,13 +428,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
 
   validateEmailDomainPresence(tier: AccessTierShortNames) {
     const {institution} = this.state;
-    console.log('error 1');
-    console.log(tier);
-    console.log(getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.DOMAINS);
     if (getTierConfig(institution, tier).membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
       const emailDomains = getTierEmailDomains(institution, tier);
-      console.log('error 1');
-      console.log(emailDomains);
       return emailDomains && emailDomains.length > 0;
     } else {
       return true;
@@ -465,10 +460,10 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
     }, {
       displayName: {presence: {allowEmpty: false}, length: {maximum: 80, tooLong: 'must be %{count} characters or less'}},
       organizationTypeEnum: {presence: {allowEmpty: false}},
-      rtTierEmailAddresses: {truthiness: true},
+      rtTierEmailAddresses: {truthiness: true} ,
       ctTierEmailAddresses: {truthiness: true},
       rtTierEmailDomains: {truthiness: true},
-      ctTierEmailDomains: {truthiness: true}
+      ctTierEmailDomains: {truthiness: true},
     });
     return <div>
       <style>{css}</style>
@@ -657,9 +652,9 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
                 <BulletAlignedUnorderedList>
                   {errors.displayName && <li>Display Name should be of at most 80 Characters</li>}
                   {errors.organizationTypeEnum && <li>Organization Type should not be empty</li>}
-                  {errors.rtTierEmailDomains || errors.ctTierEmailDomains &&
+                  {(errors.rtTierEmailDomains || errors.ctTierEmailDomains) &&
                   <li>Email Domains should not be empty</li>}
-                  {errors.rtTierEmailAddresses || errors.ctTierEmailAddresses
+                  {(errors.rtTierEmailAddresses || errors.ctTierEmailAddresses)
                   && <li>Email Addresses should not be empty</li>}
                 </BulletAlignedUnorderedList>
               </div>

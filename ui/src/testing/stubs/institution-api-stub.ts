@@ -59,7 +59,25 @@ export const defaultInstitutions: Array<Institution> = [{
     }
   ],
   userInstructions: 'Verily User Instruction'
-}];
+},{
+  shortName: 'Non CT Access',
+  displayName: 'Non CT Access',
+  organizationTypeEnum: OrganizationType.INDUSTRY,
+  tierConfigs: [
+    {
+      accessTierShortName: "registered",
+      membershipRequirement: InstitutionMembershipRequirement.DOMAINS,
+      eraRequired: true,
+      emailDomains: ['verily.com', 'google.com']
+    },
+    {
+      accessTierShortName: "controlled",
+      membershipRequirement: InstitutionMembershipRequirement.NOACCESS,
+    }
+  ],
+  userInstructions: 'Verily User Instruction'
+}
+];
 
 export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;

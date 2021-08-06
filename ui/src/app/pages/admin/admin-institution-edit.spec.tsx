@@ -69,6 +69,16 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
   });
 
+  it('should hide CT card when institution has controlled tier access disabled', async() => {
+    urlParamsStore.next({
+      institutionId: 'Non CT Access'
+    });
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper).toBeTruthy();
+    expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
+  });
+
   it('should not change eRA Required and tier enabled switches when changing tier requirement ', async() => {
     urlParamsStore.next({
       institutionId: 'Verily'
