@@ -9,6 +9,7 @@ import { LinkText } from 'app/text-labels';
 import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
 import { getPropValue } from 'utils/element-utils';
+import UserAdminPage from './admin-user-list-page';
 
 const PageTitle = 'User Admin | All of Us Researcher Workbench';
 
@@ -177,17 +178,38 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return dropdown.select(selectTextValue);
   }
 
-   // update free credit 
-   async updateFreeCredits(): Promise<void> {
+  // update free credit
+  async updateFreeCredits(): Promise<void> {
     await this.selectFreeCredits(FreeCreditSelectValue.six);
     const creditValue = await this.getFreeCreditsLimitValue();
     const newfreeCreditMaxValue = await this.getFreeCreditMaxValue();
     expect(creditValue).toEqual(newfreeCreditMaxValue);
     await this.waitForSaveButton(true);
   }
-
-
+  
+  async getBypassStatusTest(): Promise<void> {
+    await this.getEachBypassStatus('twoFactorAuthBypassToggle');
+    await this.getEachBypassStatus('complianceTrainingBypassToggle');
+    await this.getEachBypassStatus('eraCommonsBypassToggle');
+    await this.getEachBypassStatus('dataUseAgreementBypassToggle');
+    await this.getEachBypassStatus('rasLinkLoginGovBypassToggle');
+ }
  
+ async getBypassStatusStaging(): Promise<void> {
+   await this.getEachBypassStatus('twoFactorAuthBypassToggle');
+   await this.getEachBypassStatus('eraCommonsBypassToggle');
+   await this.getEachBypassStatus('dataUseAgreementBypassToggle');
+  }
 
-
+async getBypassStatus(): Promise<void>{
+    const userAdminPage = new UserAdminPage(page);
+    const dataTable = userAdminPage.getUserAdminTable();
+    const userTableTest = await dataTable.getColumnNames();
+    let testTable = ['Bypass', 'RAS Login.gov Link'];
+    if (testTable.some(i => userTableTest.includes(i))){
+      return this.getBypassStatusTest();
+    }else{
+      return this.getBypassStatusStaging();
+    }
+  }
 }
