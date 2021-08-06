@@ -17,7 +17,7 @@ bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/cb_survey_versio
 # INSERT into cb_survey_version TABLE
 #####################################
 echo "Insert cb_survey_version"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
     (survey_version_concept_id,survey_concept_id,display_name,display_order)
 SELECT survey_version_concept_id, survey_concept_id, display_name, ROW_NUMBER() OVER (ORDER BY survey_version_concept_id) AS display_order
