@@ -54,24 +54,30 @@ describe('Create python kernel notebook', () => {
     const kernelName = await notebook.getKernelName();
     expect(kernelName).toBe('Python 3');
 
-    const cell1OutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/import-os.py' });
+    const cell1OutputText = await notebook.runCodeCell(1, {
+      codeFile: 'resources/python-code/import-os.py'
+    });
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell1OutputText.endsWith('success')).toBeTruthy();
+    expect(cell1OutputText).toMatch(/success$/);
 
-    const cell2OutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/import-libs.py' });
-    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell2OutputText.endsWith('success')).toBeTruthy();
+    expect(await notebook.runCodeCell(2, {
+      codeFile: 'resources/python-code/import-libs.py'
+    })).toMatch(/success$/);
 
-    await notebook.runCodeCell(3, {
+    expect(await notebook.runCodeCell(3, {
       codeFile: 'resources/python-code/git-ignore-check.py',
       markdownWorkaround: true
-    });
-    // TODO(RW-7044): Reintroduce success check after 8/1/21, to allow image upgrade to phase in.
+    })).toMatch(/success$/);
 
-    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    expect(await notebook.runCodeCell(4, {
+      codeFile: 'resources/python-code/nbstripoutput-filter.py',
+      markdownWorkaround: true
+    })).toMatch(/success$/);
+
+    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(4);
+    const cell = notebook.findCell(5);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
