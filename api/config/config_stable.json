@@ -10,7 +10,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "stable-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {

@@ -1,6 +1,6 @@
 # Any git repo will do here, workbench-snippets is small and relevant to AoU's
 # notebook images.
-! git clone https://github.com/all-of-us/workbench-snippets.git /tmp/workbench-snippets
+! [ -d /tmp/workbench-snippets/ ] || git clone https://github.com/all-of-us/workbench-snippets /tmp/workbench-snippets
 
 ! touch /tmp/workbench-snippets/should_be_ignored.png
 ! touch /tmp/workbench-snippets/should_be_ignored.csv
@@ -28,5 +28,7 @@ assert len(visible) == 10, f"wrong number of visible files ({len(visible)}): {vi
 
 ignored = list(filter(lambda s : 'should_be_ignored' in s, actual))
 assert len(ignored) == 0, f"found {len(ignored)} files which should have been ignored: {ignored}"
+
+! cd /tmp/workbench-snippets/; git reset HEAD; git clean -f
 
 print("success")
