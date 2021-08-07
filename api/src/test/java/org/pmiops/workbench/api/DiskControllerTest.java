@@ -14,7 +14,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
-import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
