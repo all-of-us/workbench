@@ -53,13 +53,17 @@ public class DiskController implements DiskApiDelegate {
             .filter(r -> r.getName().startsWith(pdNamePrefix))
             .peek(
                 r -> {
-                  switch (r.getStatus()) {
-                    case READY:
-                      activePDCnt.addAndGet(1);
-                      break;
-                    case FAILED:
-                      failedPDCnt.addAndGet(1);
-                      break;
+                  if (r.getStatus() != null) {
+                    switch (r.getStatus()) {
+                      case READY:
+                        activePDCnt.addAndGet(1);
+                        break;
+                      case FAILED:
+                        failedPDCnt.addAndGet(1);
+                        break;
+                      default:
+                        break;
+                    }
                   }
                 }) // collect disk status
             .sorted(
@@ -106,6 +110,10 @@ public class DiskController implements DiskApiDelegate {
     String googleProject = lookupWorkspace(workspaceNamespace).getGoogleProject();
     leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  public static String getDiskCreatedDateFormat() {
+    return diskCreatedDateFormat;
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
