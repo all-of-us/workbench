@@ -315,7 +315,7 @@ public class DiskControllerTest extends SpringTest {
   }
 
   @Test
-  public void testDeleteRuntime() throws ApiException {
+  public void testDeleteDisk() throws ApiException {
     String diskName = user.generatePDName();
     diskController.deleteDisk(WORKSPACE_NS, diskName);
     verify(userDisksApi).deleteDisk(GOOGLE_PROJECT_ID, diskName);
