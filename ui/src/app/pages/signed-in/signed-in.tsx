@@ -13,7 +13,6 @@ import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {routeConfigDataStore} from 'app/utils/navigation';
 import {
-  authStore,
   cdrVersionStore,
   compoundRuntimeOpStore,
   profileStore,
@@ -51,7 +50,6 @@ const checkOpsBeforeUnload = (e) => {
 
 export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
-  useEffect(() => authStore.set({...authStore.get(), enableInactivityTimeout: true}), []);
   console.log('Render SignedIn page');
 
   const [hideFooter, setHideFooter] = useState(false);

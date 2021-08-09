@@ -41,8 +41,7 @@ const secondsToText = (seconds: number) => {
 
 const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
   window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-  signOut();
-  navigateSignOut(continuePath);
+  signOut(continuePath);
 };
 
 export const InactivityMonitor = () => {

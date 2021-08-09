@@ -4,11 +4,14 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
-import {navigateSignOut, signInStore, useNavigation} from 'app/utils/navigation';
+import {navigateSignOut, useNavigation} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {useState} from 'react';
+import {signOut} from "../utils/authentication";
+
+declare const gapi: any;
 
 const styles = reactStyles({
   flex: {
@@ -198,7 +201,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
           }
           {
             props.hasProfileImage && <img
-                src={signInStore.getValue().profileImage}
+                src={gapi.auth2 ? gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl() : null}
                 style={styles.profileImage}
             />
           }
@@ -242,11 +245,6 @@ export const SideNav = (props: SideNavProps) => {
       profile.username,
       profile.contactEmail
     );
-  };
-
-  const signOut = () => {
-    signInStore.getValue().signOut();
-    navigateSignOut();
   };
 
   return <div style={styles.sideNav}>
