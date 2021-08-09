@@ -3,7 +3,6 @@ package org.pmiops.workbench.billing;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -19,6 +18,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -103,17 +103,21 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     // iterate through ALL combinations of access tier and buffer status, counting 0 projects where
     // this combination does not appear in `counts`
-    return Streams.zip(
-            accessTierService.getAllTiers().stream(),
-            Arrays.stream(BufferEntryStatus.values()),
-            (tier, status) -> {
-              final long numProjects = counts.getOrDefault(Pair.of(tier, status), 0L);
-              return MeasurementBundle.builder()
-                  .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, numProjects)
-                  .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
-                  .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, tier.getShortName())
-                  .build();
-            })
+    return accessTierService.getAllTiers().stream()
+        .flatMap(
+            tier ->
+                Arrays.stream(BufferEntryStatus.values())
+                    .flatMap(
+                        status -> {
+                          final long numProjects = counts.getOrDefault(Pair.of(tier, status), 0L);
+                          return Stream.of(
+                              MeasurementBundle.builder()
+                                  .addMeasurement(
+                                      GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, numProjects)
+                                  .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
+                                  .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, tier.getShortName())
+                                  .build());
+                        }))
         .collect(Collectors.toList());
   }
 

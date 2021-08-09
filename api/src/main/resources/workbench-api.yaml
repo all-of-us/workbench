@@ -3318,7 +3318,7 @@ paths:
       tags:
       - cohortBuilder
       description: 'Returns criteria menu'
-      operationId: findCriteriaMenuOld
+      operationId: findCriteriaMenu
       parameters:
       - in: path
         name: parentId
@@ -3331,7 +3331,7 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria-menu/{parentId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -3339,7 +3339,7 @@ paths:
       tags:
         - cohortBuilder
       description: 'Returns criteria menu with source and standard info'
-      operationId: findCriteriaMenu
+      operationId: findCbMenu
       parameters:
         - in: path
           name: parentId
