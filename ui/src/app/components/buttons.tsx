@@ -5,10 +5,10 @@ import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
-import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
+import {Link as RouterLink} from 'react-router-dom';
 
 
 export const styles = reactStyles({
@@ -341,27 +341,18 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
   >{children}</Clickable>;
 };
 
-export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const [, navigateByUrl] = useNavigation();
+export const StyledAnchorTag = ({href, children, analyticsFn = () => {}, style = {}, ...props}) => {
   const inlineAnchor = {
     display: 'inline-block',
     color: colors.accent
   };
-  // TODO angular2react - lower priority but I think this can be swapped out with a standard react-router Link
-  return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
-              }
-            }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+
+  return <RouterLink to={href}
+                     onClick={() => analyticsFn()}
+                     style={{...inlineAnchor, ...style}}
+                     {...props}>
+    {children}
+  </RouterLink>;
 };
 
 interface SlidingFabState {
