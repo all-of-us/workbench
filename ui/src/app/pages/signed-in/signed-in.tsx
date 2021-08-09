@@ -49,7 +49,7 @@ const checkOpsBeforeUnload = (e) => {
 };
 
 interface Props extends WithSpinnerOverlayProps {
-  subscribeToInactivitySignOut: () => {};
+  enableInactivityTimeout: () => {};
   signOut: () => {};
 }
 
@@ -73,7 +73,7 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subscriptions = [];
-    props.subscribeToInactivitySignOut();
+    props.enableInactivityTimeout();
     // This handles detection of Angular-based routing data.
     subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);

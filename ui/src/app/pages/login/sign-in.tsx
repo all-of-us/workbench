@@ -109,7 +109,6 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 
 export interface SignInProps extends WindowSizeProps, WithSpinnerOverlayProps {
   initialStep?: SignInStep;
-  onSignIn: () => void;
   signIn: () => void;
 }
 
@@ -179,7 +178,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   componentDidMount() {
     this.props.hideSpinner();
     document.body.style.backgroundColor = colors.light;
-    this.props.onSignIn();
   }
 
   componentDidUpdate(prevProps: SignInProps, prevState: SignInState, snapshot) {
