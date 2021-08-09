@@ -113,14 +113,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     // iterate through ALL combinations of access tier and buffer status, counting 0 projects where
     // this combination does not appear in `counts`
-
-    Stream<Pair<DbAccessTier, BufferEntryStatus>> foo =
-        accessTierService.getAllTiers().stream()
-            .flatMap(
-                tier ->
-                    Arrays.stream(BufferEntryStatus.values())
-                        .flatMap(status -> Stream.of(Pair.of(tier, status))));
-
     return accessTierService.getAllTiers().stream()
         .flatMap(
             tier ->
@@ -128,13 +120,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                     .flatMap(
                         status -> {
                           final long numProjects = counts.getOrDefault(Pair.of(tier, status), 0L);
-
-                          String logMsg =
-                              String.format(
-                                  "allcombos2  Tier %s / Status %s: Count %d",
-                                  tier.getShortName(), status.toString(), numProjects);
-                          log.info(logMsg);
-
                           return Stream.of(
                               MeasurementBundle.builder()
                                   .addMeasurement(
@@ -144,26 +129,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                                   .build());
                         }))
         .collect(Collectors.toList());
-
-    //    return Streams.zip(
-    //            accessTierService.getAllTiers().stream(),
-    //            Arrays.stream(BufferEntryStatus.values()),
-    //            (tier, status) -> {
-    //              final long numProjects = counts.getOrDefault(Pair.of(tier, status), 0L);
-    //
-    //              String logMsg =
-    //                  String.format(
-    //                      "allcombos Tier %s / Status %s: Count %d", tier.getShortName(),
-    // status.toString(), numProjects);
-    //              log.info(logMsg);
-    //
-    //              return MeasurementBundle.builder()
-    //                  .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, numProjects)
-    //                  .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
-    //                  .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, tier.getShortName())
-    //                  .build();
-    //            })
-    //        .collect(Collectors.toList());
   }
 
   /**
