@@ -50,13 +50,6 @@ import 'rxjs/Rx';
 
 declare const gapi: any;
 
-// for e2e tests: provide your own oauth token to obviate Google's oauth UI
-// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
-// as non-human.
-declare global {
-  interface Window { setTestAccessTokenOverride: (token: string) => void; }
-}
-
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
 const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
 const SessionExpiredPage = fp.flow(withRouteData, withRoutingSpinner)(SessionExpired);
@@ -171,7 +164,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // so it's available for Puppeteer to call. If we need this even earlier in
     // the page, it could go into something like main.ts, but ideally we'd keep
     // this logic in one place, and keep main.ts minimal.
-    console.log('allowTestAccessTokenOverride: ' + environment.allowTestAccessTokenOverride);
     if (environment.allowTestAccessTokenOverride) {
       window.setTestAccessTokenOverride = (token: string) => {
         // Disclaimer: console.log statements here are unlikely to captured by
@@ -184,7 +176,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
         }
       };
-      console.log('setTestAccessTokenOverride: ' + window.setTestAccessTokenOverride);
     }
   }, []);
 
@@ -239,7 +230,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
     if (environment.allowTestAccessTokenOverride) {
-      console.log('Attempting to get puppeteer token from local storage');
       const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       // TODO angular2react - can I just replace this with `setTestAccessTokenOverride(window....)` and assume that
       // the right value will be used in the if conditional in the same execution loop?

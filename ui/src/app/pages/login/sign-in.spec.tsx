@@ -29,7 +29,6 @@ describe('SignInReact', () => {
   beforeEach(() => {
     window.scrollTo = () => {};
     props = {
-      signIn: signIn,
       windowSize: {width: 1700, height: 0},
       hideSpinner: () => {},
       showSpinner: () => {}

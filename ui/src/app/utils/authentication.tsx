@@ -8,6 +8,13 @@ import {signInStore} from './navigation';
 
 declare const gapi: any;
 
+// for e2e tests: provide your own oauth token to obviate Google's oauth UI
+// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
+// as non-human.
+declare global {
+  interface Window { setTestAccessTokenOverride: (token: string) => void; }
+}
+
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   return new Promise((resolve) => {
     gapi.load('auth2', () => {
