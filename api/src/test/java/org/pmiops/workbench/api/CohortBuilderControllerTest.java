@@ -145,7 +145,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   }
 
   @Test
-  public void findCBMenu() {
+  public void findCbMenu() {
     DbCBMenu dbCBMenu =
         cbMenuDao.save(
             DbCBMenu.builder()

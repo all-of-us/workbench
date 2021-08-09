@@ -3271,7 +3271,7 @@ paths:
       tags:
         - cohortBuilder
       description: 'Returns criteria menu with source and standard info'
-      operationId: findCBMenu
+      operationId: findCbMenu
       parameters:
         - in: path
           name: parentId
