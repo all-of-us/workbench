@@ -13,6 +13,7 @@ import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {
+  authStore,
   cdrVersionStore,
   compoundRuntimeOpStore,
   profileStore,
@@ -20,6 +21,7 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useState} from 'react';
+import {signOut} from "../../utils/authentication";
 
 const styles = reactStyles({
   appContainer: {
@@ -48,13 +50,9 @@ const checkOpsBeforeUnload = (e) => {
   }
 };
 
-interface Props extends WithSpinnerOverlayProps {
-  enableInactivityTimeout: () => {};
-  signOut: () => {};
-}
-
-export const SignedIn = (props: Props) => {
-  useEffect(() => props.hideSpinner(), []);
+export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
+  useEffect(() => authStore.set({...authStore.get(), enableInactivityTimeout: true}), []);
   console.log('Render SignedIn page');
 
   const [hideFooter, setHideFooter] = useState(false);
@@ -73,7 +71,6 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subscriptions = [];
-    props.enableInactivityTimeout();
     // This handles detection of Angular-based routing data.
     subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
@@ -126,7 +123,7 @@ export const SignedIn = (props: Props) => {
 
   const signOut = (continuePath?: string): void => {
     window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-    props.signOut();
+    signOut();
     navigateSignOut(continuePath);
   };
 
