@@ -1,10 +1,12 @@
+import * as React from 'react';
+
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HtmlViewer} from 'app/components/html-viewer';
 import {CheckBox} from 'app/components/inputs';
+import {AoU} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import * as React from 'react';
 
 const baseCheckboxLabelStyle = {
   color: colors.primary,
@@ -94,7 +96,7 @@ export class AccountCreationTos extends React.Component<
                         styles.disabledCheckboxLabel}
                       wrapperStyle={{marginBottom: '0.5rem'}}
                       label={<span>
-              I have read, understand, and agree to the <i>All of Us</i> Program Privacy Statement.</span>}
+              I have read, understand, and agree to the <AoU/> Program Privacy Statement.</span>}
             /></div>
           <div>
             <CheckBox data-test-id='terms-of-service-check'

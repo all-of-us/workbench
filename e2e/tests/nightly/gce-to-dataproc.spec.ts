@@ -7,8 +7,6 @@ import { ResourceCard } from 'app/text-labels';
 
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
-// Retry one more when fails
-jest.retryTimes(1);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {

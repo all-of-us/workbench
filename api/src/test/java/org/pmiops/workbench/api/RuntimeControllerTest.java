@@ -255,8 +255,6 @@ public class RuntimeControllerTest extends SpringTest {
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
-    config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
-    config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
 
     user = new DbUser();
@@ -393,6 +391,10 @@ public class RuntimeControllerTest extends SpringTest {
 
   private String getRuntimeName() {
     return "all-of-us-".concat(Long.toString(user.getUserId()));
+  }
+
+  private String getPdName() {
+    return "all-of-us-pd-".concat(Long.toString(user.getUserId()));
   }
 
   @Test
@@ -982,7 +984,7 @@ public class RuntimeControllerTest extends SpringTest {
                     .persistentDisk(
                         new PersistentDiskRequest()
                             .diskType(DiskType.SSD)
-                            .name(user.getPDName())
+                            .name(getPdName())
                             .size(500))));
 
     verify(userRuntimesApi)
@@ -1007,8 +1009,7 @@ public class RuntimeControllerTest extends SpringTest {
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
         .isEqualTo(LeonardoDiskType.SSD);
-    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName())
-        .isEqualTo(user.getPDName());
+    assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
   }
 

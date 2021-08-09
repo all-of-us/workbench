@@ -1,16 +1,17 @@
+import * as React from 'react';
+
+import {Divider} from 'app/components/divider';
 import {
   PageHeader,
 } from 'app/components/headers';
+import {TextColumn} from 'app/components/text-column';
+import {AoU} from 'app/components/text-wrappers';
 import {
   AccountCreationResendModal,
   AccountCreationUpdateModal
 } from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
-
-import {Divider} from 'app/components/divider';
-import {TextColumn} from 'app/components/text-column';
 import {Profile} from 'generated/fetch/api';
-import * as React from 'react';
 
 const styles = {
   buttonLinkStyling: {
@@ -61,7 +62,7 @@ export class AccountCreationSuccess
 
         <TextColumn>
           <div style={{fontSize: '16px', marginTop: '.25rem'}}>
-            Your <i>All of Us</i> research account has been created!
+            Your <AoU/> research account has been created!
           </div>
         </TextColumn>
 

@@ -725,33 +725,6 @@ Common.register_command({
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
 })
 
-def make_prep_tables_bucket(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--new-cdr-version [new-cdr-version]",
-    ->(opts, v) { opts.new_cdr_version = v},
-    "New CDR Version. Required. Ex: C2021Q2R1"
-  )
-  op.add_option(
-    "--previous-cdr-version [previous-cdr-version]",
-    ->(opts, v) { opts.previous_cdr_version = v},
-    "Previous CDR Version. Required. Ex: C2021Q4R1"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.new_cdr_version and opts.previous_cdr_version }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-prep-tables-bucket.sh #{op.opts.new_cdr_version} #{op.opts.previous_cdr_version}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-prep-tables-bucket",
-  :description => "Create a new CDR bucket and copy over reusable csv files from previous CDR bucket.",
-  :fn => ->(*args) { make_prep_tables_bucket("make-prep-tables-bucket", *args) }
-})
-
 def make_bq_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -825,7 +798,7 @@ Common.register_command({
   :fn => ->(*args) { make_prep_ppi_csv_files("make-prep-ppi-csv-files", *args) }
 })
 
-def make_bq_denormalized_tables(cmd_name, *args)
+def build_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -868,14 +841,14 @@ def make_bq_denormalized_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cdr-indices.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
   end
 end
 
 Common.register_command({
-  :invocation => "make-bq-denormalized-tables",
-  :description => "Generates big query denormalized tables for search/review/datasets.",
-  :fn => ->(*args) { make_bq_denormalized_tables("make-bq-denormalized-tables", *args) }
+  :invocation => "build-cdr-indices",
+  :description => "Kicks off build for CDR indices",
+  :fn => ->(*args) { build_cdr_indices("build-cdr-indices", *args) }
 })
 
 def make_bq_denormalized_review(cmd_name, *args)
@@ -1063,7 +1036,7 @@ Common.register_command({
   :fn => ->(*args) { generate_cb_criteria_tables("generate_cb_criteria_tables", *args) }
 })
 
-def generate_private_cdr_counts(cmd_name, *args)
+def import_cdr_indices_to_cloudsql(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -1094,17 +1067,17 @@ def generate_private_cdr_counts(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
+      common.run_inline %W{./generate-cdr/import-cdr-indices-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
   end
 end
 
 Common.register_command({
-  :invocation => "generate-private-cdr-counts",
-  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
+  :invocation => "import-cdr-indices-to-cloudsql",
+  :description => "import-cdr-indices-to-cloudsql --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
  --cdr-version=<VERSION> --bucket <BUCKET>
-Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
-  :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
+Imports CB related tables to mysql/cloudsql to be used by workbench.",
+  :fn => ->(*args) { import_cdr_indices_to_cloudsql("import-cdr-indices-to-cloudsql", *args) }
 })
 
 def copy_bq_tables(cmd_name, *args)
@@ -1196,7 +1169,7 @@ end
 Common.register_command({
   :invocation => "generate-local-cdr-db",
   :description => "generate-cloudsql-cdr --cdr-version <synth_r_20XXqX_X> --cdr-db-prefix <cdr> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-private-cdr-counts.",
+Creates and populates local mysql database from data in bucket made by import-cdr-indices-to-cloudsql.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
 
@@ -1209,7 +1182,7 @@ end
 Common.register_command({
   :invocation => "generate-local-count-dbs",
   :description => "generate-local-count-dbs --cdr-version <synth_r_20XXqX_X> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> from data in bucket made by generate-private-cdr-counts.",
+Creates and populates local mysql databases cdr<VERSION> from data in bucket made by import-cdr-indices-to-cloudsql.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 

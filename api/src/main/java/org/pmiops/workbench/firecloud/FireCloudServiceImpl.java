@@ -33,6 +33,7 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -257,16 +258,12 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    FirecloudCreateRawlsBillingProjectFullRequest request =
-        new FirecloudCreateRawlsBillingProjectFullRequest()
-            .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
-            .projectName(projectName)
-            .highSecurityNetwork(true)
-            .enableFlowLogs(true)
-            .privateIpGoogleAccess(true)
-            .servicePerimeter(servicePerimeter);
-
     if (isFireCloudBillingV2ApiEnabled()) {
+      FirecloudCreateRawlsV2BillingProjectFullRequest request =
+          new FirecloudCreateRawlsV2BillingProjectFullRequest()
+              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+              .projectName(projectName)
+              .servicePerimeter(servicePerimeter);
       BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
       retryHandler.run(
           (context) -> {
@@ -274,6 +271,14 @@ public class FireCloudServiceImpl implements FireCloudService {
             return null;
           });
     } else {
+      FirecloudCreateRawlsBillingProjectFullRequest request =
+          new FirecloudCreateRawlsBillingProjectFullRequest()
+              .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
+              .projectName(projectName)
+              .highSecurityNetwork(true)
+              .enableFlowLogs(true)
+              .privateIpGoogleAccess(true)
+              .servicePerimeter(servicePerimeter);
       BillingApi billingApi = billingApiProvider.get();
       retryHandler.run(
           (context) -> {

@@ -1,7 +1,6 @@
 import {
   CheckEmailRequest,
   CheckEmailResponse,
-  DuaType,
   GetInstitutionsResponse,
   GetPublicInstitutionDetailsResponse,
   Institution,
@@ -28,7 +27,6 @@ export const defaultInstitutions: Array<Institution> = [{
       emailDomains: ["vumc.org"]
     }
   ],
-  duaTypeEnum: DuaType.MASTER,
   userInstructions: 'Vanderbilt User Instruction'
 }, {
   shortName: 'Broad',
@@ -41,8 +39,7 @@ export const defaultInstitutions: Array<Institution> = [{
       eraRequired: true,
       emailAddresses: ['contactEmail@broadinstitute.org', 'broad_institution@broadinstitute.org']
     }
-  ],
-  duaTypeEnum: DuaType.RESTRICTED
+  ]
 }, {
   shortName: 'Verily',
   displayName: 'Verily LLC',
@@ -109,7 +106,7 @@ export class InstitutionApiStub extends InstitutionApi {
             shortName: x.shortName,
             displayName: x.displayName,
             organizationTypeEnum: x.organizationTypeEnum,
-            duaTypeEnum: x.duaTypeEnum
+            registeredTierMembershipRequirement: getRegisteredTierConfig(x).membershipRequirement
           };
         })
       });

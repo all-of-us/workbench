@@ -29,7 +29,7 @@ export const toolTipTextStigmatization = <div>
     Populations that are historically medically underserved or underrepresented in
     biomedical research are also more vulnerable to stigmatization. If your population
     of interest includes the following categories defined as Underrepresented in
-    Biomedical Research (UBR) by the <i>All of Us</i> Research Program, you are
+    Biomedical Research (UBR) by the <AouTitle/>, you are
     encouraged to request a review of your research purpose by the Resource Access
     Board (RAB).
   </div>
@@ -68,14 +68,14 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
   }, {
     shortName: 'methodsDevelopment',
     shortDescription: 'Methods development/validation study',
-    longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
+    longDescription: <div>The primary purpose of the use of <AoU/> data is to develop
       and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
       methods for describing data trends, developing more powerful methods to detect
       gene-environment, or other types of interactions in genome-wide association studies).</div>
   }, {
     shortName: 'controlSet',
     shortDescription: 'Research Control',
-    longDescription: <div><i>All of Us</i> data will be used as a reference or control dataset
+    longDescription: <div><AoU/> data will be used as a reference or control dataset
       for comparison with another dataset from a different resource (e.g. Case-control
       studies).</div>
   }, {
@@ -91,7 +91,7 @@ export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
   }, {
     shortName: 'populationHealth',
     shortDescription: 'Population Health/Public Health Research',
-    longDescription: <div>The primary purpose of using <i>All of Us</i> data is to investigate
+    longDescription: <div>The primary purpose of using <AoU/> data is to investigate
       health behaviors, outcomes, access, and disparities in populations.</div>
   }, {
     shortName: 'ethics',
@@ -148,7 +148,7 @@ export const toolTipText = {
     your institution will need to sign an amended agreement with the All of Us Data and Research Center.</div></FlexColumn>,
   researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
-    publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
+    publicly available <AoU/> website (https://www.researchallofus.org/) to inform our
     participants and other stakeholders about what kind of research their data is being used
     for. </div>,
 };

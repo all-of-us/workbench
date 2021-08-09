@@ -563,8 +563,8 @@ export const ProfileComponent = fp.flow(
             <hr style={{...styles.verticalLine}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
                 <FlexColumn style={{marginLeft: '0.8rem'}}>
-                    <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
-                    <div>Remaining <i>All of Us</i> free credits:</div>
+                    <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                    <div>Remaining <AoU/> free credits:</div>
                 </FlexColumn>
                 <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
                   <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
@@ -578,7 +578,7 @@ export const ProfileComponent = fp.flow(
             <hr style={{...styles.verticalLine}}/>
             <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
               {controlledTierEnabled && <ProfileRegistrationStepStatus
-                title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
+                title={<span><AoU/> Controlled Tier Data Training</span>}
                 wasBypassed={!!controlledTierBypassTime}
                 incompleteButtonText={'Get Started'}
                 completedButtonText={'Completed'}
@@ -613,7 +613,7 @@ export const ProfileComponent = fp.flow(
                 >
               </ProfileRegistrationStepStatus>}
               {enableComplianceTraining && <ProfileRegistrationStepStatus
-                  title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
+                  title={<span><AoU/> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
                   completedButtonText={this.getRegistrationTasksMap()['complianceTraining'].completedText}

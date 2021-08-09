@@ -23,10 +23,10 @@ import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
+  EmailAddressMismatchErrorMessage,
+  EmailDomainMismatchErrorMessage,
   getRegisteredTierConfig,
   getRoleOptions,
-  MasterDuaEmailMismatchErrorMessage,
-  RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
 import {serverConfigStore} from 'app/utils/stores';
@@ -103,11 +103,11 @@ const EmailValidationErrorMessage = ({emailValidationResponse, updatedProfile, v
         verifiedInstitutionOptions
       );
       if (getRegisteredTierConfig(selectedInstitution).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-        // Institution has signed Restricted agreement and the email is not in allowed emails list
-        return <RestrictedDuaEmailMismatchErrorMessage/>;
+        // Institution requires an exact email address match and the email is not in allowed emails list
+        return <EmailAddressMismatchErrorMessage/>;
       } else {
-        // Institution has DOMAINS for registered tier requirement and the domain is not in the allowed list
-        return <MasterDuaEmailMismatchErrorMessage/>;
+        // Institution requires email domain matching and the domain is not in the allowed list
+        return <EmailDomainMismatchErrorMessage/>;
       }
     }
   }
