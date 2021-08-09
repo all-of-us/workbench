@@ -25,7 +25,6 @@ export function useAuthentication() {
 
   useEffect(() => {
     if (isSignedIn) {
-      debugger;
       signInStore.next({
         signOut: () => signOut(),
         profileImage: profileImage(),

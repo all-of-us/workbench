@@ -184,20 +184,21 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // so it's available for Puppeteer to call. If we need this even earlier in
     // the page, it could go into something like main.ts, but ideally we'd keep
     // this logic in one place, and keep main.ts minimal.
-    // if (environment.allowTestAccessTokenOverride) {
-    //   window.setTestAccessTokenOverride = (token: string) => {
-    //     // Disclaimer: console.log statements here are unlikely to captured by
-    //     // Puppeteer, since it typically reloads the page immediately after
-    //     // invoking this function.
-    //     debugger;
-    //     if (token) {
-    //       window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-    //       location.replace('/');
-    //     } else {
-    //       window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-    //     }
-    //   };
-    // }
+    console.log("allowTestAccessTokenOverride: " + environment.allowTestAccessTokenOverride)
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        // Disclaimer: console.log statements here are unlikely to captured by
+        // Puppeteer, since it typically reloads the page immediately after
+        // invoking this function.
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+          location.replace('/');
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+      console.log("setTestAccessTokenOverride: " + window.setTestAccessTokenOverride);
+    }
   }, []);
 
   useEffect(() => {
