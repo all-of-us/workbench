@@ -289,7 +289,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .totalCount(dbCriteriaPage.getTotalElements());
   }
 
-//  TODO: Remove this method once the feature flag standardSource is turned on for all environments
+  //  TODO: Remove this method once the feature flag standardSource is turned on for all
+  // environments
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, String surveyName, Integer limit) {
