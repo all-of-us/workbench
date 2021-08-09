@@ -267,7 +267,10 @@ export const SideNav = (props: SideNavProps) => {
       showUserOptions && <SideNavItem
           content={'Sign Out'}
           onToggleSideNav={() => onToggleSideNav()}
-          parentOnClick={() => signOut()}
+          parentOnClick={() => {
+            signOut();
+            navigateSignOut();
+          }}
       />
     }
     <SideNavItem

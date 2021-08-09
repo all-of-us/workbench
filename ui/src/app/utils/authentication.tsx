@@ -49,18 +49,9 @@ export const signIn = (): void => {
   });
 };
 
-// TODO: When we sign out, we see a flash of the login page before being redirected
-// to the Google signout page. Maybe go directly to Google signout page instead.
-export const signOut = (continuePath?: string): void => {
-  // If we're in puppeteer, we never call gapi.auth2.init, so we can't sign out normally.
-  // Instead, we revoke all the access tokens and reset all the state.
-  if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
-    window.setTestAccessTokenOverride('');
-  } else {
-    gapi.auth2.getAuthInstance().signOut();
-  }
-  navigateSignOut(continuePath);
-};
+export const signOut = (): void => {
+  authStore.set({...authStore.get(), isSignedIn: false});
+}
 
 function clearIdToken(): void {
   // Using the full page redirect puts a long "id_token" parameter in the
@@ -87,7 +78,13 @@ export function useAuthentication() {
     if (isSignedIn) {
       clearIdToken();
     } else if (authLoaded) {
-      signOut();
+      // If we're in puppeteer, we never call gapi.auth2.init, so we can't sign out normally.
+      // Instead, we revoke all the access tokens and reset all the state.
+      if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
+        window.setTestAccessTokenOverride('');
+      } else {
+        gapi.auth2.getAuthInstance().signOut();
+      }
     }
     setLoggedInState(isSignedIn);
   }, [isSignedIn]);
