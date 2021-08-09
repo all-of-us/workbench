@@ -20,9 +20,11 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
+import {disabledGuard, signInGuard} from 'app/routing/guards';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from 'app/utils/analytics';
+import {AnalyticsTracker, initializeAnalytics} from 'app/utils/analytics';
+import {useAuthentication} from 'app/utils/authentication';
 import {
   cookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
@@ -32,7 +34,6 @@ import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-run
 import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
-  signInStore,
   urlParamsStore
 } from 'app/utils/navigation';
 import {
@@ -40,16 +41,12 @@ import {
   routeDataStore,
   runtimeStore,
   serverConfigStore,
-  stackdriverErrorReporterStore,
-  useStore
+  stackdriverErrorReporterStore
 } from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
-import 'rxjs/Rx';
-import {disabledGuard, signInGuard} from './guards';
-import {useAuthentication} from "../utils/authentication";
 
 declare const gapi: any;
 
@@ -184,7 +181,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // so it's available for Puppeteer to call. If we need this even earlier in
     // the page, it could go into something like main.ts, but ideally we'd keep
     // this logic in one place, and keep main.ts minimal.
-    console.log("allowTestAccessTokenOverride: " + environment.allowTestAccessTokenOverride)
+    console.log('allowTestAccessTokenOverride: ' + environment.allowTestAccessTokenOverride);
     if (environment.allowTestAccessTokenOverride) {
       window.setTestAccessTokenOverride = (token: string) => {
         // Disclaimer: console.log statements here are unlikely to captured by
@@ -197,7 +194,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
           window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
         }
       };
-      console.log("setTestAccessTokenOverride: " + window.setTestAccessTokenOverride);
+      console.log('setTestAccessTokenOverride: ' + window.setTestAccessTokenOverride);
     }
   }, []);
 
@@ -252,7 +249,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
     if (environment.allowTestAccessTokenOverride) {
-      console.log("Attempting to get puppeteer token from local storage");
+      console.log('Attempting to get puppeteer token from local storage');
       const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       // TODO angular2react - can I just replace this with `setTestAccessTokenOverride(window....)` and assume that
       // the right value will be used in the if conditional in the same execution loop?

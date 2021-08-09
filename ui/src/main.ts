@@ -7,8 +7,6 @@ import * as ReactModal from 'react-modal';
 import {ErrorHandler} from 'app/components/error-handler';
 import {setupCustomValidators} from 'app/services/setup';
 import {AppRoutingComponent} from './app/routing/app-routing';
-import {environment} from "./environments/environment";
-import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from "./app/utils/cookies";
 
 setupCustomValidators();
 ReactModal.defaultStyles.overlay = {};

@@ -21,7 +21,6 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useState} from 'react';
-import {signOut} from "../../utils/authentication";
 
 const styles = reactStyles({
   appContainer: {
