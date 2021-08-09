@@ -21,6 +21,7 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useState} from 'react';
+import {signOut} from "../../utils/authentication";
 
 const styles = reactStyles({
   appContainer: {
@@ -120,12 +121,6 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  const signOut = (continuePath?: string): void => {
-    window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-    signOut();
-    navigateSignOut(continuePath);
-  };
-
   return <FlexColumn
     style={{
       minHeight: '100vh',
@@ -162,7 +157,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
           type={FooterTypeEnum.Workbench}
       />
     }
-    <InactivityMonitor signOut={() => signOut()}/>
+    <InactivityMonitor/>
     <ZendeskWidget/>
   </FlexColumn>;
 };

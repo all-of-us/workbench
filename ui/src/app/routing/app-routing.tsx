@@ -130,16 +130,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
-  const signIn = (): void => {
-    AnalyticsTracker.Registration.SignIn();
-
-    gapi.auth2.getAuthInstance().signIn({
-      'prompt': 'select_account',
-      'ux_mode': 'redirect',
-      'redirect_uri': `${window.location.protocol}//${window.location.host}`
-    });
-  };
-
   useEffect(() => {
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
     // TODO angular2react - this actually isn't working right now, just renders an empty page
@@ -390,13 +380,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
             </AppRoute>
             <AppRoute exact path='/login'>
-              <SignInPage routeData={{title: 'Sign In'}} signIn={signIn}/>
+              <SignInPage routeData={{title: 'Sign In'}}/>
             </AppRoute>
             <AppRoute exact path='/session-expired'>
-              <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
             </AppRoute>
             <AppRoute exact path='/sign-in-again'>
-              <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
             </AppRoute>
             <AppRoute exact path='/user-disabled'>
               <UserDisabledPage routeData={{title: 'Disabled'}}/>

@@ -2,7 +2,7 @@ import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
 import {useEffect} from 'react';
-import {setLoggedInState} from './analytics';
+import {AnalyticsTracker, setLoggedInState} from './analytics';
 import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from './cookies';
 import {signInStore} from './navigation';
 
@@ -33,6 +33,16 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
       });
       resolve(gapi.auth2);
     });
+  });
+};
+
+export const signIn = (): void => {
+  AnalyticsTracker.Registration.SignIn();
+
+  gapi.auth2.getAuthInstance().signIn({
+    'prompt': 'select_account',
+    'ux_mode': 'redirect',
+    'redirect_uri': `${window.location.protocol}//${window.location.host}`
   });
 };
 

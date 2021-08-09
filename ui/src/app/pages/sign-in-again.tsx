@@ -27,19 +27,15 @@ const styles = reactStyles({
 
 const supportUrl = 'support@researchallofus.org';
 
-interface Props extends WithSpinnerOverlayProps {
-  signIn: Function;
-}
-
-export const SignInAgain = (props: Props) => {
-  useEffect(() => props.hideSpinner(), []);
+export const SignInAgain = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   return <PublicLayout contentStyle={{width: '500px'}}>
     <BoldHeader>You have been signed out</BoldHeader>
     <section style={styles.textSection}>
       You’ve been away for a while and we could not verify whether your session was still active.
     </section>
-    <GoogleSignInButton signIn={() => props.signIn()}/>
+    <GoogleSignInButton/>
     <section style={styles.noteSection}>
       <strong>Note</strong>: You may have been redirected to this page immediately after attempting to sign in,
       if you did not explicitly sign out of your most recent session. If, after signing in
