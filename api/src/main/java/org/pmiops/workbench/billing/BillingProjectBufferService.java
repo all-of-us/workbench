@@ -98,17 +98,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
             .collect(
                 Collectors.toMap(
-                    c -> {
-                      String logMsg =
-                          String.format(
-                              "counts Tier %s / Status %s: Count %d",
-                              c.getAccessTier().getShortName(),
-                              c.getStatusEnum().toString(),
-                              c.getNumProjects());
-                      log.info(logMsg);
-
-                      return Pair.of(c.getAccessTier(), c.getStatusEnum());
-                    },
+                    c -> Pair.of(c.getAccessTier(), c.getStatusEnum()),
                     ProjectCountByStatusAndTier::getNumProjects));
 
     // iterate through ALL combinations of access tier and buffer status, counting 0 projects where
