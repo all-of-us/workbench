@@ -1,6 +1,7 @@
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 import { getPropValue } from 'utils/element-utils';
+import { config} from "resources/workbench-config";
 
 describe('User registration tests:', () => {
   test('Can register new user', async () => {
@@ -56,7 +57,7 @@ describe('User registration tests:', () => {
     }
     expect(textsArray).toContain('Congratulations!');
     expect(textsArray).toContain('Your All of Us research account has been created!');
-    expect(textsArray).toContain(`${userId}@fake-research-aou.org`);
+    expect(textsArray).toContain(`${userId}${config.EMAIL_DOMAIN_NAME}`);
 
     const note =
       'Please note: For full access to the Research Workbench data and tools, ' +

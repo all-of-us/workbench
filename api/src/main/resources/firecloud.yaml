@@ -101,7 +101,7 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CreateRawlsBillingProjectFullRequest'
+              $ref: '#/components/schemas/CreateRawlsV2BillingProjectFullRequest'
         required: true
       responses:
         201:
@@ -1854,6 +1854,25 @@ components:
         allUsersGroup:
           type: boolean
           description: User is a member of the "All Users" group?
+    CreateRawlsV2BillingProjectFullRequest:
+      required:
+        - billingAccount
+        - projectName
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project to create
+        billingAccount:
+          type: string
+          description: the id of the billing account to use, must start with 'billingAccounts/'
+        servicePerimeter:
+          type: string
+          description: The fully qualified name of the GCP service perimeter to put
+            this project into in the form accessPolicies/[POLICY NUMBER]/servicePerimeters/[NAME].
+            Caller must have the add_project action for this service perimeter in
+            Sam.
+      description: ""
     ErrorReport:
       required:
         - causes
@@ -2748,6 +2767,21 @@ components:
           items:
             type: string
           description: the roles the caller has on the project
+        workspacesWithIncorrectBillingAccount:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceBillingAccount'
+    WorkspaceBillingAccount:
+      required:
+        - workspaceName
+      type: object
+      properties:
+        workspaceName:
+          type: string
+          description: the name of the workspace
+        currentBillingAccountOnGoogleProject:
+          type: string
+          description: the billing project associated with the workspace
     UpdateRawlsBillingAccountRequest:
       required:
         - billingAccount

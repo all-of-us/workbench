@@ -25,6 +25,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
@@ -126,16 +127,19 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       ApiClientFactory apiClientFactory =
           wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
-      FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
-          new FirecloudCreateRawlsBillingProjectFullRequest()
-              .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
-              .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
-
       log.info("Creating billing project");
       if (workbenchConfig.featureFlags.enableFireCloudV2Billing) {
+        FirecloudCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
+            new FirecloudCreateRawlsV2BillingProjectFullRequest()
+                .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
+                .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
         BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
         billingV2Api.createBillingProjectFullV2(billingProjectRequest);
       } else {
+        FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
+            new FirecloudCreateRawlsBillingProjectFullRequest()
+                .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
+                .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
         BillingApi billingApi = apiClientFactory.billingApi();
         billingApi.createBillingProjectFull(billingProjectRequest);
 

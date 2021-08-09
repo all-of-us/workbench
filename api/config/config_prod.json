@@ -4,13 +4,11 @@
     "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 14,
     "notebookRuntimeIdleMaxAgeDays": 7,
-    "notebookRuntimeDefaultMachineType": "n1-highmem-4",
-    "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "xAppIdValue": "AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -83,11 +81,6 @@
   },
   "zendesk": {
     "host": "https:\/\/aousupporthelp.zendesk.com"
-  },
-  "elasticsearch": {
-    "baseUrl": "",
-    "enableBasicAuth": true,
-    "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aou.nnlm.gov",

@@ -63,14 +63,38 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
+          "select c from DbCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+  Page<DbCriteria> findCriteriaByDomainAndTypeAndCodeAndStandard(
+      @Param("domain") String domain,
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      Pageable page);
+
+  @Query(
+      value =
           "select c from DbCriteria c where domainId=:domain and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaByDomainAndFullText(
       @Param("domain") String domain, @Param("term") String term, Pageable page);
 
   @Query(
       value =
+          "select c from DbCriteria c where domainId=:domain and standard=:standard and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaByDomainAndFullTextAndStandard(
+      @Param("domain") String domain,
+      @Param("term") String term,
+      @Param("standard") Boolean standard,
+      Pageable page);
+
+  @Query(
+      value =
           "select c from DbCriteria c where domainId=:domain and selectable = 1 and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
   Page<DbCriteria> findCriteriaTopCounts(@Param("domain") String domain, Pageable page);
+
+  @Query(
+      value =
+          "select c from DbCriteria c where domainId=:domain and selectable = 1 and standard=:standard and match(fullText, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
+  Page<DbCriteria> findCriteriaTopCountsByStandard(
+      @Param("domain") String domain, @Param("standard") Boolean standard, Pageable page);
 
   @Query(
       value =
@@ -178,8 +202,24 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
+          "select count(*) from DbCriteria where standard =:standard and match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
+  Long findDomainCountAndStandard(
+      @Param("term") String term,
+      @Param("domain") String domain,
+      @Param("standard") Boolean standard);
+
+  @Query(
+      value =
           "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
   Long findDomainCountOnCode(@Param("term") String term, @Param("domain") String domain);
+
+  @Query(
+      value =
+          "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and standard = :standard and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
+  Long findDomainCountOnCodeAndStandard(
+      @Param("term") String term,
+      @Param("domain") String domain,
+      @Param("standard") Boolean standard);
 
   @Query(
       value =

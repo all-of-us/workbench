@@ -9,6 +9,7 @@ import {TextInput} from 'app/components/inputs';
 import {withErrorModal, withSuccessModal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -197,18 +198,18 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </div>
                 <InitialsAgreement onChange={(v) => this.setState({initialMonitoring: v})}>
                   My work, including any external data, files, or software I upload into the
-                   Researcher Workbench, will be logged and monitored by the <i>All of Us</i> Research
+                   Researcher Workbench, will be logged and monitored by the <AoU/> Research
                    Program to ensure compliance with policies and procedures.
                 </InitialsAgreement>
                 <InitialsAgreement onChange={(v) => this.setState({initialPublic: v})}>
                   My name, affiliation, profile information and research description will be made
-                   public. My research description will be used by the <i>All of Us</i> Research
+                   public. My research description will be used by the <AoU/> Research
                    Program to provide participants with meaningful information about the research
                    being conducted.
                 </InitialsAgreement>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I acknowledge that failure to comply with the requirements outlined in this Data
-                   User Code of Conduct may result in termination of my <i>All of Us</i> Research
+                   User Code of Conduct may result in termination of my <AoU/> Research
                    Program account and/or other sanctions, including, but not limited to:
                 </div>
                 <ul style={{...styles.bold, ...styles.smallTopMargin}}>
@@ -223,7 +224,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
                 </ul>
                 <div style={{...styles.bold, ...styles.smallTopMargin}}>
                   I understand that failure to comply with these requirements may also carry
-                   financial or legal repercussions. Any misuse of the <i>All of Us</i> Research
+                   financial or legal repercussions. Any misuse of the <AoU/> Research
                    Hub, Researcher Workbench or data resources is taken very seriously, and other
                   sanctions may be sought.
                 </div>

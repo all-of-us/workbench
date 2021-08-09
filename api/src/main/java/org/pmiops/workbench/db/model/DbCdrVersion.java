@@ -27,7 +27,6 @@ public class DbCdrVersion {
   private Timestamp creationTime;
   private int numParticipants;
   private String cdrDbName;
-  private String elasticIndexBaseName;
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
@@ -153,17 +152,6 @@ public class DbCdrVersion {
     this.cdrDbName = cdrDbName;
   }
 
-  // TODO(RW-7112): remove
-  @Deprecated
-  @Column(name = "elastic_index_base_name")
-  public String getElasticIndexBaseName() {
-    return elasticIndexBaseName;
-  }
-
-  public void setElasticIndexBaseName(String elasticIndexBaseName) {
-    this.elasticIndexBaseName = elasticIndexBaseName;
-  }
-
   @Column(name = "wgs_bigquery_dataset")
   public String getWgsBigqueryDataset() {
     return wgsBigqueryDataset;
@@ -223,7 +211,6 @@ public class DbCdrVersion {
         creationTime,
         numParticipants,
         cdrDbName,
-        elasticIndexBaseName,
         wgsBigqueryDataset,
         hasFitbitData,
         hasCopeSurveyData,
@@ -250,7 +237,6 @@ public class DbCdrVersion {
         && Objects.equals(bigqueryDataset, that.bigqueryDataset)
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(cdrDbName, that.cdrDbName)
-        && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)

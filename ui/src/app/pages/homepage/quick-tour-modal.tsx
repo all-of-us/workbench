@@ -1,12 +1,12 @@
+import * as React from 'react';
 
 import {
   Button, StyledAnchorTag
 } from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
+import {AoU} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-
-import * as React from 'react';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';
@@ -18,7 +18,7 @@ export const panels = [
   {
     title: 'Introduction',
     shortTitle: 'Intro',
-    content: <div>Welcome to the <i>All of Us</i> Researcher Workbench!<br/><br/>All workbench analyses
+    content: <div>Welcome to the <AoU/> Researcher Workbench!<br/><br/>All workbench analyses
       happen in a “Workspace.” Within a Workspace you can select participants
       using the “Cohort Builder” tool. Another tool, the “Concept Set Builder,”
       allows you to select data types for analysis. The cohorts and concept sets
@@ -333,7 +333,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
       <React.Fragment>
         <div style={styles.modalBackdrop}/>
         <FlexColumn style={styles.mainStyling} data-test-id='quick-tour-react' className='quickTourReact'>
-          <div style={styles.title}><i>All of Us</i> Researcher Workbench</div>
+          <div style={styles.title}><AoU/> Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {

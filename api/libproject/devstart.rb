@@ -725,33 +725,6 @@ Common.register_command({
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
 })
 
-def make_prep_tables_bucket(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--new-cdr-version [new-cdr-version]",
-    ->(opts, v) { opts.new_cdr_version = v},
-    "New CDR Version. Required. Ex: C2021Q2R1"
-  )
-  op.add_option(
-    "--previous-cdr-version [previous-cdr-version]",
-    ->(opts, v) { opts.previous_cdr_version = v},
-    "Previous CDR Version. Required. Ex: C2021Q4R1"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.new_cdr_version and opts.previous_cdr_version }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-prep-tables-bucket.sh #{op.opts.new_cdr_version} #{op.opts.previous_cdr_version}}
-  end
-end
-
-Common.register_command({
-  :invocation => "make-prep-tables-bucket",
-  :description => "Create a new CDR bucket and copy over reusable csv files from previous CDR bucket.",
-  :fn => ->(*args) { make_prep_tables_bucket("make-prep-tables-bucket", *args) }
-})
-
 def make_bq_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
