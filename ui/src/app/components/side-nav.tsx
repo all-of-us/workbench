@@ -3,14 +3,14 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {signOut} from 'app/utils/authentication';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {navigateSignOut, useNavigation} from 'app/utils/navigation';
+import {getProfilePictureSrc} from 'app/utils/profile-picture';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {useState} from 'react';
-import {signOut} from "../utils/authentication";
-import {getProfilePictureSrc} from "../utils/profile-picture";
 
 const styles = reactStyles({
   flex: {

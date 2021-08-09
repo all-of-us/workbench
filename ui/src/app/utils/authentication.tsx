@@ -1,10 +1,9 @@
+import {AnalyticsTracker, setLoggedInState} from 'app/utils/analytics';
+import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
 import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
 import {useEffect} from 'react';
-import {AnalyticsTracker, setLoggedInState} from 'app/utils/analytics';
-import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
-import {navigateSignOut} from "./navigation";
 
 declare const gapi: any;
 
@@ -51,7 +50,7 @@ export const signIn = (): void => {
 
 export const signOut = (): void => {
   authStore.set({...authStore.get(), isSignedIn: false});
-}
+};
 
 function clearIdToken(): void {
   // Using the full page redirect puts a long "id_token" parameter in the
