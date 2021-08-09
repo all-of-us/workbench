@@ -58,21 +58,27 @@ describe('Create python kernel notebook', () => {
       codeFile: 'resources/python-code/import-os.py'
     });
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell1OutputText).toMatch(/success$/);
+    await expect(cell1OutputText).toMatch(/success$/);
 
-    expect(await notebook.runCodeCell(2, {
-      codeFile: 'resources/python-code/import-libs.py'
-    })).toMatch(/success$/);
+    await expect(
+      await notebook.runCodeCell(2, {
+        codeFile: 'resources/python-code/import-libs.py'
+      })
+    ).toMatch(/success$/);
 
-    expect(await notebook.runCodeCell(3, {
-      codeFile: 'resources/python-code/git-ignore-check.py',
-      markdownWorkaround: true
-    })).toMatch(/success$/);
+    await expect(
+      await notebook.runCodeCell(3, {
+        codeFile: 'resources/python-code/git-ignore-check.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
 
-    expect(await notebook.runCodeCell(4, {
-      codeFile: 'resources/python-code/nbstripoutput-filter.py',
-      markdownWorkaround: true
-    })).toMatch(/success$/);
+    await expect(
+      await notebook.runCodeCell(4, {
+        codeFile: 'resources/python-code/nbstripoutput-filter.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
 
     await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
