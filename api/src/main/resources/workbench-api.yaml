@@ -3263,7 +3263,7 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CBMenu/{parentId}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"

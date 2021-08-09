@@ -159,7 +159,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .build());
     assertThat(
             controller
-                .findCBMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .findCbMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
                 .getBody()
                 .getItems()
                 .get(0))
