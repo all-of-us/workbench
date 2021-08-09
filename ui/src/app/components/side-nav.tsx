@@ -10,8 +10,7 @@ import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {useState} from 'react';
 import {signOut} from "../utils/authentication";
-
-declare const gapi: any;
+import {getProfilePictureSrc} from "../utils/profile-picture";
 
 const styles = reactStyles({
   flex: {
@@ -201,7 +200,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
           }
           {
             props.hasProfileImage && <img
-                src={gapi.auth2 ? gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl() : null}
+                src={getProfilePictureSrc()}
                 style={styles.profileImage}
             />
           }
