@@ -3379,6 +3379,46 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns a collection of criteria per search term'
+      operationId: findCriteriaByDomain
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: True if standard else false
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: surveyName
+          type: string
+          required: false
+          description: name for the survey to search
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: number of criteria matches to return
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListWithCountResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search/term":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
