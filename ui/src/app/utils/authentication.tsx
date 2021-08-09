@@ -90,7 +90,7 @@ export function useAuthentication() {
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    if (config && !environment.allowTestAccessTokenOverride) {
+    if (config && (!environment.allowTestAccessTokenOverride || !window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN))) {
       makeAuth2(config);
     }
   }, [config]);
