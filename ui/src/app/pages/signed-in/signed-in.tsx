@@ -4,14 +4,14 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ZendeskWidget} from 'app/components/zendesk-widget';
-import {INACTIVITY_CONFIG, InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
+import {InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
 import {NavBar} from 'app/pages/signed-in/nav-bar';
 import {SignedInRoutes} from 'app/routing/signed-in-app-routing';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {routeConfigDataStore} from 'app/utils/navigation';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -48,13 +48,8 @@ const checkOpsBeforeUnload = (e) => {
   }
 };
 
-interface Props extends WithSpinnerOverlayProps {
-  subscribeToInactivitySignOut: () => {};
-  signOut: () => {};
-}
-
-export const SignedIn = (props: Props) => {
-  useEffect(() => props.hideSpinner(), []);
+export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
   console.log('Render SignedIn page');
 
   const [hideFooter, setHideFooter] = useState(false);
@@ -73,7 +68,6 @@ export const SignedIn = (props: Props) => {
 
   useEffect(() => {
     const subscriptions = [];
-    props.subscribeToInactivitySignOut();
     // This handles detection of Angular-based routing data.
     subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
@@ -124,12 +118,6 @@ export const SignedIn = (props: Props) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  const signOut = (continuePath?: string): void => {
-    window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-    props.signOut();
-    navigateSignOut(continuePath);
-  };
-
   return <FlexColumn
     style={{
       minHeight: '100vh',
@@ -166,7 +154,7 @@ export const SignedIn = (props: Props) => {
           type={FooterTypeEnum.Workbench}
       />
     }
-    <InactivityMonitor signOut={() => signOut()}/>
+    <InactivityMonitor/>
     <ZendeskWidget/>
   </FlexColumn>;
 };

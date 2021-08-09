@@ -3,8 +3,10 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {signOut} from 'app/utils/authentication';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
-import {navigateSignOut, signInStore, useNavigation} from 'app/utils/navigation';
+import {navigateSignOut, useNavigation} from 'app/utils/navigation';
+import {getProfilePictureSrc} from 'app/utils/profile-picture';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -198,7 +200,7 @@ export const SideNavItem = (props: SideNavItemProps) => {
           }
           {
             props.hasProfileImage && <img
-                src={signInStore.getValue().profileImage}
+                src={getProfilePictureSrc()}
                 style={styles.profileImage}
             />
           }
@@ -244,11 +246,6 @@ export const SideNav = (props: SideNavProps) => {
     );
   };
 
-  const signOut = () => {
-    signInStore.getValue().signOut();
-    navigateSignOut();
-  };
-
   return <div style={styles.sideNav}>
     <SideNavItem
         hasProfileImage={true}
@@ -269,7 +266,10 @@ export const SideNav = (props: SideNavProps) => {
       showUserOptions && <SideNavItem
           content={'Sign Out'}
           onToggleSideNav={() => onToggleSideNav()}
-          parentOnClick={() => signOut()}
+          parentOnClick={() => {
+            signOut();
+            navigateSignOut();
+          }}
       />
     }
     <SideNavItem
