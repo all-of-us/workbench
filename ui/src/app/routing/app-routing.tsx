@@ -23,7 +23,7 @@ import {UserDisabled} from 'app/pages/user-disabled';
 import {disabledGuard, signInGuard} from 'app/routing/guards';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {AnalyticsTracker, initializeAnalytics} from 'app/utils/analytics';
+import {initializeAnalytics} from 'app/utils/analytics';
 import {useAuthentication} from 'app/utils/authentication';
 import {
   cookiesEnabled,

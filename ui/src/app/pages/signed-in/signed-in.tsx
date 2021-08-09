@@ -4,14 +4,14 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ZendeskWidget} from 'app/components/zendesk-widget';
-import {INACTIVITY_CONFIG, InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
+import {InactivityMonitor} from 'app/pages/signed-in/inactivity-monitor';
 import {NavBar} from 'app/pages/signed-in/nav-bar';
 import {SignedInRoutes} from 'app/routing/signed-in-app-routing';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {routeConfigDataStore} from 'app/utils/navigation';
 import {
   authStore,
   cdrVersionStore,
@@ -21,7 +21,6 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useState} from 'react';
-import {signOut} from "../../utils/authentication";
 
 const styles = reactStyles({
   appContainer: {

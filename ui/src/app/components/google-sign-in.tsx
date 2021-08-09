@@ -1,8 +1,8 @@
 import {Button} from 'app/components/buttons';
 import {reactStyles} from 'app/utils';
 
+import {signIn} from 'app/utils/authentication';
 import * as React from 'react';
-import {signIn} from "app/utils/authentication";
 
 export const styles = reactStyles({
   button: {
