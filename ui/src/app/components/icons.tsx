@@ -112,6 +112,7 @@ const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, wid
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
+export const RegisteredTierBadge = svgIcon('/assets/icons/registered-tier-badge.svg');
 export const ControlledTierBadge = svgIcon('/assets/icons/controlled-tier-badge.svg');
 export const Arrow = svgIcon('/assets/icons/arrow-left-regular.svg');
 export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
