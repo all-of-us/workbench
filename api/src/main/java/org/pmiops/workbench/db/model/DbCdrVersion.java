@@ -42,6 +42,11 @@ public class DbCdrVersion {
   private String microarrayVcfManifestPath;
   private String microarrayIdatManifestPath;
 
+  //  data_access_level
+  //  public_db_name
+  //  elastic_index_base_name
+  //      microarray_bigquery_dataset
+
   @Id
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
