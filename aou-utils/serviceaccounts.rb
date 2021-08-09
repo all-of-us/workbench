@@ -1,4 +1,5 @@
 require "json"
+require "set"
 require_relative "workbench"
 require_relative "utils/common"
 
@@ -11,6 +12,10 @@ require_relative "utils/common"
 class ServiceAccountContext
   attr_reader :project, :service_account, :keyfile_path
 
+  TEST_SERVICE_ACCOUNTS = Set[
+    "all-of-us-workbench-test@appspot.gserviceaccount.com",
+    "aou-db-test@appspot.gserviceaccount.com"
+  ]
   SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
 
   def initialize(project, service_account = nil, keyfile_path = nil)
@@ -21,7 +26,11 @@ class ServiceAccountContext
     end
     @keyfile_path = keyfile_path
     if not @keyfile_path
-      @keyfile_path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
+      if TEST_SERVICE_ACCOUNTS.include? @service_account
+        @keyfile_path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
+      else
+        @keyfile_path = "#{Dir.tmpdir()}/#{@service_account}-key.json"
+      end
     end
   end
 
@@ -46,7 +55,7 @@ class ServiceAccountContext
       yield(self)
       return
     end
-    if @service_account == "all-of-us-workbench-test@appspot.gserviceaccount.com" || @service_account == "aou-db-test@appspot.gserviceaccount.com"
+    if TEST_SERVICE_ACCOUNTS.include? @service_account
       common.status "Copying key from GCS for #{@service_account} @ #{@keyfile_path}"
       common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
             #{@keyfile_path}}
