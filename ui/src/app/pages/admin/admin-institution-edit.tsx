@@ -386,7 +386,8 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
       }
     }
     if(ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
-      this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution)]));
+      // Don't set CT if CT is NOACCESS
+      this.setState(fp.set(['institution', 'tierConfigs'], [rtConfig]));
     } else {
       this.setState(fp.set(['institution', 'tierConfigs'], [rtConfig, ctConfig]));
     }
