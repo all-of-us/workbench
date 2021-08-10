@@ -41,11 +41,11 @@ import {
   routeDataStore,
   runtimeStore,
   serverConfigStore,
-  stackdriverErrorReporterStore
+  stackdriverErrorReporterStore, useStore
 } from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
-import {ConfigResponse, Configuration} from 'generated/fetch';
+import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 
 declare const gapi: any;
@@ -97,6 +97,43 @@ const checkBrowserSupport = () => {
   });
 };
 
+const currentAccessToken = () => {
+  const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+
+  // TODO angular2react - this used to be a setState() variable but I had to switch it to read from
+  // localStorage because testAccessTokenOverride would not be set yet in the first run of this and
+  // configure the API clients incorrectly. this should fix the issue but I want to think more about
+  // what the correct solution is. Getting rid of the state variable and only reading from localStorage
+  // could be the way to go.
+  if (tokenOverride) {
+    return tokenOverride;
+  } else if (!gapi.auth2) {
+    return null;
+  } else {
+    const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
+    if (authResponse !== null) {
+      return authResponse.access_token;
+    } else {
+      return null;
+    }
+  }
+};
+
+const bindClients = () => {
+  bindApiClients(
+    new Configuration({
+      basePath: getApiBaseUrl(),
+      accessToken: () => currentAccessToken()
+    })
+  );
+  notebooksBindApiClients(
+    new Configuration({
+      basePath: environment.leoApiUrl,
+      accessToken: () => currentAccessToken()
+    })
+  );
+};
+
 const loadErrorReporter = () => {
   // We don't report to stackdriver on local servers.
   if (environment.debug) {
@@ -129,9 +166,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const {authLoaded} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
-  const [, setTestAccessTokenOverride] = useState(undefined);
   const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
   const [overriddenUrl, setOverriddenUrl] = useState('');
+  const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
@@ -168,7 +205,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     checkBrowserSupport();
   }, []);
 
-  // TODO angular2react - this might need to go into main.ts now since useEffect runs fairly late
+  useEffect(() => {
+    // Pick up the global site title from HTML, and (for non-prod) add a tag
+    // naming the current environment.
+    document.title = buildPageTitleForEnvironment();
+    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+      document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
+    });
+  }, []);
+
   useEffect(() => {
     // Set this as early as possible in the application boot-strapping process,
     // so it's available for Puppeteer to call. If we need this even earlier in
@@ -189,94 +234,29 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, []);
 
+  // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
+  // an infinite loop
   useEffect(() => {
-    // Pick up the global site title from HTML, and (for non-prod) add a tag
-    // naming the current environment.
-    document.title = buildPageTitleForEnvironment();
-    routeDataStore.subscribe(({title, pathElementForTitle}) => {
-      document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
-    });
-  }, []);
-
-  const currentAccessToken = () => {
-    const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-
-    // TODO angular2react - this used to be a setState() variable but I had to switch it to read from
-    // localStorage because testAccessTokenOverride would not be set yet in the first run of this and
-    // configure the API clients incorrectly. this should fix the issue but I want to think more about
-    // what the correct solution is. Getting rid of the state variable and only reading from localStorage
-    // could be the way to go.
-    if (tokenOverride) {
-      return tokenOverride;
-    } else if (!gapi.auth2) {
-      return null;
-    } else {
-      const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
-      if (authResponse !== null) {
-        return authResponse.access_token;
-      } else {
-        return null;
-      }
-    }
-  };
-
-  const serverConfigStoreCallback = (config: ConfigResponse) => {
-    // TODO angular2react - is this the right place for this?
-    bindApiClients(
-      new Configuration({
-        basePath: getApiBaseUrl(),
-        accessToken: () => currentAccessToken()
-      })
-    );
-    notebooksBindApiClients(
-      new Configuration({
-        basePath: environment.leoApiUrl,
-        accessToken: () => currentAccessToken()
-      })
-    );
-
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
-    if (environment.allowTestAccessTokenOverride) {
+    if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
       const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      // TODO angular2react - can I just replace this with `setTestAccessTokenOverride(window....)` and assume that
-      // the right value will be used in the if conditional in the same execution loop?
-      setTestAccessTokenOverride(localStorageTestAccessToken);
       if (localStorageTestAccessToken) {
         console.log('found test access token in local storage, skipping normal auth flow');
 
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
-        return;
       }
     }
-  };
-
-  useEffect(() => {
-    // We only want to run this callback once. Either run it now or subscribe and run it later when we
-    // get the config.
-    const serverConfig = serverConfigStore.get();
-    if (serverConfig.config) {
-      serverConfigStoreCallback(serverConfig.config);
-    } else {
-      // This is making the assumption that a value received from the serverConfigStore will be a valid config
-      const {unsubscribe} = serverConfigStore.subscribe((nextServerConfig) => {
-        unsubscribe();
-        serverConfigStoreCallback(nextServerConfig.config);
-      });
-    }
-  }, []);
-
-  const loadConfig = async() => {
-    const config = await configApi().getConfig();
-    serverConfigStore.set({config: config});
-  };
+  }, [config]);
 
   useEffect(() => {
     const load = async() => {
-      await loadConfig();
+      const serverConfig = await configApi().getConfig();
+      serverConfigStore.set({config: serverConfig});
+      bindClients();
       loadErrorReporter();
       initializeAnalytics();
     };
