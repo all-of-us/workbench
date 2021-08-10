@@ -99,7 +99,6 @@ public class DiskControllerTest extends SpringTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
-  private static final String BIGQUERY_DATASET = "dataset-name";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
