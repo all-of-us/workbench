@@ -114,7 +114,6 @@ const ResourceNavigation = (props: NavProps) => {
     }
   }
 
-  // TODO angular2react - navigating to a new page should auto scroll to the top?
   return <Clickable disabled={!canNavigate()}>
     <RouterLink to={url} style={style} data-test-id={linkTestId} onClick={() => onNavigate()}>
       {...children}

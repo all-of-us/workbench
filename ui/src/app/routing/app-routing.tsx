@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
-import {Switch} from 'react-router-dom';
+import {Switch, useHistory} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {
@@ -134,6 +134,16 @@ const loadErrorReporter = () => {
   });
 
   stackdriverErrorReporterStore.set(reporter);
+};
+
+const ScrollToTop = () => {
+  const {location} = useHistory();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
+  return <React.Fragment/>;
 };
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
@@ -490,6 +500,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     <NotificationModal/>
     {
       isCookiesEnabled && <AppRouter>
+        <ScrollToTop/>
         {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
         {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
         {/* It should be noted that the reason this is currently working is because Switch only */}

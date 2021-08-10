@@ -347,7 +347,8 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
     display: 'inline-block',
     color: colors.accent
   };
-  // TODO angular2react - lower priority but I think this can be swapped out with a standard react-router Link
+
+  // TODO RW-7154: change to react-router Link
   return <a href={href}
             onClick={e => {
               if (analyticsFn) {
