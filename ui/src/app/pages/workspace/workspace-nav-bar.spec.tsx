@@ -8,8 +8,15 @@ import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/c
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 import {navigateSpy} from 'testing/navigation-mock';
 
-describe('WorkspaceNavBar', () => {
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
+  useParams: () => ({
+    ns: workspaceDataStub.namespace,
+    wsid: workspaceDataStub.id,
+  }),
+}));
 
+describe('WorkspaceNavBar', () => {
   let props: {};
 
   const component = () => {

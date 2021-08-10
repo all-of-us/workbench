@@ -22,8 +22,9 @@ import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-ver
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
-import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceDataStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {MemoryRouter, Route} from 'react-router-dom';
 
 describe('DataSetPage', () => {
   let datasetApiStub;
@@ -41,7 +42,23 @@ describe('DataSetPage', () => {
   });
 
   const component = () => {
-    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} match={{params: {dataSetId: 1}}} />);
+    return mount(
+      <MemoryRouter
+        initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/data-sets/${stubDataSet().id}`]}
+      >
+        <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
+          <DatasetPage
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            match={{params: {
+              ns: workspaceDataStub.namespace,
+              wsid: workspaceDataStub.id,
+              dataSetId: stubDataSet().id
+            }}}
+          />
+        </Route>
+      </MemoryRouter>
+    );
   };
 
   it('should render', async() => {

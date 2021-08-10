@@ -21,7 +21,6 @@ import {
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
-  withUrlParams,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -54,6 +53,8 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from "react-router";
+import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -447,10 +448,13 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps, WithSpinnerOverlayProps {
+interface DatasetPageRoutingProps extends WorkspaceRoutingProps {
+  dataSetId: string;
+}
+
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps<DatasetPageRoutingProps> {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  urlParams: any;
   profileState: {
     profile: Profile,
     reload: Function
@@ -489,7 +493,7 @@ interface State {
   savingDataset: boolean;
 }
 
-export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
+export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withCdrVersions(), withErrorModal(), withRouter)(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -525,7 +529,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       await this.loadResources();
 
       this.updatePrepackagedDomains();
-      if (this.props.urlParams.dataSetId) {
+      if (this.props.match.params.dataSetId) {
         this.fetchDataset();
       }
     }
@@ -570,8 +574,8 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     async fetchDataset() {
-      const dataset = await dataSetApi().getDataSet(
-        this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId);
+      const {workspace, match: {params: {dataSetId}}} = this.props;
+      const dataset = await dataSetApi().getDataSet(workspace.namespace, workspace.id, +dataSetId);
       this.loadDataset(dataset);
     }
 
