@@ -107,6 +107,14 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         .collect(Collectors.toList());
   }
 
+  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModule =
+        retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    userAccessModule.getCompletionTime() != null && userAccessModule.getBypassTime() != null
+  }
+
   /**
    * Retrieves the existing {@link DbUserAccessModule} by user and access module. Create a new one
    * if not existing in DB.

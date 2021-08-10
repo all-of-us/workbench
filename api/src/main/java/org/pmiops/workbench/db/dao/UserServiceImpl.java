@@ -55,6 +55,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
@@ -216,7 +217,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
-
+    final List<AccessModule> accessModules = accessModuleService.getClientAccessModuleStatus()
     // TODO for Controlled Tier Beta: different access module evaluation criteria
     // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
     // Registered Tier and set RT+CT or RT only based on the feature flag
