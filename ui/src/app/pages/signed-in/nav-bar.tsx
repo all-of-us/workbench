@@ -12,6 +12,7 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
+import {LoginGovIAL2NotificationMaybe} from '../../components/login-gov-ial2-notification';
 
 const styles = reactStyles({
   headerContainer: {
@@ -197,6 +198,21 @@ export const NavBar = () => {
     </div>
     <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
+    {
+      showStatusAlert && <StatusAlertBanner
+          title={statusAlertDetails.title}
+          message={statusAlertDetails.message}
+          footer={
+            statusAlertDetails.link &&
+            <Button data-test-id='status-banner-read-more-button'
+                    onClick={() => window.open(statusAlertDetails.link, '_blank')}>
+              READ MORE
+            </Button>
+          }
+          onClose={onStatusAlertBannerUnmount}
+      />
+    }
+    {window.location.pathname !== '/access-renewal' && <LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
