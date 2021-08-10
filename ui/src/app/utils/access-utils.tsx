@@ -80,6 +80,6 @@ export const useIsUserDisabled = () => {
   return disabled;
 };
 
-export const getAccessModules = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
+export const getAccessModuleStatusByName = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
   return profile.accessModules.modules.find(a => a.moduleName === moduleName);
 };

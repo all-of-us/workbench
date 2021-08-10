@@ -214,20 +214,6 @@ export const NavBar = () => {
     }
     {<LoginGovIAL2NotificationMaybe/>}
     {
-      showStatusAlert && <StatusAlertBanner
-          title={statusAlertDetails.title}
-          message={statusAlertDetails.message}
-          footer={
-            statusAlertDetails.link &&
-            <Button data-test-id='status-banner-read-more-button'
-                    onClick={() => window.open(statusAlertDetails.link, '_blank')}>
-              READ MORE
-            </Button>
-          }
-          onClose={onStatusAlertBannerUnmount}
-      />
-    }
-    {
       showSideNav
       && <SideNav
           profile={profile}

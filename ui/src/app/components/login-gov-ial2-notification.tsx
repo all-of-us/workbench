@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {getAccessModules} from 'app/utils/access-utils';
+import {getAccessModuleStatusByName} from 'app/utils/access-utils';
 import {navigate} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
@@ -70,7 +70,7 @@ const LoginGovIAL2Notification = () => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
-    <Button type='primary' style={styles.button} onClick={() => navigate(['/?workbenchAccessTasks=true'])}>
+    <Button type='primary' style={styles.button} onClick={() => navigate(['/'], { queryParams: { workbenchAccessTasks: true } })}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;
@@ -79,10 +79,10 @@ const LoginGovIAL2Notification = () => {
 export const LoginGovIAL2NotificationMaybe = () => {
   const {profile} = useStore(profileStore);
   const {config: {enableRasLoginGovLinking}} = useStore(serverConfigStore);
-  const loginGovModule = getAccessModules(profile, AccessModule.RASLINKLOGINGOV);
+  const loginGovModule = getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV);
   // Show the Login.gov IAL2 notification when
   // 1: enableRasLoginGovLinking enabled AND
-  // 2: user is not bypassed AND not hasn't completed.
+  // 2: user is not bypassed AND hasn't completed.
   // 3: loginGovModule undefined means the same thing as 2.
   const shouldShowIal2Notification = enableRasLoginGovLinking &&
       (!loginGovModule || (!loginGovModule.bypassEpochMillis && !loginGovModule.completionEpochMillis));
