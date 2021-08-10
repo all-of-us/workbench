@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -150,13 +152,19 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   public List<ReportingInstitution> getInstitutions() {
     return jdbcTemplate.query(
         "SELECT \n"
-            + "  display_name,\n"
-            + "  dua_type_enum,\n"
-            + "  institution_id,\n"
-            + "  organization_type_enum,\n"
-            + "  organization_type_other_text,\n"
-            + "  short_name\n"
-            + "FROM institution",
+            + "  i.display_name,\n"
+            + "  i.dua_type_enum,\n"
+            + "  i.institution_id,\n"
+            + "  i.organization_type_enum,\n"
+            + "  i.organization_type_other_text,\n"
+            + "  i.short_name,\n"
+            + "  itr.requirement_enum"
+            + "FROM institution i"
+            + "JOIN institution_tier_requirement itr ON i.institution_id=itr.institution_id "
+            + "JOIN access_tier on itr.access_tier_id=at.access_tier_id "
+            + "WHERE at.short_name='"
+            + AccessTierService.REGISTERED_TIER_SHORT_NAME
+            + "'",
         (rs, unused) ->
             new ReportingInstitution()
                 .displayName(rs.getString("display_name"))
@@ -165,7 +173,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .organizationTypeEnum(
                     organizationTypeFromStorage(rs.getShort("organization_type_enum")))
                 .organizationTypeOtherText(rs.getString("organization_type_other_text"))
-                .shortName(rs.getString("short_name")));
+                .shortName(rs.getString("short_name"))
+                .registeredTierRequirement(
+                    InstitutionMembershipRequirement.valueOf(rs.getString("requirement_enum"))));
   }
 
   @Override

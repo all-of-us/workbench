@@ -9066,6 +9066,10 @@ definitions:
         description: |-
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
+      registeredTierRequirement:
+        description: Institution tegisted tier requirement.
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+
   ReportingDataset:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-11-18T10:38:12-05:00.
