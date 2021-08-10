@@ -2805,15 +2805,16 @@ def set_access_module_timestamps(cmd_name, *args)
     "--user [user]",
     ->(opts, v) { opts.user = v },
     "User whose timestamps should be updated.  Use full email address.")
+  op.add_validator ->(opts) { raise ArgumentError if opts.user.nil?}
+  op.parse.validate
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
   gcc = GcloudContextV2.new(op)
-  op.parse.validate
   gcc.validate()
 
   with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{gradle setAccessModuleTimestamps --user=#{op.opts.user}}
+    common.run_inline %W{gradle setAccessModuleTimestamps -PappArgs=["#{op.opts.user}"]}
   end
 end
 

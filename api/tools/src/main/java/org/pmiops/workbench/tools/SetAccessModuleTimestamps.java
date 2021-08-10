@@ -10,9 +10,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
+import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,14 +27,31 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
   AccessModuleServiceImpl.class,
+    ActionAuditServiceImpl.class,
+    UserServiceAuditorImpl.class,
+    ActionAuditSpringConfiguration.class, // injects com.google.cloud.logging.Logging
+    UserAccessModuleMapperImpl.class,
+    CommonMappers.class,
 })
 public class SetAccessModuleTimestamps {
 
   private static final Logger log = Logger.getLogger(SetAccessModuleTimestamps.class.getName());
 
+  // copy AccessModuleService.updateCompletionTime()
+  // because injecting services into tools is too difficult :(
+//  private void updateCompletionTime(UserAccessModuleDao userAccessModuleDao,
+//      DbUser dbUser, AccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
+//    DbAccessModule dbAccessModule =
+//        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+//    DbUserAccessModule userAccessModuleToUpdate =
+//        retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+//    userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+//  }
+
   // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
   void applyTimestampUpdateToUser(
       UserDao userDao,
+      UserAccessModuleDao userAccessModuleDao,
       AccessModuleService accessModuleService,
       String username,
       AccessModuleName moduleName,
@@ -68,13 +91,14 @@ public class SetAccessModuleTimestamps {
   private static final Options options = new Options().addOption(userOpt);
 
   @Bean
-  public CommandLineRunner run(AccessModuleService accessModuleService, UserDao userDao) {
+  public CommandLineRunner run(AccessModuleService accessModuleService, UserDao userDao, UserAccessModuleDao userAccessModuleDao) {
     return (args) -> {
       final CommandLine opts = new DefaultParser().parse(options, args);
       final String username = opts.getOptionValue(userOpt.getLongOpt());
 
       applyTimestampUpdateToUser(
           userDao,
+          userAccessModuleDao,
           accessModuleService,
           username,
           AccessModuleName.PROFILE_CONFIRMATION,
