@@ -11,6 +11,7 @@ import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {CriteriaSearch, growlCSS, LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -22,8 +23,7 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
-import {RouteComponentProps, withRouter} from "react-router";
-import {WorkspaceRoutingProps} from "app/routing/workspace-app-routing";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const styles = reactStyles({
   arrowIcon: {

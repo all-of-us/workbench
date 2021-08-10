@@ -16,6 +16,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {EditComponentReact} from 'app/icons/edit';
 import {CriteriaSearch, LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-search';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -36,7 +37,6 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -101,8 +101,8 @@ function sortAndStringify(concepts) {
 }
 
 interface ConceptSearchRoutingProps extends WorkspaceRoutingProps {
-  csid?: string,
-  domain?: string,
+  csid?: string;
+  domain?: string;
 }
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<ConceptSearchRoutingProps> {

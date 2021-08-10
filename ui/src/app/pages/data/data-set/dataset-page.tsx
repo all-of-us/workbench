@@ -11,6 +11,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -53,8 +54,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {RouteComponentProps, withRouter} from "react-router";
-import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {

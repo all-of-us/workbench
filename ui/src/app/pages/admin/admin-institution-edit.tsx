@@ -29,8 +29,8 @@ import {
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
+import {RouteComponentProps} from 'react-router';
 import * as validate from 'validate.js';
-import {RouteComponentProps} from "react-router";
 
 const styles = reactStyles({
   label: {
@@ -65,7 +65,7 @@ interface InstitutionEditState {
 }
 
 interface AdminInstitutionEditRoutingProps {
-  institutionId: string
+  institutionId: string;
 }
 
 interface Props

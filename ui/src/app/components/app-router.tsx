@@ -19,13 +19,13 @@ export interface WithRouterProps {
     isExact: boolean,
     path: string,
     url: string
-  },
+  };
   location: {
     key: string,
     pathname: string,
     search: string,
     hash: string
-  },
+  };
   history: {
     length: number,
     action: string,
@@ -34,7 +34,7 @@ export interface WithRouterProps {
     go: (n: number) => {},
     goBack: () => {},
     goForward: () => {}
-  }
+  };
 }
 
 export interface Guard {

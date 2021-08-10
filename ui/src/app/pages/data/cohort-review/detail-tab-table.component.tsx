@@ -18,9 +18,9 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router';
 import {Key} from 'ts-key-enum';
-import {RouteComponentProps, withRouter} from "react-router";
-import {DetailPageRoutingProps} from "./detail-page";
+import {DetailPageRoutingProps} from './detail-page';
 
 const styles = reactStyles({
   container: {

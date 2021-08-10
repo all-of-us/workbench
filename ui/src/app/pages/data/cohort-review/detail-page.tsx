@@ -1,23 +1,22 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {from} from 'rxjs/observable/from';
 
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
+import { WorkspaceRoutingProps } from 'app/routing/workspace-app-routing';
 import {getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {currentCohortReviewStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
-import { WorkspaceRoutingProps } from 'app/routing/workspace-app-routing';
-import {RouteComponentProps, withRouter} from "react-router";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 export interface DetailPageRoutingProps extends WorkspaceRoutingProps {
-  cid: string,
-  pid: string
+  cid: string;
+  pid: string;
 }
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<DetailPageRoutingProps> {

@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
@@ -12,10 +11,8 @@ import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
-import {Observable} from 'rxjs/Observable';
-import {from} from 'rxjs/observable/from';
-import {RouteComponentProps, withRouter} from "react-router";
-import {DetailPageRoutingProps} from "./detail-page";
+import {RouteComponentProps, withRouter} from 'react-router';
+import {DetailPageRoutingProps} from './detail-page';
 
 const styles = reactStyles({
   container: {
@@ -345,7 +342,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
 
     loadParticipantChartData() {
       const {ns, wsid, pid} = this.props.match.params;
-      fp.map(async (domainName: string) => {
+      fp.map(async(domainName: string) => {
         this.setState((prevState) => ({
           chartData: {
             ...prevState.chartData,
@@ -356,7 +353,14 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
             }
           }
         }));
-        const {items} = await cohortReviewApi().getParticipantChartData(ns, wsid, this.props.cohortReview.cohortReviewId, +pid, domainName, 10);
+        const {items} = await cohortReviewApi().getParticipantChartData(
+          ns,
+          wsid,
+          this.props.cohortReview.cohortReviewId,
+          +pid,
+          domainName,
+          10
+        );
         this.setState((prevState) => ({
           chartData: {
             ...prevState.chartData,

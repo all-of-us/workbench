@@ -9,6 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {
   filterStateStore,
   getVocabOptions,
@@ -37,8 +38,7 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
-import {RouteComponentProps, withRouter} from "react-router";
-import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},

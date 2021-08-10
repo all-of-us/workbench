@@ -23,8 +23,8 @@ import * as React from 'react';
 import {Redirect, Switch, useRouteMatch} from 'react-router-dom';
 
 export interface WorkspaceRoutingProps {
-  ns: string,
-  wsid: string
+  ns: string;
+  wsid: string;
 }
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);

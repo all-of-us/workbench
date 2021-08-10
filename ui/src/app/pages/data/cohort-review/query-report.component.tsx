@@ -3,6 +3,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
@@ -26,8 +27,7 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
-import {RouteComponentProps, withRouter} from "react-router";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const css = `
   .stats-left-padding {

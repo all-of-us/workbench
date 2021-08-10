@@ -14,6 +14,7 @@ import {Spinner} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -28,9 +29,8 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {WorkspaceRoutingProps} from "../../routing/workspace-app-routing";
 import { RouteComponentProps } from 'react-router';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum Progress {
   Unknown,

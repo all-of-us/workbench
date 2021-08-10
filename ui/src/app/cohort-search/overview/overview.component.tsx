@@ -12,6 +12,7 @@ import {CreateModal} from 'app/components/create-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
@@ -29,8 +30,7 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {WorkspaceRoutingProps} from "../../routing/workspace-app-routing";
-import {RouteComponentProps, withRouter} from "react-router";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const COHORT_TYPE = 'AoU_Discover';
 

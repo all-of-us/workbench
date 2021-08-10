@@ -26,8 +26,8 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
-import {withRouter, RouteComponentProps} from "react-router";
-import {DetailPageRoutingProps} from "./detail-page";
+import {RouteComponentProps, withRouter} from 'react-router';
+import {DetailPageRoutingProps} from './detail-page';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
