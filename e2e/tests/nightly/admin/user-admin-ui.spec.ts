@@ -31,7 +31,7 @@ describe('Admin', () => {
     const bypassColIndex = await adminTable.getColumnIndex('Bypass');
     //click on the bypass link
     const bypassPopup = await userAdminPage.clickBypassLink(1, bypassColIndex);
-    const bypassUserAdmin = await bypassPopup.getBypassModuleStatus();
+    await bypassPopup.getBypassAdminEnv();
     await bypassPopup.clickCancelBypass();
 
     //get the name column index separately since it is a frozen column
@@ -41,8 +41,7 @@ describe('Admin', () => {
     const userProfileInfo = await userAdminPage.clickNameLink(1, nameColIndex);
     //navigate to admin-user-profile page
     await userProfileInfo.waitForLoad();
-    const bypassUserProfile = await userProfileInfo.getBypassStatus();
-    expect(bypassUserProfile).toEqual(bypassUserAdmin);
+    await userProfileInfo.getBypassProfileEnv();
   });
 
   test('Verify admin-user-profile page ui, update freeCredits and update institution', async () => {

@@ -9,7 +9,6 @@ import { LinkText } from 'app/text-labels';
 import SelectMenu from 'app/component/select-menu';
 import { ElementType } from 'app/xpath-options';
 import { getPropValue } from 'utils/element-utils';
-import UserAdminPage from './admin-user-list-page';
 
 const PageTitle = 'User Admin | All of Us Researcher Workbench';
 
@@ -153,17 +152,59 @@ export default class UserProfileInfo extends AuthenticatedPage {
     return await freeCreditsDropdown.getSelectedValue();
   }
 
-  // get each modules bypass access status
-  async getEachBypassStatus(toggleAccessText: string): Promise<boolean> {
-    const btn = this.getEachBypassToggle(toggleAccessText);
+  // get each modules checkbox status
+  async getEachBypassToggle(toggleAccessText: string): Promise<boolean> {
+    const xpath = `//div[@data-test-id='${toggleAccessText}']//input[@type='checkbox']`;
+    const btn = new Checkbox(this.page, xpath);
     const btnStatus = await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
     return btnStatus;
   }
 
-  // get each modules checkbox
-  private getEachBypassToggle(toggleAccessText: string): Checkbox {
-    const xpath = `//div[@data-test-id='${toggleAccessText}']//input[@type='checkbox']`;
-    return new Checkbox(this.page, xpath);
+  // get the module name and the status of each modules in test env
+  async getBypassTest(): Promise<boolean[]> {
+    const bypassProfileTest = [
+      'twoFactorAuthBypassToggle',
+      'complianceTrainingBypassToggle',
+      'eraCommonsBypassToggle',
+      'dataUseAgreementBypassToggle',
+      'rasLinkLoginGovBypassToggle'
+    ];
+    const moduleNames: string[] = [];
+    let i: number;
+    const btnStatus: boolean[] = [];
+    for (i = 0; i < bypassProfileTest.length; i++) {
+      moduleNames.push(bypassProfileTest[i]);
+      btnStatus.push(await this.getEachBypassToggle(moduleNames[i]));
+    }
+    return btnStatus;
+  }
+
+  // get the module name and the status of each modules in staging env
+  async getBypassStaging(): Promise<boolean[]> {
+    const bypassProfileStaging = [
+      'twoFactorAuthBypassToggle',
+      'eraCommonsBypassToggle',
+      'dataUseAgreementBypassToggle'
+    ];
+    const moduleNames: string[] = [];
+    let i: number;
+    const btnStatus: boolean[] = [];
+    for (i = 0; i < bypassProfileStaging.length; i++) {
+      moduleNames.push(bypassProfileStaging[i]);
+      btnStatus.push(await this.getEachBypassToggle(moduleNames[i]));
+    }
+    return btnStatus;
+  }
+
+  // check the env and run the respective function to get the module status
+  async getBypassProfileEnv(): Promise<boolean[]> {
+    const checkEnv = process.env.WORKBENCH_ENV;
+    switch (checkEnv) {
+      case 'test':
+        return this.getBypassTest();
+      case 'satging':
+        return this.getBypassStaging();
+    }
   }
 
   // select a different Verified Institution to verify email match with institution
@@ -185,31 +226,5 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const newfreeCreditMaxValue = await this.getFreeCreditMaxValue();
     expect(creditValue).toEqual(newfreeCreditMaxValue);
     await this.waitForSaveButton(true);
-  }
-
-  async getBypassStatusTest(): Promise<void> {
-    await this.getEachBypassStatus('twoFactorAuthBypassToggle');
-    await this.getEachBypassStatus('complianceTrainingBypassToggle');
-    await this.getEachBypassStatus('eraCommonsBypassToggle');
-    await this.getEachBypassStatus('dataUseAgreementBypassToggle');
-    await this.getEachBypassStatus('rasLinkLoginGovBypassToggle');
-  }
-
-  async getBypassStatusStaging(): Promise<void> {
-    await this.getEachBypassStatus('twoFactorAuthBypassToggle');
-    await this.getEachBypassStatus('eraCommonsBypassToggle');
-    await this.getEachBypassStatus('dataUseAgreementBypassToggle');
-  }
-
-  async getBypassStatus(): Promise<void> {
-    const userAdminPage = new UserAdminPage(page);
-    const dataTable = userAdminPage.getUserAdminTable();
-    const userTableTest = await dataTable.getColumnNames();
-    const testTable = ['Bypass', 'RAS Login.gov Link'];
-    if (testTable.some((i) => userTableTest.includes(i))) {
-      return this.getBypassStatusTest();
-    } else {
-      return this.getBypassStatusStaging();
-    }
   }
 }
