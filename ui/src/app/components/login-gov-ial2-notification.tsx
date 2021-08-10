@@ -84,6 +84,7 @@ export const LoginGovIAL2NotificationMaybe = () => {
   // 1: enableRasLoginGovLinking enabled AND
   // 2: user is not bypassed AND not hasn't completed.
   // 3: loginGovModule undefined means the same thing as 2.
-  const shouldShowIal2Notification = enableRasLoginGovLinking && (!loginGovModule || (!loginGovModule.bypassEpochMillis && !loginGovModule.completionEpochMillis));
+  const shouldShowIal2Notification = enableRasLoginGovLinking &&
+      (!loginGovModule || (!loginGovModule.bypassEpochMillis && !loginGovModule.completionEpochMillis));
   return shouldShowIal2Notification ? <LoginGovIAL2Notification/> : null;
 };
