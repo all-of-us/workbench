@@ -24,9 +24,6 @@ for a step-by-step guide to creating all pre-requisite tables. All relevant comm
 
 ## Prep Table commands
 
-### Copy over all static prep tables into a new CDR bucket
-`./project.rb make-prep-tables-bucket --new-cdr-version C2021Q2R2 --previous-cdr-version C2021Q2R1`
-
 ### Build prep ppi tables from surveys in redcap - [Install Python](https://github.com/all-of-us/workbench/tree/master/api/db-cdr/prep-ppi-tables)
 `./project.rb make-prep-ppi-csv-files --project all-of-us-workbench-test --dataset DummySR --date 2021-04-21`
 

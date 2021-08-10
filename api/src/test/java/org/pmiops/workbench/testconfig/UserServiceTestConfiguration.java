@@ -16,11 +16,10 @@ import org.springframework.context.annotation.Import;
   UserServiceImpl.class,
   // UserServiceImpl depends on InstitutionServiceImpl
   InstitutionServiceImpl.class,
-  // InstitutionServiceImpl depends on these 5
+  // InstitutionServiceImpl depends on these 4
   InstitutionMapperImpl.class,
   InstitutionUserInstructionsMapperImpl.class,
   PublicInstitutionDetailsMapperImpl.class,
-  InstitutionTierConfigMapperImpl.class,
   InstitutionTierConfigMapperImpl.class,
 })
 public class UserServiceTestConfiguration {}

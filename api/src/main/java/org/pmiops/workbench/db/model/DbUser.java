@@ -540,6 +540,7 @@ public class DbUser {
     return RUNTIME_NAME_PREFIX + getUserId();
   }
 
+  @Transient
   public String getUserPDNamePrefix() {
     return PD_NAME_PREFIX + getUserId();
   }

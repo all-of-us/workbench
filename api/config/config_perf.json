@@ -4,13 +4,11 @@
     "samBaseUrl": "https:\/\/sam.dsde-perf.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
-    "notebookRuntimeDefaultMachineType": "n1-standard-2",
-    "notebookRuntimeDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.5",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:2.0.1",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -85,11 +83,6 @@
   "zendesk": {
     "host": "https:\/\/aousupporthelp1580753096.zendesk.com"
   },
-  "elasticsearch": {
-    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
-    "enableBasicAuth": true,
-    "enableElasticsearchBackend": false
-  },
   "moodle": {
     "host": "aoudev.nnlm.gov",
     "enableMoodleBackend": true,
@@ -100,7 +93,6 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableAccessRenewal": true,
     "enableRasLoginGovLinking": false
   },
   "featureFlags": {

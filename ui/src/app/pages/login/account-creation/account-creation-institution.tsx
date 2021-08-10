@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -10,6 +11,7 @@ import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AouTitle} from 'app/components/text-wrappers';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
   commonStyles,
@@ -21,9 +23,9 @@ import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {
+  EmailAddressMismatchErrorMessage,
+  EmailDomainMismatchErrorMessage,
   getRoleOptions,
-  MasterDuaEmailMismatchErrorMessage,
-  RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
 import {
@@ -33,7 +35,6 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -80,7 +81,6 @@ export interface Props {
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
 }
-
 
 interface State {
   profile: Profile;
@@ -216,10 +216,9 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
   }
 
   /**
-   * Returns a DOM fragment explaining to the user why institutional email verification has
-   * failed. This may be due to (1) restricted DUA which requires users to have an
-   * exact email address match, (2) email domain not matching a master DUA list of domains or
-   * emails, or (3) a server error when making the checkEmail request.
+   * Returns a DOM fragment explaining to the user why institutional email verification has failed. This may be due to
+   * (1) failing an exact email address match, (2) failing to match the email domain against a list of domains, or
+   * (3) a server error when making the checkEmail request.
    */
   displayEmailErrorMessageIfNeeded(): React.ReactNode {
     const {institutions, checkEmailError, checkEmailResponse,
@@ -233,7 +232,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       return '';
     }
 
-    // Institution email Address is either being verified or researcher has just enter it and not change focus
+    // Institution email Address is either being verified or researcher has just entered it and has not changed focus
     if (!checkEmailResponse && !checkEmailError) {
       return '';
     }
@@ -250,15 +249,15 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
       </ErrorDiv>;
     }
 
-    // Finally, we distinguish between the two types of DUAs in terms of user messaging.
+    // Finally, we distinguish between the two types of InstitutionMembershipRequirements in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
         institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
-      // Institution has signed Restricted agreement and the email is not in allowed emails list
-      return <RestrictedDuaEmailMismatchErrorMessage/>;
+      // Institution requires an exact email address match and the email is not in allowed emails list
+      return <EmailAddressMismatchErrorMessage/>;
     } else {
-      // Institution has MASTER or NULL agreement and the domain is not in the allowed list
-      return <MasterDuaEmailMismatchErrorMessage/>;
+      // Institution requires email domain matching and the domain is not in the allowed list
+      return <EmailDomainMismatchErrorMessage/>;
     }
   }
 
@@ -338,7 +337,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
             Please complete Step 1 of 3
           </div>
           <div style={styles.institutionalDuaTextBox}>
-            For access to the <i>All of Us</i> Research Program data, your institution needs to have signed a Data Use Agreement
+            For access to the <AouTitle/> data, your institution needs to have signed a Data Use Agreement
             with the program. The institutions listed below have an Institutional Data Use Agreement with the program that
             enables us to provide their researchers with access to the Researcher Workbench.
           </div>

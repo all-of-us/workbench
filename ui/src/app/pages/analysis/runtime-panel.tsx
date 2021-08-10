@@ -154,8 +154,8 @@ const styles = reactStyles({
 
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
-const defaultDiskSize = 50;
-const defaultPdSize = 50;
+const defaultDiskSize = 100;
+const defaultPdSize = 100;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.

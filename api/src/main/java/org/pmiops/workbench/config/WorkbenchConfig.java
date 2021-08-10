@@ -20,7 +20,6 @@ public class WorkbenchConfig {
   public ServerConfig server;
   public AdminConfig admin;
   public MandrillConfig mandrill;
-  public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -43,7 +42,6 @@ public class WorkbenchConfig {
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.cdr = new CdrConfig();
-    config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
@@ -115,8 +113,6 @@ public class WorkbenchConfig {
     public String samBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
-    public String notebookRuntimeDefaultMachineType;
-    public Integer notebookRuntimeDefaultDiskSizeGb;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
@@ -206,14 +202,6 @@ public class WorkbenchConfig {
     public int sendRetries;
   }
 
-  // TODO(RW-7112): remove
-  @Deprecated
-  public static class ElasticsearchConfig {
-    public String baseUrl;
-    public boolean enableBasicAuth;
-    public boolean enableElasticsearchBackend;
-  }
-
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
@@ -240,8 +228,6 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, users can be expired on the system, losing access
-    public boolean enableAccessRenewal;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
   }

@@ -792,7 +792,7 @@ paths:
 
   "/v1/disks/{workspaceNamespace}":
     get:
-      summary: Get the user's workspace runtime.
+      summary: Get the user's workspace persistent disk.
       description: Returns the current user's latest created persistent disk, if any, which has been created
         for the given workspace.
       operationId: getDisk
@@ -817,6 +817,11 @@ paths:
         - disk
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: diskName
+          description: diskName
+          type: string
+          required: true
       responses:
         200:
           description: Success
@@ -853,7 +858,10 @@ paths:
           description: Bad Request
           schema:
             $ref: "#/definitions/ErrorResponse"
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
   "/v1/workspaces":
     get:
       tags:
@@ -3328,6 +3336,27 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns criteria menu with source and standard info'
+      operationId: findCbMenu
+      parameters:
+        - in: path
+          name: parentId
+          type: integer
+          format: int64
+          required: true
+          description: the parent id
+      responses:
+        200:
+          description: A collection of criteria menu options
+          schema:
+            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3343,6 +3372,21 @@ paths:
           description: information on the domains
           schema:
             "$ref": "#/definitions/DomainInfoResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domainCard":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns information on the domains of data in the workspace''s
+          CDR version along with participant and concept counts'
+      operationId: findDomainCards
+      responses:
+        200:
+          description: information on the domains
+          schema:
+            "$ref": "#/definitions/DomainCardResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo/{domain}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4013,6 +4057,45 @@ definitions:
       participantCount:
         description: number of participants with data in the CDR for a concept in
           this domain
+        type: integer
+        format: int64
+  DomainCard:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - conceptCount
+      - participantCount
+      - category
+    properties:
+      category:
+        description: Category of the domain
+        type: string
+      domain:
+        description: the domain ID
+        "$ref": "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      conceptCount:
+        description: number of concept count in this domain
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in
+          this domain
+        type: integer
+        format: int64
+      standard:
+        description: Identifies if the concept is standard or source
+        type: boolean
+        default: false
+      sortOrder:
+        description: Sort order for the domain
         type: integer
         format: int64
   DataFiltersResponse:
@@ -5309,6 +5392,15 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/DomainInfo"
+  DomainCardResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/DomainCard"
   ValueSet:
     type: object
     properties:
@@ -5808,6 +5900,10 @@ definitions:
       - Ready
       - Deleting
       - Deleted
+<<<<<<< HEAD
+=======
+      - Unknown
+>>>>>>> master
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user
@@ -6440,7 +6536,7 @@ definitions:
           University Medical Center'
       duaTypeEnum:
         "$ref": "#/definitions/DuaType"
-        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed, 
+        description: 'DEPRECATED. Replaced by registeredTierMembershipRequirement. Type of Data Use Agreement Institution has signed,
           Master or restricted to a defined set of specific researchers'
       organizationTypeEnum:
         "$ref": "#/definitions/OrganizationType"
@@ -7709,6 +7805,7 @@ definitions:
     - domainId
     - name
     - group
+    - standard
     - sortOrder
     properties:
       id:
@@ -7733,6 +7830,10 @@ definitions:
         type: string
       group:
         description: Is this a parent
+        type: boolean
+        default: false
+      standard:
+        description: True if standard, false for source
         type: boolean
         default: false
       sortOrder:

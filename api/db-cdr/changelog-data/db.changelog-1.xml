@@ -20,6 +20,7 @@
     <delete tableName="cb_criteria_attribute"/>
     <delete tableName="cb_criteria_relationship"/>
     <delete tableName="cb_criteria_ancestor"/>
+    <delete tableName="cb_menu"/>
     <delete tableName="cb_person"/>
     <delete tableName="cb_data_filter"/>
     <delete tableName="ds_linking"/>
@@ -27,6 +28,7 @@
     <delete tableName="cb_survey_version"/>
     <delete tableName="cb_criteria_menu"/>
     <delete tableName="ds_data_dictionary"/>
+    <delete tableName="domain_card"/>
 
     <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
@@ -370,5 +372,29 @@
       <column name="domain" type="STRING"/>
     </loadData>
 
+    <loadData tableName="cb_menu" file="csv/cb_menu.csv" encoding="UTF-8"
+              quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="category" type="STRING"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="type" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="sort_order" type="NUMERIC"/>
+    </loadData>
+
+    <loadData tableName="domain_card" file="csv/domain_card.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="category" type="STRING"/>
+      <column name="domain" type="NUMERIC"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="concept_count" type="NUMERIC"/>
+      <column name="participant_count" type="NUMERIC"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="sort_order" type="NUMERIC"/>
+    </loadData>
   </changeSet>
 </databaseChangeLog>

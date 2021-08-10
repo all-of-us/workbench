@@ -180,6 +180,7 @@
     "webpack-dev-server": "3.1.11"
   },
   "resolutions": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "node-gyp": "^4"
   }
 }

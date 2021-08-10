@@ -31,6 +31,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
@@ -244,10 +245,10 @@ public class FireCloudServiceImplTest extends SpringTest {
 
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
+    ArgumentCaptor<FirecloudCreateRawlsV2BillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsV2BillingProjectFullRequest.class);
     verify(billingV2Api).createBillingProjectFullV2(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
+    FirecloudCreateRawlsV2BillingProjectFullRequest request = captor.getValue();
 
     // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
     // as BillingProjectBufferService.
@@ -255,8 +256,6 @@ public class FireCloudServiceImplTest extends SpringTest {
     // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.isEnableFlowLogs()).isTrue();
-    assertThat(request.isHighSecurityNetwork()).isTrue();
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 }

@@ -1,8 +1,12 @@
+import * as fp from 'lodash/fp';
+import {MultiSelect} from 'primereact/multiselect';
+import * as React from 'react';
+import * as validate from 'validate.js';
+
 import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
-
 import {ClrIcon, InfoIcon, ValidationIcon} from 'app/components/icons';
-
 import {
   ErrorMessage,
   FormValidationErrorMessage,
@@ -10,20 +14,9 @@ import {
   TextAreaWithLengthValidationMessage,
   TextInputWithLabel
 } from 'app/components/inputs';
-
-import {TooltipTrigger} from 'app/components/popups';
-
-import {profileApi} from 'app/services/swagger-fetch-clients';
-
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import colors from 'app/styles/colors';
-import {Profile} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import {MultiSelect} from 'primereact/multiselect';
-import * as React from 'react';
-import * as validate from 'validate.js';
-
 import {BulletAlignedUnorderedList} from 'app/components/lists';
+import {TooltipTrigger} from 'app/components/popups';
+import {AoU} from 'app/components/text-wrappers';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
@@ -31,10 +24,13 @@ import {
   Section,
   WhyWillSomeInformationBePublic,
 } from 'app/pages/login/account-creation/common';
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
+import {Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   ...commonStyles,
@@ -58,11 +54,11 @@ const styles = reactStyles({
 
 const researchPurposeList = [
   <span>Your research training and background</span>,
-  <span>How you hope to use <i>All of Us</i> data for your research</span>,
+  <span>How you hope to use <AoU/> data for your research</span>,
   <span>Your research approach and the tools you use for answering your research questions (eg: Large datasets
      of phenotypes and genotypes, community engagement and community-based participatory research methods, etc.)</span>,
   <span>Your experience working with underrepresented populations as a scientist or outside of research, and how that
-     experience may inform your work with <i>All of Us</i> data</span>
+     experience may inform your work with <AoU/> data</span>
 ];
 
 const nameLength = 80;
@@ -341,7 +337,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </div>
           <div style={{...styles.text, fontSize: 12, marginTop: '0.3rem'}}>
             All fields required unless indicated as optional</div>
-          <Section header={<div>Create an <i>All of Us</i> username</div>} style={{marginTop: '1.25rem'}}>
+          <Section header={<div>Create an <AoU/> username</div>} style={{marginTop: '1.25rem'}}>
             <div>
               <FlexRow>
                 <FlexColumn>
@@ -468,7 +464,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               <div
                 style={{...styles.asideText, marginTop: '.125px'}}>
-                  This information will be posted publicly on the <i>All of Us</i> Research Hub website to inform program participants.
+                  This information will be posted publicly on the <AoU/> Research Hub website to inform program participants.
                   <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
               </div>
               <div style={{marginTop: '.5rem'}}>
@@ -479,7 +475,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                         (previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb})
                       )}
                   >
-                    <i>All of Us</i> participants are most interested in knowing:
+                    <AoU/> participants are most interested in knowing:
                   </div>
                   <ClrIcon shape='angle' style={{
                     transform: this.state.showMostInterestedInKnowingBlurb ? 'rotate(180deg)' : 'rotate(90deg)'
@@ -516,7 +512,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <div style={{...styles.asideText, marginTop: '.5rem', marginBottom: '.5rem'}}>
                 You could provide a link to your faculty bio page from your institution's website,
                 your LinkedIn profile page, or another webpage featuring your work. This will
-                allow <i>All of Us</i> researchers and participants to learn more about your work and
+                allow <AoU/> researchers and participants to learn more about your work and
                 publications.
               </div>
             </React.Fragment>}

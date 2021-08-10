@@ -7,6 +7,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -54,30 +55,42 @@ describe('Create python kernel notebook', () => {
     const kernelName = await notebook.getKernelName();
     expect(kernelName).toBe('Python 3');
 
-    const cell1OutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/import-os.py' });
-    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell1OutputText.endsWith('success')).toBeTruthy();
-
-    const cell2OutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/import-libs.py' });
-    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell2OutputText.endsWith('success')).toBeTruthy();
-
-    await notebook.runCodeCell(3, {
-      codeFile: 'resources/python-code/git-ignore-check.py',
-      markdownWorkaround: true
+    const cell1OutputText = await notebook.runCodeCell(1, {
+      codeFile: 'resources/python-code/import-os.py'
     });
-    // TODO(RW-7044): Reintroduce success check after 8/1/21, to allow image upgrade to phase in.
+    // toContain() is not a strong enough check: error text also includes "success" because it's in the code
+    expect(cell1OutputText).toMatch(/success$/);
 
-    await notebook.runCodeCell(4, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    expect(
+      await notebook.runCodeCell(2, {
+        codeFile: 'resources/python-code/import-libs.py'
+      })
+    ).toMatch(/success$/);
+
+    expect(
+      await notebook.runCodeCell(3, {
+        codeFile: 'resources/python-code/git-ignore-check.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
+
+    expect(
+      await notebook.runCodeCell(4, {
+        codeFile: 'resources/python-code/nbstripoutput-filter.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
+
+    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(4);
+    const cell = notebook.findCell(5);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
     const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(5, { code: codeSnippet });
+    const codeSnippetOutput = await notebook.runCodeCell(6, { code: codeSnippet });
     expect(codeSnippetOutput).toEqual(expect.stringContaining('python3'));
 
     // Save, exit notebook then come back from Analysis page.
