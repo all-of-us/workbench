@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {InstitutionApi, ProfileApi} from 'generated/fetch';
+import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
 import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -26,11 +26,11 @@ describe('Access Renewal Page', () => {
     const expiredTime = oneHourAgo();
     const {profile} = profileStore.get();
 
-    const newProfile = fp.set('renewableAccessModules', {modules: [
-      {moduleName: 'dataUseAgreement', expirationEpochMillis: expiredTime},
-      {moduleName: 'complianceTraining', expirationEpochMillis: expiredTime},
-      {moduleName: 'profileConfirmation', expirationEpochMillis: expiredTime},
-      {moduleName: 'publicationConfirmation', expirationEpochMillis: expiredTime}
+    const newProfile = fp.set('accessModules', {modules: [
+      {moduleName: AccessModule.DATAUSERCODEOFCONDUCT, expirationEpochMillis: expiredTime},
+      {moduleName: AccessModule.COMPLIANCETRAINING, expirationEpochMillis: expiredTime},
+      {moduleName: AccessModule.PROFILECONFIRMATION, expirationEpochMillis: expiredTime},
+      {moduleName: AccessModule.PUBLICATIONCONFIRMATION, expirationEpochMillis: expiredTime}
     ]}, profile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -40,8 +40,8 @@ describe('Access Renewal Page', () => {
     const newModules = fp.map(({moduleName, expirationEpochMillis}) => ({
       moduleName,
       expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
-    }), oldProfile.renewableAccessModules.modules);
-    const newProfile = fp.set(['renewableAccessModules', 'modules'], newModules, oldProfile)
+    }), oldProfile.accessModules.modules);
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -51,8 +51,8 @@ describe('Access Renewal Page', () => {
         (moduleName === toBeRemoved ? {} : {
           moduleName,
           expirationEpochMillis}),
-        oldProfile.renewableAccessModules.modules);
-    const newProfile = fp.set(['renewableAccessModules', 'modules'], newModules, oldProfile)
+        oldProfile.accessModules.modules);
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -122,7 +122,7 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -139,8 +139,8 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
-    updateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -156,9 +156,9 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
-    updateOneModule('publicationConfirmation', oneYearFromNow());
-    updateOneModule('complianceTraining', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -173,10 +173,10 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
-    updateOneModule('publicationConfirmation', oneYearFromNow());
-    updateOneModule('complianceTraining', oneYearFromNow());
-    updateOneModule('dataUseAgreement', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    updateOneModule(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
     setCompletionTimes(() => Date.now());
 
@@ -197,8 +197,8 @@ describe('Access Renewal Page', () => {
     setCompletionTimes(() => Date.now());
     setBypassTimes(() => Date.now());
 
-    updateOneModule('profileConfirmation', oneHourAgo());
-    updateOneModule('publicationConfirmation', oneHourAgo());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneHourAgo());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneHourAgo());
 
     await waitOneTickAndUpdate(wrapper);
 
@@ -219,8 +219,8 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
-    updateOneModule('publicationConfirmation', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
 
     setBypassTimes(oneYearFromNow);
 
@@ -248,11 +248,11 @@ describe('Access Renewal Page', () => {
 
     setCompletionTimes(() => Date.now());
 
-    updateOneModule('profileConfirmation', oneYearFromNow());
-    updateOneModule('publicationConfirmation', oneYearFromNow());
-    updateOneModule('dataUseAgreement', oneYearFromNow());
+    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModule(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
-    // these modules will not be returned in RenewableAccessModules because they are disabled
+    // these modules will not be returned in AccessModules because they are disabled
     removeOneModule('complianceTraining');
 
     await waitOneTickAndUpdate(wrapper);
