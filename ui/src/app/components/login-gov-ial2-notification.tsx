@@ -70,7 +70,7 @@ const LoginGovIAL2Notification = () => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity. 60 days remaining.
     </div>
-    <Button type='primary' style={styles.button} onClick={() => navigate(['access-renewal'])}>
+    <Button type='primary' style={styles.button} onClick={() => navigate(['TBD-CRP'])}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;

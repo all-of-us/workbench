@@ -212,7 +212,7 @@ export const NavBar = () => {
           onClose={onStatusAlertBannerUnmount}
       />
     }
-    {window.location.pathname !== '/access-renewal' && <LoginGovIAL2NotificationMaybe/>}
+    {window.location.pathname !== '/TBD-CRP' && <LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
