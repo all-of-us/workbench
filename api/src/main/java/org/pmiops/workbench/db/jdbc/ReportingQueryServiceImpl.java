@@ -158,10 +158,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  i.organization_type_enum,\n"
             + "  i.organization_type_other_text,\n"
             + "  i.short_name,\n"
-            + "  itr.requirement_enum"
-            + "FROM institution i"
-            + "JOIN institution_tier_requirement itr ON i.institution_id=itr.institution_id "
-            + "JOIN access_tier on itr.access_tier_id=at.access_tier_id "
+            + "  itr.requirement_enum\n"
+            + "FROM institution i\n"
+            + "JOIN institution_tier_requirement itr\n"
+            + "   ON i.institution_id=itr.institution_id\n"
+            + "JOIN access_tier at\n"
+            + "   ON itr.access_tier_id=at.access_tier_id\n"
             + "WHERE at.short_name='"
             + AccessTierService.REGISTERED_TIER_SHORT_NAME
             + "'",
