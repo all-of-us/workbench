@@ -1,7 +1,7 @@
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 import { getPropValue } from 'utils/element-utils';
-import { config} from "resources/workbench-config";
+import { config } from 'resources/workbench-config';
 
 describe('User registration tests:', () => {
   test('Can register new user', async () => {
