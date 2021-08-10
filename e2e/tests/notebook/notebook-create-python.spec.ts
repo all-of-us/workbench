@@ -7,6 +7,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -58,22 +59,22 @@ describe('Create python kernel notebook', () => {
       codeFile: 'resources/python-code/import-os.py'
     });
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    await expect(cell1OutputText).toMatch(/success$/);
+    expect(cell1OutputText).toMatch(/success$/);
 
-    await expect(
+    expect(
       await notebook.runCodeCell(2, {
         codeFile: 'resources/python-code/import-libs.py'
       })
     ).toMatch(/success$/);
 
-    await expect(
+    expect(
       await notebook.runCodeCell(3, {
         codeFile: 'resources/python-code/git-ignore-check.py',
         markdownWorkaround: true
       })
     ).toMatch(/success$/);
 
-    await expect(
+    expect(
       await notebook.runCodeCell(4, {
         codeFile: 'resources/python-code/nbstripoutput-filter.py',
         markdownWorkaround: true
