@@ -93,7 +93,7 @@ const Workspaces = () => {
             style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
             onClick={() => {
               AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces/build']);
+              navigate(['workspaces', 'build']);
             }}
         />
       </FlexRow>

@@ -413,7 +413,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backNavigate() {
-    navigate(['admin/institution']);
+    navigate(['admin', 'institution']);
   }
 
   validateEmailAddressPresence(tier: AccessTierShortNames) {

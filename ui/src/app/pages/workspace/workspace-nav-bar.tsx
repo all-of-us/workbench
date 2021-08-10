@@ -117,7 +117,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {showModal && <CdrVersionUpgradeModal
         defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
-        upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
+        upgrade={() => NavStore.navigate(['workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;
 };
@@ -154,7 +154,7 @@ export const WorkspaceNavBar = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+        onClick={() => NavStore.navigate(['workspaces', namespace, id, link])}
       >
         {name}
       </Clickable>

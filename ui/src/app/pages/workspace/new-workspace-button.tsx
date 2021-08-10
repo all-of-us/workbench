@@ -15,7 +15,7 @@ const styles = reactStyles({
 export const NewWorkspaceButton = () =>
   <CardButton onClick={() => {
     AnalyticsTracker.Workspaces.OpenCreatePage();
-    navigate(['workspaces/build']);
+    navigate(['workspaces', 'build']);
   }}
               style={styles.addCard}>
     Create a <br/> New Workspace
