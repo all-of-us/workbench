@@ -522,43 +522,11 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     async componentDidMount() {
       this.props.hideSpinner();
-      console.log('dataset-page mounting');
+      await this.loadResources();
 
-      // TODO angular2react - refactor
-      if (this.props.workspace.namespace && this.props.workspace.id && this.props.cdrVersionTiersResponse) {
-        // depends on workspace/cdrVersionTiersResponse
-        if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
-          PREPACKAGED_DOMAINS =   {
-            ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-            ...PREPACKAGED_WITH_FITBIT_DOMAINS
-          };
-        }
-        // Only allow selection of genomics prepackaged concept sets if genomics
-        // data extraction is possible, since extraction is the only action that
-        // can be taken on genomics variant data from the dataset builder.
-        if (serverConfigStore.get().config.enableGenomicExtraction &&
-          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
-          PREPACKAGED_DOMAINS = {
-            ...PREPACKAGED_DOMAINS,
-            ...PREPACKAGED_WITH_WHOLE_GENOME
-          };
-        }
-      }
-
-      if (this.props.workspace.namespace && this.props.workspace.id) {
-        const resourcesPromise = this.loadResources();
-
-        console.log('dataSetId: ', this.props.urlParams.dataSetId);
-        if (this.props.urlParams.dataSetId) {
-          console.log('running dataset update');
-
-          const [, dataset] = await Promise.all([
-            resourcesPromise,
-            dataSetApi().getDataSet(this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId)
-          ]);
-
-          this.loadDataset(dataset);
-        }
+      this.updatePrepackagedDomains();
+      if (this.props.urlParams.dataSetId) {
+        this.fetchDataset();
       }
     }
 
@@ -581,52 +549,48 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       });
     }
 
+    updatePrepackagedDomains() {
+      // depends on workspace/cdrVersionTiersResponse
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+        PREPACKAGED_DOMAINS =   {
+          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_WITH_FITBIT_DOMAINS
+        };
+      }
+      // Only allow selection of genomics prepackaged concept sets if genomics
+      // data extraction is possible, since extraction is the only action that
+      // can be taken on genomics variant data from the dataset builder.
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+      }
+    }
+
+    async fetchDataset() {
+      const dataset = await dataSetApi().getDataSet(
+        this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId);
+      this.loadDataset(dataset);
+    }
+
     async componentDidUpdate(prevProps, prevState: State) {
       if (hasNewValidProps(this.props, prevProps, [
         (props) => props.workspace.namespace,
         (props) => props.workspace.id,
         (props) => props.cdrVersionTiersResponse
       ])) {
-        console.log('running cdr update');
-
-        // depends on workspace/cdrVersionTiersResponse
-        if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
-          PREPACKAGED_DOMAINS =   {
-            ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-            ...PREPACKAGED_WITH_FITBIT_DOMAINS
-          };
-        }
-        // Only allow selection of genomics prepackaged concept sets if genomics
-        // data extraction is possible, since extraction is the only action that
-        // can be taken on genomics variant data from the dataset builder.
-        if (serverConfigStore.get().config.enableGenomicExtraction &&
-          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
-          PREPACKAGED_DOMAINS = {
-            ...PREPACKAGED_DOMAINS,
-            ...PREPACKAGED_WITH_WHOLE_GENOME
-          };
-        }
+        this.updatePrepackagedDomains();
       }
 
-      console.log('Checking props for resource loading');
       if (hasNewValidProps(this.props, prevProps, [
         (props) => props.workspace.namespace,
         (props) => props.workspace.id,
         (props) => props.urlParams.dataSetId])) {
-        console.log('running workspace update');
 
-        const resourcesPromise = this.loadResources();
-
-        console.log('dataSetId: ', this.props.urlParams.dataSetId);
         if (hasNewValidProps(this.props, prevProps, [(props) => props.urlParams.dataSetId])) {
-          console.log('running dataset update');
-
-          const [, dataset] = await Promise.all([
-            resourcesPromise,
-            dataSetApi().getDataSet(this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId)
-          ]);
-
-          this.loadDataset(dataset);
+          this.fetchDataset();
         }
       }
 
