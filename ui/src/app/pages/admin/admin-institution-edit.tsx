@@ -24,7 +24,8 @@ import {
   getControlledTierEmailDomains,
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains, getTierConfig,
+  getRegisteredTierEmailDomains,
+  getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
   updateCtEmailAddresses,
@@ -369,12 +370,25 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
     const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
+    const ctConfig: InstitutionTierConfig = getControlledTierConfig(institution);
     if (institution && rtConfig) {
       if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
         rtConfig.emailAddresses = [];
       } else if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         rtConfig.emailDomains = [];
       }
+    }
+    if (institution && ctConfig) {
+      if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+        ctConfig.emailAddresses = [];
+      } else if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+        ctConfig.emailDomains = [];
+      }
+    }
+    if(ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
+      this.setState(fp.set(['institution', 'tierConfigs'], [getRegisteredTierConfig(this.state.institution)]));
+    } else {
+      this.setState(fp.set(['institution', 'tierConfigs'], [rtConfig, ctConfig]));
     }
     if (institution && institution.organizationTypeEnum !== OrganizationType.OTHER) {
       institution.organizationTypeOtherText = null;
