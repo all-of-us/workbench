@@ -1,5 +1,4 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
@@ -12,9 +11,12 @@ import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 
 describe('AdminInstitutionEditSpec', () => {
-
   const component = () => {
-    return mount(<AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(<AdminInstitutionEdit
+        hideSpinner={() => {}}
+        showSpinner={() => {}}
+        match={{params: {institutionId: 'Verily'}}}
+    />);
   };
 
   beforeEach(() => {
@@ -30,9 +32,6 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
   it('should throw error for existing Institution if display name is more than 80 characters', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -45,9 +44,6 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
   it('should default DUA to Master', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();

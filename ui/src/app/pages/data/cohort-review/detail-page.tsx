@@ -9,11 +9,18 @@ import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
-import {currentCohortReviewStore, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortReviewStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import { WorkspaceRoutingProps } from 'app/routing/workspace-app-routing';
+import {RouteComponentProps, withRouter} from "react-router";
 
-interface Props extends WithSpinnerOverlayProps {
+export interface DetailPageRoutingProps extends WorkspaceRoutingProps {
+  cid: string,
+  pid: string
+}
+
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<DetailPageRoutingProps> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -22,7 +29,7 @@ interface State {
   participant: ParticipantCohortStatus;
 }
 
-export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
+export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
   class extends React.Component<Props, State> {
     private subscription;
     constructor(props: any) {
@@ -34,9 +41,9 @@ export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
       const {workspace: {cdrVersionId, id, namespace}, hideSpinner} = this.props;
       hideSpinner();
       let {cohortReview} = this.props;
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid, cid} = this.props.match.params;
       if (!cohortReview) {
-        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
           page: 0,
           pageSize: 25,
           sortOrder: SortOrder.Asc,
@@ -46,22 +53,32 @@ export const DetailPage = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
           currentCohortReviewStore.next(cohortReview);
         });
       }
-      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
-        .filter(params => !!params.pid)
-        .switchMap(({pid}) => {
-          return from(cohortReviewApi()
-            .getParticipantCohortStatus(ns, wsid, cohortReview.cohortReviewId, +pid))
-            .do(ps => participantStore.next(ps));
-        })
-        .subscribe();
       if (!vocabOptions.getValue()) {
         getVocabOptions(namespace, id, cohortReview.cohortReviewId);
       }
-      this.subscription.add(participantStore.subscribe(participant => this.setState({participant})));
+      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
+      this.updateParticipantStore();
+    }
+
+    componentDidUpdate(prevProps) {
+      if (
+          this.props.match.params !== prevProps.match.params
+          && !!this.props.match.params.pid
+          && this.props.cohortReview
+      ) {
+        this.updateParticipantStore();
+      }
     }
 
     componentWillUnmount() {
       this.subscription.unsubscribe();
+    }
+
+    async updateParticipantStore() {
+      const {ns, wsid, pid} = this.props.match.params;
+      const participantCohortStatus = await cohortReviewApi()
+        .getParticipantCohortStatus(ns, wsid, this.props.cohortReview.cohortReviewId, +pid);
+      participantStore.next(participantCohortStatus);
     }
 
     render() {

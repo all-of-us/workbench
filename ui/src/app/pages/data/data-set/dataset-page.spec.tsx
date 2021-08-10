@@ -6,7 +6,7 @@ import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {
   CdrVersionsApi,
@@ -35,17 +35,13 @@ describe('DataSetPage', () => {
     registerApiClient(DataSetApi, datasetApiStub);
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   const component = () => {
-    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} match={{params: {dataSetId: 1}}} />);
   };
 
   it('should render', async() => {
@@ -412,7 +408,6 @@ describe('DataSetPage', () => {
       domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -432,7 +427,6 @@ describe('DataSetPage', () => {
       domainValuePairs: [{domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
     };
-    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 

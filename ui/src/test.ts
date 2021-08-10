@@ -19,7 +19,6 @@ import {
   currentConceptSetStore,
   queryParamsStore,
   routeConfigDataStore,
-  urlParamsStore,
 } from 'app/utils/navigation';
 import {
   compoundRuntimeOpStore,
@@ -51,7 +50,6 @@ beforeEach(() => {
   routeConfigDataStore.next({});
   routeDataStore.set({});
   serverConfigStore.set({});
-  urlParamsStore.next({});
 });
 // Then we find all the tests.
 const context = require.context('./', true, /\.spec\.ts$/);

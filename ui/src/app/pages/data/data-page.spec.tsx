@@ -2,13 +2,11 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 import {MemoryRouter} from 'react-router';
 
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-
 import {ResourceCardBase} from 'app/components/card';
 import {DataComponent} from 'app/pages/data/data-component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortReviewApi, CohortsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -27,10 +25,6 @@ describe('DataPage', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
   });

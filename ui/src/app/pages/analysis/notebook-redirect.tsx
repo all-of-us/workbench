@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -29,6 +29,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {WorkspaceRoutingProps} from "../../routing/workspace-app-routing";
+import { RouteComponentProps } from 'react-router';
 
 export enum Progress {
   Unknown,
@@ -220,7 +222,11 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface NotebookRedirectRoutingProps extends WorkspaceRoutingProps {
+  nbName: string;
+}
+
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<NotebookRedirectRoutingProps> {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -280,7 +286,7 @@ export const NotebookRedirect = fp.flow(
 
     // get notebook name without file suffix
     private getNotebookName() {
-      const {nbName} = urlParamsStore.getValue();
+      const {nbName} = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }

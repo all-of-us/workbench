@@ -6,8 +6,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
   currentConceptSetStore,
   currentConceptStore,
-  currentWorkspaceStore,
-  urlParamsStore
+  currentWorkspaceStore
 } from 'app/utils/navigation';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -28,19 +27,22 @@ describe('ConceptSearch', () => {
     currentConceptStore.next([]);
     currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      csid: conceptSet.id
-    });
   });
 
   const component = () => {
-    return mount(<MemoryRouter><ConceptSearch setConceptSetUpdating={() => {}}
-                                setShowUnsavedModal={() => {}}
-                                setUnsavedConceptChanges={() => {}}
-                                hideSpinner={() => {}}
-                                showSpinner={() => {}}/></MemoryRouter>);
+    return mount(<MemoryRouter>
+      <ConceptSearch setConceptSetUpdating={() => {}}
+                     setShowUnsavedModal={() => {}}
+                     setUnsavedConceptChanges={() => {}}
+                     hideSpinner={() => {}}
+                     showSpinner={() => {}}
+                     match={{params: {
+                       wsid: workspaceDataStub.id,
+                       ns: workspaceDataStub.namespace,
+                       csid: conceptSet.id
+                     }}}
+      />
+    </MemoryRouter>);
   }
 
   it('should render', () => {

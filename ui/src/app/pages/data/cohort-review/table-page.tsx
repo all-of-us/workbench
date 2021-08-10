@@ -23,8 +23,7 @@ import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/ut
 import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
-  NavigationProps,
-  urlParamsStore
+  NavigationProps
 } from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -38,6 +37,8 @@ import {
   ParticipantCohortStatus,
   SortOrder,
 } from 'generated/fetch';
+import {RouteComponentProps, withRouter} from "react-router";
+import {WorkspaceRoutingProps} from "../../../routing/workspace-app-routing";
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
@@ -226,7 +227,11 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+export interface TablePageRoutingProps extends WorkspaceRoutingProps {
+  cid: string;
+}
+
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<TablePageRoutingProps> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -243,7 +248,7 @@ interface State {
   demoFilters: any;
 }
 
-export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
@@ -271,7 +276,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       const {filters} = this.state;
       let {demoFilters} = this.state;
       const promises = [];
-      const {ns, wsid} = urlParamsStore.getValue();
+      const {ns, wsid} = this.props.match.params;
       if (!cohortReview) {
         promises.push(
           this.getParticipantStatuses().then(response => {
@@ -353,7 +358,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
     getParticipantStatuses() {
       const {page, sortField, sortOrder} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
+      const {cid} = this.props.match.params;
       const filters = this.mapFilters();
       if (filters === null) {
         this.setState({data: [], loading: false});
@@ -365,7 +370,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           filters: {items: filters},
         } as Request;
-        return cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query);
+        return cohortReviewApi().getParticipantCohortStatuses(namespace, id, +cid, +cdrVersionId, query);
       }
     }
 
@@ -423,13 +428,13 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
     goBack() {
       triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
+      const {cid} = this.props.match.params;
       this.props.navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build`, {queryParams: {cohortId: cid}});
     }
 
     onRowClick = (event: any) => {
       const {id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
+      const {cid} = this.props.match.params;
       this.props.navigate([
         'workspaces',
         namespace,
@@ -446,7 +451,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
     showCohortDescription() {
       triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
       const {id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
+      const {cid} = this.props.match.params;
       this.props.navigate([
         'workspaces',
         namespace,

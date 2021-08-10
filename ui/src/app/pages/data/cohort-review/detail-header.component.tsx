@@ -13,8 +13,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortReviewStore,
   currentWorkspaceStore,
-  NavigationProps,
-  urlParamsStore
+  NavigationProps
 } from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -27,6 +26,8 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
+import {withRouter, RouteComponentProps} from "react-router";
+import {DetailPageRoutingProps} from "./detail-page";
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
@@ -186,7 +187,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps extends NavigationProps {
+export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<DetailPageRoutingProps> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
@@ -201,7 +202,7 @@ export interface DetailHeaderState {
   filterTab: string;
 }
 
-export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<DetailHeaderProps, DetailHeaderState> {
     constructor(props: DetailHeaderProps) {
       super(props);
@@ -254,7 +255,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     backToTable() {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid, cid} = this.props.match.params;
       this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
@@ -279,7 +280,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           : statuses[0];
 
         const {page, pageSize} = reviewPaginationStore.getValue();
-        const {ns, wsid, cid} = urlParamsStore.getValue();
+        const {ns, wsid, cid} = this.props.match.params;
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = {
           page: left ? page - 1 : page + 1,
@@ -287,7 +288,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           sortOrder: SortOrder.Asc,
           filters: {items: this.getRequestFilters()}
         } as PageFilterRequest;
-        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, request).then(response => {
+        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, request).then(response => {
           currentCohortReviewStore.next(response.cohortReview);
           const status = statusGetter(response.cohortReview.participantCohortStatuses);
           this.navigateById(status.participantId);
@@ -296,7 +297,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
     }
 
     navigateById = (id: number): void => {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid, cid} = this.props.match.params;
       this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 

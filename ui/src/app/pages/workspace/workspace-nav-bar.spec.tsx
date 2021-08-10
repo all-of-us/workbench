@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
@@ -20,7 +20,6 @@ describe('WorkspaceNavBar', () => {
     props = {};
 
     currentWorkspaceStore.next(workspaceDataStub);
-    urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
     serverConfigStore.set({config: {
       gsuiteDomain: 'fake-research-aou.org',
         enableResearchReviewPrompt: true

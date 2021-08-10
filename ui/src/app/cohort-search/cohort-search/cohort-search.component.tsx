@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -19,9 +20,10 @@ import {
   currentCohortSearchContextStore,
   currentCohortStore,
   setSidebarActiveIconStore,
-  urlParamsStore,
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
+import {RouteComponentProps, withRouter} from "react-router";
+import {WorkspaceRoutingProps} from "app/routing/workspace-app-routing";
 
 const styles = reactStyles({
   arrowIcon: {
@@ -94,7 +96,6 @@ function initGroup(role: string, item: any) {
   };
 }
 
-
 export function getItemFromSearchRequest(groupId: string, itemId: string, role: string) {
   const searchRequest = searchRequestStore.getValue();
   const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
@@ -126,7 +127,7 @@ export function saveCriteria(selections?: Array<Selection>) {
   currentCohortCriteriaStore.next(undefined);
 }
 
-interface Props {
+interface Props extends RouteComponentProps<WorkspaceRoutingProps> {
   cohortContext: any;
   selections?: Array<Selection>;
   setUnsavedChanges: (unsavedChanges: boolean) => void;
@@ -140,7 +141,7 @@ interface State {
   unsavedChanges: boolean;
 }
 
-export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
+export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter)(class extends React.Component<Props, State> {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -239,7 +240,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
-    const {wsid} = urlParamsStore.getValue();
+    const {wsid} = this.props.match.params;
     const cohort = currentCohortStore.getValue();
     cohortContext.item.searchParameters = selections;
     const localStorageContext = {

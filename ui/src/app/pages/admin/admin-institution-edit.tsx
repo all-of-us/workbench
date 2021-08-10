@@ -11,7 +11,7 @@ import {Scroll} from 'app/icons/scroll';
 import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {
   getRegisteredTierConfig,
@@ -30,6 +30,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {RouteComponentProps} from "react-router";
 
 const styles = reactStyles({
   label: {
@@ -63,9 +64,16 @@ interface InstitutionEditState {
   title: string;
 }
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps, NavigationProps {}
+interface AdminInstitutionEditRoutingProps {
+  institutionId: string
+}
 
-export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(class extends React.Component<Props, InstitutionEditState> {
+interface Props
+    extends WithSpinnerOverlayProps,
+        NavigationProps,
+        RouteComponentProps<AdminInstitutionEditRoutingProps> {}
+
+export const AdminInstitutionEdit = fp.flow(withNavigation)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -91,8 +99,9 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
   async componentDidMount() {
     this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
-    if (this.props.urlParams.institutionId) {
-      const loadedInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
+    const {institutionId} = this.props.match.params;
+    if (institutionId) {
+      const loadedInstitution = await institutionApi().getInstitution(institutionId);
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: loadedInstitution,
@@ -266,7 +275,7 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
     }
 
     if (institutionMode === InstitutionMode.EDIT) {
-      await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution)
+      await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
         .then(value => this.backNavigate())
         .catch(reason => this.handleError(reason));
     } else {

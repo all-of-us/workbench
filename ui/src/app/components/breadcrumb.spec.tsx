@@ -1,5 +1,5 @@
 import {getTrail} from 'app/components/breadcrumb'
-import {BreadcrumbType, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {registerApiClient} from "app/services/swagger-fetch-clients";
 
 import {WorkspacesApi} from "generated/fetch";
@@ -7,16 +7,12 @@ import {WorkspacesApi} from "generated/fetch";
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {exampleCohortStubs} from "testing/stubs/cohorts-api-stub";
 import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
-import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('getTrail', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     currentWorkspaceStore.next(workspaceDataStub);
   });
 

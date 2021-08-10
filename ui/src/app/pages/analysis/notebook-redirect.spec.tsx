@@ -5,7 +5,7 @@ import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -16,7 +16,7 @@ import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceStubs} from 'testing/stubs/workspaces';
 import {navigateSpy} from 'testing/navigation-mock';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
@@ -35,7 +35,8 @@ describe('NotebookRedirect', () => {
 
   const component = async() => {
     const c = mount(<NotebookRedirect hideSpinner={() => {}}
-                                      showSpinner={() => {}}/>);
+                                      showSpinner={() => {}}
+                                      match={{params: {nbName: 'wharrgarbl'}}}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };
@@ -58,11 +59,6 @@ describe('NotebookRedirect', () => {
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
 
     serverConfigStore.set({config: {gsuiteDomain: 'x'}});
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      nbName: 'blah blah'
-    });
     queryParamsStore.next({
       kernelType: Kernels.R,
       creating: true
