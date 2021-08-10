@@ -5,7 +5,7 @@ import {reactStyles} from 'app/utils';
 import {getAccessModules} from 'app/utils/access-utils';
 import {navigate} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
-import {AccessModule} from '../../generated/fetch';
+import {AccessModule} from 'generated/fetch';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
@@ -68,9 +68,9 @@ const styles = reactStyles({
 const LoginGovIAL2Notification = () => {
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
-    <div style={styles.text}>Please verify your identity. 60 days remaining.
+    <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
-    <Button type='primary' style={styles.button} onClick={() => navigate(['TBD-CRP'])}>
+    <Button type='primary' style={styles.button} onClick={() => navigate(['/?workbenchAccessTasks=true'])}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;

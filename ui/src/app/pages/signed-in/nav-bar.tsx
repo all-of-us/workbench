@@ -2,6 +2,7 @@ import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-noti
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {LoginGovIAL2NotificationMaybe} from 'app/components/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
@@ -12,7 +13,6 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {LoginGovIAL2NotificationMaybe} from '../../components/login-gov-ial2-notification';
 
 const styles = reactStyles({
   headerContainer: {
@@ -212,7 +212,7 @@ export const NavBar = () => {
           onClose={onStatusAlertBannerUnmount}
       />
     }
-    {window.location.pathname !== '/TBD-CRP' && <LoginGovIAL2NotificationMaybe/>}
+    {<LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
