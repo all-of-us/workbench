@@ -10,11 +10,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
@@ -22,9 +20,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnu
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DataprocConfig;
-import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskConfig;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -67,8 +63,6 @@ public interface LeonardoMapper {
   }
 
   DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
-
-  Disk toApiDisk(LeonardoListPersistentDiskResponse disk);
 
   @Mapping(target = "cloudService", ignore = true)
   LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
@@ -174,13 +168,6 @@ public interface LeonardoMapper {
       return RuntimeStatus.UNKNOWN;
     }
     return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
-  }
-
-  default DiskStatus toApiDiskStatus(LeonardoDiskStatus leonardoDiskStatus) {
-    if (leonardoDiskStatus == null) {
-      return DiskStatus.UNKNOWN;
-    }
-    return DiskStatus.fromValue(leonardoDiskStatus.toString());
   }
 
   default String getJupyterImage(List<LeonardoRuntimeImage> images) {

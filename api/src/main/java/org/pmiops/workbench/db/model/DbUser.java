@@ -538,11 +538,6 @@ public class DbUser {
     return RUNTIME_NAME_PREFIX + getUserId();
   }
 
-  @Transient
-  public String getUserPDNamePrefix() {
-    return PD_NAME_PREFIX + getUserId();
-  }
-
   /** Returns a name for the Persistent Disk to be created for this user. */
   @Transient
   public String generatePDName() {
@@ -551,6 +546,6 @@ public class DbUser {
             .hashUnencodedChars(UUID.randomUUID().toString())
             .toString()
             .substring(0, PD_UUID_SUFFIX_SIZE);
-    return getUserPDNamePrefix() + "-" + randomString;
+    return PD_NAME_PREFIX + getUserId() + "-" + randomString;
   }
 }
