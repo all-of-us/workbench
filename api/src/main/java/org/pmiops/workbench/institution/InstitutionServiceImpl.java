@@ -473,6 +473,10 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (institutionRequest.getTierConfigs() != null) {
       List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
       for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
+        if(institutionTierConfig.getMembershipRequirement() == InstitutionMembershipRequirement.NO_ACCESS) {
+          // Skip if is NO_ACCESS
+          continue;
+        }
         // All tier need to be present in API if tier requirement is present.
         getAccessTierByShortNameOrThrow(
             dbAccessTiers, institutionTierConfig.getAccessTierShortName());
