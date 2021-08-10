@@ -2813,8 +2813,14 @@ def set_access_module_timestamps(cmd_name, *args)
   gcc = GcloudContextV2.new(op)
   gcc.validate()
 
+  gradle_args = ([
+      ["--user", op.opts.user]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
   with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{gradle setAccessModuleTimestamps -PappArgs=["#{op.opts.user}"]}
+    common.run_inline %W{gradle setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
