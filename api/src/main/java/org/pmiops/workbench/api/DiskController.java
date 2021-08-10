@@ -1,15 +1,16 @@
 package org.pmiops.workbench.api;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.joda.time.Instant;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -26,8 +27,6 @@ public class DiskController implements DiskApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final LeonardoMapper leonardoMapper;
   private final Provider<DbUser> userProvider;
-  // timestamp for the date was created in ISO 8601 format
-  private static final String diskCreatedDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 
   @Autowired
   public DiskController(
@@ -45,52 +44,36 @@ public class DiskController implements DiskApiDelegate {
   public ResponseEntity<Disk> getDisk(String workspaceNamespace) {
     String googleProject = lookupWorkspace(workspaceNamespace).getGoogleProject();
     String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
-    SimpleDateFormat dateFormatter = new SimpleDateFormat(diskCreatedDateFormat);
-    AtomicInteger activePDCnt = new AtomicInteger();
-    AtomicInteger failedPDCnt = new AtomicInteger();
-    Stream<LeonardoListPersistentDiskResponse> responseStream =
+
+    List<LeonardoListPersistentDiskResponse> responseList =
         leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false).stream()
             .filter(r -> r.getName().startsWith(pdNamePrefix))
-            .peek(
-                r -> {
-                  if (r.getStatus() != null) {
-                    switch (r.getStatus()) {
-                      case READY:
-                        activePDCnt.addAndGet(1);
-                        break;
-                      case FAILED:
-                        failedPDCnt.addAndGet(1);
-                        break;
-                      default:
-                        break;
-                    }
-                  }
-                }) // collect disk status
-            .sorted(
-                (r1, r2) -> {
-                  try {
-                    return dateFormatter
-                        .parse(r2.getAuditInfo().getCreatedDate())
-                        .compareTo(dateFormatter.parse(r1.getAuditInfo().getCreatedDate()));
-                  } catch (ParseException e) {
-                    log.warning(String.format("Observed PDs CreatedDate parsing error: %s", e));
-                    return 0;
-                  }
-                }); // sort by descent order
+            .collect(Collectors.toList());
 
     LeonardoListPersistentDiskResponse response =
-        responseStream.findFirst().orElseThrow(NotFoundException::new);
+        responseList.stream()
+            .max(Comparator.comparing((r) -> Instant.parse(r.getAuditInfo().getCreatedDate())))
+            .orElseThrow(
+                (() ->
+                    new NotFoundException(
+                        String.format(
+                            "Active PD with prefix %s not found in workspace %s",
+                            pdNamePrefix, workspaceNamespace))));
 
-    if (activePDCnt.get() > 1) {
+    if (LeonardoDiskStatus.FAILED.equals(response.getStatus())) {
+      log.warning(
+          String.format(
+              "Observed failed PD with prefix %s in workspace %s",
+              pdNamePrefix, workspaceNamespace));
+    }
+
+    long activePDCnt =
+        responseList.stream().filter(r -> LeonardoDiskStatus.READY.equals(r.getStatus())).count();
+
+    if (activePDCnt > 1) {
       log.warning(
           String.format(
               "Observed multiple active PDs for a single user with prefix %s in workspace %s",
-              pdNamePrefix, workspaceNamespace));
-    }
-    if (failedPDCnt.get() > 0) {
-      log.warning(
-          String.format(
-              "Observed failed PDs with prefix %s in workspace %s",
               pdNamePrefix, workspaceNamespace));
     }
 
@@ -110,10 +93,6 @@ public class DiskController implements DiskApiDelegate {
     String googleProject = lookupWorkspace(workspaceNamespace).getGoogleProject();
     leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  public static String getDiskCreatedDateFormat() {
-    return diskCreatedDateFormat;
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {

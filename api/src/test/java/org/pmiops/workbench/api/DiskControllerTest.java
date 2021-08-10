@@ -32,17 +32,13 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -57,7 +53,6 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
@@ -100,8 +95,6 @@ public class DiskControllerTest extends SpringTest {
   private static final String WORKSPACE_ID = "myfirstworkspace";
   private static final String WORKSPACE_NAME = "My First Workspace";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
-  private static final String OTHER_USER_EMAIL = "alice@gmail.com";
-  private static final String BUCKET_NAME = "workspace-bucket";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
@@ -179,100 +172,69 @@ public class DiskControllerTest extends SpringTest {
 
   @MockBean ProxyApi proxyApi;
 
-  @Autowired CdrVersionDao cdrVersionDao;
   @MockBean WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
   @Autowired DiskController diskController;
   @Autowired LeonardoMapper leonardoMapper;
 
-  private DbCdrVersion cdrVersion;
-
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.server.apiBaseUrl = API_BASE_URL;
-    config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
-    config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
 
     user = new DbUser();
     user.setUsername(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
 
-    createUser(OTHER_USER_EMAIL);
-
-    cdrVersion = new DbCdrVersion();
-    cdrVersion.setName("1");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion.setBigqueryDataset(BIGQUERY_DATASET);
     DbWorkspace testWorkspace = new DbWorkspace();
     testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
     testWorkspace.setGoogleProject(GOOGLE_PROJECT_ID);
     testWorkspace.setName(WORKSPACE_NAME);
     testWorkspace.setFirecloudName(WORKSPACE_ID);
-    testWorkspace.setCdrVersion(cdrVersion);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
-  private static FirecloudWorkspace createFcWorkspace(
-      String ns, String googleProject, String name, String creator) {
-    return new FirecloudWorkspace()
-        .namespace(ns)
-        .name(name)
-        .createdBy(creator)
-        .googleProject(googleProject)
-        .bucketName(BUCKET_NAME);
-  }
-
-  private void stubGetWorkspace(
-      String workspaceNamespace, String googleProject, String firecloudName, String creator) {
-    DbWorkspace w = new DbWorkspace();
-    w.setWorkspaceNamespace(workspaceNamespace);
-    w.setFirecloudName(firecloudName);
-    w.setCdrVersion(cdrVersion);
-    w.setGoogleProject(googleProject);
-    when(workspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
-    when(workspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
-    stubGetFcWorkspace(
-        createFcWorkspace(workspaceNamespace, googleProject, firecloudName, creator));
-  }
-
-  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) {
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
-    fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    when(mockFireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
-        .thenReturn(fcResponse);
-  }
-
   @Test
-  public void testGetPD() throws ApiException {
+  public void testGetPD_MostRecentReady() throws ApiException {
     String readyPDName = user.generatePDName();
     LeonardoListPersistentDiskResponse readyPDResponse =
-        new LeonardoListPersistentDiskResponse()
-            .name(readyPDName)
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.READY)
-            .auditInfo(new LeonardoAuditInfo().createdDate("2021-08-06T17:57:29.827954Z"))
-            .googleProject(GOOGLE_PROJECT_ID);
+        createListPdResponse(readyPDName, LeonardoDiskStatus.READY, "2021-08-06T17:57:29.827954Z");
 
+    String deletingPDName = user.generatePDName();
     LeonardoListPersistentDiskResponse deletingPDResponse =
-        new LeonardoListPersistentDiskResponse()
-            .name(user.generatePDName())
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.DELETING)
-            .auditInfo(new LeonardoAuditInfo().createdDate("2021-08-06T16:57:29.827954Z"))
-            .googleProject(GOOGLE_PROJECT_ID);
+        createListPdResponse(
+            deletingPDName, LeonardoDiskStatus.DELETING, "2021-08-06T16:57:29.827954Z");
 
     Disk readyPD =
         new Disk().size(300).diskType(DiskType.STANDARD).name(readyPDName).status(DiskStatus.READY);
+
     when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(readyPD);
+  }
+
+  @Test
+  public void testGetPD_MostRecentDeleting() throws ApiException {
+    String readyPDName = user.generatePDName();
+    LeonardoListPersistentDiskResponse readyPDResponse =
+        createListPdResponse(readyPDName, LeonardoDiskStatus.READY, "2021-08-06T17:57:29.827954Z");
+
+    String deletingPDName = user.generatePDName();
+    LeonardoListPersistentDiskResponse deletingPDResponse =
+        createListPdResponse(
+            deletingPDName, LeonardoDiskStatus.DELETING, "2021-08-06T19:57:29.827954Z");
+
+    Disk deletingPD =
+        new Disk()
+            .size(300)
+            .diskType(DiskType.STANDARD)
+            .name(deletingPDName)
+            .status(DiskStatus.DELETING);
+
+    when(userDisksApi.listDisksByProject(GOOGLE_PROJECT_ID, null, false))
+        .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
+    assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(deletingPD);
   }
 
   @Test
@@ -305,7 +267,6 @@ public class DiskControllerTest extends SpringTest {
 
   @Test
   public void testUpdateDisk() throws ApiException {
-    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
     int diskSize = 200;
     String diskName = user.generatePDName();
     diskController.updateDisk(WORKSPACE_NS, diskName, diskSize);
@@ -321,11 +282,14 @@ public class DiskControllerTest extends SpringTest {
     verify(userDisksApi).deleteDisk(GOOGLE_PROJECT_ID, diskName);
   }
 
-  private void createUser(String email) {
-    DbUser user = new DbUser();
-    user.setGivenName("first");
-    user.setFamilyName("last");
-    user.setUsername(email);
-    userDao.save(user);
+  private LeonardoListPersistentDiskResponse createListPdResponse(
+      String pdName, LeonardoDiskStatus status, String date) {
+    return new LeonardoListPersistentDiskResponse()
+        .name(pdName)
+        .size(300)
+        .diskType(LeonardoDiskType.STANDARD)
+        .status(status)
+        .auditInfo(new LeonardoAuditInfo().createdDate(date))
+        .googleProject(GOOGLE_PROJECT_ID);
   }
 }
