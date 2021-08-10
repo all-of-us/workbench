@@ -552,7 +552,7 @@ jobs:
           at: .
       - steps: << parameters.optional_steps >>
       - run:
-          name: "Export e2e test user to environment variable"
+          name: "Export e2e test users to environment variables"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
       - when:
           condition:
@@ -633,8 +633,8 @@ jobs:
       - gcloud-auth-login
       - run:
           working_directory: ~/workbench/api
-          name: Prep the e2e users by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps
+          name: Prep the e2e access test user (in Test env) by setting access module timestamps
+          command: ./project.rb set-access-module-timestamps ${PUPPETEER_ACCESS_TEST}
  
 workflows:
   joel-workflow:
