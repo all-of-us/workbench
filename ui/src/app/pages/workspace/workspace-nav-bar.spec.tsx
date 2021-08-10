@@ -45,7 +45,7 @@ describe('WorkspaceNavBar', () => {
 
     wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
     expect(navSpy).toHaveBeenCalledWith(
-      ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
+      ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 
   it('should disable Data and Analysis tab if workspace require review research purpose', () => {
