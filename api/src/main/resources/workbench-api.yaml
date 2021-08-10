@@ -789,7 +789,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-
   "/v1/disks/{workspaceNamespace}":
     get:
       summary: Get the user's workspace persistent disk.
@@ -858,10 +857,6 @@ paths:
           description: Bad Request
           schema:
             $ref: "#/definitions/ErrorResponse"
-<<<<<<< HEAD
-
-=======
->>>>>>> master
   "/v1/workspaces":
     get:
       tags:
@@ -5900,10 +5895,7 @@ definitions:
       - Ready
       - Deleting
       - Deleted
-<<<<<<< HEAD
-=======
       - Unknown
->>>>>>> master
   RuntimeConfigurationType:
     description: >
       The configuration type for this runtime. Namely, whether there was a user

@@ -434,7 +434,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 signal: aborter.signal
               });
             } else if (enablePD && pdSizeReduced) {
-              await disksApi().deleteDisk(currentWorkspaceNamespace, {
+              await disksApi().deleteDisk(currentWorkspaceNamespace, persistentDisk.name, {
                 signal: aborter.signal
               });
             }

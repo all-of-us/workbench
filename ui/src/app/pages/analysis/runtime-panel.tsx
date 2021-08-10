@@ -1253,7 +1253,7 @@ export const RuntimePanel = fp.flow(
       [PanelContent.Delete, () => (enablePD && selectedCompute === ComputeType.Standard && !runtimeExists && pdExists) ?
           <ConfirmDeleteUnattachedPD
               onConfirm={async() => {
-                await disksApi().deleteDisk(namespace);
+                await disksApi().deleteDisk(namespace, persistentDisk.name);
                 onClose();
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
