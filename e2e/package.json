@@ -27,6 +27,7 @@
     "test-nightly:debug": "cross-env PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false WORKBENCH_ENV=test TEST_MODE=nightly-integration yarn _test --detectOpenHandles",
     "test-nightly-local-devup": "cross-env WORKBENCH_ENV=local TEST_MODE=nightly-integration yarn jest --maxWorkers=1",
     "test-nightly-local-devup:debug": "cross-env WORKBENCH_ENV=local TEST_MODE=nightly-integration PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false DEBUG=true yarn jest --maxWorkers=1",
+    "test-nightly-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false TEST_MODE=nightly-integration yarn _test --maxWorkers=1",
     "clean": "rimraf tsc-out",
     "build": "yarn clean && tsc -p tsconfig.json",
     "lint": "eslint . --ext .js,.ts",
