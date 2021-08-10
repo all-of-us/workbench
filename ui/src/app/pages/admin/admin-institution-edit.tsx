@@ -385,7 +385,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
         ctConfig.emailDomains = [];
       }
     }
-    if(ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
+    if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
       // Don't set CT if CT is NOACCESS
       institution.tierConfigs = [rtConfig];
     } else {
