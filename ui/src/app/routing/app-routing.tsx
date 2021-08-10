@@ -20,15 +20,20 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
+import {disabledGuard, signInGuard} from 'app/routing/guards';
 import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
-import {AnalyticsTracker, initializeAnalytics, setLoggedInState} from 'app/utils/analytics';
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
+import {initializeAnalytics} from 'app/utils/analytics';
+import {useAuthentication} from 'app/utils/authentication';
+import {
+  cookiesEnabled,
+  LOCAL_STORAGE_API_OVERRIDE_KEY,
+  LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
+} from 'app/utils/cookies';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
-  signInStore,
   urlParamsStore
 } from 'app/utils/navigation';
 import {
@@ -36,26 +41,14 @@ import {
   routeDataStore,
   runtimeStore,
   serverConfigStore,
-  stackdriverErrorReporterStore,
-  useStore
+  stackdriverErrorReporterStore
 } from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
 import {ConfigResponse, Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
-import 'rxjs/Rx';
-import {disabledGuard, signInGuard} from './guards';
 
 declare const gapi: any;
-
-// for e2e tests: provide your own oauth token to obviate Google's oauth UI
-// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
-// as non-human.
-declare global {
-  interface Window { setTestAccessTokenOverride: (token: string) => void; }
-}
-
-const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
 const NotFoundPage = fp.flow(withRouteData, withRoutingSpinner)(NotFound);
@@ -70,20 +63,6 @@ interface RoutingProps {
   signIn: () => void;
   subscribeToInactivitySignOut: () => void;
   signOut: () => void;
-}
-
-function clearIdToken(): void {
-  // Using the full page redirect puts a long "id_token" parameter in the
-  // window hash; clear this after gapi has consumed it.
-  window.location.hash = '';
-}
-
-function profileImage() {
-  if (!gapi.auth2) {
-    return null;
-  } else {
-    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
-  }
 }
 
 const checkBrowserSupport = () => {
@@ -147,59 +126,17 @@ const ScrollToTop = () => {
 };
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
-  const {authLoaded = false} = useStore(authStore);
+  const {authLoaded} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [, setTestAccessTokenOverride] = useState(undefined);
-  const [signInMounted, setSignInMounted] = useState(false);
-  const [doSignOut, setDoSignOut] = useState(false);
   const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
   const [overriddenUrl, setOverriddenUrl] = useState('');
-
-  // TODO angular2react - does this work?
-  const onSignIn = (): void => {
-    setSignInMounted(true);
-  };
-
-  const signIn = (): void => {
-    AnalyticsTracker.Registration.SignIn();
-
-    gapi.auth2.getAuthInstance().signIn({
-      'prompt': 'select_account',
-      'ux_mode': 'redirect',
-      'redirect_uri': `${window.location.protocol}//${window.location.host}`
-    });
-  };
-
-  const signOut = (): void => {
-    // If we're in puppeteer, we never call gapi.auth2.init, so we can't sign out normally.
-    // Instead, we revoke all the access tokens and reset all the state.
-    if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
-      authStore.set({...authStore.get(), authLoaded: true, isSignedIn: false});
-      setIsSignedIn(false);
-      window.setTestAccessTokenOverride('');
-    } else {
-      gapi.auth2.getAuthInstance().signOut();
-    }
-  };
-
-  const subscribeToInactivitySignOut = () => {
-    setDoSignOut(true);
-  };
-
-  const nextSignInStore = () => {
-    signInStore.next({
-      signOut: () => signOut(),
-      profileImage: profileImage(),
-    });
-  };
 
   useEffect(() => {
     // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
     // TODO angular2react - this actually isn't working right now, just renders an empty page
     // but this bug is also on test right now so it isn't a regression
-    console.log('isCookiesEnabled useEffect');
     setIsCookiesEnabled(cookiesEnabled());
 
     if (isCookiesEnabled) {
@@ -242,7 +179,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         // Disclaimer: console.log statements here are unlikely to captured by
         // Puppeteer, since it typically reloads the page immediately after
         // invoking this function.
-        console.log('token: ', token);
         if (token) {
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
           location.replace('/');
@@ -261,56 +197,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
     });
   }, []);
-
-  useEffect(() => {
-    // TODO angular2react - verify that this only runs AFTER subscribeToAuth2User
-    // this might run before if react hooks run useEffect on the initial value, otherwise, we should be ok
-    // The main thing this affects in the value of authLoaded being true. The rest of the fields make sense
-    // with both values of isSignedIn
-    console.log('Running useEffect authLoaded ', authLoaded, isSignedIn);
-    authStore.set({...authStore.get(), isSignedIn});
-    if (isSignedIn) {
-      nextSignInStore();
-      clearIdToken();
-
-      // TODO angular2react - does this work? or rather, do we even need this?
-      if (signInMounted) {
-        console.log('Calling redirect to root');
-        // <Redirect to='/'/>;
-      }
-    } else {
-      // TODO angular2react - do I really need to check this? when would I ever want to not sign out here
-      if (doSignOut) {
-        signOut();
-      }
-    }
-    setLoggedInState(isSignedIn);
-  }, [isSignedIn]);
-
-  const makeAuth2 = (config: ConfigResponse): Promise<any> => {
-    return new Promise((resolve) => {
-      gapi.load('auth2', () => {
-        gapi.auth2.init({
-          client_id: environment.clientId,
-          hosted_domain: config.gsuiteDomain,
-          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
-            + (config.enableBillingUpgrade ? ' https://www.googleapis.com/auth/cloud-billing' : '')
-        }).then(() => {
-          authStore.set({
-            authLoaded: true,
-            isSignedIn: gapi.auth2.getAuthInstance().isSignedIn.get()
-          });
-          setIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
-
-          console.log('Setting up gapi auth listener', gapi.auth2.getAuthInstance().isSignedIn.get());
-          gapi.auth2.getAuthInstance().isSignedIn.listen((nextIsSignedIn: boolean) => {
-            setIsSignedIn(nextIsSignedIn);
-          });
-        });
-        resolve(gapi.auth2);
-      });
-    });
-  };
 
   const currentAccessToken = () => {
     const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
@@ -336,7 +222,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
 
   const serverConfigStoreCallback = (config: ConfigResponse) => {
     // TODO angular2react - is this the right place for this?
-    console.log(currentAccessToken());
     bindApiClients(
       new Configuration({
         basePath: getApiBaseUrl(),
@@ -349,7 +234,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         accessToken: () => currentAccessToken()
       })
     );
-    console.log('API Clients bound');
 
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
@@ -365,14 +249,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
 
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
-        setIsSignedIn(true);
         return;
       }
     }
-
-
-
-    makeAuth2(config);
   };
 
   useEffect(() => {
@@ -411,8 +290,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       .distinctUntilChanged(fp.isEqual)
       .switchMap(async({ns, wsid}) => {
         currentWorkspaceStore.next(null);
-        console.log('Running urlParamsStore sub to get workspace', ns, wsid);
-
         // This needs to happen for testing because we seed the urlParamsStore with {}.
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
@@ -481,18 +358,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       // since multiple update recent workspace requests (from the same page) within the span of 1 second should
       // almost always be for the same workspace and extremely rarely for different workspaces
       .subscribe(({ns, wsid}) => {
-        console.log('Runnign update recent workspace ', ns);
         if (ns && wsid) {
           workspacesApi().updateRecentWorkspaces(ns, wsid);
         }
       }).unsubscribe;
-  }, []);
-
-  console.log('Rendering AppRouting. AuthLoaded: ' + authLoaded + ' IsUserDisabled: ' + isUserDisabled);
-  useEffect(() => {
-    console.log('Mounting AppRouting (ish)');
-
-    return () => console.log('Unmounting AppRouting');
   }, []);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
@@ -512,13 +381,13 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
             </AppRoute>
             <AppRoute exact path='/login'>
-              <SignInPage routeData={{title: 'Sign In'}} onSignIn={onSignIn} signIn={signIn}/>
+              <SignInPage routeData={{title: 'Sign In'}}/>
             </AppRoute>
             <AppRoute exact path='/session-expired'>
-              <SessionExpiredPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
             </AppRoute>
             <AppRoute exact path='/sign-in-again'>
-              <SignInAgainPage routeData={{title: 'You have been signed out'}} signIn={signIn}/>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
             </AppRoute>
             <AppRoute exact path='/user-disabled'>
               <UserDisabledPage routeData={{title: 'Disabled'}}/>
@@ -534,9 +403,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               <SignedInPage
                   intermediaryRoute={true}
                   routeData={{}}
-                  // TODO angular2react - I think I might be able to just sign out and ignore this field
-                  subscribeToInactivitySignOut={subscribeToInactivitySignOut}
-                  signOut={signOut}
               />
             </AppRoute>
           </Switch>

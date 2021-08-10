@@ -1,6 +1,7 @@
 import {Button} from 'app/components/buttons';
 import {reactStyles} from 'app/utils';
 
+import {signIn} from 'app/utils/authentication';
 import * as React from 'react';
 
 export const styles = reactStyles({
@@ -19,8 +20,8 @@ export const styles = reactStyles({
   },
 });
 
-export const GoogleSignInButton: React.FunctionComponent<{signIn: Function}> = ({signIn}) =>
-  <Button type='primary' style={styles.button} onClick={signIn}>
+export const GoogleSignInButton: React.FunctionComponent = () =>
+  <Button type='primary' style={styles.button} onClick={() => signIn()}>
     <img src='/assets/icons/google-icon.png'
          style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
     <div>

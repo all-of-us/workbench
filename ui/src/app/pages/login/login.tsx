@@ -42,7 +42,7 @@ export const styles = reactStyles({
 
 
 export const LoginReactComponent: React.FunctionComponent<{
-  signIn: Function, onCreateAccount: Function }> = ({ signIn, onCreateAccount}) => {
+  onCreateAccount: Function }> = ({onCreateAccount}) => {
     return <React.Fragment>
       <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem',  paddingLeft: '3rem'}}>
         <div>
@@ -51,7 +51,7 @@ export const LoginReactComponent: React.FunctionComponent<{
             Researcher Workbench account?
           </Header>
           <div>
-            <GoogleSignInButton signIn={signIn} />
+            <GoogleSignInButton />
           </div>
           <StyledAnchorTag
             target='_blank'
