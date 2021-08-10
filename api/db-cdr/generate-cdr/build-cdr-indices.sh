@@ -32,14 +32,18 @@ else
     exit 1
 fi
 
-echo ""
-echo "Creating cb_survey_version table"
-if ./generate-cdr/make-bq-cb-survey-version.sh "$BQ_PROJECT" "$BQ_DATASET"
+if [ "$DATA_BROWSER" == false ]
 then
-    echo "cb_survey_version table creation is complete"
-else
-    echo "cb_survey_version table creation failed!"
-    exit 1
+
+  echo ""
+  echo "Creating cb_survey_version table"
+  if ./generate-cdr/make-bq-cb-survey-version.sh "$BQ_PROJECT" "$BQ_DATASET"
+  then
+      echo "cb_survey_version table creation is complete"
+  else
+      echo "cb_survey_version table creation failed!"
+      exit 1
+  fi
 fi
 
 echo ""
