@@ -5,6 +5,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
 import {MemoryRouter} from 'react-router';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {stubResource} from 'testing/stubs/resources-stub';
 
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -51,6 +52,12 @@ describe('HomepageComponent', () => {
       enableEraCommons: true
     }});
     cdrVersionStore.set(cdrVersionTiersResponse);
+
+    stubResource.notebook = {
+      name: '',
+      path: '',
+      lastModifiedTime: 0
+    };
   });
 
   it('should render the homepage', () => {

@@ -9,6 +9,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {stringifyUrl} from 'app/utils/navigation';
 import {
   getDescription,
   getDisplayName,
@@ -101,7 +102,7 @@ interface NavProps extends PropsWithChildren<any> {
 
 const ResourceNavigation = (props: NavProps) => {
   const {resource, linkTestId, style = styles.resourceName, children} = props;
-  const url = getResourceUrl(resource);
+  const url = stringifyUrl(getResourceUrl(resource));
 
   function canNavigate(): boolean {
     // can always navigate to notebooks

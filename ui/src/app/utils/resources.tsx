@@ -11,7 +11,7 @@ import {
     WorkspaceAccessLevel,
     WorkspaceResource
 } from 'generated/fetch';
-import {encodeURIComponentStrict} from './navigation';
+import {encodeURIComponentStrict, UrlObj} from './navigation';
 import {WorkspaceData} from './workspace-data';
 
 const isCohort = (resource: WorkspaceResource): boolean => !!resource.cohort;
@@ -66,17 +66,16 @@ function getId(resource: WorkspaceResource): number {
   ])(resource);
 }
 
-function getResourceUrl(resource: WorkspaceResource): string {
+function getResourceUrl(resource: WorkspaceResource): UrlObj {
   const {workspaceNamespace, workspaceFirecloudName} = resource;
   const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
   return fp.cond([
-      // TODO angular2react - this should use a queryParam object
-      [isCohort, r => `${workspacePrefix}/data/cohorts/build?cohortId=${r.cohort.id}`],
-      [isCohortReview, r => `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`],
-      [isConceptSet, r => `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`],
-      [isDataSet, r => `${workspacePrefix}/data/data-sets/${r.dataSet.id}`],
-      [isNotebook, r => `${workspacePrefix}/notebooks/preview/${encodeURIComponentStrict(r.notebook.name)}`],
+    [isCohort, r => ({url: `${workspacePrefix}/data/cohorts/build`, queryParams: { cohortId: r.cohort.id }})],
+    [isCohortReview, r => ({url: `${workspacePrefix}/data/cohorts/${r.cohortReview.cohortId}/review`})],
+    [isConceptSet, r => ({url: `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`})],
+    [isDataSet, r => ({url: `${workspacePrefix}/data/data-sets/${r.dataSet.id}`})],
+    [isNotebook, r => ({url: `${workspacePrefix}/notebooks/preview/${encodeURIComponentStrict(r.notebook.name)}`})],
   ])(resource);
 }
 

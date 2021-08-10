@@ -91,6 +91,15 @@ export const navigateSignOut = (continuePath: string = '/login') => {
     `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
 };
 
+export interface UrlObj {
+  url: string;
+  queryParams?: Map<string, string>;
+}
+
+export const stringifyUrl = (url: UrlObj) => {
+  return url.url + (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '');
+};
+
 /**
  * Retrieve query parameters from the React Router.
  *
