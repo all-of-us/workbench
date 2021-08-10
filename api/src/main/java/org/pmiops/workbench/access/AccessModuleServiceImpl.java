@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -32,9 +33,9 @@ import org.springframework.stereotype.Service;
 public class AccessModuleServiceImpl implements AccessModuleService {
   private static final Logger logger = Logger.getLogger(AccessModuleServiceImpl.class.getName());
 
-  private final Provider<List<DbAccessModule>> dbAccessModulesProvider;
   private final Clock clock;
 
+  private final AccessModuleDao accessModuleDao;
   private final UserAccessModuleDao userAccessModuleDao;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
@@ -43,15 +44,15 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Autowired
   public AccessModuleServiceImpl(
-      Provider<List<DbAccessModule>> dbAccessModulesProvider,
+      AccessModuleDao accessModuleDao,
       Clock clock,
       UserAccessModuleDao userAccessModuleDao,
       UserDao userDao,
       UserServiceAuditor userServiceAuditor,
       Provider<WorkbenchConfig> configProvider,
       UserAccessModuleMapper userAccessModuleMapper) {
-    this.dbAccessModulesProvider = dbAccessModulesProvider;
     this.clock = clock;
+    this.accessModuleDao = accessModuleDao;
     this.userAccessModuleDao = userAccessModuleDao;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
@@ -61,8 +62,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateBypassTime(long userId, AccessModule accessModuleName, boolean isBypassed) {
-    DbAccessModule accessModule =
-        getDbAccessModuleFromApi(dbAccessModulesProvider.get(), accessModuleName);
+    DbAccessModule accessModule = getDbAccessModuleFromApi(accessModuleName);
     if (!accessModule.getBypassable()) {
       throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
     }
@@ -93,8 +93,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public void updateCompletionTime(
       DbUser dbUser, AccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
-    DbAccessModule dbAccessModule =
-        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbAccessModule dbAccessModule = getDbAccessModuleOrThrow(accessModuleName);
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
@@ -141,9 +140,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
             dbUserAccessModule.getCompletionTime(), configProvider.get().accessRenewal.expiryDays));
   }
 
-  private static DbAccessModule getDbAccessModuleOrThrow(
-      List<DbAccessModule> dbAccessModules, AccessModuleName accessModuleName) {
-    return dbAccessModules.stream()
+  private DbAccessModule getDbAccessModuleOrThrow(AccessModuleName accessModuleName) {
+    return accessModuleDao.findAll().stream()
         .filter(a -> a.getName() == accessModuleName)
         .findFirst()
         .orElseThrow(
@@ -152,9 +150,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
                     "There is no access module named: " + accessModuleName.toString()));
   }
 
-  private static DbAccessModule getDbAccessModuleFromApi(
-      List<DbAccessModule> dbAccessModules, AccessModule apiAccessModule) {
-    return getDbAccessModuleOrThrow(dbAccessModules, clientAccessModuleToStorage(apiAccessModule));
+  private DbAccessModule getDbAccessModuleFromApi(AccessModule apiAccessModule) {
+    return getDbAccessModuleOrThrow(clientAccessModuleToStorage(apiAccessModule));
   }
 
   /**
