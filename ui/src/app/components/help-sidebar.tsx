@@ -396,9 +396,6 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
-      // This is being set here instead of the constructor to show the opening animation of the side panel and
-      // indicate to the user that it's something they can close.
-      // TODO angular2react - fix bug where last opened panel closes on load
       this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
       this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
       this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
