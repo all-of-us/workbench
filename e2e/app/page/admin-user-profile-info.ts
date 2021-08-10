@@ -184,7 +184,8 @@ export default class UserProfileInfo extends AuthenticatedPage {
     const bypassProfileStaging = [
       'twoFactorAuthBypassToggle',
       'eraCommonsBypassToggle',
-      'dataUseAgreementBypassToggle'
+      'dataUseAgreementBypassToggle',
+      'complianceTrainingBypassToggle'
     ];
     const moduleNames: string[] = [];
     let i: number;
@@ -202,7 +203,7 @@ export default class UserProfileInfo extends AuthenticatedPage {
     switch (checkEnv) {
       case 'test':
         return this.getBypassTest();
-      case 'satging':
+      case 'staging':
         return this.getBypassStaging();
     }
   }
