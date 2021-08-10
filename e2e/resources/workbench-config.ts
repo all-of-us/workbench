@@ -45,7 +45,7 @@ const test: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',
-  ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
+  ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
 };
@@ -58,7 +58,7 @@ const staging: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetcitester4@staging.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
-  ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
+  ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
