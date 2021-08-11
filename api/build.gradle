@@ -1,6 +1,10 @@
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
+if(JavaVersion.current() != JavaVersion.VERSION_1_8){
+  throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
+}
+
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {

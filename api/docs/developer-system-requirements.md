@@ -2,6 +2,10 @@
 ### Operating System
 We currently only support MacOS and Linux for development and testing.
 ### Prerequisite Software
+  * [Java 8](https://openjdk.java.net/projects/jdk8/)
+    * This must be installed, but needn't be the default.
+    * See [Developer System Initialization](developer-system-initialization.md) for configuration if your
+      system has a different default version of Java
   * [Docker CE](https://www.docker.com/community-edition)
     * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
     * __IMPORTANT__: be sure to allocate ~70-80% of available memory and swap to the Docker Engine. This should be
