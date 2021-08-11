@@ -30,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
@@ -54,6 +55,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
@@ -139,6 +141,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
@@ -505,11 +508,14 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     // bypass the other access requirements
     final DbUser dbUser = userDao.findUserByUserId(userId);
-    dbUser.setComplianceTrainingBypassTime(TIMESTAMP);
-    dbUser.setEraCommonsBypassTime(TIMESTAMP);
-    dbUser.setTwoFactorAuthBypassTime(TIMESTAMP);
-    dbUser.setPublicationsLastConfirmedTime(TIMESTAMP);
-    dbUser.setProfileLastConfirmedTime(TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, TIMESTAMP);
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
     userDao.save(dbUser);
 
     // arbitrary; at coding time the current version is 3

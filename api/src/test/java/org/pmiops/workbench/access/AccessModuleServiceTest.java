@@ -79,6 +79,8 @@ public class AccessModuleServiceTest extends SpringTest {
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
+    config.access.enableComplianceTraining = true;
+    config.access.enableEraCommons = true;
     TestMockFactory.createAccessModules(accessModuleDao);
     accessModules = accessModuleDao.findAll();
   }
@@ -397,7 +399,7 @@ public class AccessModuleServiceTest extends SpringTest {
 
     assertThat(
             accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
-        .isFalse();
+        .isTrue();
   }
 
   @Test
