@@ -634,7 +634,7 @@ jobs:
       - run:
           working_directory: ~/workbench/api
           name: Prep the e2e access test user (in Test env) by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps ${PUPPETEER_ACCESS_TEST}
+          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
  
 workflows:
   joel-workflow:
