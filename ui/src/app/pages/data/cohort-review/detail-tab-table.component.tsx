@@ -3,6 +3,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {ReviewDomainChartsComponent} from 'app/pages/data/cohort-review/review-domain-charts';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -20,7 +21,6 @@ import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router';
 import {Key} from 'ts-key-enum';
-import {DetailPageRoutingProps} from './detail-page';
 
 const styles = reactStyles({
   container: {
@@ -227,7 +227,7 @@ class NameContainer extends React.Component<{data: any, vocab: string}, {showMor
   }
 }
 
-interface Props extends RouteComponentProps<DetailPageRoutingProps> {
+interface Props extends RouteComponentProps<MatchParamsProps> {
   tabName: string;
   cohortReview: CohortReview;
   columns: Array<any>;

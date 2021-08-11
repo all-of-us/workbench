@@ -4,6 +4,7 @@ import * as React from 'react';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {filterStateStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
@@ -12,7 +13,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {RouteComponentProps, withRouter} from 'react-router';
-import {DetailPageRoutingProps} from './detail-page';
 
 const styles = reactStyles({
   container: {
@@ -290,7 +290,7 @@ const domainList = [
 ];
 const EVENT_CATEGORY = 'Review Individual';
 
-interface Props extends RouteComponentProps<DetailPageRoutingProps> {
+interface Props extends RouteComponentProps<MatchParamsProps> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }

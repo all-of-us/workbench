@@ -4,7 +4,7 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -71,11 +71,7 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface ConceptSetActionsRoutingProps extends WorkspaceRoutingProps {
-  csid: string;
-}
-
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<ConceptSetActionsRoutingProps> {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParamsProps> {
   workspace: WorkspaceData;
 }
 

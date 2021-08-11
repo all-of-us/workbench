@@ -32,7 +32,6 @@ import {
 } from 'app/utils/cookies';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {
-  BreadcrumbType,
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
   urlParamsStore
@@ -60,17 +59,17 @@ const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
 
 export interface MatchParamsProps {
-  cid?: string,
-  csid?: string,
-  dataSetId?: string,
-  domain?: string,
-  institutionId?: string,
-  nbName?: string,
-  ns?: string,
-  pid?: string,
-  username?: string,
-  usernameWithoutGsuiteDomain?: string,
-  wsid?: string,
+  cid?: string;
+  csid?: string;
+  dataSetId?: string;
+  domain?: string;
+  institutionId?: string;
+  nbName?: string;
+  ns?: string;
+  pid?: string;
+  username?: string;
+  usernameWithoutGsuiteDomain?: string;
+  wsid?: string;
 }
 
 interface RoutingProps {

@@ -11,6 +11,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -28,8 +29,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
-import {RouteComponentProps, withRouter} from "react-router";
-import {MatchParamsProps} from "../../routing/app-routing";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const styles = reactStyles({
   infoRow: {

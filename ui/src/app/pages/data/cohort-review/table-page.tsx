@@ -9,7 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {
   filterStateStore,
   getVocabOptions,
@@ -227,11 +227,7 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-export interface TablePageRoutingProps extends WorkspaceRoutingProps {
-  cid: string;
-}
-
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<TablePageRoutingProps> {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParamsProps> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }

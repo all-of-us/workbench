@@ -3,7 +3,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
-import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
@@ -190,11 +190,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportRoutingProps extends WorkspaceRoutingProps {
-  cid: string;
-}
-
-export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<QueryReportRoutingProps> {
+export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParamsProps> {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   cohortReview: CohortReview;
   workspace: WorkspaceData;

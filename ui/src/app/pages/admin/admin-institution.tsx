@@ -142,10 +142,17 @@ export const AdminInstitution = fp.flow(withNavigation)(
           </SemiBoldHeader>
           {institutionLoadError && <div style={{color: colors.danger}}>
             Error while loading Institution. Please try again later</div>}
-          <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                     rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
-                     paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
-                     currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+          <DataTable
+              data-test-id='institution-datatable'
+              value={institutions}
+              paginator={true}
+              rows={10}
+              scrollable={true}
+              frozenWidth='7rem'
+              loading={loadingInstitutions}
+              paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+              currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
+          >
             <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
                     bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
             <Column field='organizationTypeEnum' header='Institution Type'

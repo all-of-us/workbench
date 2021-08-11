@@ -5,6 +5,7 @@ import * as React from 'react';
 import {validate, validators} from 'validate.js';
 
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -27,7 +28,6 @@ import {
   SortOrder
 } from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router';
-import {DetailPageRoutingProps} from './detail-page';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
@@ -187,7 +187,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<DetailPageRoutingProps> {
+export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParamsProps> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;

@@ -11,7 +11,7 @@ import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {CriteriaSearch, growlCSS, LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
-import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -127,7 +127,7 @@ export function saveCriteria(selections?: Array<Selection>) {
   currentCohortCriteriaStore.next(undefined);
 }
 
-interface Props extends RouteComponentProps<WorkspaceRoutingProps> {
+interface Props extends RouteComponentProps<MatchParamsProps> {
   cohortContext: any;
   selections?: Array<Selection>;
   setUnsavedChanges: (unsavedChanges: boolean) => void;

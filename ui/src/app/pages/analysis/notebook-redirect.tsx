@@ -14,7 +14,7 @@ import {Spinner} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NotebookIcon} from 'app/icons/notebook-icon';
 import {ReminderIcon} from 'app/icons/reminder';
-import {WorkspaceRoutingProps} from 'app/routing/workspace-app-routing';
+import {MatchParamsProps} from 'app/routing/app-routing';
 import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -222,11 +222,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface NotebookRedirectRoutingProps extends WorkspaceRoutingProps {
-  nbName: string;
-}
-
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<NotebookRedirectRoutingProps> {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParamsProps> {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
