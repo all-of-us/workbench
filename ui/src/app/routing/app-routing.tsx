@@ -33,17 +33,15 @@ import {
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
-  nextWorkspaceWarmupStore,
+  nextWorkspaceWarmupStore, startTitleSetter,
   urlParamsStore
 } from 'app/utils/navigation';
 import {
   authStore,
-  routeDataStore,
   runtimeStore,
   serverConfigStore,
   stackdriverErrorReporterStore, useStore
 } from 'app/utils/stores';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
@@ -147,6 +145,26 @@ const loadErrorReporter = () => {
   stackdriverErrorReporterStore.set(reporter);
 };
 
+const exposeAccessTokenSetter = () => {
+  // Set this as early as possible in the application boot-strapping process,
+  // so it's available for Puppeteer to call. If we need this even earlier in
+  // the page, it could go into something like main.ts, but ideally we'd keep
+  // this logic in one place, and keep main.ts minimal.
+  if (environment.allowTestAccessTokenOverride) {
+    window.setTestAccessTokenOverride = (token: string) => {
+      // Disclaimer: console.log statements here are unlikely to captured by
+      // Puppeteer, since it typically reloads the page immediately after
+      // invoking this function.
+      if (token) {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        location.replace('/');
+      } else {
+        window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      }
+    };
+  }
+};
+
 const ScrollToTop = () => {
   const {location} = useHistory();
 
@@ -157,29 +175,26 @@ const ScrollToTop = () => {
   return <React.Fragment/>;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
-  // TODO angular2react: how can I ensure that config runs before everything? such as the subscriptions
+const useServerConfig = () => {
+  const {config} = useStore(serverConfigStore);
+
   useEffect(() => {
     const load = async() => {
       const serverConfig = await configApi().getConfig();
       serverConfigStore.set({config: serverConfig});
-      bindClients();
-      loadErrorReporter();
-      initializeAnalytics();
     };
 
     load();
   }, []);
 
-  const {authLoaded} = useAuthentication();
-  const isUserDisabled = useIsUserDisabled();
-  const [pollAborter, setPollAborter] = useState(new AbortController());
-  const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
+  return config;
+};
+
+const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
-  const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    if (isCookiesEnabled) {
+    if (cookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -202,45 +217,21 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         console.log('Error setting urls: ' + err);
       }
     }
-  }, [isCookiesEnabled]);
-
-  useEffect(() => {
-    checkBrowserSupport();
-    setIsCookiesEnabled(cookiesEnabled());
   }, []);
 
-  useEffect(() => {
-    // Pick up the global site title from HTML, and (for non-prod) add a tag
-    // naming the current environment.
-    document.title = buildPageTitleForEnvironment();
-    routeDataStore.subscribe(({title, pathElementForTitle}) => {
-      document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
-    });
-  }, []);
+  return overriddenUrl;
+};
 
-  useEffect(() => {
-    // Set this as early as possible in the application boot-strapping process,
-    // so it's available for Puppeteer to call. If we need this even earlier in
-    // the page, it could go into something like main.ts, but ideally we'd keep
-    // this logic in one place, and keep main.ts minimal.
-    if (environment.allowTestAccessTokenOverride) {
-      window.setTestAccessTokenOverride = (token: string) => {
-        // Disclaimer: console.log statements here are unlikely to captured by
-        // Puppeteer, since it typically reloads the page immediately after
-        // invoking this function.
-        if (token) {
-          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-          location.replace('/');
-        } else {
-          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        }
-      };
-    }
-  }, []);
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
+  const config = useServerConfig();
+  const {authLoaded, isSignedIn} = useAuthentication();
+  const isUserDisabled = useIsUserDisabled();
+  const [pollAborter, setPollAborter] = useState(new AbortController());
+  const overriddenUrl = useOverriddenApiUrl();
 
-  // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
-  // an infinite loop
-  useEffect(() => {
+  const loadLocalStorageAccessToken = () => {
+    // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
+    // an infinite loop
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
@@ -248,90 +239,109 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
       const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       if (localStorageTestAccessToken) {
-        console.log('found test access token in local storage, skipping normal auth flow');
-
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
       }
     }
+  };
+
+  useEffect(() => {
+    exposeAccessTokenSetter();
+    checkBrowserSupport();
+    startTitleSetter();
+  }, []);
+
+  useEffect(() => {
+    if (config) {
+      // Bootstrapping that requires server config
+      bindClients();
+      loadErrorReporter();
+      initializeAnalytics();
+      loadLocalStorageAccessToken();
+    }
   }, [config]);
 
-
   useEffect(() => {
-    const sub = urlParamsStore
-      .map(({ns, wsid}) => ({ns, wsid}))
-      .distinctUntilChanged(fp.isEqual)
-      .switchMap(async({ns, wsid}) => {
-        currentWorkspaceStore.next(null);
-        // This needs to happen for testing because we seed the urlParamsStore with {}.
-        // Otherwise it tries to make an api call with undefined, because the component
-        // initializes before we have access to the route.
-        if (!ns || !wsid) {
-          return null;
-        }
+    if (isSignedIn) {
+      const subs = [];
+      subs.push(
+        urlParamsStore
+          .map(({ns, wsid}) => ({ns, wsid}))
+          .distinctUntilChanged(fp.isEqual)
+          .switchMap(async({ns, wsid}) => {
+            currentWorkspaceStore.next(null);
+            // This needs to happen for testing because we seed the urlParamsStore with {}.
+            // Otherwise it tries to make an api call with undefined, because the component
+            // initializes before we have access to the route.
+            if (!ns || !wsid) {
+              return null;
+            }
 
-        // In a handful of situations - namely on workspace creation/clone,
-        // the application will preload the next workspace to avoid a redundant
-        // refetch here.
-        const nextWs = nextWorkspaceWarmupStore.getValue();
-        nextWorkspaceWarmupStore.next(undefined);
-        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-          return nextWs;
-        }
+            // In a handful of situations - namely on workspace creation/clone,
+            // the application will preload the next workspace to avoid a redundant
+            // refetch here.
+            const nextWs = nextWorkspaceWarmupStore.getValue();
+            nextWorkspaceWarmupStore.next(undefined);
+            if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+              return nextWs;
+            }
 
-        return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
-          return {
-            ...wsResponse.workspace,
-            accessLevel: wsResponse.accessLevel
-          };
-        });
-      })
-      .subscribe(async(workspace) => {
-        if (workspace === null) {
-          // This handles the empty urlParamsStore story.
-          return;
-        }
-        currentWorkspaceStore.next(workspace);
-        runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-        pollAborter.abort();
-        const newPollAborter = new AbortController();
-        setPollAborter(newPollAborter);
-        try {
-          await LeoRuntimeInitializer.initialize({
-            workspaceNamespace: workspace.namespace,
-            pollAbortSignal: newPollAborter.signal,
-            maxCreateCount: 0,
-            maxDeleteCount: 0,
-            maxResumeCount: 0
-          });
-        } catch (e) {
-          // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-          // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-          // initialization here.
-          if (!(e instanceof ExceededActionCountError)) {
-            throw e;
+            return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+              return {
+                ...wsResponse.workspace,
+                accessLevel: wsResponse.accessLevel
+              };
+            });
+          })
+          .subscribe(async(workspace) => {
+            if (workspace === null) {
+              // This handles the empty urlParamsStore story.
+              return;
+            }
+            currentWorkspaceStore.next(workspace);
+            runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+            pollAborter.abort();
+            const newPollAborter = new AbortController();
+            setPollAborter(newPollAborter);
+            try {
+              await LeoRuntimeInitializer.initialize({
+                workspaceNamespace: workspace.namespace,
+                pollAbortSignal: newPollAborter.signal,
+                maxCreateCount: 0,
+                maxDeleteCount: 0,
+                maxResumeCount: 0
+              });
+            } catch (e) {
+              // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
+              // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
+              // initialization here.
+              if (!(e instanceof ExceededActionCountError)) {
+                throw e;
+              }
+            }
+          })
+      );
+
+      subs.push(urlParamsStore
+        .map(({ns, wsid}) => ({ns, wsid}))
+        .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
+        // due to urlParamsStore being updated multiple times while rendering a route.
+        // What we really want to subscribe to here is an event that triggers on navigation start or end
+        // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
+        // since multiple update recent workspace requests (from the same page) within the span of 1 second should
+        // almost always be for the same workspace and extremely rarely for different workspaces
+        .subscribe(({ns, wsid}) => {
+          if (ns && wsid) {
+            workspacesApi().updateRecentWorkspaces(ns, wsid);
           }
-        }
-      });
+        })
+      );
 
-    return sub.unsubscribe;
-  }, []);
+      return () => subs.forEach(sub => sub.unsubscribe());
+    }
+  }, [isSignedIn]);
 
-  useEffect(() => {
-    return urlParamsStore
-      .map(({ns, wsid}) => ({ns, wsid}))
-      .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
-      // due to urlParamsStore being updated multiple times while rendering a route.
-      // What we really want to subscribe to here is an event that triggers on navigation start or end
-      // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
-      // since multiple update recent workspace requests (from the same page) within the span of 1 second should
-      // almost always be for the same workspace and extremely rarely for different workspaces
-      .subscribe(({ns, wsid}) => {
-        if (ns && wsid) {
-          workspacesApi().updateRecentWorkspaces(ns, wsid);
-        }
-      }).unsubscribe;
-  }, []);
+  const isCookiesEnabled = cookiesEnabled();
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
