@@ -3,7 +3,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {ReviewDomainChartsComponent} from 'app/pages/data/cohort-review/review-domain-charts';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -227,7 +227,7 @@ class NameContainer extends React.Component<{data: any, vocab: string}, {showMor
   }
 }
 
-interface Props extends RouteComponentProps<MatchParamsProps> {
+interface Props extends RouteComponentProps<MatchParams> {
   tabName: string;
   cohortReview: CohortReview;
   columns: Array<any>;

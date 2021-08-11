@@ -5,7 +5,7 @@ import * as React from 'react';
 import {validate, validators} from 'validate.js';
 
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -187,7 +187,7 @@ const FILTER_KEYS = {
   DATE: 'Date',
   VISITS: 'Visits'
 };
-export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParamsProps> {
+export interface DetailHeaderProps extends NavigationProps, RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   participant: ParticipantCohortStatus;
   workspace: WorkspaceData;

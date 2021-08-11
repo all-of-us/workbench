@@ -13,7 +13,7 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -24,6 +24,9 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import {RouteComponentProps} from "react-router";
+import {MatchParams} from "../../routing/app-routing";
+import {withRouter} from "react-router-dom";
 
 
 const styles = reactStyles({
@@ -101,9 +104,8 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  urlParams: any;
   runtimeStore: RuntimeStore;
 }
 
@@ -125,10 +127,10 @@ enum PreviewErrorMode {
 }
 
 export const InteractiveNotebook = fp.flow(
-  withUrlParams(),
   withRuntimeStore(),
   withCurrentWorkspace(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();
@@ -152,9 +154,10 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      const {urlParams: {ns, wsid, nbName}} = this.props;
+      const {ns, wsid, nbName} = this.props.match.params;
+      const oldParams = prevProps.match.params;
 
-      if (prevProps.urlParams.ns === ns && prevProps.urlParams.wsid === wsid && prevProps.urlParams.nbName === nbName) {
+      if (oldParams.ns === ns && oldParams.wsid === wsid && oldParams.nbName === nbName) {
         return;
       }
 
@@ -189,7 +192,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
-      await maybeInitializeRuntime(this.props.urlParams.ns, this.pollAborter.signal);
+      await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
       onRuntimeReady();
     }
 
@@ -229,8 +232,9 @@ export const InteractiveNotebook = fp.flow(
         playgroundMode: playgroundMode
       };
 
-      this.props.navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
-        'notebooks', this.props.urlParams.nbName], {'queryParams': queryParams});
+      const {ns, wsid, nbName} = this.props.match.params;
+
+      this.props.navigate(['workspaces', ns, wsid, 'notebooks', nbName], {'queryParams': queryParams});
     }
 
     private navigatePlaygroundMode() {
@@ -259,7 +263,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private cloneNotebook() {
-      const {ns, wsid, nbName} = this.props.urlParams;
+      const {ns, wsid, nbName} = this.props.match.params;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
         this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
       });

@@ -58,7 +58,7 @@ const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
 
-export interface MatchParamsProps {
+export interface MatchParams {
   cid?: string;
   csid?: string;
   dataSetId?: string;

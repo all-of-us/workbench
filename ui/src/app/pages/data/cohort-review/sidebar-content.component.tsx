@@ -11,7 +11,7 @@ import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/
 import {participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {withCurrentCohortReview, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AnnotationType,
@@ -22,6 +22,9 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import Timeout = NodeJS.Timeout;
+import { withRouter } from 'react-router-dom';
+import {RouteComponentProps} from "react-router";
+import {MatchParams} from "../../../routing/app-routing";
 
 const styles = {
   header: {
@@ -79,25 +82,28 @@ const readValue = (type, annotation) => {
   }
 };
 
+interface AnnotationProps extends RouteComponentProps<MatchParams> {
+  annotation: ParticipantCohortAnnotation;
+  setAnnotation: Function;
+  cohortReview: CohortReview;
+  definition: CohortAnnotationDefinition;
+  workspace: WorkspaceData;
+}
+
+interface AnnotationState {
+  editValue: number | string | boolean | Date;
+  savingValue: number | string | boolean | Date;
+  saving: boolean;
+  error: boolean;
+  success: boolean;
+  timeout: Timeout;
+}
+
 const AnnotationItem = fp.flow(
-  withUrlParams(),
   withCurrentCohortReview(),
   withCurrentWorkspace(),
-)(class extends React.Component<{
-  annotation: ParticipantCohortAnnotation,
-  setAnnotation: Function,
-  cohortReview: CohortReview;
-  definition: CohortAnnotationDefinition,
-  urlParams: any,
-  workspace: WorkspaceData,
-}, {
-  editValue: number | string | boolean | Date,
-  savingValue: number | string | boolean | Date,
-  saving: boolean,
-  error: boolean,
-  success: boolean,
-  timeout: Timeout
-}> {
+  withRouter
+)(class extends React.Component<AnnotationProps, AnnotationState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -111,9 +117,9 @@ const AnnotationItem = fp.flow(
   }
 
   componentDidUpdate(prevProps: any): void {
-    const {urlParams: {pid}} = this.props;
+    const {match: {params: {pid}}} = this.props;
     const {timeout} = this.state;
-    if ((pid !== prevProps.urlParams.pid)) {
+    if ((pid !== prevProps.match.params.pid)) {
       // get rid of spinners and save messages when switching participants
       clearTimeout(timeout);
       this.setState({saving: false, error: false, success: false});
@@ -126,7 +132,7 @@ const AnnotationItem = fp.flow(
         annotation, setAnnotation,
         cohortReview: {cohortReviewId},
         definition: {annotationType, cohortAnnotationDefinitionId},
-        urlParams: {ns, wsid, pid},
+        match: {params: {ns, wsid, pid}},
       } = this.props;
       const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
@@ -134,12 +140,12 @@ const AnnotationItem = fp.flow(
       this.setState({savingValue: newValue});
       if (aid && fp.includes(newValue, [null, ''])) {
         setAnnotation(await cohortReviewApi()
-          .deleteParticipantCohortAnnotation(ns, wsid, cohortReviewId, pid, aid));
+          .deleteParticipantCohortAnnotation(ns, wsid, cohortReviewId, +pid, aid));
       } else if (aid && newValue !== value) {
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .updateParticipantCohortAnnotation(ns, wsid, cohortReviewId, pid, aid, {
+          .updateParticipantCohortAnnotation(ns, wsid, cohortReviewId, +pid, aid, {
             ...writeValue(annotationType, newValue),
           }).then(res => {
             setAnnotation(res);
@@ -149,10 +155,10 @@ const AnnotationItem = fp.flow(
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .createParticipantCohortAnnotation(ns, wsid, cohortReviewId, pid, {
+          .createParticipantCohortAnnotation(ns, wsid, cohortReviewId, +pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId,
-            participantId: pid,
+            participantId: +pid,
             ...writeValue(annotationType, newValue),
           }).then(res => {
             setAnnotation(res);
@@ -261,26 +267,26 @@ const AnnotationItem = fp.flow(
   }
 });
 
+interface SidebarProps extends RouteComponentProps<MatchParams> {
+  cohortReview: CohortReview;
+  workspace: WorkspaceData;
+}
+
+interface SidebarState {
+  savingStatus: CohortStatus,
+  creatingDefinition: boolean,
+  editingDefinitions: boolean,
+  annotations: ParticipantCohortAnnotation[],
+  annotationDefinitions: CohortAnnotationDefinition[],
+  annotationDeleted: boolean,
+  participant: ParticipantCohortStatus,
+}
+
 export const SidebarContent = fp.flow(
-  withUrlParams(),
   withCurrentCohortReview(),
   withCurrentWorkspace(),
-)(class extends React.Component<
-  {
-    cohortReview: CohortReview;
-    urlParams: any,
-    workspace: WorkspaceData,
-  },
-  {
-    savingStatus: CohortStatus,
-    creatingDefinition: boolean,
-    editingDefinitions: boolean,
-    annotations: ParticipantCohortAnnotation[],
-    annotationDefinitions: CohortAnnotationDefinition[],
-    annotationDeleted: boolean,
-    participant: ParticipantCohortStatus,
-  }
-> {
+  withRouter
+)(class extends React.Component<SidebarProps, SidebarState> {
   private subscription;
   constructor(props) {
     super(props);
@@ -296,7 +302,7 @@ export const SidebarContent = fp.flow(
   }
 
   componentDidMount(): void {
-    const {cohortReview: {cohortReviewId}, urlParams: {ns, wsid, pid, cid}} = this.props;
+    const {cohortReview: {cohortReviewId}, match: {params: {ns, wsid, pid, cid}}} = this.props;
     cohortReviewApi()
     .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
     .then(({items}) => {
@@ -311,7 +317,7 @@ export const SidebarContent = fp.flow(
   }
 
   componentDidUpdate(prevProps: any): void {
-    const {cohortReview: {cohortReviewId}, urlParams: {ns, wsid, pid}} = this.props;
+    const {cohortReview: {cohortReviewId}, match: {params: {ns, wsid, pid}}} = this.props;
     if (pid !== prevProps.urlParams.pid && !isNaN(+pid)) {
       // get values for annotations when switching participants
       cohortReviewApi()
@@ -328,13 +334,13 @@ export const SidebarContent = fp.flow(
 
   async saveStatus(v) {
     try {
-      const {cohortReview: {cohortReviewId}, urlParams: {ns, wsid, pid}} = this.props;
+      const {cohortReview: {cohortReviewId}, match: {params: {ns, wsid, pid}}} = this.props;
       this.setState({savingStatus: v});
       const participant = await cohortReviewApi().updateParticipantCohortStatus(
-        ns, wsid, cohortReviewId, pid, {status: v}
+        ns, wsid, cohortReviewId, +pid, {status: v}
       );
       // make sure we're still on the same page before updating
-      if (participant.participantId === +this.props.urlParams.pid) {
+      if (participant.participantId === +this.props.match.params.pid) {
         participantStore.next(participant);
         updateParticipant(participant);
       }
@@ -412,7 +418,7 @@ export const SidebarContent = fp.flow(
           key={cohortAnnotationDefinitionId} annotation={annotation} definition={def}
           setAnnotation={update => {
             // make sure we're still on the same page before updating
-            if (participantId === +this.props.urlParams.pid) {
+            if (participantId === +this.props.match.params.pid) {
               const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
               this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
             }

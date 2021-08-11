@@ -14,10 +14,9 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatFreeCreditsUSD,
   isBlank,
-  reactStyles,
-  withUrlParams
+  reactStyles
 } from 'app/utils';
-import {Link as RouterLink} from 'react-router-dom';
+import {Link as RouterLink, withRouter} from 'react-router-dom';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -40,6 +39,8 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
+import {RouteComponentProps} from "react-router";
+import {MatchParams} from "app/routing/app-routing";
 
 const styles = reactStyles({
   semiBold: {
@@ -144,12 +145,7 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface Props extends WithSpinnerOverlayProps {
-  // From withUrlParams
-  urlParams: {
-    usernameWithoutGsuiteDomain: string
-  };
-}
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
 interface State {
   emailValidationError: string;
@@ -162,8 +158,7 @@ interface State {
   verifiedInstitutionOptions: Array<PublicInstitutionDetails>;
 }
 
-
-export const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
+export const AdminUser = withRouter(class extends React.Component<Props, State> {
 
   private aborter: AbortController;
 
@@ -188,7 +183,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
-    if (prevProps.urlParams.usernameWithoutGsuiteDomain !== this.props.urlParams.usernameWithoutGsuiteDomain) {
+    if (prevProps.match.params.usernameWithoutGsuiteDomain !== this.props.match.params.usernameWithoutGsuiteDomain) {
       this.getUserData();
     }
   }
@@ -249,7 +244,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   async getUser() {
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      const profile = await profileApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});

@@ -12,7 +12,7 @@ import {CreateModal} from 'app/components/create-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
@@ -121,7 +121,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends NavigationProps, RouteComponentProps<MatchParamsProps> {
+interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
   searchRequest: any;

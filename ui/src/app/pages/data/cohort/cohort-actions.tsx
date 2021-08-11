@@ -6,13 +6,15 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {RouteComponentProps} from "react-router";
+import {MatchParams} from "../../../routing/app-routing";
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -66,9 +68,8 @@ const actionCards = [
   },
 ];
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  urlParams: any;
 }
 
 interface State {
@@ -78,7 +79,6 @@ interface State {
 
 export const CohortActions = fp.flow(
   withCurrentWorkspace(),
-  withUrlParams(),
   withNavigation
 )(
   class extends React.Component<Props, State> {
@@ -92,19 +92,20 @@ export const CohortActions = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      if (!this.props.workspace.namespace || !this.props.workspace.id || !this.props.urlParams.cid) {
+      if (!this.props.workspace.namespace || !this.props.workspace.id || !this.props.match.params.cid) {
         return;
       }
 
       if (this.props.workspace.namespace === prevProps.workspace.namespace
         && this.props.workspace.id === prevProps.workspace.id
-        && this.props.urlParams.cid === prevProps.urlParams.cid) {
+        && this.props.match.params.cid === prevProps.match.params.cid) {
         return;
       }
 
       this.setState({cohortLoading: true});
       const {namespace, id} = this.props.workspace;
-      cohortsApi().getCohort(namespace, id, this.props.urlParams.cid).then(c => {
+      const {cid} = this.props.match.params;
+      cohortsApi().getCohort(namespace, id, +cid).then(c => {
         if (c) {
           this.setState({cohort: c, cohortLoading: false});
         } else {

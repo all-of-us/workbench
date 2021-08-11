@@ -9,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -68,7 +68,7 @@ interface InstitutionEditState {
 interface Props
     extends WithSpinnerOverlayProps,
         NavigationProps,
-        RouteComponentProps<MatchParamsProps> {}
+        RouteComponentProps<MatchParams> {}
 
 export const AdminInstitutionEdit = fp.flow(withNavigation)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {

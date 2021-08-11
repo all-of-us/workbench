@@ -4,7 +4,7 @@ import * as React from 'react';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {filterStateStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
@@ -290,7 +290,7 @@ const domainList = [
 ];
 const EVENT_CATEGORY = 'Review Individual';
 
-interface Props extends RouteComponentProps<MatchParamsProps> {
+interface Props extends RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }

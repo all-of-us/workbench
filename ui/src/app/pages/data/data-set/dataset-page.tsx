@@ -11,7 +11,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
-import {MatchParamsProps} from 'app/routing/app-routing';
+import {MatchParams} from 'app/routing/app-routing';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -448,7 +448,7 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps<MatchParamsProps> {
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   profileState: {

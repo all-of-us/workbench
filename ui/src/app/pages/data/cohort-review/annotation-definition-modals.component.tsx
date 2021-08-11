@@ -10,9 +10,12 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils';
+import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
+import {withRouter} from "react-router-dom";
+import {RouteComponentProps} from "react-router";
+import {MatchParams} from "../../../routing/app-routing";
 
 const styles = reactStyles({
   editRow: {
@@ -32,15 +35,20 @@ const styles = reactStyles({
   }
 });
 
-export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.Component<
-  {
-    annotationDefinitions: CohortAnnotationDefinition[],
-    onCancel: Function,
-    onCreate: Function,
-    urlParams: any
-  },
-  {name: string, annotationType: AnnotationType, enumValues: string[], saving: boolean}
-> {
+interface Props extends RouteComponentProps<MatchParams> {
+  annotationDefinitions: CohortAnnotationDefinition[];
+  onCancel: Function;
+  onCreate: Function;
+}
+
+interface State {
+  name: string;
+  annotationType: AnnotationType;
+  enumValues: string[];
+  saving: boolean;
+}
+
+export const AddAnnotationDefinitionModal = withRouter(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -53,12 +61,12 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
 
   async create() {
     try {
-      const {onCreate, urlParams: {ns, wsid, cid}} = this.props;
+      const {onCreate, match: {params: {ns, wsid, cid}}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
       const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
-        ns, wsid, cid, {
-          cohortId: cid,
+        ns, wsid, +cid, {
+          cohortId: +cid,
           columnName: name,
           annotationType,
           enumValues: annotationType === AnnotationType.ENUM ? enumValues : undefined
@@ -149,16 +157,22 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
   }
 });
 
-export const EditAnnotationDefinitionsModal = withUrlParams()(class extends React.Component<
-  {
-    onClose: Function,
-    annotationDefinitions: CohortAnnotationDefinition[],
-    setAnnotationDefinitions: Function,
-    urlParams: any
-  },
-  {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
-    renameError: boolean}
-> {
+interface ModalProps extends RouteComponentProps<MatchParams> {
+  onClose: Function;
+  annotationDefinitions: CohortAnnotationDefinition[];
+  setAnnotationDefinitions: Function;
+}
+
+interface ModalState {
+  editId: number;
+  editValue: string;
+  busy: boolean;
+  deleteId: number;
+  deleteError: boolean;
+  renameError: boolean;
+}
+
+export const EditAnnotationDefinitionsModal = withRouter(class extends React.Component<ModalProps, ModalState> {
   constructor(props) {
     super(props);
     this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined,
@@ -169,10 +183,10 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     try {
       const {
         annotationDefinitions, onClose, setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
+        match: {params: {ns, wsid, cid}}
       } = this.props;
       this.setState({busy: true});
-      await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, cid, id);
+      await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, +cid, id);
       setAnnotationDefinitions(
         fp.remove({cohortAnnotationDefinitionId: id}, annotationDefinitions)
       );
@@ -191,7 +205,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       const {
         annotationDefinitions,
         setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
+        match: {params: {ns, wsid, cid}}
       } = this.props;
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
@@ -199,8 +213,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
         const {annotationType, etag} = annotationDefinitions
           .find(annotationDef => annotationDef.cohortAnnotationDefinitionId === editId);
         const newDef = await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
-          ns, wsid, cid, editId,
-          {cohortId: cid, columnName: editValue, annotationType, etag}
+          ns, wsid, +cid, editId,
+          {cohortId: +cid, columnName: editValue, annotationType, etag}
         );
         setAnnotationDefinitions(
           annotationDefinitions.map(oldDef => {
