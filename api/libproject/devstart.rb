@@ -1493,52 +1493,6 @@ Common.register_command({
     :fn => ->(*args) {fetch_workspace_details("fetch-workspace-details", *args)}
 })
 
-def export_workspace_data(cmd_name, *args)
-  common = Common.new
-  ensure_docker cmd_name, args
-
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.project = TEST_PROJECT
-
-  op.add_typed_option(
-      "--export-filename [export-filename]",
-      String,
-      ->(opts, v) { opts.export_filename = v},
-      "Filename of export file to write to")
-  op.add_typed_option(
-      "--include-demographics=[include-demographics]",
-      TrueClass,
-      ->(opts, v) { opts.include_demographics = v},
-      "Whether to include sensitive researcher demographics in the export. Default is false"
-  )
-
-  # Create a cloud context and apply the DB connection variables to the environment.
-  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate()
-
-  flags = ([
-      ["--export-filename", op.opts.export_filename]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  if op.opts.include_demographics
-    flags += [ "--include-demographics" ]
-  end
-  flags.map! { |f| "'#{f}'" }
-
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        gradle exportWorkspaceData
-       -PappArgs=[#{flags.join(',')}]}
-  end
-end
-
-Common.register_command({
-    :invocation => "export-workspace-data",
-    :description => "Export workspace data to CSV.\n",
-    :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
-})
-
 def generate_impersonated_user_tokens(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
@@ -2610,46 +2564,6 @@ Common.register_command({
   :invocation => "docker-run",
   :description => "Runs the specified command in a docker container.",
   :fn => ->(*args) { docker_run(args) }
-})
-
-def print_scoped_access_token(cmd_name, args)
-  ensure_docker cmd_name, args
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_typed_option(
-    "--scopes s1,s2,s3",
-    Array,
-    ->(opts, v) { opts.scopes = v},
-    "Action to perform: add/remove."
-  )
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  ServiceAccountContext.new(gcc.project).run do
-    if op.opts.scopes.nil?
-      op.opts.scopes = []
-    end
-
-    scopes = %W{profile email} + op.opts.scopes
-
-    require "googleauth"
-
-    File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH) do |f|
-      creds = Google::Auth::ServiceAccountCredentials.make_creds(
-          json_key_io: f,
-          scope: scopes
-      )
-
-      token_data = creds.fetch_access_token!
-      puts "\n#{token_data["access_token"]}"
-    end
-
-  end
-end
-
-Common.register_command({
-  :invocation => "print-scoped-sa-access-token",
-  :description => "Prints access token for the service account that has been scoped for API access.",
-  :fn => ->(*args) { print_scoped_access_token("print-scoped-sa-access-token", args) }
 })
 
 def create_project_resources(gcc)
