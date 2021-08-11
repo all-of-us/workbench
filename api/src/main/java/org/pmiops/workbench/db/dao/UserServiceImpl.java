@@ -338,15 +338,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
-    System.out.println("~~~~~~~!!!!");
-    System.out.println("~~~~~~~!!!!");
-    System.out.println("~~~~~~~!!!!");
-    System.out.println("~~~~~~~!!!!");
-    System.out.println(eRACommonsComplete);
-    System.out.println(dataUseAgreementTrainingComplete);
-    System.out.println(complianceTrainingComplete);
-    System.out.println(publicationConfirmationComplete);
-    System.out.println(profileConfirmationComplete);
     return !user.getDisabled()
         && twoFactorAuthComplete
         && eRACommonsComplete
@@ -1175,11 +1166,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
-    System.out.println("~~~~22222");
-    System.out.println("~~~~22222");
-    System.out.println("~~~~22222");
-    System.out.println(daysRemaining);
-    System.out.println(millisRemaining);
     final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
     try {
       // we only want to send the expiration email on the day of the actual expiration
