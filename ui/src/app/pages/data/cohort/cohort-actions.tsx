@@ -88,9 +88,7 @@ export const CohortActions = fp.flow(
     }
 
     componentDidMount(): void {
-      console.log('Mounting CohortActions');
       this.props.hideSpinner();
-
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
@@ -142,8 +140,6 @@ export const CohortActions = fp.flow(
     }
 
     render() {
-      console.log('Rendering CohortActions');
-
       const {cohort, cohortLoading} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {cohortLoading && <SpinnerOverlay />}

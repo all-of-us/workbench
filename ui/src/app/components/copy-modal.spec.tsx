@@ -45,8 +45,6 @@ describe('CopyModalComponent', () => {
   let props: CopyModalProps;
 
   const component = () => {
-    // return mount<CopyModal, CopyModalProps, CopyModalState>
-    // (<CopyModal {...props}/>);
     return mount(<CopyModal {...props}/>);
   };
 
@@ -226,7 +224,6 @@ describe('CopyModalComponent', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    console.log(altCdrWorkspace);
     simulateWorkspaceSelection(wrapper, altCdrWorkspace);
 
     expect(getNotebookCdrMismatchWarning(wrapper).getDOMNode().textContent).toBe(

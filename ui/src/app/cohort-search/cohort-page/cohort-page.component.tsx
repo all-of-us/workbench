@@ -96,12 +96,10 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     componentDidMount() {
       const {workspace: {id}, hideSpinner} = this.props;
       hideSpinner();
-      console.log('Mounting cohort page');
       this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
         const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
-        console.log(searchRequest);
         this.setState({
           criteria: searchRequest,
           overview: searchRequest.includes.length > 0 || searchRequest.excludes.length > 0,
@@ -124,7 +122,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentWillUnmount() {
-      console.log('Unmounting cohort page');
       this.subscription.unsubscribe();
       idsInUse.next(new Set());
       currentCohortStore.next(undefined);
@@ -134,7 +131,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     initCohort(cid: number) {
-      console.log(cid);
       const {workspace: {id, namespace}} = this.props;
       const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
       const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
@@ -142,7 +138,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       if (cid) {
         this.setState({loading: true});
         cohortsApi().getCohort(namespace, id, cid).then(cohort => {
-          console.log(cohort);
           this.setState({cohort, loading: false});
           currentCohortStore.next(cohort);
           if (existingCohort && existingCohort.workspaceId === id && existingCohort.cohortId === +cid) {
@@ -212,7 +207,6 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
 
     render() {
       const {cohort, cohortChanged, cohortError, criteria, loading, overview, updateCount, updateGroupListsCount} = this.state;
-      console.log('rendering cohort page', overview);
       return <React.Fragment>
         <Prompt
           when={this.showUnsavedChangesModal()}

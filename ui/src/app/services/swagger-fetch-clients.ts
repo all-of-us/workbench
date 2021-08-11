@@ -71,7 +71,6 @@ const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
  * Returns a getter for the service implementation (backed by the registry).
  */
 function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
-
   apiCtors.push(ctor);
   return () => {
     if (!registry.has(ctor)) {

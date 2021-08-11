@@ -50,7 +50,6 @@ const checkOpsBeforeUnload = (e) => {
 
 export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
-  console.log('Render SignedIn page');
 
   const [hideFooter, setHideFooter] = useState(false);
 

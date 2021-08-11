@@ -26,7 +26,6 @@ import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
 import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect} from 'react';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
@@ -50,18 +49,7 @@ const WorkspaceLibraryPage = fp.flow(withRouteData, withRoutingSpinner)(Workspac
 const WorkspaceListPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceList);
 const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminWorkspaceSearch);
 
-/*
- * TODO angular2react: Adding memo here feels a little off but it was necessary to prevent signed-in
- *  component from rendering over and over again on page load, rendering (hah) the app unusable.
- *  We should be able to refactor this once we are driving the entire app through React router.
- */
-export const SignedInRoutes = React.memo(() => {
-  console.log('Rendering SignedInRoutes');
-  useEffect(() => {
-    console.log('Mounting SignedInRoutes (ish)');
-
-    return () => console.log('Unmounting SignedInRoutes');
-  }, []);
+export const SignedInRoutes = () => {
   return <Switch>
     <AppRoute exact path='/' guards={[expiredGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
@@ -142,4 +130,4 @@ export const SignedInRoutes = React.memo(() => {
       <Redirect to={'/not-found'}/>
     </AppRoute>
   </Switch>;
-});
+};
