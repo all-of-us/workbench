@@ -191,59 +191,6 @@ def setup_local_environment()
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
 end
 
-# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
-#
-# This command is only ever meant to be run via CircleCI; see .circleci/config.yml
-def run_local_migrations()
-  setup_local_environment
-  # Runs migrations against the local database.
-  common = Common.new
-  Dir.chdir('db') do
-    common.run_inline %W{./run-migrations.sh main}
-  end
-  Dir.chdir('db-cdr/generate-cdr') do
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
-  end
-  common.run_inline %W{./gradlew :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
-  common.run_inline %W{./gradlew :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
-  common.run_inline %W{./gradlew :loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json}
-  common.run_inline %W{./gradlew :updateCdrConfig -PappArgs=['config/cdr_config_local.json',false]}
-end
-
-Common.register_command({
-  :invocation => "run-local-migrations",
-  :description => "Runs DB migrations with the local MySQL instance.",
-  :fn => ->() { run_local_migrations() }
-})
-
-def start_local_api()
-  setup_local_environment
-  common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    common.status "Starting API server..."
-    common.run_inline %W{./gradlew appengineStart}
-  end
-end
-
-Common.register_command({
-  :invocation => "start-local-api",
-  :description => "Starts api using a local MySQL instance.",
-  :fn => ->() { start_local_api() }
-})
-
-def stop_local_api()
-  setup_local_environment
-  common = Common.new
-  common.status "Stopping API server..."
-  common.run_inline %W{./gradlew appengineStop}
-end
-
-Common.register_command({
-  :invocation => "stop-local-api",
-  :description => "Stops locally running api.",
-  :fn => ->() { stop_local_api() }
-})
-
 def run_local_api_tests()
   common = Common.new
   status = common.capture_stdout %W{curl --silent --fail http://localhost:8081/}
@@ -260,18 +207,6 @@ Common.register_command({
   :invocation => "run-local-api-tests",
   :description => "Runs smoke tests against local api server",
   :fn => ->() { run_local_api_tests() }
-})
-
-# TODO(6699): rm
-def clean()
-  common = Common.new
-  common.run_inline %W{./gradlew clean}
-end
-
-Common.register_command({
-  :invocation => "clean",
-  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
-  :fn => ->(*args) { clean(*args) }
 })
 
 def run_api_incremental()
