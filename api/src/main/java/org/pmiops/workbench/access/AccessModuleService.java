@@ -16,4 +16,6 @@ public interface AccessModuleService {
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */
   List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user);
+
+  boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName);
 }

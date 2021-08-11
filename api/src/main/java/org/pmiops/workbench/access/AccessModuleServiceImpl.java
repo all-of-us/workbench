@@ -107,6 +107,20 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModule =
+        retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
+    boolean isCompleted = userAccessModule.getCompletionTime() != null;
+    boolean isExpired = getExpirationTime(userAccessModule).map(x -> x.before(new Timestamp(clock.millis()))).orElse(false);
+
+    // A module is completed when it is bypassed OR (completed but not expired).
+    return isBypassed || (isCompleted && !isExpired);
+  }
+
   /**
    * Retrieves the existing {@link DbUserAccessModule} by user and access module. Create a new one
    * if not existing in DB.

@@ -55,6 +55,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
@@ -314,59 +315,28 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
-    final ModuleTimes duaTimes =
-        new ModuleTimes(
-            user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime());
-    if (duaTimes.isBypassed()) {
-      return true;
-    }
     final Integer signedVersion = user.getDataUseAgreementSignedVersion();
     if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
       return false;
     }
-    return duaTimes.isComplete() && !duaTimes.hasExpired();
-  }
-
-  // Checking for annual completion time is not a part of this module
-  private boolean isEraCommonsCompliant(DbUser user) {
-    return user.getEraCommonsBypassTime() != null
-        || !configProvider.get().access.enableEraCommons
-        || user.getEraCommonsCompletionTime() != null;
-  }
-
-  private boolean isComplianceTrainingCompliant(DbUser user) {
-    if (!configProvider.get().access.enableComplianceTraining) {
-      return true;
-    }
-    final ModuleTimes ctTimes =
-        new ModuleTimes(
-            user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime());
-    return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
-  }
-
-  private boolean isProfileConfirmationCompliant(DbUser user) {
-    final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
-    return profileTimes.isComplete() && !profileTimes.hasExpired();
-  }
-
-  private boolean isPublicationConfirmationCompliant(DbUser user) {
-    final ModuleTimes publicationTimes =
-        new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
-    return publicationTimes.isComplete() && !publicationTimes.hasExpired();
+    return accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    // 2FA does not need to be checked for annual renewal
     boolean twoFactorAuthComplete =
-        user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
-    // TODO: can take out other checks once we're entirely moved over to the 'module' columns
+        accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH);
+    boolean eRACommonsComplete = !configProvider.get().access.enableEraCommons || accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+    boolean complianceTrainingComplete = !configProvider.get().access.enableComplianceTraining || accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
+    boolean dataUseAgreementTrainingComplete = isDataUseAgreementCompliant(user);
+    boolean publicationConfirmationComplete = accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    boolean profileConfirmationComplete = accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
     return !user.getDisabled()
-        && isComplianceTrainingCompliant(user)
-        && isEraCommonsCompliant(user)
         && twoFactorAuthComplete
-        && isDataUseAgreementCompliant(user)
-        && isPublicationConfirmationCompliant(user)
-        && isProfileConfirmationCompliant(user);
+        && eRACommonsComplete
+        && complianceTrainingComplete
+        && dataUseAgreementTrainingComplete
+        && publicationConfirmationComplete
+        && profileConfirmationComplete;
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -1150,11 +1120,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
-    final Set<Optional<Timestamp>> expirations =
-        getRenewableAccessModules(user).values().stream()
-            .filter(times -> !times.isBypassed())
-            .map(ModuleTimes::getExpiration)
-            .collect(Collectors.toSet());
+    Set<Optional<Long>> expirations = accessModuleService.getClientAccessModuleStatus(user)
+        .stream().map(a -> Optional.ofNullable(a.getExpirationEpochMillis())).collect(Collectors.toSet());
 
     // if any un-bypassed modules are incomplete, we know:
     // * this user does not currently have access
@@ -1168,7 +1135,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           .map(Optional::get)
           // note: min() returns EMPTY if the stream is empty at this point,
           // which is also an indicator that we should not send an email
-          .min(Timestamp::compareTo);
+          .min(Long::compareTo).map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
     }
   }
 
