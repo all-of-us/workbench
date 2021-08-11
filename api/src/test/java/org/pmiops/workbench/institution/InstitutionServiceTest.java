@@ -23,7 +23,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.InstitutionTierConfig;
@@ -625,17 +624,13 @@ public class InstitutionServiceTest extends SpringTest {
 
   @Test
   public void test_emailValidation_null_requirement() {
-    assertThrows(
-        ServerErrorException.class,
-        () -> {
-          final Institution inst =
-              service.createInstitution(
-                  new Institution()
-                      .shortName("Broad")
-                      .displayName("The Broad Institute")
-                      .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
-          service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk");
-        });
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
   }
 
   @Test
