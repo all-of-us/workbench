@@ -59,38 +59,45 @@ describe('Create python kernel notebook', () => {
       codeFile: 'resources/python-code/import-os.py'
     });
     // toContain() is not a strong enough check: error text also includes "success" because it's in the code
-    expect(cell1OutputText).toMatch(/success$/);
+    await expect(cell1OutputText).toMatch(/success$/);
 
-    expect(
+    await expect(
       await notebook.runCodeCell(2, {
         codeFile: 'resources/python-code/import-libs.py'
       })
     ).toMatch(/success$/);
 
-    expect(
+    await expect(
       await notebook.runCodeCell(3, {
         codeFile: 'resources/python-code/git-ignore-check.py',
         markdownWorkaround: true
       })
     ).toMatch(/success$/);
 
-    expect(
+    await expect(
       await notebook.runCodeCell(4, {
         codeFile: 'resources/python-code/nbstripoutput-filter.py',
         markdownWorkaround: true
       })
     ).toMatch(/success$/);
 
-    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    await expect(
+      await notebook.runCodeCell(5, {
+        codeFile: 'resources/python-code/gsutil.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
+
+    await notebook.runCodeCell(6, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(5);
+    const cell = notebook.findCell(6);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
     const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(6, { code: codeSnippet });
+    const codeSnippetOutput = await notebook.runCodeCell(7, { code: codeSnippet });
     expect(codeSnippetOutput).toEqual(expect.stringContaining('python3'));
 
     // Save, exit notebook then come back from Analysis page.
