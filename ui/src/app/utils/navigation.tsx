@@ -33,10 +33,6 @@ export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 export const useNavigation = () => {
   const history = useHistory();
 
-  const navigate = (commands, extras?: NavigateExtras) => {
-    navigateByUrl(commands.join('/'), extras);
-  };
-
   const navigateByUrl = (url, extras?: NavigateExtras) => {
     url = '/' + url.replace(/^\//, '');
 
@@ -52,6 +48,10 @@ export const useNavigation = () => {
       pathname: url,
       search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
     });
+  };
+
+  const navigate = (commands, extras?: NavigateExtras) => {
+    navigateByUrl(commands.join('/'), extras);
   };
 
   return [navigate, navigateByUrl];
