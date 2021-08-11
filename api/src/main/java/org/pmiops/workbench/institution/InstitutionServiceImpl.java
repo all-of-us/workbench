@@ -225,64 +225,64 @@ public class InstitutionServiceImpl implements InstitutionService {
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
     final String accessTierShortName = REGISTERED_TIER_SHORT_NAME;
-    final InstitutionTierConfig tierConfig =
-        getTierConfigByTier(institution, accessTierShortName)
-            .orElseThrow(
-                () -> {
-                  String errMsg =
-                      String.format(
-                          "Institutional tier config not found for institution '%s' and tier '%s'",
-                          institution.getShortName(), accessTierShortName);
-                  return new ServerErrorException(errMsg);
-                });
-
+    Optional<InstitutionTierConfig> tierConfig =
+        getTierConfigByTier(institution, accessTierShortName);
     final boolean validated;
     final String logMsg;
-    switch (tierConfig.getMembershipRequirement()) {
-      case NO_ACCESS:
-        validated = false;
-        logMsg =
-            String.format(
-                "Cannot validate email because the membership requirement for institution '%s' and tier '%s' is NO_ACCESS",
-                institution.getShortName(), accessTierShortName);
-        break;
-      case ADDRESSES:
-        validated =
-            getEmailAddressesByTierOrEmptySet(institution, accessTierShortName).stream()
-                .anyMatch(contactEmail::equalsIgnoreCase);
-        logMsg =
-            String.format(
-                "Contact email '%s' validated against '%s' tier with ADDRESSES requirement: "
-                    + "'%s': address %s",
-                contactEmail,
-                accessTierShortName,
-                institution.getShortName(),
-                validated ? "MATCHED" : "DID NOT MATCH");
-        break;
-      case DOMAINS:
-        final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
-        validated =
-            getEmailDomainsByTierOrEmptySet(institution, accessTierShortName).stream()
-                .anyMatch(contactEmailDomain::equalsIgnoreCase);
-        logMsg =
-            String.format(
-                "Contact email '%s' validated against '%s' tier with DOMAINS requirement '%s': "
-                    + "domain %s %s",
-                contactEmail,
-                accessTierShortName,
-                institution.getShortName(),
-                contactEmailDomain,
-                validated ? "MATCHED" : "DID NOT MATCH");
-        break;
-      default:
-        validated = false;
-        logMsg =
-            String.format(
-                "Cannot validate email because institution '%s' does not have a membership requirement for tier '%s'",
-                institution.getShortName(), accessTierShortName);
-        break;
+    if (!tierConfig.isPresent()) {
+      logMsg =
+          String.format(
+              "Cannot validate email because the membership requirement for institution '%s' and "
+                  + "tier '%s' not in DB",
+              institution.getShortName(), accessTierShortName);
+      validated = false;
+    } else {
+      switch (tierConfig.get().getMembershipRequirement()) {
+        case NO_ACCESS:
+          validated = false;
+          logMsg =
+              String.format(
+                  "Cannot validate email because the membership requirement for institution '%s' "
+                      + "and tier '%s' is NO_ACCESS",
+                  institution.getShortName(), accessTierShortName);
+          break;
+        case ADDRESSES:
+          validated =
+              getEmailAddressesByTierOrEmptySet(institution, accessTierShortName).stream()
+                  .anyMatch(contactEmail::equalsIgnoreCase);
+          logMsg =
+              String.format(
+                  "Contact email '%s' validated against '%s' tier with ADDRESSES requirement: "
+                      + "'%s': address %s",
+                  contactEmail,
+                  accessTierShortName,
+                  institution.getShortName(),
+                  validated ? "MATCHED" : "DID NOT MATCH");
+          break;
+        case DOMAINS:
+          final String contactEmailDomain = contactEmail.substring(contactEmail.indexOf("@") + 1);
+          validated =
+              getEmailDomainsByTierOrEmptySet(institution, accessTierShortName).stream()
+                  .anyMatch(contactEmailDomain::equalsIgnoreCase);
+          logMsg =
+              String.format(
+                  "Contact email '%s' validated against '%s' tier with DOMAINS requirement '%s': "
+                      + "domain %s %s",
+                  contactEmail,
+                  accessTierShortName,
+                  institution.getShortName(),
+                  contactEmailDomain,
+                  validated ? "MATCHED" : "DID NOT MATCH");
+          break;
+        default:
+          validated = false;
+          logMsg =
+              String.format(
+                  "Cannot validate email because institution '%s' does not have a membership requirement for tier '%s'",
+                  institution.getShortName(), accessTierShortName);
+          break;
+      }
     }
-
     log.info(logMsg);
     return validated;
   }
@@ -438,10 +438,23 @@ public class InstitutionServiceImpl implements InstitutionService {
       throw new ServerErrorException(
           "Failed to cleanup existing tier requirements before replacing them");
     }
-    institutionTierConfigMapper
-        .tierConfigsToDbTierRequirements(
-            modelInstitution.getTierConfigs(), dbInstitution, dbAccessTiers)
-        .forEach(institutionTierRequirementDao::save);
+
+    // If requirement is NO_ACCESS, it is possible that this tier does not exist yet. Skip the
+    // saving.
+    if (modelInstitution.getTierConfigs() != null) {
+      institutionTierConfigMapper
+          .tierConfigsToDbTierRequirements(
+              modelInstitution.getTierConfigs().stream()
+                  .filter(
+                      i ->
+                          (i.getMembershipRequirement() != null
+                              && i.getMembershipRequirement()
+                                  != InstitutionMembershipRequirement.NO_ACCESS))
+                  .collect(Collectors.toList()),
+              dbInstitution,
+              dbAccessTiers)
+          .forEach(institutionTierRequirementDao::save);
+    }
   }
 
   // Take first 76 characters from display Name (with no spaces) and append 3 random number
@@ -473,6 +486,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (institutionRequest.getTierConfigs() != null) {
       List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
       for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
+        if (institutionTierConfig.getMembershipRequirement()
+            == InstitutionMembershipRequirement.NO_ACCESS) {
+          // If requirement is NO_ACCESS, it is possible that this tier does not exist yet. Skip the
+          // validation.
+          continue;
+        }
         // All tier need to be present in API if tier requirement is present.
         getAccessTierByShortNameOrThrow(
             dbAccessTiers, institutionTierConfig.getAccessTierShortName());
