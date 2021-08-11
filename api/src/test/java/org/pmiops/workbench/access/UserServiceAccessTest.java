@@ -588,7 +588,7 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
-    ;
+
     // a completion requirement for DUCC (formerly "DUA" - TODO rename)
     dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
 
