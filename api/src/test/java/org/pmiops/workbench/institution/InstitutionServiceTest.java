@@ -574,6 +574,30 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
+  public void test_emailValidation_no_access() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com"))
+                            .emailAddresses(
+                                ImmutableList.of(
+                                    "external-researcher@sanger.uk", "science@aol.com")))));
+
+    // fail even if address or domain matches
+    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk")).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com")).isFalse();
+  }
+
+  @Test
   public void test_emailValidation_domain_ignoreCase() {
     final Institution inst =
         service.createInstitution(
