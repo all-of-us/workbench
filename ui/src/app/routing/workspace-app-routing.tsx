@@ -20,7 +20,6 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect} from 'react';
 import {Redirect, Switch, useRouteMatch} from 'react-router-dom';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
@@ -40,7 +39,7 @@ const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 
-export const WorkspaceRoutes =() => {
+export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
 
   return <Switch>

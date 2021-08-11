@@ -26,7 +26,6 @@ import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
 import {BreadcrumbType} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect} from 'react';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
