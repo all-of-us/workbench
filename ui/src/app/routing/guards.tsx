@@ -20,6 +20,6 @@ export const registrationGuard: Guard = {
 };
 
 export const expiredGuard: Guard = {
-  allowed: (): boolean => !profileStore.get().profile.renewableAccessModules.anyModuleHasExpired,
+  allowed: (): boolean => !profileStore.get().profile.accessModules.anyModuleHasExpired,
   redirectPath: '/access-renewal'
 };
