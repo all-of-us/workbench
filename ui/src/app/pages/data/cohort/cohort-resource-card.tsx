@@ -78,8 +78,7 @@ export const CohortResourceCard = fp.flow(
         icon: 'grid-view',
         displayName: 'Review',
         onClick: () => {
-          const urlObj = getResourceUrl(resource);
-          this.props.navigateByUrl(urlObj.url, urlObj);
+          this.props.navigateByUrl(this.reviewUrlForCohort);
         },
         disabled: !canWrite(resource)
       },
