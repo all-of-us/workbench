@@ -33,7 +33,6 @@ anchors:
 
   env-db: &env-db
     MYSQL_ROOT_PASSWORD: root-notasecret
-    MYSQL_USER: root
 
   # Job runs for master branch only
   filter-master-branch: &filter-master-branch
