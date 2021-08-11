@@ -66,6 +66,7 @@
       "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-perf-ct",
       "bigqueryDataset": "test_R2019q4r3",
+      "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
