@@ -109,8 +109,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   componentDidMount() {
-    console.log('Workspace about mounting');
-
     this.props.hideSpinner();
     this.setVisits();
     const workspace = this.reloadWorkspace(currentWorkspaceStore.getValue());

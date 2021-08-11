@@ -416,7 +416,6 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   render() {
-    console.log(this.props.urlParams);
     const {
       emailValidationError,
       emailValidationResponse,
