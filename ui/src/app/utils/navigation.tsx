@@ -33,17 +33,6 @@ export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 export const useNavigation = () => {
   const history = useHistory();
 
-  const navigate = (commands, extras?: NavigateExtras) => {
-    // url should always lead with a slash so that the given url replaces the current one
-    const url = '/' + commands.join('/').replace(/^\//, '');
-    history.push({
-      pathname: url,
-      search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
-    });
-  };
-
-  // TODO angular2react - refactor this with navigate
-  // TODO angular2react - add type to extras
   const navigateByUrl = (url, extras?: NavigateExtras) => {
     url = '/' + url.replace(/^\//, '');
 
@@ -59,6 +48,10 @@ export const useNavigation = () => {
       pathname: url,
       search: extras && extras.queryParams ? querystring.stringify(extras.queryParams) : ''
     });
+  };
+
+  const navigate = (commands, extras?: NavigateExtras) => {
+    navigateByUrl(commands.join('/'), extras);
   };
 
   return [navigate, navigateByUrl];

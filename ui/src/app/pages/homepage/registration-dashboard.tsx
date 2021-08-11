@@ -131,9 +131,8 @@ interface RegistrationTask {
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 //
-// TODO angular2react - Needing to pass navigate in here is far from ideal but this was the lowest effort
-// workaround I could come up with for now. Exposing the navigate function through a global store like NavStore
-// could be the better solution.
+// Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
+// can only be accessed through a hook/HOC from a component.
 export const getRegistrationTasks = (navigate) => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
