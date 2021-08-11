@@ -232,7 +232,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (!tierConfig.isPresent()) {
       logMsg =
           String.format(
-              "Cannot validate email because the membership requirement for institution '%s' and tier '%s' is NO_ACCESS",
+              "Cannot validate email because the membership requirement for institution '%s' and "
+                  + "tier '%s' not in DB",
               institution.getShortName(), accessTierShortName);
       validated = false;
     } else {
@@ -241,7 +242,8 @@ public class InstitutionServiceImpl implements InstitutionService {
           validated = false;
           logMsg =
               String.format(
-                  "Cannot validate email because the membership requirement for institution '%s' and tier '%s' is NO_ACCESS",
+                  "Cannot validate email because the membership requirement for institution '%s' "
+                      + "and tier '%s' is NO_ACCESS",
                   institution.getShortName(), accessTierShortName);
           break;
         case ADDRESSES:
