@@ -1,7 +1,8 @@
 require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
-require_relative "../../../libproject/wboptionsparser"
+require_relative "../../../libproject/gcloudcontext"
 require_relative "../../../libproject/environments"
+require_relative "../../../libproject/wboptionsparser"
 require "json"
 require "set"
 require "tempfile"
@@ -34,15 +35,17 @@ end
 
 def service_account_context_for_bq(project, account)
   common = Common.new
+
+  original_account = get_active_gcloud_account()
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     project, account, key_file.path).run do
-    # TODO(RW-3768): This currently leaves the user session with an activated service
-    # account user. Ideally the activation would be hermetic within the docker
-    # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
     yield
+  ensure
+    common.status "restoring original gcloud account: #{original_account}"
+    common.run_inline %{gcloud auth login #{original_account}}
   end
 end
 
@@ -57,7 +60,6 @@ def bq_ingest(tier, tier_name, source_project, dataset_name, table_match_filter=
   # If you receive an error from "bq" like "Invalid JWT Signature", you may
   # need to delete cached BigQuery creds on your local machine. Try running
   # bq init --delete_credentials as recommended in the output.
-  # TODO(RW-3768): Find a better solution for Google credentials in docker.
 
   # validate the CDR's tier label against the user-supplied tier, as a safety check
 
