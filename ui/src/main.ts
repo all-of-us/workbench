@@ -5,8 +5,8 @@ import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
 import {ErrorHandler} from 'app/components/error-handler';
+import {AppRoutingComponent} from 'app/routing/app-routing';
 import {setupCustomValidators} from 'app/services/setup';
-import {AppRoutingComponent} from './app/routing/app-routing';
 
 setupCustomValidators();
 ReactModal.defaultStyles.overlay = {};

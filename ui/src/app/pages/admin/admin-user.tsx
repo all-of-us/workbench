@@ -21,6 +21,7 @@ import {Link as RouterLink, withRouter} from 'react-router-dom';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {MatchParams} from 'app/routing/app-routing';
 import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,
@@ -38,9 +39,8 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {RouteComponentProps} from 'react-router';
 import * as validate from 'validate.js';
-import {RouteComponentProps} from "react-router";
-import {MatchParams} from "app/routing/app-routing";
 
 const styles = reactStyles({
   semiBold: {

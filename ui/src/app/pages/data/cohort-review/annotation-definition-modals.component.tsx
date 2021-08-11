@@ -8,14 +8,14 @@ import {ClrIcon} from 'app/components/icons';
 import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {MatchParams} from 'app/routing/app-routing';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
+import {RouteComponentProps} from 'react-router';
+import {withRouter} from 'react-router-dom';
 import {Key} from 'ts-key-enum';
-import {withRouter} from "react-router-dom";
-import {RouteComponentProps} from "react-router";
-import {MatchParams} from "../../../routing/app-routing";
 
 const styles = reactStyles({
   editRow: {

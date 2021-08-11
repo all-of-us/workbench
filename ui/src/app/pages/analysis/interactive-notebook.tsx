@@ -11,6 +11,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {EditComponentReact} from 'app/icons/edit';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
+import {MatchParams} from 'app/routing/app-routing';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -24,9 +25,8 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
-import {RouteComponentProps} from "react-router";
-import {MatchParams} from "../../routing/app-routing";
-import {withRouter} from "react-router-dom";
+import {RouteComponentProps} from 'react-router';
+import {withRouter} from 'react-router-dom';
 
 
 const styles = reactStyles({

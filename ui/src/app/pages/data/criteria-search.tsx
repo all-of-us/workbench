@@ -11,6 +11,7 @@ import {Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {MatchParams} from 'app/routing/app-routing';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
@@ -23,7 +24,6 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router';
-import {MatchParams} from "../../routing/app-routing";
 
 export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';

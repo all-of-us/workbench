@@ -6,6 +6,7 @@ import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
+import {MatchParams} from 'app/routing/app-routing';
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -17,8 +18,7 @@ import {
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
-import {RouteComponentProps, withRouter} from "react-router";
-import {MatchParams} from "../../../routing/app-routing";
+import {RouteComponentProps, withRouter} from 'react-router';
 
 const styles = reactStyles({
   title: {
@@ -29,7 +29,7 @@ const styles = reactStyles({
 });
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
-  workspace: WorkspaceData
+  workspace: WorkspaceData;
 }
 
 interface State {

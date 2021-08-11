@@ -4,6 +4,7 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {MatchParams} from 'app/routing/app-routing';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -13,8 +14,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {RouteComponentProps} from "react-router";
-import {MatchParams} from "../../../routing/app-routing";
+import {RouteComponentProps} from 'react-router';
 
 const styles = reactStyles({
   cohortsHeader: {

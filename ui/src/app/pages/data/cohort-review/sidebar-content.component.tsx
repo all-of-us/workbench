@@ -8,6 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, inputBorderColor, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
+import {MatchParams} from 'app/routing/app-routing';
 import {participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -21,10 +22,9 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {RouteComponentProps} from 'react-router';
 import Timeout = NodeJS.Timeout;
 import { withRouter } from 'react-router-dom';
-import {RouteComponentProps} from "react-router";
-import {MatchParams} from "../../../routing/app-routing";
 
 const styles = {
   header: {
@@ -273,13 +273,13 @@ interface SidebarProps extends RouteComponentProps<MatchParams> {
 }
 
 interface SidebarState {
-  savingStatus: CohortStatus,
-  creatingDefinition: boolean,
-  editingDefinitions: boolean,
-  annotations: ParticipantCohortAnnotation[],
-  annotationDefinitions: CohortAnnotationDefinition[],
-  annotationDeleted: boolean,
-  participant: ParticipantCohortStatus,
+  savingStatus: CohortStatus;
+  creatingDefinition: boolean;
+  editingDefinitions: boolean;
+  annotations: ParticipantCohortAnnotation[];
+  annotationDefinitions: CohortAnnotationDefinition[];
+  annotationDeleted: boolean;
+  participant: ParticipantCohortStatus;
 }
 
 export const SidebarContent = fp.flow(
