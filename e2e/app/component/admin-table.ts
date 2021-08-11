@@ -18,35 +18,44 @@ export default class adminTable extends Table {
   getFrozenHeader(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-header-table"]`
+      `${this.getXpath()}
+      //div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-header-table"]`
     );
   }
 
   getFrozenBody(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-body-table"]`
+      `${this.getXpath()}
+      //div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]
+      //table[@class="p-datatable-scrollable-body-table"]`
     );
   }
 
   getHeaderTable(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-header-table"]`
+      `${this.getXpath()}
+      //div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]
+      //table[@class="p-datatable-scrollable-header-table"]`
     );
   }
 
   getBodyTable(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-body-table"]`
+      `${this.getXpath()}
+      //div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]
+      //table[@class="p-datatable-scrollable-body-table"]`
     );
   }
 
   getFooterTable(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]//table[@class="p-datatable-scrollable-footer-table"]`
+      `${this.getXpath()}
+      //div[@class="p-datatable-scrollable-view p-datatable-unfrozen-view"]
+      //table[@class="p-datatable-scrollable-footer-table"]`
     );
   }
 

@@ -5,7 +5,6 @@ import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 import Link from 'app/element/link';
 
-
 export default abstract class BaseMenu extends Container {
   protected abstract getMenuItemXpath(menuItemText: string): string;
 
@@ -89,7 +88,6 @@ export default abstract class BaseMenu extends Container {
     return actionTextsArray;
   }
 
-  
   protected async isOpen(xpath?: string): Promise<boolean> {
     xpath = xpath || this.getXpath();
     try {
