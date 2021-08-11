@@ -4,12 +4,10 @@ import {convertAPIError} from 'app/utils/errors';
 import {queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {AccessModuleStatus, Profile} from 'generated/fetch';
 import {
   AccessModule,
   AccessModuleStatus,
-  Profile,
-  RenewableAccessModuleStatus
+  Profile
 } from 'generated/fetch';
 import {ErrorCode} from 'generated/fetch';
 import * as fp from 'lodash/fp';
