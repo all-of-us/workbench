@@ -146,4 +146,4 @@ export const AdminInstitution = fp.flow(withNavigation)(
         </FadeBox>
       </div>;
     }
-});
+  });

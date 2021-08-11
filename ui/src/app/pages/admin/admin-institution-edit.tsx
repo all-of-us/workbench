@@ -33,9 +33,8 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
   InstitutionMembershipRequirement,
