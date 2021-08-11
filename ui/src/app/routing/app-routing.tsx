@@ -100,11 +100,6 @@ const checkBrowserSupport = () => {
 const currentAccessToken = () => {
   const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 
-  // TODO angular2react - this used to be a setState() variable but I had to switch it to read from
-  // localStorage because testAccessTokenOverride would not be set yet in the first run of this and
-  // configure the API clients incorrectly. this should fix the issue but I want to think more about
-  // what the correct solution is. Getting rid of the state variable and only reading from localStorage
-  // could be the way to go.
   if (tokenOverride) {
     return tokenOverride;
   } else if (!gapi.auth2) {
@@ -163,6 +158,19 @@ const ScrollToTop = () => {
 };
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
+  // TODO angular2react: how can I ensure that config runs before everything? such as the subscriptions
+  useEffect(() => {
+    const load = async() => {
+      const serverConfig = await configApi().getConfig();
+      serverConfigStore.set({config: serverConfig});
+      bindClients();
+      loadErrorReporter();
+      initializeAnalytics();
+    };
+
+    load();
+  }, []);
+
   const {authLoaded} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
   const [pollAborter, setPollAborter] = useState(new AbortController());
@@ -171,11 +179,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
-    // TODO angular2react - this actually isn't working right now, just renders an empty page
-    // but this bug is also on test right now so it isn't a regression
-    setIsCookiesEnabled(cookiesEnabled());
-
     if (isCookiesEnabled) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
@@ -203,6 +206,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
 
   useEffect(() => {
     checkBrowserSupport();
+    setIsCookiesEnabled(cookiesEnabled());
   }, []);
 
   useEffect(() => {
@@ -252,17 +256,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, [config]);
 
-  useEffect(() => {
-    const load = async() => {
-      const serverConfig = await configApi().getConfig();
-      serverConfigStore.set({config: serverConfig});
-      bindClients();
-      loadErrorReporter();
-      initializeAnalytics();
-    };
-
-    load();
-  }, []);
 
   useEffect(() => {
     const sub = urlParamsStore
@@ -285,10 +278,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
           return nextWs;
         }
-
-        // TODO angular2react : do we really need this hack?
-        // Hack to ensure auth is loaded before a workspaces API call.
-        // await this.signInService.isSignedIn$.first().toPromise();
 
         return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {
@@ -355,7 +344,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* It should be noted that the reason this is currently working is because Switch only */}
         {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
         {/* that they are a Route or a subclass of Route. */}
-        {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
           <Switch>
             <AppRoute exact path='/cookie-policy'>
               <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
