@@ -88,5 +88,5 @@ export function useAuthentication() {
     setLoggedInState(isSignedIn);
   }, [isSignedIn]);
 
-  return {authLoaded: authLoaded};
+  return {authLoaded, isSignedIn};
 }
