@@ -26,6 +26,16 @@ const noModules: Profile = {
   accessModules: {}
 }
 
+const noExpirableModules: Profile = {
+  ...ProfileStubVariables.PROFILE_STUB,
+  accessModules : {
+    modules: [{
+      moduleName: AccessModule.RASLINKLOGINGOV,
+      expirationEpochMillis: undefined,
+    }]
+  }
+}
+
 const noExpModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
   accessModules : {
@@ -75,6 +85,10 @@ const thirtyDaysPlusExpiration: Profile = {
 describe('maybeDaysRemaining', () => {
   it('returns undefined when the profile has no accessModules', () => {
      expect(maybeDaysRemaining(noModules)).toBeUndefined();
+  });
+
+  it('returns undefined when the profile has no expirable accessModules', () => {
+    expect(maybeDaysRemaining(noExpirableModules)).toBeUndefined();
   });
 
   it('returns undefined when the profile has no accessModules with expirations', () => {
