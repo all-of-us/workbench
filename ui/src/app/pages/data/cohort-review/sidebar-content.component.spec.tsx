@@ -8,6 +8,7 @@ import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annota
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {SidebarContent} from './sidebar-content.component';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('SidebarContent', () => {
   beforeEach(() => {
@@ -18,7 +19,7 @@ describe('SidebarContent', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<SidebarContent />);
+    const wrapper = mount(<MemoryRouter><SidebarContent/></MemoryRouter>);
     expect(wrapper.exists()).toBeTruthy();
   });
 });

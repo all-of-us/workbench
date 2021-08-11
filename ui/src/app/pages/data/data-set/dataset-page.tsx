@@ -587,9 +587,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (hasNewValidProps(this.props, prevProps, [
         (props) => props.workspace.namespace,
         (props) => props.workspace.id,
-        (props) => props.urlParams.dataSetId])) {
+        (props) => props.match.params.dataSetId])) {
 
-        if (hasNewValidProps(this.props, prevProps, [(props) => props.urlParams.dataSetId])) {
+        if (hasNewValidProps(this.props, prevProps, [(props) => props.match.params.dataSetId])) {
           this.fetchDataset();
         }
       }

@@ -318,7 +318,7 @@ export const SidebarContent = fp.flow(
 
   componentDidUpdate(prevProps: any): void {
     const {cohortReview: {cohortReviewId}, match: {params: {ns, wsid, pid}}} = this.props;
-    if (pid !== prevProps.urlParams.pid && !isNaN(+pid)) {
+    if (pid !== prevProps.match.params.pid && !isNaN(+pid)) {
       // get values for annotations when switching participants
       cohortReviewApi()
       .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
