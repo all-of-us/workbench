@@ -55,7 +55,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
@@ -316,6 +315,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
     final Integer signedVersion = user.getDataUseAgreementSignedVersion();
+    if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
+      return true;
+    }
     if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
       return false;
     }
@@ -325,11 +327,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private boolean shouldUserBeRegistered(DbUser user) {
     boolean twoFactorAuthComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH);
-    boolean eRACommonsComplete = !configProvider.get().access.enableEraCommons || accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
-    boolean complianceTrainingComplete = !configProvider.get().access.enableComplianceTraining || accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
+    boolean eRACommonsComplete =
+        !configProvider.get().access.enableEraCommons
+            || accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+    boolean complianceTrainingComplete =
+        !configProvider.get().access.enableComplianceTraining
+            || accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
     boolean dataUseAgreementTrainingComplete = isDataUseAgreementCompliant(user);
-    boolean publicationConfirmationComplete = accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
-    boolean profileConfirmationComplete = accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    boolean publicationConfirmationComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
+    boolean profileConfirmationComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+    System.out.println("~~~~~~~!!!!");
+    System.out.println("~~~~~~~!!!!");
+    System.out.println("~~~~~~~!!!!");
+    System.out.println("~~~~~~~!!!!");
+    System.out.println(eRACommonsComplete);
+    System.out.println(dataUseAgreementTrainingComplete);
+    System.out.println(complianceTrainingComplete);
+    System.out.println(publicationConfirmationComplete);
+    System.out.println(profileConfirmationComplete);
     return !user.getDisabled()
         && twoFactorAuthComplete
         && eRACommonsComplete
@@ -1120,8 +1137,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
-    Set<Optional<Long>> expirations = accessModuleService.getClientAccessModuleStatus(user)
-        .stream().map(a -> Optional.ofNullable(a.getExpirationEpochMillis())).collect(Collectors.toSet());
+    Set<Optional<Long>> expirations =
+        accessModuleService.getClientAccessModuleStatus(user).stream()
+            .filter(a -> a.getBypassEpochMillis() == null)
+            .map(a -> Optional.ofNullable(a.getExpirationEpochMillis()))
+            .collect(Collectors.toSet());
 
     // if any un-bypassed modules are incomplete, we know:
     // * this user does not currently have access
@@ -1135,7 +1155,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           .map(Optional::get)
           // note: min() returns EMPTY if the stream is empty at this point,
           // which is also an indicator that we should not send an email
-          .min(Long::compareTo).map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
+          .min(Long::compareTo)
+          .map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
     }
   }
 
@@ -1154,6 +1175,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
+    System.out.println("~~~~22222");
+    System.out.println("~~~~22222");
+    System.out.println("~~~~22222");
+    System.out.println(daysRemaining);
+    System.out.println(millisRemaining);
     final List<Long> thresholds = configProvider.get().accessRenewal.expiryDaysWarningThresholds;
     try {
       // we only want to send the expiration email on the day of the actual expiration

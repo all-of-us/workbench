@@ -17,5 +17,13 @@ public interface AccessModuleService {
   /** Retrieves all {@link AccessModuleStatus} for a user. */
   List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user);
 
+  /**
+   * Returns true is the access module compliant.
+   *
+   * <p>The module can be bypassed OR (completed but not expired).
+   */
   boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName);
+
+  /** Returns true is the access module is bypassable and bypassed */
+  boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
 }

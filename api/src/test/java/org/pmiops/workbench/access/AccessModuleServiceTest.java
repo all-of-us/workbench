@@ -287,6 +287,44 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
+  public void testGetClientAccessModuleStatus_moduleNotEnabledInEnv() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+    config.access.enableComplianceTraining = false;
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+
+    // 2FA module: Module is not expirable, so no expiration date present.
+    Timestamp twoFactorCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    DbUserAccessModule twoFactorAuthUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setUser(user)
+            .setCompletionTime(twoFactorCompletionTime);
+    AccessModuleStatus expected2FAModuleStatus =
+        new AccessModuleStatus()
+            .moduleName(AccessModule.TWO_FACTOR_AUTH)
+            .completionEpochMillis(twoFactorCompletionTime.getTime());
+
+    Timestamp rtTrainingCompletionTime =
+        Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    Timestamp rtTrainingBypassTime = Timestamp.from(now);
+    DbUserAccessModule rtTrainingAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(rtTrainingModule)
+            .setUser(user)
+            .setBypassTime(rtTrainingBypassTime)
+            .setCompletionTime(rtTrainingCompletionTime);
+    userAccessModuleDao.saveAll(
+        ImmutableList.of(twoFactorAuthUserAccessModule, rtTrainingAccessModule));
+    assertThat(accessModuleService.getClientAccessModuleStatus(user))
+        .containsExactly(expected2FAModuleStatus);
+  }
+
+  @Test
   public void testModuleComplaint_byPassedAndExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
@@ -304,7 +342,9 @@ public class AccessModuleServiceTest extends SpringTest {
             .setBypassTime(bypassTime);
     userAccessModuleDao.save(duccDbUserAccessModule);
 
-   assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)).isTrue();
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isTrue();
   }
 
   @Test
@@ -328,11 +368,15 @@ public class AccessModuleServiceTest extends SpringTest {
             .setAccessModule(twoFactorAuthModule)
             .setUser(user)
             .setCompletionTime(completionTime);
-    userAccessModuleDao.saveAll(ImmutableList.of(twoFactorAuthDbUserAccessModule, duccDbUserAccessModule));
+    userAccessModuleDao.saveAll(
+        ImmutableList.of(twoFactorAuthDbUserAccessModule, duccDbUserAccessModule));
 
     // DUAA expired, but 2FA not because it is not expirable
-    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)).isFalse();
-    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH)).isTrue();
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isFalse();
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH))
+        .isTrue();
   }
 
   @Test
@@ -351,12 +395,16 @@ public class AccessModuleServiceTest extends SpringTest {
             .setCompletionTime(completionTime);
     userAccessModuleDao.save(existingDbUserAccessModule);
 
-    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)).isFalse();
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isFalse();
   }
 
   @Test
   public void testModuleComplaint_moduleNotExist() {
-    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)).isFalse();
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isFalse();
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(
