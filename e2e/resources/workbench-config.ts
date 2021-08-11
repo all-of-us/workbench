@@ -12,7 +12,8 @@ const userCredential: ICredentialConfig = {
   USER_ACCESS_TOKEN_FILE: 'signin-tokens/puppeteer-access-token.txt',
   COLLABORATOR_ACCESS_TOKEN_FILE: 'signin-tokens/collaborator-puppeteer-access-token.txt',
   READER_ACCESS_TOKEN_FILE: 'signin-tokens/reader-puppeteer-access-token.txt',
-  WRITER_ACCESS_TOKEN_FILE: 'signin-tokens/writer-puppeteer-access-token.txt'
+  WRITER_ACCESS_TOKEN_FILE: 'signin-tokens/writer-puppeteer-access-token.txt',
+  ACCESS_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/access-test-puppeteer-access-token.txt'
 };
 
 const urlPath: IPathConfig = {
@@ -31,6 +32,7 @@ const local: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitester1@fake-research-aou.org',
+  ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
 };
@@ -43,6 +45,7 @@ const test: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetmaster@fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcitestreader1@fake-research-aou.org',
+  ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
 };
@@ -55,6 +58,7 @@ const staging: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetcitester4@staging.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetmaster@staging.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetcistagingreader1@staging.fake-research-aou.org',
+  ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };
@@ -68,7 +72,8 @@ const stable: IEnvConfig = {
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   COLLABORATOR_USER: 'TODO - NOT AVAILABLE',
   WRITER_USER: 'TODO - NOT AVAILABLE',
-  READER_USER: 'TODO - NOT AVAILABLE'
+  READER_USER: 'TODO - NOT AVAILABLE',
+  ACCESS_TEST_USER: 'TODO - NOT AVAILABLE'
 };
 
 // workbench perf environment
@@ -79,6 +84,7 @@ const perf: IEnvConfig = {
   COLLABORATOR_USER: process.env.COLLABORATOR_USER || 'puppetciperfreader@perf.fake-research-aou.org',
   WRITER_USER: process.env.WRITER_USER || 'puppetciperfwriter1@perf.fake-research-aou.org',
   READER_USER: process.env.READER_USER || 'puppetciperfreader@perf.fake-research-aou.org',
+  ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
 };

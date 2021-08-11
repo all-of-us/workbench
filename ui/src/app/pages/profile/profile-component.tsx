@@ -34,6 +34,8 @@ import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {InstitutionalRole, Profile} from 'generated/fetch';
+import {environment} from 'environments/environment';
+import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
@@ -351,10 +353,12 @@ export const ProfileComponent = fp.flow(
     } = currentProfile;
 
 
-      const hasExpired = fp.flow(
-        fp.find({moduleName: 'profileConfirmation'}),
-        fp.get('hasExpired')
-      )(profile.renewableAccessModules.modules);
+      const profileExpiration = fp.flow(
+        fp.find({moduleName: AccessModule.PROFILECONFIRMATION}),
+        fp.get('expirationEpochMillis'),
+      )(profile.accessModules.modules);
+      const hasExpired = profileExpiration && profileExpiration < Date.now();
+
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;

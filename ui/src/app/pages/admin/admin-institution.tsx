@@ -7,11 +7,9 @@ import {OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
+  getControlledTierConfig,
   getRegisteredTierConfig,
-  getTierEmailAddresses,
-  getTierEmailDomains
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
@@ -103,28 +101,17 @@ export const AdminInstitution = fp.flow(withNavigation)(
       return organizationLabel;
     }
 
-    renderDuaType(row, col) {
-      // TODO(yonghao): Handle NO_ACCESS
-      return (getRegisteredTierConfig(row)).membershipRequirement === InstitutionMembershipRequirement.ADDRESSES ?
-          'Individual' : 'Master';
-    }
-
-    // If email domain list has more than 4 entries show top 4 and replace others with ...
-    renderEmailDomain(row, col) {
-      const rawEmailDomains = getTierEmailDomains(row, AccessTierShortNames.Registered);
-      const emailDomain = fp.take(4, rawEmailDomains).join('\n');
-      if (rawEmailDomains && rawEmailDomains.length > 4) {
-        return emailDomain + '...';
+    renderAccessTiers(row, col) {
+      let tiers = '';
+      if (getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+        tiers += 'Registered';
       }
-    }
 
-    // If email address list has more than 4 entries show top 4 and replace others with ...
-    renderEmailAddress(row, col) {
-      const rawEmailAddresses = getTierEmailAddresses(row, AccessTierShortNames.Registered);
-      const emailAddresses = fp.take(4, rawEmailAddresses).join('\n');
-      if (rawEmailAddresses && rawEmailAddresses.length > 4) {
-        return emailAddresses + '...';
+      if (getControlledTierConfig(row)
+        && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+        tiers += ',Controlled';
       }
+      return tiers;
     }
 
     render() {
@@ -151,11 +138,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
             <Column field='organizationTypeEnum' header='Institution Type'
                     body={this.renderOrganizationType} bodyStyle={styles.text}
                     headerStyle={styles.header}/>
-            <Column field='duaTypeEnum' header='Agreement Type' body={this.renderDuaType}
-                    bodyStyle={styles.text} headerStyle={styles.header}/>
-            <Column field='emailDomains' header='Accepted Domain List' body={this.renderEmailDomain}
-                    bodyStyle={styles.text} headerStyle={styles.header}/>
-            <Column field='emailAddresses' header='Accepted Email List' body={this.renderEmailAddress}
+            <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
                     bodyStyle={styles.text} headerStyle={styles.header}/>
             <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
                     headerStyle={{...styles.header, width: '5rem'}}/>
@@ -163,4 +146,4 @@ export const AdminInstitution = fp.flow(withNavigation)(
         </FadeBox>
       </div>;
     }
-  });
+}

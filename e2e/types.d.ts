@@ -8,6 +8,7 @@ export interface ICredentialConfig {
   COLLABORATOR_ACCESS_TOKEN_FILE: string;
   READER_ACCESS_TOKEN_FILE: string;
   WRITER_ACCESS_TOKEN_FILE: string;
+  ACCESS_TEST_ACCESS_TOKEN_FILE: string;
 }
 
 export interface IPathConfig {
@@ -25,6 +26,7 @@ export interface IEnvConfig {
   COLLABORATOR_USER: string;
   WRITER_USER: string;
   READER_USER: string;
+  ACCESS_TEST_USER: string;
   DEFAULT_CDR_VERSION_NAME: string;
   ALTERNATIVE_CDR_VERSION_NAME: string;
 }

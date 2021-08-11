@@ -1038,6 +1038,7 @@ Common.register_command({
 
 def import_cdr_indices_to_cloudsql(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -1058,6 +1059,11 @@ def import_cdr_indices_to_cloudsql(cmd_name, *args)
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
   )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
   op.parse.validate
   gcc = GcloudContextV2.new(op)
@@ -1067,16 +1073,14 @@ def import_cdr_indices_to_cloudsql(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/import-cdr-indices-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
+      common.run_inline %W{./generate-cdr/import-cdr-indices-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.data_browser}}
     end
   end
 end
 
 Common.register_command({
   :invocation => "import-cdr-indices-to-cloudsql",
-  :description => "import-cdr-indices-to-cloudsql --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
- --cdr-version=<VERSION> --bucket <BUCKET>
-Imports CB related tables to mysql/cloudsql to be used by workbench.",
+  :description => "Imports CB related tables to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { import_cdr_indices_to_cloudsql("import-cdr-indices-to-cloudsql", *args) }
 })
 

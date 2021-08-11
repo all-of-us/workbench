@@ -7,13 +7,11 @@ import {
   NihToken,
   Profile,
   ProfileApi,
-  RenewableAccessModuleStatus,
 } from 'generated/fetch';
 
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
@@ -45,18 +43,18 @@ export class ProfileStubVariables {
       institutionDisplayName: 'The Broad Institute',
       institutionalRoleEnum: InstitutionalRole.FELLOW
     },
-    renewableAccessModules: {
+    accessModules : {
       modules: [{
-        moduleName: ModuleNameEnum.DataUseAgreement,
+        moduleName: AccessModule.COMPLIANCETRAINING,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.ComplianceTraining,
+        moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.ProfileConfirmation,
+        moduleName: AccessModule.PROFILECONFIRMATION,
         expirationEpochMillis: undefined
       }, {
-        moduleName: ModuleNameEnum.PublicationConfirmation,
+        moduleName: AccessModule.PUBLICATIONCONFIRMATION,
         expirationEpochMillis: undefined
       }],
       anyModuleHasExpired: false

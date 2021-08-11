@@ -10,8 +10,6 @@ import {useEffect, useState} from 'react';
 
 interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
 
-
-
 const AdminWorkspaceSearchImpl = (props: Props) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
   const [navigate, ] = useNavigation();
