@@ -40,18 +40,9 @@ const QueryReportPage = fp.flow(withRouteData, withRoutingSpinner)(QueryReport);
 const WorkspaceAboutPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceAbout);
 const WorkspaceEditPage = fp.flow(withRouteData, withRoutingSpinner)(WorkspaceEdit);
 
-// TODO angular2react: Adding memo here feels a little off but it was necessary to prevent workspace-wrapper from
-// rendering over and over again on page load, rendering (hah) the app unusable.
-// We should be able to refactor this once we are driving the entire app through React router.
-export const WorkspaceRoutes = React.memo(() => {
+export const WorkspaceRoutes =() => {
   const { path } = useRouteMatch();
 
-  console.log('Rendering WorkspaceRoutes');
-  useEffect(() => {
-    console.log('Mounting WorkspaceRoutes (ish)');
-
-    return () => console.log('Unmounting WorkspaceRoutes');
-  }, []);
   return <Switch>
     <AppRoute exact path={`${path}/about`}>
       <WorkspaceAboutPage
@@ -221,4 +212,4 @@ export const WorkspaceRoutes = React.memo(() => {
       <Redirect to={'/not-found'}/>
     </AppRoute>
   </Switch>;
-});
+};
