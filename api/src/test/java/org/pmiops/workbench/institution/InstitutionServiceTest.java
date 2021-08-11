@@ -336,6 +336,35 @@ public class InstitutionServiceTest extends SpringTest {
         .isEmpty();
   }
 
+  @Test
+  public void test_updateInstitution_tierRequirement_changetoNoAccess() {
+    final Institution existingInst =
+        new Institution()
+            .shortName("test_updateInstitution_tierRequirement")
+            .displayName("test_updateInstitution_tierRequirement")
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName()))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+    assertThat(service.createInstitution(existingInst)).isEqualTo(existingInst);
+
+    final Institution instWithNewTierRequirement =
+        existingInst.tierConfigs(
+            ImmutableList.of(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                    .eraRequired(false)
+                    .accessTierShortName(registeredTier.getShortName())));
+    assertThat(
+            service
+                .updateInstitution(existingInst.getShortName(), instWithNewTierRequirement)
+                .get()
+                .getTierConfigs())
+        .isEmpty();
+  }
+
   // we uniquify Email Addresses and Domains in the DB per-institution
   @Test
   public void test_uniqueEmailPatterns() {
