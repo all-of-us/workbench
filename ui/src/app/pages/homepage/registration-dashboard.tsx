@@ -344,14 +344,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           {bypassActionComplete &&
             <span>Bypass action is complete.
               <Button style={{marginLeft: '0.5rem'}}
-                      onClick={() => {
-                        // Quirk / hack note: the goal here is to send the user to the homepage once they've bypassed
-                        // all access modules. Normally we would just navigate(['']) to do this. However, because
-                        // of the way this dashboard is rendered *within* the homepage component, a call to
-                        // navigate is not enough to trigger the normal homepage to load. As a workaround, we
-                        // explicitly clear the search query and redirect to the root path.
-                        location.replace('/');
-                      }}>Get Started</Button>
+                      onClick={() => {location.replace('/'); }}>Get Started</Button>
             </span>}
           {!bypassActionComplete && <span>
             [Test environment] Self-service bypass is enabled:
@@ -427,8 +420,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
              data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => {location.replace('/'); }}
-          >Get Started</Button>
+                  onClick={() => {
+                    // Quirk / hack note: the goal here is to send the user to the homepage once they've completed
+                    // all access modules. Normally we would just navigate(['']) to do this. However, because
+                    // of the way this dashboard is rendered *within* the homepage component, a call to
+                    // navigate is not enough to trigger the normal homepage to load. As a workaround, we
+                    // explicitly clear the search query and redirect to the root path.
+                    location.replace('/');
+                  }}>Get Started</Button>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>
