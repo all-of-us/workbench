@@ -210,7 +210,7 @@ commands:
       - run:
           name: Launch local API server
           working_directory: ~/workbench/api
-          command: ./project.rb dev-up
+          command: ./project.rb dev-up --nostart-db
           background: true
       - run:
           name: Wait for local API server to start

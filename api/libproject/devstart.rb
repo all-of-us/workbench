@@ -104,7 +104,15 @@ def start_local_db_service()
   common.status "Database startup complete (#{format_benchmark(bm)})"
 end
 
-def dev_up()
+def dev_up(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.start_db = true
+  op.add_option(
+      "--nostart-db",
+      ->(opts, c) { opts.start_db = false },
+      "If specified, don't start the DB service")
+  op.parse.validate
+
   common = Common.new
 
   account = get_auth_login_account()
@@ -113,13 +121,13 @@ def dev_up()
   end
 
   at_exit do
-    common.run_inline %W{docker-compose down}
+    common.run_inline %W{docker-compose down} if op.opts.start_db
   end
 
   setup_local_environment()
 
   overall_bm = Benchmark.measure {
-    start_local_db_service()
+    start_local_db_service() if op.opts.start_db
 
     handle_gradle_interrupt() do
       common.status "Database init & migrations..."
@@ -147,7 +155,7 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
      "update. (You can use run-api instead if database and config are up-to-date.)",
-  :fn => ->() { dev_up() }
+  :fn => ->(*args) { dev_up("dev-up", args) }
 })
 
 def start_api_reqs()
@@ -219,7 +227,7 @@ end
 
 Common.register_command({
   :invocation => "start-local-api",
-  :description => "Starts api using the local MySQL instance.",
+  :description => "Starts api using a local MySQL instance.",
   :fn => ->() { start_local_api() }
 })
 
