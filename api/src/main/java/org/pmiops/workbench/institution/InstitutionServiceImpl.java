@@ -438,10 +438,23 @@ public class InstitutionServiceImpl implements InstitutionService {
       throw new ServerErrorException(
           "Failed to cleanup existing tier requirements before replacing them");
     }
-    institutionTierConfigMapper
-        .tierConfigsToDbTierRequirements(
-            modelInstitution.getTierConfigs(), dbInstitution, dbAccessTiers)
-        .forEach(institutionTierRequirementDao::save);
+
+    // If requirement is NO_ACCESS, it is possible that this tier does not exist yet. Skip the
+    // saving.
+    if (modelInstitution.getTierConfigs() != null) {
+      institutionTierConfigMapper
+          .tierConfigsToDbTierRequirements(
+              modelInstitution.getTierConfigs().stream()
+                  .filter(
+                      i ->
+                          (i.getMembershipRequirement() != null
+                              && i.getMembershipRequirement()
+                                  != InstitutionMembershipRequirement.NO_ACCESS))
+                  .collect(Collectors.toList()),
+              dbInstitution,
+              dbAccessTiers)
+          .forEach(institutionTierRequirementDao::save);
+    }
   }
 
   // Take first 76 characters from display Name (with no spaces) and append 3 random number
@@ -475,7 +488,8 @@ public class InstitutionServiceImpl implements InstitutionService {
       for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
         if (institutionTierConfig.getMembershipRequirement()
             == InstitutionMembershipRequirement.NO_ACCESS) {
-          // Skip if is NO_ACCESS
+          // If requirement is NO_ACCESS, it is possible that this tier does not exist yet. Skip the
+          // validation.
           continue;
         }
         // All tier need to be present in API if tier requirement is present.

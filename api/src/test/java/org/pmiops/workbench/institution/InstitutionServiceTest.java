@@ -114,6 +114,38 @@ public class InstitutionServiceTest extends SpringTest {
   }
 
   @Test
+  public void testCreateInstitutionError_accessTierNotFound() {
+    final Institution anotherInst =
+        new Institution()
+            .shortName("otherInst")
+            .displayName("An Institution for Testing")
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .eraRequired(false)
+                    .accessTierShortName("non exist tier"))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+
+    assertThrows(NotFoundException.class, () -> service.createInstitution(anotherInst));
+  }
+
+  @Test
+  public void testCreateInstitution_accessTierNotFound_noAccessRequirement() {
+    final Institution anotherInst =
+        new Institution()
+            .shortName("otherInst")
+            .displayName("An Institution for Testing")
+            .addTierConfigsItem(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                    .eraRequired(false)
+                    .accessTierShortName("non exist tier"))
+            .organizationTypeEnum(OrganizationType.INDUSTRY);
+
+    assertThat(service.createInstitution(anotherInst).getTierConfigs()).isEmpty();
+  }
+
+  @Test
   public void test_deleteInstitution() {
     service.deleteInstitution(testInst.getShortName());
     assertThat(service.getInstitutions()).isEmpty();
