@@ -109,7 +109,7 @@ def dev_up(cmd_name, args)
   op.opts.start_db = true
   op.add_option(
       "--nostart-db",
-      ->(opts, c) { opts.start_db = false },
+      ->(opts, _) { opts.start_db = false },
       "If specified, don't start the DB service")
   op.parse.validate
 
@@ -224,7 +224,7 @@ def run_api_incremental()
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
     common.run_inline %W{./gradlew --continuous incrementalHotSwap}
-  rescue Interrupt => e
+  rescue Interrupt
     # Do nothing
   ensure
     common.run_inline %W{./gradlew --stop}
