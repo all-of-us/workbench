@@ -101,12 +101,12 @@ const AdminNotebookViewComponent = (props: Props) => {
 const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
+  const {ns, nbName} = useParams<{ns: string, nbName: string}>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 
   // react-router does not handling decoding of URL parameters, they must be decoded here.
   return <AdminNotebookViewComponent
-      workspaceNamespace={workspaceNamespace}
+      workspaceNamespace={ns}
       notebookName={decodeURIComponent(nbName)}
       accessReason={accessReason}/>;
 };

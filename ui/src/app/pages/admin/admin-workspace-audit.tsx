@@ -35,10 +35,10 @@ const getAdminPageUrl = (subject: string) => {
 export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {workspaceNamespace = ''} = useParams<{workspaceNamespace: string}>();
+  const {ns = ''} = useParams<{ns: string}>();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
-                             initialAuditSubject={workspaceNamespace}
+                             initialAuditSubject={ns}
                              getNextAuditPath={getNextAuditPath}
                              queryAuditLog={queryAuditLog}
                              getAdminPageUrl={getAdminPageUrl}/>;

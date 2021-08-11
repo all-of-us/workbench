@@ -13,30 +13,6 @@ import { BrowserRouter, Link, Redirect, Route, Switch, useLocation, useParams, u
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
-export interface WithRouterProps {
-  match: {
-    params: any,
-    isExact: boolean,
-    path: string,
-    url: string
-  };
-  location: {
-    key: string,
-    pathname: string,
-    search: string,
-    hash: string
-  };
-  history: {
-    length: number,
-    action: string,
-    push: (path: string) => {},
-    replace: (path: string) => {},
-    go: (n: number) => {},
-    goBack: () => {},
-    goForward: () => {}
-  };
-}
-
 export interface Guard {
   allowed: () => boolean;
   redirectPath: string;
@@ -47,7 +23,7 @@ export const usePath = () => {
   return path;
 };
 
-const useQuery = () => {
+export const useQuery = () => {
   const searchString = useLocation().search.replace(/^\?/, '');
   return querystring.parse(searchString);
 };
@@ -57,8 +33,6 @@ const useQuery = () => {
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
   const query = useQuery();
-
-  console.log(routeData);
 
   useEffect(() => {
     if (!intermediaryRoute) {
