@@ -3,6 +3,7 @@ package org.pmiops.workbench.tools;
 import com.google.cloud.tasks.v2.CloudTasksClient;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -72,14 +73,17 @@ public class BackfillWorkspacesToRdr {
   public CommandLineRunner run(RdrExportDao rdrExportDao, TaskQueueService taskQueueService) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
-      Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
+
+      Optional<Integer> limit =
+          Optional.ofNullable(opts.getParsedOptionValue(limitOpt.getLongOpt()))
+              .map(opt -> ((Number) opt).intValue());
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
       // Only backfill the workspaces that have not changed. The changed workspaces will be handled
       // by the nightly cron job. This way changed workspaces won't slip past the manual review
       List<BigInteger> nativeWorkspaceListToExport =
-          limit != null
-              ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit)
+          limit.isPresent()
+              ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit.get())
               : rdrExportDao.findAllUnchangedDbWorkspaceIds();
 
       List<Long> workspaceListToExport =
