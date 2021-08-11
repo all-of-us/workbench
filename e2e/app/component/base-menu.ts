@@ -4,7 +4,7 @@ import { MenuOption } from 'app/text-labels';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 import Link from 'app/element/link';
-//import Checkbox from 'app/element/checkbox';
+
 
 export default abstract class BaseMenu extends Container {
   protected abstract getMenuItemXpath(menuItemText: string): string;
@@ -89,42 +89,9 @@ export default abstract class BaseMenu extends Container {
     return actionTextsArray;
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+  
   protected async isOpen(xpath?: string): Promise<boolean> {
     xpath = xpath || this.getXpath();
-=======
-  /**
-   *  Get toggle status all modules
-   */
-  protected async getToggleStatus(selector: string): Promise<boolean[]> {
-    await this.page.waitForXPath(selector, { visible: true });
-    const inputs = await this.page.$x(selector);
-    const toggleStatus = [];
-    for (const element of inputs) {
-      new Checkbox(this.page, selector);
-      toggleStatus.push(await getPropValue<boolean>(element, 'checked'));
-    }
-    return toggleStatus;
-  }
-
-  /**
-   *  Get individual toggle status of each modules
-   */
-  protected async getEachToggleStatus(selector: string): Promise<boolean> {
-    await this.page.waitForXPath(selector, { visible: true });
-    await this.page.$x(selector);
-    const btn = new Checkbox(this.page, selector);
-    return await getPropValue<boolean>(await btn.asElementHandle(), 'checked');
-  }
-
-  protected async isOpen(): Promise<boolean> {
->>>>>>> 4cd69d210 (created functions to get the status of the bypass-link modules)
-=======
-  protected async isOpen(xpath?: string): Promise<boolean> {
-    xpath = xpath || this.getXpath();
-
->>>>>>> 7ded74085 (removed no-op functions)
     try {
       await this.page.waitForXPath(xpath, { visible: true, timeout: 2000 });
       return true;
