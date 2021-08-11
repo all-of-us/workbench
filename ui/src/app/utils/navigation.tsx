@@ -75,14 +75,6 @@ export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);
 };
 
-export const samePageNavigationHack = (path: string, queryString: string) => {
-  // Quirk / hack note: the goal here is to send the user to the page they're already on,
-  // with an altered queryString. A call to navigate is not enough to trigger the page to reload.
-  // As a workaround, we explicitly set the search query and redirect to the path.
-  window.location.pathname = path;
-  window.location.search = queryString;
-}
-
 /**
  * Strict variant of URI encoding to satisfy Angular routing, specifically for
  * handling parens. See https://github.com/angular/angular/issues/10280 for

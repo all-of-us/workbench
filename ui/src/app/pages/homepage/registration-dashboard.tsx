@@ -15,7 +15,7 @@ import {reactStyles} from 'app/utils';
 import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {navigate, samePageNavigationHack} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessModule, Profile} from 'generated/fetch';
@@ -350,7 +350,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                         // of the way this dashboard is rendered *within* the homepage component, a call to
                         // navigate is not enough to trigger the normal homepage to load. As a workaround, we
                         // explicitly clear the search query and redirect to the root path.
-                        samePageNavigationHack('/', '');
+                        location.replace('/');
                       }}>Get Started</Button>
             </span>}
           {!bypassActionComplete && <span>
@@ -427,14 +427,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
              data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => {
-                    // Quirk / hack note: the goal here is to send the user to the homepage once they've completed
-                    // all access modules. Normally we would just navigate(['']) to do this. However, because
-                    // of the way this dashboard is rendered *within* the homepage component, a call to
-                    // navigate is not enough to trigger the normal homepage to load. As a workaround, we
-                    // explicitly clear the search query and redirect to the root path.
-                    samePageNavigationHack('/', '');
-                  }}>Get Started</Button>
+                  onClick={() => {location.replace('/')}}
+          >Get Started</Button>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <Modal width={500}>
