@@ -3,7 +3,6 @@ import * as React from 'react';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {getAccessModuleStatusByName} from 'app/utils/access-utils';
-import {navigate} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
 import {Button} from './buttons';
