@@ -70,7 +70,7 @@ const LoginGovIAL2Notification = () => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
-    <Button type='primary' style={styles.button} onClick={() => navigate(['/'], { queryParams: { workbenchAccessTasks: true } })}>
+    <Button type='primary' style={styles.button} onClick={() => location.replace('/?workbenchAccessTasks=true')}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;
