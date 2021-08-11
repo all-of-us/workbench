@@ -5,6 +5,12 @@ import {queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModuleStatus, Profile} from 'generated/fetch';
+import {
+  AccessModule,
+  AccessModuleStatus,
+  Profile,
+  RenewableAccessModuleStatus
+} from 'generated/fetch';
 import {ErrorCode} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -72,4 +78,8 @@ export const useIsUserDisabled = () => {
     return () => mounted = false;
   }, [authLoaded, isSignedIn]);
   return disabled;
+};
+
+export const getAccessModules = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
+  return profile.accessModules.modules.find(a => a.moduleName === moduleName);
 };
