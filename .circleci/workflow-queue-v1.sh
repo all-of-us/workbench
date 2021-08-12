@@ -80,7 +80,7 @@ fetch_older_pipelines() {
   jq_filter="select(.status | test(\"running|pending|queued\"))"
   jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
   # DEBUG
-  filteredResult=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=${1}) | .build_num")
+  filteredResult=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | .build_num")
   printf "\n\nPipelines build_num values\n%s\n\n" "${filteredResult}"
   # END OF DEBUG
   __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=${1}) | .build_num")
