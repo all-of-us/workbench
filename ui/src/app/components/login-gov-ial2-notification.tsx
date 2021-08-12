@@ -65,7 +65,7 @@ const styles = reactStyles({
 
 
 const LoginGovIAL2Notification = () => {
-  return <FlexRow style={styles.box}>
+  return <FlexRow data-test-id='ial2-notification' style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
