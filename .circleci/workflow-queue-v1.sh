@@ -94,7 +94,7 @@ printf "%s\n\n" "Current pipeline CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
 
 fetch_current_pipeline_start_time
 current_pipeline_start_time=$__
-printf "%s\n\n" "Current pipeline start_at: ${current_pipeline_start_time}"
+printf "%s\n\n" "Current pipeline start_at time: ${current_pipeline_start_time}"
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
@@ -105,7 +105,9 @@ while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
   fetch_older_pipelines "${current_pipeline_start_time}"
   pipelines=$__
+
   if [[ $pipelines ]]; then
+    printf "%s\n%s\n" "Found pipelines submitted previous to the current pipelines. CIRCLE_BUILD_NUM are:" "${pipelines}"
     printf "%s\n" "Waiting for previous builds to finish. sleep ${wait} seconds. Please wait..."
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
