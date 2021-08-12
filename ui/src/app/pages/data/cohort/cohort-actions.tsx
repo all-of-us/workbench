@@ -6,7 +6,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -92,13 +92,11 @@ export const CohortActions = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      if (!this.props.workspace.namespace || !this.props.workspace.id || !this.props.urlParams.cid) {
-        return;
-      }
-
-      if (this.props.workspace.namespace === prevProps.workspace.namespace
-        && this.props.workspace.id === prevProps.workspace.id
-        && this.props.urlParams.cid === prevProps.urlParams.cid) {
+      if (!hasNewValidProps(this.props, prevProps, [
+        p => p.workspace.namespace,
+        p => p.workspace.id,
+        p => p.urlParams.cid
+      ])) {
         return;
       }
 
@@ -117,12 +115,12 @@ export const CohortActions = fp.flow(
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
-      let queryParams;
+      const queryParams: any = {};
 
       switch (action) {
         case 'cohort':
           url += `data/cohorts/build`;
-          queryParams = {cohortId: cohort.id};
+          queryParams.cohortId = cohort.id;
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;

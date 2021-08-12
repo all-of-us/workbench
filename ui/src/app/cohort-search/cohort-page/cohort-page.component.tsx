@@ -65,7 +65,7 @@ interface State {
   minHeight: string;
   updateGroupListsCount: number;
   cohortChanged: boolean;
-  updatingCohort: boolean;
+  userClickedSaveRequest: boolean;
   unsavedSelections: boolean;
   searchContext: any;
 }
@@ -87,7 +87,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         minHeight: '10rem',
         updateGroupListsCount: 0,
         cohortChanged: false,
-        updatingCohort: false,
+        userClickedSaveRequest: false,
         unsavedSelections: false,
         searchContext: undefined
       };
@@ -176,7 +176,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       // updatingCohort should really be renamed to savingCohort and it indicates that a child component is making a
       // save cohort API call. We don't want to show the warning modal in this case because the user is intentionally
       // navigating away by calling save.
-      return !this.state.updatingCohort && (this.state.cohortChanged || this.state.unsavedSelections);
+      return !this.state.userClickedSaveRequest && (this.state.cohortChanged || this.state.unsavedSelections);
     }
 
     unsavedChangesMessage() {
@@ -248,7 +248,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       cohortChanged={cohortChanged}
                       searchRequest={criteria}
                       updateCount={updateCount}
-                      updating={() => this.setState({updatingCohort: true})}/>}
+                      updating={() => this.setState({userClickedSaveRequest: true})}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>

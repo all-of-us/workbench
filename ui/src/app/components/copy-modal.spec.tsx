@@ -13,7 +13,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore} from '../utils/stores';
 
-import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
+import {CopyModal, CopyModalProps} from './copy-modal';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 function simulateSelect(wrapper: ReactWrapper, reactSelect: Select, selection: string) {
@@ -41,7 +41,7 @@ function simulateWorkspaceSelection(wrapper: ReactWrapper, workspace: TestWorksp
   simulateSelect(wrapper, Select, workspace.name);
 }
 
-describe('CopyModalComponent', () => {
+describe('CopyModal', () => {
   let props: CopyModalProps;
 
   const component = () => {

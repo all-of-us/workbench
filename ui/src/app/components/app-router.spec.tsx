@@ -1,9 +1,9 @@
-import * as React from "react";
 import {AppRoute, AppRouter, Guard} from "app/components/app-router";
-import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
+import * as React from "react";
+import {MemoryRouter} from "react-router";
 import {Redirect, Switch} from "react-router-dom";
-import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
+import {waitOneTickAndUpdate} from "testing/react-test-helpers";
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
