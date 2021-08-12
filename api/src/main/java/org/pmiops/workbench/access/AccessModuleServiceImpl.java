@@ -115,7 +115,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     // if the module is not enabled, the user is always compliant
-    if(!isModuleEnabledInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+    if (!isModuleEnabledInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
       return true;
     }
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);

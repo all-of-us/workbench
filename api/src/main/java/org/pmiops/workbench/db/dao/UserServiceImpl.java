@@ -328,11 +328,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean twoFactorAuthComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH);
     boolean eRACommonsComplete =
-        !configProvider.get().access.enableEraCommons
-            || accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
     boolean complianceTrainingComplete =
-        !configProvider.get().access.enableComplianceTraining
-            || accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
+        accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
     boolean dataUseAgreementTrainingComplete = isDataUseAgreementCompliant(user);
     boolean publicationConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);

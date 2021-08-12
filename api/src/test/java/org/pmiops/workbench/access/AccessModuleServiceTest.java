@@ -327,7 +327,7 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
-  public void testModuleComplaint_byPassedAndExpired() {
+  public void testModuleCompliant_byPassedAndExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
@@ -350,7 +350,7 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
-  public void testModuleComplaint_expired() {
+  public void testModuleCompliant_expired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
@@ -373,7 +373,7 @@ public class AccessModuleServiceTest extends SpringTest {
     userAccessModuleDao.saveAll(
         ImmutableList.of(twoFactorAuthDbUserAccessModule, duccDbUserAccessModule));
 
-    // DUAA expired, but 2FA not because it is not expirable
+    // DUCC expired, but 2FA not because it is not expirable
     assertThat(
             accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
         .isFalse();
@@ -382,7 +382,7 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
-  public void testModuleComplaint_completeAndNotExpired() {
+  public void testModuleCompliant_completeAndNotExpired() {
     Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
     long expiryDays = 365L;
     config.accessRenewal.expiryDays = expiryDays;
@@ -403,25 +403,22 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
-  public void testModuleComplaint_moduleNotEnabled() {
+  public void testModuleCompliant_moduleNotEnabled() {
     config.access.enableComplianceTraining = false;
     DbAccessModule rtTrainingModule =
         accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
 
     DbUserAccessModule existingDbUserAccessModule =
-        new DbUserAccessModule()
-            .setAccessModule(rtTrainingModule)
-            .setUser(user);
+        new DbUserAccessModule().setAccessModule(rtTrainingModule).setUser(user);
     userAccessModuleDao.save(existingDbUserAccessModule);
-    assertThat(
-            accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
         .isTrue();
   }
 
   @Test
-  public void testModuleComplaint_moduleNotExist() {
+  public void testModuleCompliant_moduleNotExist() {
     assertThat(
-        accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
         .isFalse();
   }
 

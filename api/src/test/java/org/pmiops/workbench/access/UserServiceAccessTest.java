@@ -145,8 +145,7 @@ public class UserServiceAccessTest {
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    TestMockFactory.createAccessModules(accessModuleDao);
-    accessModules = accessModuleDao.findAll();
+    accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
     dbUser = new DbUser();
     dbUser.setUsername(USERNAME);
@@ -276,7 +275,6 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
-          user.setEraCommonsBypassTime(null);
           return userDao.save(user);
         });
   }
@@ -289,7 +287,6 @@ public class UserServiceAccessTest {
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
-          user.setTwoFactorAuthBypassTime(null);
           return userDao.save(user);
         });
   }
@@ -302,7 +299,6 @@ public class UserServiceAccessTest {
         user -> {
           accessModuleService.updateBypassTime(
               dbUser.getUserId(), AccessModule.COMPLIANCE_TRAINING, false);
-          user.setComplianceTrainingBypassTime(null);
           return userDao.save(user);
         });
   }
@@ -423,7 +419,7 @@ public class UserServiceAccessTest {
         user -> {
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateCompletionTime(
-              dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, willExpire);
+              dbUser, AccessModuleName.PROFILE_CONFIRMATION, willExpire);
           advanceClockDays(EXPIRATION_DAYS + 1);
 
           return userDao.save(user);
@@ -511,8 +507,6 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // but this module is incomplete (and also not bypassed)
-    dbUser.setDataUseAgreementCompletionTime(null);
-    dbUser.setDataUseAgreementBypassTime(null);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     accessModuleService.updateBypassTime(
@@ -536,7 +530,8 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, now);
 
     // this is bypassed
-    dbUser.setDataUseAgreementBypassTime(now);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
 
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
@@ -569,7 +564,8 @@ public class UserServiceAccessTest {
         dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // a bypass which would "expire" in 30 days does NOT trigger a 30-day warning
-    dbUser.setDataUseAgreementBypassTime(willExpireAfter(daysPlusSome(30)));
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessModule.DATA_USER_CODE_OF_CONDUCT, true);
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 
