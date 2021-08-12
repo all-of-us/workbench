@@ -12,6 +12,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersionTiersResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
 
@@ -180,13 +181,13 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
 
     getMenuOptions() {
       this.setState({loadingMenuOptions: true});
-      const {workspace: {id, cdrVersionId, namespace}} = this.props;
+      const {workspace: {cdrVersionId}} = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
-      cohortBuilderApi().findCriteriaMenu(namespace, id, 0).then(async res => {
+      this.getMenuOptionsFromApi(0).then(async res => {
         const menuOptions = await Promise.all(res.items.map(async item => {
           const option = mapMenuItem(item);
           if (option.group) {
-            const children = await cohortBuilderApi().findCriteriaMenu(namespace, id, option.id);
+            const children = await this.getMenuOptionsFromApi(option.id);
             option.children = children.items.map(mapMenuItem);
           }
           return option;
@@ -195,6 +196,15 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
         criteriaMenuOptionsStore.next(criteriaMenuOptions);
         this.setState({loadingMenuOptions: false});
       });
+    }
+
+    // Temporary function for calling the correct menu endpoint based on 'enableStandardSourceDomains' flag
+    // TODO As part of RW-7124, remove and replace all usages with cohortBuilderApi().findCbMenu
+    getMenuOptionsFromApi(parentId: number) {
+      const {workspace: {id, namespace}} = this.props;
+      return serverConfigStore.get().config.enableStandardSourceDomains
+        ? cohortBuilderApi().findCbMenu(namespace, id, parentId)
+        : cohortBuilderApi().findCriteriaMenu(namespace, id, parentId);
     }
 
     mapCriteriaMenuItem(domain: any, temporalGroup: number) {
