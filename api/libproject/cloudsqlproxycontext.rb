@@ -9,7 +9,7 @@ class CloudSqlProxyContext < ServiceAccountContext
     # TODO(dmohs): An error here does not cause the main thread to die.
     super do
       ps = nil
-      cid = nil
+      docker_container_id = nil
       instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
       if Workbench.in_docker?
         ps = fork do
@@ -20,7 +20,7 @@ class CloudSqlProxyContext < ServiceAccountContext
           })
         end
       else
-        cid = common.capture_stdout(%W{docker run -d
+        docker_container_id = common.capture_stdout(%W{docker run -d
              -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
              -p 0.0.0.0:3307:3307
@@ -45,8 +45,8 @@ class CloudSqlProxyContext < ServiceAccountContext
         if ps
           Process.kill "HUP", ps
           Process.wait
-        else if cid
-          common.run_inline(%W{docker kill #{cid}})
+        else if docker_container_id
+          common.run_inline(%W{docker kill #{docker_container_id}})
         end
       end
     end

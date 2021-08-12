@@ -20,7 +20,7 @@ Gradle requires Java 8 to build currently (RW-5609 will upgrade to 11).
   - or, just in the Workbench repo: `api/gradle.properties`
   ```
   # gradle.properties
-  org.gradle.java.home={PATH_TO_JDK8}
+  org.gradle.java.home={YOUR_PATH_TO_JDK8}
 
   # Example:
   $ cat api/gradle.properties
