@@ -156,7 +156,6 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserRegisteredTierWarningThreshold(
       final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
-    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     final String logMsg =
         String.format(
@@ -348,12 +347,12 @@ public class MailServiceImpl implements MailService {
     return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
-  private RecipientAddress validatedRecipient(final String contactEmail) throws MessagingException {
+  private RecipientAddress validatedRecipient(final String contactEmail) {
     try {
       final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
       contactInternetAddress.validate();
     } catch (AddressException e) {
-      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+      throw new ServerErrorException("Email: " + contactEmail + " is invalid.");
     }
 
     final RecipientAddress toAddress = new RecipientAddress();
@@ -362,21 +361,10 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendWithRetries(
-      List<String> contactEmails, String subject, String description, String htmlMessage)
-      throws MessagingException {
+      List<String> contactEmails, String subject, String description, String htmlMessage) {
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(
-                contactEmails.stream()
-                    .map(
-                        e -> {
-                          try {
-                            return validatedRecipient(e);
-                          } catch (MessagingException messagingException) {
-                            throw new ServerErrorException(e);
-                          }
-                        })
-                    .collect(Collectors.toList()))
+            .to(contactEmails.stream().map(this::validatedRecipient).collect(Collectors.toList()))
             .html(htmlMessage)
             .subject(subject)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
@@ -403,7 +391,7 @@ public class MailServiceImpl implements MailService {
                 String.format(
                     "ApiException: On Last Attempt! Email '%s' not sent: %s",
                     description, attempt.getRight().toString()));
-            throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+            throw new ServerErrorException("Sending email failed: " + attempt.getRight());
           }
           break;
 
@@ -413,7 +401,7 @@ public class MailServiceImpl implements MailService {
               String.format(
                   "Messaging Exception: Email '%s' not sent: %s",
                   description, attempt.getRight().toString()));
-          throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+          throw new ServerErrorException("Sending email failed: " + attempt.getRight());
 
         case SUCCESSFUL:
           log.log(Level.INFO, String.format("Email '%s' was sent.", description));
@@ -423,7 +411,7 @@ public class MailServiceImpl implements MailService {
           if (retries == 0) {
             log.log(
                 Level.SEVERE, String.format("Email '%s' was not sent. Default case.", description));
-            throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+            throw new ServerErrorException("Sending email failed: " + attempt.getRight());
           }
       }
     } while (retries > 0);
