@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, inputBorderColor, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
-import {MatchParams} from 'app/routing/app-routing';
+import {MatchParams} from 'app/components/app-router';
 import {participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';

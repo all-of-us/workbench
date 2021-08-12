@@ -21,7 +21,7 @@ import {Link as RouterLink, withRouter} from 'react-router-dom';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {MatchParams} from 'app/routing/app-routing';
+import {MatchParams} from 'app/components/app-router';
 import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,

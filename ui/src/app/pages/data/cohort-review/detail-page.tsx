@@ -5,7 +5,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
-import {MatchParams} from 'app/routing/app-routing';
+import {MatchParams} from 'app/components/app-router';
 import {getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';

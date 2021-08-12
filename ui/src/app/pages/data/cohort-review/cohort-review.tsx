@@ -6,7 +6,7 @@ import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
-import {MatchParams} from 'app/routing/app-routing';
+import {MatchParams} from 'app/components/app-router';
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';

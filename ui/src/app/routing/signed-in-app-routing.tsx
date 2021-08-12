@@ -126,7 +126,7 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/workspaces/build' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
     </AppRoute>
-    <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]}>
+    <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]} intermediaryRoute={true}>
       <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>
     </AppRoute>
     <AppRoute exact path='*'>

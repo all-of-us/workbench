@@ -40,6 +40,7 @@ import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import * as ReactDOM from "react-dom";
 import {Button} from "app/components/buttons";
+import { ParamsContextProvider } from './params-context-provider';
 
 declare const gapi: any;
 
@@ -50,20 +51,6 @@ const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(withRouteData, withRoutingSpinner)(UserDisabled);
-
-export interface MatchParams {
-  cid?: string;
-  csid?: string;
-  dataSetId?: string;
-  domain?: string;
-  institutionId?: string;
-  nbName?: string;
-  ns?: string;
-  pid?: string;
-  username?: string;
-  usernameWithoutGsuiteDomain?: string;
-  wsid?: string;
-}
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -289,45 +276,48 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     <NotificationModal/>
     {
       isCookiesEnabled && <BrowserRouter getUserConfirmation={getUserConfirmation}>
-        <AppRoutingWrapper>
-          <ScrollToTop/>
-          {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-          {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-          {/* It should be noted that the reason this is currently working is because Switch only */}
-          {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-          {/* that they are a Route or a subclass of Route. */}
-          {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
-          <Switch>
-            <AppRoute exact path='/cookie-policy'>
-              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-            </AppRoute>
-            <AppRoute exact path='/login'>
-              <SignInPage routeData={{title: 'Sign In'}}/>
-            </AppRoute>
-            <AppRoute exact path='/session-expired'>
-              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
-            </AppRoute>
-            <AppRoute exact path='/sign-in-again'>
-              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
-            </AppRoute>
-            <AppRoute exact path='/user-disabled'>
-              <UserDisabledPage routeData={{title: 'Disabled'}}/>
-            </AppRoute>
-            <AppRoute exact path='/not-found'>
-              <NotFoundPage routeData={{title: 'Not Found'}}/>
-            </AppRoute>
-            <AppRoute
-                path=''
-                exact={false}
-                guards={[signInGuard, disabledGuard(isUserDisabled)]}
-            >
-              <SignedInPage
+        <ParamsContextProvider>
+          <AppRoutingWrapper>
+            <ScrollToTop/>
+            {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+            {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+            {/* It should be noted that the reason this is currently working is because Switch only */}
+            {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+            {/* that they are a Route or a subclass of Route. */}
+            {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
+            <Switch>
+              <AppRoute exact path='/cookie-policy'>
+                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+              </AppRoute>
+              <AppRoute exact path='/login'>
+                <SignInPage routeData={{title: 'Sign In'}}/>
+              </AppRoute>
+              <AppRoute exact path='/session-expired'>
+                <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
+              </AppRoute>
+              <AppRoute exact path='/sign-in-again'>
+                <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
+              </AppRoute>
+              <AppRoute exact path='/user-disabled'>
+                <UserDisabledPage routeData={{title: 'Disabled'}}/>
+              </AppRoute>
+              <AppRoute exact path='/not-found'>
+                <NotFoundPage routeData={{title: 'Not Found'}}/>
+              </AppRoute>
+              <AppRoute
+                  path=''
+                  exact={false}
+                  guards={[signInGuard, disabledGuard(isUserDisabled)]}
                   intermediaryRoute={true}
-                  routeData={{}}
-              />
-            </AppRoute>
-          </Switch>
-        </AppRoutingWrapper>
+              >
+                <SignedInPage
+                    intermediaryRoute={true}
+                    routeData={{}}
+                />
+              </AppRoute>
+            </Switch>
+          </AppRoutingWrapper>
+        </ParamsContextProvider>
       </BrowserRouter>
     }
     {

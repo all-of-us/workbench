@@ -9,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
-import {MatchParams} from 'app/routing/app-routing';
+import {MatchParams} from 'app/components/app-router';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -30,7 +30,7 @@ import {
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
-import {RouteComponentProps} from 'react-router';
+import {RouteComponentProps, withRouter} from 'react-router';
 import * as validate from 'validate.js';
 
 const styles = reactStyles({
@@ -70,7 +70,10 @@ interface Props
         NavigationProps,
         RouteComponentProps<MatchParams> {}
 
-export const AdminInstitutionEdit = fp.flow(withNavigation)(class extends React.Component<Props, InstitutionEditState> {
+export const AdminInstitutionEdit = fp.flow(
+    withNavigation,
+    withRouter
+)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {

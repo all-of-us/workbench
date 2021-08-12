@@ -8,14 +8,33 @@ import {routeDataStore, runtimeStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import * as ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Redirect, Route, Switch, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 import {workspacesApi} from "../services/swagger-fetch-clients";
-import {ExceededActionCountError, LeoRuntimeInitializer} from "../utils/leo-runtime-initializer";
-import {buildPageTitleForEnvironment} from "../utils/title";
+import {ExceededActionCountError, LeoRuntimeInitializer} from "app/utils/leo-runtime-initializer";
+import {buildPageTitleForEnvironment} from "app/utils/title";
+import {
+  ParamsContext,
+  ParamsContextProvider
+} from "app/routing/params-context-provider";
+
+export interface MatchParams {
+  cid?: string;
+  csid?: string;
+  dataSetId?: string;
+  domain?: string;
+  institutionId?: string;
+  nbName?: string;
+  ns?: string;
+  pid?: string;
+  username?: string;
+  usernameWithoutGsuiteDomain?: string;
+  wsid?: string;
+}
+
 
 export interface Guard {
   allowed: () => boolean;
@@ -66,7 +85,6 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
       // so we should revisit.
       urlParamsStore.next({...urlParamsStore.getValue(), ...params});
     } else {
-      console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
@@ -83,13 +101,27 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-export const AppRoute = ({path, guards = [], exact, children}): React.ReactElement => {
+const ParamsContextShim = ({intermediaryRoute, children}) => {
+  const newParams = useParams();
+  const {params, setParams} = useContext(ParamsContext);
+  useEffect(() => {
+    if (!fp.isEqual(params, newParams) && !intermediaryRoute) {
+      setParams(newParams);
+    }
+  }, [newParams]);
+
+  return children;
+}
+
+export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
 
   return <Route exact={exact} path={path}>
     {redirectPath
         ? <Redirect to={redirectPath}/>
-        : (children)
+        : <ParamsContextShim intermediaryRoute={intermediaryRoute}>
+          {children}
+        </ParamsContextShim>
     }
   </Route>;
 };
@@ -189,9 +221,15 @@ export const AppRoutingWrapper = ({children}) => {
         workspacesApi().updateRecentWorkspaces(ns, wsid);
       }
     }).unsubscribe;
+    // const {ns, wsid} = params;
+    // debugger;
+    // if (ns && wsid) {
+    //   workspacesApi().updateRecentWorkspaces(ns, wsid);
+    // }
   }, []);
 
   return <React.Fragment>
-    (children)
+    {children}
   </React.Fragment>
+
 }

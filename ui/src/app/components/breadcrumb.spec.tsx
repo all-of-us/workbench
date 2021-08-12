@@ -23,10 +23,10 @@ describe('getTrail', () => {
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
       {
-        pathname: '/workspaces/testns/testwsid/data/cohorts/88/review/participants/77',
-        state: {},
-        search: '',
-        hash: ''
+        ns: 'testns',
+        wsid: 'testwsid',
+        cid: '88',
+        pid: '77'
       }
     );
     expect(trail.map(item => item.label))
