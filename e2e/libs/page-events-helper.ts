@@ -101,9 +101,9 @@ const getResponseText = async (request: Request): Promise<string> => {
     // Log response if response it's not a redirect or no-content
     const status = clonedResponse && clonedResponse.status();
     if (
-        status &&
-        !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
-        status !== NO_CONTENT_RESPONSE_CODE
+      status &&
+      !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
+      status !== NO_CONTENT_RESPONSE_CODE
     ) {
       try {
         return (await clonedResponse.buffer()).toString();
