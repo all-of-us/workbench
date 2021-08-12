@@ -422,9 +422,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> sendBillingSetupEmail(SendBillingSetupEmailRequest emailRequest) {
     try {
-      mailServiceProvider
-          .get()
-          .sendBillingSetupEmail(userProvider.get(), emailRequest);
+      mailServiceProvider.get().sendBillingSetupEmail(userProvider.get(), emailRequest);
     } catch (MessagingException e) {
       throw new ServerErrorException("Failed to send billing setup email", e);
     }

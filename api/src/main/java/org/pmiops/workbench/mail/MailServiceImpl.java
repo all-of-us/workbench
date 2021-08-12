@@ -1,7 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.directory.model.User;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -207,19 +208,23 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest) throws MessagingException {
+  public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest)
+      throws MessagingException {
     final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    if(!workbenchConfig.featureFlags.enableBillingUpgrade) {
+    if (!workbenchConfig.featureFlags.enableBillingUpgrade) {
       return;
     }
 
     final String htmlMessage =
-        buildHtml(
-            SETUP_BILLING_ACCOUNT_EMAIL,
-            setupBillingAccountEmailMap(dbUser, emailRequest));
+        buildHtml(SETUP_BILLING_ACCOUNT_EMAIL, setupBillingAccountEmailMap(dbUser, emailRequest));
 
+    List<String> receiptEmails = new ArrayList<>();
+    receiptEmails.add(dbUser.getContactEmail());
+    if (!Strings.isNullOrEmpty(workbenchConfig.billing.carahsoftEmail)) {
+      receiptEmails.add(workbenchConfig.billing.carahsoftEmail);
+    }
     sendWithRetries(
-        ImmutableList.of(dbUser.getContactEmail()),
+        receiptEmails,
         "Your access to All of Us Registered Tier Data has expired",
         String.format(
             "Registered Tier access expired for user %s (%s)",
@@ -307,9 +312,19 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.INSTITUTION_NAME, request.getInstitution())
         .put(EmailSubstitutionField.USER_PHONE, request.getPhone())
-        .put(EmailSubstitutionField.USERNAME, user.getUsername() + "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
-        .put(EmailSubstitutionField.PAYMENT_METHOD, request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD ? "Credit Card" : "Purchase Order/Other")
-        .put(EmailSubstitutionField.NIH_FUNDED, BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
+        .put(
+            EmailSubstitutionField.USERNAME,
+            user.getUsername()
+                + "@"
+                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
+        .put(
+            EmailSubstitutionField.PAYMENT_METHOD,
+            request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD
+                ? "Credit Card"
+                : "Purchase Order/Other")
+        .put(
+            EmailSubstitutionField.NIH_FUNDED,
+            BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
         .build();
   }
 
@@ -351,13 +366,17 @@ public class MailServiceImpl implements MailService {
       throws MessagingException {
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(contactEmails.stream().map(e -> {
-              try {
-                return validatedRecipient(e);
-              } catch (MessagingException messagingException) {
-               throw new ServerErrorException(e);
-              }
-            }).collect(Collectors.toList()))
+            .to(
+                contactEmails.stream()
+                    .map(
+                        e -> {
+                          try {
+                            return validatedRecipient(e);
+                          } catch (MessagingException messagingException) {
+                            throw new ServerErrorException(e);
+                          }
+                        })
+                    .collect(Collectors.toList()))
             .html(htmlMessage)
             .subject(subject)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);

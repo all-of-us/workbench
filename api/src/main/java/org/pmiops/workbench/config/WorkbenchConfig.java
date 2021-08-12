@@ -105,6 +105,8 @@ public class WorkbenchConfig {
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
+    // The contact email from Sarahsoft for billing account setup
+    public String carahsoftEmail;
   }
 
   public static class FireCloudConfig {

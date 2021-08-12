@@ -30,7 +30,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "NIHStrides@Carahsoft.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
