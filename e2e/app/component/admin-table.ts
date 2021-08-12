@@ -19,7 +19,8 @@ export default class adminTable extends Table {
     return new Table(
       this.page,
       `${this.getXpath()}
-      //div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]//table[@class="p-datatable-scrollable-header-table"]`
+      //div[@class="p-datatable-scrollable-view p-datatable-frozen-view"]
+      //table[@class="p-datatable-scrollable-header-table"]`
     );
   }
 
