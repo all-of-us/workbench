@@ -95,21 +95,25 @@ const getResponseText = async (request: Request): Promise<string> => {
   const REDIRECT_CODE_START = 300;
   const REDIRECT_CODE_END = 308;
   const NO_CONTENT_RESPONSE_CODE = 204;
-  const response = request.response();
-  // Log response if response it's not a redirect or no-content
-  const status = response && response.status();
-  if (
-    status &&
-    !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
-    status !== NO_CONTENT_RESPONSE_CODE
-  ) {
-    try {
-      return (await request.response().buffer()).toString();
-    } catch (err) {
-      console.error(`Puppeteer error during get response text.\n${err}`);
-      return undefined;
+  const response = request.response;
+  if (response) {
+    const clonedResponse = fp.clone(response());
+    // Log response if response it's not a redirect or no-content
+    const status = clonedResponse && clonedResponse.status();
+    if (
+        status &&
+        !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
+        status !== NO_CONTENT_RESPONSE_CODE
+    ) {
+      try {
+        return (await clonedResponse.buffer()).toString();
+      } catch (err) {
+        console.error(`Puppeteer error during get response text.\n${err}`);
+        return undefined;
+      }
     }
   }
+  return undefined;
 };
 
 export const logRequestError = async (request: Request): Promise<void> => {
