@@ -7,7 +7,7 @@ import { LinkText } from 'app/text-labels';
 export const PageTitle = 'Access Renewal';
 
 export const LabelAlias = {
-  AccessExpired: 'Researcher workbench access has expired.',
+  AccessExpired: 'Researcher workbench access has expired.'
 };
 
 export default class AccessRenewalPage extends AuthenticatedPage {

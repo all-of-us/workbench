@@ -21,7 +21,7 @@ describe('Annual Access Renewal', () => {
     expect(await aarPage.hasExpired()).toBeTruthy();
   });
 
-  // note that this test is "destructive" in that it brings the user to state
+  // note that this test is "destructive" in that it brings the user to a state
   // where they cannot complete this test again, because they have completed
   // AAR and are no longer forced into renewal
 
