@@ -2708,3 +2708,40 @@ Common.register_command({
     "random copies in a given output directory",
   :fn => ->(*args) { randomize_vcf("randomize-vcf", *args) }
 })
+
+def set_access_module_timestamps(cmd_name, *args)
+  common = Common.new
+  ensure_docker(cmd_name, args)
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+  op.add_option(
+    "--user [user]",
+    ->(opts, v) { opts.user = v },
+    "User whose timestamps should be updated.  Use full email address.")
+  op.add_validator ->(opts) { raise ArgumentError if opts.user.nil?}
+  op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+      ["--user", op.opts.user]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{gradle setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+SET_ACCESS_MODULE_TIMESTAMPS_CMD = "set-access-module-timestamps"
+
+Common.register_command({
+    :invocation => SET_ACCESS_MODULE_TIMESTAMPS_CMD,
+    :description => "Set access module timestamps for e2e test users.",
+    :fn => ->(*args) {set_access_module_timestamps(SET_ACCESS_MODULE_TIMESTAMPS_CMD, *args)}
+})
