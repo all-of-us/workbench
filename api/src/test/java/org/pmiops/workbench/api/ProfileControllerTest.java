@@ -516,7 +516,6 @@ public class ProfileControllerTest extends BaseControllerTest {
         dbUser, AccessModuleName.PUBLICATION_CONFIRMATION, TIMESTAMP);
     accessModuleService.updateCompletionTime(
         dbUser, AccessModuleName.PROFILE_CONFIRMATION, TIMESTAMP);
-    userDao.save(dbUser);
 
     // arbitrary; at coding time the current version is 3
     final int versionA = 5;
