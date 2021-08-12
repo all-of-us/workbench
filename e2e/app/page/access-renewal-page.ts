@@ -8,7 +8,6 @@ export const PageTitle = 'Access Renewal';
 
 export const LabelAlias = {
   AccessExpired: 'Researcher workbench access has expired.',
-  StepsComplete: 'Thank you for completing all the necessary steps'
 };
 
 export default class AccessRenewalPage extends AuthenticatedPage {
@@ -24,10 +23,6 @@ export default class AccessRenewalPage extends AuthenticatedPage {
 
   hasExpired(): Promise<boolean> {
     return this.containsText(LabelAlias.AccessExpired);
-  }
-
-  isComplete(): Promise<boolean> {
-    return this.containsText(LabelAlias.StepsComplete);
   }
 
   getReviewProfileButton(): Button {

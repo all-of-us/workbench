@@ -56,7 +56,7 @@ describe('Annual Access Renewal', () => {
 
     await modalOK.click();
     await aarPage.waitForLoad();
-    expect(await aarPage.isComplete()).toBeTruthy();
+    expect(await aarPage.hasExpired()).toBeFalsy();
 
     // and we can now access the home page
 
