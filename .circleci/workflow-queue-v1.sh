@@ -65,7 +65,7 @@ fetch_current_pipeline_start_time() {
 
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetch previously submitted pipelines on \"${branch}\" branch that are running, pending or queued:"
+  printf '%s\n' "Fetch previously submitted pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued:"
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
@@ -79,7 +79,7 @@ fetch_older_pipelines() {
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
   echo "${get_result}" | jq -r ".[] | ${jq_filter}"
   printf "done echo"
-  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter}[] | select(.start_time>=\"${1}\") | ${jq_object}")
+  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | ${jq_object}")
 }
 
 
