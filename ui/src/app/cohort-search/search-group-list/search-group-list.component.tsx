@@ -126,8 +126,7 @@ function mapMenuItem(item: CriteriaMenu) {
     id,
     name,
     sortOrder,
-    // We can remove this check once the standardSource flag is set to true
-    standard: standard,
+    standard,
     type
   };
 }
