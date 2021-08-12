@@ -2,6 +2,7 @@ import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-noti
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {LoginGovIAL2NotificationMaybe} from 'app/components/login-gov-ial2-notification';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
@@ -211,6 +212,7 @@ export const NavBar = () => {
           onClose={onStatusAlertBannerUnmount}
       />
     }
+    {<LoginGovIAL2NotificationMaybe/>}
     {
       showSideNav
       && <SideNav

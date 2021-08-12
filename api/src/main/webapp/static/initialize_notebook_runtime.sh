@@ -8,6 +8,10 @@ set -x
 # API server and its path is passed in as jupyterUserScriptUri during notebook
 # runtime creation.
 
+# Running these commands with `sudo -E -u jupyter` acts as the Jupyter user,
+# which is preferred where possible to ensure that the Jupyter user can access
+# any files or directories created below.
+
 # Enable any built-in extensions. Snippets menu is used for AoU-specific code
 # snippet insertion, see README.md for more details.
 # Note: keep the command line invocation here in-sync with how Leo installs its
@@ -17,13 +21,14 @@ sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable snippets_menu/main
 # Section represents the jupyter page to which the extension will be applied to
 sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-upload-policy-extension/main --section=tree
 
-nbstripout --install --global
+sudo -E -u jupyter /opt/conda/bin/nbstripout --install --global
 
 # Setup gitignore to avoid accidental checkin of data on AoU. Ideally this would be
 # configured on the image, per https://github.com/DataBiosphere/terra-docker/pull/234
 # but that's no longer possible as the home directory is mounted at runtime.
 ignore_file=/home/jupyter/gitignore_global
-cat <<EOF > ${ignore_file}
+
+cat <<EOF | sudo -E -u jupyter tee ${ignore_file}
 # By default, all files should be ignored by git.
 # We want to be sure to exclude files containing data such as CSVs and images such as PNGs.
 *.*
@@ -39,5 +44,5 @@ cat <<EOF > ${ignore_file}
 !*.rst
 !LICENSE*
 EOF
-chown jupyter:users ${ignore_file}
-git config --global core.excludesfile ${ignore_file}
+
+sudo -E -u jupyter /usr/bin/git config --global core.excludesfile ${ignore_file}
