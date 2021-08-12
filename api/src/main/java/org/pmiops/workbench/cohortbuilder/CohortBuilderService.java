@@ -78,6 +78,8 @@ public interface CohortBuilderService {
 
   Long findDomainCount(String domain, String term);
 
+  Long findDomainCountByStandard(String domain, String term, Boolean standard);
+
   List<DomainInfo> findDomainInfos();
 
   List<DomainCard> findDomainCards();
