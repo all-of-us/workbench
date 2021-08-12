@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
+import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
@@ -113,6 +114,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    // if the module is not enabled, the user is always compliant
+    if(!isModuleEnabledInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+      return true;
+    }
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
     boolean isCompleted = userAccessModule.getCompletionTime() != null;

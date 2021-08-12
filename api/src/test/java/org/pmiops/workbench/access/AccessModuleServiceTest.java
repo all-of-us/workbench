@@ -403,9 +403,25 @@ public class AccessModuleServiceTest extends SpringTest {
   }
 
   @Test
+  public void testModuleComplaint_moduleNotEnabled() {
+    config.access.enableComplianceTraining = false;
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+
+    DbUserAccessModule existingDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(rtTrainingModule)
+            .setUser(user);
+    userAccessModuleDao.save(existingDbUserAccessModule);
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isTrue();
+  }
+
+  @Test
   public void testModuleComplaint_moduleNotExist() {
     assertThat(
-            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
         .isFalse();
   }
 

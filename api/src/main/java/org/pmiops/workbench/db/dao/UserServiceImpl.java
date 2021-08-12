@@ -314,10 +314,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
-    final Integer signedVersion = user.getDataUseAgreementSignedVersion();
     if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
       return true;
     }
+    final Integer signedVersion = user.getDataUseAgreementSignedVersion();
     if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
       return false;
     }
