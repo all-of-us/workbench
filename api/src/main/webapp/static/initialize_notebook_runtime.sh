@@ -21,7 +21,7 @@ sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable snippets_menu/main
 # Section represents the jupyter page to which the extension will be applied to
 sudo -E -u jupyter /opt/conda/bin/jupyter nbextension enable aou-upload-policy-extension/main --section=tree
 
-sudo -E -u jupyter nbstripout --install --global
+sudo -E -u jupyter /opt/conda/bin/nbstripout --install --global
 
 # Setup gitignore to avoid accidental checkin of data on AoU. Ideally this would be
 # configured on the image, per https://github.com/DataBiosphere/terra-docker/pull/234
@@ -45,4 +45,4 @@ cat <<EOF | sudo -E -u jupyter tee ${ignore_file}
 !LICENSE*
 EOF
 
-sudo -E -u jupyter git config --global core.excludesfile ${ignore_file}
+sudo -E -u jupyter /usr/bin/git config --global core.excludesfile ${ignore_file}
