@@ -77,7 +77,7 @@ fetch_older_pipelines() {
   jq_filter="select(.status | test(\"running|pending|queued\"))"
   jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
-  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | ${jq_object}")
+  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter}[] | select(.start_time>=\"${1}\") | ${jq_object}")
 }
 
 
@@ -113,7 +113,7 @@ while [[ "${is_running}" == "true" ]]; do
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
   else
-    printf "\n%s\n" "all previous builds have finished."
+    printf "\n%s\n" "all previous submitted pipelines have finished."
     is_running=false
   fi
 
