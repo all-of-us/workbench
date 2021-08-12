@@ -70,7 +70,7 @@ fetch_older_pipelines() {
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
   if [[ ! "${get_result}" ]]; then
-    printf "curl failed."
+    printf "curl request for older pipelines failed."
     exit 1
   fi
   # jq_filter="select(.branch==\"${branch}\" and (.status | test(\"running|pending|queued\")))"
@@ -79,7 +79,7 @@ fetch_older_pipelines() {
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
   echo "${get_result}" | jq -r ".[] | ${jq_filter}"
   printf "done echo"
-  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | ${jq_object}")
+  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\")")
 }
 
 
