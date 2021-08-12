@@ -249,7 +249,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     backToTable() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     previous = () => {
@@ -291,7 +291,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 
     getRequestFilters = () => {

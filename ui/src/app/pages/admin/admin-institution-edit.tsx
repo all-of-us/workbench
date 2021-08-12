@@ -369,12 +369,26 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   async saveInstitution() {
     const {institution, institutionMode} = this.state;
     const rtConfig: InstitutionTierConfig = getRegisteredTierConfig(institution);
+    const ctConfig: InstitutionTierConfig = getControlledTierConfig(institution);
     if (institution && rtConfig) {
       if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
         rtConfig.emailAddresses = [];
       } else if (rtConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
         rtConfig.emailDomains = [];
       }
+    }
+    if (institution && ctConfig) {
+      if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.DOMAINS) {
+        ctConfig.emailAddresses = [];
+      } else if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
+        ctConfig.emailDomains = [];
+      }
+    }
+    if (ctConfig.membershipRequirement === InstitutionMembershipRequirement.NOACCESS) {
+      // Don't set CT if CT is NOACCESS
+      institution.tierConfigs = [rtConfig];
+    } else {
+      institution.tierConfigs = [rtConfig, ctConfig];
     }
     if (institution && institution.organizationTypeEnum !== OrganizationType.OTHER) {
       institution.organizationTypeOtherText = null;
@@ -413,7 +427,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backNavigate() {
-    navigate(['admin/institution']);
+    navigate(['admin', 'institution']);
   }
 
   validateEmailAddressPresence(tier: AccessTierShortNames) {

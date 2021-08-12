@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {cohortsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {cdrVersionStore} from 'app/utils/stores';
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
@@ -16,6 +16,7 @@ describe('CohortPage', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({config: {enableStandardSourceDomains: false, gsuiteDomain: ''}});
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
   });

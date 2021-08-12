@@ -342,9 +342,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
-            <span>Bypass action is complete. Reload the page to continue.</span>}
+            <span>Bypass action is complete.
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => {location.replace('/'); }}>Get Started</Button>
+            </span>}
           {!bypassActionComplete && <span>
-            [Test environment] Self-service bypass is enabled:&nbsp;
+            [Test environment] Self-service bypass is enabled:
             {anyBypassActionsRemaining &&
               <Button style={{marginLeft: '0.5rem'}}
                       onClick={() => this.setAllModulesBypassState(true)}
@@ -418,13 +421,10 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           You successfully completed all the required steps to access the Researcher Workbench.
           <Button style={{marginLeft: '0.5rem'}}
                   onClick={() => {
-                    // Quirk / hack note: the goal here is to send the user to the homepage once they've completed
-                    // all access modules. Normally we would just navigate(['']) to do this. However, because
-                    // of the way this dashboard is rendered *within* the homepage component, a call to
-                    // navigate is not enough to trigger the normal homepage to load. As a workaround, we
-                    // explicitly clear the search query and redirect to the root path.
-                    window.location.pathname = '/';
-                    window.location.search = '';
+                    // After a registration status change, to be safe, we reload the application. This results in
+                    // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+                    // have been dependent on the user's registration status, e.g. CDR config information.
+                    location.replace('/');
                   }}>Get Started</Button>
         </div>
       }

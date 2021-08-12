@@ -271,7 +271,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
 
     goBack() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     render() {
