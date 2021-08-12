@@ -249,6 +249,49 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public CriteriaListWithCountResponse findCriteriaByDomain(
+      String domain, String term, String surveyName, Boolean standard, Integer limit) {
+    PageRequest pageRequest =
+        PageRequest.of(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
+
+    // if search term is empty find the top counts for the domain
+    if (isTopCountsSearch(term)) {
+      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
+    }
+
+    String modifiedSearchTerm = modifyTermMatch(term);
+    // if the modified search term is empty return an empty result
+    if (modifiedSearchTerm.isEmpty()) {
+      return new CriteriaListWithCountResponse().totalCount(0L);
+    }
+
+    // if domain type is survey then search survey by term.
+    if (isSurveyDomain(domain)) {
+      return findSurveyCriteriaBySearchTerm(domain, surveyName, pageRequest, modifiedSearchTerm);
+    }
+
+    // find a match on concept code
+    Page<DbCriteria> dbCriteriaPage =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCodeAndStandard(
+            domain, term.replaceAll("[()+\"*-]", ""), standard, pageRequest);
+
+    // if no match is found on concept code then find match on full text index by term
+    if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
+      dbCriteriaPage =
+          cbCriteriaDao.findCriteriaByDomainAndFullTextAndStandard(
+              domain, modifiedSearchTerm, standard, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  //  TODO: Remove this method once the feature flag standardSource is turned on for all
+  // environments
+  @Override
   public CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, String surveyName, Integer limit) {
     PageRequest pageRequest =
@@ -456,6 +499,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
+      String domain, String surveyName, Boolean standard, PageRequest pageRequest) {
+    Page<DbCriteria> dbCriteriaPage;
+    if (isSurveyDomain(domain)) {
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
+    } else {
+      dbCriteriaPage = cbCriteriaDao.findCriteriaTopCountsByStandard(domain, standard, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
   }
 
   private CriteriaListWithCountResponse getTopCountsSearch(
