@@ -329,8 +329,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     getCriteriaInfoByDomain(domain, value, surveyName) {
       const {workspace: {id, namespace}, searchContext: {standard}} = this.props;
+      // Remove the standard null check once https://precisionmedicineinitiative.atlassian.net/browse/RW-6982 is done
       return serverConfigStore.get().config.enableStandardSourceDomains
-          ? cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, standard, value, surveyName)
+          ? cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, standard == null ? true : standard, value, surveyName)
           : cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value, surveyName);
     }
 
