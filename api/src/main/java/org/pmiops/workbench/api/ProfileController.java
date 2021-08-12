@@ -57,6 +57,7 @@ import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -416,6 +417,18 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     return resetPasswordAndSendWelcomeEmail(username, user);
+  }
+
+  @Override
+  public ResponseEntity<Void> sendBillingSetupEmail(SendBillingSetupEmailRequest emailRequest) {
+    try {
+      mailServiceProvider
+          .get()
+          .sendBillingSetupEmail(userProvider.get(), emailRequest);
+    } catch (MessagingException e) {
+      throw new ServerErrorException("Failed to send billing setup email", e);
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   private boolean userHasEverLoggedIn(

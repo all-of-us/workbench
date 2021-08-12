@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.directory.model.User;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -20,11 +22,13 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -32,6 +36,8 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
+import org.pmiops.workbench.model.BillingPaymentMethod;
+import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +59,8 @@ public class MailServiceImpl implements MailService {
       "emails/rt_access_threshold_email/content.html";
   private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
       "emails/rt_access_expired_email/content.html";
+  private static final String SETUP_BILLING_ACCOUNT_EMAIL =
+      "emails/setup_gcp_billing_account_email/content.html";
 
   private enum Status {
     REJECTED,
@@ -78,7 +86,7 @@ public class MailServiceImpl implements MailService {
         buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user));
 
     sendWithRetries(
-        contactEmail,
+        Collections.singletonList(contactEmail),
         "Your new All of Us Researcher Workbench Account",
         String.format("Welcome for %s", user.getName()),
         htmlMessage);
@@ -96,7 +104,7 @@ public class MailServiceImpl implements MailService {
         buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions));
 
     sendWithRetries(
-        contactEmail,
+        Collections.singletonList(contactEmail),
         "Instructions from your institution on using the Researcher Workbench",
         String.format("Institution user instructions for %s", contactEmail),
         htmlMessage);
@@ -119,7 +127,7 @@ public class MailServiceImpl implements MailService {
             freeTierDollarThresholdSubstitutionMap(user, currentUsage, remainingBalance));
 
     sendWithRetries(
-        user.getContactEmail(),
+        Collections.singletonList(user.getContactEmail()),
         String.format(
             "Reminder - %s Free credit usage in All of Us Researcher Workbench",
             formatPercentage(threshold)),
@@ -138,7 +146,7 @@ public class MailServiceImpl implements MailService {
         buildHtml(FREE_TIER_EXPIRATION_RESOURCE, freeTierExpirationSubstitutionMap(user));
 
     sendWithRetries(
-        user.getContactEmail(),
+        Collections.singletonList(user.getContactEmail()),
         "Alert - Free credit expiration in All of Us Researcher Workbench",
         expirationMsg,
         htmlMessage);
@@ -164,7 +172,7 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime));
 
     sendWithRetries(
-        user.getContactEmail(),
+        Collections.singletonList(user.getContactEmail()),
         "Your access to All of Us Registered Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
@@ -190,11 +198,32 @@ public class MailServiceImpl implements MailService {
             registeredTierAccessSubstitutionMap(expirationTime));
 
     sendWithRetries(
-        user.getContactEmail(),
+        Collections.singletonList(user.getContactEmail()),
         "Your access to All of Us Registered Tier Data has expired",
         String.format(
             "Registered Tier access expired for user %s (%s)",
             user.getUsername(), user.getContactEmail()),
+        htmlMessage);
+  }
+
+  @Override
+  public void sendBillingSetupEmail(DbUser dbUser, SendBillingSetupEmailRequest emailRequest) throws MessagingException {
+    final WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    if(!workbenchConfig.featureFlags.enableBillingUpgrade) {
+      return;
+    }
+
+    final String htmlMessage =
+        buildHtml(
+            SETUP_BILLING_ACCOUNT_EMAIL,
+            setupBillingAccountEmailMap(dbUser, emailRequest));
+
+    sendWithRetries(
+        ImmutableList.of(dbUser.getContactEmail()),
+        "Your access to All of Us Registered Tier Data has expired",
+        String.format(
+            "Registered Tier access expired for user %s (%s)",
+            dbUser.getUsername(), dbUser.getContactEmail()),
         htmlMessage);
   }
 
@@ -268,6 +297,22 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
+  private ImmutableMap<EmailSubstitutionField, String> setupBillingAccountEmailMap(
+      DbUser user, SendBillingSetupEmailRequest request) {
+
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+        .put(EmailSubstitutionField.INSTITUTION_NAME, request.getInstitution())
+        .put(EmailSubstitutionField.USER_PHONE, request.getPhone())
+        .put(EmailSubstitutionField.USERNAME, user.getUsername() + "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
+        .put(EmailSubstitutionField.PAYMENT_METHOD, request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD ? "Credit Card" : "Purchase Order/Other")
+        .put(EmailSubstitutionField.NIH_FUNDED, BooleanUtils.isTrue(request.getIsNihFunded()) ? "Yes" : "No")
+        .build();
+  }
+
   private String buildHtml(
       final String resource, final Map<EmailSubstitutionField, String> replacementMap)
       throws MessagingException {
@@ -302,11 +347,17 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendWithRetries(
-      String contactEmail, String subject, String description, String htmlMessage)
+      List<String> contactEmails, String subject, String description, String htmlMessage)
       throws MessagingException {
     final MandrillMessage msg =
         new MandrillMessage()
-            .to(Collections.singletonList(validatedRecipient(contactEmail)))
+            .to(contactEmails.stream().map(e -> {
+              try {
+                return validatedRecipient(e);
+              } catch (MessagingException messagingException) {
+               throw new ServerErrorException(e);
+              }
+            }).collect(Collectors.toList()))
             .html(htmlMessage)
             .subject(subject)
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);

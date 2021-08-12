@@ -20,6 +20,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
@@ -27,6 +28,8 @@ import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
+import org.pmiops.workbench.model.BillingPaymentMethod;
+import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.pmiops.workbench.test.Providers;
 
 public class MailServiceImplTest extends SpringTest {
@@ -108,6 +111,24 @@ public class MailServiceImplTest extends SpringTest {
                 }));
   }
 
+  @Test
+  public void testSendBillingSetupEmail() throws Exception {
+    DbUser user = createDbUser();
+    SendBillingSetupEmailRequest request = new SendBillingSetupEmailRequest().institution("inst")
+        .paymentMethod(BillingPaymentMethod.CREDIT_CARD).phone("123456");
+    service.sendInstitutionUserInstructions(
+        "asdf@gmail.com", "Ask for help at help@myinstitute.org <script>window.alert()</script>>");
+    verify(mandrillApi, times(1))
+        .send(
+            argThat(
+                got -> {
+                  String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+                  // tags should be escaped, email addresses shouldn't.
+                  return gotHtml.contains("help@myinstitute.org")
+                      && gotHtml.contains("&lt;script&gt;window.alert()&lt;/script&gt;&gt;");
+                }));
+  }
+
   private User createUser() {
     return new User()
         .setPrimaryEmail(PRIMARY_EMAIL)
@@ -116,6 +137,15 @@ public class MailServiceImplTest extends SpringTest {
         .setEmails(
             new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
         .setChangePasswordAtNextLogin(true);
+  }
+
+  private DbUser createDbUser() {
+    DbUser user = new DbUser();
+    user.setFamilyName("familay name");
+    user.setGivenName("given name");
+    user.setContactEmail("user@contact.com");
+    user.setUsername("username");
+    return user;
   }
 
   private WorkbenchConfig createWorkbenchConfig() {

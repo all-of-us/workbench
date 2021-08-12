@@ -314,6 +314,27 @@ paths:
           description: Welcome Email sent.
         500:
           description: Internal Server Error
+  "/v1/send-billing-setup-email":
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Send billing setup email to GCP partner
+      operationId: sendBillingSetupEmail
+      security: [ ]
+      parameters:
+        - in: body
+          name: sendBillingSetupEmail
+          schema:
+            "$ref": "#/definitions/SendBillingSetupEmailRequest"
+      responses:
+        200:
+          description: Billing setup email sent.
+        403:
+          description: Forbidden
+        500:
+          description: Internal Server Error
   "/v1/google-account":
     post:
       tags:
@@ -5470,6 +5491,29 @@ definitions:
       creationNonce:
         type: string
         description: The nonce returned from the account creation API.
+  SendBillingSetupEmailRequest:
+    type: object
+    required:
+      - paymentMethod
+    properties:
+      phone:
+        type: string
+        description: User contact phone
+      institution:
+        type: string
+        description: The insitution of the user.
+      paymentMethod:
+        description: The payment to use, credit card or purchase order
+        "$ref": "#/definitions/BillingPaymentMethod"
+      isNihFunded:
+        type: boolean
+        description: Whether its NIH Funded resaerch
+  BillingPaymentMethod:
+    type: string
+    description: 'The payment to use when setting up billing with billing parners, credit card or purchase order'
+    enum:
+      - CREDIT_CARD
+      - PURCHASE_ORDER
   UpdateContactEmailRequest:
     type: object
     required:
