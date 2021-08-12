@@ -61,6 +61,9 @@ public interface CohortBuilderService {
 
   List<Criteria> findCriteriaBy(String domain, String type, Boolean standard, Long parentId);
 
+  CriteriaListWithCountResponse findCriteriaByDomain(
+      String domain, String term, String surveyName, Boolean standard, Integer limit);
+
   CriteriaListWithCountResponse findCriteriaByDomainAndSearchTerm(
       String domain, String term, String surveyName, Integer limit);
 
