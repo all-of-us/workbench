@@ -256,7 +256,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     // if search term is empty find the top counts for the domain
     if (isTopCountsSearch(term)) {
-      return getTopCountsSearch(domain, surveyName, pageRequest);
+      return getTopCountsSearchWithStandard(domain, surveyName, standard, pageRequest);
     }
 
     String modifiedSearchTerm = modifyTermMatch(term);
@@ -499,6 +499,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
+      String domain, String surveyName, Boolean standard, PageRequest pageRequest) {
+    Page<DbCriteria> dbCriteriaPage;
+    if (isSurveyDomain(domain)) {
+      Long id = cbCriteriaDao.findSurveyId(surveyName);
+      dbCriteriaPage = cbCriteriaDao.findSurveyQuestionByPath(id, pageRequest);
+    } else {
+      dbCriteriaPage = cbCriteriaDao.findCriteriaTopCountsByStandard(domain, standard, pageRequest);
+    }
+    return new CriteriaListWithCountResponse()
+        .items(
+            dbCriteriaPage.getContent().stream()
+                .map(cohortBuilderMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .totalCount(dbCriteriaPage.getTotalElements());
   }
 
   private CriteriaListWithCountResponse getTopCountsSearch(

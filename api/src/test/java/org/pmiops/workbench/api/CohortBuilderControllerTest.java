@@ -763,7 +763,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .getItems())
         .isEmpty();
   }
-  /*
+
   @Test
   public void findCriteriaByDomainEmptyTerm() {
     DbCriteria criteria =
@@ -786,19 +786,32 @@ public class CohortBuilderControllerTest extends SpringTest {
     assertThat(
             controller
                 .findCriteriaByDomain(
-                    WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), true,"", null, null)
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.CONDITION.name(),
+                    true,
+                    "",
+                    null,
+                    null)
                 .getBody()
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(criteria));
 
     assertThat(
-        controller
-            .findCriteriaByDomain(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, Domain.CONDITION.name(), false,"", null, null)
-            .getBody()
-            .getItems()).isEmpty();
-  }*/
+            controller
+                .findCriteriaByDomain(
+                    WORKSPACE_NAMESPACE,
+                    WORKSPACE_ID,
+                    Domain.CONDITION.name(),
+                    false,
+                    "",
+                    null,
+                    null)
+                .getBody()
+                .getItems())
+        .isEmpty();
+  }
 
   @Test
   public void findCriteriaByDomainDrugMatchesSynonyms() {
