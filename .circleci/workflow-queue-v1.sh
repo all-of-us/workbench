@@ -69,9 +69,6 @@ fetch_older_pipelines() {
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
-  # DEBUG
-  printf "\n\nGET_RESULT value\n%s\n\n" "${get_result}"
-  # END OF DEBUG
   if [[ ! "${get_result}" ]]; then
     printf "curl failed."
     exit 1
@@ -79,10 +76,6 @@ fetch_older_pipelines() {
   # jq_filter="select(.branch==\"${branch}\" and (.status | test(\"running|pending|queued\")))"
   jq_filter="select(.status | test(\"running|pending|queued\"))"
   jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
-  # DEBUG
-  filteredResult=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | .build_num")
-  printf "\n\nPipelines build_num values\n%s\n\n" "${filteredResult}"
-  # END OF DEBUG
   __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | .build_num")
 }
 
@@ -112,9 +105,6 @@ while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
   fetch_older_pipelines "${current_pipeline_start_time}"
   pipelines=$__
-  # DEBUG
-  printf "\n\nOLDER PIPELINES value:\n%s\n\n" "${pipelines}"
-  # END OF DEBUG
   if [[ $pipelines ]]; then
     printf "%s\n" "Waiting for previous builds to finish. sleep ${wait} seconds. Please wait..."
     sleep $sleep_time
