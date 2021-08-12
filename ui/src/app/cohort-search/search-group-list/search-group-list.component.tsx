@@ -127,7 +127,7 @@ function mapMenuItem(item: CriteriaMenu) {
     name,
     sortOrder,
     // We can remove this check once the standardSource flag is set to true
-    standard: domainId === Domain.VISIT.toString() ? true : standard,
+    standard: standard,
     type
   };
 }
