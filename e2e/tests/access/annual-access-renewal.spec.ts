@@ -7,7 +7,8 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 
 // Important: the access test user must be in a state where they are currently failing access renewal
-// due to an expired "profile last confirmed" date
+// due to an expired "profile last confirmed" date.  This is accomplished by the CircleCI nightly test runner
+// executing the API project.rb CLI tool SetAccessModuleTimestamps
 
 describe('Annual Access Renewal', () => {
   beforeEach(async () => {
@@ -19,6 +20,10 @@ describe('Annual Access Renewal', () => {
     expect(aarPage).toBeTruthy();
     expect(await aarPage.hasExpired()).toBeTruthy();
   });
+
+  // note that this test is "destructive" in that it brings the user to state
+  // where they cannot complete this test again, because they have completed
+  // AAR and are no longer forced into renewal
 
   test('Expired User can complete Annual Access Renewal (AAR)', async () => {
     const aarPage = await new AccessRenewalPage(page).waitForLoad();
