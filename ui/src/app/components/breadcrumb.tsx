@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Link as RouterLink} from 'react-router-dom';
+import {Link as RouterLink, matchPath} from 'react-router-dom';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
@@ -19,6 +19,7 @@ import {
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
+import {useLocation} from "react-router";
 
 const styles = {
   firstLink: {
@@ -54,6 +55,11 @@ export const getTrail = (
 ): Array<BreadcrumbData> => {
   const {ns, wsid, cid, csid, pid, nbName} = urlParams;
   const prefix = `/workspaces/${ns}/${wsid}`;
+  const location = useLocation();
+  const workspacesMatch = matchPath(location.pathname, {
+    path: '/workspaces'
+  });
+  
   switch (type) {
     case BreadcrumbType.Workspaces:
       return [
