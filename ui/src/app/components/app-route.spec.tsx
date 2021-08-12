@@ -1,21 +1,11 @@
 import * as React from "react";
-import {AppRoute, AppRouter, Guard} from "app/components/app-router";
+import {AppRoute, Guard} from "app/components/app-router";
 import {MemoryRouter} from "react-router";
 import {mount} from "enzyme";
 import {Redirect, Switch} from "react-router-dom";
-import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
+import {waitOneTickAndUpdate} from "testing/react-test-helpers";
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-
-  return {
-    __esModule: true,
-    ...originalModule,
-    BrowserRouter: ({ children }) => <div>{children}</div>,
-  }
-});
-
-describe('AppRouter', () => {
+describe('AppRoute', () => {
   const component = (initialEntries: string[], initialIndex: number) => {
     return mount(<MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
       {makeAppRouter()}
@@ -79,8 +69,7 @@ const otherAlwaysTrueGuard: Guard = {
 }
 
 const makeAppRouter = () => {
-  return <AppRouter>
-    <Switch>
+  return <Switch>
       <AppRoute exact path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
       <AppRoute exact path='/punting'><TestComponent text={'Punting'}/></AppRoute>
       <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
@@ -95,7 +84,6 @@ const makeAppRouter = () => {
       <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
       <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
     </Switch>
-  </AppRouter>
 }
 
 class TestComponent extends React.Component<{text: String}> {

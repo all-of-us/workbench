@@ -1,6 +1,5 @@
 import {
   AppRoute,
-  withFullHeight,
   withRouteData
 } from 'app/components/app-router';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
@@ -28,6 +27,10 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
+
+export const withFullHeight = WrappedComponent => ({...props}) => {
+  return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
+};
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
