@@ -74,16 +74,6 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
-def handle_gradle_interrupt()
-  common = Common.new
-  begin
-    yield
-  rescue Interrupt
-    common.run_inline %W{./gradlew --stop}
-    raise
-  end
-end
-
 def start_local_db_service()
   common = Common.new
   deadlineSec = 40
@@ -109,7 +99,8 @@ def dev_up(cmd_name, args)
   op.add_option(
       "--nostart-db",
       ->(opts, _) { opts.start_db = false },
-      "If specified, don't start the DB service")
+      "If specified, don't start the DB service. This is useful when running " +
+      "within docker, i.e. on CircleCI, as the DB service runs via docker-compose")
   op.parse.validate
 
   common = Common.new
@@ -128,22 +119,20 @@ def dev_up(cmd_name, args)
   overall_bm = Benchmark.measure {
     start_local_db_service() if op.opts.start_db
 
-    handle_gradle_interrupt() do
-      common.status "Database init & migrations..."
-      bm = Benchmark.measure {
-        Dir.chdir('db') do
-          common.run_inline %W{./run-migrations.sh main}
-        end
-        init_new_cdr_db %W{--cdr-db-name cdr}
-      }
-      common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+    common.status "Database init & migrations..."
+    bm = Benchmark.measure {
+      Dir.chdir('db') do
+        common.run_inline %W{./run-migrations.sh main}
+      end
+      init_new_cdr_db %W{--cdr-db-name cdr}
+    }
+    common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
-      common.status "Loading configs & data..."
-      bm = Benchmark.measure {
-        common.run_inline %W{./libproject/load_local_data_and_configs.sh}
-      }
-      common.status "Loading configs complete (#{format_benchmark(bm)})"
-    end
+    common.status "Loading configs & data..."
+    bm = Benchmark.measure {
+      common.run_inline %W{./libproject/load_local_data_and_configs.sh}
+    }
+    common.status "Loading configs complete (#{format_benchmark(bm)})"
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
 
@@ -530,6 +519,8 @@ Common.register_command({
 
 def run_local_data_migrations()
   setup_local_environment()
+  start_local_db_service()
+
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -541,6 +532,8 @@ Common.register_command({
 
 def run_local_rw_migrations()
   setup_local_environment()
+  start_local_db_service()
+
   common = Common.new
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
