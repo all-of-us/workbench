@@ -28,7 +28,7 @@ sudo -E -u jupyter nbstripout --install --global
 # but that's no longer possible as the home directory is mounted at runtime.
 ignore_file=/home/jupyter/gitignore_global
 
-sudo -E -u jupyter cat <<EOF > ${ignore_file}
+cat <<EOF | sudo -E -u jupyter tee ${ignore_file}
 # By default, all files should be ignored by git.
 # We want to be sure to exclude files containing data such as CSVs and images such as PNGs.
 *.*
