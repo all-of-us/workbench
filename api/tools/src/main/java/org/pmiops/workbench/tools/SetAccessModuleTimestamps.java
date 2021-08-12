@@ -41,7 +41,7 @@ public class SetAccessModuleTimestamps {
   // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
   private final AccessModuleName moduleName = AccessModuleName.PROFILE_CONFIRMATION;
   private final Timestamp timestamp = Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
-  
+
   void applyTimestampUpdateToUser(
       UserDao userDao,
       AccessModuleService accessModuleService,
@@ -89,12 +89,7 @@ public class SetAccessModuleTimestamps {
       final String username = opts.getOptionValue(userOpt.getLongOpt());
 
       applyTimestampUpdateToUser(
-          userDao,
-          accessModuleService,
-          username,
-          moduleName,
-          timestamp,
-          false);
+          userDao, accessModuleService, username, moduleName, timestamp, false);
     };
   }
 
