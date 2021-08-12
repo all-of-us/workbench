@@ -59,7 +59,7 @@ fetch_current_pipeline_start_time() {
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
-  jq_filter="select(.build_num < $CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\") | select(.workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\") | .start_time | @sh"
+  jq_filter="select(.build_num < $CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\") | select(.workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\") | .start_time"
   __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter}")
 }
 
