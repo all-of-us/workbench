@@ -65,7 +65,7 @@ fetch_current_pipeline_start_time() {
 
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetch previously submitted builds on \"${branch}\" branch that are running, pending or queued:"
+  printf '%s\n' "Fetch previously submitted pipelines on \"${branch}\" branch that are running, pending or queued:"
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
@@ -76,7 +76,7 @@ fetch_older_pipelines() {
   # jq_filter="select(.branch==\"${branch}\" and (.status | test(\"running|pending|queued\")))"
   jq_filter="select(.status | test(\"running|pending|queued\"))"
   jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
-  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time }"
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
   __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | ${jq_object}")
 }
 
@@ -108,8 +108,8 @@ while [[ "${is_running}" == "true" ]]; do
   pipelines=$__
 
   if [[ $pipelines ]]; then
-    printf "%s\n%s\n" "Found pipelines submitted previous to the current pipelines. CIRCLE_BUILD_NUM are:" "${pipelines}"
-    printf "%s\n" "Waiting for previous builds to finish. sleep ${wait} seconds. Please wait..."
+    printf "%s\n%s\n" "Found older pipelines:" "${pipelines}"
+    printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${wait} seconds. Please wait..."
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
   else
