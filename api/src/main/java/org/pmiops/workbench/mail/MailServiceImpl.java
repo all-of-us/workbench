@@ -309,8 +309,13 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
-        .put(EmailSubstitutionField.INSTITUTION_NAME, request.getInstitution())
-        .put(EmailSubstitutionField.USER_PHONE, request.getPhone())
+        .put(
+            EmailSubstitutionField.INSTITUTION_NAME,
+            HtmlEscapers.htmlEscaper().escape(request.getInstitution()))
+        .put(
+            EmailSubstitutionField.USER_PHONE,
+            HtmlEscapers.htmlEscaper().escape(request.getPhone()))
+        .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
         .put(
             EmailSubstitutionField.USERNAME,
             user.getUsername()
@@ -361,7 +366,8 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendWithRetries(
-      List<String> contactEmails, String subject, String description, String htmlMessage) {
+      List<String> contactEmails, String subject, String description, String htmlMessage)
+      throws MessagingException {
     final MandrillMessage msg =
         new MandrillMessage()
             .to(contactEmails.stream().map(this::validatedRecipient).collect(Collectors.toList()))
@@ -391,7 +397,7 @@ public class MailServiceImpl implements MailService {
                 String.format(
                     "ApiException: On Last Attempt! Email '%s' not sent: %s",
                     description, attempt.getRight().toString()));
-            throw new ServerErrorException("Sending email failed: " + attempt.getRight());
+            throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
           break;
 
@@ -401,7 +407,7 @@ public class MailServiceImpl implements MailService {
               String.format(
                   "Messaging Exception: Email '%s' not sent: %s",
                   description, attempt.getRight().toString()));
-          throw new ServerErrorException("Sending email failed: " + attempt.getRight());
+          throw new MessagingException("Sending email failed: " + attempt.getRight());
 
         case SUCCESSFUL:
           log.log(Level.INFO, String.format("Email '%s' was sent.", description));
@@ -411,7 +417,7 @@ public class MailServiceImpl implements MailService {
           if (retries == 0) {
             log.log(
                 Level.SEVERE, String.format("Email '%s' was not sent. Default case.", description));
-            throw new ServerErrorException("Sending email failed: " + attempt.getRight());
+            throw new MessagingException("Sending email failed: " + attempt.getRight());
           }
       }
     } while (retries > 0);

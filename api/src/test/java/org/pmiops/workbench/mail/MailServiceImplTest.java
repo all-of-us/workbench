@@ -76,7 +76,7 @@ public class MailServiceImplTest extends SpringTest {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     User user = createUser();
     assertThrows(
-        ServerErrorException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(1)).send(any());
   }
 
@@ -85,7 +85,7 @@ public class MailServiceImplTest extends SpringTest {
     doThrow(ApiException.class).when(mandrillApi).send(any());
     User user = createUser();
     assertThrows(
-        ServerErrorException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
     verify(mandrillApi, times(3)).send(any());
   }
 

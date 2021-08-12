@@ -23,7 +23,8 @@ public enum EmailSubstitutionField {
   INSTITUTION_NAME("INSTITUTION_NAME"),
   USER_PHONE("USER_PHONE"),
   PAYMENT_METHOD("PAYMENT_METHOD"),
-  NIH_FUNDED("NIH_FUNDED");
+  NIH_FUNDED("NIH_FUNDED"),
+  FROM_EMAIL("FROM_EMAIL");
 
   private String value;
 

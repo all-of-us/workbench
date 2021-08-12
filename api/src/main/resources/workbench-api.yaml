@@ -322,7 +322,6 @@ paths:
         - application/json
       description: Send billing setup email to GCP partner
       operationId: sendBillingSetupEmail
-      security: [ ]
       parameters:
         - in: body
           name: sendBillingSetupEmail
@@ -5547,7 +5546,7 @@ definitions:
         "$ref": "#/definitions/BillingPaymentMethod"
       isNihFunded:
         type: boolean
-        description: Whether its NIH Funded resaerch
+        description: Whether its NIH Funded research
   BillingPaymentMethod:
     type: string
     description: 'The payment to use when setting up billing with billing parners, credit card or purchase order'
