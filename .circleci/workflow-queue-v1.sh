@@ -83,7 +83,7 @@ fetch_older_pipelines() {
   filteredResult=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | .build_num")
   printf "\n\nPipelines build_num values\n%s\n\n" "${filteredResult}"
   # END OF DEBUG
-  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=${1}) | .build_num")
+  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | select(.start_time>=\"${1}\") | .build_num")
 }
 
 
