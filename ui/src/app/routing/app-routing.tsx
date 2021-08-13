@@ -3,11 +3,11 @@ import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
-import {useHistory, BrowserRouter, Switch} from 'react-router-dom';
+import {BrowserRouter, Switch, useHistory} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {
-  withRouteData, AppRoutingWrapper, AppRoute
+  AppRoute, AppRoutingWrapper, withRouteData
 } from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle, NotificationModal} from 'app/components/modals';
@@ -230,7 +230,7 @@ const getUserConfirmation = (message, callback) => {
   };
 
   ReactDOM.render(
-      <Modal>
+    <Modal>
         <ModalTitle>Warning!</ModalTitle>
         <ModalBody>
           {message}
@@ -244,9 +244,8 @@ const getUserConfirmation = (message, callback) => {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
-  const {authLoaded, isSignedIn} = useAuthentication();
+  const {authLoaded} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
-  const [pollAborter, setPollAborter] = useState(new AbortController());
   const overriddenUrl = useOverriddenApiUrl();
 
   const loadLocalStorageAccessToken = () => {

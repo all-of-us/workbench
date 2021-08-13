@@ -62,7 +62,7 @@ export const CohortReview = fp.flow(
 
     loadCohort() {
       const {ns, wsid, cid} = this.props.match.params;
-      const {accessLevel, cdrVersionId} = this.props.workspace;
+      const {cdrVersionId} = this.props.workspace;
 
       if (!cid) {
         return;
