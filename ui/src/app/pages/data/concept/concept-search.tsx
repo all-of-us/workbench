@@ -37,7 +37,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {withRouter} from "react-router-dom";
+import {withRouter} from 'react-router-dom';
 
 const styles = reactStyles({
   conceptSetHeader: {

@@ -30,8 +30,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import { RouteComponentProps } from 'react-router';
+import {withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {withRouter} from "react-router-dom";
 
 export enum Progress {
   Unknown,

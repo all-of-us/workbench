@@ -15,7 +15,7 @@ import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps} from 'react-router';
-import {withRouter} from "react-router-dom";
+import {withRouter} from 'react-router-dom';
 
 const styles = reactStyles({
   cohortsHeader: {
