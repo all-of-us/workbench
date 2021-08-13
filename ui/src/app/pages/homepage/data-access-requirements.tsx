@@ -115,7 +115,7 @@ const RegisteredTierCard = () => {
         <div>Not the real RT tasks UI (TODO) but some output for debugging</div>
         {rtModules.map(module => {
           const {completionEpochMillis, bypassEpochMillis} = getAccessModuleStatusByName(profile, module);
-          return <React.Fragment>
+          return <React.Fragment key={module}>
             <hr/>
             <FlexRow>
               <div>{module}</div>
