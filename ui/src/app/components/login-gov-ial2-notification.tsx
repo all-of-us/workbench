@@ -3,6 +3,7 @@ import * as React from 'react';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {navigate} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
 import {Button} from './buttons';
@@ -69,7 +70,7 @@ const LoginGovIAL2Notification = () => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
-    <Button type='primary' style={styles.button} onClick={() => location.replace('/?workbenchAccessTasks=true')}>
+    <Button type='primary' style={styles.button} onClick={() => navigate(['data-access-requirements'])}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;
