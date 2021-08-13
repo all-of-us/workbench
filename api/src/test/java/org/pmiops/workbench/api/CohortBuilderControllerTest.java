@@ -124,7 +124,7 @@ public class CohortBuilderControllerTest extends SpringTest {
 
   //  TODO: Remove this test once feature flag enableStandardSourceDomains is removed
   @Test
-  public void findCriteriaMenuOld() {
+  public void findCriteriaMenu() {
     DbCriteriaMenu dbCriteriaMenu =
         criteriaMenuDao.save(
             DbCriteriaMenu.builder()
@@ -137,7 +137,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .build());
     assertThat(
             controller
-                .findCriteriaMenuOld(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
                 .getBody()
                 .getItems()
                 .get(0))
@@ -145,7 +145,7 @@ public class CohortBuilderControllerTest extends SpringTest {
   }
 
   @Test
-  public void findCriteriaMenu() {
+  public void findCbMenu() {
     DbCBMenu dbCBMenu =
         cbMenuDao.save(
             DbCBMenu.builder()
@@ -159,7 +159,7 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .build());
     assertThat(
             controller
-                .findCriteriaMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
+                .findCbMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
                 .getBody()
                 .getItems()
                 .get(0))

@@ -3,7 +3,9 @@ package org.pmiops.workbench.notebooks;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -50,6 +52,21 @@ public interface LeonardoNotebooksClient {
 
   /** Create a new data synchronization Welder storage link on a runtime. */
   StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
+
+  /** Gets information about a persistent disk */
+  LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
+      throws WorkbenchException;
+
+  /** Deletes a persistent disk */
+  void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
+
+  /** Update a persistent disk */
+  void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
+      throws WorkbenchException;
+
+  /** List all persistent disks by google project */
+  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+      String googleProject, boolean includeDeleted);
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();

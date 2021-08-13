@@ -13,12 +13,12 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
@@ -120,6 +120,8 @@ public class ReportingTestUtils {
       OrganizationType.ACADEMIC_RESEARCH_INSTITUTION;
   public static final String INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT = "foo_4";
   public static final String INSTITUTION__SHORT_NAME = "foo_5";
+  public static final InstitutionMembershipRequirement INSTITUTION__REGISTERED_TIER_REQUIREMENT =
+      InstitutionMembershipRequirement.DOMAINS;
   // All constant values, mocking statements, and assertions in this file are generated. The values
   // are chosen so that errors with transposed columns can be caught.
   // Mapping Short values with valid enums can be tricky, and currently there are
@@ -349,18 +351,8 @@ public class ReportingTestUtils {
         .institutionId(INSTITUTION__INSTITUTION_ID)
         .organizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM)
         .organizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
-        .shortName(INSTITUTION__SHORT_NAME);
-  }
-
-  public static DbInstitution createDbInstitution() {
-    final DbInstitution institution = new DbInstitution();
-    institution.setDisplayName(INSTITUTION__DISPLAY_NAME);
-    institution.setDuaTypeEnum(INSTITUTION__DUA_TYPE_ENUM);
-    institution.setInstitutionId(INSTITUTION__INSTITUTION_ID);
-    institution.setOrganizationTypeEnum(INSTITUTION__ORGANIZATION_TYPE_ENUM);
-    institution.setOrganizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
-    institution.setShortName(INSTITUTION__SHORT_NAME);
-    return institution;
+        .shortName(INSTITUTION__SHORT_NAME)
+        .registeredTierRequirement(INSTITUTION__REGISTERED_TIER_REQUIREMENT);
   }
 
   public static void assertInstitutionFields(ReportingInstitution institution) {

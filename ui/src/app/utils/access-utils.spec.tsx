@@ -4,15 +4,14 @@ import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {authStore, profileStore} from 'app/utils/stores';
-import {ErrorCode} from 'generated/fetch';
-import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
+import {AccessModule, ErrorCode} from 'generated/fetch';
+import {Profile, AccessModuleStatus} from 'generated/fetch';
 import {
   maybeDaysRemaining,
   MILLIS_PER_DAY,
   NOTIFICATION_THRESHOLD_DAYS,
   useIsUserDisabled
 } from "app/utils/access-utils";
-import ModuleNameEnum = RenewableAccessModuleStatus.ModuleNameEnum;
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;
@@ -24,15 +23,14 @@ const todayPlusDays = (days: number): number => {
 
 const noModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  renewableAccessModules: {}
+  accessModules: {}
 }
 
 const noExpModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  renewableAccessModules: {
+  accessModules : {
     modules: [{
-      moduleName: ModuleNameEnum.ComplianceTraining,
-      hasExpired: false,
+      moduleName: AccessModule.COMPLIANCETRAINING,
       expirationEpochMillis: undefined,
     }]
   }
@@ -40,10 +38,9 @@ const noExpModules: Profile = {
 
 const laterExpiration: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  renewableAccessModules: {
+  accessModules : {
     modules: [{
-      moduleName: ModuleNameEnum.ComplianceTraining,
-      hasExpired: false,
+      moduleName: AccessModule.COMPLIANCETRAINING,
       expirationEpochMillis: todayPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1),
     }]
   }
@@ -51,15 +48,12 @@ const laterExpiration: Profile = {
 
 const expirationsInWindow: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  renewableAccessModules: {
+  accessModules : {
     modules: [{
-      moduleName: ModuleNameEnum.ComplianceTraining,
-      hasExpired: false,
+      moduleName: AccessModule.COMPLIANCETRAINING,
       expirationEpochMillis: todayPlusDays(5),
-    },
-    {
-      moduleName: ModuleNameEnum.DataUseAgreement,
-      hasExpired: false,
+    }, {
+      moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
       expirationEpochMillis: todayPlusDays(10),
     }]
   }
@@ -67,30 +61,27 @@ const expirationsInWindow: Profile = {
 
 const thirtyDaysPlusExpiration: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  renewableAccessModules: {
+  accessModules : {
     modules: [{
-      moduleName: ModuleNameEnum.ComplianceTraining,
-      hasExpired: false,
+      moduleName: AccessModule.COMPLIANCETRAINING,
       expirationEpochMillis: todayPlusDays(30),
-    },
-    {
-      moduleName: ModuleNameEnum.DataUseAgreement,
-      hasExpired: false,
+    }, {
+      moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
       expirationEpochMillis: todayPlusDays(31),
     }]
   }
 }
 
 describe('maybeDaysRemaining', () => {
-  it('returns undefined when the profile has no renewableAccessModules', () => {
+  it('returns undefined when the profile has no accessModules', () => {
      expect(maybeDaysRemaining(noModules)).toBeUndefined();
   });
 
-  it('returns undefined when the profile has no renewableAccessModules with expirations', () => {
+  it('returns undefined when the profile has no accessModules with expirations', () => {
      expect(maybeDaysRemaining(noExpModules)).toBeUndefined();
   });
 
-  it('returns undefined when the renewableAccessModules have expirations past the window', () => {
+  it('returns undefined when the accessModules have expirations past the window', () => {
     expect(maybeDaysRemaining(laterExpiration)).toBeUndefined();
   });
 

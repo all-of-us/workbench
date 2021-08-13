@@ -256,7 +256,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     backToTable() {
       const {ns, wsid, cid} = this.props.match.params;
-      this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     previous = () => {

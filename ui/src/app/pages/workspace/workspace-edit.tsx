@@ -40,7 +40,8 @@ import {
   reactStyles,
   sliceByHalfLength,
   withCdrVersions,
-  withCurrentWorkspace, withUserProfile
+  withCurrentWorkspace,
+  withUserProfile
 } from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';

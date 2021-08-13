@@ -20,7 +20,8 @@ import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  withCurrentWorkspace, withQueryParams,
+  withCurrentWorkspace,
+  withQueryParams,
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';

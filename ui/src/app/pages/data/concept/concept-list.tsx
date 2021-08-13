@@ -84,7 +84,7 @@ interface State {
   conceptAddModalOpen: boolean;
   updating: boolean;
 }
-export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet(), withNavigation)(
+export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcept(), withCurrentConceptSet(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);

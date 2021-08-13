@@ -156,7 +156,7 @@ export const WorkspaceNavBar = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => navigate(fp.compact(['/workspaces', params.ns, params.wsid, link]))}
+        onClick={() => navigate(['workspaces', params.ns, params.wsid, link])}
       >
         {name}
       </Clickable>

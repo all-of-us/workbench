@@ -151,9 +151,7 @@ export const InteractiveNotebook = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-
       const {ns, wsid, nbName} = this.props.match.params;
-
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
       }).catch((e) => {

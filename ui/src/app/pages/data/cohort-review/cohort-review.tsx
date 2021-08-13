@@ -10,7 +10,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortReviewStore,
   NavigationProps
@@ -35,7 +35,6 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponent
 interface State {
   reviewPresent: boolean;
   cohort: Cohort;
-  readonly: boolean;
 }
 
 export const CohortReview = fp.flow(
@@ -49,8 +48,11 @@ export const CohortReview = fp.flow(
       this.state = {
         reviewPresent: undefined,
         cohort: undefined,
-        readonly: false
       };
+    }
+
+    get readonly() {
+      return this.props.workspace.accessLevel === WorkspaceAccessLevel.READER;
     }
 
     componentDidMount(): void {
@@ -61,7 +63,6 @@ export const CohortReview = fp.flow(
     loadCohort() {
       const {ns, wsid, cid} = this.props.match.params;
       const {accessLevel, cdrVersionId} = this.props.workspace;
-      this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
 
       if (!cid) {
         return;
@@ -98,11 +99,11 @@ export const CohortReview = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      const {ns, wsid, cid} = this.props.match.params;
-      const oldParams = prevProps.match.params;
-      if (oldParams.ns !== ns
-        || oldParams.wsid !== wsid
-        || oldParams.cid !== cid) {
+      if (hasNewValidProps(this.props, prevProps, [
+        p => p.match.params.ns,
+        p => p.match.params.wsid,
+        p => p.match.params.cid
+      ])) {
         this.loadCohort();
       }
     }
@@ -116,10 +117,10 @@ export const CohortReview = fp.flow(
     }
 
     render() {
-      const {cohort, readonly, reviewPresent} = this.state;
+      const {cohort, reviewPresent} = this.state;
       const loading = !cohort || reviewPresent === undefined;
-      const ableToReview = !!cohort && reviewPresent === false && !readonly;
-      const unableToReview = !!cohort && reviewPresent === false && readonly;
+      const ableToReview = !!cohort && reviewPresent === false && !this.readonly;
+      const unableToReview = !!cohort && reviewPresent === false && this.readonly;
       return <React.Fragment>
         {loading ? <SpinnerOverlay/>
           : <React.Fragment>

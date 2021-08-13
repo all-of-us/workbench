@@ -16,7 +16,8 @@ import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/service
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
-  formatDomainString, hasNewValidProps,
+  formatDomainString,
+  hasNewValidProps,
   reactStyles,
   switchCase,
   toggleIncludes,
@@ -550,7 +551,6 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     updatePrepackagedDomains() {
-      // depends on workspace/cdrVersionTiersResponse
       if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
         PREPACKAGED_DOMAINS =   {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,

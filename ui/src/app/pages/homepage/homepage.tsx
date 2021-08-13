@@ -96,7 +96,7 @@ const Workspaces = () => {
             style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
             onClick={() => {
               AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces/build']);
+              navigate(['workspaces', 'build']);
             }}
         />
       </FlexRow>
@@ -297,7 +297,6 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
       this.setState({
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(this.getRegistrationTasksMap()['eraCommons']

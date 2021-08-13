@@ -3,13 +3,11 @@ import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
-import {BrowserRouter, Switch, useHistory} from 'react-router-dom';
+import {useHistory, BrowserRouter, Switch} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {
-  AppRoute,
-  AppRoutingWrapper,
-  withRouteData
+  withRouteData, AppRoutingWrapper, AppRoute
 } from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle, NotificationModal} from 'app/components/modals';
@@ -34,7 +32,8 @@ import {
 import {
   authStore,
   serverConfigStore,
-  stackdriverErrorReporterStore, useStore
+  stackdriverErrorReporterStore,
+  useStore
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
@@ -94,11 +93,6 @@ const checkBrowserSupport = () => {
 const currentAccessToken = () => {
   const tokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 
-  // TODO angular2react - this used to be a setState() variable but I had to switch it to read from
-  // localStorage because testAccessTokenOverride would not be set yet in the first run of this and
-  // configure the API clients incorrectly. this should fix the issue but I want to think more about
-  // what the correct solution is. Getting rid of the state variable and only reading from localStorage
-  // could be the way to go.
   if (tokenOverride) {
     return tokenOverride;
   } else if (!gapi.auth2) {
@@ -146,6 +140,26 @@ const loadErrorReporter = () => {
   stackdriverErrorReporterStore.set(reporter);
 };
 
+const exposeAccessTokenSetter = () => {
+  // Set this as early as possible in the application boot-strapping process,
+  // so it's available for Puppeteer to call. If we need this even earlier in
+  // the page, it could go into something like main.ts, but ideally we'd keep
+  // this logic in one place, and keep main.ts minimal.
+  if (environment.allowTestAccessTokenOverride) {
+    window.setTestAccessTokenOverride = (token: string) => {
+      // Disclaimer: console.log statements here are unlikely to captured by
+      // Puppeteer, since it typically reloads the page immediately after
+      // invoking this function.
+      if (token) {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        location.replace('/');
+      } else {
+        window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      }
+    };
+  }
+};
+
 const ScrollToTop = () => {
   const {location} = useHistory();
 
@@ -156,43 +170,26 @@ const ScrollToTop = () => {
   return <React.Fragment/>;
 };
 
-const getUserConfirmation = (message, callback) => {
-  const modal = document.createElement('div');
-  document.body.appendChild(modal);
-
-  const withCleanup = (answer) => {
-    ReactDOM.unmountComponentAtNode(modal);
-    document.body.removeChild(modal);
-    callback(answer);
-  };
-
-  ReactDOM.render(
-    <Modal>
-        <ModalTitle>Warning!</ModalTitle>
-        <ModalBody>
-          {message}
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>, modal);
-};
-
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
-  const {authLoaded} = useAuthentication();
-  const isUserDisabled = useIsUserDisabled();
-  const [isCookiesEnabled, setIsCookiesEnabled] = useState(false);
-  const [overriddenUrl, setOverriddenUrl] = useState('');
+const useServerConfig = () => {
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    // TODO angular2react - is it better to pull this out into a const so this loop only runs once?
-    // TODO angular2react - this actually isn't working right now, just renders an empty page
-    // but this bug is also on test right now so it isn't a regression
-    setIsCookiesEnabled(cookiesEnabled());
+    const load = async() => {
+      const serverConfig = await configApi().getConfig();
+      serverConfigStore.set({config: serverConfig});
+    };
 
-    if (isCookiesEnabled) {
+    load();
+  }, []);
+
+  return config;
+};
+
+const useOverriddenApiUrl = () => {
+  const [overriddenUrl, setOverriddenUrl] = useState('');
+
+  useEffect(() => {
+    if (cookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -215,35 +212,46 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         console.log('Error setting urls: ' + err);
       }
     }
-  }, [isCookiesEnabled]);
-
-  useEffect(() => {
-    checkBrowserSupport();
   }, []);
 
-  useEffect(() => {
-    // Set this as early as possible in the application boot-strapping process,
-    // so it's available for Puppeteer to call. If we need this even earlier in
-    // the page, it could go into something like main.ts, but ideally we'd keep
-    // this logic in one place, and keep main.ts minimal.
-    if (environment.allowTestAccessTokenOverride) {
-      window.setTestAccessTokenOverride = (token: string) => {
-        // Disclaimer: console.log statements here are unlikely to captured by
-        // Puppeteer, since it typically reloads the page immediately after
-        // invoking this function.
-        if (token) {
-          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-          location.replace('/');
-        } else {
-          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        }
-      };
-    }
-  }, []);
+  return overriddenUrl;
+};
 
-  // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
-  // an infinite loop
-  useEffect(() => {
+// This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
+// confirm navigating away from the page.
+const getUserConfirmation = (message, callback) => {
+  const modal = document.createElement('div');
+  document.body.appendChild(modal);
+
+  const withCleanup = (answer) => {
+    ReactDOM.unmountComponentAtNode(modal);
+    document.body.removeChild(modal);
+    callback(answer);
+  };
+
+  ReactDOM.render(
+      <Modal>
+        <ModalTitle>Warning!</ModalTitle>
+        <ModalBody>
+          {message}
+        </ModalBody>
+        <ModalFooter>
+          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
+          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
+        </ModalFooter>
+      </Modal>, modal);
+};
+
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
+  const config = useServerConfig();
+  const {authLoaded, isSignedIn} = useAuthentication();
+  const isUserDisabled = useIsUserDisabled();
+  const [pollAborter, setPollAborter] = useState(new AbortController());
+  const overriddenUrl = useOverriddenApiUrl();
+
+  const loadLocalStorageAccessToken = () => {
+    // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
+    // an infinite loop
     // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
@@ -251,26 +259,28 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
       const localStorageTestAccessToken = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       if (localStorageTestAccessToken) {
-        console.log('found test access token in local storage, skipping normal auth flow');
-
         // The client has already configured an access token override. Skip the normal oauth flow.
         authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
       }
     }
-  }, [config]);
+  };
 
   useEffect(() => {
-    const load = async() => {
-      const serverConfig = await configApi().getConfig();
-      serverConfigStore.set({config: serverConfig});
+    exposeAccessTokenSetter();
+    checkBrowserSupport();
+  }, []);
+
+  useEffect(() => {
+    if (config) {
+      // Bootstrapping that requires server config
       bindClients();
       loadErrorReporter();
       initializeAnalytics();
-    };
+      loadLocalStorageAccessToken();
+    }
+  }, [config]);
 
-    load();
-  }, []);
-
+  const isCookiesEnabled = cookiesEnabled();
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
     <ParamsContextProvider>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}

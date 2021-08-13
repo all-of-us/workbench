@@ -68,6 +68,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   return <WrappedComponent {...props}/>;
 };
 
+
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
 const ParamsContextSetter = ({intermediaryRoute, children}) => {
