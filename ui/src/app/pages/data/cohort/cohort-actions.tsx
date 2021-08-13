@@ -97,7 +97,7 @@ export const CohortActions = fp.flow(
       if (!hasNewValidProps(this.props, prevProps, [
         p => p.workspace.namespace,
         p => p.workspace.id,
-        p => p.urlParams.cid
+        p => p.match.params.cid
       ])) {
         return;
       }

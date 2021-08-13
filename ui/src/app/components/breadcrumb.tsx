@@ -152,7 +152,6 @@ interface Props extends RouteComponentProps<MatchParams>, ParamsContextProps {
   cohort: Cohort;
   cohortReview: CohortReview;
   conceptSet: ConceptSet;
-  urlParams: any;
   routeConfigData: any;
   reactRouteData: RouteDataStore;
 }
