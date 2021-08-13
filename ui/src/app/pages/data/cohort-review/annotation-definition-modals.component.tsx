@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -13,9 +12,8 @@ import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients'
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
-import {RouteComponentProps} from 'react-router';
-import {withRouter} from 'react-router-dom';
 import {Key} from 'ts-key-enum';
+import { withParamsContext, ParamsContextProps } from 'app/routing/params-context-provider';
 
 const styles = reactStyles({
   editRow: {
@@ -35,7 +33,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends RouteComponentProps<MatchParams> {
+interface Props extends ParamsContextProps {
   annotationDefinitions: CohortAnnotationDefinition[];
   onCancel: Function;
   onCreate: Function;
@@ -48,7 +46,7 @@ interface State {
   saving: boolean;
 }
 
-export const AddAnnotationDefinitionModal = withRouter(class extends React.Component<Props, State> {
+export const AddAnnotationDefinitionModal = withParamsContext(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -61,7 +59,7 @@ export const AddAnnotationDefinitionModal = withRouter(class extends React.Compo
 
   async create() {
     try {
-      const {onCreate, match: {params: {ns, wsid, cid}}} = this.props;
+      const {onCreate, paramsContext: {params: {ns, wsid, cid}}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
       const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
@@ -157,7 +155,7 @@ export const AddAnnotationDefinitionModal = withRouter(class extends React.Compo
   }
 });
 
-interface ModalProps extends RouteComponentProps<MatchParams> {
+interface ModalProps extends ParamsContextProps {
   onClose: Function;
   annotationDefinitions: CohortAnnotationDefinition[];
   setAnnotationDefinitions: Function;
@@ -172,7 +170,7 @@ interface ModalState {
   renameError: boolean;
 }
 
-export const EditAnnotationDefinitionsModal = withRouter(class extends React.Component<ModalProps, ModalState> {
+export const EditAnnotationDefinitionsModal = withParamsContext(class extends React.Component<ModalProps, ModalState> {
   constructor(props) {
     super(props);
     this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined,
@@ -183,7 +181,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
     try {
       const {
         annotationDefinitions, onClose, setAnnotationDefinitions,
-        match: {params: {ns, wsid, cid}}
+        paramsContext: {params: {ns, wsid, cid}}
       } = this.props;
       this.setState({busy: true});
       await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, +cid, id);
@@ -205,7 +203,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
       const {
         annotationDefinitions,
         setAnnotationDefinitions,
-        match: {params: {ns, wsid, cid}}
+        paramsContext: {params: {ns, wsid, cid}}
       } = this.props;
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
