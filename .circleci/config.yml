@@ -634,8 +634,8 @@ workflows:
     jobs:
       # Running two or more build-test-deploy workflows concurrently may result in failures to
       #  puppeteer-test, api-deploy-to-test or/and ui-deploy-to-test jobs.
-      - wait_until_previous_workflow_done:
-          <<: *filter-master-branch
+      - wait_until_previous_workflow_done
+          # <<: *filter-master-branch
       # Always run basic test/lint/compilation (open PRs, master branch merge)
       # Note: by default tags are not picked up.
       - api-local-test
@@ -664,6 +664,7 @@ workflows:
             - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
+            - wait_until_previous_workflow_done
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
