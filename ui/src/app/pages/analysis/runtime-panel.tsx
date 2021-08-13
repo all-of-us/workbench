@@ -253,7 +253,8 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
     </div>
       <div>
         <div>If you want to save some files permanently, such as input data, analysis outputs,
-          or installed packages, move them to the workspace bucket.</div>
+          or installed packages,<a href= 'https://support.terra.bio/hc/en-us/articles/360026639112'>move them to the workspace bucket.</a>
+        </div>
         <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
     </div>
     <FlexRow style={{justifyContent: 'flex-end'}}>
