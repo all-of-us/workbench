@@ -88,7 +88,6 @@ const ParamsContextSetter = ({intermediaryRoute, children}) => {
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
-  console.log(path);
 
   return <Route exact={exact} path={path}>
     {redirectPath

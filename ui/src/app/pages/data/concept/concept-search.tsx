@@ -37,6 +37,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {withRouter} from "react-router-dom";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -128,7 +129,8 @@ export const ConceptSearch = fp.flow(
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentWorkspace(),
-  withNavigation)
+  withNavigation,
+  withRouter)
 (class extends React.Component<Props, State> {
   subscription: Subscription;
   constructor(props: any) {

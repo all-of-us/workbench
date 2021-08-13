@@ -31,6 +31,7 @@ import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import { RouteComponentProps } from 'react-router';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {withRouter} from "react-router-dom";
 
 export enum Progress {
   Unknown,
@@ -238,7 +239,8 @@ export const NotebookRedirect = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withQueryParams(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
 

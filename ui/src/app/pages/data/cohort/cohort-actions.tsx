@@ -15,6 +15,7 @@ import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps} from 'react-router';
+import {withRouter} from "react-router-dom";
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -79,7 +80,8 @@ interface State {
 
 export const CohortActions = fp.flow(
   withCurrentWorkspace(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
     constructor(props: any) {
@@ -89,18 +91,6 @@ export const CohortActions = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-    }
-
-    componentDidUpdate(prevProps: Readonly<Props>) {
-      if (!this.props.workspace.namespace || !this.props.workspace.id || !this.props.match.params.cid) {
-        return;
-      }
-
-      if (this.props.workspace.namespace === prevProps.workspace.namespace
-        && this.props.workspace.id === prevProps.workspace.id
-        && this.props.match.params.cid === prevProps.match.params.cid) {
-        return;
-      }
 
       this.setState({cohortLoading: true});
       const {namespace, id} = this.props.workspace;
