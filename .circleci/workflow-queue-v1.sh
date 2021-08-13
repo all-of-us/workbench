@@ -123,4 +123,4 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
   fi
 done
-printf "\n%s\n" "Finished."
+printf "\n%s\n" "Finished waiting."
