@@ -57,20 +57,20 @@ export const ConceptNavigationBar: React.FunctionComponent<
     const [navigate, ] = useNavigation();
 
     return <FlexRow>
-    <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
-               onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
-               data-test-id='concepts-link'>
-      Concepts
-    </Clickable>
-    <Clickable
-      style={{...(showConcepts ? styles.headerLinks : activatedStyles.headerActivated),
-        marginLeft: '1rem'}}
-      onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts', 'sets'])}
-      data-test-id='concept-sets-link'>
-      Concept Sets
-    </Clickable>
-    <TooltipTrigger content={tooltipContent}>
-      <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
-    </TooltipTrigger>
-  </FlexRow>;
+      <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
+                 onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
+                 data-test-id='concepts-link'>
+        Concepts
+      </Clickable>
+      <Clickable
+        style={{...(showConcepts ? styles.headerLinks : activatedStyles.headerActivated),
+          marginLeft: '1rem'}}
+        onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts', 'sets'])}
+        data-test-id='concept-sets-link'>
+        Concept Sets
+      </Clickable>
+      <TooltipTrigger content={tooltipContent}>
+        <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
+      </TooltipTrigger>
+    </FlexRow>;
   };

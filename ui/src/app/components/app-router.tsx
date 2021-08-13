@@ -34,8 +34,6 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
   const params = useParams();
   const query = useQuery();
 
-  console.log(routeData);
-
   useEffect(() => {
     if (!intermediaryRoute) {
       routeConfigDataStore.next(routeData);
@@ -64,14 +62,12 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
       // so we should revisit.
       urlParamsStore.next({...urlParamsStore.getValue(), ...params});
     } else {
-      console.log(params);
       urlParamsStore.next(params);
     }
   }, [params]);
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      // console.log(query);
       queryParamsStore.next(query);
     }
   }, [query]);
@@ -83,6 +79,8 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
   return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
 };
 
+// This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
+// confirm navigating away from the page.
 const getUserConfirmation = (message, callback) => {
   const modal = document.createElement('div');
   document.body.appendChild(modal);

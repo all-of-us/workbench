@@ -13,7 +13,7 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -154,11 +154,7 @@ export const InteractiveNotebook = fp.flow(
     componentDidUpdate(prevProps: Readonly<Props>) {
       const {urlParams: {ns, wsid, nbName}} = this.props;
 
-      if (prevProps.urlParams.ns === ns && prevProps.urlParams.wsid === wsid && prevProps.urlParams.nbName === nbName) {
-        return;
-      }
-
-      if (!ns || !wsid || !nbName) {
+      if (!hasNewValidProps(this.props, prevProps, [p => p.urlParams.ns, p => p.urlParams.wsid, p => p.urlParams.nbName])) {
         return;
       }
 

@@ -12,7 +12,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  formatFreeCreditsUSD,
+  formatFreeCreditsUSD, hasNewValidProps,
   isBlank,
   reactStyles,
   withUrlParams
@@ -188,7 +188,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
-    if (prevProps.urlParams.usernameWithoutGsuiteDomain !== this.props.urlParams.usernameWithoutGsuiteDomain) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.urlParams.usernameWithoutGsuiteDomain])) {
       this.getUserData();
     }
   }
