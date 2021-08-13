@@ -17,14 +17,6 @@ describe('Annual Access Renewal', () => {
     await signInWithAccessToken(page, config.ACCESS_TEST_ACCESS_TOKEN_FILE);
   });
 
-  // This test cannot run after the "Expired User can complete Annual Access Renewal" test - see below.
-
-  test('Expired User is redirected to Annual Access Renewal (AAR) on login', async () => {
-    const aarPage = await new AccessRenewalPage(page).waitForLoad();
-    expect(aarPage).toBeTruthy();
-    expect(await aarPage.hasExpired()).toBeTruthy();
-  });
-
   // note that this test is "destructive" in that it brings the user to a state
   // where they cannot complete this test again, because they have completed
   // AAR and are no longer forced into renewal
