@@ -3,14 +3,15 @@ import * as fp from 'lodash/fp';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
-import {Switch, useHistory, BrowserRouter} from 'react-router-dom';
+import {BrowserRouter, Switch, useHistory} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {
   AppRoute,
-  withRouteData,
-  AppRoutingWrapper
+  AppRoutingWrapper,
+  withRouteData
 } from 'app/components/app-router';
+import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle, NotificationModal} from 'app/components/modals';
 import {withRoutingSpinner} from 'app/components/with-routing-spinner';
 import {CookiePolicy} from 'app/pages/cookie-policy';
@@ -21,7 +22,7 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {disabledGuard, signInGuard} from 'app/routing/guards';
-import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {bindApiClients, configApi, getApiBaseUrl} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {useAuthentication} from 'app/utils/authentication';
@@ -37,9 +38,8 @@ import {
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
+import * as ReactDOM from 'react-dom';
 import 'rxjs/Rx';
-import * as ReactDOM from "react-dom";
-import {Button} from "app/components/buttons";
 import { ParamsContextProvider } from './params-context-provider';
 
 declare const gapi: any;
@@ -167,7 +167,7 @@ const getUserConfirmation = (message, callback) => {
   };
 
   ReactDOM.render(
-      <Modal>
+    <Modal>
         <ModalTitle>Warning!</ModalTitle>
         <ModalBody>
           {message}
@@ -284,7 +284,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
             {/* It should be noted that the reason this is currently working is because Switch only */}
             {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
             {/* that they are a Route or a subclass of Route. */}
-            {/* TODO angular2react: rendering component through component() prop is causing the components to unmount/remount on every render*/}
             <Switch>
               <AppRoute exact path='/cookie-policy'>
                 <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>

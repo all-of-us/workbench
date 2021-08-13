@@ -2,13 +2,13 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
+import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {MatchParams} from 'app/components/app-router';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';

@@ -1,18 +1,18 @@
+import {ParamsContext} from 'app/routing/params-context-provider';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore, nextWorkspaceWarmupStore,
   queryParamsStore,
   routeConfigDataStore
 } from 'app/utils/navigation';
 import {routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useContext, useEffect, useState} from 'react';
 import { Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
-import {workspacesApi} from "../services/swagger-fetch-clients";
-import {ExceededActionCountError, LeoRuntimeInitializer} from "app/utils/leo-runtime-initializer";
-import {buildPageTitleForEnvironment} from "app/utils/title";
-import {ParamsContext} from "app/routing/params-context-provider";
 
 export interface MatchParams {
   cid?: string;
@@ -47,7 +47,6 @@ export const useQuery = () => {
 // TODO angular2react: This isn't really the right place to be making the store updates but it's the
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
-  const params = useParams();
   const query = useQuery();
 
   useEffect(() => {
@@ -85,7 +84,7 @@ const ParamsContextShim = ({intermediaryRoute, children}) => {
   }, [newParams]);
 
   return children;
-}
+};
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
@@ -114,12 +113,12 @@ export const AppRoutingWrapper = ({children}) => {
   useEffect(() => {
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
-    document.title = buildPageTitleForEnvironment(title || params[pathElementForTitle] || "");
+    document.title = buildPageTitleForEnvironment(title || params[pathElementForTitle] || '');
   }, [params, title, pathElementForTitle]);
 
   useEffect(() => {
-    const getWorkspaceAndUpdateStores = async (namespace, id) => {
-      const wsResponse = await workspacesApi().getWorkspace(namespace, id)
+    const getWorkspaceAndUpdateStores = async(namespace, id) => {
+      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
       const {workspace, accessLevel} = wsResponse;
       currentWorkspaceStore.next({
         ...workspace,
@@ -147,7 +146,7 @@ export const AppRoutingWrapper = ({children}) => {
           throw e;
         }
       }
-    }
+    };
 
     const {ns, wsid} = params;
 
@@ -184,6 +183,6 @@ export const AppRoutingWrapper = ({children}) => {
 
   return <React.Fragment>
     {children}
-  </React.Fragment>
+  </React.Fragment>;
 
-}
+};

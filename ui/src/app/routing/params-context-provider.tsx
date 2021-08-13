@@ -1,12 +1,12 @@
-import * as React from 'react';
 import { MatchParams } from 'app/components/app-router';
-import {useState} from "react";
+import * as React from 'react';
+import {useState} from 'react';
 
 export interface ParamsContextProps {
   paramsContext: {
     params: MatchParams;
     setParams: Function;
-  }
+  };
 }
 
 export const ParamsContext = React.createContext({
@@ -19,8 +19,8 @@ export const ParamsContextProvider = ({children}) => {
 
   return <ParamsContext.Provider value={{params, setParams}}>
     {children}
-  </ParamsContext.Provider>
-}
+  </ParamsContext.Provider>;
+};
 
 // A HOC to use with class components to inject ParamsContext into the wrapped component's props
 export const withParamsContext = WrappedComponent => {
@@ -29,4 +29,4 @@ export const withParamsContext = WrappedComponent => {
         {context => <WrappedComponent paramsContext={context} {...props}/>}
       </ParamsContext.Consumer>
   );
-}
+};

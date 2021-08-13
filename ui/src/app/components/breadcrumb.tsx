@@ -2,8 +2,10 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Link as RouterLink} from 'react-router-dom';
 
+import {MatchParams} from 'app/components/app-router';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
+import { ParamsContextProps, withParamsContext } from 'app/routing/params-context-provider';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -18,9 +20,7 @@ import {
 import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
-import {MatchParams} from "app/components/app-router";
-import {RouteComponentProps} from "react-router";
-import { withParamsContext, ParamsContextProps } from 'app/routing/params-context-provider';
+import {RouteComponentProps} from 'react-router';
 
 const styles = {
   firstLink: {

@@ -12,7 +12,6 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
-import {ParamsContextProvider, ParamsContext} from "../../routing/params-context-provider";
 
 const styles = reactStyles({
   headerContainer: {

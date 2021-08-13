@@ -18,10 +18,10 @@ import {
 } from 'app/utils';
 import {Link as RouterLink, withRouter} from 'react-router-dom';
 
+import {MatchParams} from 'app/components/app-router';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {MatchParams} from 'app/components/app-router';
 import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,

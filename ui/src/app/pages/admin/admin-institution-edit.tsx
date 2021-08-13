@@ -1,3 +1,4 @@
+import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -9,7 +10,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {Scroll} from 'app/icons/scroll';
 import {MembershipRequirements, OrganizationTypeOptions} from 'app/pages/admin/admin-institution-options';
-import {MatchParams} from 'app/components/app-router';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -71,8 +71,8 @@ interface Props
         RouteComponentProps<MatchParams> {}
 
 export const AdminInstitutionEdit = fp.flow(
-    withNavigation,
-    withRouter
+  withNavigation,
+  withRouter
 )(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);

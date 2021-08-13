@@ -4,8 +4,8 @@ import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
 
-import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
 import {MatchParams} from 'app/components/app-router';
+import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
 import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
