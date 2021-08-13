@@ -10,7 +10,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortReviewStore,
   NavigationProps
@@ -95,16 +95,6 @@ export const CohortReview = fp.flow(
             })
           ]);
         });
-      }
-    }
-
-    componentDidUpdate(prevProps: Readonly<Props>) {
-      if (hasNewValidProps(this.props, prevProps, [
-        p => p.match.params.ns,
-        p => p.match.params.wsid,
-        p => p.match.params.cid
-      ])) {
-        this.loadCohort();
       }
     }
 

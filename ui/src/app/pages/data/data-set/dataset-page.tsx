@@ -17,7 +17,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  hasNewValidProps,
   reactStyles,
   switchCase,
   toggleIncludes,
@@ -576,24 +575,6 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     }
 
     async componentDidUpdate(prevProps, prevState: State) {
-      if (hasNewValidProps(this.props, prevProps, [
-        (props) => props.workspace.namespace,
-        (props) => props.workspace.id,
-        (props) => props.cdrVersionTiersResponse
-      ])) {
-        this.updatePrepackagedDomains();
-      }
-
-      if (hasNewValidProps(this.props, prevProps, [
-        (props) => props.workspace.namespace,
-        (props) => props.workspace.id,
-        (props) => props.match.params.dataSetId])) {
-
-        if (hasNewValidProps(this.props, prevProps, [(props) => props.match.params.dataSetId])) {
-          this.fetchDataset();
-        }
-      }
-
       // If any domains were dropped, we want to drop any domain/value pair selections.
       const droppedDomains = Array.from(prevState.selectedDomains)
           .filter(d => !this.state.selectedDomains.has(d));
