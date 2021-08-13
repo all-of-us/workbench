@@ -34,7 +34,7 @@ function run_mysql() {
 }
 
 echo "Creating database if it does not exist..."
-run_mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
+run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" < "${CREATE_DB_FILE}"
 
 echo "Upgrading database..."
 (cd "$(dirname "${BASH_SOURCE}")" && ../gradlew update $activity $context)
