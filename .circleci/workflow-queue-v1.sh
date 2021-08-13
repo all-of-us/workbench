@@ -77,7 +77,7 @@ fetch_older_pipelines() {
   jq_filter="(.status | test(\"running|pending|queued\")) and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
   jq_object+="job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
-  const debug=$(echo ${get_result} | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\")")
+  debug=$(echo ${get_result} | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\")")
   printf "%s\n\n" ${debug}
   printf "echo 1"
   __=$(echo "${get_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\") | ${jq_object}")
