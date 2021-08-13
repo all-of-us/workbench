@@ -72,7 +72,6 @@ fetch_older_pipelines() {
     printf "Fetch older pipelines failed."
     exit 1
   fi
-  # jq_filter="(.status | test(\"running|pending|queued\")) "
   jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
   jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
@@ -96,6 +95,10 @@ printf "%s\n\n" "Current pipeline CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
 fetch_current_pipeline_start_time
 current_pipeline_start_time=$__
 printf "%s\n\n" "Current pipeline start_at time: ${current_pipeline_start_time}"
+if [[ ! "${current_pipeline_start_time}" ]]; then
+  printf "Value of current_pipeline_start_time is not valid."
+  exit 1
+fi
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
