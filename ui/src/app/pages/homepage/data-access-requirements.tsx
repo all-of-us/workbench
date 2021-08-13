@@ -150,6 +150,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
       <RegisteredTierCard/>
       {/* TODO - Step 2 ControlledTierCard */}
       <DuccCard/>
-   </FadeBox>
+    </FadeBox>
     </FlexColumn>;
 });
