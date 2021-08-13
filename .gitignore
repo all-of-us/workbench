@@ -48,6 +48,7 @@ tools/*.jar
 tools/cloud_sql_proxy
 .DS_Store
 client/py/.pydevproject
+gradle.properties
 **/.idea
 **/*.iml
 **/*.ipr
