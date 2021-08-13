@@ -7,13 +7,16 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 
 // Important: the access test user must be in a state where they are currently failing access renewal
-// due to an expired "profile last confirmed" date.  This is accomplished by the CircleCI nightly test runner
-// executing the API project.rb CLI tool SetAccessModuleTimestamps
+// due to an expired "profile last confirmed" date.  CircleCI accomplishes this by running the access-test-user-setup
+// task, which executes `./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}`.
+// This can also be run locally.
 
 describe('Annual Access Renewal', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ACCESS_TEST_ACCESS_TOKEN_FILE);
   });
+
+  // This test cannot run after the "Expired User can complete Annual Access Renewal" test - see below.
 
   test('Expired User is redirected to Annual Access Renewal (AAR) on login', async () => {
     const aarPage = await new AccessRenewalPage(page).waitForLoad();
