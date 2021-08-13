@@ -306,8 +306,12 @@ public class MailServiceImpl implements MailService {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(
+            EmailSubstitutionField.FIRST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
+        .put(
+            EmailSubstitutionField.LAST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getFamilyName()))
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(
             EmailSubstitutionField.INSTITUTION_NAME,
