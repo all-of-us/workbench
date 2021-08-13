@@ -55,31 +55,29 @@ circle_get() {
 }
 
 fetch_current_pipeline_start_time() {
-  printf '%s\n' "Fetch current pipeline start time"
+  printf '%s\n' "Fetch current pipeline start time."
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
   jq_filter=".build_num==$CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\""
-  # jq_filter="select(.build_num==$CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\") | select(.workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\") | .start_time"
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | .start_time")
 }
 
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetch previously submitted pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued:"
+  printf '%s\n' "Fetch previously submitted pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
   if [[ ! "${get_result}" ]]; then
-    printf "Fetch older pipelines curl failed."
+    printf "Fetch older pipelines failed."
     exit 1
   fi
   # jq_filter="select(.branch==\"${branch}\" and (.status | test(\"running|pending|queued\")))"
   jq_filter="(.status | test(\"running|pending|queued\")) and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
-  # jq_filter="select(.status | test(\"running|pending|queued\"))"
-  # jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
-  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
-  printf "%s\n\n" "${get_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\")"
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
+  jq_object+="job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
+  printf "%s\n\n" "echo ${get_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\")"
   printf "echo 1"
   __=$(echo "${get_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time > \"${1}\") | ${jq_object}")
 }
