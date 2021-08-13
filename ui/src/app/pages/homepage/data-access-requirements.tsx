@@ -9,6 +9,9 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {profileStore, useStore} from 'app/utils/stores';
+import {AccessModule} from 'generated/fetch';
 import {useEffect} from 'react';
 
 const styles = reactStyles({
@@ -83,25 +86,49 @@ const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
   </FlexColumn>;
 
-const RegisteredTierCard = () => <FlexColumn style={styles.stepCard}>
-  <div style={styles.stepCardStep}>Step 1</div>
-  <FlexRow>
-    <FlexColumn>
-      <div style={styles.stepCardHeader}>Complete Registration</div>
-      <div style={styles.rtData}>Registered Tier data</div>
-      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-      <FlexRow style={styles.rtDataDetails}>Individual (not aggregated) data</FlexRow>
-      <FlexRow style={styles.rtDataDetails}>Identifying information removed</FlexRow>
-      <FlexRow style={styles.rtDataDetails}>Electronic health records</FlexRow>
-      <FlexRow style={styles.rtDataDetails}>Survey responses</FlexRow>
-      <FlexRow style={styles.rtDataDetails}>Physical measurements</FlexRow>
-      <FlexRow style={styles.rtDataDetails}>Wearable devices</FlexRow>
-    </FlexColumn>
-    <FlexColumn>
-      RT tasks will go here
-    </FlexColumn>
-  </FlexRow>
-</FlexColumn>;
+const RegisteredTierCard = () => {
+  // in display order
+  const rtModules = [
+    AccessModule.TWOFACTORAUTH,
+    AccessModule.RASLINKLOGINGOV,
+    AccessModule.ERACOMMONS,
+    AccessModule.COMPLIANCETRAINING,
+  ];
+
+  const {profile} = useStore(profileStore);
+
+  return <FlexColumn style={styles.stepCard}>
+    <div style={styles.stepCardStep}>Step 1</div>
+    <FlexRow>
+      <FlexColumn>
+        <div style={styles.stepCardHeader}>Complete Registration</div>
+        <div style={styles.rtData}>Registered Tier data</div>
+        <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+        <FlexRow style={styles.rtDataDetails}>Individual (not aggregated) data</FlexRow>
+        <FlexRow style={styles.rtDataDetails}>Identifying information removed</FlexRow>
+        <FlexRow style={styles.rtDataDetails}>Electronic health records</FlexRow>
+        <FlexRow style={styles.rtDataDetails}>Survey responses</FlexRow>
+        <FlexRow style={styles.rtDataDetails}>Physical measurements</FlexRow>
+        <FlexRow style={styles.rtDataDetails}>Wearable devices</FlexRow>
+      </FlexColumn>
+      <FlexColumn style={{padding: '1em'}}>
+        <div>Not the real RT tasks UI (TODO) but some output for debugging</div>
+        {rtModules.map(module => {
+          const {completionEpochMillis, bypassEpochMillis} = getAccessModuleStatusByName(profile, module);
+          return <React.Fragment>
+            <hr/>
+            <FlexRow>
+              <div>{module}</div>
+              <FlexColumn style={{paddingLeft: '1em'}}>
+                <div>Completion Time {completionEpochMillis || '(none)'}</div>
+                <div>Bypass Time {bypassEpochMillis || '(none)'}</div>
+              </FlexColumn>
+            </FlexRow>
+          </React.Fragment>; })}
+      </FlexColumn>
+    </FlexRow>
+  </FlexColumn>;
+};
 
 const DuccCard = () => <FlexColumn style={styles.stepCard}>
   {/* This will be Step 3 when CT becomes the new Step 2 */}
