@@ -26,6 +26,6 @@ export default class AccessRenewalPage extends AuthenticatedPage {
   }
 
   getReviewProfileButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Review }, this);
+    return Button.findByName(this.page, { name: LinkText.Review });
   }
 }
