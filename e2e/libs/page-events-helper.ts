@@ -72,8 +72,7 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/config',
     '/user-recent-workspaces',
     '/user-recent-resources',
-    '/profile',
-    '/domainValues/'
+    '/profile'
   ];
   return !filters.some((partialUrl) => request && request.url().includes(partialUrl));
 };
@@ -104,7 +103,12 @@ const getResponseText = async (request: Request): Promise<string> => {
     !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
     status !== NO_CONTENT_RESPONSE_CODE
   ) {
-    return (await request.response().buffer()).toString();
+    try {
+      return (await request.response().buffer()).toString();
+    } catch (err) {
+      console.error(`Puppeteer error during get response text.\n${err}`);
+      return undefined;
+    }
   }
 };
 
