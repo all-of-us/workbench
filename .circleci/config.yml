@@ -552,7 +552,7 @@ jobs:
           at: .
       - steps: << parameters.optional_steps >>
       - run:
-          name: "Export e2e test user to environment variable"
+          name: "Export e2e test users to environment variables"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
       - when:
           condition:
@@ -624,6 +624,17 @@ jobs:
           paths:
             - .
 
+  puppeteer-access-test-user-setup:
+    executor: workbench-executor
+    steps:
+      - checkout-code
+      - attach_workspace:
+          at: .
+      - gcloud-auth-login
+      - run:
+          working_directory: ~/workbench/api
+          name: Prep the e2e access test user (in Test env) by setting access module timestamps
+          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
 
 workflows:
   build-test-deploy:
@@ -727,12 +738,14 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
+      - puppeteer-access-test-user-setup
       - puppeteer-test:
           parallel_num: 1
           env_name: "test"
           test_mode: "nightly-integration"
           requires:
             - puppeteer-env-setup
+            - puppeteer-access-test-user-setup
 
 experimental:
   notify:
