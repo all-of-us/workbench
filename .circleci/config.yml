@@ -624,7 +624,7 @@ jobs:
           paths:
             - .
 
-  access-test-user-setup:
+  puppeteer-access-test-user-setup:
     executor: workbench-executor
     steps:
       - checkout-code
@@ -738,14 +738,14 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
-      - access-test-user-setup
+      - puppeteer-access-test-user-setup
       - puppeteer-test:
           parallel_num: 1
           env_name: "test"
           test_mode: "nightly-integration"
           requires:
             - puppeteer-env-setup
-            - access-test-user-setup
+            - puppeteer-access-test-user-setup
 
 experimental:
   notify:
