@@ -20,6 +20,7 @@ import {workspaceStubs} from 'testing/stubs/workspaces';
 import {navigateSpy} from 'testing/navigation-mock';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
+import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('NotebookRedirect', () => {
   const workspace = {
@@ -34,9 +35,13 @@ describe('NotebookRedirect', () => {
   let runtimeStub: RuntimeApiStub;
 
   const component = async() => {
-    const c = mount(<NotebookRedirect hideSpinner={() => {}}
-                                      showSpinner={() => {}}
-                                      match={{params: {nbName: 'wharrgarbl'}}}/>);
+    const c = mount(<MemoryRouter initialEntries={['/workspaces/namespace/id/notebooks/wharrgarbl']}>
+      <Route path='/workspaces/:ns/:wsid/notebooks/:nbName'>
+        <NotebookRedirect hideSpinner={() => {}}
+                          showSpinner={() => {}}/>
+      </Route>
+    </MemoryRouter>
+  );
     await waitOneTickAndUpdate(c);
     return c;
   };
