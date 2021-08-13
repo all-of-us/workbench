@@ -6,7 +6,6 @@ class GcloudContextV2
   attr_reader :account, :creds_file, :project
 
   def initialize(options_parser)
-    Workbench.assert_in_docker
     @options_parser = options_parser
     # We use both gcloud and gsutil commands for various tasks. While gcloud can take arguments,
     # gsutil uses the current gcloud config, so we want to grab and verify the account from there.
