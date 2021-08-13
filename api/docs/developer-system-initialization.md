@@ -15,7 +15,8 @@ openjdk 11.0.11 2021-08-03
 Gradle requires Java 8 to build currently (RW-5609 will upgrade to 11).
 
 - Ensure Java 8 is installed on your system
-- Create a Gradle properties file to point to this version:
+- Find Java 8 home directory, e.g. on mac run: `/usr/libexec/java_home -v 1.8`
+- Create a Gradle properties file to point to this directory:
   - Globally for your workstation: `~/.gradle/gradle.properties`
   - or, just in the Workbench repo: `api/gradle.properties`
   ```
