@@ -54,18 +54,21 @@ circle_get() {
     "${url}"
 }
 
+# Function returns current pipeline's start_time. It is used for comparison of start_time values.
 fetch_current_pipeline_start_time() {
   printf '%s\n' "Fetch current pipeline start time."
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
-  jq_filter=".build_num==$CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\""
+  jq_filter=".build_num==$CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\" "
+  jq_filter+="and .workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\""
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | .start_time")
 }
 
+# Function takes start_time parameter.
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetch previously submitted pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
+  printf '%s\n' "Fetch pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
   # local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local get_result=$(circle_get "${get_path}")
@@ -74,7 +77,8 @@ fetch_older_pipelines() {
     exit 1
   fi
   # jq_filter="select(.branch==\"${branch}\" and (.status | test(\"running|pending|queued\")))"
-  jq_filter="(.status | test(\"running|pending|queued\")) and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
+  jq_filter="(.status | test(\"running|pending|queued\")) and .workflows.workflow_name==\"${workflow_name}\" "
+  jq_filter+="and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
   jq_object+="job_name: .workflows.job_name, build_num: .build_num, start_time: .start_time, status: .status }"
   __=$(echo "${get_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | ${jq_object}")
@@ -119,7 +123,7 @@ while [[ "${is_running}" == "true" ]]; do
 
   printf "%s\n" "Has been waiting for ${waited_time} seconds."
   if [ $waited_time -gt $max_time ]; then
-    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds. *****"
+    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
     is_running=false
   fi
 done
