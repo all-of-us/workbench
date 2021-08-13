@@ -8,7 +8,6 @@ import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-st
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
-
 describe('AdminUser', () => {
   let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}};
 

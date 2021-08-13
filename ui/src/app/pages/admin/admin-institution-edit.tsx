@@ -45,7 +45,7 @@ const styles = reactStyles({
   }
 });
 
-enum InstitutionMode {
+export enum InstitutionMode {
   ADD,
   EDIT
 }

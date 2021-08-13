@@ -272,11 +272,11 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   }, []);
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
+    <ParamsContextProvider>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     {
       isCookiesEnabled && <BrowserRouter getUserConfirmation={getUserConfirmation}>
-        <ParamsContextProvider>
           <AppRoutingWrapper>
             <ScrollToTop/>
             {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
@@ -316,9 +316,9 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               </AppRoute>
             </Switch>
           </AppRoutingWrapper>
-        </ParamsContextProvider>
       </BrowserRouter>
     }
+    </ParamsContextProvider>
     {
      overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
       <span style={{fontSize: '80%', color: 'darkred'}}>

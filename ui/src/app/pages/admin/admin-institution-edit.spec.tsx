@@ -8,15 +8,22 @@ import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {AdminInstitutionEdit} from './admin-institution-edit';
+import {AdminInstitutionEdit, InstitutionMode} from './admin-institution-edit';
+import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('AdminInstitutionEditSpec', () => {
   const component = () => {
-    return mount(<AdminInstitutionEdit
-        hideSpinner={() => {}}
-        showSpinner={() => {}}
-        match={{params: {institutionId: 'Verily'}}}
-    />);
+    return mount(<MemoryRouter
+        initialEntries={['/admin/institution/edit/Verily']}
+    >
+      <Route path='/admin/institution/edit/:institutionId'>
+        <AdminInstitutionEdit
+          hideSpinner={() => {}}
+          showSpinner={() => {}}
+
+        />
+      </Route>
+    </MemoryRouter>);
   };
 
   beforeEach(() => {

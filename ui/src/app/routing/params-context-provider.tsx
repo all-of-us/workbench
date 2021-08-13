@@ -9,15 +9,17 @@ export interface ParamsContextProps {
   };
 }
 
-export const ParamsContext = React.createContext({
-  params: {},
-  setParams: (newParams: MatchParams) => {}
+export const ParamsContext = React.createContext<ParamsContextProps>({
+  paramsContext: {
+    params: {},
+    setParams: (newParams: MatchParams) => {}
+  }
 });
 
 export const ParamsContextProvider = ({children}) => {
-  const [params, setParams] = useState({});
+  const [params, setParams] = useState<MatchParams>({});
 
-  return <ParamsContext.Provider value={{params, setParams}}>
+  return <ParamsContext.Provider value={{paramsContext: {params, setParams}}}>
     {children}
   </ParamsContext.Provider>;
 };
@@ -26,7 +28,7 @@ export const ParamsContextProvider = ({children}) => {
 export const withParamsContext = WrappedComponent => {
   return props => (
       <ParamsContext.Consumer>
-        {context => <WrappedComponent paramsContext={context} {...props}/>}
+        {context => <WrappedComponent {...context} {...props}/>}
       </ParamsContext.Consumer>
   );
 };

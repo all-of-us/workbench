@@ -72,7 +72,7 @@ export const RouteLink = ({path, style = {}, children}): React.ReactElement => <
 
 const ParamsContextSetter = ({intermediaryRoute, children}) => {
   const newParams = useParams();
-  const {params, setParams} = useContext(ParamsContext);
+  const {paramsContext: {params, setParams}} = useContext(ParamsContext);
   useEffect(() => {
     if (!fp.isEqual(params, newParams)) {
       if (intermediaryRoute) {
@@ -107,7 +107,7 @@ export const Navigate = ({to}): React.ReactElement => {
 
 export const AppRoutingWrapper = ({children}) => {
   const [pollAborter, setPollAborter] = useState(new AbortController());
-  const {params} = useContext(ParamsContext);
+  const {paramsContext: {params}} = useContext(ParamsContext);
   const {title, pathElementForTitle} = useStore(routeDataStore);
 
   useEffect(() => {
