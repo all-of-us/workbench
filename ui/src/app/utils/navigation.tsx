@@ -19,7 +19,6 @@ export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
