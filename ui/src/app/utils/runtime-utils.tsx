@@ -19,7 +19,8 @@ import * as React from 'react';
 const {useState, useEffect} = React;
 
 export enum RuntimeStatusRequest {
-  Delete = 'Delete',
+  DeleteRuntime = 'DeleteRuntime',
+  DeleteRuntimeAndPD = 'DeleteRuntimeAndPD',
   Start = 'Start',
   Stop = 'Stop'
 }
@@ -337,7 +338,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest, deletePD: boolean) => Promise<void>]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   const enablePD = serverConfigStore.get().config.enablePersistentDisk;
@@ -350,7 +351,8 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   useEffect(() => {
     // Additional status changes can be put here
     const resolutionCondition: (r: Runtime) => boolean = switchCase(runtimeStatus,
-        [RuntimeStatusRequest.Delete, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+        [RuntimeStatusRequest.DeleteRuntime, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+        [RuntimeStatusRequest.DeleteRuntimeAndPD, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
         [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
         [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
     );
@@ -375,14 +377,13 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     initializePolling();
   }, [runtimeStatus]);
 
-  const setStatusRequest = async(req, deletePD) => {
+  const setStatusRequest = async(req) => {
     await switchCase(req,
-      [RuntimeStatusRequest.Delete, () => {
-        if (enablePD) {
-          return runtimeApi().deleteRuntime(currentWorkspaceNamespace, deletePD);
-        } else {
-          return runtimeApi().deleteRuntime(currentWorkspaceNamespace, false);
-        }
+      [RuntimeStatusRequest.DeleteRuntime, () => {
+        return runtimeApi().deleteRuntime(currentWorkspaceNamespace, false);
+      }],
+      [RuntimeStatusRequest.DeleteRuntimeAndPD, () => {
+        return runtimeApi().deleteRuntime(currentWorkspaceNamespace, true);
       }],
       [RuntimeStatusRequest.Start, () => {
         return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
@@ -399,11 +400,10 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useCustomRuntime = (currentWorkspaceNamespace):
+export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
 
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
-  const {persistentDisk} = useStore(diskStore);
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
@@ -411,9 +411,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
-  if (enablePD) {
-    useDisk(currentWorkspaceNamespace);
-  }
 
   useEffect(() => {
     let mounted = true;
@@ -425,8 +422,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
       try {
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
-          const pdExists = persistentDisk;
-          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).pdSize < persistentDisk.size);
+          const pdExists = !!detachableDisk;
+          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).pdSize < detachableDisk.size);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
             if (runtime.status !== RuntimeStatus.Deleted) {
@@ -434,7 +431,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 signal: aborter.signal
               });
             } else if (enablePD && pdSizeReduced) {
-              await disksApi().deleteDisk(currentWorkspaceNamespace, persistentDisk.name, {
+              await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
                 signal: aborter.signal
               });
             }
@@ -521,7 +518,6 @@ export const useDisk = (currentWorkspaceNamespace) => {
             persistentDisk: pd
           });
         }
-
       });
     getDisk();
   }, [currentWorkspaceNamespace]);
@@ -530,12 +526,9 @@ export const useDisk = (currentWorkspaceNamespace) => {
 export const withRuntimeStore = () => WrappedComponent => {
   return (props) => {
     const value = useStore(runtimeStore);
-    const enablePD = serverConfigStore.get().config.enablePersistentDisk;
     // Ensure that a runtime gets initialized, if it hasn't already been.
     useRuntime(value.workspaceNamespace);
-    if (enablePD) {
-      useDisk(value.workspaceNamespace);
-    }
+    useDisk(value.workspaceNamespace);
 
     return <WrappedComponent {...props} runtimeStore={value} />;
   };

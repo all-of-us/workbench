@@ -18,7 +18,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {
-  ComputeType,
+  ComputeType, diskPrice, diskPricePerMonth,
   findMachineByName,
   Machine,
   machineRunningCost,
@@ -155,7 +155,6 @@ const styles = reactStyles({
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 100;
-const defaultPdSize = 100;
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
@@ -171,7 +170,8 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
 enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
-  Delete = 'Delete',
+  DeleteRuntime = 'DeleteRuntime',
+  DeleteUnattachedPd = 'DeleteUnattachedPd',
   Disabled = 'Disabled',
   Confirm = 'Confirm'
 }
@@ -282,9 +282,9 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
   </Fragment>;
 };
 
-export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm}) => {
+export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, pdSize}) => {
   const [deleting, setDeleting] = useState(false);
-  const [selectedKeepPD, setKeepPD] = useState(true);
+  const [keepPD, setKeepPD] = useState(true);
   return <Fragment>
     <div style={{display: 'flex'}}>
       <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
@@ -294,7 +294,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm}) => {
 
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={selectedKeepPD === true} onChange={() => setKeepPD(true)}/>
+        <label ><input type= 'radio' checked={keepPD === true} onChange={() => setKeepPD(true)}/>
         Keep persistent disk, delete application configuration and compute profile</label>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
@@ -305,20 +305,20 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm}) => {
         The disk will be automatically reattached the next time you create a cloud environment using the standard VM compute type.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at $2.20 per month.
+        You will continue to incur persistent disk cost at ${diskPricePerMonth * pdSize} per month.
       </p>
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={selectedKeepPD === false} onChange={() => setKeepPD(false)}/>
+        <label ><input type= 'radio' checked={keepPD === false} onChange={() => setKeepPD(false)}/>
         Delete everything, including persistent disk</label>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-        Also deletes your application configuration and cloud compute profile</p>
-
+        Also deletes your application configuration and cloud compute profile
+      </p>
     </div>
     <div>
       <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
@@ -340,7 +340,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm}) => {
           onClick={async() => {
             setDeleting(true);
             try {
-              await onConfirm(!selectedKeepPD);
+              await onConfirm(keepPD);
             } catch (err) {
               setDeleting(false);
               throw err;
@@ -449,7 +449,10 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   return <FlexColumn>
 
     <h3 style={{...styles.sectionHeader, ...styles.bold}} >Persistent Disk (GB)</h3>
-    <div> Persistent disks store analysis data. Learn more about persistent disks and where your disk is mounted.</div>
+    <div> Persistent disks store analysis data.
+      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
+      </a>
+    </div>
     <InputNumber id={`${idPrefix}-disk`}
                  showButtons
                  disabled={disabled}
@@ -606,7 +609,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime running, click to pause',
         iconShape: 'compute-running',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop, false); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
     [
@@ -637,7 +640,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       () => ({
         altText: 'Runtime paused, click to resume',
         iconShape: 'compute-stopped',
-        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start, false); }
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
     [
@@ -845,7 +848,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
     <div id='compute-resources'>- Default: compute size of
       <b> {runtimeConfig.machine.cpu} CPUs</b>,
       <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-      <b> {runtimeConfig.diskSize} GB Persistent disk</b>
+      <b> {runtimeConfig.diskSize} GB persistent disk</b>
     </div>
     {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
       <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
@@ -933,9 +936,9 @@ export const RuntimePanel = fp.flow(
   const {profile} = profileState;
 
   const {hasWgsData: allowDataproc} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasWgsData: false};
-  let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
   const enablePD = serverConfigStore.get().config.enablePersistentDisk;
-  const {persistentDisk} = enablePD ? useStore(diskStore) : null;
+  const {persistentDisk} = useStore(diskStore);
+  let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace, persistentDisk);
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
   if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
     currentRuntime = applyPresetOverride(currentRuntime);
@@ -949,8 +952,8 @@ export const RuntimePanel = fp.flow(
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const pdExists = persistentDisk;
-  const pdSize = pdExists ? persistentDisk.size : defaultPdSize;
+  const pdExists = !!persistentDisk;
+  const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -1012,6 +1015,7 @@ export const RuntimePanel = fp.flow(
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const pdSizeReduced = pdExists && selectedPdSize < pdSize;
+  const pdSizeNotReduced = pdExists && selectedPdSize >= pdSize;
   const runtimeExistsWithoutPD = runtimeExists && !pdExists;
 
 
@@ -1042,7 +1046,7 @@ export const RuntimePanel = fp.flow(
     // OR (update an existing runtime with no PD attached).
     // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
     // post launch PD when all existing running Runtime shutdown.
-    if (!enablePD || (!pdSizeReduced && runtimeExists) || runtimeExistsWithoutPD) {
+    if (!enablePD || (pdSizeNotReduced && runtimeExists) || runtimeExistsWithoutPD) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,
@@ -1250,28 +1254,32 @@ export const RuntimePanel = fp.flow(
               </FlexRow>
             </Fragment>
       ],
-      [PanelContent.Delete, () => (enablePD && selectedCompute === ComputeType.Standard && !runtimeExists && pdExists) ?
-          <ConfirmDeleteUnattachedPD
-              onConfirm={async() => {
-                await disksApi().deleteDisk(namespace, persistentDisk.name);
+      [PanelContent.DeleteRuntime, () => {
+        if (enablePD && selectedCompute === ComputeType.Standard && pdExists) {
+          return  <ConfirmDeleteRuntimeWithPD
+              onConfirm={async(keepPD) => {
+                await setRuntimeStatus(keepPD ? RuntimeStatusRequest.DeleteRuntime : RuntimeStatusRequest.DeleteRuntimeAndPD);
                 onClose();
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
-          /> : (enablePD && selectedCompute === ComputeType.Standard && runtimeExists && pdExists) ?
-              <ConfirmDeleteRuntimeWithPD
-                  onConfirm={async(keepPD) => {
-                    await setRuntimeStatus(RuntimeStatusRequest.Delete, keepPD);
-                    onClose();
-                  }}
-                  onCancel={() => setPanelContent(PanelContent.Customize)}
-              /> :
-          <ConfirmDelete
-            onConfirm={async() => {
-              await setRuntimeStatus(RuntimeStatusRequest.Delete, false);
-              onClose();
-            }}
-            onCancel={() => setPanelContent(PanelContent.Customize)}
-          />],
+              pdSize = {selectedPdSize}
+          />;
+        } else {
+          return <ConfirmDelete
+              onConfirm={async() => {
+                await setRuntimeStatus(RuntimeStatusRequest.DeleteRuntime);
+                onClose();
+              }}
+              onCancel={() => setPanelContent(PanelContent.Customize)}
+          />;
+        }}],
+      [PanelContent.DeleteUnattachedPd, () => <ConfirmDeleteUnattachedPD
+          onConfirm={async() => {
+            await disksApi().deleteDisk(namespace, persistentDisk.name);
+            onClose();
+          }}
+          onCancel={() => setPanelContent(PanelContent.Customize)}
+      />],
       [PanelContent.Customize, () => <Fragment>
             <div style={styles.controlSection}>
               <FlexRow style={styles.costPredictorWrapper}>
@@ -1372,7 +1380,7 @@ export const RuntimePanel = fp.flow(
                       )}}
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
-                    onClick={() => setPanelContent(PanelContent.Delete)}>Delete Persistent Disk</Link>
+                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</Link>
                 {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
@@ -1383,7 +1391,7 @@ export const RuntimePanel = fp.flow(
                     )}}
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
-                  onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
+                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
               {!runtimeExists && !pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow>
         }
