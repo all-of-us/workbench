@@ -106,8 +106,8 @@ export default class ProfilePage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LabelAlias.SaveProfile });
   }
 
-  needsConfirmation(): Promise<boolean> {
-    return this.containsText(LabelAlias.NeedsConfirmation);
+  async needsConfirmation(): Promise<boolean> {
+    return await this.containsText(LabelAlias.NeedsConfirmation);
   }
 
   getLooksGoodLink(): Link {

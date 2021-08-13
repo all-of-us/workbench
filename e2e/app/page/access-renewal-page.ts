@@ -21,11 +21,11 @@ export default class AccessRenewalPage extends AuthenticatedPage {
     return true;
   }
 
-  hasExpired(): Promise<boolean> {
-    return this.containsText(LabelAlias.AccessExpired);
+  async hasExpired(): Promise<boolean> {
+    return await this.containsText(LabelAlias.AccessExpired);
   }
 
   getReviewProfileButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.Review });
+    return Button.findByName(this.page, { name: LinkText.Review }, this);
   }
 }

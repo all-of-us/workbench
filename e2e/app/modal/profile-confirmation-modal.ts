@@ -17,6 +17,6 @@ export default class ProfileConfirmationModal extends Modal {
   }
 
   getOKButton(): Button {
-    return Button.findByName(this.page, { name: LinkText.OK });
+    return Button.findByName(this.page, { name: LinkText.OK }, this);
   }
 }

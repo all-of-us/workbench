@@ -59,6 +59,7 @@ describe('Annual Access Renewal', () => {
     // clicking OK returns us to AAR
 
     await modalOK.click();
+    await modal.waitUntilClose();
     await aarPage.waitForLoad();
     expect(await aarPage.hasExpired()).toBeFalsy();
 
