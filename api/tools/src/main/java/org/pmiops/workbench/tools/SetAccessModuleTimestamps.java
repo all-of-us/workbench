@@ -2,6 +2,7 @@ package org.pmiops.workbench.tools;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.apache.commons.cli.CommandLine;
@@ -65,11 +66,11 @@ public class SetAccessModuleTimestamps {
     }
 
     if (moduleName == AccessModuleName.PROFILE_CONFIRMATION && !isBypass) {
-      final String logMsg =
+      final String field = isBypass ? "bypass" : "completion";
+      final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
+      LOG.info(
           String.format(
-              "Updating %s %s time for user %s to %s",
-              moduleName, isBypass ? "bypass" : "completion", username, timestamp.toString());
-      LOG.info(logMsg);
+              "Updating %s %s time for user %s to %s", moduleName, field, username, time));
 
       // dual-write to DbUser and AccessModuleService
       // we will remove the module fields in DbUser soon
