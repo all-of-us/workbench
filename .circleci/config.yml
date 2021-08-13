@@ -32,7 +32,9 @@ anchors:
     TERM: dumb
 
   env-db: &env-db
-    MYSQL_ROOT_PASSWORD: root-notasecret
+    MYSQL_ROOT_PASSWORD: ubuntu
+    MYSQL_USER: ubuntu
+    MYSQL_PASSWORD: ubuntu
 
   # Job runs for master branch only
   filter-master-branch: &filter-master-branch
@@ -206,9 +208,14 @@ commands:
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
+          name: Run Local Migrations
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
+      - run:
           name: Launch local API server
           working_directory: ~/workbench/api
-          command: ./project.rb dev-up --nostart-db
+          # tail -f is important here, it keeps this process running indefinitely
+          command: ./project.rb start-local-api && tail -f build/dev-appserver-out/dev_appserver.out
           background: true
       - run:
           name: Wait for local API server to start
@@ -393,7 +400,7 @@ jobs:
             - launch-local-api
             - run:
                 working_directory: ~/workbench/api
-                command: ./project.rb run-local-api-tests
+                command: ./project.rb run-local-api-tests && ./project.rb stop-local-api
 
   api-deps-check:
     executor: workbench-executor

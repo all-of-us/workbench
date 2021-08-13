@@ -25,6 +25,13 @@ def must_get_wgs_proxy_group(project)
   return v
 end
 
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm cdr-scripts ./generate-cdr/project.rb #{cmd_name}} + args))
+  end
+end
+
 def service_account_context_for_bq(project, account)
   common = Common.new
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
@@ -110,6 +117,8 @@ def bq_update_acl(fq_dataset)
 end
 
 def publish_cdr(cmd_name, args)
+  ensure_docker cmd_name, args
+
   op = WbOptionsParser.new(cmd_name, args)
 
   op.add_option(
@@ -197,6 +206,8 @@ Common.register_command({
 })
 
 def publish_cdr_wgs(cmd_name, args)
+  ensure_docker cmd_name, args
+
   op = WbOptionsParser.new(cmd_name, args)
 
   op.add_option(
@@ -256,6 +267,8 @@ Common.register_command({
 })
 
 def create_wgs_extraction_datasets(cmd_name, args)
+  ensure_docker cmd_name, args
+
   op = WbOptionsParser.new(cmd_name, args)
 
   op.add_option(

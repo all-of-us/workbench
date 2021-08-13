@@ -1,0 +1,39 @@
+version: "2"
+options:
+  compose-file-path: 'docker-compose.yml'
+  # Turn this on if you need to debug something and see verbose logs.
+  verbose: false
+  # The root directory to be used when transforming sync src into absolute path.
+  # accepted values: pwd (current working directory), config_path (the directory where docker-sync.yml is found)
+  project_root: 'pwd'
+
+syncs:
+  src-sync:
+    # This can / should be set to false for most purposes, but may be useful to turn on when debugging / fixing our
+    # docker-sync machinery.
+    notify_terminal: false
+    src: '..'
+    host_disk_mount_mode: 'cached' # see https://docs.docker.com/docker-for-mac/osxfs-caching/#cached
+    # See http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ignore for the excludes syntax.
+    sync_excludes: [
+      '.gradle',
+      '.idea',
+      'api/build',
+      'api/out',
+      'api/src/generated',
+      'appengine-cron-emulator/build',
+      'common-api/build',
+      'common-api/out',
+      'node_modules',
+      'tsc-app',
+      'tsc-out',
+      'ui/coverage',
+      'ui/dist',
+      'ui/src/generated',
+      'ui/src/notebooks-generated'
+    ]
+    # For AoU, we need docker-sync to write files with the same userid used by the container. We have
+    # other machinery that causes our Docker containers to run as the host userid. Using the 'from_host'
+    # option here causes docker-sync to do the same.
+    sync_userid: 'from_host'
+    sync_groupid: 'from_host'
