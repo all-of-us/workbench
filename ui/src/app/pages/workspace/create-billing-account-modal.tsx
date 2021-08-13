@@ -7,6 +7,7 @@ import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import {supportUrls} from 'app/utils/zendesk';
 import * as React from 'react';
+import {GoogleCloudLogoSvg} from 'app/components/icons';
 import {useState} from 'react';
 import {ProfileStore, profileStore, useStore} from '../../utils/stores';
 import {TextInput} from "../../components/inputs";
@@ -14,10 +15,10 @@ import {reactStyles} from "../../utils";
 
 export const styles = reactStyles({
   line: {
+    borderLeft: `1px solid #97979`,
     boxSizing: 'border-box',
-    height: '100%',
-    // Set relative positioning so the spinner overlay is centered in the card.
-    position: 'relative'
+    height: '34px',
+    width: '1px',
   },
   textInput: {
     width: '75%',
@@ -26,7 +27,36 @@ export const styles = reactStyles({
     backgroundColor: 'transparent',
     outline: 'none',
   },
+  textHeader: {
+    color: '#262262',
+    fontFamily: 'Montserrat',
+    fontSize: '16px',
+    fontWeight: 600,
+    lineHeight: '20px',
+    letterSpacing: '0',
+  },
+  textNormal: {
+    color: '#262262',
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    lineHeight: '22px',
+    letterSpacing: '0',
+  },
 })
+
+const stylesFunction = {
+  stepButtonCircle: (alert: boolean): React.CSSProperties => {
+    return {
+      border: 'solid 1px',
+      borderRadius: '50%',
+      height: '50px',
+      width: '50px',
+      marginLeft: '12px',
+      padding: '4px',
+      backgroundColor: alert ? colors.danger : colors.secondary,
+    };
+  }
+};
 
 export interface CreateBillingAccountState {
   currentStep: number;
@@ -50,23 +80,21 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState();
 
-  return <Modal width={600} onRequestClose={() => onClose()}>
-        <ModalTitle style={{marginBottom: '0.7rem'}}>Create a billing account</ModalTitle>
+  return <Modal width={650} onRequestClose={() => onClose()}>
+        <ModalBody style={{marginTop: '0'}}>
+          <FlexColumn>
+            <FlexRow style={{alignItems: 'center'}}>
+              <GoogleCloudLogoSvg style={{height: '33px', width: '207px'}}/>
+              <div style={styles.line}></div>
+              <div style={{paddingTop: 5}}><div style={styles.textHeader}>Create billing account</div></div>
+              {currentStep !== 1 && <FlexRow style={{alignItems: 'center'}}>
 
-        <ModalBody>
-          <FlexColumn style={{alignItems: 'flex-start'}}>
-            <img style={{width: '12rem', marginLeft: '-0.7rem'}} src='/assets/images/gcp_logo.png'/>
-
+              </FlexRow>}
+            </FlexRow>
             <TextColumn>
-              <div>Billing accounts are managed via Google Cloud Platform™ service.</div>
-              <div>Learn more on how to set up a billing account.</div>
+              <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
+              <div style={styles.textNormal}>Learn more on how to set up a billing account.</div>
             </TextColumn>
-
-            <Button type='primary'
-                    style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => window.open(supportUrls.createBillingAccount, '_blank')}>
-              Read Instructions
-            </Button>
           </FlexColumn>
         </ModalBody>
 
@@ -80,8 +108,8 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
       <FlexRow>
         <FlexColumn>
           <TextColumn>
-            <p style={{marginTop: 0}}>Familiar with setting up a Google Cloud Platform account?</p>
-            <p style={{marginTop: 0}}>Manually set up an account in GCP. Step-by-step directions</p>
+            <p style={styles.textHeader}>Familiar with setting up a Google Cloud Platform account?</p>
+            <p style={styles.textNormal}>Manually set up an account in GCP. Step-by-step directions</p>
           </TextColumn>
           <Button type='primary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
@@ -91,13 +119,13 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
         </FlexColumn>
         <FlexColumn>
           <TextColumn>
-            <p style={{marginTop: 0}}>Let a Google billing partner create the account for you.</p>
-            <p style={{marginTop: 0}}>A representative will help you set up your billing account.</p>
+            <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
+            <p style={styles.textNormal}>A representative will help you set up your billing account.</p>
           </TextColumn>
           <Button type='primary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                  onClick={() => this.setState({currentStep: 2})}>
-            Get Started
+                  onClick={() => {setCurrentStep(2)}}>
+            USE A BILLING PARTNER
           </Button>
         </FlexColumn>
       </FlexRow>
@@ -130,7 +158,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
         </Button>
         <Button type='primary'
                 style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                onClick={() => this.setState({currentStep: 3})}>
+                onClick={() => {setCurrentStep(2)}}>
           Next
         </Button>
       </FlexColumn>
