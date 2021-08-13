@@ -70,7 +70,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-const ParamsContextShim = ({intermediaryRoute, children}) => {
+const ParamsContextSetter = ({intermediaryRoute, children}) => {
   const newParams = useParams();
   const {params, setParams} = useContext(ParamsContext);
   useEffect(() => {
@@ -93,9 +93,9 @@ export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, c
   return <Route exact={exact} path={path}>
     {redirectPath
         ? <Redirect to={redirectPath}/>
-        : <ParamsContextShim intermediaryRoute={intermediaryRoute}>
+        : <ParamsContextSetter intermediaryRoute={intermediaryRoute}>
           {children}
-        </ParamsContextShim>
+        </ParamsContextSetter>
     }
   </Route>;
 };
