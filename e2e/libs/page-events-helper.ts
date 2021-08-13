@@ -1,5 +1,5 @@
 import fp from 'lodash/fp';
-import { JSHandle, Request } from 'puppeteer';
+import {JSHandle, Request, Response} from 'puppeteer';
 import { logger } from 'libs/logger';
 
 export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
@@ -95,9 +95,9 @@ const getResponseText = async (request: Request): Promise<string> => {
   const REDIRECT_CODE_START = 300;
   const REDIRECT_CODE_END = 308;
   const NO_CONTENT_RESPONSE_CODE = 204;
-  const response = request.response;
+  const response: Response = request.response();
   if (response) {
-    const clonedResponse = fp.clone(response());
+    const clonedResponse = fp.clone(response);
     // Log response if response it's not a redirect or no-content
     const status = clonedResponse && clonedResponse.status();
     if (
