@@ -2562,7 +2562,6 @@ Common.register_command({
 
 def set_access_module_timestamps(cmd_name, *args)
   common = Common.new
-  ensure_docker(cmd_name, args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.project = TEST_PROJECT
@@ -2585,7 +2584,7 @@ def set_access_module_timestamps(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{gradle setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
+    common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
