@@ -1,5 +1,5 @@
 import fp from 'lodash/fp';
-import {JSHandle, Request, Response} from 'puppeteer';
+import { JSHandle, Request, Response } from 'puppeteer';
 import { logger } from 'libs/logger';
 
 export const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
