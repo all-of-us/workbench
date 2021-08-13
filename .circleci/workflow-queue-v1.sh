@@ -114,7 +114,7 @@ while [[ "${is_running}" == "true" ]]; do
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
   else
-    printf "\n%s\n" "all previous submitted pipelines have finished."
+    printf "\n%s\n" "All previous submitted pipelines have finished."
     is_running=false
   fi
 
