@@ -36,7 +36,17 @@ import org.springframework.context.annotation.Import;
 })
 public class SetAccessModuleTimestamps {
 
-  private static final Logger log = Logger.getLogger(SetAccessModuleTimestamps.class.getName());
+  private static final Logger LOG = Logger.getLogger(SetAccessModuleTimestamps.class.getName());
+
+  private static final Option USER_OPT =
+      Option.builder()
+          .longOpt("user")
+          .desc("Username (email) of the user to modify")
+          .required()
+          .hasArg()
+          .build();
+
+  private static final Options OPTIONS = new Options().addOption(USER_OPT);
 
   // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
   private final AccessModuleName moduleName = AccessModuleName.PROFILE_CONFIRMATION;
@@ -59,10 +69,12 @@ public class SetAccessModuleTimestamps {
           String.format(
               "Updating %s %s time for user %s to %s",
               moduleName, isBypass ? "bypass" : "completion", username, timestamp.toString());
-      log.info(logMsg);
+      LOG.info(logMsg);
 
       // dual-write to DbUser and AccessModuleService
       // we will remove the module fields in DbUser soon
+      // see the Access Module Update epic
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
 
       dbUser.setProfileLastConfirmedTime(timestamp);
       dbUser = userDao.save(dbUser);
@@ -72,21 +84,11 @@ public class SetAccessModuleTimestamps {
     }
   }
 
-  private static final Option userOpt =
-      Option.builder()
-          .longOpt("user")
-          .desc("Username (email) of the user to modify")
-          .required()
-          .hasArg()
-          .build();
-
-  private static final Options options = new Options().addOption(userOpt);
-
   @Bean
   public CommandLineRunner run(AccessModuleService accessModuleService, UserDao userDao) {
     return (args) -> {
-      final CommandLine opts = new DefaultParser().parse(options, args);
-      final String username = opts.getOptionValue(userOpt.getLongOpt());
+      final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
+      final String username = opts.getOptionValue(USER_OPT.getLongOpt());
 
       applyTimestampUpdateToUser(
           userDao, accessModuleService, username, moduleName, timestamp, false);
