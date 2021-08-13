@@ -31,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "support@researchallofus.org"
   },
   "auth": {
     "serviceAccountApiUsers": [
