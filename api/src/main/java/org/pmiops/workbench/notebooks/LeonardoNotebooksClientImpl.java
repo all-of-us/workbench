@@ -97,7 +97,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     String assetsBaseUrl = config.server.apiBaseUrl + "/static";
 
     Map<String, String> nbExtensions =
-        new ImmutableMap.Builder()
+        new ImmutableMap.Builder<String, String>()
             .put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js")
             .put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js")
             .put("aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js")
@@ -105,7 +105,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .build();
 
     Map<String, String> runtimeLabels =
-        new ImmutableMap.Builder()
+        new ImmutableMap.Builder<String, String>()
             .put(LeonardoMapper.RUNTIME_LABEL_AOU, "true")
             .put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail)
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
