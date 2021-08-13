@@ -59,9 +59,7 @@ fetch_current_pipeline_start_time() {
   printf '%s\n' "Fetch current pipeline start time."
   local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
-  jq_filter=".build_num==$CIRCLE_BUILD_NUM and .workflows.workflow_name==\"${workflow_name}\" "
-  jq_filter+="and .workflows.workflow_id==\"${CIRCLE_WORKFLOW_ID}\""
-  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | .start_time")
+  __=$(echo "${curl_result}" | jq -r ".[] | select(.build_num==$CIRCLE_BUILD_NUM) | .start_time")
 }
 
 # Function takes start_time parameter.
@@ -114,7 +112,7 @@ while [[ "${is_running}" == "true" ]]; do
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
   else
-    printf "\n%s\n" "All previous submitted pipelines have finished."
+    printf "\n%s\n" "All previously submitted pipelines have finished."
     is_running=false
   fi
 
