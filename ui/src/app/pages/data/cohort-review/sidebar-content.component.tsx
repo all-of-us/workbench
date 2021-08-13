@@ -8,6 +8,8 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, inputBorderColor, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
+import Timeout = NodeJS.Timeout;
+import {ParamsContextProps, withParamsContext} from 'app/routing/params-context-provider';
 import {participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -21,8 +23,6 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import Timeout = NodeJS.Timeout;
-import {ParamsContextProps, withParamsContext} from "app/routing/params-context-provider";
 
 const styles = {
   header: {

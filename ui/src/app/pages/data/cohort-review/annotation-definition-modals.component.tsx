@@ -8,12 +8,12 @@ import {ClrIcon} from 'app/components/icons';
 import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import { ParamsContextProps, withParamsContext } from 'app/routing/params-context-provider';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
-import { withParamsContext, ParamsContextProps } from 'app/routing/params-context-provider';
 
 const styles = reactStyles({
   editRow: {
