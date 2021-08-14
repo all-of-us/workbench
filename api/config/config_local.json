@@ -74,8 +74,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "http:\/\/localhost:4200/login",
-    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+    "loginUrl": "http:\/\/localhost:4200/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
