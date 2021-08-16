@@ -3509,7 +3509,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     from
     (
     SELECT
-    ROW_NUMBER() OVER(ORDER BY concept_name) + (SELECT MAX(id) FROM aou-res-curation-output-prod.R2021Q3R2.cb_criteria) as id
+    ROW_NUMBER() OVER(ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
     , -1 as parent_id
     , 'MEASUREMENT' as domain_id
     , 1 as is_standard
@@ -3532,8 +3532,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     , b.concept_id
     , b.concept_code
     , COUNT(DISTINCT a.person_id) cnt
-    FROM aou-res-curation-output-prod.R2021Q3R2.measurement a
-    JOIN aou-res-curation-output-prod.R2021Q3R2.concept b on a.measurement_concept_id = b.concept_id
+    FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
+    JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
     WHERE standard_concept = 'S'
     and domain_id = 'Measurement'
     and vocabulary_id = 'LOINC'
