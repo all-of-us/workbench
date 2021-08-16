@@ -403,7 +403,7 @@ jobs:
             - run:
                 name: Scan dependencies for vulnerabilities
                 working_directory: ~/workbench/api
-                command: ./project.rb gradle dependencyCheckAnalyze --info
+                command: ./gradlew dependencyCheckAnalyze --info
 
   api-integration-test:
     executor: workbench-executor
