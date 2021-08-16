@@ -26,7 +26,7 @@ import {
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
+import {Concept, Domain, DomainCard, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
@@ -76,18 +76,18 @@ const styles = reactStyles({
   }
 });
 
-const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo, browseInDomain: Function, updating: boolean}> =
-  ({conceptDomainInfo, browseInDomain, updating}) => {
-    const conceptCount = conceptDomainInfo.allConceptCount.toLocaleString();
+const DomainCard: React.FunctionComponent<{conceptDomainCard: DomainCard, browseInDomain: Function, updating: boolean}> =
+  ({conceptDomainCard, browseInDomain, updating}) => {
+    const conceptCount = conceptDomainCard.conceptCount.toLocaleString();
     return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
       <Clickable style={styles.domainBoxHeader}
            onClick={browseInDomain}
-           data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
+           data-test-id='domain-box-name'>{conceptDomainCard.name}</Clickable>
       <div style={styles.conceptText}>
         {updating ? <Spinner size={42}/> : <React.Fragment>
           <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain.
         </React.Fragment>}
-        <div><b>{conceptDomainInfo.participantCount.toLocaleString()}</b> participants in domain.</div>
+        <div><b>{conceptDomainCard.participantCount.toLocaleString()}</b> participants in domain.</div>
       </div>
       <Clickable style={styles.domainBoxLink}
                  onClick={browseInDomain}>Select Concepts</Clickable>
@@ -113,7 +113,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
     </DomainCardBase>;
   };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo,
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainCard,
   browsePhysicalMeasurements: Function, updating: boolean}> =
     ({physicalMeasurement, browsePhysicalMeasurements, updating}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
@@ -122,7 +122,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
           {updating ? <Spinner size={42}/> : <React.Fragment>
-            <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+            <span style={{fontSize: 30}}>{physicalMeasurement.conceptCount.toLocaleString()}</span> physical measurements.
           </React.Fragment>}
           <div><b>{physicalMeasurement.participantCount.toLocaleString()}</b> participants in this domain</div>
         </div>
@@ -141,7 +141,7 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps {
 
 interface State {
   // Array of domains and their metadata
-  conceptDomainList: Array<DomainInfo>;
+  conceptDomainCards: Array<DomainCard>;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
   // Current string in search box
@@ -169,7 +169,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     constructor(props) {
       super(props);
       this.state = {
-        conceptDomainList: [],
+        conceptDomainCards: [],
         conceptSurveysList: [],
         currentInputString: props.cohortContext ? props.cohortContext.searchTerms : '',
         currentSearchString: props.cohortContext ? props.cohortContext.searchTerms : '',
@@ -190,8 +190,8 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     async loadDomainsAndSurveys() {
       const {cohortContext, workspace: {id, namespace}} = this.props;
-      const getDomainInfo = cohortBuilderApi().findDomainInfos(namespace, id)
-        .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
+      const getDomainInfo = cohortBuilderApi().findDomainCards(namespace, id)
+        .then(conceptDomainInfo => this.setState({conceptDomainCards: conceptDomainInfo.items}))
         .catch((e) => {
           this.setState({domainInfoError: true});
           console.error(e);
@@ -211,16 +211,16 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     async updateCardCounts() {
       const {id, namespace} = this.props.workspace;
-      const {conceptDomainList, conceptSurveysList, currentInputString} = this.state;
+      const {conceptDomainCards, conceptSurveysList, currentInputString} = this.state;
       this.setState({
-        domainsLoading: conceptDomainList.map(domain => domain.domain),
+        domainsLoading: conceptDomainCards.map(domain => domain.domain),
         surveysLoading: conceptSurveysList.map(survey => survey.name),
       });
       const promises = [];
-      conceptDomainList.forEach(conceptDomain => {
+      conceptDomainCards.forEach(conceptDomain => {
         promises.push(this.getDomainCounts(conceptDomain.domain.toString())
           .then(domainCount => {
-            conceptDomain.allConceptCount = domainCount.conceptCount;
+            conceptDomain.conceptCount = domainCount.conceptCount;
             this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
           })
         );
@@ -233,7 +233,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
           }));
       });
       await Promise.all(promises);
-      this.setState({conceptDomainList, conceptSurveysList});
+      this.setState({conceptDomainCards, conceptSurveysList});
     }
 
     // Temp function to use the correct endpoint based on the enableStandardSourceDomains config flag
@@ -289,10 +289,10 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     render() {
-      const {conceptDomainList, conceptSurveysList, currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors,
+      const {conceptDomainCards, conceptSurveysList, currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors,
         loadingDomains, surveyInfoError, showSearchError, surveysLoading} = this.state;
-      const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
-      const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
+      const domainCards = conceptDomainCards.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
+      const physicalMeasurementsCard = conceptDomainCards.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -323,13 +323,13 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
               <div style={styles.cardList}>
                 {domainInfoError
                   ? this.errorMessage()
-                  : conceptDomainCards.some(domain => domainsLoading.includes(domain.domain))
+                  : domainCards.some(domain => domainsLoading.includes(domain.domain))
                     ? <Spinner size={42}/>
-                    : conceptDomainCards.every(domain => domain.allConceptCount === 0)
+                    : domainCards.every(domain => domain.conceptCount === 0)
                       ? 'No Domain Results. Please type in a new search term.'
-                      : conceptDomainCards
-                        .filter(domain => domain.allConceptCount !== 0)
-                        .map((domain, i) => <DomainCard conceptDomainInfo={domain}
+                      : domainCards
+                        .filter(domain => domain.conceptCount !== 0)
+                        .map((domain, i) => <DomainCard conceptDomainCard={domain}
                                                         browseInDomain={() => this.browseDomain(domain.domain)}
                                                         key={i} data-test-id='domain-box'
                                                         updating={domainsLoading.includes(domain.domain)}/>)
@@ -362,7 +362,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                     ? this.errorMessage()
                     : domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)
                       ? <Spinner size={42}/>
-                      : physicalMeasurementsCard.allConceptCount === 0
+                      : physicalMeasurementsCard.conceptCount === 0
                         ? 'No Program Physical Measurement Results. Please type in a new search term.'
                         : <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurementsCard}
                                                     browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
