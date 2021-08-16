@@ -3467,84 +3467,7 @@ WHERE x.concept_id = y.concept_id
 ################################################
 # MEASUREMENT - Clinical - STANDARD LOINC
 ################################################
-echo "MEASUREMENT - Clinical - STANDARD LOINC - add root"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , concept_id
-        , code
-        , name
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
-    , 0
-    , 'MEASUREMENT'
-    , 1
-    , 'LOINC'
-    , 'CLIN'
-    , 36207527
-    , 'LP248771-0'
-    , 'Clinical'
-    , 1
-    , 0
-    , 0
-    , 1
-    , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS STRING)"
-
-echo "MEASUREMENT - Clinical - STANDARD LOINC - add parents"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , name
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT ROW_NUMBER() OVER(ORDER BY name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
-    , (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'CLIN') as parent_id
-    , 'MEASUREMENT'
-    , 1
-    , 'LOINC'
-    , 'CLIN'
-    , name
-    , 1
-    , 0
-    , 0
-    , 1
-    , CONCAT( (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'LOINC' and subtype = 'CLIN'), '.',
-        CAST(ROW_NUMBER() OVER(ORDER BY name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING) )
-FROM
-    (
-        SELECT DISTINCT parent as name
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_clinical_terms_nc\` a
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b using (concept_id)
-        WHERE b.concept_id in
-            (
-                SELECT DISTINCT measurement_concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-            )
-    ) c"
-
-# this will add all clinical items that have been categorized and added into prep_clinical_terms_nc
-echo "MEASUREMENT - Clinical - STANDARD LOINC - add children"
+echo "MEASUREMENT - Clinical - STANDARD LOINC"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
@@ -3566,52 +3489,57 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
         , path
     )
-SELECT
-    ROW_NUMBER() OVER(ORDER BY parent_id, concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
-    , parent_id
-    , 'MEASUREMENT'
-    , 1
-    , 'LOINC'
-    , 'CLIN'
+    select id,
+    parent_id,
+    domain_id,
+    is_standard,
+    type,
+    subtype,
+    concept_id,
+    concept_code,
+    concept_name,
+    rollup_count,
+    item_count,
+    est_count,
+    is_group,
+    is_selectable,
+    has_attribute,
+    has_hierarchy,
+    id as path
+    from
+    (
+    SELECT
+    ROW_NUMBER() OVER(ORDER BY concept_name) + (SELECT MAX(id) FROM aou-res-curation-output-prod.R2021Q3R2.cb_criteria) as id
+    , -1 as parent_id
+    , 'MEASUREMENT' as domain_id
+    , 1 as is_standard
+    , 'LOINC' as type
+    , 'CLIN' as subtype
     , concept_id
     , concept_code
     , concept_name
-    , 0
-    , cnt
-    , cnt
-    , 0
-    , 1
-    , 0
-    , 1
-    , CONCAT(parent_path, '.',
-        CAST(ROW_NUMBER() OVER(ORDER BY parent_id, concept_name) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
-FROM
+    , 0 as rollup_count
+    , cnt as item_count
+    , cnt as est_count
+    , 0 as is_group
+    , 1 as is_selectable
+    , 0 as has_attribute
+    , 1 as has_hierarchy
+    FROM
     (
-        SELECT
-              b.concept_name
-            , b.concept_id
-            , b.concept_code
-            , d.id as parent_id
-            , d.path as parent_path
-            , COUNT(DISTINCT a.person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_clinical_terms_nc\` c on b.concept_id = c.concept_id
-        JOIN
-            (
-                SELECT id, name, path
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE type = 'LOINC'
-                    and subtype = 'CLIN'
-                    and is_group = 1
-            ) d on c.parent = d.name
-        WHERE standard_concept = 'S'
-            and domain_id = 'Measurement'
-            and vocabulary_id = 'LOINC'
-        GROUP BY 1,2,3, 4, 5
-    ) e"
-
+    SELECT
+    b.concept_name
+    , b.concept_id
+    , b.concept_code
+    , COUNT(DISTINCT a.person_id) cnt
+    FROM aou-res-curation-output-prod.R2021Q3R2.measurement a
+    JOIN aou-res-curation-output-prod.R2021Q3R2.concept b on a.measurement_concept_id = b.concept_id
+    WHERE standard_concept = 'S'
+    and domain_id = 'Measurement'
+    and vocabulary_id = 'LOINC'
+    and concept_class_id = 'Clinical Observation'
+    GROUP BY 1,2,3
+    ) a) b"
 
 ################################################
 # MEASUREMENT - Labs - STANDARD LOINC
