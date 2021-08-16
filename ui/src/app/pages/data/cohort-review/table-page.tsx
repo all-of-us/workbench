@@ -4,7 +4,6 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
@@ -26,6 +25,7 @@ import {
   currentCohortReviewStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {

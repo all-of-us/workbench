@@ -1,5 +1,4 @@
 import {domainToTitle} from 'app/cohort-search/utils';
-import {MatchParams} from 'app/components/app-router';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -10,6 +9,7 @@ import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';

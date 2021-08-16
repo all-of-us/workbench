@@ -1,4 +1,3 @@
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -35,7 +34,7 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,

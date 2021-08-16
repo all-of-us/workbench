@@ -39,7 +39,6 @@ import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
 import * as ReactDOM from 'react-dom';
 import 'rxjs/Rx';
-import { ParamsContextProvider } from './params-context-provider';
 
 declare const gapi: any;
 
@@ -281,53 +280,51 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
 
   const isCookiesEnabled = cookiesEnabled();
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
-    <ParamsContextProvider>
     {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
     <NotificationModal/>
     {
       isCookiesEnabled && <BrowserRouter getUserConfirmation={getUserConfirmation}>
-          <AppRoutingWrapper>
-            <ScrollToTop/>
-            {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
-            {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
-            {/* It should be noted that the reason this is currently working is because Switch only */}
-            {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
-            {/* that they are a Route or a subclass of Route. */}
-            <Switch>
-              <AppRoute exact path='/cookie-policy'>
-                <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-              </AppRoute>
-              <AppRoute exact path='/login'>
-                <SignInPage routeData={{title: 'Sign In'}}/>
-              </AppRoute>
-              <AppRoute exact path='/session-expired'>
-                <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
-              </AppRoute>
-              <AppRoute exact path='/sign-in-again'>
-                <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
-              </AppRoute>
-              <AppRoute exact path='/user-disabled'>
-                <UserDisabledPage routeData={{title: 'Disabled'}}/>
-              </AppRoute>
-              <AppRoute exact path='/not-found'>
-                <NotFoundPage routeData={{title: 'Not Found'}}/>
-              </AppRoute>
-              <AppRoute
-                  path=''
-                  exact={false}
-                  guards={[signInGuard, disabledGuard(isUserDisabled)]}
+        <AppRoutingWrapper>
+          <ScrollToTop/>
+          {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
+          {/* see https://github.com/all-of-us/workbench/pull/3917 for details. */}
+          {/* It should be noted that the reason this is currently working is because Switch only */}
+          {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
+          {/* that they are a Route or a subclass of Route. */}
+          <Switch>
+            <AppRoute exact path='/cookie-policy'>
+              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+            </AppRoute>
+            <AppRoute exact path='/login'>
+              <SignInPage routeData={{title: 'Sign In'}}/>
+            </AppRoute>
+            <AppRoute exact path='/session-expired'>
+              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/sign-in-again'>
+              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
+            </AppRoute>
+            <AppRoute exact path='/user-disabled'>
+              <UserDisabledPage routeData={{title: 'Disabled'}}/>
+            </AppRoute>
+            <AppRoute exact path='/not-found'>
+              <NotFoundPage routeData={{title: 'Not Found'}}/>
+            </AppRoute>
+            <AppRoute
+                path=''
+                exact={false}
+                guards={[signInGuard, disabledGuard(isUserDisabled)]}
+                intermediaryRoute={true}
+            >
+              <SignedInPage
                   intermediaryRoute={true}
-              >
-                <SignedInPage
-                    intermediaryRoute={true}
-                    routeData={{}}
-                />
-              </AppRoute>
-            </Switch>
-          </AppRoutingWrapper>
+                  routeData={{}}
+              />
+            </AppRoute>
+          </Switch>
+        </AppRoutingWrapper>
       </BrowserRouter>
     }
-    </ParamsContextProvider>
     {
      overriddenUrl && <div style={{position: 'absolute', top: 0, left: '1rem'}}>
       <span style={{fontSize: '80%', color: 'darkred'}}>

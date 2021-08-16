@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -15,6 +14,7 @@ import {
   currentCohortReviewStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';

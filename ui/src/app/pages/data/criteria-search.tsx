@@ -7,7 +7,6 @@ import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
-import {MatchParams} from 'app/components/app-router';
 import {Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -21,6 +20,7 @@ import {
   currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router';

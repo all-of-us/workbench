@@ -5,7 +5,6 @@ import * as React from 'react';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {ageTypeToText, genderOrSexTypeToText, mapRequest} from 'app/cohort-search/utils';
-import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {ComboChart} from 'app/components/combo-chart.component';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
@@ -19,6 +18,7 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps} from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {

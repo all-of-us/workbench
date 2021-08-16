@@ -4,9 +4,8 @@ import Iframe from 'react-iframe';
 
 import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
-import {RuntimeStore} from 'app/utils/stores';
+import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';

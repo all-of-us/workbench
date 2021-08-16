@@ -18,7 +18,6 @@ import {
 } from 'app/utils';
 import {Link as RouterLink, withRouter} from 'react-router-dom';
 
-import {MatchParams} from 'app/components/app-router';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -29,7 +28,7 @@ import {
   getRoleOptions,
   validateEmail
 } from 'app/utils/institutions';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,

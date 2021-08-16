@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
@@ -20,6 +19,7 @@ import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
+import {MatchParams} from 'app/utils/stores';
 import {
   CloudStorageTraffic,
   FileDetail,

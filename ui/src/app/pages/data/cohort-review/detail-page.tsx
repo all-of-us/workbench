@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
@@ -10,6 +9,7 @@ import {getVocabOptions, participantStore, vocabOptions} from 'app/services/revi
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {currentCohortReviewStore} from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router';

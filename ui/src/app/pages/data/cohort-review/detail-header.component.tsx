@@ -4,7 +4,6 @@ import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
 
-import {MatchParams} from 'app/components/app-router';
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
 import {filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -16,6 +15,7 @@ import {
   currentWorkspaceStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {

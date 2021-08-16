@@ -2,7 +2,6 @@ import * as Cookies from 'js-cookie';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PlaygroundIcon} from 'app/components/icons';
@@ -19,7 +18,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
-import {profileStore, RuntimeStore} from 'app/utils/stores';
+import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';

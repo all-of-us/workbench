@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {MatchParams} from 'app/components/app-router';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
@@ -9,6 +8,7 @@ import {filterStateStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';

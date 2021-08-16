@@ -1,33 +1,18 @@
-import {ParamsContext} from 'app/routing/params-context-provider';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {
-  currentWorkspaceStore, nextWorkspaceWarmupStore,
+  currentWorkspaceStore,
+  nextWorkspaceWarmupStore,
   queryParamsStore,
   routeConfigDataStore
 } from 'app/utils/navigation';
-import {routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
+import {routeDataStore, runtimeStore, urlParamsStore, useStore} from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useContext, useEffect, useState} from 'react';
-import { Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
-
-export interface MatchParams {
-  cid?: string;
-  csid?: string;
-  dataSetId?: string;
-  domain?: string;
-  institutionId?: string;
-  nbName?: string;
-  ns?: string;
-  pid?: string;
-  username?: string;
-  usernameWithoutGsuiteDomain?: string;
-  wsid?: string;
-}
-
+import {useEffect, useState} from 'react';
+import {Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 export interface Guard {
   allowed: () => boolean;
@@ -71,15 +56,18 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
 
-const ParamsContextSetter = ({intermediaryRoute, children}) => {
+const RouterStoresSetter = ({intermediaryRoute, children}) => {
   const newParams = useParams();
-  const {paramsContext: {params, setParams}} = useContext(ParamsContext);
+
   useEffect(() => {
-    if (!fp.isEqual(params, newParams)) {
+    console.log('location: ', location.pathname);
+    console.log('old params: ', urlParamsStore.get().params);
+    console.log('new params: ', newParams);
+    if (!fp.isEqual(urlParamsStore.get().params, newParams)) {
       if (intermediaryRoute) {
-        setParams({...params, ...newParams});
+        urlParamsStore.set({params: {...urlParamsStore.get().params, ...newParams}});
       } else {
-        setParams(newParams);
+        urlParamsStore.set({params: newParams});
       }
     }
   }, [newParams]);
@@ -89,13 +77,14 @@ const ParamsContextSetter = ({intermediaryRoute, children}) => {
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+  console.log('path: ', path);
 
   return <Route exact={exact} path={path}>
     {redirectPath
         ? <Redirect to={redirectPath}/>
-        : <ParamsContextSetter intermediaryRoute={intermediaryRoute}>
+        : <RouterStoresSetter intermediaryRoute={intermediaryRoute}>
           {children}
-        </ParamsContextSetter>
+        </RouterStoresSetter>
     }
   </Route>;
 };
@@ -107,8 +96,8 @@ export const Navigate = ({to}): React.ReactElement => {
 
 export const AppRoutingWrapper = ({children}) => {
   const [pollAborter, setPollAborter] = useState(new AbortController());
-  const {paramsContext: {params}} = useContext(ParamsContext);
   const {title, pathElementForTitle} = useStore(routeDataStore);
+  const {params} = useStore(urlParamsStore);
 
   useEffect(() => {
     // Pick up the global site title from HTML, and (for non-prod) add a tag

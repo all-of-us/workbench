@@ -2,10 +2,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Link as RouterLink} from 'react-router-dom';
 
-import {MatchParams} from 'app/components/app-router';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
-import { ParamsContextProps, withParamsContext } from 'app/routing/params-context-provider';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -17,7 +15,13 @@ import {
 import {
   BreadcrumbType
 } from 'app/utils/navigation';
-import {routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
+import {
+  MatchParams,
+  routeDataStore,
+  RouteDataStore, urlParamsStore,
+  UrlParamsStore,
+  withStore
+} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
 import {RouteComponentProps} from 'react-router';
@@ -147,11 +151,12 @@ const BreadcrumbLink = ({href, ...props}) => {
   return <RouterLink to={href} {...props}/>;
 };
 
-interface Props extends RouteComponentProps<MatchParams>, ParamsContextProps {
+interface Props extends RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   cohort: Cohort;
   cohortReview: CohortReview;
   conceptSet: ConceptSet;
+  paramsStore: UrlParamsStore;
   routeConfigData: any;
   reactRouteData: RouteDataStore;
 }
@@ -167,7 +172,7 @@ export const Breadcrumb = fp.flow(
   withCurrentConceptSet(),
   withRouteConfigData(),
   withStore(routeDataStore, 'reactRouteData'),
-  withParamsContext,
+  withStore(urlParamsStore, 'paramsStore')
 )(
   class extends React.Component<Props, State> {
     constructor(props) {
@@ -198,7 +203,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        this.props.paramsContext.params
+        this.props.paramsStore.params
       );
     }
 

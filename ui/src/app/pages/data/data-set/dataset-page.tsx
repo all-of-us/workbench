@@ -1,4 +1,3 @@
-import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CreateModal} from 'app/components/create-modal';
@@ -28,7 +27,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';

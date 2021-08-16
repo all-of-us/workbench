@@ -9,11 +9,11 @@ import {CheckBox, DatePicker, inputBorderColor, NumberInput, Select, TextArea} f
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
 import Timeout = NodeJS.Timeout;
-import {ParamsContextProps, withParamsContext} from 'app/routing/params-context-provider';
 import {participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
+import {UrlParamsStore, urlParamsStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AnnotationType,
@@ -80,11 +80,12 @@ const readValue = (type, annotation) => {
   }
 };
 
-interface AnnotationProps extends ParamsContextProps {
+interface AnnotationProps {
   annotation: ParticipantCohortAnnotation;
   setAnnotation: Function;
   cohortReview: CohortReview;
   definition: CohortAnnotationDefinition;
+  paramsStore: UrlParamsStore;
   workspace: WorkspaceData;
 }
 
@@ -100,7 +101,7 @@ interface AnnotationState {
 const AnnotationItem = fp.flow(
   withCurrentCohortReview(),
   withCurrentWorkspace(),
-  withParamsContext
+  withStore(urlParamsStore, 'paramsStore')
 )(class extends React.Component<AnnotationProps, AnnotationState> {
   constructor(props) {
     super(props);
@@ -114,10 +115,10 @@ const AnnotationItem = fp.flow(
     };
   }
 
-  componentDidUpdate(prevProps: any): void {
-    const {paramsContext: {params: {pid}}} = this.props;
+  componentDidUpdate(prevProps: AnnotationProps): void {
+    const {paramsStore: {params: {pid}}} = this.props;
     const {timeout} = this.state;
-    if ((pid !== prevProps.paramsContext.params.pid)) {
+    if ((pid !== prevProps.paramsStore.params.pid)) {
       // get rid of spinners and save messages when switching participants
       clearTimeout(timeout);
       this.setState({saving: false, error: false, success: false});
@@ -130,7 +131,7 @@ const AnnotationItem = fp.flow(
         annotation, setAnnotation,
         cohortReview: {cohortReviewId},
         definition: {annotationType, cohortAnnotationDefinitionId},
-        paramsContext: {params: {ns, wsid, pid}},
+        paramsStore: {params: {ns, wsid, pid}},
       } = this.props;
       const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
@@ -265,8 +266,9 @@ const AnnotationItem = fp.flow(
   }
 });
 
-interface SidebarProps extends ParamsContextProps {
+interface SidebarProps {
   cohortReview: CohortReview;
+  paramsStore: UrlParamsStore;
   workspace: WorkspaceData;
 }
 
@@ -283,7 +285,7 @@ interface SidebarState {
 export const SidebarContent = fp.flow(
   withCurrentCohortReview(),
   withCurrentWorkspace(),
-  withParamsContext
+  withStore(urlParamsStore, 'paramsStore')
 )(class extends React.Component<SidebarProps, SidebarState> {
   private subscription;
   constructor(props) {
@@ -300,7 +302,7 @@ export const SidebarContent = fp.flow(
   }
 
   componentDidMount(): void {
-    const {cohortReview: {cohortReviewId}, paramsContext: {params}} = this.props;
+    const {cohortReview: {cohortReviewId}, paramsStore: {params}} = this.props;
     const {ns, wsid, pid, cid} = params;
     cohortReviewApi()
     .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
@@ -315,10 +317,10 @@ export const SidebarContent = fp.flow(
       .subscribe(participant => this.setState({participant: participant || {} as ParticipantCohortStatus}));
   }
 
-  componentDidUpdate(prevProps: any): void {
-    const {cohortReview: {cohortReviewId}, paramsContext: {params}} = this.props;
+  componentDidUpdate(prevProps: SidebarProps): void {
+    const {cohortReview: {cohortReviewId}, paramsStore: {params}} = this.props;
     const {ns, wsid, pid} = params;
-    if (pid !== prevProps.paramsContext.params.pid && !isNaN(+pid)) {
+    if (pid !== prevProps.paramsStore.params.pid && !isNaN(+pid)) {
       // get values for annotations when switching participants
       cohortReviewApi()
       .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
@@ -334,7 +336,7 @@ export const SidebarContent = fp.flow(
 
   async saveStatus(v) {
     try {
-      const {cohortReview: {cohortReviewId}, paramsContext: {params}} = this.props;
+      const {cohortReview: {cohortReviewId}, paramsStore: {params}} = this.props;
       const {ns, wsid, pid} = params;
       this.setState({savingStatus: v});
       const participant = await cohortReviewApi().updateParticipantCohortStatus(
@@ -419,7 +421,7 @@ export const SidebarContent = fp.flow(
           key={cohortAnnotationDefinitionId} annotation={annotation} definition={def}
           setAnnotation={update => {
             // make sure we're still on the same page before updating
-            if (participantId === +this.props.paramsContext.params.pid) {
+            if (participantId === +this.props.paramsStore.params.pid) {
               const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
               this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
             }

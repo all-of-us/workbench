@@ -7,7 +7,6 @@ import {Demographics} from 'app/cohort-search/demographics/demographics.componen
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {generateId, typeToTitle} from 'app/cohort-search/utils';
-import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -22,6 +21,7 @@ import {
   currentCohortStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router';
 

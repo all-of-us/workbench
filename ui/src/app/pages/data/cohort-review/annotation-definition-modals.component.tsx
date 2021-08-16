@@ -8,10 +8,10 @@ import {ClrIcon} from 'app/components/icons';
 import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import { ParamsContextProps, withParamsContext } from 'app/routing/params-context-provider';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
+import {urlParamsStore, UrlParamsStore, withStore} from 'app/utils/stores';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
@@ -33,10 +33,11 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends ParamsContextProps {
+interface Props {
   annotationDefinitions: CohortAnnotationDefinition[];
   onCancel: Function;
   onCreate: Function;
+  paramsStore: UrlParamsStore;
 }
 
 interface State {
@@ -46,7 +47,7 @@ interface State {
   saving: boolean;
 }
 
-export const AddAnnotationDefinitionModal = withParamsContext(class extends React.Component<Props, State> {
+export const AddAnnotationDefinitionModal = withStore(urlParamsStore, 'paramsStore')(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
@@ -59,7 +60,7 @@ export const AddAnnotationDefinitionModal = withParamsContext(class extends Reac
 
   async create() {
     try {
-      const {onCreate, paramsContext: {params: {ns, wsid, cid}}} = this.props;
+      const {onCreate, paramsStore: {params: {ns, wsid, cid}}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
       const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
@@ -155,9 +156,10 @@ export const AddAnnotationDefinitionModal = withParamsContext(class extends Reac
   }
 });
 
-interface ModalProps extends ParamsContextProps {
-  onClose: Function;
+interface ModalProps {
   annotationDefinitions: CohortAnnotationDefinition[];
+  onClose: Function;
+  paramsStore: UrlParamsStore;
   setAnnotationDefinitions: Function;
 }
 
@@ -170,7 +172,8 @@ interface ModalState {
   renameError: boolean;
 }
 
-export const EditAnnotationDefinitionsModal = withParamsContext(class extends React.Component<ModalProps, ModalState> {
+export const EditAnnotationDefinitionsModal = withStore(urlParamsStore, 'paramsStore')
+(class extends React.Component<ModalProps, ModalState> {
   constructor(props) {
     super(props);
     this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined,
@@ -181,7 +184,7 @@ export const EditAnnotationDefinitionsModal = withParamsContext(class extends Re
     try {
       const {
         annotationDefinitions, onClose, setAnnotationDefinitions,
-        paramsContext: {params: {ns, wsid, cid}}
+        paramsStore: {params: {ns, wsid, cid}}
       } = this.props;
       this.setState({busy: true});
       await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, +cid, id);
@@ -203,7 +206,7 @@ export const EditAnnotationDefinitionsModal = withParamsContext(class extends Re
       const {
         annotationDefinitions,
         setAnnotationDefinitions,
-        paramsContext: {params: {ns, wsid, cid}}
+        paramsStore: {params: {ns, wsid, cid}}
       } = this.props;
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {

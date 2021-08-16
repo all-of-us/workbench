@@ -4,7 +4,6 @@ import {Prompt, RouteComponentProps} from 'react-router';
 import {Subscription} from 'rxjs/Subscription';
 import * as validate from 'validate.js';
 
-import {MatchParams} from 'app/components/app-router';
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
@@ -33,6 +32,7 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';

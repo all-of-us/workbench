@@ -1,4 +1,3 @@
-import {MatchParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -9,6 +8,7 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
