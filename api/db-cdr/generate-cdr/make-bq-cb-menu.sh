@@ -9,7 +9,7 @@ export BQ_DATASET=$2  # dataset
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(cb_criteria_menu cb_menu)
+create_tables=(cb_criteria_menu)
 
 for t in "${create_tables[@]}"
 do
