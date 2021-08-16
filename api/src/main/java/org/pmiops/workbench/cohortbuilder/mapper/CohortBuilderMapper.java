@@ -6,7 +6,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
-import org.pmiops.workbench.cdr.model.DbCBMenu;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
@@ -64,8 +63,5 @@ public interface CohortBuilderMapper {
 
   SurveyModule dbModelToClient(DbSurveyModule source);
 
-  @Mapping(target = "standard", ignore = true)
   CriteriaMenu dbModelToClient(DbCriteriaMenu source);
-
-  CriteriaMenu dbModelToClient(DbCBMenu source);
 }

@@ -167,17 +167,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CriteriaMenuListResponse response =
         new CriteriaMenuListResponse()
-            .items(cohortBuilderService.findCriteriaMenuByParentId_old(parentId));
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaMenuListResponse> findCbMenu(
-      String workspaceNamespace, String workspaceId, Long parentId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CriteriaMenuListResponse response =
-        new CriteriaMenuListResponse()
             .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
     return ResponseEntity.ok(response);
   }
