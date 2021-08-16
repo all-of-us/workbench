@@ -34,21 +34,30 @@ export default class NotebookCell extends NotebookFrame {
     return this;
   }
 
+  async findCell(iframe?: Frame): Promise<ElementHandle> {
+    iframe = iframe || (await this.getIFrame());
+    const selector = this.cellSelector(this.getCellIndex());
+    return iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
+  }
+
+  async clear(): Promise<ElementHandle> {
+    const cell = await this.findCell();
+    await cell.hover();
+    await cell.focus();
+    await cell.click({ clickCount: 3 });
+    await this.page.keyboard.press('Backspace');
+    return cell;
+  }
+
   /**
    * Set focus to (select) a notebook cell input. Retry up to 3 times if focus fails.
    * @returns ElementHandle to code input if exists.
    */
   async focus(maxAttempts = 3): Promise<ElementHandle> {
-    const clickInCell = async (iframe: Frame): Promise<ElementHandle> => {
-      const selector = this.cellSelector(this.getCellIndex());
-      const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
-      await cell.click({ delay: 10 }); // focus
-      return cell;
-    };
-
     const clickAndCheck = async (iframe: Frame): Promise<ElementHandle> => {
       maxAttempts--;
-      const cell = await clickInCell(iframe);
+      const cell = await this.findCell(iframe);
+      await cell.click({ delay: 10 });
       const [element] = await iframe.$$('body.notebook_app.edit_mode');
       if (element) {
         return cell;
@@ -57,7 +66,7 @@ export default class NotebookCell extends NotebookFrame {
         console.warn('Notebook body is not in edit_mode.');
         return cell;
       }
-      await this.page.waitForTimeout(3000); // Pause 3 seconds then retry
+      await this.page.waitForTimeout(2000); // Pause 2 seconds then retry
       return clickAndCheck(iframe);
     };
 
