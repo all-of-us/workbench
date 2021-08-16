@@ -28,7 +28,6 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
-import org.pmiops.workbench.cdr.dao.CBMenuDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -75,7 +74,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private final CBCriteriaDao cbCriteriaDao;
   private final CriteriaMenuDao criteriaMenuDao;
-  private final CBMenuDao cbMenuDao;
   private final CBDataFilterDao cbDataFilterDao;
   private final DomainInfoDao domainInfoDao;
   private final DomainCardDao domainCardDao;
@@ -91,7 +89,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
       CriteriaMenuDao criteriaMenuDao,
-      CBMenuDao cbMenuDao,
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       DomainCardDao domainCardDao,
@@ -104,7 +101,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.criteriaMenuDao = criteriaMenuDao;
-    this.cbMenuDao = cbMenuDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.domainCardDao = domainCardDao;
@@ -332,15 +328,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CriteriaMenu> findCriteriaMenuByParentId_old(long parentId) {
-    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
-        .map(cohortBuilderMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
-  @Override
   public List<CriteriaMenu> findCriteriaMenuByParentId(long parentId) {
-    return cbMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
+    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }

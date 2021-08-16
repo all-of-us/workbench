@@ -116,7 +116,7 @@ const css = `
 `;
 
 function mapMenuItem(item: CriteriaMenu) {
-  const {category, domainId, group, id, name, sortOrder, type, standard} = item;
+  const {category, domainId, group, id, name, sortOrder, type} = item;
   return {
     category,
     children: null,
@@ -125,7 +125,7 @@ function mapMenuItem(item: CriteriaMenu) {
     id,
     name,
     sortOrder,
-    standard,
+    standard: domainId === Domain.VISIT.toString() ? true : null,
     type
   };
 }

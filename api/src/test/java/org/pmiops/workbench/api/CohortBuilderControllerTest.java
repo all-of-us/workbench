@@ -15,13 +15,11 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
-import org.pmiops.workbench.cdr.dao.CBMenuDao;
 import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainCardDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.DbCBMenu;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
@@ -71,7 +69,6 @@ public class CohortBuilderControllerTest extends SpringTest {
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private CriteriaMenuDao criteriaMenuDao;
-  @Autowired private CBMenuDao cbMenuDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private DomainCardDao domainCardDao;
   @Autowired private PersonDao personDao;
@@ -100,7 +97,6 @@ public class CohortBuilderControllerTest extends SpringTest {
             cbCriteriaAttributeDao,
             cbCriteriaDao,
             criteriaMenuDao,
-            cbMenuDao,
             cbDataFilterDao,
             domainInfoDao,
             domainCardDao,
@@ -122,7 +118,6 @@ public class CohortBuilderControllerTest extends SpringTest {
     dbWorkspace.setCdrVersion(cdrVersion);
   }
 
-  //  TODO: Remove this test once feature flag enableStandardSourceDomains is removed
   @Test
   public void findCriteriaMenu() {
     DbCriteriaMenu dbCriteriaMenu =
@@ -142,28 +137,6 @@ public class CohortBuilderControllerTest extends SpringTest {
                 .getItems()
                 .get(0))
         .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
-  }
-
-  @Test
-  public void findCbMenu() {
-    DbCBMenu dbCBMenu =
-        cbMenuDao.save(
-            DbCBMenu.builder()
-                .addParentId(0L)
-                .addCategory("Program Data")
-                .addDomainId("Condition")
-                .addGroup(true)
-                .addName("Condition")
-                .addIsStandard(true)
-                .addSortOrder(2L)
-                .build());
-    assertThat(
-            controller
-                .findCbMenu(WORKSPACE_NAMESPACE, WORKSPACE_ID, 0L)
-                .getBody()
-                .getItems()
-                .get(0))
-        .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCBMenu));
   }
 
   // Todo: Remove this test once the standardSource flag is true on all environment

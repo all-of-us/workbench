@@ -3351,27 +3351,6 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: 'Returns criteria menu with source and standard info'
-      operationId: findCbMenu
-      parameters:
-        - in: path
-          name: parentId
-          type: integer
-          format: int64
-          required: true
-          description: the parent id
-      responses:
-        200:
-          description: A collection of criteria menu options
-          schema:
-            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -7861,7 +7840,6 @@ definitions:
     - domainId
     - name
     - group
-    - standard
     - sortOrder
     properties:
       id:
@@ -7886,10 +7864,6 @@ definitions:
         type: string
       group:
         description: Is this a parent
-        type: boolean
-        default: false
-      standard:
-        description: True if standard, false for source
         type: boolean
         default: false
       sortOrder:
