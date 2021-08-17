@@ -220,6 +220,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
       diskSize: runtime.gceConfig.diskSize,
+      autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null
     };
   } else if (runtime.dataprocConfig) {
@@ -227,6 +228,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       computeType: ComputeType.Dataproc,
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
       diskSize: runtime.dataprocConfig.masterDiskSize,
+      autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig
     };
   }
