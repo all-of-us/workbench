@@ -314,6 +314,8 @@ public class WorkbenchConfig {
   public static class AccessRenewalConfig {
     // Days a user's module completion is good for until it expires
     public Long expiryDays;
+    // Lookback period - the point when we give users the option to update their compliance items
+    public Long lookbackPeriod;
     // Thresholds for sending warning emails based on approaching module expiration, in days
     public List<Long> expiryDaysWarningThresholds;
   }
