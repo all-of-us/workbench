@@ -1127,7 +1127,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     Set<Optional<Long>> expirations =
-        accessModuleService.getClientAccessModuleStatus(user).stream()
+        accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getBypassEpochMillis() == null)
             .map(a -> Optional.ofNullable(a.getExpirationEpochMillis()))
             .collect(Collectors.toSet());

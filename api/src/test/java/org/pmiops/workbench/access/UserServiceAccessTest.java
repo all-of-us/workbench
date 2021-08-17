@@ -591,7 +591,8 @@ public class UserServiceAccessTest {
     // expiring in .5 days will not trigger an email
 
     final Duration halfDay = Duration.ofHours(12);
-    dbUser.setComplianceTrainingCompletionTime(willExpireAfter(halfDay));
+    accessModuleService.updateCompletionTime(
+        dbUser, AccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(halfDay));
 
     userService.maybeSendAccessExpirationEmail(dbUser);
 

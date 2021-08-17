@@ -15,7 +15,7 @@ public interface AccessModuleService {
   void updateCompletionTime(DbUser dbUser, AccessModuleName accessModuleName, Timestamp timestamp);
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */
-  List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user);
+  List<AccessModuleStatus> getAccessModuleStatus(DbUser user);
 
   /**
    * Returns true is the access module compliant.

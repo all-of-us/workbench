@@ -279,7 +279,7 @@ public class AccessModuleServiceTest extends SpringTest {
             rtTrainingAccessModule,
             publicationAccessModule,
             profileAccessModule));
-    assertThat(accessModuleService.getClientAccessModuleStatus(user))
+    assertThat(accessModuleService.getAccessModuleStatus(user))
         .containsExactly(
             expected2FAModuleStatus,
             expectedDuccModuleStatus,
@@ -322,7 +322,7 @@ public class AccessModuleServiceTest extends SpringTest {
             .setCompletionTime(rtTrainingCompletionTime);
     userAccessModuleDao.saveAll(
         ImmutableList.of(twoFactorAuthUserAccessModule, rtTrainingAccessModule));
-    assertThat(accessModuleService.getClientAccessModuleStatus(user))
+    assertThat(accessModuleService.getAccessModuleStatus(user))
         .containsExactly(expected2FAModuleStatus);
   }
 
@@ -411,6 +411,13 @@ public class AccessModuleServiceTest extends SpringTest {
     DbUserAccessModule existingDbUserAccessModule =
         new DbUserAccessModule().setAccessModule(rtTrainingModule).setUser(user);
     userAccessModuleDao.save(existingDbUserAccessModule);
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_moduleNotEnabled_notExistInDb() {
+    config.access.enableComplianceTraining = false;
     assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
         .isTrue();
   }

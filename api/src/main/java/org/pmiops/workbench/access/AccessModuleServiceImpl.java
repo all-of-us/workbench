@@ -103,7 +103,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
+  public List<AccessModuleStatus> getAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
         .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
         .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()))

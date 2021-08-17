@@ -141,7 +141,7 @@ public class ProfileService {
                     .anyMatch(RenewableAccessModuleStatus::getHasExpired));
 
     final List<AccessModuleStatus> accessModuleStatuses =
-        accessModuleService.getClientAccessModuleStatus(userLite);
+        accessModuleService.getAccessModuleStatus(userLite);
     final ProfileAccessModules accessModules =
         new ProfileAccessModules()
             .modules(accessModuleStatuses)
