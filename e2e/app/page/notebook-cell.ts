@@ -27,6 +27,13 @@ export default class NotebookCell extends NotebookFrame {
     super(page);
   }
 
+  async findCell(iframe?: Frame, cellIndx?: number): Promise<ElementHandle> {
+    iframe = iframe || (await this.getIFrame());
+    cellIndx = cellIndx || this.getCellIndex();
+    const selector = this.cellSelector(cellIndx);
+    return iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
+  }
+
   async getLastCell(): Promise<NotebookCell | null> {
     const elements = await this.findAllCells();
     if (elements.length === 0) return null;
@@ -34,19 +41,18 @@ export default class NotebookCell extends NotebookFrame {
     return this;
   }
 
-  async findCell(iframe?: Frame): Promise<ElementHandle> {
+  async isSelected(iframe?: Frame, cellIndx?: number): Promise<boolean> {
     iframe = iframe || (await this.getIFrame());
-    const selector = this.cellSelector(this.getCellIndex());
-    return iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
-  }
-
-  async clear(): Promise<ElementHandle> {
-    const cell = await this.findCell();
-    await cell.hover();
-    await cell.focus();
-    await cell.click({ clickCount: 3 });
-    await this.page.keyboard.press('Backspace');
-    return cell;
+    cellIndx = cellIndx || this.getCellIndex();
+    const selector = this.cellSelector(cellIndx);
+    return iframe
+      .waitForSelector(`${selector}.selected`, { visible: true })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 
   /**
@@ -57,15 +63,16 @@ export default class NotebookCell extends NotebookFrame {
     const clickAndCheck = async (iframe: Frame): Promise<ElementHandle> => {
       maxAttempts--;
       const cell = await this.findCell(iframe);
-      await cell.click({ delay: 10 });
+      await cell.click({ delay: 30 });
       // Click in a notebook cell editor area enables cell Edit mode.
       // When a cell is in Edit mode, user can enter code to run.
       const [element] = await iframe.$$('body.notebook_app.edit_mode');
-      if (element) {
+      const selected = await this.isSelected(iframe);
+      if (element && selected) {
         return cell;
       }
       if (maxAttempts <= 0) {
-        console.warn('Notebook cell is not in edit_mode.');
+        console.warn(`Notebook cell[${this.getCellIndex()}] is not in edit_mode or selected.`);
         return cell;
       }
       await this.page.waitForTimeout(2000); // Pause 2 seconds then retry

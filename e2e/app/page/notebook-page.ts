@@ -101,7 +101,9 @@ export default class NotebookPage extends NotebookFrame {
     await this.waitForKernelIdle(60000, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
-    await this.page.waitForTimeout(2000);
+    // Click Run button turns notebook page into Command_mode from Edit mode.
+    // Command mode indicates click of Run button was successful.
+    await this.page.waitForTimeout(500);
     await runButton.dispose();
   }
 
@@ -154,7 +156,7 @@ export default class NotebookPage extends NotebookFrame {
   /**
    * Wait for notebook kernel becomes ready (idle).
    */
-  async waitForKernelIdle(timeOut?: number, sleepInterval = 10000): Promise<boolean> {
+  async waitForKernelIdle(timeOut = 300000, sleepInterval = 10000): Promise<boolean> {
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
@@ -232,11 +234,11 @@ export default class NotebookPage extends NotebookFrame {
       throw new Error('Code or codeFile parameter is required in runCodeCell method.');
     }
     const notebookCode = code ? code : fs.readFileSync(codeFile, 'ascii');
-    logger.info(`Typing notebook code:\n${notebookCode}`);
+    logger.info(`Typing notebook code:\n--------${notebookCode}\n--------`);
 
     await this.waitForKernelIdle(60000, 5000);
     const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
-    const cellInputTextbox = await codeCell.clear();
+    const cellInputTextbox = await codeCell.focus();
 
     // autoCloseBrackets is true by default for R code cells.
     // Puppeteer types in every character of code, resulting in extra brackets.
@@ -244,7 +246,7 @@ export default class NotebookPage extends NotebookFrame {
     if (markdownWorkaround) {
       await this.changeToMarkdownCell();
       const markdownCell = this.findCell(cellIndex, CellType.Markdown);
-      const markdownCellInput = await markdownCell.findCell();
+      const markdownCellInput = await markdownCell.focus();
       await markdownCellInput.type(notebookCode);
       await this.changeToCodeCell();
     } else {
@@ -252,7 +254,7 @@ export default class NotebookPage extends NotebookFrame {
     }
 
     await this.run();
-    const codeOutput = await codeCell.waitForOutput(timeOut);
+    const codeOutput = await this.waitForKernelIdle(300000, 3000).then(() => codeCell.waitForOutput(timeOut));
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
   }
@@ -312,6 +314,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToMarkdownCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('M');
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -320,6 +323,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToCodeCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('Y');
+    await this.page.waitForTimeout(500);
   }
 
   /**

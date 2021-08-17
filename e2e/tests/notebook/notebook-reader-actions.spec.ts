@@ -20,7 +20,7 @@ jest.setTimeout(30 * 60 * 1000);
 describe('Workspace READER Jupyter notebook action tests', () => {
   // All tests use same workspace and notebook.
   const workspace = makeWorkspaceName();
-  const notebookName = makeRandomName('Py3');
+  const notebookName = makeRandomName('py3');
 
   const pyCode = 'print(1+1)';
   const pyAnswer = 2;
