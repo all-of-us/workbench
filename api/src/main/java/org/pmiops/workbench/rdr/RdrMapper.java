@@ -31,6 +31,7 @@ public interface RdrMapper {
   @Mapping(source = "specificPopulationsEnum", target = "workspaceDemographic")
   @Mapping(source = "workspaceActiveStatusEnum", target = "status")
   @Mapping(source = "cdrVersion.name", target = "cdrVersionName")
+  @Mapping(source = "cdrVersion.accessTier.shortName", target = "accessTier")
   // Workspace User will be populated by a call to FireCloud
   // This will be handle in ServiceImpl Class
   @Mapping(target = "workspaceUsers", ignore = true)
