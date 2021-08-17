@@ -6,7 +6,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language, LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
@@ -20,6 +20,7 @@ jest.setTimeout(30 * 60 * 1000);
 describe('Workspace READER Jupyter notebook action tests', () => {
   // All tests use same workspace and notebook.
   const workspace = makeWorkspaceName();
+  const readerWorkspaceName = makeWorkspaceName(); // READER workspace for copy-to.
   const notebookName = makeRandomName('py3');
 
   const pyCode = 'print(1+1)';
@@ -53,8 +54,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // READER log in.
     await signInWithAccessToken(page, config.READER_ACCESS_TOKEN_FILE);
 
-    // Create a new Workspace. This is the copy-to workspace.
-    const readerWorkspaceName = await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: readerWorkspaceName });
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
