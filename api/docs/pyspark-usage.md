@@ -65,19 +65,20 @@ unzips it, then counts the lines.
 import os
 import subprocess
 
-input_files = !gsutil ls gs://fc-aou-test-datasets-registered/6/wgs/vcf/merged
+# Take the first 5 VCF files in the bucket for testing.
+input_files = !gsutil ls gs://fc-aou-test-datasets-registered/6/wgs/vcf/merged/*.vcf
 input_files = input_files[:5]
 
-def wc(path):
-    name = os.path.basename(path)
-    subprocess.run(['hadoop', 'fs', '-get', '-f', path, name]).check_returncode()
+def unzip_and_wc(input_file):
+    name = os.path.basename(input_file)
+    subprocess.run(['hadoop', 'fs', '-get', '-f', input_file, name]).check_returncode()
     subprocess.run(['ls']).check_returncode()
     subprocess.run(['gunzip', '-f', name]).check_returncode()
     result = subprocess.run(['wc', '-l', name[:-len('.gz')]], stdout=subprocess.PIPE)
     result.check_returncode()
     return result.stdout
 
-sc.parallelize(input_files).map(wc).collect()
+sc.parallelize(input_files).map(unzip_and_wc).collect()
 ```
 
 ## Run an arbitrary bash script over a collection of files
@@ -85,21 +86,26 @@ sc.parallelize(input_files).map(wc).collect()
 ```bash
 %%bash
 
+# Write a bash script file locally.
 cat > my_script.sh << EOF
 #!/bin/bash
 
 echo "processing file" \$1
 EOF
 
-chmod +x my_script.sh
+# Make the script executable and verify that it runs.
+chmod a+x my_script.sh
 ./my_script.sh foo.txt
 ```
 
 ```bash
 %%bash
 
+# Upload the script to HDFS.
 hadoop fs -mkdir hdfs:///user/scripts/
 hadoop fs -put -f my_script.sh hdfs:///user/scripts/
+
+# Verify it's there.
 hadoop fs -ls hdfs:///user/scripts/
 ```
 
@@ -107,14 +113,15 @@ hadoop fs -ls hdfs:///user/scripts/
 import os
 import subprocess
 
+# Take the first 5 VCF files in the bucket for testing.
 input_files = !gsutil ls gs://fc-aou-test-datasets-registered/6/wgs/vcf/merged
 input_files = input_files[:5]
 
-def script(path):
+def script(input_file):
     subprocess.run(['hadoop', 'fs', '-get', '-f', 'hdfs:///user/scripts/my_script.sh', '.']).check_returncode()
     subprocess.run(['chmod', 'a+x', 'my_script.sh']).check_returncode()
     subprocess.run(['ls']).check_returncode()
-    result = subprocess.run(['./my_script.sh', path], stdout=subprocess.PIPE)
+    result = subprocess.run(['./my_script.sh', input_file], stdout=subprocess.PIPE)
     result.check_returncode()
     return result.stdout
 
@@ -130,19 +137,20 @@ sc.parallelize(input_files).map(script).collect()
 import os
 import subprocess
 
-out_path = os.getenv('WORKSPACE_BUCKET') + '/spark-test/outputs'
+bucket_out_path = os.getenv('WORKSPACE_BUCKET') + '/spark-test/outputs'
 count = 5
 
 def write(i):
-    path = f"my_output-{i}-of-{count}.txt"
-    with open(path, "w") as f:
+    filename = f"my_output-{i}-of-{count}.txt"
+    with open(filename, "w") as f:
         f.write(f"my output {i}")
     
-    subprocess.run(['hadoop', 'fs', '-put', '-f', path, f"{out_path}/{path}"]).check_returncode()
+    subprocess.run(['hadoop', 'fs', '-put', '-f', filename, f"{bucket_out_path}/{filename}"]).check_returncode()
 
 sc.range(count).map(write).collect()
 ```
 
 ```bash
+# Verify the outputs were written.
 ! gsutil ls "${WORKSPACE_BUCKET}/spark-test/outputs"
 ```
