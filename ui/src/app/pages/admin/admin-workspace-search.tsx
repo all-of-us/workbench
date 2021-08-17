@@ -11,7 +11,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
   const [navigate, ] = useNavigation();
 
-  const navigateToWorkspace = () => navigate(['/admin/workspaces/' + workspaceNamespace]);
+  const navigateToWorkspace = () => navigate(['admin/workspaces/' + workspaceNamespace]);
 
   useEffect(() => spinnerProps.hideSpinner(), []);
 

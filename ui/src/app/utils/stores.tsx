@@ -67,11 +67,6 @@ export const profileStore = atom<ProfileStore>({
     return profileStore.get().profile;
   },
   reload: async() => {
-    try {
-      profileApi().getMe();
-    } catch (e) {
-      console.error(e);
-    }
     const newProfile = await profileApi().getMe();
     profileStore.get().updateCache(newProfile);
     return profileStore.get().profile;

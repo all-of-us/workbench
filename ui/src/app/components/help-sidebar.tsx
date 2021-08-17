@@ -290,7 +290,7 @@ export const HelpSidebar = fp.flow(
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      this.props.navigate(['/workspaces']);
+      this.props.navigate(['workspaces']);
     });
 
     iconConfig(iconKey): IconConfig {
@@ -484,7 +484,7 @@ export const HelpSidebar = fp.flow(
               icon='copy'
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                this.props.navigate(['/workspaces', namespace, id, 'duplicate']);
+                this.props.navigate(['workspaces', namespace, id, 'duplicate']);
               }}>
               Duplicate
             </MenuItem>
@@ -494,7 +494,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
-                this.props.navigate(['/workspaces', namespace, id, 'edit']);
+                this.props.navigate(['workspaces', namespace, id, 'edit']);
               }}>
               Edit
             </MenuItem>
