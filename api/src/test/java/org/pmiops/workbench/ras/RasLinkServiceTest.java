@@ -159,6 +159,8 @@ public class RasLinkServiceTest extends SpringTest {
     public WorkbenchConfig getWorkbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.accessRenewal.expiryDays = (long) 365;
+      config.access.enableEraCommons = true;
+      config.access.enableRasLoginGovLinking = true;
       return config;
     }
 

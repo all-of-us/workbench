@@ -154,7 +154,7 @@ public class RasLinkService {
     // information.
     DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
     Optional<AccessModuleStatus> eRAModuleStatus =
-        accessModuleService.getClientAccessModuleStatus(user).stream()
+        accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
             .findFirst();
     if (eRAModuleStatus.isPresent()

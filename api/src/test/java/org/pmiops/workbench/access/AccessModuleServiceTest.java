@@ -79,6 +79,8 @@ public class AccessModuleServiceTest extends SpringTest {
     user = userDao.save(user);
     config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.enableAccessModuleRewrite = true;
+    config.access.enableComplianceTraining = true;
+    config.access.enableEraCommons = true;
     TestMockFactory.createAccessModules(accessModuleDao);
     accessModules = accessModuleDao.findAll();
   }
@@ -277,13 +279,154 @@ public class AccessModuleServiceTest extends SpringTest {
             rtTrainingAccessModule,
             publicationAccessModule,
             profileAccessModule));
-    assertThat(accessModuleService.getClientAccessModuleStatus(user))
+    assertThat(accessModuleService.getAccessModuleStatus(user))
         .containsExactly(
             expected2FAModuleStatus,
             expectedDuccModuleStatus,
             expectedProfileModuleStatus,
             expectedPublicationModuleStatus,
             expectedRtTrainingModuleStatus);
+  }
+
+  @Test
+  public void testGetClientAccessModuleStatus_moduleNotEnabledInEnv() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+    config.access.enableComplianceTraining = false;
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+
+    // 2FA module: Module is not expirable, so no expiration date present.
+    Timestamp twoFactorCompletionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    DbUserAccessModule twoFactorAuthUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setUser(user)
+            .setCompletionTime(twoFactorCompletionTime);
+    AccessModuleStatus expected2FAModuleStatus =
+        new AccessModuleStatus()
+            .moduleName(AccessModule.TWO_FACTOR_AUTH)
+            .completionEpochMillis(twoFactorCompletionTime.getTime());
+
+    Timestamp rtTrainingCompletionTime =
+        Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    Timestamp rtTrainingBypassTime = Timestamp.from(now);
+    DbUserAccessModule rtTrainingAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(rtTrainingModule)
+            .setUser(user)
+            .setBypassTime(rtTrainingBypassTime)
+            .setCompletionTime(rtTrainingCompletionTime);
+    userAccessModuleDao.saveAll(
+        ImmutableList.of(twoFactorAuthUserAccessModule, rtTrainingAccessModule));
+    assertThat(accessModuleService.getAccessModuleStatus(user))
+        .containsExactly(expected2FAModuleStatus);
+  }
+
+  @Test
+  public void testModuleCompliant_byPassedAndExpired() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+    DbAccessModule duccModule =
+        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    Timestamp completionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+    Timestamp bypassTime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+
+    DbUserAccessModule duccDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(duccModule)
+            .setUser(user)
+            .setCompletionTime(completionTime)
+            .setBypassTime(bypassTime);
+    userAccessModuleDao.save(duccDbUserAccessModule);
+
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_expired() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+    DbAccessModule duccModule =
+        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    Timestamp completionTime = Timestamp.from(now.minus(expiryDays + 10, ChronoUnit.DAYS));
+
+    DbUserAccessModule duccDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(duccModule)
+            .setUser(user)
+            .setCompletionTime(completionTime);
+    DbUserAccessModule twoFactorAuthDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(twoFactorAuthModule)
+            .setUser(user)
+            .setCompletionTime(completionTime);
+    userAccessModuleDao.saveAll(
+        ImmutableList.of(twoFactorAuthDbUserAccessModule, duccDbUserAccessModule));
+
+    // DUCC expired, but 2FA not because it is not expirable
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isFalse();
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_completeAndNotExpired() {
+    Instant now = Instant.ofEpochMilli(FakeClockConfiguration.NOW_TIME);
+    long expiryDays = 365L;
+    config.accessRenewal.expiryDays = expiryDays;
+    DbAccessModule duccModule =
+        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    Timestamp completionTime = Timestamp.from(now.minus(expiryDays - 10, ChronoUnit.DAYS));
+
+    DbUserAccessModule existingDbUserAccessModule =
+        new DbUserAccessModule()
+            .setAccessModule(duccModule)
+            .setUser(user)
+            .setCompletionTime(completionTime);
+    userAccessModuleDao.save(existingDbUserAccessModule);
+
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_moduleNotEnabled() {
+    config.access.enableComplianceTraining = false;
+    DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+
+    DbUserAccessModule existingDbUserAccessModule =
+        new DbUserAccessModule().setAccessModule(rtTrainingModule).setUser(user);
+    userAccessModuleDao.save(existingDbUserAccessModule);
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_moduleNotEnabled_notExistInDb() {
+    config.access.enableComplianceTraining = false;
+    assertThat(accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isTrue();
+  }
+
+  @Test
+  public void testModuleCompliant_moduleNotExist() {
+    assertThat(
+            accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isFalse();
   }
 
   private static Optional<Instant> nullableTimestampToOptionalInstant(
