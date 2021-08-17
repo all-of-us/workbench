@@ -7,6 +7,22 @@ export enum ComputeType {
   Standard = 'Standard VM',
   Dataproc = 'Dataproc Cluster'
 }
+//
+// export const AutopauseMinuteThresholds = new Map([
+//   ['1 hour (default)', 60],
+//   ['8 hours', 60 * 8],
+//   ['5 days', 5 * 24 * 60],
+//   ['10 days', 10 * 24 * 60]
+// ]);
+
+export const AutopauseMinuteThresholds = new Map([
+  [60, '1 hour (default)'],
+  [60 * 8, '8 hours'],
+  [5 * 24 * 60, '5 days'],
+  [10 * 24 * 60, '10 days']
+]);
+
+export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = AutopauseMinuteThresholds.keys().next().value;
 
 export interface Machine {
   name: string;

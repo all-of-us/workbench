@@ -37,6 +37,7 @@ export interface RuntimeConfig {
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
+  autopauseThreshold: number;
 }
 
 export interface UpdateMessaging {
