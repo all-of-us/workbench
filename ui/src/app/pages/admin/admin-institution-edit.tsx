@@ -32,8 +32,9 @@ import {
   updateRtEmailAddresses,
   updateRtEmailDomains,
 } from 'app/utils/institutions';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
   InstitutionMembershipRequirement,
@@ -117,9 +118,9 @@ interface InstitutionEditState {
   title: string;
 }
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+interface Props extends UrlParamsProps, WithSpinnerOverlayProps, NavigationProps {}
 
-export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<Props, InstitutionEditState> {
+export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -427,7 +428,7 @@ export const AdminInstitutionEdit = withUrlParams()(class extends React.Componen
   }
 
   backNavigate() {
-    navigate(['admin', 'institution']);
+    this.props.navigate(['admin', 'institution']);
   }
 
   validateEmailAddressPresence(tier: AccessTierShortNames) {
