@@ -127,10 +127,7 @@ export default class DataResourceCard extends CardBase {
   async clickResourceName(): Promise<string> {
     const name = await this.getResourceName();
     const elemts = await this.asElementHandle().$x(`.//*[${DataResourceCardSelector.cardNameXpath}]`);
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
-      elemts[0].click()
-    ]);
+    await Promise.all([this.page.waitForNavigation(), elemts[0].click()]);
     await waitWhileLoading(this.page);
     return name;
   }

@@ -58,12 +58,14 @@ export default class NotebookCell extends NotebookFrame {
       maxAttempts--;
       const cell = await this.findCell(iframe);
       await cell.click({ delay: 10 });
+      // Click in a notebook cell editor area enables cell Edit mode.
+      // When a cell is in Edit mode, user can enter code to run.
       const [element] = await iframe.$$('body.notebook_app.edit_mode');
       if (element) {
         return cell;
       }
       if (maxAttempts <= 0) {
-        console.warn('Notebook body is not in edit_mode.');
+        console.warn('Notebook cell is not in edit_mode.');
         return cell;
       }
       await this.page.waitForTimeout(2000); // Pause 2 seconds then retry

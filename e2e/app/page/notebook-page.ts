@@ -97,6 +97,7 @@ export default class NotebookPage extends NotebookFrame {
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
   async run(): Promise<void> {
+    logger.info('Click notebook Run button.');
     await this.waitForKernelIdle(60000, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
@@ -231,7 +232,7 @@ export default class NotebookPage extends NotebookFrame {
       throw new Error('Code or codeFile parameter is required in runCodeCell method.');
     }
     const notebookCode = code ? code : fs.readFileSync(codeFile, 'ascii');
-    logger.info(`Type notebook code:\n${notebookCode}`);
+    logger.info(`Typing notebook code:\n${notebookCode}`);
 
     await this.waitForKernelIdle(60000, 5000);
     const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
@@ -251,7 +252,9 @@ export default class NotebookPage extends NotebookFrame {
     }
 
     await this.run();
-    return codeCell.waitForOutput(timeOut);
+    const codeOutput = await codeCell.waitForOutput(timeOut);
+    logger.info(`Notebook code output:\n${codeOutput}`);
+    return codeOutput;
   }
 
   /**
