@@ -4355,6 +4355,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/RuntimeImage"
+      freeTierBillingAccountId:
+        type: string
+        description: The free tier billing account id
 
   RuntimeImage:
     type: object
