@@ -314,59 +314,35 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
-    final ModuleTimes duaTimes =
-        new ModuleTimes(
-            user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime());
-    if (duaTimes.isBypassed()) {
+    if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
       return true;
     }
     final Integer signedVersion = user.getDataUseAgreementSignedVersion();
     if (signedVersion == null || signedVersion != getCurrentDuccVersion()) {
       return false;
     }
-    return duaTimes.isComplete() && !duaTimes.hasExpired();
-  }
-
-  // Checking for annual completion time is not a part of this module
-  private boolean isEraCommonsCompliant(DbUser user) {
-    return user.getEraCommonsBypassTime() != null
-        || !configProvider.get().access.enableEraCommons
-        || user.getEraCommonsCompletionTime() != null;
-  }
-
-  private boolean isComplianceTrainingCompliant(DbUser user) {
-    if (!configProvider.get().access.enableComplianceTraining) {
-      return true;
-    }
-    final ModuleTimes ctTimes =
-        new ModuleTimes(
-            user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime());
-    return ctTimes.isBypassed() || (ctTimes.isComplete() && !ctTimes.hasExpired());
-  }
-
-  private boolean isProfileConfirmationCompliant(DbUser user) {
-    final ModuleTimes profileTimes = new ModuleTimes(user.getProfileLastConfirmedTime(), null);
-    return profileTimes.isComplete() && !profileTimes.hasExpired();
-  }
-
-  private boolean isPublicationConfirmationCompliant(DbUser user) {
-    final ModuleTimes publicationTimes =
-        new ModuleTimes(user.getPublicationsLastConfirmedTime(), null);
-    return publicationTimes.isComplete() && !publicationTimes.hasExpired();
+    return accessModuleService.isModuleCompliant(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT);
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
-    // 2FA does not need to be checked for annual renewal
     boolean twoFactorAuthComplete =
-        user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
-    // TODO: can take out other checks once we're entirely moved over to the 'module' columns
+        accessModuleService.isModuleCompliant(user, AccessModuleName.TWO_FACTOR_AUTH);
+    boolean eRACommonsComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.ERA_COMMONS);
+    boolean complianceTrainingComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.RT_COMPLIANCE_TRAINING);
+    boolean dataUseAgreementTrainingComplete = isDataUseAgreementCompliant(user);
+    boolean publicationConfirmationComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
+    boolean profileConfirmationComplete =
+        accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
     return !user.getDisabled()
-        && isComplianceTrainingCompliant(user)
-        && isEraCommonsCompliant(user)
         && twoFactorAuthComplete
-        && isDataUseAgreementCompliant(user)
-        && isPublicationConfirmationCompliant(user)
-        && isProfileConfirmationCompliant(user);
+        && eRACommonsComplete
+        && complianceTrainingComplete
+        && dataUseAgreementTrainingComplete
+        && publicationConfirmationComplete
+        && profileConfirmationComplete;
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -1150,10 +1126,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
-    final Set<Optional<Timestamp>> expirations =
-        getRenewableAccessModules(user).values().stream()
-            .filter(times -> !times.isBypassed())
-            .map(ModuleTimes::getExpiration)
+    Set<Optional<Long>> expirations =
+        accessModuleService.getAccessModuleStatus(user).stream()
+            .filter(a -> a.getBypassEpochMillis() == null)
+            .map(a -> Optional.ofNullable(a.getExpirationEpochMillis()))
             .collect(Collectors.toSet());
 
     // if any un-bypassed modules are incomplete, we know:
@@ -1168,7 +1144,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           .map(Optional::get)
           // note: min() returns EMPTY if the stream is empty at this point,
           // which is also an indicator that we should not send an email
-          .min(Timestamp::compareTo);
+          .min(Long::compareTo)
+          .map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
     }
   }
 
