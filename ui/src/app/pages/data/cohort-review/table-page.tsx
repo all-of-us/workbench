@@ -21,12 +21,7 @@ import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {
-  currentCohortReviewStore,
-  NavigationProps,
-  urlParamsStore
-} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {currentCohortReviewStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
@@ -226,7 +221,7 @@ const reverseColumnEnum = {
 };
 const EVENT_CATEGORY = 'Review Participant List';
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -243,7 +238,7 @@ interface State {
   demoFilters: any;
 }
 
-export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
@@ -424,13 +419,13 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      this.props.navigateByUrl(`workspaces/${namespace}/${id}/data/cohorts/build`, {queryParams: {cohortId: cid}});
+      navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
     }
 
     onRowClick = (event: any) => {
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      this.props.navigate([
+      navigate([
         'workspaces',
         namespace,
         id,
@@ -447,7 +442,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      this.props.navigate([
+      navigate([
         'workspaces',
         namespace,
         id,

@@ -19,14 +19,18 @@ const styles = reactStyles({
   }
 });
 
-export const SessionExpired = (spinnerProps: WithSpinnerOverlayProps) => {
-  useEffect(() => spinnerProps.hideSpinner(), []);
+interface Props extends WithSpinnerOverlayProps {
+  signIn: Function;
+}
+
+export const SessionExpired = (props: Props) => {
+  useEffect(() => props.hideSpinner(), []);
 
   return <PublicLayout>
     <BoldHeader>You have been signed out</BoldHeader>
     <section style={styles.textSection}>
       You were automatically signed out of your session due to inactivity
     </section>
-    <GoogleSignInButton/>
+    <GoogleSignInButton signIn={() => props.signIn()}/>
   </PublicLayout>;
 };

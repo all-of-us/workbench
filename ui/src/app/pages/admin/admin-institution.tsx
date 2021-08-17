@@ -11,11 +11,9 @@ import {
   getControlledTierConfig,
   getRegisteredTierConfig,
 } from 'app/utils/institutions';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {navigateByUrl} from 'app/utils/navigation';
 import {Institution, InstitutionMembershipRequirement} from 'generated/fetch';
 import {OrganizationType} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
@@ -51,99 +49,94 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {}
-
 interface State {
   loadingInstitutions: boolean;
   institutions: Array<Institution>;
   institutionLoadError: boolean;
 }
 
-export const AdminInstitution = fp.flow(withNavigation)(
-  class extends React.Component<Props, State> {
-    constructor(props) {
-      super(props);
-      this.state = {
-        loadingInstitutions: true,
-        institutions: [],
-        institutionLoadError: false
-      };
-    }
+export class AdminInstitution extends React.Component<WithSpinnerOverlayProps, State> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loadingInstitutions: true,
+      institutions: [],
+      institutionLoadError: false
+    };
+  }
 
-    async componentDidMount() {
-      this.props.hideSpinner();
-      try {
-        const details = await institutionApi().getInstitutions();
-        this.setState({
-          loadingInstitutions: false,
-          institutions: details.institutions
-        });
-      } catch (e) {
-        this.setState({
-          loadingInstitutions: false,
-          institutionLoadError: true
-        });
-      }
+  async componentDidMount() {
+    this.props.hideSpinner();
+    try {
+      const details = await institutionApi().getInstitutions();
+      this.setState({
+        loadingInstitutions: false,
+        institutions: details.institutions
+      });
+    } catch (e) {
+      this.setState({
+        loadingInstitutions: false,
+        institutionLoadError: true
+      });
     }
+  }
 
-    renderInstitutionName(row, col) {
-      const link = 'admin/institution/edit/' + row['shortName'];
-      return <a href={link}> {row['displayName']}</a>;
+  renderInstitutionName(row, col) {
+    const link = 'admin/institution/edit/' + row['shortName'];
+    return <a href={link}> {row['displayName']}</a>;
+  }
+
+  renderOrganizationType(row, col) {
+    // This should fail if the organization value is not in list
+    const organizationLabel = OrganizationTypeOptions
+      .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
+    if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
+      return organizationLabel + ' - ' + row['organizationTypeOtherText'];
     }
+    return organizationLabel;
+  }
 
-    renderOrganizationType(row, col) {
-      // This should fail if the organization value is not in list
-      const organizationLabel = OrganizationTypeOptions
-        .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
-      if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-        return organizationLabel + ' - ' + row['organizationTypeOtherText'];
-      }
-      return organizationLabel;
+  renderAccessTiers(row, col) {
+    let tiers = '';
+    if (getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += 'Registered';
     }
-
-    renderAccessTiers(row, col) {
-      let tiers = '';
-      if (getRegisteredTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-        tiers += 'Registered';
-      }
-
-      if (getControlledTierConfig(row)
-        && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
-        tiers += ',Controlled';
-      }
-      return tiers;
+    if (getControlledTierConfig(row) && getControlledTierConfig(row).membershipRequirement !== InstitutionMembershipRequirement.NOACCESS) {
+      tiers += ',Controlled';
     }
+    return tiers;
+  }
 
-    render() {
-      const {institutions, institutionLoadError, loadingInstitutions} = this.state;
-      return <div>
-        <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
-          <SemiBoldHeader style={styles.pageHeader}>
-            <label>Institution admin table</label>
-                <Button type='secondaryLight'
-                        style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
-                        onClick={() => this.props.navigateByUrl('admin/institution/add')}
-                        data-test-id='add-institution'>
-                  <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
-                </Button>
-          </SemiBoldHeader>
-          {institutionLoadError && <div style={{color: colors.danger}}>
-            Error while loading Institution. Please try again later</div>}
-          <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
-                     rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
-                     paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
-                     currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
-            <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
-                    bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
-            <Column field='organizationTypeEnum' header='Institution Type'
-                    body={this.renderOrganizationType} bodyStyle={styles.text}
-                    headerStyle={styles.header}/>
-            <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
-                    bodyStyle={styles.text} headerStyle={styles.header}/>
-            <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
-                    headerStyle={{...styles.header, width: '5rem'}}/>
-          </DataTable>
-        </FadeBox>
-      </div>;
-    }
-  });
+  render() {
+    const {institutions, institutionLoadError, loadingInstitutions} = this.state;
+    return <div>
+      <FadeBox style={{marginTop: '1rem', marginLeft: '1rem'}}>
+        <SemiBoldHeader style={styles.pageHeader}>
+          <label>Institution admin table</label>
+              <Button type='secondaryLight'
+                      style={{padding: '0rem', marginTop: '0.3rem', verticalAlign: 'sub'}}
+                      onClick={() => navigateByUrl('admin/institution/add')}
+                      data-test-id='add-institution'>
+                <ClrIcon shape='plus-circle' class='is-solid' size={20}/>
+              </Button>
+        </SemiBoldHeader>
+        {institutionLoadError && <div style={{color: colors.danger}}>
+          Error while loading Institution. Please try again later</div>}
+        <DataTable data-test-id='institution-datatable' value={institutions} paginator={true}
+                   rows={10} scrollable={true} frozenWidth='7rem' loading={loadingInstitutions}
+                   paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
+                   currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+          <Column field='displayName' header='Institution Name' body={this.renderInstitutionName}
+                  bodyStyle={styles.text} headerStyle={styles.header} frozen={true}/>
+          <Column field='organizationTypeEnum' header='Institution Type'
+                  body={this.renderOrganizationType} bodyStyle={styles.text}
+                  headerStyle={styles.header}/>
+          <Column field='accessTiers' header='Data access tiers' body={this.renderAccessTiers}
+                  bodyStyle={styles.text} headerStyle={styles.header}/>
+          <Column field='userInstructions' header='User Email Instruction' bodyStyle={styles.text}
+                  headerStyle={{...styles.header, width: '5rem'}}/>
+        </DataTable>
+      </FadeBox>
+    </div>;
+  }
+}

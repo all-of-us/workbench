@@ -13,7 +13,8 @@ describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
 
   const component = () => {
-    return mount(<RegistrationDashboard {...props}/>);
+    return mount<RegistrationDashboard, RegistrationDashboardProps, {trainingWarningOpen: boolean}>
+    (<RegistrationDashboard {...props}/>);
   };
 
   beforeEach(async() => {

@@ -15,11 +15,11 @@ import {
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export const stubDataSet = (): DataSet => ({
-  id: 1,
+  id: 0,
   name: 'Stub Dataset',
   description: 'Stub Dataset',
   includesAllParticipants: false,
-  workspaceId: 1,
+  workspaceId: 0,
   lastModifiedTime: 10000,
   conceptSets: [],
   cohorts: [],

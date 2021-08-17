@@ -17,8 +17,7 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {NavigationProps} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {navigate} from 'app/utils/navigation';
 import {Profile} from 'generated/fetch';
 
 
@@ -83,7 +82,7 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -100,7 +99,7 @@ interface State {
   proceedDisabled: boolean;
 }
 
-export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
+export const DataUserCodeOfConduct = withUserProfile()(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -118,7 +117,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
       withSuccessModal({
         title: 'Your agreement has been updated',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal'])
+        onDismiss: () => navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
     )(async(initials) => {
@@ -131,7 +130,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
       const duccVersion = getLiveDUCCVersion();
       profileApi().submitDataUseAgreement(duccVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        this.props.navigate(['/']);
+        navigate(['/']);
       });
     }
 

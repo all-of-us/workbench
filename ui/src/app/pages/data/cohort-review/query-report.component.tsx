@@ -7,12 +7,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentCohortReviewStore,
-  NavigationProps,
-  urlParamsStore
-} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {currentCohortReviewStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
@@ -189,7 +184,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps {
+export interface QueryReportProps extends WithSpinnerOverlayProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   cohortReview: CohortReview;
   workspace: WorkspaceData;
@@ -203,7 +198,7 @@ export interface QueryReportState {
   reviewLoading: boolean;
 }
 
-export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<QueryReportProps, QueryReportState> {
     constructor(props: any) {
       super(props);
@@ -276,7 +271,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
 
     goBack() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     render() {

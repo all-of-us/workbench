@@ -1,3 +1,4 @@
+import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -12,9 +13,10 @@ import {
   routeConfigDataStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {Domain} from 'generated/fetch';
+import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, profileStore, withStore} from './stores';
@@ -156,6 +158,41 @@ type ReactStyles<T> = {
  */
 export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: T): ReactStyles<T> {
   return t;
+}
+
+/**
+ * Helper base class for defining an Angular-wrapped React component. This is a
+ * stop-gap for React migration.
+ *
+ * Requirements:
+ *  - Component template must contain a div labeled "#root".
+ *  - React propNames must exactly match instance property names on the subclass
+ *    (usually these are also annotated as Angular @Inputs)
+ */
+export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
+  @ViewChild('root') rootElement: ElementRef;
+
+  constructor(private WrappedComponent: React.ComponentType, private propNames: string[]) {}
+
+  ngOnInit(): void {
+    this.renderComponent();
+  }
+
+  ngOnChanges(): void {
+    this.renderComponent();
+  }
+
+  ngOnDestroy(): void {
+    ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
+  }
+
+  renderComponent(): void {
+    const {WrappedComponent, propNames} = this;
+    ReactDOM.render(
+      <WrappedComponent {...fp.fromPairs(propNames.map(name => [name, this[name]]))} />,
+      this.rootElement.nativeElement
+    );
+  }
 }
 
 export function decamelize(str: string, separator: string) {
@@ -374,21 +411,6 @@ export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
 
-
-export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
-  for (const fieldGetter of fieldsToCompare) {
-    if (!fieldGetter(currProps)) {
-      return false;
-    }
-
-    if (fieldGetter(currProps) !== fieldGetter(prevProps)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 // Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
@@ -587,4 +609,3 @@ export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T)
     }
   }
 };
-

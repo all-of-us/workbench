@@ -7,15 +7,9 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {
-  conceptSetUpdating,
-  NavigationProps,
-  urlParamsStore
-} from 'app/utils/navigation';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -70,11 +64,11 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)(
+export const ConceptSetActions = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -87,18 +81,15 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)
     componentDidMount(): void {
       this.props.hideSpinner();
       conceptSetUpdating.next(false);
-      this.setState({conceptSetLoading: true});
-    }
-
-    componentDidUpdate() {
       const csid = urlParamsStore.getValue().csid;
-      if (csid && this.state.conceptSetLoading) {
+      this.setState({conceptSetLoading: true});
+      if (csid) {
         const {namespace, id} = this.props.workspace;
         conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            this.props.navigate(['workspaces', namespace, id, 'data', 'concepts']);
+            navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
@@ -122,7 +113,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)
           url += `data/data-sets`;
           break;
       }
-      this.props.navigateByUrl(url);
+      navigateByUrl(url);
     }
 
     render() {

@@ -5,7 +5,7 @@ import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
-import {useNavigation} from 'app/utils/navigation';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
@@ -342,13 +342,10 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
 };
 
 export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const [, navigateByUrl] = useNavigation();
   const inlineAnchor = {
     display: 'inline-block',
     color: colors.accent
   };
-
-  // TODO RW-7154: change to react-router Link
   return <a href={href}
             onClick={e => {
               if (analyticsFn) {
@@ -356,10 +353,7 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
               }
               // This does same page navigation iff there is no key pressed and target is not set.
               if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
+                navigateAndPreventDefaultIfNoKeysPressed(e, href);
               }
             }}
             style={{...inlineAnchor, ...style}} {...props}>{children}</a>;

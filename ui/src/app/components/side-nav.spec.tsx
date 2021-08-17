@@ -2,7 +2,6 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {SideNav, SideNavItem, SideNavProps} from './side-nav';
-import * as ProfilePicture from 'app/utils/profile-picture';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('SideNav', () => {
@@ -10,12 +9,7 @@ describe('SideNav', () => {
     profile: ProfileStubVariables.PROFILE_STUB,
     onToggleSideNav: () => {},
   };
-
-  const spy = jest.spyOn(ProfilePicture, "getProfilePictureSrc");
-  spy.mockReturnValue("lol.png");
-
   const component = () => mount(<SideNav {...props}/>);
-
   it('should render', () => {
     const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();

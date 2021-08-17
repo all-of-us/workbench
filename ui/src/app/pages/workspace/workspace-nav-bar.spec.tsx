@@ -2,11 +2,10 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
-import {navigateSpy} from 'testing/navigation-mock';
 
 describe('WorkspaceNavBar', () => {
 
@@ -40,14 +39,18 @@ describe('WorkspaceNavBar', () => {
   });
 
   it('should navigate on tab click', () => {
+    const navSpy = jest.fn();
+    NavStore.navigate = navSpy;
     const wrapper = component();
 
     wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
-    expect(navigateSpy).toHaveBeenCalledWith(
+    expect(navSpy).toHaveBeenCalledWith(
       ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 
   it('should disable Data and Analysis tab if workspace require review research purpose', () => {
+    const navSpy = jest.fn();
+    NavStore.navigate = navSpy;
     workspaceDataStub.researchPurpose.needsReviewPrompt = true;
 
     const wrapper = component();
@@ -55,6 +58,7 @@ describe('WorkspaceNavBar', () => {
     expect(wrapper.find({'data-test-id': 'Data'}).first().props().disabled).toBeTruthy();
     expect(wrapper.find({'data-test-id': 'Analysis'}).first().props().disabled).toBeTruthy();
     expect(wrapper.find({'data-test-id': 'About'}).first().props().disabled).toBeFalsy();
+
   });
 
   it('should display the default CDR Version with no new version flag or upgrade modal visible', () => {

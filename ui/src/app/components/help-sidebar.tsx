@@ -37,7 +37,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {
   currentCohortSearchContextStore,
   currentConceptStore,
-  NavigationProps,
+  NavStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -63,7 +63,7 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {navigate} from 'app/utils/navigation';
 import {
   CdrVersionTiersResponse,
   Criteria, GenomicExtractionJob,
@@ -224,7 +224,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props extends NavigationProps {
+interface Props {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -261,8 +261,7 @@ export const HelpSidebar = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
   withStore(genomicExtractionStore, 'genomicExtraction'),
   withUserProfile(),
-  withCdrVersions(),
-  withNavigation
+  withCdrVersions()
 )(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -290,7 +289,7 @@ export const HelpSidebar = fp.flow(
     }, async() => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      this.props.navigate(['workspaces']);
+      navigate(['workspaces']);
     });
 
     iconConfig(iconKey): IconConfig {
@@ -400,7 +399,7 @@ export const HelpSidebar = fp.flow(
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+      this.setActiveIcon(setSidebarActiveIconStore.getValue());
       this.subscriptions.push(participantStore.subscribe(participant => this.setState({participant})));
       this.subscriptions.push(setSidebarActiveIconStore.subscribe(activeIcon => {
         this.setState({activeIcon});
@@ -484,7 +483,7 @@ export const HelpSidebar = fp.flow(
               icon='copy'
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDuplicatePage();
-                this.props.navigate(['workspaces', namespace, id, 'duplicate']);
+                NavStore.navigate(['workspaces', namespace, id, 'duplicate']);
               }}>
               Duplicate
             </MenuItem>
@@ -494,7 +493,7 @@ export const HelpSidebar = fp.flow(
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
-                this.props.navigate(['workspaces', namespace, id, 'edit']);
+                NavStore.navigate(['workspaces', namespace, id, 'edit']);
               }}>
               Edit
             </MenuItem>
