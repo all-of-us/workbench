@@ -14,5 +14,5 @@ export const NotFound = (spinnerProps: WithSpinnerOverlayProps) => {
     <section style={{color: colors.primary, fontSize: '18px', marginTop: '.5rem'}}>
       Please try navigating to the <RouteLink path='/'>home page</RouteLink>.
     </section>
-    </PublicLayout>;
+  </PublicLayout>;
 };

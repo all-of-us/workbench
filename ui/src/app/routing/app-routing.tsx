@@ -245,6 +245,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   };
 
+  // TODO(RW-7198): Move most of this bootstrapping out of the app router.
   useEffect(() => {
     exposeAccessTokenSetter();
     checkBrowserSupport();

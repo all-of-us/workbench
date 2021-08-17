@@ -89,6 +89,7 @@ export const CohortActions = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
+      this.setState({cohortLoading: true});
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
@@ -100,7 +101,6 @@ export const CohortActions = fp.flow(
         return;
       }
 
-      this.setState({cohortLoading: true});
       const {namespace, id} = this.props.workspace;
       cohortsApi().getCohort(namespace, id, this.props.urlParams.cid).then(c => {
         if (c) {

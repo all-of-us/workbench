@@ -197,7 +197,7 @@ export const ConceptSearch = fp.flow(
     });
     const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0) ||
       (!!currentConceptSet && sortAndStringify(currentConceptSet.criteriums) !== sortAndStringify(currentConceptsMap));
-    this.setState({unsavedChanges: unsavedChanges});
+    this.setState({unsavedChanges});
   }
 
   async getConceptSet() {
