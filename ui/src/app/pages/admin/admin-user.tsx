@@ -11,7 +11,13 @@ import {TextInputWithLabel, Toggle} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {formatFreeCreditsUSD, isBlank, reactStyles, withUrlParams} from 'app/utils';
+import {
+  formatFreeCreditsUSD, hasNewValidProps,
+  isBlank,
+  reactStyles,
+  withUrlParams
+} from 'app/utils';
+import {Link as RouterLink} from 'react-router-dom';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -23,7 +29,6 @@ import {
   getRoleOptions,
   validateEmail
 } from 'app/utils/institutions';
-import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
@@ -179,6 +184,16 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
 
   async componentDidMount() {
     this.props.hideSpinner();
+    this.getUserData();
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.urlParams.usernameWithoutGsuiteDomain])) {
+      this.getUserData();
+    }
+  }
+
+  async getUserData() {
     try {
       Promise.all([
         this.getUser(),
@@ -235,7 +250,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
       const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
-      this.setState({oldProfile: profile, updatedProfile: profile});
+      this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});
     }
@@ -437,18 +452,18 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
       {profileLoadingError && <div>{profileLoadingError}</div>}
       {updatedProfile && <FlexColumn>
         <FlexRow style={{alignItems: 'center'}}>
-          <a onClick={() => navigate(['admin', 'users'])}>
+          <RouterLink to='/admin/users'>
             <ClrIcon
-              shape='arrow'
-              size={37}
-              style={{
-                backgroundColor: colorWithWhiteness(colors.accent, .85),
-                color: colors.accent,
-                borderRadius: '18px',
-                transform: 'rotate(270deg)'
-              }}
+                shape='arrow'
+                size={37}
+                style={{
+                  backgroundColor: colorWithWhiteness(colors.accent, .85),
+                  color: colors.accent,
+                  borderRadius: '18px',
+                  transform: 'rotate(270deg)'
+                }}
             />
-          </a>
+          </RouterLink>
           <SmallHeader style={{marginTop: 0, marginLeft: '0.5rem'}}>
             User Profile Information
           </SmallHeader>

@@ -25,15 +25,17 @@ function searchTable(searchTerm: string, wrapper) {
 
 const defaultSearchTerm = 'test';
 
-const component = () => {
-  return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
-                                setShowUnsavedModal={() => {}}
-                                setUnsavedConceptChanges={() => {}}
-                                hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
-}
+
 
 describe('ConceptHomepage', () => {
+
+  const component = () => {
+    return mount(<ConceptHomepage setConceptSetUpdating={() => {}}
+                                  setShowUnsavedModal={() => {}}
+                                  setUnsavedConceptChanges={() => {}}
+                                  hideSpinner={() => {}}
+                                  showSpinner={() => {}}/>);
+  };
 
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());

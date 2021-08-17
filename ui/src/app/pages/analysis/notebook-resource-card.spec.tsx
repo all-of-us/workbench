@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {WorkspaceAccessLevel} from 'generated/fetch';
+import {MemoryRouter} from 'react-router';
 
 
 describe('NotebookResourceCard', () => {
@@ -14,10 +15,13 @@ describe('NotebookResourceCard', () => {
       permission: WorkspaceAccessLevel.WRITER
     };
 
-    return mount(<NotebookResourceCard
+    return mount(<MemoryRouter>
+      <NotebookResourceCard
       resource={props}
       existingNameList={[]}
       onUpdate={() => {}}/>);
+    </MemoryRouter>
+    );
   };
 
   it('should render', () => {
