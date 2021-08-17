@@ -1,5 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
+import {MemoryRouter} from 'react-router';
 
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
@@ -35,9 +36,11 @@ describe('DataPage', () => {
   });
 
   const component = () => {
-    return mount(<DataComponent hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
-  }
+    return mount(<MemoryRouter>
+      <DataComponent hideSpinner={() => {}}
+                     showSpinner={() => {}}/>
+    </MemoryRouter>);
+  };
 
   it('should render', async() => {
     const wrapper = component();

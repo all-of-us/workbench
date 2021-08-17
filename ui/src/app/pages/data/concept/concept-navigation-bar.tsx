@@ -4,7 +4,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -54,6 +54,8 @@ const tooltipContent = [
 export const ConceptNavigationBar: React.FunctionComponent<
   {ns: string, wsId: string, showConcepts: boolean}> =
   ({ns, wsId, showConcepts}) => {
+    const [navigate, ] = useNavigation();
+
     return <FlexRow>
       <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
                  onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}

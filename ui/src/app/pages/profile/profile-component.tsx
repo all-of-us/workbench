@@ -26,14 +26,13 @@ import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
-  lensOnProps,
-  withUserProfile
+  lensOnProps, withUserProfile
 } from 'app/utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {environment} from 'environments/environment';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
@@ -66,7 +65,7 @@ enum RegistrationStepStatus {
   UNCOMPLETE
 }
 
-interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -130,7 +129,8 @@ const getControlledTierContent = fp.flow(
 
 export const ProfileComponent = fp.flow(
   withUserProfile(),
-  withProfileErrorModal
+  withProfileErrorModal,
+  withNavigation
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -151,14 +151,14 @@ export const ProfileComponent = fp.flow(
     saveProfileWithRenewal = withSuccessModal({
       title: 'Your profile has been updated',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
-      onDismiss: () => navigate(['access-renewal'])
+      onDismiss: () => this.props.navigate(['access-renewal'])
     }, this.saveProfile.bind(this));
 
     confirmProfile = fp.flow(
       withSuccessModal({
         title: 'You have confirmed your profile is accurate',
         message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => navigate(['access-renewal'])
+        onDismiss: () => this.props.navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
     )(async() => {
@@ -177,11 +177,6 @@ export const ProfileComponent = fp.flow(
       } catch (e) {
         reportError(e);
       }
-    }
-
-    navigateToTraining(): void {
-      window.location.assign(
-        environment.trainingUrl + '/static/data-researcher.html?saml=on');
     }
 
     initializeProfile() {
@@ -303,8 +298,12 @@ export const ProfileComponent = fp.flow(
       }
     }
 
+    getRegistrationTasksMap() {
+      return getRegistrationTasksMap(this.props.navigate);
+    }
+
     private getDUCCText(profile) {
-      const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+      const universalText = <a onClick={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
       View code of conduct
     </a>;
       switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
@@ -599,9 +598,9 @@ export const ProfileComponent = fp.flow(
                 title='Turn on Google 2-Step Verification'
                 wasBypassed={!!profile.twoFactorAuthBypassTime}
                 incompleteButtonText='Set Up'
-                completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}
+                completedButtonText={this.getRegistrationTasksMap()['twoFactorAuth'].completedText}
+                isComplete={!!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
+                completeStep={this.getRegistrationTasksMap()['twoFactorAuth'].onClick}
                 content={getTwoFactorContent(profile)}
                 >
               </ProfileRegistrationStepStatus>
@@ -609,9 +608,9 @@ export const ProfileComponent = fp.flow(
                   title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
-                  completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}
+                  completedButtonText={this.getRegistrationTasksMap()['eraCommons'].completedText}
+                  isComplete={!!(this.getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
+                  completeStep={this.getRegistrationTasksMap()['eraCommons'].onClick}
                   content={this.getEraCommonsCardText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
@@ -619,9 +618,9 @@ export const ProfileComponent = fp.flow(
                   title={<span><AoU/> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
-                  completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}
+                  completedButtonText={this.getRegistrationTasksMap()['complianceTraining'].completedText}
+                  isComplete={!!(this.getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
+                  completeStep={this.getRegistrationTasksMap()['complianceTraining'].onClick}
                   content={this.getComplianceTrainingText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
@@ -629,9 +628,9 @@ export const ProfileComponent = fp.flow(
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
-                  completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
+                  completedButtonText={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
+                  isComplete={!!(this.getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
+                  completeStep={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
                   childrenStyle={{marginLeft: 0}}
                   content={this.getDUCCText(profile)}
                 >

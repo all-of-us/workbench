@@ -6,7 +6,7 @@ import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {
   CdrVersionsApi,
@@ -16,6 +16,7 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
+import {navigateByUrlSpy} from 'testing/navigation-mock';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -45,7 +46,7 @@ describe('DataSetPage', () => {
 
   const component = () => {
     return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} />);
-  }
+  };
 
   it('should render', async() => {
     const wrapper = component();
@@ -263,17 +264,20 @@ describe('DataSetPage', () => {
     const wrapper = component();
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
-    // Mock out navigateByUrl
-    const navSpy = jest.fn();
-    NavStore.navigateByUrl = navSpy;
-
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build');
+
+    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
+      preventDefaultIfNoKeysPressed: true,
+      event: expect.anything()
+    });
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/concepts');
+    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/concepts', {
+      preventDefaultIfNoKeysPressed: true,
+      event: expect.anything()
+    });
   });
 
   it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
@@ -404,11 +408,11 @@ describe('DataSetPage', () => {
     datasetApiStub.getDatasetMock = {
       ...stubDataSet(),
       conceptSets: [{id: 345, domain: Domain.PERSON}],
-      cohorts: [{id: 0}],
+      cohorts: [{id: 1}],
       domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    urlParamsStore.next({dataSetId: 0});
+    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -424,11 +428,11 @@ describe('DataSetPage', () => {
         id: ConceptSetsApiStub.stubConceptSets().find(cs => cs.domain === Domain.WHOLEGENOMEVARIANT).id,
         domain: Domain.WHOLEGENOMEVARIANT
       }],
-      cohorts: [{id: 0}],
+      cohorts: [{id: 1}],
       domainValuePairs: [{domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
     };
-    urlParamsStore.next({dataSetId: 0});
+    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
