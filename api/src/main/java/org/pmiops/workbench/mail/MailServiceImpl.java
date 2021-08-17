@@ -224,9 +224,9 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
-        "Your access to All of Us Registered Tier Data has expired",
+        "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(
-            "Registered Tier access expired for user %s (%s)",
+            " User %s (%s) requests billing setup from Carasoft.",
             dbUser.getUsername(), dbUser.getContactEmail()),
         htmlMessage);
   }
@@ -320,11 +320,8 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
         .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
-        .put(
-            EmailSubstitutionField.USERNAME,
-            user.getUsername()
-                + "@"
-                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
             EmailSubstitutionField.PAYMENT_METHOD,
             request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD
