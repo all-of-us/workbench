@@ -76,7 +76,7 @@ import org.springframework.stereotype.Service;
  * "userId":"user1"
  * "email":"foo@gmail.com"
  * "federated_identities":{
- *    "identities":[
+ *    "identities":
  *    {
  *       "login.gov":{
  *          "firstname":"",
@@ -91,7 +91,6 @@ import org.springframework.stereotype.Service;
  *          "userid":"yyu_pi"
  *       }
  *    }
- *  ]
  *  }
  * }</pre>
  *
@@ -201,7 +200,6 @@ public class RasLinkService {
     return Optional.of(userInfo)
         .map(u -> u.get(FEDERATED_IDENTITIES))
         .map(u -> u.get(IDENTITIES))
-        .map(u -> u.get(0))
         .map(u -> u.get(ERA_COMMONS_PROVIDER_NAME))
         .map(u -> u.get(IDENTITY_USERID))
         .map(JsonNode::asText);
