@@ -1,5 +1,13 @@
 Code snippets for using Pyspark within the Researcher Workbench.
 
+# Limitations
+
+* gsutil/gcloud cannot be used from Worker VMs. As a workaround for now, HDFS with Cloud Storage
+  connector is enabled. See snippets below for examples.
+* Python packages cannot be installed on worker nodes. This feature request is pending.
+
+# Spark operations
+
 ## Spark console links
 
 ```python
@@ -19,6 +27,27 @@ html_links = [f"<li><a href=\"{base_url}/{link['path']}\">{link['name']}</a>" fo
 
 HTML('<h3>Spark Console links</h3><br/>' + '\n'.join(html_links))
 ```
+
+## Kill a rogue Spark job
+
+Easiest from the Jupyter terminal:
+
+```bash
+yarn application -list
+…
+                Application-Id      Application-Name        Application-Type          User           Queue  State        Final-State             Progress                        Tracking-URL
+application_1628813867520_0002         pyspark-shell                   SPARK       jupyter         defaultRUNNING          UNDEFINED                  10% http://all-of-us-137-m.c.aou-rw-test-92318201.internal:4041
+application_1628813867520_0001         pyspark-shell                   SPARK       jupyter         defaultRUNNING          UNDEFINED                  10% http://all-of-us-137-m.c.aou-rw-test-92318201.internal:4040
+```
+
+```bash
+jupyter@all-of-us-137-m:~$ yarn application -kill application_1628813867520_0002
+…
+Killing application application_1628813867520_0002
+21/08/13 01:34:15 INFO impl.YarnClientImpl: Killed application application_1628813867520_0002
+```
+
+# Pyspark snippets
 
 ## Pyspark Setup
 
@@ -116,23 +145,4 @@ sc.range(count).map(write).collect()
 
 ```bash
 ! gsutil ls "${WORKSPACE_BUCKET}/spark-test/outputs"
-```
-
-## Kill a rogue Spark job
-
-Easiest from the Jupyter terminal:
-
-```bash
-yarn application -list
-…
-                Application-Id      Application-Name        Application-Type          User           Queue  State        Final-State             Progress                        Tracking-URL
-application_1628813867520_0002         pyspark-shell                   SPARK       jupyter         defaultRUNNING          UNDEFINED                  10% http://all-of-us-137-m.c.aou-rw-test-92318201.internal:4041
-application_1628813867520_0001         pyspark-shell                   SPARK       jupyter         defaultRUNNING          UNDEFINED                  10% http://all-of-us-137-m.c.aou-rw-test-92318201.internal:4040
-```
-
-```bash
-jupyter@all-of-us-137-m:~$ yarn application -kill application_1628813867520_0002
-…
-Killing application application_1628813867520_0002
-21/08/13 01:34:15 INFO impl.YarnClientImpl: Killed application application_1628813867520_0002
 ```
