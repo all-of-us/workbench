@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
@@ -14,12 +15,13 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
 import {serverConfigStore} from 'app/utils/stores';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
@@ -70,30 +72,32 @@ const styles = reactStyles({
   }
 });
 
-function updateWorkspaceRPReviewPrompt(workspace) {
-  workspacesApi().markResearchPurposeReviewed(workspace.namespace, workspace.id)
-    .then((markedWorkspace) => {
-      workspace.researchPurpose.needsReviewPrompt = false;
-      navigate(
-        ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
-    });
-}
-function looksGoodEvent(workspace) {
-  AnalyticsTracker.WorkspaceUpdatePrompt.LooksGood();
-  updateWorkspaceRPReviewPrompt(workspace);
-}
-
-function updateWorkspaceEvent(workspace) {
-  AnalyticsTracker.WorkspaceUpdatePrompt.UpdateWorkspace();
-  navigate(['workspaces', workspace.namespace, workspace.id, 'edit']);
-}
-
-
-export const ResearchPurpose = withCurrentWorkspace()(
+export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
   ({workspace}: {workspace: WorkspaceData}) => {
+    const [navigate, ] = useNavigation();
     const isOwner = WorkspacePermissionsUtil.isOwner(workspace.accessLevel);
     const selectedResearchPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose, true);
     const selectedPrimaryPurposeItems = getSelectedResearchPurposeItems(workspace.researchPurpose, false);
+
+    const updateWorkspaceEvent = () => {
+      AnalyticsTracker.WorkspaceUpdatePrompt.UpdateWorkspace();
+      navigate(['workspaces', workspace.namespace, workspace.id, 'edit']);
+    };
+
+    const updateWorkspaceRPReviewPrompt = () => {
+      workspacesApi().markResearchPurposeReviewed(workspace.namespace, workspace.id)
+        .then((markedWorkspace) => {
+          workspace.researchPurpose.needsReviewPrompt = false;
+          navigate(
+            ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
+        });
+    };
+
+    const looksGoodEvent = () => {
+      AnalyticsTracker.WorkspaceUpdatePrompt.LooksGood();
+      updateWorkspaceRPReviewPrompt();
+    };
+
     return <FadeBox>
       <div style={styles.mainHeader}>Primary purpose of project
         <Clickable disabled={!isOwner}
@@ -118,10 +122,10 @@ export const ResearchPurpose = withCurrentWorkspace()(
             Research Project Directory</a> for participants and public to review.</label>
         </FlexColumn>
         <div style={{marginLeft: 'auto', marginRight: '0.5rem'}}>
-        <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent(workspace)}>Looks
+        <a style={{marginRight: '0.5rem'}} onClick={() => looksGoodEvent()}>Looks
         Good</a>
         |
-        <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent(workspace)}>Update</a>
+        <a style={{marginLeft: '0.5rem'}} onClick={() => updateWorkspaceEvent()}>Update</a>
         </div>
         </FlexRow>}
       <div style={styles.sectionContentContainer}>

@@ -8,6 +8,7 @@ import {
     DataSet,
     WorkspaceResource,
 } from 'generated/fetch';
+import {stringifyUrl} from './navigation';
 import {
     getDescription,
     getDisplayName,
@@ -180,10 +181,10 @@ describe('resources.tsx', () => {
         const EXPECTED_DATA_SET_URL = `${WORKSPACE_URL_PREFIX}/data/data-sets/${DATA_SET_ID}`;
         const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/notebooks/preview/${NOTEBOOK_NAME}`
 
-        expect(getResourceUrl(testCohort)).toBe(EXPECTED_COHORT_URL);
-        expect(getResourceUrl(testCohortReview)).toBe(EXPECTED_COHORT_REVIEW_URL);
-        expect(getResourceUrl(testConceptSet)).toBe(EXPECTED_CONCEPT_SET_URL);
-        expect(getResourceUrl(testDataSet)).toBe(EXPECTED_DATA_SET_URL);
-        expect(getResourceUrl(testNotebook)).toBe(EXPECTED_NOTEBOOK_URL);
+        expect(stringifyUrl(getResourceUrl(testCohort))).toBe(EXPECTED_COHORT_URL);
+        expect(stringifyUrl(getResourceUrl(testCohortReview))).toBe(EXPECTED_COHORT_REVIEW_URL);
+        expect(stringifyUrl(getResourceUrl(testConceptSet))).toBe(EXPECTED_CONCEPT_SET_URL);
+        expect(stringifyUrl(getResourceUrl(testDataSet))).toBe(EXPECTED_DATA_SET_URL);
+        expect(stringifyUrl(getResourceUrl(testNotebook))).toBe(EXPECTED_NOTEBOOK_URL);
     });
 });

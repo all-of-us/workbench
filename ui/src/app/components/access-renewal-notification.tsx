@@ -3,7 +3,7 @@ import * as React from 'react';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {maybeDaysRemaining} from 'app/utils/access-utils';
-import {navigate} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
@@ -65,6 +65,8 @@ const styles = reactStyles({
 
 
 const AccessRenewalNotification = ({daysRemaining}: {daysRemaining: number}) => {
+  const [navigate, ] = useNavigation();
+
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Time for access renewal. {
