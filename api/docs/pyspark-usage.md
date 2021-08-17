@@ -86,7 +86,8 @@ sc.parallelize(input_files).map(unzip_and_wc).collect()
 ```bash
 %%bash
 
-# Write a bash script file locally.
+# Write a bash script file locally. Alternatively, you can use the Jupyter menu to
+# create/edit a script file.
 cat > my_script.sh << EOF
 #!/bin/bash
 
