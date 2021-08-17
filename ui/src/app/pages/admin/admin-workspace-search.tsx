@@ -14,7 +14,7 @@ const AdminWorkspaceSearchImpl = (props: Props) => {
   const [workspaceNamespace, setWorkspaceNamespace] = useState();
   const [navigate, ] = useNavigation();
 
-  const navigateToWorkspace = () => navigate(['/admin/workspaces/' + workspaceNamespace]);
+  const navigateToWorkspace = () => navigate(['admin/workspaces/' + workspaceNamespace]);
 
   useEffect(() => props.hideSpinner(), []);
 

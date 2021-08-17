@@ -276,7 +276,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
 
     goBack() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     render() {

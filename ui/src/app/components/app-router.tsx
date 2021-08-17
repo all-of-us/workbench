@@ -80,7 +80,8 @@ export const withFullHeight = WrappedComponent => ({...props}) => {
 };
 
 // This function is invoked if react-router `<Prompt>` is rendered by a component that wants the user to
-// confirm navigating away from the page.
+// confirm navigating away from the page. The default behavior of <Prompt> is being overridden by this
+// getUserConfirmation function so we can provide a custom styled warning modal instead of the browser's default.
 const getUserConfirmation = (message, callback) => {
   const modal = document.createElement('div');
   document.body.appendChild(modal);

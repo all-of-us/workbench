@@ -118,7 +118,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {showModal && <CdrVersionUpgradeModal
         defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
-        upgrade={() => navigate(['/workspaces', namespace, id, 'duplicate'])}
+        upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;
 };

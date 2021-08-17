@@ -297,7 +297,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      this.props.navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
+      this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 
     getRequestFilters = () => {

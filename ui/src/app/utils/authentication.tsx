@@ -41,10 +41,12 @@ const makeAuth2 = (config: ConfigResponse): Promise<any> => {
 export const signIn = (): void => {
   AnalyticsTracker.Registration.SignIn();
 
-  gapi.auth2.getAuthInstance().signIn({
-    'prompt': 'select_account',
-    'ux_mode': 'redirect',
-    'redirect_uri': `${window.location.protocol}//${window.location.host}`
+  gapi.load('auth2', () => {
+    gapi.auth2.getAuthInstance().signIn({
+      'prompt': 'select_account',
+      'ux_mode': 'redirect',
+      'redirect_uri': `${window.location.protocol}//${window.location.host}`
+    });
   });
 };
 
@@ -86,7 +88,7 @@ export function useAuthentication() {
       }
     }
     setLoggedInState(isSignedIn);
-  }, [isSignedIn]);
+  }, [isSignedIn, authLoaded]);
 
   return {authLoaded, isSignedIn};
 }
