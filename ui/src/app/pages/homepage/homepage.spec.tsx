@@ -3,9 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
-import {MemoryRouter} from 'react-router';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {stubResource} from 'testing/stubs/resources-stub';
 
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -22,7 +20,7 @@ describe('HomepageComponent', () => {
   let profileApi: ProfileApiStub;
 
   const component = () => {
-    return mount(<MemoryRouter><Homepage hideSpinner={() => {}} /></MemoryRouter>);
+    return mount(<Homepage hideSpinner={() => {}} />);
   };
 
   const load = jest.fn();
@@ -52,12 +50,6 @@ describe('HomepageComponent', () => {
       enableEraCommons: true
     }});
     cdrVersionStore.set(cdrVersionTiersResponse);
-
-    stubResource.notebook = {
-      name: '',
-      path: '',
-      lastModifiedTime: 0
-    };
   });
 
   it('should render the homepage', () => {

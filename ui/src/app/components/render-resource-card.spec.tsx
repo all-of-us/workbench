@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
-import {MemoryRouter} from 'react-router';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {renderResourceCard} from './render-resource-card';
@@ -10,13 +9,6 @@ import {stubResource} from 'testing/stubs/resources-stub';
 import {serverConfigStore} from 'app/utils/stores';
 
 describe('renderResourceCard', () => {
-
-  const component = (card) => {
-    return mount(<MemoryRouter>
-      {card}
-    </MemoryRouter>);
-  };
-
   beforeEach(() => {
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
   });
@@ -33,7 +25,7 @@ describe('renderResourceCard', () => {
       onUpdate: async () => {},
       menuOnly: false,
     });
-    const wrapper = component(card);
+    const wrapper = mount(card);
     expect(wrapper.exists()).toBeTruthy();
     expect(wrapper.text()).toContain('Cohort');
     expect(wrapper.text()).toContain(testCohort.cohort.name);
@@ -63,7 +55,7 @@ describe('renderResourceCard', () => {
       onUpdate: async () => {},
       menuOnly: true,
     });
-    const wrapper = component(menu);
+    const wrapper = mount(menu);
     expect(wrapper.exists()).toBeTruthy();
     expect(wrapper.text()).toBe('');
   });
@@ -83,7 +75,7 @@ describe('renderResourceCard', () => {
       onUpdate: async () => {},
       menuOnly: true,
     });
-    const wrapper = component(menu);
+    const wrapper = mount(menu);
     wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
     expect(wrapper.text()).toContain('Export to Notebook');
     expect(wrapper.text()).not.toContain('Extract VCF Files');
@@ -107,7 +99,7 @@ describe('renderResourceCard', () => {
       onUpdate: async () => {},
       menuOnly: true,
     });
-    const wrapper = component(menu);
+    const wrapper = mount(menu);
     wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
     expect(wrapper.text()).toContain('Export to Notebook');
     expect(wrapper.text()).toContain('Extract VCF Files');

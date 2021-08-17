@@ -1,8 +1,6 @@
 import Timeout = NodeJS.Timeout;
 import {TextModal} from 'app/components/text-modal';
 import {debouncer} from 'app/utils';
-import {signOut} from 'app/utils/authentication';
-import {navigateSignOut} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
@@ -39,19 +37,17 @@ const secondsToText = (seconds: number) => {
       `${seconds / 60} minutes` : `${seconds} seconds`;
 };
 
-const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
-  window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
-  signOut();
-  navigateSignOut(continuePath);
-};
+export interface Props {
+  signOut: (continuePath?: string) => void;
+}
 
-export const InactivityMonitor = () => {
+export const InactivityMonitor = ({signOut}: Props) => {
   const [showModal, setShowModal] = useState(false);
 
   function signOutIfLocalStorageInactivityElapsed(continuePath?: string): void {
     const elapsedMs = getInactivityElapsedMs();
     if (elapsedMs && elapsedMs > environment.inactivityTimeoutSeconds * 1000) {
-      invalidateInactivityCookieAndSignOut(continuePath);
+      signOut(continuePath);
     }
   }
 
@@ -76,7 +72,7 @@ export const InactivityMonitor = () => {
     const startInactivityTimers = (elapsedMs: number = 0) => {
       clearTimeout(logoutTimer);
       logoutTimer = setTimeout(
-        () => invalidateInactivityCookieAndSignOut('/session-expired'),
+        () => signOut('/session-expired'),
         Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs));
 
       clearTimeout(inactivityModalTimer);

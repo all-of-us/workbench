@@ -1,6 +1,5 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Link as RouterLink} from 'react-router-dom';
 
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -14,6 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {formatWorkspaceResourceDisplayDate, reactStyles, withCdrVersions} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {
   CdrVersionTiersResponse,
@@ -54,9 +54,12 @@ const WorkspaceNavigation = (props: NavProps) => {
   const url = `/workspaces/${namespace}/${id}/${tab}`;
 
   return <Clickable>
-    <RouterLink to={url} style={style} data-test-id='workspace-navigation'>
+    <a data-test-id='workspace-navigation'
+       style={style}
+       href={url}
+       onClick={e => navigateAndPreventDefaultIfNoKeysPressed(e, url)}>
       {name}
-    </RouterLink>
+    </a>
   </Clickable>;
 };
 

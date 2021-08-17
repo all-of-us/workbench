@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 import {RuntimeStore} from 'app/utils/stores';
 
@@ -25,7 +25,6 @@ import {
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {maybeInitializeRuntime, withRuntimeStore} from 'app/utils/runtime-utils';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
@@ -221,7 +220,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -237,7 +236,6 @@ export const NotebookRedirect = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withQueryParams(),
-  withNavigation
 )(
   class extends React.Component<Props, State> {
 
@@ -326,7 +324,7 @@ export const NotebookRedirect = fp.flow(
       const {status: prevStatus = null} = prevProps.runtimeStore.runtime || {};
       const {status: curStatus = null} = runtime || {};
       if (isLoaded && interactiveRuntimeStatuses.has(prevStatus) && !interactiveRuntimeStatuses.has(curStatus)) {
-        this.props.navigate([
+        navigate([
           'workspaces', workspace.namespace, workspace.id,
           // navigate will encode the notebook name automatically
           'notebooks', 'preview', this.getFullNotebookName()

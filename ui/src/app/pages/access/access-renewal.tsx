@@ -23,7 +23,7 @@ import {
   withStyle
 } from 'app/utils';
 import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
-import {useNavigation} from 'app/utils/navigation';
+import {navigateByUrl} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
 
@@ -229,7 +229,6 @@ export const AccessRenewal = fp.flow(
   const reportId = useId();
   const [refreshButtonDisabled, setRefreshButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [, navigateByUrl] = useNavigation();
 
 
   // onMount - as we move between pages, let's make sure we have the latest profile
@@ -301,7 +300,7 @@ export const AccessRenewal = fp.flow(
         <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.PROFILECONFIRMATION))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
-          onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}
+          onClick={() => navigateByUrl('profile?renewal=1')}
           wasBypassed={wasBypassed(AccessModule.PROFILECONFIRMATION)} />
       </RenewalCard>
       {/* Publications */}
@@ -383,7 +382,7 @@ export const AccessRenewal = fp.flow(
         <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.DATAUSERCODEOFCONDUCT))}
           actionButtonText='View & Sign'
           completedButtonText='Completed'
-          onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}
+          onClick={() => navigateByUrl('data-code-of-conduct?renewal=1')}
           wasBypassed={wasBypassed(AccessModule.DATAUSERCODEOFCONDUCT)}/>
       </RenewalCard>
     </div>

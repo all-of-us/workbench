@@ -1,16 +1,15 @@
 import {Button} from 'app/components/buttons';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {withCurrentWorkspace, withUserProfile} from 'app/utils';
-import {NavigationProps} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
-interface Props extends NavigationProps {
+interface Props {
   workspace: WorkspaceData;
   profileState: {
     profile: Profile
@@ -21,7 +20,6 @@ interface Props extends NavigationProps {
 export const InvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
   withUserProfile(),
-  withNavigation
 )((props: Props) => {
   const {enableBillingUpgrade} = serverConfigStore.get().config;
   const userAction = enableBillingUpgrade ?
@@ -47,7 +45,7 @@ export const InvalidBillingBanner = fp.flow(
         </Button>
         {enableBillingUpgrade && <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}
                                     onClick={() => {
-                                      this.props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
+                                      navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
                                     }}>
             Provide billing account
         </a>}

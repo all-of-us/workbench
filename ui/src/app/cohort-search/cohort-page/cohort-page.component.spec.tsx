@@ -11,7 +11,6 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
-import {MemoryRouter} from "react-router";
 
 describe('CohortPage', () => {
   beforeEach(() => {
@@ -22,13 +21,13 @@ describe('CohortPage', () => {
   });
 
   const component = () => {
-    return mount(<MemoryRouter><CohortPage
+    return mount(<CohortPage
         setCohortChanged={() => {}}
         setShowWarningModal={() => {}}
         setUpdatingCohort={() => {}}
         hideSpinner={() => {}}
         showSpinner={() => {}}
-    /></MemoryRouter>);
+    />);
   }
 
   it('should render', () => {

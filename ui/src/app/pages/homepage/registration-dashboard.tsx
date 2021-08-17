@@ -15,10 +15,9 @@ import {reactStyles} from 'app/utils';
 import {redirectToTraining} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
-import {NavigationProps} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -130,10 +129,7 @@ interface RegistrationTask {
 // the server-side logic, else users can get stuck on the registration dashboard
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-//
-// Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
-// can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate) => serverConfigStore.get().config ? ([
+export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
@@ -216,7 +212,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
   throw new Error('Cannot load registration tasks before config loaded');
 })();
 
-export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
+export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
@@ -234,8 +230,6 @@ export interface RegistrationDashboardProps {
   dataUserCodeOfConductCompleted: boolean;
 }
 
-interface HocProps extends RegistrationDashboardProps, NavigationProps {}
-
 interface State {
   showRefreshButton: boolean;
   trainingWarningOpen: boolean;
@@ -245,9 +239,9 @@ interface State {
   accessTaskKeyToButtonAsRefresh: Map<string, boolean>;
 }
 
+export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
 
-export const RegistrationDashboard = fp.flow(withNavigation)(class extends React.Component<HocProps, State> {
-  constructor(props: HocProps) {
+  constructor(props: RegistrationDashboardProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
@@ -263,12 +257,8 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
     this.setState({showRefreshButton: false});
   }
 
-  getRegistrationTasks() {
-    return getRegistrationTasks(this.props.navigate);
-  }
-
   get taskCompletionList(): Array<boolean> {
-    return this.getRegistrationTasks().map((config) => {
+    return getRegistrationTasks().map((config) => {
       return this.props[config.completionPropsKey] as boolean;
     });
   }
@@ -289,7 +279,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
   }
 
   get taskLoadingList(): Array<boolean> {
-    return this.getRegistrationTasks().map((config) => {
+    return getRegistrationTasks().map((config) => {
       return this.props[config.loadingPropsKey] as boolean;
     });
   }
@@ -338,7 +328,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
 
     // Override on click for the two factor auth access task. This is important because we want to affect the DOM
     // for this specific task.
-    const registrationTasksToRender = this.getRegistrationTasks().map(registrationTask =>
+    const registrationTasksToRender = getRegistrationTasks().map(registrationTask =>
       registrationTask.key === 'twoFactorAuth' ? {...registrationTask,
         onClick: () => this.setState({twoFactorAuthModalOpen: true})} :
         registrationTask);
@@ -462,4 +452,4 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       </Modal>}
     </FlexColumn>;
   }
-});
+}

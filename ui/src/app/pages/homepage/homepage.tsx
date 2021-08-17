@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
+import {navigate, queryParamsStore} from 'app/utils/navigation';
 
 import {
   StyledAnchorTag,
@@ -25,7 +25,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
-import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
@@ -83,8 +82,6 @@ const WelcomeHeader = () => {
 };
 
 const Workspaces = () => {
-  const [navigate, ] = useNavigation();
-
   return <FlexColumn>
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <FlexRow style={{alignItems: 'center'}}>
@@ -140,7 +137,7 @@ const GettingStarted = () => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -164,7 +161,7 @@ interface State {
   userWorkspacesResponse: WorkspaceResponseListResponse;
 }
 
-export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends React.Component<Props, State> {
+export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
 
@@ -253,14 +250,10 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
-  getRegistrationTasksMap() {
-    return getRegistrationTasksMap(this.props.navigate);
-  }
-
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
-        trainingCompleted: !!(this.getRegistrationTasksMap()['complianceTraining']
+        trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
           .completionTimestamp(result))
       });
     }).catch(err => {
@@ -269,7 +262,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
-        twoFactorAuthCompleted: !!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
+        twoFactorAuthCompleted: !!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
@@ -299,10 +292,10 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
       }
       this.setState({
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
-            (() => !!(this.getRegistrationTasksMap()['eraCommons']
+            (() => !!(getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
-          (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
+          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
