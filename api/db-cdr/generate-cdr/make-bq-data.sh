@@ -43,7 +43,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking ds_data_dictionary domain_info domain_card survey_module cb_person cb_data_filter cb_criteria_menu cb_menu)
+create_tables=(cb_survey_attribute cb_survey_version cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor ds_linking ds_data_dictionary domain_info domain_card survey_module cb_person cb_data_filter cb_criteria_menu)
 
 for t in "${create_tables[@]}"
 do
@@ -72,17 +72,6 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 (id,parent_id,category,domain_id,type,name,is_group,sort_order)
 SELECT id,parent_id,category,domain_id,type,name,is_group,sort_order
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`"
-
-# Populate cb_menu
-#######################
-#  cb_menu   #
-#######################
-echo "Inserting cb_menu"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_menu\`
-(id,parent_id,category,domain_id,type,name,is_group,is_standard,sort_order)
-SELECT id,parent_id,category,domain_id,type,name,is_group,is_standard,sort_order
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_menu\`"
 
 # Populate cb_survey_attribute
 #######################

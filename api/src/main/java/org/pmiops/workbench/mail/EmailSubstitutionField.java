@@ -24,8 +24,12 @@ public enum EmailSubstitutionField {
   USER_PHONE("USER_PHONE"),
   PAYMENT_METHOD("PAYMENT_METHOD"),
   NIH_FUNDED("NIH_FUNDED"),
+<<<<<<< HEAD
   FROM_EMAIL("FROM_EMAIL"),
   USER_CONTACT_EMAIL("USER_CONTACT_EMAIL");
+=======
+  FROM_EMAIL("FROM_EMAIL");
+>>>>>>> origin
 
   private String value;
 

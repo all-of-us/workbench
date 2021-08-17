@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {cohortsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {cdrVersionStore} from 'app/utils/stores';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
@@ -11,24 +11,24 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
+import {MemoryRouter} from "react-router";
 
 describe('CohortPage', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.set({config: {enableStandardSourceDomains: false, gsuiteDomain: ''}});
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
   });
 
   const component = () => {
-    return mount(<CohortPage
+    return mount(<MemoryRouter><CohortPage
         setCohortChanged={() => {}}
         setShowWarningModal={() => {}}
         setUpdatingCohort={() => {}}
         hideSpinner={() => {}}
         showSpinner={() => {}}
-    />);
+    /></MemoryRouter>);
   }
 
   it('should render', () => {

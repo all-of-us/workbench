@@ -306,8 +306,17 @@ public class MailServiceImpl implements MailService {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+<<<<<<< HEAD
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+=======
+        .put(
+            EmailSubstitutionField.FIRST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
+        .put(
+            EmailSubstitutionField.LAST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getFamilyName()))
+>>>>>>> origin
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(
             EmailSubstitutionField.INSTITUTION_NAME,
@@ -316,8 +325,16 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
         .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
+<<<<<<< HEAD
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
+=======
+        .put(
+            EmailSubstitutionField.USERNAME,
+            user.getUsername()
+                + "@"
+                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
+>>>>>>> origin
         .put(
             EmailSubstitutionField.PAYMENT_METHOD,
             request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD

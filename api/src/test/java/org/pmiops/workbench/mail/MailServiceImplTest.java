@@ -142,7 +142,10 @@ public class MailServiceImplTest extends SpringTest {
                   // tags should be escaped, email addresses shouldn't.
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Credit Card")
+<<<<<<< HEAD
                       && gotHtml.contains("user@contact.com")
+=======
+>>>>>>> origin
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: No");
@@ -174,7 +177,10 @@ public class MailServiceImplTest extends SpringTest {
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Purchase Order/Other")
                       && gotHtml.contains("given name family name")
+<<<<<<< HEAD
                       && gotHtml.contains("user@contact.com")
+=======
+>>>>>>> origin
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
@@ -206,7 +212,10 @@ public class MailServiceImplTest extends SpringTest {
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Purchase Order/Other")
                       && gotHtml.contains("given name family name")
+<<<<<<< HEAD
                       && gotHtml.contains("user@contact.com")
+=======
+>>>>>>> origin
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
@@ -240,9 +249,14 @@ public class MailServiceImplTest extends SpringTest {
     DbUser user = new DbUser();
     user.setFamilyName("family name");
     user.setGivenName("given name");
+<<<<<<< HEAD
     user.setGivenName("given name");
     user.setContactEmail("user@contact.com");
     user.setUsername("username@research.org");
+=======
+    user.setContactEmail("user@contact.com");
+    user.setUsername("username");
+>>>>>>> origin
     return user;
   }
 

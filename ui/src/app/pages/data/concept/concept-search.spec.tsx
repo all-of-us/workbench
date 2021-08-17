@@ -3,21 +3,30 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentConceptSetStore,
+  currentConceptStore,
+  currentWorkspaceStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
+import {MemoryRouter} from "react-router";
 
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
+    currentConceptStore.next([]);
+    currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -27,11 +36,11 @@ describe('ConceptSearch', () => {
   });
 
   const component = () => {
-    return mount(<ConceptSearch setConceptSetUpdating={() => {}}
+    return mount(<MemoryRouter><ConceptSearch setConceptSetUpdating={() => {}}
                                 setShowUnsavedModal={() => {}}
                                 setUnsavedConceptChanges={() => {}}
                                 hideSpinner={() => {}}
-                                showSpinner={() => {}}/>);
+                                showSpinner={() => {}}/></MemoryRouter>);
   }
 
   it('should render', () => {

@@ -48,11 +48,15 @@ public interface LeonardoMapper {
 
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
+  @Mapping(target = "componentGatewayEnabled", ignore = true)
   LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
-  default void addCloudServiceEnum(@MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
-    leonardoMachineConfig.setCloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC);
+  default void addMachineConfigDefaults(
+      @MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
+    leonardoMachineConfig
+        .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+        .componentGatewayEnabled(true);
   }
 
   GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);

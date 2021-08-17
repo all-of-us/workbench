@@ -54,22 +54,29 @@ circle_get() {
     "${url}"
 }
 
-# Fetch list of builds on master branch that are running, pending or queued.
-fetch_pipelines() {
-  printf '%s\n' "Fetch previously submitted builds on \"${branch}\" branch that are running, pending or queued:"
+# Function returns current pipeline's start_time. It is used for comparison of start_time values.
+fetch_current_pipeline_start_time() {
+  printf '%s\n' "Fetch current pipeline start time."
   local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
-  local get_result=$(circle_get "${get_path}")
-  if [[ ! "${get_result}" ]]; then
-    printf "curl failed."
+  local curl_result=$(circle_get "${get_path}")
+  __=$(echo "${curl_result}" | jq -r ".[] | select(.build_num==$CIRCLE_BUILD_NUM) | .start_time")
+}
+
+# Function takes start_time parameter.
+# Fetch list of builds on master branch that are running, pending or queued.
+fetch_older_pipelines() {
+  printf '%s\n' "Fetch pipelines (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
+  local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
+  local curl_result=$(circle_get "${get_path}")
+  if [[ ! "${curl_result}" ]]; then
+    printf "Fetch older pipelines failed."
     exit 1
   fi
-  jq_filter="select(.branch==\"${branch}\""
-  jq_filter+=" and .build_num < $CIRCLE_BUILD_NUM"
-  jq_filter+=" and (.status | test(\"running|pending|queued\")))"
-  jq_filter+=" | select(.workflows.workflow_name==\"${workflow_name}\""
-  jq_filter+=" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\")"
-
-  __=$(echo "${get_result}" | jq -r ".[] | ${jq_filter} | .build_num | @sh")
+  jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
+  jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
+  jq_object+="job_name: .workflows.job_name, build_num, start_time, status }"
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | ${jq_object}")
 }
 
 
@@ -85,6 +92,14 @@ check_circleci_workflow_id
 printf "%s\n" "Current pipeline CIRCLE_BUILD_NUM: ${CIRCLE_BUILD_NUM}"
 printf "%s\n\n" "Current pipeline CIRCLE_WORKFLOW_ID: ${CIRCLE_WORKFLOW_ID}"
 
+fetch_current_pipeline_start_time
+current_pipeline_start_time=$__
+printf "%s\n\n" "Current pipeline start_at time: ${current_pipeline_start_time}"
+if [[ ! "${current_pipeline_start_time}" ]]; then
+  printf "Value of current_pipeline_start_time is not valid."
+  exit 1
+fi
+
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
 waited_time=0
@@ -92,22 +107,23 @@ wait="30s"
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
-  fetch_pipelines
+  fetch_older_pipelines "${current_pipeline_start_time}"
   pipelines=$__
 
   if [[ $pipelines ]]; then
-    printf "%s\n" "Waiting for previous builds to finish. sleep ${wait} seconds. Please wait..."
+    printf "\n%s\n" "${pipelines}"
+    printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${wait} seconds. Please wait..."
     sleep $sleep_time
     waited_time=$((sleep_time + waited_time))
   else
-    printf "\n%s\n" "all previous builds have finished."
+    printf "\n%s\n" "All previously submitted pipelines have finished."
     is_running=false
   fi
 
   printf "%s\n" "Has been waiting for ${waited_time} seconds."
   if [ $waited_time -gt $max_time ]; then
-    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds. *****"
+    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
     is_running=false
   fi
 done
-printf "\n%s\n" "Finished."
+printf "\n%s\n" "Finished waiting."

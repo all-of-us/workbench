@@ -52,9 +52,14 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+<<<<<<< HEAD
 import {getBillingAccountInfo, hasBillingScope} from 'app/utils/workbench-gapi-client';
+=======
+import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+>>>>>>> origin
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -256,7 +261,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
   </div>;
 };
 
-export interface WorkspaceEditProps extends WithSpinnerOverlayProps {
+export interface WorkspaceEditProps extends WithSpinnerOverlayProps, NavigationProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -288,7 +293,7 @@ export interface WorkspaceEditState {
   workspaceNewAclDelayedContinueFn: Function;
 }
 
-export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
+export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile(), withNavigation)(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -784,7 +789,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               ...ws.workspace,
               accessLevel: ws.accessLevel
             }));
-          navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
           return;
         }
 
@@ -801,7 +806,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
-        const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        const navigateToWorkspace = () => this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +

@@ -6,10 +6,12 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {NavigationProps} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -64,8 +66,9 @@ const actionCards = [
   },
 ];
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
+  urlParams: any;
 }
 
 interface State {
@@ -73,7 +76,11 @@ interface State {
   cohortLoading: boolean;
 }
 
-export const CohortActions = withCurrentWorkspace()(
+export const CohortActions = fp.flow(
+  withCurrentWorkspace(),
+  withUrlParams(),
+  withNavigation
+)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -82,27 +89,38 @@ export const CohortActions = withCurrentWorkspace()(
 
     componentDidMount(): void {
       this.props.hideSpinner();
-      const cid = urlParamsStore.getValue().cid;
       this.setState({cohortLoading: true});
-      if (cid) {
-        const {namespace, id} = this.props.workspace;
-        cohortsApi().getCohort(namespace, id, cid).then(c => {
-          if (c) {
-            this.setState({cohort: c, cohortLoading: false});
-          } else {
-            navigate(['workspaces', namespace, id, 'data', 'cohorts']);
-          }
-        });
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      if (!hasNewValidProps(this.props, prevProps, [
+        p => p.workspace.namespace,
+        p => p.workspace.id,
+        p => p.urlParams.cid
+      ])) {
+        return;
       }
+
+      const {namespace, id} = this.props.workspace;
+      cohortsApi().getCohort(namespace, id, this.props.urlParams.cid).then(c => {
+        if (c) {
+          this.setState({cohort: c, cohortLoading: false});
+        } else {
+          this.props.navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+        }
+      });
     }
 
     navigateTo(action: string): void {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
+      const queryParams: any = {};
+
       switch (action) {
         case 'cohort':
-          url += `data/cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build`;
+          queryParams.cohortId = cohort.id;
           break;
         case 'review':
           url += `data/cohorts/${cohort.id}/review`;
@@ -116,7 +134,7 @@ export const CohortActions = withCurrentWorkspace()(
         case 'newCohort':
           url += `data/cohorts/build`;
       }
-      navigateByUrl(url);
+      this.props.navigateByUrl(url, {queryParams});
     }
 
     render() {
