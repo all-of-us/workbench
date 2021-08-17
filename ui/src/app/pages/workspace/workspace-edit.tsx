@@ -54,7 +54,7 @@ import {
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+import {getBillingAccountInfo, hasBillingScope} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -215,6 +215,7 @@ export const styles = reactStyles({
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
+const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
 
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
@@ -272,6 +273,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   populationChecked: boolean;
   selectResearchPurpose: boolean;
+  showCreateBillingAccountDropdown: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
   showCreateBillingAccountModal: boolean;
@@ -297,6 +299,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        showCreateBillingAccountDropdown: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
         showCreateBillingAccountModal: false,
@@ -316,9 +319,17 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       history.back();
     }
 
+    async initialBillingAccountLoad() {
+      if(!hasBillingScope()) {
+        const freeTierBillingAccount = {
+          billingAccountName: serverConfigStore.get().config
+        }
+      } else {
+        await this.fetchBillingAccounts()
+      }
+    }
     async fetchBillingAccounts() {
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
-
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
@@ -369,9 +380,13 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       this.setState({billingAccounts});
     }
 
+    async requestBillingScopeThenFetchBillingAccount() {
+      await this.fetchBillingAccounts();
+      this.setState({"showCreateBillingAccountDropdown": true});
+    }
+
     async componentDidMount() {
       this.props.hideSpinner();
-      await this.fetchBillingAccounts();
     }
 
     createWorkspace(): Workspace {
@@ -854,10 +869,17 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         value: a.name,
         disabled: !a.isOpen
       }));
-      if (enableBillingUpgrade) {
+      if (enableBillingUpgrade && this.state.showCreateBillingAccountDropdown) {
         options.push({
-          label: 'Create a new billing account',
+          label: 'Create a Google Cloud billing account',
           value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+          disabled: false
+        });
+      }
+      if (enableBillingUpgrade && !this.state.showCreateBillingAccountDropdown) {
+        options.push({
+          label: 'Select or create a Google Cloud billing account',
+          value: SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE,
           disabled: false
         });
       }
@@ -1166,16 +1188,20 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </div>
             </OverlayPanel>
             <FlexRow>
-              <Dropdown style={{width: '14rem'}}
+              <Dropdown style={{width: '20rem', overlayVisible: 'true'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
-                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                          if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                            e.originalEvent.stopPropagation();
+                            this.requestBillingScopeThenFetchBillingAccount();
+                            this.buildBillingAccountOptions();
+                          } else if(e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
                               showCreateBillingAccountModal: true
                             });
-                          } else {
+                          }else {
                             this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
                           }
                         }}

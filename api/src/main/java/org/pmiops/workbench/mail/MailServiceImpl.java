@@ -316,11 +316,8 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
         .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
-        .put(
-            EmailSubstitutionField.USERNAME,
-            user.getUsername()
-                + "@"
-                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
             EmailSubstitutionField.PAYMENT_METHOD,
             request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD
