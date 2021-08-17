@@ -102,7 +102,7 @@ export default class NotebookPage extends NotebookFrame {
     const runButton = await this.findRunButton();
     await runButton.click();
     // Click Run button turns notebook page into Command_mode from Edit mode.
-    // Command mode indicates click of Run button was successful.
+    // Short sleep to avoid check output too soon.
     await this.page.waitForTimeout(500);
     await runButton.dispose();
   }
