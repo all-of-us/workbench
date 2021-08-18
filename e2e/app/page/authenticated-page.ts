@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
+import { logger } from 'libs/logger';
 
 export const signedInIndicator = '[data-test-id="signed-in"]';
 
@@ -33,6 +34,8 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.isSignedIn();
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
+    const pageTitle = await this.page.title();
+    logger.info(`"${pageTitle}" page loaded.`);
     return this;
   }
 

@@ -38,6 +38,7 @@ describe('Updating runtime compute type', () => {
     const workersOutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe("'2'");
+    await notebook.save();
 
     // Open runtime panel
     await runtimePanel.open();
