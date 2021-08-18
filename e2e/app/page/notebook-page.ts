@@ -225,9 +225,6 @@ export default class NotebookPage extends NotebookFrame {
     opts: { code?: string; codeFile?: string; timeOut?: number; markdownWorkaround?: boolean } = {}
   ): Promise<string> {
     const { code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false } = opts;
-    if (code === undefined && codeFile === undefined) {
-      throw new Error('Code or codeFile parameter is required in runCodeCell method.');
-    }
     if (code !== undefined && codeFile !== undefined) {
       throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
