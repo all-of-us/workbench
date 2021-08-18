@@ -74,7 +74,6 @@ export default class DataResourceCard extends CardBase {
       `[.//*[${DataResourceCardSelector.cardNameXpath}` +
       ` and normalize-space(text())="${resourceName}"]]`;
 
-    console.log(`card select: ${selector}`);
     return this.page
       .waitForXPath(selector, { timeout })
       .then((element) => {
