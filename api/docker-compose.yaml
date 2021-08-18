@@ -1,37 +1,6 @@
 version: "3.4"
 
-# x- indicates an "extension", so docker-compose will ignore the attribute. The
-# name is not important, it's just the necessary syntax to create a YAML anchor
-# for reuse across the below services.
-x-api-defaults: &api-defaults
-  # This image label exists for documentation purposes only, e.g. to identify
-  # it via `docker images`. We do not actually push this image up to DockerHub.
-  # Since docker-compose should never find this image remotely, it will rebuild
-  # it from the provided build context or use a cached local version.
-  # When making changes to this image, you can modify this tag to force all devs
-  # to rebuild.
-  image: allofustest/workbench-dev-api:local-6
-  build:
-    context: ./src/dev/server
-  user: ${UID}
-  working_dir: /w/api
-  environment:
-    - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
-  env_file:
-    - db/vars.env
-  volumes:
-    - src-sync:/w:nocopy
-    - gradle-cache:/.gradle
-    - ~/.config:/.config:cached
-    - ~/.gsutil:/.gsutil:cached
-
 services:
-  scripts:
-    <<: *api-defaults
-  ports-scripts:
-    <<: *api-defaults
-    ports:
-      - 127.0.0.1:3307:3307
   db:
     image: mysql:5.7.27
     env_file:
@@ -40,58 +9,6 @@ services:
       - db:/var/lib/mysql
     ports:
       - 127.0.0.1:3306:3306
-  api:
-    <<: *api-defaults
-    depends_on:
-      - db
-    command: ./project.rb start-api-and-incremental-build
-    ports:
-      - 127.0.0.1:8081:8081
-      - 127.0.0.1:8001:8001
-  es-scripts:
-    <<: *api-defaults
-  db-scripts:
-    <<: *api-defaults
-    depends_on:
-      - db
-    working_dir: /w/api/db
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
-
-  api-scripts:
-    <<: *api-defaults
-    depends_on:
-      - db
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
-
-  cdr-scripts:
-    <<: *api-defaults
-    depends_on:
-      - db
-    working_dir: /w/api/db-cdr
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
-    env_file: db-cdr/vars.env
-
-  db-make-bq-tables:
-    <<: *api-defaults
-    depends_on:
-      - db
-    working_dir: /w/api/db-cdr
-    env_file: db-cdr/vars.env
-
-  db-cloudsql-import:
-    <<: *api-defaults
-    working_dir: /w/api/db-cdr
-    entrypoint: ["./generate-cdr/cloudsql-import.sh"]
-
-  db-local-mysql-import:
-    <<: *api-defaults
-    working_dir: /w/api/db-cdr
-    entrypoint: ["./generate-cdr/local-mysql-import.sh"]
 
 volumes:
   db:
-  esdata:
-  gradle-cache:
-  src-sync:
-    external: true
-

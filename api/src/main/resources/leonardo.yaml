@@ -2765,6 +2765,13 @@ components:
           type: object
           additionalProperties:
             type: string
+        componentGatewayEnabled:
+          type: boolean
+          description: >
+            Optional, specifies whether to enable Dataproc Component Gateway on the cluster.
+            This can be used for accessing Spark web UIs. See
+            https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways for more details.
+            Defaults to false.
     UserJupyterExtensionConfig:
       description: Specification of Jupyter Extensions to be installed on the cluster
       properties:

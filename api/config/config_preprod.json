@@ -31,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "NIHStrides@Carahsoft.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -73,7 +74,6 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
   "mandrill": {

@@ -18,8 +18,9 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
@@ -33,7 +34,6 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.DATASET, 'data');
 
 export interface Props {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
@@ -43,6 +43,10 @@ export interface Props {
   onCopy: Function;
   resourceType: ResourceType;
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
+}
+
+interface HocProps extends Props, NavigationProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface WorkspaceOptions {
@@ -125,8 +129,9 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
   Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
-class CopyModalComponent extends React.Component<Props, State> {
-  constructor(props: Props) {
+const CopyModal = fp.flow(withNavigation, withCdrVersions())
+(class extends React.Component<HocProps, State> {
+  constructor(props: HocProps) {
     super(props);
     this.state = {
       workspaceOptions: [],
@@ -232,7 +237,7 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   goToDestinationWorkspace() {
-    navigate(
+    this.props.navigate(
       [
         'workspaces',
         this.state.destination.namespace,
@@ -382,13 +387,10 @@ class CopyModalComponent extends React.Component<Props, State> {
         Do you want to view the copied {toDisplay(resourceType)}?</div>
     );
   }
-}
-
-const CopyModal = fp.flow(withCdrVersions())(CopyModalComponent);
+});
 
 export {
   CopyModal,
-  CopyModalComponent, // VisibleForTesting
   Props as CopyModalProps,
   State as CopyModalState,
 };

@@ -1,6 +1,9 @@
 // Local storage key to override the API base path.
 export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 
+// Local storage key to override authn with a Puppeteer test token.
+export const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
+
 /**
  * See feature-detects/cookies.js in https://github.com/Modernizr
  *

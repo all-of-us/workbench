@@ -30,7 +30,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -72,8 +73,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
-    "adminIdVerification": "support@researchallofus.org"
+    "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",

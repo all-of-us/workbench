@@ -8,11 +8,6 @@ import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
-jest.mock('app/utils/navigation', () => ({
-  ...(jest.requireActual('app/utils/navigation')),
-  navigate: jest.fn()
-}));
-
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();
   const reload = jest.fn();
@@ -40,7 +35,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should not allow DataUserCodeOfConduct without identical initials', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).setState({proceedDisabled: false});
+    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -57,7 +52,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should not allow DataUserCodeOfConduct with only one field populated', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).setState({proceedDisabled: false});
+    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -75,7 +70,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should populate username and name from the profile automatically', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).setState({proceedDisabled: false});
+    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -90,7 +85,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should submit DataUserCodeOfConduct acceptance with version number', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).setState({proceedDisabled: false});
+    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');

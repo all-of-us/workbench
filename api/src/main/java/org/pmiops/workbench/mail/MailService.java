@@ -4,6 +4,7 @@ import com.google.api.services.directory.model.User;
 import java.time.Instant;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
   void sendWelcomeEmail(final String contactEmail, final String password, final User user)
@@ -22,5 +23,8 @@ public interface MailService {
       final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException;
 
   void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
+      throws MessagingException;
+
+  void sendBillingSetupEmail(final DbUser user, SendBillingSetupEmailRequest emailRequest)
       throws MessagingException;
 }

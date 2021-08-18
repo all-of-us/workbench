@@ -13,13 +13,14 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
@@ -100,7 +101,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   urlParams: any;
   runtimeStore: RuntimeStore;
@@ -126,7 +127,8 @@ enum PreviewErrorMode {
 export const InteractiveNotebook = fp.flow(
   withUrlParams(),
   withRuntimeStore(),
-  withCurrentWorkspace()
+  withCurrentWorkspace(),
+  withNavigation
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();
@@ -146,19 +148,26 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidMount(): void {
-      const {urlParams: {ns, wsid, nbName}, hideSpinner} = this.props;
-      hideSpinner();
+      this.props.hideSpinner();
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      const {urlParams: {ns, wsid, nbName}} = this.props;
+
+      if (!hasNewValidProps(this.props, prevProps, [p => p.urlParams.ns, p => p.urlParams.wsid, p => p.urlParams.nbName])) {
+        return;
+      }
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
       }).catch((e) => {
         let previewErrorMode = PreviewErrorMode.ERROR;
         let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +
-            'please try reloading or opening the notebook in edit or playground mode.';
+          'please try reloading or opening the notebook in edit or playground mode.';
         if (e.status === 412) {
           previewErrorMode = PreviewErrorMode.INVALID;
           previewErrorMessage = 'Notebook is too large to display in preview mode, please use edit mode or ' +
-              'playground mode to view this notebook.';
+            'playground mode to view this notebook.';
         }
         this.setState({previewErrorMode, previewErrorMessage});
       });
@@ -216,7 +225,7 @@ export const InteractiveNotebook = fp.flow(
         playgroundMode: playgroundMode
       };
 
-      navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
+      this.props.navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
         'notebooks', this.props.urlParams.nbName], {'queryParams': queryParams});
     }
 
@@ -248,7 +257,7 @@ export const InteractiveNotebook = fp.flow(
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.urlParams;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
-        navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
+        this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
       });
     }
 

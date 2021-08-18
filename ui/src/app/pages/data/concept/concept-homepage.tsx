@@ -18,7 +18,12 @@ import {
   withCurrentConcept,
   withCurrentWorkspace
 } from 'app/utils';
-import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'app/utils/navigation';
+import {
+  currentCohortSearchContextStore,
+  currentConceptStore,
+  NavigationProps
+} from 'app/utils/navigation';
+import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
@@ -127,7 +132,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
@@ -158,7 +163,7 @@ interface State {
   surveysLoading: Array<string>;
 }
 
-export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace())(
+export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withNavigation)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -261,11 +266,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     browseDomain(domain: Domain, surveyName?: string) {
       const {namespace, id} = this.props.workspace;
       currentCohortSearchContextStore.next({domain: domain, searchTerms: this.state.currentSearchString, surveyName});
-      let url = `/workspaces/${namespace}/${id}/data/concepts/${domain}`;
-      if (surveyName) {
-        url += `?survey=${encodeURIComponent(surveyName)}`;
-      }
-      NavStore.navigateByUrl(url);
+      const url = `workspaces/${namespace}/${id}/data/concepts/${domain}`;
+
+      this.props.navigateByUrl(url, surveyName ? {queryParams: {survey: surveyName}} : {});
     }
 
     errorMessage() {

@@ -2,11 +2,17 @@ require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 require "json"
 
+def get_active_gcloud_account()
+  common = Common.new
+  configs = common.capture_stdout %W{gcloud --format=json config configurations list}
+  active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
+  return active_config["properties"]["core"]["account"]
+end
+
 class GcloudContextV2
   attr_reader :account, :creds_file, :project
 
   def initialize(options_parser)
-    Workbench.assert_in_docker
     @options_parser = options_parser
     # We use both gcloud and gsutil commands for various tasks. While gcloud can take arguments,
     # gsutil uses the current gcloud config, so we want to grab and verify the account from there.
@@ -39,10 +45,7 @@ class GcloudContextV2
   def self.validate_gcloud_auth()
     common = Common.new
     common.status "Reading gcloud configuration..."
-    configs = common.capture_stdout %W{gcloud --format=json config configurations list}
-    active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
-    common.status "Using '#{active_config["name"]}' gcloud configuration"
-    account = active_config["properties"]["core"]["account"]
+    account = get_active_gcloud_account()
     common.status "  account: #{account}"
     unless account
       common.error "Account must be set in gcloud config. Try:\n" \

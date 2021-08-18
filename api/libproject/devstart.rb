@@ -11,7 +11,6 @@ require_relative "gcloudcontext"
 require_relative "wboptionsparser"
 require "benchmark"
 require "fileutils"
-require "io/console"
 require "json"
 require "optparse"
 require "ostruct"
@@ -36,50 +35,10 @@ def get_cdr_sql_project(project)
   return must_get_env_value(project, :cdr_sql_instance).split(":")[0]
 end
 
-def ensure_docker_sync()
-  common = Common.new
-  at_exit do
-    common.run_inline %W{docker-sync stop}
-  end
-  common.run_inline %W{docker-sync start}
-end
-
-def ensure_docker(cmd_name, args=nil)
-  args = (args or [])
-  unless Workbench.in_docker?
-    ensure_docker_sync()
-    exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
-  end
-end
-
-def ensure_docker_with_ports(cmd_name, args=nil)
-  args = (args or [])
-  unless Workbench.in_docker?
-    ensure_docker_sync()
-    exec(*(%W{docker-compose run --service-ports --rm ports-scripts ./project.rb #{cmd_name}} + args))
-  end
-end
-
 def init_new_cdr_db(args)
-  Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
-end
-
-# exec against a live local API server - used for script access to a local API
-# server or database.
-def ensure_docker_api(cmd_name, args)
-  if Workbench.in_docker?
-    return
+  Dir.chdir('db-cdr') do
+    Common.new.run_inline %W{./generate-cdr/init-new-cdr-db.sh} + args
   end
-  Process.wait spawn(*(%W{docker-compose exec api ./project.rb #{cmd_name}} + args))
-  unless $?.exited? and $?.success?
-    Common.new.error "command against docker-compose service 'api' failed, " +
-                     "please verify your local API server is running (dev-up " +
-                     "or run-api)"
-  end
-  if $?.exited?
-    exit $?.exitstatus
-  end
-  exit 1
 end
 
 def gcs_vars_path(project)
@@ -87,7 +46,6 @@ def gcs_vars_path(project)
 end
 
 def read_db_vars(gcc)
-  Workbench.assert_in_docker
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{gcs_vars_path(gcc.project)}
   }))
@@ -116,7 +74,35 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
-def dev_up()
+def start_local_db_service()
+  common = Common.new
+  deadlineSec = 40
+
+  bm = Benchmark.measure {
+    common.run_inline %W{docker-compose up -d db}
+
+    common.status "waiting up to #{deadlineSec}s for mysql service to start..."
+    start = Time.now
+    until (common.run %W{docker-compose exec -T db mysqladmin ping --silent}).success?
+      if Time.now - start >= deadlineSec
+        raise("mysql docker service did not become available after #{deadlineSec}s")
+      end
+      sleep 1
+    end
+  }
+  common.status "Database startup complete (#{format_benchmark(bm)})"
+end
+
+def dev_up(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.start_db = true
+  op.add_option(
+      "--nostart-db",
+      ->(opts, _) { opts.start_db = false },
+      "If specified, don't start the DB service. This is useful when running " +
+      "within docker, i.e. on CircleCI, as the DB service runs via docker-compose")
+  op.parse.validate
+
   common = Common.new
 
   account = get_auth_login_account()
@@ -125,52 +111,39 @@ def dev_up()
   end
 
   at_exit do
-    common.run_inline %W{docker-compose down}
+    common.run_inline %W{docker-compose down} if op.opts.start_db
   end
 
-  # ensures that sa-key.json is included in the docker-sync image
-  # This is necessary because docker-compose exposes it as GOOGLE_APPLICATION_CREDENTIALS
-  # which is needed to construct the IamCredentialsClient Bean
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    ensure_docker_sync()
-  end
+  setup_local_environment()
 
   overall_bm = Benchmark.measure {
-    common.status "Database startup..."
-    bm = Benchmark.measure {
-      common.run_inline %W{docker-compose up -d db}
-    }
-    common.status "Database startup complete (#{format_benchmark(bm)})"
+    start_local_db_service() if op.opts.start_db
 
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run --rm db-scripts ./run-migrations.sh main
-      }
+      Dir.chdir('db') do
+        common.run_inline %W{./run-migrations.sh main}
+      end
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
     common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
     common.status "Loading configs & data..."
     bm = Benchmark.measure {
-      common.run_inline %W{
-        docker-compose run --rm api-scripts ./libproject/load_local_data_and_configs.sh
-      }
+      common.run_inline %W{./libproject/load_local_data_and_configs.sh}
     }
     common.status "Loading configs complete (#{format_benchmark(bm)})"
-
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
 
-  common.status "Starting API server..."
-  run_api()
+  run_api_incremental()
 end
 
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
      "update. (You can use run-api instead if database and config are up-to-date.)",
-  :fn => ->() { dev_up() }
+  :fn => ->(*args) { dev_up("dev-up", args) }
 })
 
 def start_api_reqs()
@@ -199,67 +172,12 @@ Common.register_command({
 })
 
 def setup_local_environment()
-  root_password = ENV["MYSQL_ROOT_PASSWORD"]
   ENV.update(Workbench.read_vars_file("db/vars.env"))
   ENV.update(must_get_env_value("local", :gae_vars))
   ENV.update({"WORKBENCH_ENV" => "local"})
   ENV["DB_HOST"] = "127.0.0.1"
-  ENV["MYSQL_ROOT_PASSWORD"] = root_password
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
 end
-
-# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
-#
-# This command is only ever meant to be run via CircleCI; see .circleci/config.yml
-def run_local_migrations()
-  setup_local_environment
-  # Runs migrations against the local database.
-  common = Common.new
-  Dir.chdir('db') do
-    common.run_inline %W{./run-migrations.sh main}
-  end
-  Dir.chdir('db-cdr/generate-cdr') do
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
-  end
-  common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
-  common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
-  common.run_inline %W{gradle :loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json}
-  common.run_inline %W{gradle :updateCdrConfig -PappArgs=['config/cdr_config_local.json',false]}
-end
-
-Common.register_command({
-  :invocation => "run-local-migrations",
-  :description => "Runs DB migrations with the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => ->() { run_local_migrations() }
-})
-
-def start_local_api()
-  setup_local_environment
-  common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    common.status "Starting API server..."
-    common.run_inline %W{gradle appengineStart}
-  end
-end
-
-Common.register_command({
-  :invocation => "start-local-api",
-  :description => "Starts api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => ->() { start_local_api() }
-})
-
-def stop_local_api()
-  setup_local_environment
-  common = Common.new
-  common.status "Stopping API server..."
-  common.run_inline %W{gradle appengineStop}
-end
-
-Common.register_command({
-  :invocation => "stop-local-api",
-  :description => "Stops locally running api.",
-  :fn => ->() { stop_local_api() }
-})
 
 def run_local_api_tests()
   common = Common.new
@@ -279,34 +197,36 @@ Common.register_command({
   :fn => ->() { run_local_api_tests() }
 })
 
-def run_api()
+def run_api_incremental()
   common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-    common.status "are here:"
-    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-    at_exit { common.run_inline %W{docker-compose down} }
-    common.run_inline_swallowing_interrupt %W{docker-compose up api}
+
+  # The GAE gradle configuration depends on the existence of an sa-key.json file for auth.
+  get_test_service_account()
+
+  begin
+    common.status "Starting API server..."
+    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+    # the application has finished starting.
+    common.run_inline "./gradlew --daemon appengineRun &"
+
+    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
+    # in the output.
+    common.run_inline %W{./gradlew --continuous incrementalHotSwap}
+  rescue Interrupt
+    # Do nothing
+  ensure
+    common.run_inline %W{./gradlew --stop}
   end
 end
 
-def clean()
-  common = Common.new
-  common.run_inline %W{docker-compose run --rm api gradle clean}
-end
-
-Common.register_command({
-  :invocation => "clean",
-  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
-  :fn => ->(*args) { clean(*args) }
-})
-
-
 def run_api_and_db()
+  setup_local_environment
+
   common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  run_api()
+  at_exit { common.run_inline %W{docker-compose down} }
+  start_local_db_service()
+
+  run_api_incremental()
 end
 
 Common.register_command({
@@ -317,7 +237,6 @@ Common.register_command({
 
 
 def validate_swagger(cmd_name, args)
-  ensure_docker cmd_name, args
   Common.new.run_inline %W{./gradlew validateSwagger} + args
 end
 
@@ -329,8 +248,7 @@ Common.register_command({
 
 
 def run_tests(cmd_name, args)
-  ensure_docker cmd_name, args
-  Common.new.run_inline %W{gradle :test} + args
+  Common.new.run_inline %W{./gradlew :test} + args
 end
 
 Common.register_command({
@@ -341,10 +259,9 @@ Common.register_command({
 })
 
 def run_integration_tests(cmd_name, *args)
-  ensure_docker cmd_name, args
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    common.run_inline %W{gradle integrationTest} + args
+    common.run_inline %W{./gradlew integrationTest} + args
   end
 end
 
@@ -355,10 +272,9 @@ Common.register_command({
 })
 
 def run_bigquery_tests(cmd_name, *args)
-  ensure_docker cmd_name, args
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    common.run_inline %W{gradle bigQueryTest} + args
+    common.run_inline %W{./gradlew bigQueryTest} + args
   end
 end
 
@@ -367,25 +283,6 @@ Common.register_command({
   :description => "Runs bigquerytest tests.",
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
 })
-
-def run_gradle(cmd_name, args)
-  ensure_docker cmd_name, args
-  begin
-    Common.new.run_inline %W{gradle} + args
-  ensure
-    if $! && $!.status != 0
-      Common.new.error "Command exited with non-zero status"
-      exit 1
-    end
-  end
-end
-
-Common.register_command({
-  :invocation => "gradle",
-  :description => "Runs gradle inside the API docker container with the given arguments.",
-  :fn => ->(*args) { run_gradle("gradle", args) }
-})
-
 
 def connect_to_db()
   common = Common.new
@@ -406,9 +303,7 @@ def docker_clean()
   common = Common.new
 
   # --volumes clears out any cached data between runs, e.g. the MySQL database
-  # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
-  #   still be cached and this is fast.
-  common.run_inline %W{docker-compose down --volumes --rmi local}
+  common.run_inline %W{docker-compose down --volumes}
 
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
@@ -424,21 +319,8 @@ Common.register_command({
   :invocation => "docker-clean",
   :description => \
     "Removes docker containers and volumes, allowing the next `dev-up` to" \
-    " start from scratch (e.g., the database will be re-created). Includes ALL" \
-    " docker images, not just for the API.",
+    " start from scratch (e.g., the database will be re-created).",
   :fn => ->() { docker_clean() }
-})
-
-def rebuild_image()
-  common = Common.new
-
-  common.run_inline %W{docker-compose build}
-end
-
-Common.register_command({
-  :invocation => "rebuild-image",
-  :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => ->() { rebuild_image() }
 })
 
 def copy_file_to_gcs(source_path, bucket, filename)
@@ -464,7 +346,6 @@ def get_auth_login_account()
 end
 
 def drop_cloud_db(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -486,7 +367,6 @@ Common.register_command({
 })
 
 def drop_cloud_cdr(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -508,9 +388,13 @@ Common.register_command({
 })
 
 def run_local_all_migrations()
-  ensure_docker_sync()
+  setup_local_environment()
+  start_local_db_service()
+
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
+  Dir.chdir('db') do
+    common.run_inline %W{./run-migrations.sh main}
+  end
 
   init_new_cdr_db %W{--cdr-db-name cdr}
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -541,9 +425,7 @@ def liquibase_gradlew_command(command, argument = '', run_list = '')
   full_cmd_array
 end
 
-YES_RESPONSES = ['uh huh', 'roger', 'affirmative', 'you know it', 'most definitely', 'you betcha',
-'most assuredly', 'indubitably', 'yep','by all means', 'positively', 'aye', 'definitely', 'Make it so.',
-'You had me at hello, world.']
+YES_RESPONSES = ['roger', 'affirmative', 'indubitably', 'yep', 'positively', 'aye', 'definitely']
 
 # Get user confirmation
 def get_user_confirmation(message)
@@ -571,7 +453,6 @@ def run_liquibase(cmd_name, *args)
   }
 
   common = Common.new
-  ensure_docker(cmd_name, args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
@@ -610,7 +491,7 @@ def run_liquibase(cmd_name, *args)
   context = GcloudContextV2.new(op)
   context.validate
 
-  with_optional_cloud_proxy_and_db(context, nil, 'sa-key.json') do |gcc|
+  with_optional_cloud_proxy_and_db(context) do |gcc|
     common.status('inside with_optional_cloud_proxy_and_db')
     common.status("project: #{gcc.project}, account: #{gcc.account}, creds_file: #{gcc.creds_file}, dir: #{Dir.pwd}")
     command = op.opts.command
@@ -637,7 +518,9 @@ Common.register_command({
 })
 
 def run_local_data_migrations()
-  ensure_docker_sync()
+  setup_local_environment()
+  start_local_db_service()
+
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -648,9 +531,13 @@ Common.register_command({
 })
 
 def run_local_rw_migrations()
-  ensure_docker_sync()
+  setup_local_environment()
+  start_local_db_service()
+
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-scripts ./run-migrations.sh main}
+  Dir.chdir('db') do
+    common.run_inline %W{./run-migrations.sh main}
+  end
 end
 
 Common.register_command({
@@ -852,7 +739,6 @@ Common.register_command({
 })
 
 def make_bq_denormalized_review(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -868,7 +754,9 @@ def make_bq_denormalized_review(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-review.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
 end
 
 Common.register_command({
@@ -878,7 +766,6 @@ Common.register_command({
 })
 
 def make_bq_denormalized_search_events(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -900,7 +787,9 @@ def make_bq_denormalized_search_events(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  end
 end
 
 Common.register_command({
@@ -910,7 +799,6 @@ Common.register_command({
 })
 
 def make_bq_denormalized_search_person(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -942,7 +830,9 @@ def make_bq_denormalized_search_person(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
+  end
 end
 
 Common.register_command({
@@ -952,7 +842,6 @@ Common.register_command({
 })
 
 def make_bq_denormalized_dataset(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -968,7 +857,9 @@ def make_bq_denormalized_dataset(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-dataset.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
 end
 
 Common.register_command({
@@ -978,7 +869,6 @@ Common.register_command({
 })
 
 def make_bq_dataset_linking(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -994,7 +884,9 @@ def make_bq_dataset_linking(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-dataset-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+  end
 end
 
 Common.register_command({
@@ -1005,7 +897,6 @@ Must be run once when a new cdr is released",
 })
 
 def generate_cb_criteria_tables(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
   op.add_option(
@@ -1027,7 +918,9 @@ def generate_cb_criteria_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-criteria-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+  end
 end
 
 Common.register_command({
@@ -1085,7 +978,6 @@ Common.register_command({
 })
 
 def copy_bq_tables(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--sa-project [sa-project]",
@@ -1109,7 +1001,9 @@ def copy_bq_tables(cmd_name, *args)
   ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
-    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project}}
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project}}
+    end
   end
 end
 
@@ -1149,10 +1043,15 @@ def cloudsql_import(cmd_name, *args)
   op.parse.validate
 
   ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    common.run_inline %W{docker-compose run --rm db-cloudsql-import
-          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
-          --bucket #{op.opts.bucket} --file #{op.opts.file}}
+    Dir.chdir('db-cdr') do
+      common = Common.new
+      common.run_inline %W{./generate-cdr/cloudsql-import.sh
+        --project #{op.opts.project}
+        --instance #{op.opts.instance}
+        --database #{op.opts.database}
+        --bucket #{op.opts.bucket}
+        --file #{op.opts.file}}
+    end
   end
 end
 
@@ -1162,12 +1061,14 @@ Common.register_command({
   :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
    --database <DATABASE> --bucket <BUCKET> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
 Import bucket of files or a single file in a bucket to a cloudsql database",
-                            :fn => ->(*args) { cloudsql_import("cloud-sql-import", *args) }
-                        })
+  :fn => ->(*args) { cloudsql_import("cloud-sql-import", *args) }
+})
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/generate-local-cdr-db.sh} + args
+  end
 end
 
 Common.register_command({
@@ -1180,7 +1081,9 @@ Creates and populates local mysql database from data in bucket made by import-cd
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/generate-local-count-dbs.sh} + args
+  end
 end
 
 Common.register_command({
@@ -1193,7 +1096,9 @@ Creates and populates local mysql databases cdr<VERSION> from data in bucket mad
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-mysqldump.sh} + args
+  end
 end
 
 
@@ -1219,8 +1124,10 @@ def local_mysql_import(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-local-mysql-import
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/local-mysql-import.sh
         --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket}}
+  end
 end
 Common.register_command({
                             :invocation => "local-mysql-import",
@@ -1231,9 +1138,10 @@ Imports .sql file to local mysql instance",
 
 
 def run_drop_cdr_db()
-  ensure_docker_sync()
   common = Common.new
-  common.run_inline %W{docker-compose run --rm cdr-scripts ./run-drop-db.sh}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./run-drop-db.sh}
+  end
 end
 
 Common.register_command({
@@ -1321,7 +1229,6 @@ Common.register_command({
 
 def fix_desynchronized_billing_project_owners(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1360,7 +1267,7 @@ def fix_desynchronized_billing_project_owners(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
-        gradle fixDesynchronizedBillingProjectOwners
+        ./gradlew fixDesynchronizedBillingProjectOwners
        -PappArgs=[#{flags.join(',')}]}
   end
 end
@@ -1423,7 +1330,6 @@ Common.register_command({
 
 def fetch_firecloud_user_profile(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.project = TEST_PROJECT
@@ -1442,7 +1348,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle fetchFireCloudUserProfile
+        ./gradlew fetchFireCloudUserProfile
        -PappArgs=["#{op.opts.user}"]}
   end
 end
@@ -1455,7 +1361,6 @@ Common.register_command({
 
 def fetch_workspace_details(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.project = TEST_PROJECT
@@ -1482,7 +1387,7 @@ def fetch_workspace_details(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle fetchWorkspaceDetails
+        ./gradlew fetchWorkspaceDetails
        -PappArgs=[#{flags.join(',')}]}
   end
 end
@@ -1495,7 +1400,6 @@ Common.register_command({
 
 def generate_impersonated_user_tokens(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.add_typed_option(
@@ -1565,7 +1469,7 @@ def generate_impersonated_user_tokens(cmd_name, *args)
 
   ServiceAccountContext.new(project_id).run do
     common.run_inline %W{
-        gradle generateImpersonatedUserTokens
+        ./gradlew generateImpersonatedUserTokens
        -PappArgs=[#{flags.join(',')}]}
   end
 end
@@ -1578,7 +1482,6 @@ Common.register_command({
 
 def load_institutions(cmd_name, *args)
   common = Common.new
-  ensure_docker(cmd_name, args)
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1617,7 +1520,7 @@ def load_institutions(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle loadInstitutions
+        ./gradlew loadInstitutions
        -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
@@ -1632,7 +1535,6 @@ Common.register_command({
 
 def delete_workspaces(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1675,7 +1577,7 @@ def delete_workspaces(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle deleteWorkspaces
+        ./gradlew deleteWorkspaces
        -PappArgs=[#{flags.join(',')}]}
   end
 end
@@ -1690,7 +1592,6 @@ Common.register_command({
 
 def delete_workspace_rdr_export(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1730,7 +1631,7 @@ def delete_workspace_rdr_export(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle deleteWorkspaceFromRdrExport
+        ./gradlew deleteWorkspaceFromRdrExport
        -PappArgs=[#{flags.join(',')}]}
   end
 end
@@ -1745,7 +1646,6 @@ Common.register_command({
 
 def backfill_workspaces_to_rdr(cmd_name, *args)
   common = Common.new
-  ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -1772,7 +1672,7 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   isDryRun = op.opts.dry_run ? "--dry-run" : nil
   flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
   gradleCommand = %W{
-    gradle backfillWorkspacesToRdr
+    ./gradlew backfillWorkspacesToRdr
    -PappArgs=[#{flags.join(',')}]}
 
   with_optional_cloud_proxy_and_db(context) do
@@ -1813,7 +1713,6 @@ def authority_options(cmd_name, args)
 end
 
 def set_authority(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = authority_options(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1822,7 +1721,7 @@ def set_authority(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     common.run_inline %W{
-      gradle setAuthority
+      ./gradlew setAuthority
      -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
   end
 end
@@ -1841,7 +1740,7 @@ def set_authority_local(cmd_name, *args)
 
   app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
   common = Common.new
-  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew setAuthority} + app_args
+  common.run_inline %W{./gradlew setAuthority} + app_args
 end
 
 Common.register_command({
@@ -1853,8 +1752,6 @@ Common.register_command({
 })
 
 def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
-  ensure_docker cmd_name, args
-
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1891,7 +1788,7 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     ServiceAccountContext.new(gcc.project).run do
       common.run_inline %W{
-         gradle createWgsCohortExtractionBillingProjectWorkspace
+         ./gradlew createWgsCohortExtractionBillingProjectWorkspace
          -PappArgs=[#{flags.join(',')}]}
     end
   end
@@ -1921,8 +1818,6 @@ def get_github_commit_hash(repo, ref)
 end
 
 def create_terra_method_snapshot(cmd_name, *args)
-  ensure_docker cmd_name, args
-
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1986,7 +1881,7 @@ def create_terra_method_snapshot(cmd_name, *args)
 
     ServiceAccountContext.new(project).run do
       common.run_inline %W{
-       gradle createTerraMethodSnapshot
+       ./gradlew createTerraMethodSnapshot
        -PappArgs=[#{flags.join(',')}]}
     end
   }
@@ -2000,8 +1895,6 @@ Common.register_command({
 })
 
 def delete_runtimes(cmd_name, *args)
-  ensure_docker cmd_name, args
-
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
@@ -2035,7 +1928,7 @@ def delete_runtimes(cmd_name, *args)
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
-       gradle manageLeonardoRuntimes
+       ./gradlew manageLeonardoRuntimes
       -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.runtime_ids}',#{op.opts.dry_run}]}
   end
 end
@@ -2047,7 +1940,6 @@ Common.register_command({
 })
 
 def describe_runtime(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--id [RUNTIME_ID]",
@@ -2069,7 +1961,7 @@ def describe_runtime(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do |ctx|
     common = Common.new
     common.run_inline %W{
-       gradle manageLeonardoRuntimes
+       ./gradlew manageLeonardoRuntimes
       -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.runtime_id}']}
   end
 end
@@ -2082,7 +1974,6 @@ Common.register_command({
 
 
 def list_runtimes(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -2092,7 +1983,7 @@ def list_runtimes(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      gradle manageLeonardoRuntimes -PappArgs=['list','#{api_url}']
+      ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}']
     }
   end
 end
@@ -2116,12 +2007,11 @@ end
 def update_cdr_config_for_project(cdr_config_file, dry_run)
   common = Common.new
   common.run_inline %W{
-    gradle updateCdrConfig
+    ./gradlew updateCdrConfig
    -PappArgs=['#{cdr_config_file}',#{dry_run}]}
 end
 
 def update_cdr_config(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = update_cdr_config_options(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -2129,7 +2019,7 @@ def update_cdr_config(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("/w/api/config/#{cdr_config_file}", op.opts.dry_run)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
   end
 end
 
@@ -2140,14 +2030,13 @@ Common.register_command({
 })
 
 def update_cdr_config_local(cmd_name, *args)
-  ensure_docker_sync()
   setup_local_environment
   op = update_cdr_config_options(cmd_name, args)
   op.parse.validate
   cdr_config_file = 'config/cdr_config_local.json'
-  app_args = ["-PappArgs=['/w/api/" + cdr_config_file + "',false]"]
+  app_args = ["-PappArgs=['" + cdr_config_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew updateCdrConfig} + app_args
+  common.run_inline %W{./gradlew updateCdrConfig} + app_args
 end
 
 Common.register_command({
@@ -2169,7 +2058,6 @@ Common.register_command({
 })
 
 def connect_to_cloud_db(cmd_name, *args)
-  ensure_docker_with_ports cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -2222,7 +2110,6 @@ Common.register_command({
 })
 
 def connect_to_cloud_db_binlog(cmd_name, *args)
-  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
@@ -2233,10 +2120,10 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     common.status "\n" + "*" * 80
     common.status "Listing available journal files: "
 
-    password = env["DEV_READONLY_DB_PASSWORD"]
+    password = env["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
       "echo 'SHOW BINARY LOGS;' | " +
-      "mysql --host=127.0.0.1 --port=3307 --user=dev-readonly " +
+      "mysql --host=127.0.0.1 --port=3307 --user=root " +
       "--database=#{env['DB_NAME']} --password=#{password}", password)
     common.status "*" * 80
 
@@ -2247,11 +2134,11 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     common.status "See the Workbench playbook for more details."
     common.status "*" * 80
 
-    # Work out of /tmp for easy local file redirection. We don't want binlogs
-    # winding up back in Workbench source control accidentally.
     run_with_redirects(
-      "export MYSQL_HOME=$(with-mysql-login.sh dev-readonly #{password}); " +
-      "cd /tmp; /bin/bash", password)
+      "docker run -i -t --rm --network host --entrypoint '' " +
+      "-v $(pwd)/libproject/with-mysql-login.sh:/with-mysql-login.sh " +
+      "mysql:5.7.27 /bin/bash -c " +
+      "'export MYSQL_HOME=$(./with-mysql-login.sh root #{password}); /bin/bash'", password)
   end
 end
 
@@ -2304,7 +2191,7 @@ def deploy_app(cmd_name, args, with_cron, with_queue)
   Dir.chdir("snippets-menu") do
     common.run_inline(%W{./build.rb build-snippets-menu})
   end
-  common.run_inline %W{gradle :appengineStage}
+  common.run_inline %W{./gradlew :appengineStage}
   promote = "--no-promote"
   unless op.opts.promote.nil?
     promote = op.opts.promote ? "--promote" : "--no-promote"
@@ -2323,7 +2210,6 @@ def deploy_app(cmd_name, args, with_cron, with_queue)
 end
 
 def deploy_api(cmd_name, args)
-  ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
   deploy_app(cmd_name, args, true, true)
@@ -2346,7 +2232,6 @@ def create_or_update_workbench_db()
 end
 
 def create_or_update_workbench_db_cmd(cmd_name, args)
-  ensure_docker cmd_name, args
   with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
     # with_cloud_proxy_and_db_env loads env vars into scope which parameterize this call
     create_or_update_workbench_db
@@ -2369,7 +2254,7 @@ def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    run_inline_or_log(dry_run, %W{gradle update -PrunList=main})
+    run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
   end
 end
 
@@ -2424,9 +2309,9 @@ def load_config(project, dry_run = false)
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
-  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
-  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_json}})
+  run_inline_or_log(dry_run, %W{./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
+  run_inline_or_log(dry_run, %W{./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
+  run_inline_or_log(dry_run, %W{./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_json}})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
@@ -2441,7 +2326,7 @@ end
 def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   common = Common.new
   if gcc.project == 'local'
-    common.status('No proxy needed for local environment')
+    start_local_db_service()
     yield gcc
   else
     common.status("Creating cloud proxy for environment #{gcc.project}")
@@ -2462,8 +2347,6 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def deploy(cmd_name, args)
-  ensure_docker cmd_name, args
-
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
@@ -2533,7 +2416,6 @@ Common.register_command({
 
 
 def run_cloud_migrations(cmd_name, args)
-  ensure_docker cmd_name, args
   with_cloud_proxy_and_db_env(cmd_name, args) { migrate_database }
 end
 
@@ -2544,7 +2426,6 @@ Common.register_command({
 })
 
 def update_cloud_config(cmd_name, args)
-  ensure_docker cmd_name, args
   with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
     load_config(ctx.project)
   end
@@ -2623,7 +2504,6 @@ end
 # TODO: add a goal which updates CDR DBs but nothing else
 
 def setup_cloud_project(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--cdr-db-name [CDR_DB]",
@@ -2645,35 +2525,6 @@ Common.register_command({
   :invocation => "setup-cloud-project",
   :description => "Initializes resources within a cloud project that has already been created",
   :fn => ->(*args) { setup_cloud_project("setup-cloud-project", *args) }
-})
-
-def start_api_and_incremental_build(cmd_name, args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  begin
-    common.status "API server startup..."
-    bm = Benchmark.measure {
-      # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
-      # the application has finished starting.
-      common.run_inline %W{gradle --daemon appengineStart}
-      common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
-      # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
-      # in the output.
-    }
-    common.status "API server startup complete (#{format_benchmark(bm)})"
-
-    common.run_inline %W{gradle --no-daemon --continuous incrementalHotSwap}
-  ensure
-    common.run_inline %W{gradle --stop}
-  end
-end
-
-# TODO(dmohs): This is really isn't meant to be run directly, so it'd be better to hide it from the
-# menu of options.
-Common.register_command({
-  :invocation => "start-api-and-incremental-build",
-  :description => "Used internally by other commands.",
-  :fn => ->(*args) { start_api_and_incremental_build("start-api-and-incremental-build", args) }
 })
 
 def randomize_vcf(cmd_name, *args)
@@ -2707,4 +2558,40 @@ Common.register_command({
   :description => "Given an example vcf and a number of copies to make, generates that many " +
     "random copies in a given output directory",
   :fn => ->(*args) { randomize_vcf("randomize-vcf", *args) }
+})
+
+def set_access_module_timestamps(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+  op.add_option(
+    "--user [user]",
+    ->(opts, v) { opts.user = v },
+    "User whose timestamps should be updated.  Use full email address.")
+  op.add_validator ->(opts) { raise ArgumentError if opts.user.nil?}
+  op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+      ["--user", op.opts.user]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+SET_ACCESS_MODULE_TIMESTAMPS_CMD = "set-access-module-timestamps"
+
+Common.register_command({
+    :invocation => SET_ACCESS_MODULE_TIMESTAMPS_CMD,
+    :description => "Set access module timestamps for e2e test users.",
+    :fn => ->(*args) {set_access_module_timestamps(SET_ACCESS_MODULE_TIMESTAMPS_CMD, *args)}
 })

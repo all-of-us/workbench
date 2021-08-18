@@ -314,6 +314,26 @@ paths:
           description: Welcome Email sent.
         500:
           description: Internal Server Error
+  "/v1/send-billing-setup-email":
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Send billing setup email to GCP partner
+      operationId: sendBillingSetupEmail
+      parameters:
+        - in: body
+          name: sendBillingSetupEmail
+          schema:
+            "$ref": "#/definitions/SendBillingSetupEmailRequest"
+      responses:
+        200:
+          description: Billing setup email sent.
+        403:
+          description: Forbidden
+        500:
+          description: Internal Server Error
   "/v1/google-account":
     post:
       tags:
@@ -3331,27 +3351,6 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: 'Returns criteria menu with source and standard info'
-      operationId: findCbMenu
-      parameters:
-        - in: path
-          name: parentId
-          type: integer
-          format: int64
-          required: true
-          description: the parent id
-      responses:
-        200:
-          description: A collection of criteria menu options
-          schema:
-            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3402,6 +3401,36 @@ paths:
         type: string
         required: true
         description: the term to search for
+      responses:
+        200:
+          description: A count of matching concepts in this domain
+          schema:
+            "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaincard/{domain}/{standard}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns a count of term matches per domain per standard flag'
+      operationId: findDomainCountByStandardSource
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: is domain standard or Source
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
       responses:
         200:
           description: A count of matching concepts in this domain
@@ -4326,6 +4355,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/RuntimeImage"
+      freeTierBillingAccountId:
+        type: string
+        description: The free tier billing account id
 
   RuntimeImage:
     type: object
@@ -5510,6 +5542,29 @@ definitions:
       creationNonce:
         type: string
         description: The nonce returned from the account creation API.
+  SendBillingSetupEmailRequest:
+    type: object
+    required:
+      - paymentMethod
+    properties:
+      phone:
+        type: string
+        description: User contact phone
+      institution:
+        type: string
+        description: The insitution of the user.
+      paymentMethod:
+        description: The payment to use, credit card or purchase order
+        "$ref": "#/definitions/BillingPaymentMethod"
+      isNihFunded:
+        type: boolean
+        description: Whether its NIH Funded research
+  BillingPaymentMethod:
+    type: string
+    description: 'The payment to use when setting up billing with billing parners, credit card or purchase order'
+    enum:
+      - CREDIT_CARD
+      - PURCHASE_ORDER
   UpdateContactEmailRequest:
     type: object
     required:
@@ -7818,7 +7873,6 @@ definitions:
     - domainId
     - name
     - group
-    - standard
     - sortOrder
     properties:
       id:
@@ -7843,10 +7897,6 @@ definitions:
         type: string
       group:
         description: Is this a parent
-        type: boolean
-        default: false
-      standard:
-        description: True if standard, false for source
         type: boolean
         default: false
       sortOrder:
