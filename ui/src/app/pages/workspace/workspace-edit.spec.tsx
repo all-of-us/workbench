@@ -41,11 +41,6 @@ jest.mock('app/utils/workbench-gapi-client', () => ({
   getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
 
-// jest.mock('app/utils/authentication', () => ({
-//   ensureBillingScope: () => {},
-//   hasBillingScope: jest.fn()
-// }));
-
 let mockHasBillingScope: SpyInstance;
 let mockEnsureBillingScope: SpyInstance;
 
