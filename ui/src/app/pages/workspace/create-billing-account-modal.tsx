@@ -23,7 +23,7 @@ import {useState} from 'react';
 
 export const styles = reactStyles({
   line: {
-    borderLeft: '1px solid #97979',
+    borderLeft: '1px solid #979797',
     boxSizing: 'border-box',
     height: '34px',
     width: '1px',
