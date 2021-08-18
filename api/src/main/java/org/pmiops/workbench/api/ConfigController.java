@@ -44,6 +44,7 @@ public class ConfigController implements ConfigApiDelegate {
             .enableStandardSourceDomains(config.featureFlags.enableStandardSourceDomains)
             .rasHost(config.ras.host)
             .rasClientId(config.ras.clientId)
+            .freeTierBillingAccountId(config.billing.accountId)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()

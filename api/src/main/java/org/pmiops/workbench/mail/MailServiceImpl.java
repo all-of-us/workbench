@@ -224,9 +224,9 @@ public class MailServiceImpl implements MailService {
     }
     sendWithRetries(
         receiptEmails,
-        "Your access to All of Us Registered Tier Data has expired",
+        "Request to set up Google Cloud Billing Account for All of Us Workbench",
         String.format(
-            "Registered Tier access expired for user %s (%s)",
+            " User %s (%s) requests billing setup from Carasoft.",
             dbUser.getUsername(), dbUser.getContactEmail()),
         htmlMessage);
   }
@@ -306,17 +306,12 @@ public class MailServiceImpl implements MailService {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-<<<<<<< HEAD
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-=======
         .put(
             EmailSubstitutionField.FIRST_NAME,
             HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
         .put(
             EmailSubstitutionField.LAST_NAME,
             HtmlEscapers.htmlEscaper().escape(user.getFamilyName()))
->>>>>>> origin
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(
             EmailSubstitutionField.INSTITUTION_NAME,
@@ -325,16 +320,8 @@ public class MailServiceImpl implements MailService {
             EmailSubstitutionField.USER_PHONE,
             HtmlEscapers.htmlEscaper().escape(request.getPhone()))
         .put(EmailSubstitutionField.FROM_EMAIL, workbenchConfigProvider.get().mandrill.fromEmail)
-<<<<<<< HEAD
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
-=======
-        .put(
-            EmailSubstitutionField.USERNAME,
-            user.getUsername()
-                + "@"
-                + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain)
->>>>>>> origin
         .put(
             EmailSubstitutionField.PAYMENT_METHOD,
             request.getPaymentMethod() == BillingPaymentMethod.CREDIT_CARD

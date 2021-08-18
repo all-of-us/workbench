@@ -195,7 +195,6 @@ public class WorkbenchConfig {
   }
 
   public static class AdminConfig {
-    public String adminIdVerification;
     public String loginUrl;
   }
 
