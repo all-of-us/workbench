@@ -18,6 +18,7 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -29,8 +30,7 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const COHORT_TYPE = 'AoU_Discover';
 

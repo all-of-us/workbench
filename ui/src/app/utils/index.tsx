@@ -9,8 +9,7 @@ import {
   currentWorkspaceStore,
   globalErrorStore,
   queryParamsStore,
-  routeConfigDataStore,
-  urlParamsStore
+  routeConfigDataStore
 } from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';

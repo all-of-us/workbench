@@ -33,7 +33,7 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {serverConfigStore, MatchParams} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
@@ -45,8 +45,8 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
-import * as validate from 'validate.js';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as validate from 'validate.js';
 
 const styles = reactStyles({
   label: {

@@ -81,20 +81,20 @@ const readValue = (type, annotation) => {
 };
 
 interface AnnotationProps extends RouteComponentProps {
-  annotation: ParticipantCohortAnnotation,
-  setAnnotation: Function,
+  annotation: ParticipantCohortAnnotation;
+  setAnnotation: Function;
   cohortReview: CohortReview;
-  definition: CohortAnnotationDefinition,
-  workspace: WorkspaceData,
+  definition: CohortAnnotationDefinition;
+  workspace: WorkspaceData;
 }
 
 interface AnnotationState {
-  editValue: number | string | boolean | Date,
-  savingValue: number | string | boolean | Date,
-  saving: boolean,
-  error: boolean,
-  success: boolean,
-  timeout: Timeout
+  editValue: number | string | boolean | Date;
+  savingValue: number | string | boolean | Date;
+  saving: boolean;
+  error: boolean;
+  success: boolean;
+  timeout: Timeout;
 }
 
 const AnnotationItem = fp.flow(
@@ -268,17 +268,17 @@ const AnnotationItem = fp.flow(
 
 interface SidebarProps extends RouteComponentProps {
   cohortReview: CohortReview;
-  workspace: WorkspaceData,
+  workspace: WorkspaceData;
 }
 
 interface SidebarState {
-  savingStatus: CohortStatus,
-  creatingDefinition: boolean,
-  editingDefinitions: boolean,
-  annotations: ParticipantCohortAnnotation[],
-  annotationDefinitions: CohortAnnotationDefinition[],
-  annotationDeleted: boolean,
-  participant: ParticipantCohortStatus,
+  savingStatus: CohortStatus;
+  creatingDefinition: boolean;
+  editingDefinitions: boolean;
+  annotations: ParticipantCohortAnnotation[];
+  annotationDefinitions: CohortAnnotationDefinition[];
+  annotationDeleted: boolean;
+  participant: ParticipantCohortStatus;
 }
 
 export const SidebarContent = fp.flow(
@@ -318,7 +318,10 @@ export const SidebarContent = fp.flow(
 
   componentDidUpdate(prevProps: SidebarProps, prevState: SidebarState): void {
     const location = this.props.location;
-    const {params: {ns, wsid, pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
+    const {params: {ns, wsid, pid}} = matchPath(
+      location.pathname,
+        {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'}
+    );
     const {cohortReview: {cohortReviewId}} = this.props;
     if (pid !== prevState.participant.participantId && !isNaN(+pid)) {
       // get values for annotations when switching participants

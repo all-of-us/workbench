@@ -12,8 +12,8 @@ import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients'
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
+import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
 import {Key} from 'ts-key-enum';
-import { withRouter, matchPath, RouteComponentProps } from 'react-router-dom';
 
 const styles = reactStyles({
   editRow: {
@@ -40,10 +40,10 @@ interface ModalProps extends RouteComponentProps {
 }
 
 interface ModalState {
-  name: string,
-  annotationType: AnnotationType,
-  enumValues: string[],
-  saving: boolean
+  name: string;
+  annotationType: AnnotationType;
+  enumValues: string[];
+  saving: boolean;
 }
 
 export const AddAnnotationDefinitionModal = withRouter(class extends React.Component<ModalProps, ModalState> {

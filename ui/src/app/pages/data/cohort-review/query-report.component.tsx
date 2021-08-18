@@ -11,6 +11,7 @@ import {
   currentCohortReviewStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {MatchParams} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -26,8 +27,7 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import {RouteComponentProps, withRouter} from "react-router-dom";
-import {MatchParams} from "../../../utils/stores";
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 const css = `
   .stats-left-padding {
@@ -221,7 +221,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     async componentDidMount() {
       const {cdrVersionTiersResponse, cohortReview, workspace: {cdrVersionId}, hideSpinner} = this.props;
       hideSpinner();
-      const {ns, wsid, cid} = this.props.match.params
+      const {ns, wsid, cid} = this.props.match.params;
       let request: SearchRequest;
       if (cohortReview) {
         this.setState({reviewLoading: false});

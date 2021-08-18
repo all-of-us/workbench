@@ -19,8 +19,8 @@ import {
 import {useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
+import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
-import {useParams} from "react-router-dom";
 
 const styles = reactStyles({
   container: {

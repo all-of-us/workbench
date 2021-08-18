@@ -20,11 +20,10 @@ import {
   currentCohortSearchContextStore,
   currentCohortStore,
   setSidebarActiveIconStore,
-  urlParamsStore,
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   arrowIcon: {

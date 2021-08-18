@@ -8,13 +8,13 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   cohortsHeader: {

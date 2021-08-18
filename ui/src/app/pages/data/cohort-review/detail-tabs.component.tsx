@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
@@ -14,14 +13,11 @@ import {
   withCurrentWorkspace
 } from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {urlParamsStore} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
-import {Observable} from 'rxjs/Observable';
-import {from} from 'rxjs/observable/from';
-import {RouteComponentProps} from "react-router-dom";
-import { MatchParams } from 'app/utils/stores';
+import {RouteComponentProps} from 'react-router-dom';
 
 const styles = reactStyles({
   container: {
@@ -362,12 +358,12 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
           }
         }));
         const {items} = await cohortReviewApi().getParticipantChartData(
-            ns,
-            wsid,
-            this.props.cohortReview.cohortReviewId,
-            +pid,
-            domainName,
-            10
+          ns,
+          wsid,
+          this.props.cohortReview.cohortReviewId,
+          +pid,
+          domainName,
+          10
         );
         this.setState((prevState) => ({
           chartData: {

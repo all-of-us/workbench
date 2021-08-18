@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Prompt, withRouter, RouteComponentProps} from 'react-router';
+import {Prompt, RouteComponentProps, withRouter} from 'react-router';
 import {Subscription} from 'rxjs/Subscription';
 import * as validate from 'validate.js';
 
@@ -32,11 +32,11 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   conceptSetHeader: {

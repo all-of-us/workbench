@@ -4,7 +4,7 @@ import Iframe from 'react-iframe';
 
 import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
-import {RuntimeStore, MatchParams} from 'app/utils/stores';
+import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
@@ -29,8 +29,8 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
-import {RouteComponentProps, withRouter} from "react-router-dom";
 
 export enum Progress {
   Unknown,

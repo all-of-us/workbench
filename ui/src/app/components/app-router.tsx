@@ -27,7 +27,6 @@ const useQuery = () => {
 // TODO angular2react: This isn't really the right place to be making the store updates but it's the
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
-  const params = useParams();
   const query = useQuery();
 
   useEffect(() => {
@@ -97,8 +96,8 @@ const RouteStoreSetter = ({intermediaryRoute, children}) => {
 
   return <React.Fragment>
     {children}
-  </React.Fragment>
-}
+  </React.Fragment>;
+};
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};

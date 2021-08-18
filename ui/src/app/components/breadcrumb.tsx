@@ -15,7 +15,7 @@ import {
 import {
   BreadcrumbType
 } from 'app/utils/navigation';
-import {routeDataStore, RouteDataStore, withStore, MatchParams} from 'app/utils/stores';
+import {MatchParams, routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
 
@@ -190,22 +190,22 @@ export const Breadcrumb = fp.flow(
       const workspaceMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid'
       });
-      const {ns = undefined, wsid = undefined} = workspaceMatch ? workspaceMatch.params : {}
+      const {ns, wsid} = workspaceMatch ? workspaceMatch.params : {};
 
       const cohortMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/cohorts/:cid'
       });
-      const {cid = undefined} = cohortMatch ? cohortMatch.params : {};
+      const {cid} = cohortMatch ? cohortMatch.params : {};
 
       const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/concepts/sets/:csid'
       });
-      const {csid = undefined} = conceptSetMatch ? conceptSetMatch.params : {};
+      const {csid} = conceptSetMatch ? conceptSetMatch.params : {};
 
       const participantMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
       });
-      const {pid = undefined} = participantMatch ? participantMatch.params : {};
+      const {pid} = participantMatch ? participantMatch.params : {};
 
       let nbName;
       const notebookMatch = matchPath<MatchParams>(location.pathname, {
@@ -218,7 +218,7 @@ export const Breadcrumb = fp.flow(
           ? notebookMatch.params.nbName
           : notebookPreviewMatch
               ? notebookPreviewMatch.params.nbName
-              : undefined
+              : undefined;
 
       return getTrail(
         this.props.routeConfigData.breadcrumb || this.props.reactRouteData.breadcrumb,

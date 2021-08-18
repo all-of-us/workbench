@@ -18,13 +18,13 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
-import {profileStore, RuntimeStore, MatchParams} from 'app/utils/stores';
+import {MatchParams, profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 
 const styles = reactStyles({

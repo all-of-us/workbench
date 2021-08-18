@@ -4,10 +4,10 @@ import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {reactRouterUrlSearchParams} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router';
-import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   heading: {

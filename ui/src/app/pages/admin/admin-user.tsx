@@ -16,7 +16,7 @@ import {
   isBlank,
   reactStyles
 } from 'app/utils';
-import {Link as RouterLink, withRouter, RouteComponentProps} from 'react-router-dom';
+import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -28,7 +28,7 @@ import {
   getRoleOptions,
   validateEmail
 } from 'app/utils/institutions';
-import {serverConfigStore, MatchParams} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,

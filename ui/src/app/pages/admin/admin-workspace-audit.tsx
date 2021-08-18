@@ -1,11 +1,11 @@
 import {AuditPageComponent} from 'app/components/admin/audit-page-component';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import { MatchParams } from 'app/utils/stores';
 import {WorkspaceAuditLogQueryResponse} from 'generated/fetch';
 import * as React from 'react';
 import {useEffect} from 'react';
 import {useParams} from 'react-router';
-import { MatchParams } from 'app/utils/stores';
 
 const getAuditLog = (subject: string) => {
   // Workspace actions take up many rows because of the Research Purpose fields

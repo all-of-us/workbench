@@ -1,6 +1,5 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {from} from 'rxjs/observable/from';
 
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -10,10 +9,10 @@ import {getVocabOptions, participantStore, vocabOptions} from 'app/services/revi
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {hasNewValidProps, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {currentCohortReviewStore} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;

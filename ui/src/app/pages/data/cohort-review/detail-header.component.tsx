@@ -15,6 +15,7 @@ import {
   currentWorkspaceStore,
   NavigationProps
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -26,8 +27,7 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
-import {RouteComponentProps, withRouter} from "react-router-dom";
-import { MatchParams } from 'app/utils/stores';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 validators.dateFormat = (value: string) => {
   return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';

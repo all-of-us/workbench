@@ -14,11 +14,11 @@ import {
   currentCohortReviewStore,
   NavigationProps
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   title: {

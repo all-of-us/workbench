@@ -19,6 +19,7 @@ import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
+import { MatchParams } from 'app/utils/stores';
 import {
   CloudStorageTraffic,
   FileDetail,
@@ -28,8 +29,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { MatchParams } from 'app/utils/stores';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   infoRow: {
