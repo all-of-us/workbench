@@ -10,7 +10,7 @@ import { logger } from 'libs/logger';
 const DataResourceCardSelector = {
   cardRootXpath: '//*[@data-test-id="card"]',
   cardNameXpath: '@data-test-id="card-name"',
-  cardTypeXpath: './/*[@data-test-id="card-type"]'
+  cardTypeXpath: '@data-test-id="card-type"'
 };
 
 /**
@@ -67,20 +67,23 @@ export default class DataResourceCard extends CardBase {
     super(page);
   }
 
-  async findCard(resourceName: string, cardType?: ResourceCard): Promise<DataResourceCard | null> {
-    const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
-    let elements: DataResourceCard[];
-    if (cardType === undefined) {
-      elements = await DataResourceCard.findAllCards(this.page);
-    } else {
-      elements = await this.getResourceCard(cardType);
-    }
-    for (const elem of elements) {
-      if ((await elem.asElementHandle().$x(selector)).length > 0) {
-        return elem;
-      }
-    }
-    return null;
+  async findCard(resourceName: string, cardType: ResourceCard, timeout = 30000): Promise<DataResourceCard | null> {
+    const selector =
+      DataResourceCardSelector.cardRootXpath +
+      `[.//*[${DataResourceCardSelector.cardTypeXpath} and text()="${cardType}"]]` +
+      `[.//*[${DataResourceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${resourceName}"]]`;
+
+    return this.page
+      .waitForXPath(selector, { timeout })
+      .then((element) => {
+        logger.info(`Found ${cardType} card: "${resourceName}"`);
+        return new DataResourceCard(this.page).asCard(element);
+      })
+      .catch(() => {
+        logger.info(`${cardType} card: "${resourceName}" is not found`);
+        return null;
+      });
   }
 
   async findAnyCard(cardType: ResourceCard): Promise<DataResourceCard | null> {
@@ -97,7 +100,7 @@ export default class DataResourceCard extends CardBase {
    * Find card type: Cohort, Datasets or Concept Sets.
    */
   async getCardType(): Promise<string> {
-    const [element] = await this.cardElement.$x(DataResourceCardSelector.cardTypeXpath);
+    const [element] = await this.cardElement.$x(`.//*[${DataResourceCardSelector.cardTypeXpath}]`);
     return getPropValue<string>(element, 'innerText');
   }
 

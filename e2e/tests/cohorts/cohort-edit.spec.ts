@@ -42,7 +42,7 @@ describe('Editing Cohort tests', () => {
     // Back to Data page.
     await dataPage.waitForLoad();
     const resourceCard = new DataResourceCard(page);
-    expect(await resourceCard.findCard(cohortName)).toBeTruthy();
+    expect(await resourceCard.findCard(cohortName, ResourceCard.Cohort)).toBeTruthy();
   });
 
   test('Delete cohort', async () => {
@@ -60,7 +60,7 @@ describe('Editing Cohort tests', () => {
     await dataPage.waitForLoad();
 
     const resourceCard = new DataResourceCard(page);
-    expect(await resourceCard.findCard(cohortName)).toBeFalsy();
+    expect(await resourceCard.findCard(cohortName, ResourceCard.Cohort)).toBeFalsy();
   });
 
   test('Save as cohort', async () => {
@@ -95,9 +95,9 @@ describe('Editing Cohort tests', () => {
 
     const resourceCard = new DataResourceCard(page);
     // Save as cohort is gone.
-    expect(await resourceCard.findCard(cohortName)).toBeFalsy();
+    expect(await resourceCard.findCard(cohortName, ResourceCard.Cohort)).toBeFalsy();
     // Original cohort remains.
-    expect(await resourceCard.findCard(originalCohortName)).toBeTruthy();
+    expect(await resourceCard.findCard(originalCohortName, ResourceCard.Cohort)).toBeTruthy();
   });
 
   // Helper functions
