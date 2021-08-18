@@ -2,29 +2,28 @@ import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {GoogleCloudLogoSvg} from 'app/components/icons';
+import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
   ModalFooter,
-  withErrorModal,
-  withSuccessModal
+  withErrorModal
 } from 'app/components/modals';
 import {TextColumn} from 'app/components/text-column';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {profileStore, useStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
+import {BillingPaymentMethod} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useState} from 'react';
-import {GoogleCloudLogoSvg} from 'app/components/icons';
-import {profileStore, useStore} from '../../utils/stores';
-import {CheckBox, RadioButton, TextInput} from "../../components/inputs";
-import {reactStyles} from "../../utils";
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import {BillingPaymentMethod} from "../../../generated/fetch";
-import * as fp from 'lodash/fp';
 
 export const styles = reactStyles({
   line: {
-    borderLeft: `1px solid #97979`,
+    borderLeft: '1px solid #97979',
     boxSizing: 'border-box',
     height: '34px',
     width: '1px',
@@ -56,7 +55,7 @@ export const styles = reactStyles({
     letterSpacing: '0',
     marginTop: '5px',
   },
-})
+});
 
 const stylesFunction = {
   stepButtonCircle: (currentStep: number, buttonStep: number): React.CSSProperties => {
@@ -73,7 +72,7 @@ const stylesFunction = {
       fontSize: '18px',
       fontWeight: 600,
       letterSpacing: '0',
-      color: "#FFFFFF",
+      color: '#FFFFFF',
       marginRight: '10px',
     };
   }
@@ -91,7 +90,7 @@ export interface Props {
   onClose: Function;
 }
 
-export const CreateBillingAccountModal = ({onClose}:Props) => {
+export const CreateBillingAccountModal = ({onClose}: Props) => {
   const {profile: {
     contactEmail,
     givenName,
@@ -105,7 +104,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
   const [useCreditCard, setUseCreditCard] = useState<boolean>(null);
   const [nihFunded, setNihFunded] = useState<boolean>(null);
 
-  const validatePhoneNumber = (phoneInput : string) => {
+  const validatePhoneNumber = (phoneInput: string) => {
     const sanitizedPhone = phoneInput.replace(/\D/g, '');
 
     if (sanitizedPhone.length >= 10 && sanitizedPhone.length <= 11) {
@@ -114,22 +113,22 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
     } else {
       setInvalidPhoneNumberInput(true);
     }
-  }
+  };
 
   const sendCreateBillingEmail = fp.flow(
-      withErrorModal({
-        title: 'Failed To Send Email',
-        message: 'An error occurred trying to send email. Please try again.',
-      })
+    withErrorModal({
+      title: 'Failed To Send Email',
+      message: 'An error occurred trying to send email. Please try again.',
+    })
   )(async() => {await profileApi().sendBillingSetupEmail(
-      {
-        phone: phoneNumber,
-        paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,
-        isNihFunded: nihFunded,
-        institution: verifiedInstitutionalAffiliation.institutionShortName
-      }
+    {
+      phone: phoneNumber,
+      paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,
+      isNihFunded: nihFunded,
+      institution: verifiedInstitutionalAffiliation.institutionDisplayName
+    }
   );
-  setCurrentStep(4);
+    setCurrentStep(4);
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
@@ -138,7 +137,8 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
             <FlexRow style={{alignItems: 'center', width: '620px', marginBottom: '0.8rem'}}>
               <GoogleCloudLogoSvg style={{height: '33px', width: '207px', marginLeft: '-0.5remx', marginRight: '0.5rem'}}/>
               <div style={styles.line}></div>
-              <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}><div style={styles.textHeader}>Create billing account</div></div>
+              <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
+                <div style={styles.textHeader}>Create billing account</div></div>
                 <div style={stylesFunction.stepButtonCircle(currentStep, 1)}>1</div>
                 <div style={stylesFunction.stepButtonCircle(currentStep, 2)}>2</div>
                 <div style={stylesFunction.stepButtonCircle(currentStep, 3)}>3</div>
@@ -159,7 +159,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
           marginBottom: '0.5rem'
         }}/>
 
-    {currentStep === 0 && <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+    {currentStep === 0 && <ModalFooter data-test-id='step-0-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
       <FlexRow style={{justifyContent: 'space-evenly'}}>
         <FlexColumn>
           <TextColumn>
@@ -177,15 +177,16 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
             <p style={styles.textHeader}>Let a Google billing partner create the account for you.</p>
             <p style={styles.textNormal}>A representative will help you set up <br/>your billing account.</p>
           </TextColumn>
-          <Button type='primary'
+          <Button data-test-id='use-billing-partner-button'
+              type='primary'
                   style={{marginTop: '0.5rem', fontWeight: 500, fontSize: '14px', height: '39px', width: '220px'}}
-                  onClick={() => {setCurrentStep(1)}}>
+                  onClick={() => {setCurrentStep(1); }}>
             USE A BILLING PARTNER
           </Button>
         </FlexColumn>
       </FlexRow>
     </ModalFooter>}
-    {currentStep === 1 && <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+    {currentStep === 1 && <ModalFooter data-test-id='step-1-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
       <FlexColumn style={{justifyContent: 'space-evenly', width: '37rem'}}>
         <div style={styles.textHeader}>Your Information</div>
         <FlexRow style={{marginTop: '20px'}}>
@@ -194,6 +195,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
             <TextInput
                 data-test-id='user-full-name'
                 style={styles.textInput}
+                disabled={true}
                 onChange={(v) => this.setState({userFullName: v})}
                 value={givenName + ' ' + familyName}/>
           </FlexColumn>
@@ -212,7 +214,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
           <FlexColumn style={styles.textNormal}>
             Your contact email address
             <TextInput
-                data-test-id='user-full-name'
+                data-test-id='user-contact-email'
                 disabled={true}
                 style={styles.textInput}
                 value={contactEmail}/>
@@ -220,7 +222,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
           <FlexColumn style={styles.textNormal}>
             Your Researchallofus ID
             <TextInput
-                data-test-id='user-phone-number'
+                data-test-id='user-workbench-id'
                 style={styles.textInput}
                 disabled={true}
                 value={username}/>
@@ -230,10 +232,10 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
           <FlexColumn style={styles.textNormal}>
             Your institution
             <TextInput
-                data-test-id='user-full-name'
+                data-test-id='user-institution'
                 style={styles.textInput}
                 disabled={true}
-                value={verifiedInstitutionalAffiliation.institutionShortName}/>
+                value={verifiedInstitutionalAffiliation.institutionDisplayName}/>
           </FlexColumn>
         </FlexRow>
         <FlexRow style={{marginTop: '100px', justifyContent: 'flex-end'}}>
@@ -242,21 +244,22 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
                   onClick={() => onClose()}>
             Cancel
           </Button>
-          <Button type='primary'
+          <Button data-test-id='next-button'
+                  type='primary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
                   disabled={!phoneNumber}
-                  onClick={() => {setCurrentStep(2)}}>
+                  onClick={() => {setCurrentStep(2); }}>
             Next
           </Button>
         </FlexRow>
       </FlexColumn>
     </ModalFooter>}
-    {currentStep === 2 && <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+    {currentStep === 2 && <ModalFooter data-test-id='step-2-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
       <FlexColumn style={{justifyContent: 'space-evenly', width: '100%'}}>
         <div style={styles.textHeader}>What payment method would you like to use?</div>
         <FlexColumn style={{marginTop: '20px', width: '100%'}}>
           <FlexRow style={{boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #CCCFD4', marginBottom: '7px'}}>
-            <RadioButton
+            <RadioButton data-test-id='credit-card-radio'
                          style={{margin: '15px', height: '17px', width: '17px'}}
                          checked={useCreditCard === true}
                          onChange={() => setUseCreditCard(true)}/>
@@ -300,7 +303,7 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
         <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
           <Button type='secondary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                  onClick={() => {setCurrentStep(1)}}>
+                  onClick={() => {setCurrentStep(1); }}>
             Back
           </Button>
         <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -309,53 +312,54 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
                   onClick={() => onClose()}>
             Cancel
           </Button>
-          <Button type='primary'
+          <Button data-test-id='next-button'
+              type='primary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
                   disabled={useCreditCard === null}
-                  onClick={() => {setCurrentStep(3)}}>
+                  onClick={() => {setCurrentStep(3); }}>
             Next
           </Button>
         </FlexRow>
         </FlexRow>
       </FlexColumn>
     </ModalFooter>}
-    {currentStep === 3 && <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+    {currentStep === 3 && <ModalFooter data-test-id='step-3-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
       <FlexColumn style={{width: '100%'}}>
         <div style={styles.textHeader}>Please review your information</div>
         <TextColumn>
           <FlexRow  style={{marginTop: '15px'}}>
             <div style={{width: '170px'}}>Name: </div>
-            <div>{givenName + ' ' + familyName}</div>
+            <div data-test-id='user-full-name-text'>{givenName + ' ' + familyName}</div>
           </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
           <div style={{width: '170px'}}>Phone mumber: </div>
-          <div>{phoneNumber}</div>
+          <div data-test-id='user-phone-number-text'>{phoneNumber}</div>
         </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
             <div style={{width: '170px'}}>Contact email: </div>
-            <div>{contactEmail}</div>
+            <div data-test-id='user-contact-email-text'>{contactEmail}</div>
           </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
           <div style={{width: '170px'}}>Researchallofus ID: </div>
-          <div>{username}</div>
+          <div data-test-id='user-workbench-id-text'>{username}</div>
         </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
           <div style={{width: '170px'}}>Institution: </div>
-          <div>{verifiedInstitutionalAffiliation.institutionShortName}</div>
+          <div data-test-id='user-institution-text'>{verifiedInstitutionalAffiliation.institutionDisplayName}</div>
         </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
           <div style={{width: '170px'}}>Payment type: </div>
-          <div>{useCreditCard ? 'Credit credit' : 'Purchase order/Other'}</div>
+          <div data-test-id='use-credit-card-text'>{useCreditCard ? 'Credit credit' : 'Purchase order/Other'}</div>
         </FlexRow>
           <FlexRow  style={{marginTop: '5px'}}>
           <div style={{width: '170px'}}>NiH-funded: </div>
-          <div>{nihFunded ? 'NIH’s STRIDES initiative' : 'N/A'}</div>
+          <div data-test-id='nih-funded-text'>{nihFunded ? 'NIH’s STRIDES initiative' : 'N/A'}</div>
         </FlexRow>
         </TextColumn>
         <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
           <Button type='secondary'
                   style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                  onClick={() => {setCurrentStep(1)}}>
+                  onClick={() => {setCurrentStep(1); }}>
             Back
           </Button>
           <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -364,16 +368,17 @@ export const CreateBillingAccountModal = ({onClose}:Props) => {
                     onClick={() => onClose()}>
               Cancel
             </Button>
-            <Button type='primary'
+            <Button data-test-id='submit-button'
+                type='primary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px', width: '93px'}}
-                    onClick={() => {sendCreateBillingEmail()}}>
+                    onClick={() => {sendCreateBillingEmail(); }}>
               Submit
             </Button>
           </FlexRow>
         </FlexRow>
       </FlexColumn>
     </ModalFooter>}
-    {currentStep === 4 && <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
+    {currentStep === 4 && <ModalFooter data-test-id='step-4-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
       <FlexColumn>
         <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
           One of their representatives will contact you shortly.</div>
