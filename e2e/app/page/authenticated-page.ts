@@ -34,7 +34,8 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.isSignedIn();
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
-    logger.info(`"${await this.page.title()}" page loaded.`);
+    const pageTitle = await this.page.title();
+    logger.info(`"${pageTitle}" page loaded.`);
     return this;
   }
 

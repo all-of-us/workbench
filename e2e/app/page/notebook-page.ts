@@ -145,12 +145,8 @@ export default class NotebookPage extends NotebookFrame {
       frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
       frame.waitForSelector(notificationSelector, { hidden: true, timeout })
     ])
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
+      .then(() => true)
+      .catch(() => false);
   }
 
   /**
@@ -230,8 +226,11 @@ export default class NotebookPage extends NotebookFrame {
     opts: { code?: string; codeFile?: string; timeOut?: number; markdownWorkaround?: boolean } = {}
   ): Promise<string> {
     const { code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false } = opts;
-    if (!!code && !!codeFile) {
+    if (code === undefined && codeFile === undefined) {
       throw new Error('Code or codeFile parameter is required in runCodeCell method.');
+    }
+    if (code !== undefined && codeFile !== undefined) {
+      throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
     const notebookCode = code ? code : fs.readFileSync(codeFile, 'ascii');
     logger.info(`Typing notebook code:\n--------${notebookCode}\n--------`);

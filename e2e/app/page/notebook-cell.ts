@@ -1,4 +1,4 @@
-import { ElementHandle, Frame, Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import NotebookFrame from './notebook-frame';
 
@@ -27,8 +27,8 @@ export default class NotebookCell extends NotebookFrame {
     super(page);
   }
 
-  async findCell(iframe?: Frame, cellIndx?: number): Promise<ElementHandle> {
-    iframe = iframe || (await this.getIFrame());
+  async findCell(cellIndx?: number): Promise<ElementHandle> {
+    const iframe = await this.getIFrame();
     cellIndx = cellIndx || this.getCellIndex();
     const selector = this.cellSelector(cellIndx);
     return iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
@@ -41,8 +41,8 @@ export default class NotebookCell extends NotebookFrame {
     return this;
   }
 
-  async isSelected(iframe?: Frame, cellIndx?: number): Promise<boolean> {
-    iframe = iframe || (await this.getIFrame());
+  async isSelected(cellIndx?: number): Promise<boolean> {
+    const iframe = await this.getIFrame();
     cellIndx = cellIndx || this.getCellIndex();
     const selector = this.cellSelector(cellIndx);
     return iframe
@@ -60,14 +60,15 @@ export default class NotebookCell extends NotebookFrame {
    * @returns ElementHandle to code input if exists.
    */
   async focus(maxAttempts = 3): Promise<ElementHandle> {
-    const clickAndCheck = async (iframe: Frame): Promise<ElementHandle> => {
+    const clickAndCheck = async (): Promise<ElementHandle> => {
       maxAttempts--;
-      const cell = await this.findCell(iframe);
+      const cell = await this.findCell();
       await cell.click({ delay: 30 });
       // Click in a notebook cell editor area enables cell Edit mode.
       // When a cell is in Edit mode, user can enter code to run.
+      const iframe = await this.getIFrame();
       const [element] = await iframe.$$('body.notebook_app.edit_mode');
-      const selected = await this.isSelected(iframe);
+      const selected = await this.isSelected();
       if (element && selected) {
         return cell;
       }
@@ -76,11 +77,10 @@ export default class NotebookCell extends NotebookFrame {
         return cell;
       }
       await this.page.waitForTimeout(2000); // Pause 2 seconds then retry
-      return clickAndCheck(iframe);
+      return clickAndCheck();
     };
 
-    const frame = await this.getIFrame();
-    return clickAndCheck(frame);
+    return clickAndCheck();
   }
 
   /**
