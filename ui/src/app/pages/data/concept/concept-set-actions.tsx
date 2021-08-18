@@ -9,14 +9,15 @@ import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   conceptSetUpdating,
-  NavigationProps,
-  urlParamsStore
+  NavigationProps
 } from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from "react-router-dom";
+import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   conceptSetsHeader: {
@@ -70,11 +71,11 @@ interface State {
   conceptSetLoading: boolean;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
 }
 
-export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)(
+export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -91,10 +92,10 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation)
     }
 
     componentDidUpdate() {
-      const csid = urlParamsStore.getValue().csid;
+      const {csid} = this.props.match.params;
       if (csid && this.state.conceptSetLoading) {
         const {namespace, id} = this.props.workspace;
-        conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
+        conceptSetsApi().getConceptSet(namespace, id, +csid).then(cs => {
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {

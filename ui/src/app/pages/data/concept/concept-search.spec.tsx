@@ -15,7 +15,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
-import {MemoryRouter} from "react-router";
+import {MemoryRouter, Route} from "react-router";
 
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
@@ -28,19 +28,21 @@ describe('ConceptSearch', () => {
     currentConceptStore.next([]);
     currentConceptSetStore.next(undefined);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      csid: conceptSet.id
-    });
   });
 
   const component = () => {
-    return mount(<MemoryRouter><ConceptSearch setConceptSetUpdating={() => {}}
-                                setShowUnsavedModal={() => {}}
-                                setUnsavedConceptChanges={() => {}}
-                                hideSpinner={() => {}}
-                                showSpinner={() => {}}/></MemoryRouter>);
+    return mount(<MemoryRouter
+        initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/concepts/sets/${conceptSet.id}`]}
+    >
+      <Route path='/workspaces/:ns/:wsid/data/concepts/sets/:csid'>
+        <ConceptSearch setConceptSetUpdating={() => {}}
+                       setShowUnsavedModal={() => {}}
+                       setUnsavedConceptChanges={() => {}}
+                       hideSpinner={() => {}}
+                       showSpinner={() => {}}
+        />
+      </Route>
+    </MemoryRouter>);
   }
 
   it('should render', () => {

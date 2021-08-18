@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -22,6 +23,8 @@ import {
   urlParamsStore,
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -126,7 +129,7 @@ export function saveCriteria(selections?: Array<Selection>) {
   currentCohortCriteriaStore.next(undefined);
 }
 
-interface Props {
+interface Props extends RouteComponentProps<MatchParams> {
   cohortContext: any;
   selections?: Array<Selection>;
   setUnsavedChanges: (unsavedChanges: boolean) => void;
@@ -140,7 +143,7 @@ interface State {
   unsavedChanges: boolean;
 }
 
-export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
+export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter)(class extends React.Component<Props, State> {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -230,7 +233,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   }
 
   addSelection = (param: any) => {
-    const {cohortContext} = this.props;
+    const {cohortContext, match: {params: {wsid}}} = this.props;
     let {selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
       selections = selections.filter(p => p.parameterId !== param.parameterId);
@@ -239,7 +242,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
-    const {wsid} = urlParamsStore.getValue();
     const cohort = currentCohortStore.getValue();
     cohortContext.item.searchParameters = selections;
     const localStorageContext = {

@@ -377,6 +377,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
             <AppRoute
                 path=''
                 exact={false}
+                intermediaryRoute={true}
                 guards={[signInGuard, disabledGuard(isUserDisabled)]}
             >
               <SignedInPage

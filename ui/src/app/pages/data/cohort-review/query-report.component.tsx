@@ -9,8 +9,7 @@ import {reactStyles, withCdrVersions, withCurrentCohortReview, withCurrentWorksp
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   currentCohortReviewStore,
-  NavigationProps,
-  urlParamsStore
+  NavigationProps
 } from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -27,6 +26,8 @@ import {
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from "react-router-dom";
+import {MatchParams} from "../../../utils/stores";
 
 const css = `
   .stats-left-padding {
@@ -189,7 +190,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.DRUG],
   Domain[Domain.LAB]];
 
-export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps {
+export interface QueryReportProps extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   cohortReview: CohortReview;
   workspace: WorkspaceData;
@@ -203,7 +204,7 @@ export interface QueryReportState {
   reviewLoading: boolean;
 }
 
-export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace(), withNavigation)(
+export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(), withCurrentWorkspace(), withNavigation, withRouter)(
   class extends React.Component<QueryReportProps, QueryReportState> {
     constructor(props: any) {
       super(props);
@@ -220,13 +221,13 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     async componentDidMount() {
       const {cdrVersionTiersResponse, cohortReview, workspace: {cdrVersionId}, hideSpinner} = this.props;
       hideSpinner();
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid, cid} = this.props.match.params
       let request: SearchRequest;
       if (cohortReview) {
         this.setState({reviewLoading: false});
         request = (JSON.parse(cohortReview.cohortDefinition));
       } else {
-        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
           page: 0,
           pageSize: 25,
           sortOrder: SortOrder.Asc
@@ -236,7 +237,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
           currentCohortReviewStore.next(review);
         });
       }
-      cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
+      cohortsApi().getCohort(ns, wsid, +cid).then(cohort => this.setState({cohort}));
       const cdrName = findCdrVersion(cdrVersionId, cdrVersionTiersResponse).name;
       this.setState({cdrName});
       cohortBuilderApi().findDemoChartInfo(ns, wsid, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
@@ -275,7 +276,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     }
 
     goBack() {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid, cid} = this.props.match.params;
       this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 

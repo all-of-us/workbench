@@ -13,10 +13,6 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 describe('getTrail', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     currentWorkspaceStore.next(workspaceDataStub);
   });
 
@@ -26,7 +22,7 @@ describe('getTrail', () => {
       exampleCohortStubs[0],
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
-      {ns: 'testns', wsid: 'testwsid', cid: 88, pid: 77}
+      {ns: 'testns', wsid: 'testwsid', cid: "88", pid: "77"}
     );
     expect(trail.map(item => item.label))
       .toEqual(['Workspaces', 'defaultWorkspace', 'Cohort Name', 'Participant 77']);

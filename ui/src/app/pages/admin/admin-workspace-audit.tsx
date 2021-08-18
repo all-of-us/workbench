@@ -5,6 +5,7 @@ import {WorkspaceAuditLogQueryResponse} from 'generated/fetch';
 import * as React from 'react';
 import {useEffect} from 'react';
 import {useParams} from 'react-router';
+import { MatchParams } from 'app/utils/stores';
 
 const getAuditLog = (subject: string) => {
   // Workspace actions take up many rows because of the Research Purpose fields
@@ -35,10 +36,10 @@ const getAdminPageUrl = (subject: string) => {
 export const WorkspaceAudit = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {workspaceNamespace = ''} = useParams<{workspaceNamespace: string}>();
+  const {ns = ''} = useParams<MatchParams>();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
-                             initialAuditSubject={workspaceNamespace}
+                             initialAuditSubject={ns}
                              getNextAuditPath={getNextAuditPath}
                              queryAuditLog={queryAuditLog}
                              getAdminPageUrl={getAdminPageUrl}/>;

@@ -7,7 +7,12 @@ import {DetailTabTable} from 'app/pages/data/cohort-review/detail-tab-table.comp
 import {IndividualParticipantsCharts} from 'app/pages/data/cohort-review/individual-participants-charts';
 import {filterStateStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
+import {
+  hasNewValidProps,
+  reactStyles,
+  withCurrentCohortReview,
+  withCurrentWorkspace
+} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -15,6 +20,8 @@ import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
+import {RouteComponentProps} from "react-router-dom";
+import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   container: {
@@ -292,7 +299,7 @@ const domainList = [
 ];
 const EVENT_CATEGORY = 'Review Individual';
 
-interface Props {
+interface Props extends RouteComponentProps<MatchParams> {
   cohortReview: CohortReview;
   workspace: WorkspaceData;
 }
@@ -323,43 +330,56 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     }
 
     componentDidMount() {
-      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
-        .filter(({pid}) => !!pid)
-        .switchMap(({ns, wsid, pid}) => {
-          const chartData = {};
-          return Observable.forkJoin(
-            ...domainList.map(domainName => {
-              chartData[domainName] = {
-                loading: true,
-                conditionTitle: '',
-                items: []
-              };
-              this.setState({chartData, participantId: pid});
-              return from(cohortReviewApi()
-                .getParticipantChartData(ns, wsid, this.props.cohortReview.cohortReviewId, pid, domainName, 10))
-                .do(({items}) => {
-                  chartData[domainName] = {
-                    loading: false,
-                    conditionTitle: domainToTitle(domainName),
-                    items
-                  };
-                  this.setState({chartData});
-                });
-            })
-          );
-        })
-        .subscribe();
-
-      this.subscription.add(filterStateStore.subscribe(filterState => {
+      this.subscription = filterStateStore.subscribe(filterState => {
         let {updateState} = this.state;
         // this.vocab = filterState.vocab;
         updateState++;
         this.setState({filterState, updateState});
-      }));
+      });
+    }
+
+    componentDidUpdate(prevProps) {
+      if (hasNewValidProps(this.props, prevProps, [p => p.match.params.pid])) {
+        this.loadParticipantChartData();
+      }
     }
 
     componentWillUnmount() {
       this.subscription.unsubscribe();
+    }
+
+    loadParticipantChartData() {
+      const {ns, wsid, pid} = this.props.match.params;
+      fp.map(async(domainName: string) => {
+        this.setState((prevState) => ({
+          chartData: {
+            ...prevState.chartData,
+            [domainName]: {
+              loading: true,
+              conditionTitle: '',
+              items: []
+            }
+          }
+        }));
+        const {items} = await cohortReviewApi().getParticipantChartData(
+            ns,
+            wsid,
+            this.props.cohortReview.cohortReviewId,
+            +pid,
+            domainName,
+            10
+        );
+        this.setState((prevState) => ({
+          chartData: {
+            ...prevState.chartData,
+            [domainName]: {
+              loading: false,
+              conditionTitle: '',
+              items: items
+            }
+          }
+        }));
+      })(domainList);
     }
 
     filteredData(_domain: string, checkedItems: any) {

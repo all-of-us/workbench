@@ -18,10 +18,6 @@ describe('ModifierPage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
 
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.set({config: {
       enableEventDateModifier: false,

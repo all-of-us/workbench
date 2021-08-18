@@ -9,7 +9,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortReviewStore,
   NavigationProps
@@ -17,6 +17,8 @@ import {
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   title: {
@@ -26,7 +28,7 @@ const styles = reactStyles({
   },
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   urlParams: any;
 }
@@ -38,8 +40,8 @@ interface State {
 
 export const CohortReview = fp.flow(
   withCurrentWorkspace(),
-  withUrlParams(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
     constructor(props: any) {
@@ -60,14 +62,14 @@ export const CohortReview = fp.flow(
     }
 
     loadCohort() {
-      const {ns, wsid, cid} = this.props.urlParams;
+      const {ns, wsid, cid} = this.props.match.params;
       const {cdrVersionId} = this.props.workspace;
 
       if (!cid) {
         return;
       }
 
-      cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+      cohortReviewApi().getParticipantCohortStatuses(ns, wsid, +cid, +cdrVersionId, {
         page: 0,
         pageSize: 25,
         sortOrder: SortOrder.Asc,
@@ -82,7 +84,7 @@ export const CohortReview = fp.flow(
           this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
         }
       });
-      cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
+      cohortsApi().getCohort(ns, wsid, +cid).then(cohort => this.setState({cohort}));
       if (!visitsFilterOptions.getValue()) {
         cohortBuilderApi().findCriteriaBy(
           ns, wsid, Domain[Domain.VISIT], CriteriaType[CriteriaType.VISIT]

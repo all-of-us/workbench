@@ -141,9 +141,25 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
-export interface CanComponentDeactivate {
-  canDeactivate: () => Promise<boolean> | boolean;
+export interface MatchParams {
+  cid?: string;
+  csid?: string;
+  dataSetId?: string;
+  domain?: string;
+  institutionId?: string;
+  nbName?: string;
+  ns?: string;
+  pid?: string;
+  username?: string;
+  usernameWithoutGsuiteDomain?: string;
+  wsid?: string;
 }
+
+export interface UrlParamsStore {
+  params: MatchParams;
+}
+
+export const urlParamsStore = atom<UrlParamsStore>({params: {}});
 
 /**
  * @name useStore

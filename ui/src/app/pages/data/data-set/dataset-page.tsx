@@ -22,14 +22,13 @@ import {
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
-  withUrlParams,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
-import {serverConfigStore} from 'app/utils/stores';
+import {serverConfigStore, MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -55,6 +54,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -448,10 +448,9 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props extends WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithErrorModalProps, WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
-  urlParams: any;
   profileState: {
     profile: Profile,
     reload: Function
@@ -490,7 +489,7 @@ interface State {
   savingDataset: boolean;
 }
 
-export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
+export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withCdrVersions(), withErrorModal(), withRouter)(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -526,7 +525,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       await this.loadResources();
 
       this.updatePrepackagedDomains();
-      if (this.props.urlParams.dataSetId) {
+      if (this.props.match.params.dataSetId) {
         this.fetchDataset();
       }
     }
@@ -571,7 +570,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     async fetchDataset() {
       const dataset = await dataSetApi().getDataSet(
-        this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId);
+        this.props.workspace.namespace, this.props.workspace.id, +this.props.match.params.dataSetId);
       this.loadDataset(dataset);
     }
 
@@ -587,9 +586,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (hasNewValidProps(this.props, prevProps, [
         (props) => props.workspace.namespace,
         (props) => props.workspace.id,
-        (props) => props.urlParams.dataSetId])) {
+        (props) => props.match.params.dataSetId])) {
 
-        if (hasNewValidProps(this.props, prevProps, [(props) => props.urlParams.dataSetId])) {
+        if (hasNewValidProps(this.props, prevProps, [(props) => props.match.params.dataSetId])) {
           this.fetchDataset();
         }
       }

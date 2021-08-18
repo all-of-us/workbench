@@ -6,13 +6,15 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { MatchParams } from 'app/utils/stores';
 
 const styles = reactStyles({
   cohortsHeader: {
@@ -66,9 +68,8 @@ const actionCards = [
   },
 ];
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  urlParams: any;
 }
 
 interface State {
@@ -78,8 +79,8 @@ interface State {
 
 export const CohortActions = fp.flow(
   withCurrentWorkspace(),
-  withUrlParams(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
     constructor(props: any) {
@@ -96,13 +97,13 @@ export const CohortActions = fp.flow(
       if (!hasNewValidProps(this.props, prevProps, [
         p => p.workspace.namespace,
         p => p.workspace.id,
-        p => p.urlParams.cid
+        p => p.match.params.cid
       ])) {
         return;
       }
 
       const {namespace, id} = this.props.workspace;
-      cohortsApi().getCohort(namespace, id, this.props.urlParams.cid).then(c => {
+      cohortsApi().getCohort(namespace, id, +this.props.match.params.cid).then(c => {
         if (c) {
           this.setState({cohort: c, cohortLoading: false});
         } else {

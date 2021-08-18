@@ -13,17 +13,18 @@ import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {NavigationProps} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
-import {profileStore, RuntimeStore} from 'app/utils/stores';
+import {profileStore, RuntimeStore, MatchParams} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 const styles = reactStyles({
@@ -101,7 +102,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   urlParams: any;
   runtimeStore: RuntimeStore;
@@ -125,10 +126,10 @@ enum PreviewErrorMode {
 }
 
 export const InteractiveNotebook = fp.flow(
-  withUrlParams(),
   withRuntimeStore(),
   withCurrentWorkspace(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
     private pollAborter = new AbortController();
@@ -152,9 +153,9 @@ export const InteractiveNotebook = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      const {urlParams: {ns, wsid, nbName}} = this.props;
+      const {match: {params: {ns, wsid, nbName}}} = this.props;
 
-      if (!hasNewValidProps(this.props, prevProps, [p => p.urlParams.ns, p => p.urlParams.wsid, p => p.urlParams.nbName])) {
+      if (!hasNewValidProps(this.props, prevProps, [p => p.match.params.ns, p => p.match.params.wsid, p => p.match.params.nbName])) {
         return;
       }
 

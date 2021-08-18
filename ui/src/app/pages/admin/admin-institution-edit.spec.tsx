@@ -1,5 +1,4 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
@@ -11,12 +10,22 @@ import {simulateSwitchToggle, waitOneTickAndUpdate} from 'testing/react-test-hel
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
 import {InputSwitch} from "primereact/inputswitch";
+import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('AdminInstitutionEditSpec', () => {
 
-  const component = () => {
-    return mount(<AdminInstitutionEdit hideSpinner={() => {}} showSpinner={() => {}} />);
-  };
+  const component = (institution = 'Verily') => {
+    return mount(<MemoryRouter initialEntries={[`/admin/institution/edit/${institution}`]}>
+      <Route path='/admin/institution/edit/:institutionId'>
+        <AdminInstitutionEdit
+            hideSpinner={() => {
+            }}
+            showSpinner={() => {
+            }}
+        />
+      </Route>
+    </MemoryRouter>);
+  }
 
   beforeEach(() => {
     serverConfigStore.set({config: defaultServerConfig});
@@ -31,9 +40,6 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
   it('should throw error for existing Institution if display name is more than 80 characters', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -60,9 +66,6 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
   it('should show CT card when institution has controlled tier access enabled', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -70,19 +73,13 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
   it('should hide CT card when institution has controlled tier access disabled', async() => {
-    urlParamsStore.next({
-      institutionId: 'Non CT Access'
-    });
-    const wrapper = component();
+    const wrapper = component('Non CT Access');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
   });
 
   it('should not change eRA Required and tier enabled switches when changing tier requirement ', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -106,9 +103,6 @@ describe('AdminInstitutionEditSpec', () => {
 
 
   it('should update and save institution tier requirement', async() => {
-    urlParamsStore.next({
-      institutionId: 'Verily'
-    });
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
