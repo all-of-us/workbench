@@ -623,6 +623,21 @@ describe('WorkspaceEdit', () => {
     .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
   });
 
+  it('should show free tier user account and create_billing_account when user granted billing scope', async () => {
+    mockHasBillingScope.mockImplementation(() => true);
+    workspaceEditMode = WorkspaceEditMode.Create;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
+
+    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.options.map(o => o.value))
+    .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
+    expect(billingDropDown.props.options.map(o => o.label))
+    .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
+  });
+
   it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
     mockHasBillingScope.mockImplementation(() => true);
     workspaceEditMode = WorkspaceEditMode.Create;
