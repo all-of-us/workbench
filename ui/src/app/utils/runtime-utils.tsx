@@ -438,7 +438,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
       try {
-        console.log('NEEDS_DELETE_PD', runtime, requestedRuntime);
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
           const pdExists = !!detachableDisk;
