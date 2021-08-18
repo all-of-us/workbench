@@ -21,7 +21,7 @@ import {SignInAgain} from 'app/pages/sign-in-again';
 import {SignedIn} from 'app/pages/signed-in/signed-in';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {disabledGuard, signInGuard} from 'app/routing/guards';
-import {bindApiClients, configApi, getApiBaseUrl, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {bindApiClients, configApi, getApiBaseUrl} from 'app/services/swagger-fetch-clients';
 import {useIsUserDisabled} from 'app/utils/access-utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {useAuthentication} from 'app/utils/authentication';
@@ -30,17 +30,12 @@ import {
   LOCAL_STORAGE_API_OVERRIDE_KEY,
   LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
 } from 'app/utils/cookies';
-import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
-import {
-  currentWorkspaceStore,
-  nextWorkspaceWarmupStore, startTitleSetter,
-  urlParamsStore
-} from 'app/utils/navigation';
+import {startTitleSetter, } from 'app/utils/navigation';
 import {
   authStore,
-  runtimeStore,
   serverConfigStore,
-  stackdriverErrorReporterStore, useStore
+  stackdriverErrorReporterStore,
+  useStore
 } from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
@@ -222,11 +217,12 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
+
+
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => {
   const config = useServerConfig();
-  const {authLoaded, isSignedIn} = useAuthentication();
+  const {authLoaded} = useAuthentication();
   const isUserDisabled = useIsUserDisabled();
-  const [pollAborter, setPollAborter] = useState(new AbortController());
   const overriddenUrl = useOverriddenApiUrl();
 
   const loadLocalStorageAccessToken = () => {
@@ -262,86 +258,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
     }
   }, [config]);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      const subs = [];
-      subs.push(
-        urlParamsStore
-          .map(({ns, wsid}) => ({ns, wsid}))
-          .distinctUntilChanged(fp.isEqual)
-          .switchMap(async({ns, wsid}) => {
-            currentWorkspaceStore.next(null);
-            // This needs to happen for testing because we seed the urlParamsStore with {}.
-            // Otherwise it tries to make an api call with undefined, because the component
-            // initializes before we have access to the route.
-            if (!ns || !wsid) {
-              return null;
-            }
-
-            // In a handful of situations - namely on workspace creation/clone,
-            // the application will preload the next workspace to avoid a redundant
-            // refetch here.
-            const nextWs = nextWorkspaceWarmupStore.getValue();
-            nextWorkspaceWarmupStore.next(undefined);
-            if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
-              return nextWs;
-            }
-
-            return await workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
-              return {
-                ...wsResponse.workspace,
-                accessLevel: wsResponse.accessLevel
-              };
-            });
-          })
-          .subscribe(async(workspace) => {
-            if (workspace === null) {
-              // This handles the empty urlParamsStore story.
-              return;
-            }
-            currentWorkspaceStore.next(workspace);
-            runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
-            pollAborter.abort();
-            const newPollAborter = new AbortController();
-            setPollAborter(newPollAborter);
-            try {
-              await LeoRuntimeInitializer.initialize({
-                workspaceNamespace: workspace.namespace,
-                pollAbortSignal: newPollAborter.signal,
-                maxCreateCount: 0,
-                maxDeleteCount: 0,
-                maxResumeCount: 0
-              });
-            } catch (e) {
-              // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
-              // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
-              // initialization here.
-              if (!(e instanceof ExceededActionCountError)) {
-                throw e;
-              }
-            }
-          })
-      );
-
-      subs.push(urlParamsStore
-        .map(({ns, wsid}) => ({ns, wsid}))
-        .debounceTime(1000) // Kind of hacky but this prevents multiple update requests going out simultaneously
-        // due to urlParamsStore being updated multiple times while rendering a route.
-        // What we really want to subscribe to here is an event that triggers on navigation start or end
-        // Debounce 1000 (ms) will throttle the output events to once a second which should be OK for real life usage
-        // since multiple update recent workspace requests (from the same page) within the span of 1 second should
-        // almost always be for the same workspace and extremely rarely for different workspaces
-        .subscribe(({ns, wsid}) => {
-          if (ns && wsid) {
-            workspacesApi().updateRecentWorkspaces(ns, wsid);
-          }
-        })
-      );
-
-      return () => subs.forEach(sub => sub.unsubscribe());
-    }
-  }, [isSignedIn]);
-
   const isCookiesEnabled = cookiesEnabled();
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
@@ -355,37 +271,37 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
         {/* It should be noted that the reason this is currently working is because Switch only */}
         {/* duck-types its children; it cares about them having a 'path' prop but doesn't validate */}
         {/* that they are a Route or a subclass of Route. */}
-          <Switch>
-            <AppRoute exact path='/cookie-policy'>
-              <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
-            </AppRoute>
-            <AppRoute exact path='/login'>
-              <SignInPage routeData={{title: 'Sign In'}}/>
-            </AppRoute>
-            <AppRoute exact path='/session-expired'>
-              <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
-            </AppRoute>
-            <AppRoute exact path='/sign-in-again'>
-              <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
-            </AppRoute>
-            <AppRoute exact path='/user-disabled'>
-              <UserDisabledPage routeData={{title: 'Disabled'}}/>
-            </AppRoute>
-            <AppRoute exact path='/not-found'>
-              <NotFoundPage routeData={{title: 'Not Found'}}/>
-            </AppRoute>
-            <AppRoute
-                path=''
-                exact={false}
+        <Switch>
+          <AppRoute exact path='/cookie-policy'>
+            <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>
+          </AppRoute>
+          <AppRoute exact path='/login'>
+            <SignInPage routeData={{title: 'Sign In'}}/>
+          </AppRoute>
+          <AppRoute exact path='/session-expired'>
+            <SessionExpiredPage routeData={{title: 'You have been signed out'}}/>
+          </AppRoute>
+          <AppRoute exact path='/sign-in-again'>
+            <SignInAgainPage routeData={{title: 'You have been signed out'}}/>
+          </AppRoute>
+          <AppRoute exact path='/user-disabled'>
+            <UserDisabledPage routeData={{title: 'Disabled'}}/>
+          </AppRoute>
+          <AppRoute exact path='/not-found'>
+            <NotFoundPage routeData={{title: 'Not Found'}}/>
+          </AppRoute>
+          <AppRoute
+              path=''
+              exact={false}
+              intermediaryRoute={true}
+              guards={[signInGuard, disabledGuard(isUserDisabled)]}
+          >
+            <SignedInPage
                 intermediaryRoute={true}
-                guards={[signInGuard, disabledGuard(isUserDisabled)]}
-            >
-              <SignedInPage
-                  intermediaryRoute={true}
-                  routeData={{}}
-              />
-            </AppRoute>
-          </Switch>
+                routeData={{}}
+            />
+          </AppRoute>
+        </Switch>
       </AppRouter>
     }
     {

@@ -2,12 +2,11 @@ import {mount, shallow} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/stores'
-import {currentCohortSearchContextStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ModifierPage} from './modifier-page.component';

@@ -24,8 +24,7 @@ import {
   compoundRuntimeOpStore,
   profileStore,
   routeDataStore,
-  serverConfigStore,
-  urlParamsStore
+  serverConfigStore
 } from "app/utils/stores";
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
@@ -51,7 +50,6 @@ beforeEach(() => {
   routeConfigDataStore.next({});
   routeDataStore.set({});
   serverConfigStore.set({});
-  urlParamsStore.set({params: {}});
 });
 // Then we find all the tests.
 const context = require.context('./', true, /\.spec\.ts$/);

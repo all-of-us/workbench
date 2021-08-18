@@ -4,10 +4,10 @@ import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generat
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useLocation} from 'react-router';
-import {useHistory} from 'react-router-dom';
+import {matchPath, useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {URLSearchParams} from 'url';
-import {routeDataStore} from './stores';
+import {MatchParams, routeDataStore} from './stores';
 import {buildPageTitleForEnvironment} from './title';
 
 // This is an optional warmup store which can be populated to avoid redundant
@@ -22,7 +22,6 @@ export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
@@ -61,8 +60,24 @@ export const useNavigation = () => {
 
 export const startTitleSetter = () => {
   document.title = buildPageTitleForEnvironment();
-  routeDataStore.subscribe(({title, pathElementForTitle}) => {
-    document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
+  routeDataStore.subscribe(({title}) => {
+    // Currently, the only path element we use in the title is notebook name.
+    // We'll need to revert to using pathElementForTitle in route data and
+    // put more matchPath if this ever changes.
+    let nbName;
+    const notebookMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:wsid/notebooks/:nbName'
+    });
+    const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
+      path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName'
+    });
+    nbName = notebookMatch
+        ? notebookMatch.params.nbName
+        : notebookPreviewMatch
+            ? notebookPreviewMatch.params.nbName
+            : undefined;
+
+    document.title = buildPageTitleForEnvironment(title || nbName);
   });
 };
 

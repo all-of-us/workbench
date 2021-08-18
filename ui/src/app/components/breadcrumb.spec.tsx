@@ -1,5 +1,5 @@
 import {getTrail} from 'app/components/breadcrumb'
-import {BreadcrumbType, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {registerApiClient} from "app/services/swagger-fetch-clients";
 
 import {WorkspacesApi} from "generated/fetch";

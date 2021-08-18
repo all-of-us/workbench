@@ -1,11 +1,11 @@
 import {queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
-import {routeDataStore, urlParamsStore} from 'app/utils/stores';
+import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter, Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, useLocation, useRouteMatch} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
@@ -67,37 +67,22 @@ const getUserConfirmation = (message, callback) => {
 
   ReactDOM.render(
     <Modal>
-      <ModalTitle>Warning!</ModalTitle>
-      <ModalBody>
-        {message}
-      </ModalBody>
-      <ModalFooter>
-        <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-        <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-      </ModalFooter>
-    </Modal>, modal);
+        <ModalTitle>Warning!</ModalTitle>
+        <ModalBody>
+          {message}
+        </ModalBody>
+        <ModalFooter>
+          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
+          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
+        </ModalFooter>
+      </Modal>, modal);
 };
 
-export const AppRouter = ({children}): React.ReactElement =>
-    <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
+export const AppRouter = ({children}): React.ReactElement => {
+  return <BrowserRouter getUserConfirmation={getUserConfirmation}>{children}</BrowserRouter>;
+};
 
 export const RouteLink = ({path, style = {}, children}): React.ReactElement => <Link style={{...style}} to={path}>{children}</Link>;
-
-const RouteStoreSetter = ({intermediaryRoute, children}) => {
-  const params = useParams();
-
-  useEffect(() => {
-    if (intermediaryRoute) {
-      urlParamsStore.set({...urlParamsStore.get(), ...params});
-    } else {
-      urlParamsStore.set({params: params});
-    }
-  }, [params]);
-
-  return <React.Fragment>
-    {children}
-  </React.Fragment>;
-};
 
 export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, children}): React.ReactElement => {
   const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
@@ -105,7 +90,7 @@ export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, c
   return <Route exact={exact} path={path}>
     {redirectPath
         ? <Redirect to={redirectPath}/>
-        : <RouteStoreSetter intermediaryRoute={intermediaryRoute}>{children}</RouteStoreSetter>
+        : (children)
     }
   </Route>;
 };

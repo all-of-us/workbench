@@ -155,12 +155,6 @@ export interface MatchParams {
   wsid?: string;
 }
 
-export interface UrlParamsStore {
-  params: MatchParams;
-}
-
-export const urlParamsStore = atom<UrlParamsStore>({params: {}});
-
 /**
  * @name useStore
  * @description React hook that will trigger a render when the corresponding store's value changes

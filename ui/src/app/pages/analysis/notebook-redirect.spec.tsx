@@ -5,7 +5,7 @@ import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
@@ -63,11 +63,6 @@ describe('NotebookRedirect', () => {
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
 
     serverConfigStore.set({config: {gsuiteDomain: 'x'}});
-    // urlParamsStore.next({
-    //   ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    //   wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-    //   nbName: 'blah blah'
-    // });
     queryParamsStore.next({
       kernelType: Kernels.R,
       creating: true
