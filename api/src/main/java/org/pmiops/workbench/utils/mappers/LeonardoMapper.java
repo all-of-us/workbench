@@ -13,7 +13,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;

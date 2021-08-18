@@ -286,107 +286,79 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
 export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pdSize}) => {
   const [deleting, setDeleting] = useState(false);
   const [runtimeStatusReq, setRuntimeStatusReq] = useState(RuntimeStatusRequest.DeleteRuntime);
-  if (computeType === ComputeType.Standard) {
-    return <Fragment>
-      <div style={{display: 'flex'}}>
-        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
-                 shape='exclamation-triangle' size='20'/>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
-      </div>
-
-      <div style={styles.confirmWarning}>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
-            Keep persistent disk, delete application configuration and compute profile</label>
-        </h3>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-          Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s stored on your disk.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-          Deletes your application configuration and cloud compute profile, but detaches your persistent disk and saves it for later.
-          The disk will be automatically reattached the next time you create a cloud environment using the standard VM compute type.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-          You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
-        </p>
-      </div>
-      <div style={styles.confirmWarning}>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}/>
-            Delete everything, including persistent disk</label>
-        </h3>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-          Deletes your persistent disk, which will also delete all files on the disk.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-          Also deletes your application configuration and cloud compute profile
-        </p>
-      </div>
-      <div>
-        <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
-          move them to the workspace bucket.</div>
-        <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
-      </div>
-      <FlexRow style={{justifyContent: 'flex-end'}}>
-        <Button
-            type='secondaryLight'
-            aria-label={'Cancel'}
-            disabled={deleting}
-            style={{marginRight: '.6rem'}}
-            onClick={() => onCancel()}>
-          Cancel
-        </Button>
-        <Button
-            aria-label={'Delete'}
-            disabled={deleting}
-            onClick={async() => {
-              setDeleting(true);
-              try {
-                await onConfirm(runtimeStatusReq);
-              } catch (err) {
-                setDeleting(false);
-                throw err;
-              }
-            }}>
-          Delete
-        </Button>
-      </FlexRow>
-    </Fragment>;
-  } else if (computeType === ComputeType.Dataproc) {
-    return <Fragment>
-      <div style={{display: 'flex'}}>
-        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
-                 shape='exclamation-triangle' size='20'/>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
-      </div>
-
-      <div style={styles.confirmWarning}>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
+  const standardvmDeleteOption = <div>
+    <div style={styles.confirmWarning}>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+        <label><input type='radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
+                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
+          Keep persistent disk, delete application configuration and compute profile</label>
+      </h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+        Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s
+        stored on your disk.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+        Deletes your application configuration and cloud compute profile, but detaches your
+        persistent disk and saves it for later.
+        The disk will be automatically reattached the next time you create a cloud environment using
+        the standard VM compute type.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
+        You will continue to incur persistent disk cost at
+        ${formatUsd(diskPricePerMonth * pdSize)} per month.
+      </p>
+    </div>
+    <div style={styles.confirmWarning}>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+        <label><input type='radio'
+                      checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}
+                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}/>
+          Delete everything, including persistent disk</label>
+      </h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+        Deletes your persistent disk, which will also delete all files on the disk.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+        Also deletes your application configuration and cloud compute profile
+      </p>
+    </div>
+  </div>;
+  const dataprocDeleteOption = <div>
+    <div style={styles.confirmWarning}>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+        <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
           Delete application configuration and cloud compute profile
-          </label></h3>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-          You’re about to delete your cloud analysis environment.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-          Deletes your application configuration and cloud compute profile. This will also delete all files on the built-in hard disk.
-        </p>
+        </label></h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+        You’re about to delete your cloud analysis environment.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+        Deletes your application configuration and cloud compute profile. This will also delete all files on the built-in hard disk.
+      </p>
+    </div>
+    <div style={styles.confirmWarning}>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+        <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
+          Delete unattached persistent disk</label>
+      </h3>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+        Deletes your unattached persistent disk, which will also delete all files on the disk.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+        Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
+        You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
+      </p>
+    </div>
+  </div>;
+  return <Fragment>
+      <div style={{display: 'flex'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
       </div>
-      <div style={styles.confirmWarning}>
-        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
-            Delete unattached persistent disk</label>
-        </h3>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-          Deletes your unattached persistent disk, which will also delete all files on the disk.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-          Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
-        </p>
-        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-          You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
-        </p>
-      </div>
+      {computeType === ComputeType.Standard ? standardvmDeleteOption : dataprocDeleteOption}
       <div>
         <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
           move them to the workspace bucket.</div>
@@ -417,9 +389,6 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         </Button>
       </FlexRow>
     </Fragment>;
-
-  }
-
 };
 
 const MachineSelector = ({
@@ -1095,10 +1064,7 @@ export const RuntimePanel = fp.flow(
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const pdSizeReduced = pdExists && selectedPdSize < pdSize;
-  const pdSizeNotReduced = pdExists && selectedPdSize >= pdSize;
   const runtimeExistsWithoutPD = runtimeExists && !pdExists;
-
-
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
@@ -1126,7 +1092,7 @@ export const RuntimePanel = fp.flow(
     // OR (update an existing runtime with no PD attached).
     // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
     // post launch PD when all existing running Runtime shutdown.
-    if (!enablePD || (pdSizeNotReduced && runtimeExists) || runtimeExistsWithoutPD) {
+    if (!enablePD || (pdExists && selectedPdSize >= pdSize && runtimeExists) || runtimeExistsWithoutPD) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,

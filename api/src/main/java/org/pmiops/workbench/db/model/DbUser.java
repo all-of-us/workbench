@@ -94,9 +94,6 @@ public class DbUser {
   private Timestamp profileLastConfirmedTime;
 
   private Timestamp publicationsLastConfirmedTime;
-
-  @VisibleForTesting static final int PD_UUID_PREFIX_SIZE = 4;
-
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
   @Deprecated private Integer moodleId;
