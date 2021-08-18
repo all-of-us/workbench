@@ -945,11 +945,11 @@ describe('RuntimePanel', () => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
     const wrapper = await component({workspace: {
-       ...workspaceStubs[0],
-       accessLevel: WorkspaceAccessLevel.WRITER,
-       billingAccountType: BillingAccountType.USERPROVIDED,
-       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-     }});
+        ...workspaceStubs[0],
+        accessLevel: WorkspaceAccessLevel.WRITER,
+        billingAccountType: BillingAccountType.USERPROVIDED,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      }});
 
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -973,11 +973,11 @@ describe('RuntimePanel', () => {
 
   it('should render disabled panel when creator billing disabled', async () => {
     const wrapper = await component({workspace: {
-       ...workspaceStubs[0],
-       accessLevel: WorkspaceAccessLevel.WRITER,
-       billingStatus: BillingStatus.INACTIVE,
-       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-     }});
+        ...workspaceStubs[0],
+        accessLevel: WorkspaceAccessLevel.WRITER,
+        billingStatus: BillingStatus.INACTIVE,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      }});
 
     const disabledPanel = wrapper.find({'data-test-id': 'runtime-disabled-panel'});
     expect(disabledPanel.exists()).toBeTruthy();
