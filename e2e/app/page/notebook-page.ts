@@ -167,7 +167,8 @@ export default class NotebookPage extends NotebookFrame {
       }
     }
     // Throws exception if not ready.
-    throw new Error(`Notebook kernel is not idle. Actual kernel status is ${await this.getKernelStatus()}.`);
+    const status = await this.getKernelStatus();
+    throw new Error(`Notebook kernel is not idle. Actual kernel status is ${status}.`);
   }
 
   async getKernelStatus(): Promise<KernelStatus | string> {
