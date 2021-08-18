@@ -190,22 +190,22 @@ export const Breadcrumb = fp.flow(
       const workspaceMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid'
       });
-      const {ns, wsid} = workspaceMatch ? workspaceMatch.params : {};
+      const {ns = '', wsid = ''} = workspaceMatch ? workspaceMatch.params : {};
 
       const cohortMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/cohorts/:cid'
       });
-      const {cid} = cohortMatch ? cohortMatch.params : {};
+      const {cid = ''} = cohortMatch ? cohortMatch.params : {};
 
       const conceptSetMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/concepts/sets/:csid'
       });
-      const {csid} = conceptSetMatch ? conceptSetMatch.params : {};
+      const {csid = ''} = conceptSetMatch ? conceptSetMatch.params : {};
 
       const participantMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
       });
-      const {pid} = participantMatch ? participantMatch.params : {};
+      const {pid = ''} = participantMatch ? participantMatch.params : {};
 
       let nbName;
       const notebookMatch = matchPath<MatchParams>(location.pathname, {
