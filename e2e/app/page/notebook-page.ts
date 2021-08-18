@@ -228,8 +228,12 @@ export default class NotebookPage extends NotebookFrame {
     if (code !== undefined && codeFile !== undefined) {
       throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
-    const notebookCode = code ? code : fs.readFileSync(codeFile, 'ascii');
-    logger.info(`Typing notebook code:\n--------${notebookCode}\n--------`);
+    let notebookCode;
+    if (code !== undefined) {
+      notebookCode = code;
+    } else if (codeFile !== undefined) {
+      notebookCode = fs.readFileSync(codeFile, 'ascii');
+    }
 
     await this.waitForKernelIdle(60000, 5000);
     const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
@@ -238,14 +242,17 @@ export default class NotebookPage extends NotebookFrame {
     // autoCloseBrackets is true by default for R code cells.
     // Puppeteer types in every character of code, resulting in extra brackets.
     // Workaround: Type code in Markdown cell, then change to Code cell to run.
-    if (markdownWorkaround) {
-      await this.changeToMarkdownCell();
-      const markdownCell = this.findCell(cellIndex, CellType.Markdown);
-      const markdownCellInput = await markdownCell.focus();
-      await markdownCellInput.type(notebookCode);
-      await this.changeToCodeCell();
-    } else {
-      await cellInputTextbox.type(notebookCode);
+    if (notebookCode) {
+      if (markdownWorkaround) {
+        await this.changeToMarkdownCell();
+        const markdownCell = this.findCell(cellIndex, CellType.Markdown);
+        const markdownCellInput = await markdownCell.focus();
+        await markdownCellInput.type(notebookCode);
+        await this.changeToCodeCell();
+      } else {
+        await cellInputTextbox.type(notebookCode);
+      }
+      logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
     await this.run();
