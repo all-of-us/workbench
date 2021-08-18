@@ -18,7 +18,9 @@ import {
   withUserProfile
 } from 'app/utils';
 import {
-  ComputeType, diskPrice, diskPricePerMonth,
+  ComputeType,
+  diskPrice,
+  diskPricePerMonth,
   findMachineByName,
   Machine,
   machineRunningCost,
@@ -48,7 +50,8 @@ import {
   BillingAccountType,
   BillingStatus,
   CdrVersionTiersResponse,
-  DataprocConfig, DiskType,
+  DataprocConfig,
+  DiskType,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus
@@ -485,11 +488,10 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
 };
 
 const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
-  return <FlexColumn>
-
+  return <div>
     <h3 style={{...styles.sectionHeader, ...styles.bold}} >Persistent Disk (GB)</h3>
     <div> Persistent disks store analysis data.
-      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
+      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'> Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
     <InputNumber id={`${idPrefix}-disk`}
@@ -501,7 +503,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
                  inputStyle={styles.inputNumber}
                  onChange={({value}) => onChange(value)}
     />
-  </FlexColumn>;
+  </div>;
 };
 
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
@@ -797,7 +799,7 @@ const CostEstimator = ({
           </div>
         }>
           <div
-              style={{fontSize: '20px', color: costTextColor}}
+              style={{fontSize: '15px', color: costTextColor}}
               data-test-id='running-cost'
           >
             {formatUsd(runningCost)}/hr
@@ -813,7 +815,7 @@ const CostEstimator = ({
           </div>
         }>
           <div
-              style={{fontSize: '20px', color: costTextColor}}
+              style={{fontSize: '15px', color: costTextColor}}
               data-test-id='storage-cost'
           >
             {formatUsd(storageCost)}/hr
@@ -823,7 +825,7 @@ const CostEstimator = ({
     <FlexColumn>
       <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
         <div
-            style={{fontSize: '20px', color: costTextColor}}
+            style={{fontSize: '15px', color: costTextColor}}
             data-test-id='pd-cost'
         >
           {formatUsd(pdSize * diskPrice)}/hr
@@ -1001,7 +1003,7 @@ export const RuntimePanel = fp.flow(
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const pdExists = !!persistentDisk;
+  const pdExists = enablePD && !!persistentDisk;
   const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
@@ -1063,8 +1065,8 @@ export const RuntimePanel = fp.flow(
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
-  const pdSizeReduced = pdExists && selectedPdSize < pdSize;
-  const runtimeExistsWithoutPD = runtimeExists && !pdExists;
+  const pdSizeReduced = selectedPdSize < pdSize;
+  const gceWithoutPdExists = runtimeExists && initialCompute === ComputeType.Standard && !pdExists;
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
@@ -1092,7 +1094,7 @@ export const RuntimePanel = fp.flow(
     // OR (update an existing runtime with no PD attached).
     // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
     // post launch PD when all existing running Runtime shutdown.
-    if (!enablePD || (pdExists && selectedPdSize >= pdSize && runtimeExists) || runtimeExistsWithoutPD) {
+    if (!enablePD || (pdExists && !pdSizeReduced && runtimeExists) || gceWithoutPdExists) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,
@@ -1247,7 +1249,7 @@ export const RuntimePanel = fp.flow(
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && runtimeCanBeCreated || pdSizeReduced;
+      && runtimeCanBeCreated || pdExists && pdSizeReduced;
 
   const renderUpdateButton = () => {
     return <Button
@@ -1301,7 +1303,7 @@ export const RuntimePanel = fp.flow(
             </Fragment>
       ],
       [PanelContent.DeleteRuntime, () => {
-        if (enablePD && pdExists) {
+        if (pdExists) {
           return  <ConfirmDeleteRuntimeWithPD
               onConfirm={async(runtimeStatusReq) => {
                 await setRuntimeStatus(runtimeStatusReq);
@@ -1356,7 +1358,7 @@ export const RuntimePanel = fp.flow(
                   onChange={(value) => setSelectedMachine(value)}
                   validMachineTypes={validMainMachineTypes}
                   machineType={machineName}/>
-                {(!enablePD && runtimeExistsWithoutPD || selectedCompute !== ComputeType.Standard) ?
+                {(gceWithoutPdExists || selectedCompute !== ComputeType.Standard) &&
                     <DiskSizeSelector
                         idPrefix='runtime'
                         selectedDiskSize={selectedDiskSize}
@@ -1365,8 +1367,7 @@ export const RuntimePanel = fp.flow(
                         }}
                         disabled={disableControls}
                         diskSize={diskSize}
-                    /> : null
-                }
+                    />}
              </div>
              <FlexColumn style={{marginTop: '1rem'}}>
                <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
@@ -1389,7 +1390,7 @@ export const RuntimePanel = fp.flow(
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              {enablePD && selectedCompute === ComputeType.Standard && !runtimeExistsWithoutPD &&
+              {enablePD && selectedCompute === ComputeType.Standard && !gceWithoutPdExists &&
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
@@ -1418,7 +1419,7 @@ export const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {enablePD && !runtimeExists && pdExists ?
+        {!runtimeExists && pdExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(
@@ -1439,7 +1440,7 @@ export const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {!runtimeExists && !pdSizeReduced ? renderCreateButton() : renderNextButton()}
+              {!runtimeExists && (pdExists && !pdSizeReduced) ? renderCreateButton() : renderNextButton()}
             </FlexRow>
         }
          </Fragment>],
