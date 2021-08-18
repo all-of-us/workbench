@@ -67,7 +67,7 @@ export default class DataResourceCard extends CardBase {
     super(page);
   }
 
-  async findCard(resourceName: string, cardType: ResourceCard, timeout = 3000): Promise<DataResourceCard | null> {
+  async findCard(resourceName: string, cardType: ResourceCard, timeout = 30000): Promise<DataResourceCard | null> {
     const selector =
       DataResourceCardSelector.cardRootXpath +
       `[.//*[${DataResourceCardSelector.cardTypeXpath} and text()="${cardType}"]]` +
