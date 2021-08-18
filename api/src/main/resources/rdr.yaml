@@ -157,6 +157,8 @@ definitions:
         $ref: '#/definitions/RdrWorkspaceDemographic'
       cdrVersionName: 
         type: string
+      accessTier: 
+        type: string
 
   RdrWorkspaceDemographic:
     type: object
