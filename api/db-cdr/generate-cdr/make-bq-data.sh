@@ -120,14 +120,12 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\`
 (id,category,domain,name,description,concept_count,participant_count,is_standard,sort_order)
 VALUES
-(1,'Standard Domains',0,'Conditions','Conditions',0,0,1,1),
-(2,'Standard Domains',3,'Drug Exposures','Drug Exposures',0,0,1,2),
-(3,'Standard Domains',4,'Labs and Measurements','Labs and Measurements',0,0,1,3),
-(4,'Standard Domains',5,'Observations','Observations',0,0,1,4),
-(5,'Standard Domains',6,'Procedures','Procedures',0,0,1,5),
-(6,'Source Domains',0,'Conditions (ICD9, ICD10)','Conditions',43954,96528,0,6),
-(7,'Source Domains',6,'Procedures (ICD9, ICD10, CPT)','Procedures',33803,48619,0,7),
-(8,'Program Physical Measurements',19,'Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process(program physical measurements)',0,0,0,8)"
+(1,'Domains',0,'Conditions','Conditions',0,0,1,1),
+(2,'Domains',3,'Drug Exposures','Drug Exposures',0,0,1,2),
+(3,'Domains',4,'Labs and Measurements','Labs and Measurements',0,0,1,3),
+(4,'Domains',5,'Observations','Observations',0,0,1,4),
+(5,'Domains',6,'Procedures','Procedures',0,0,1,5),
+(6,'Program Physical Measurements',19,'Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process(program physical measurements)',0,0,0,8)"
 
 # Populate survey_module
 #################
@@ -423,56 +421,6 @@ from (select count(distinct se.person_id) as participant_count
       and se.is_standard = 1) c
 where d.domain = 6
 and d.is_standard = 1"
-
-# Set concept_count for source Conditions
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
-set d.concept_count = c.concept_count
-from (select count(distinct concept_id) as concept_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
-      where domain_id = 'CONDITION'
-      and is_standard = 0
-      and type in ('ICD10CM', 'ICD9CM')) c
-where d.domain = 0
-and d.is_standard = 0"
-
-# Set participant_count for source Conditions
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
-set d.participant_count = c.participant_count
-from (select count(distinct co.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on c.concept_id = co.condition_source_concept_id
-      where c.domain_id = 'CONDITION'
-      and c.is_standard = 0
-      and c.type in ('ICD10CM', 'ICD9CM')) c
-where d.domain = 0
-and d.is_standard = 0"
-
-# Set concept_count for source Procedures
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
-set d.concept_count = c.concept_count
-from (select count(distinct concept_id) as concept_count
-      from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
-      where domain_id = 'PROCEDURE'
-      and is_standard = 0
-      and type in ('ICD9Proc', 'ICD10PCS', 'CPT4')) c
-where d.domain = 6
-and d.is_standard = 0"
-
-# Set participant_count for source Procedures
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_card\` d
-set d.participant_count = c.participant_count
-from (select count(distinct po.person_id) as participant_count
-      from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
-      join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c on c.concept_id = po.procedure_source_concept_id
-      where c.domain_id = 'PROCEDURE'
-      and c.is_standard = 0
-      and c.type in ('ICD9Proc', 'ICD10PCS', 'CPT4')) c
-where d.domain = 6
-and d.is_standard = 0"
 
 # Set concept_count for source PM
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
