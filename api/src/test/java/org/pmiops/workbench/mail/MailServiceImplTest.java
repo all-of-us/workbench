@@ -143,6 +143,7 @@ public class MailServiceImplTest extends SpringTest {
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Credit Card")
                       && gotHtml.contains("given name family name")
+                      && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: No");
                 }));
@@ -173,6 +174,7 @@ public class MailServiceImplTest extends SpringTest {
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Purchase Order/Other")
                       && gotHtml.contains("given name family name")
+                      && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
@@ -204,6 +206,7 @@ public class MailServiceImplTest extends SpringTest {
                   return gotHtml.contains("username@research.org")
                       && gotHtml.contains("Purchase Order/Other")
                       && gotHtml.contains("given name family name")
+                      && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
                           "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
@@ -238,7 +241,7 @@ public class MailServiceImplTest extends SpringTest {
     user.setFamilyName("family name");
     user.setGivenName("given name");
     user.setContactEmail("user@contact.com");
-    user.setUsername("username");
+    user.setUsername("username@research.org");
     return user;
   }
 
