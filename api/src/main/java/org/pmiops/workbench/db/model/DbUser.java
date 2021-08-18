@@ -94,6 +94,7 @@ public class DbUser {
   private Timestamp profileLastConfirmedTime;
 
   private Timestamp publicationsLastConfirmedTime;
+
   // potentially obsolete access module fields.  These are likely to be deleted in the near future.
   // Moodle badges are indexed by username, not this value.  See ComplianceService.
   @Deprecated private Integer moodleId;
