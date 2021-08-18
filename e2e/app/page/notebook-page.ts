@@ -162,9 +162,7 @@ export default class NotebookPage extends NotebookFrame {
         return true;
       }
       ready = idle;
-      if (Date.now() - startTime + sleepInterval < timeOut) {
-        await this.page.waitForTimeout(sleepInterval);
-      }
+      await this.page.waitForTimeout(sleepInterval);
     }
     // Throws exception if not ready.
     const status = await this.getKernelStatus();
