@@ -1,14 +1,19 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import {
+  ExceededActionCountError,
+  LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializer,
+} from 'app/utils/leo-runtime-initializer';
 import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
   diskStore,
   markCompoundRuntimeOperationCompleted,
   registerCompoundRuntimeOperation,
-  runtimeStore, serverConfigStore,
+  runtimeStore,
+  serverConfigStore,
   useStore
 } from 'app/utils/stores';
 
@@ -21,6 +26,7 @@ const {useState, useEffect} = React;
 export enum RuntimeStatusRequest {
   DeleteRuntime = 'DeleteRuntime',
   DeleteRuntimeAndPD = 'DeleteRuntimeAndPD',
+  DeletePD = 'DeletePD',
   Start = 'Start',
   Stop = 'Stop'
 }
@@ -37,7 +43,8 @@ export enum RuntimeDiffState {
   NO_CHANGE,
   CAN_UPDATE_IN_PLACE,
   CAN_UPDATE_WITH_REBOOT,
-  NEEDS_DELETE
+  NEEDS_DELETE_RUNTIME,
+  NEEDS_DELETE_PD
 }
 
 export interface RuntimeConfig {
@@ -63,7 +70,13 @@ export const diffsToUpdateMessaging = (diffs: RuntimeDiff[]): UpdateMessaging =>
   const diffType = findMostSevereDiffState(diffs.map(({differenceType}) => differenceType));
   return switchCase(
     diffType,
-    [RuntimeDiffState.NEEDS_DELETE, () => ({
+    [RuntimeDiffState.NEEDS_DELETE_PD, () => ({
+      applyAction: 'APPLY & RECREATE',
+      warn: 'Reducing the size of a persistent disk requires it to be deleted and recreated. This will delete all files on the disk.',
+      warnMore: 'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, move them to the workspace bucket. \n' +
+          'Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.'
+    })],
+    [RuntimeDiffState.NEEDS_DELETE_RUNTIME, () => ({
       applyAction: 'APPLY & RECREATE',
       warn: 'These changes require deletion and re-creation of your cloud ' +
             'environment to take effect.',
@@ -89,7 +102,7 @@ const compareComputeTypes = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfi
     previous: oldRuntime.computeType,
     new: newRuntime.computeType,
     differenceType: oldRuntime.computeType === newRuntime.computeType ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -122,7 +135,7 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
   let diffType;
   if (newRuntime.diskSize < oldRuntime.diskSize) {
     desc = 'Decease ' + desc;
-    diffType = RuntimeDiffState.NEEDS_DELETE;
+    diffType = RuntimeDiffState.NEEDS_DELETE_RUNTIME;
   } else if (newRuntime.diskSize > oldRuntime.diskSize) {
     desc = 'Increase ' + desc;
     diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
@@ -139,11 +152,11 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
 };
 
 const comparePdSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  let desc = 'Disk Size';
+  let desc = 'Persistent Disk Size';
   let diffType;
   if (newRuntime.pdSize < oldRuntime.pdSize) {
     desc = 'Decease ' + desc;
-    diffType = RuntimeDiffState.NEEDS_DELETE;
+    diffType = RuntimeDiffState.NEEDS_DELETE_PD;
   } else if (newRuntime.pdSize > oldRuntime.pdSize) {
     desc = 'Increase ' + desc;
     diffType = RuntimeDiffState.CAN_UPDATE_WITH_REBOOT;
@@ -171,7 +184,7 @@ const compareWorkerCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig):
     desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
-    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+    differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -187,7 +200,7 @@ const compareWorkerMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfi
     desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
-    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+    differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -204,7 +217,7 @@ const compareDataprocWorkerDiskSize = (oldRuntime: RuntimeConfig, newRuntime: Ru
     previous: oldDiskSize.toString() + ' GB',
     new: newDiskSize.toString() + ' GB',
     differenceType: oldDiskSize === newDiskSize ?
-      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -271,9 +284,10 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
 };
 
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
+  const computeType = newRuntime.computeType;
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize, comparePdSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, computeType === ComputeType.Standard ? comparePdSize : compareDiskSize]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
@@ -353,6 +367,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     const resolutionCondition: (r: Runtime) => boolean = switchCase(runtimeStatus,
         [RuntimeStatusRequest.DeleteRuntime, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
         [RuntimeStatusRequest.DeleteRuntimeAndPD, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+        [RuntimeStatusRequest.DeletePD, () => (r) => r.status === RuntimeStatus.Running || r.status === RuntimeStatus.Stopped],
         [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
         [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
     );
@@ -384,6 +399,9 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
       }],
       [RuntimeStatusRequest.DeleteRuntimeAndPD, () => {
         return runtimeApi().deleteRuntime(currentWorkspaceNamespace, true);
+      }],
+      [RuntimeStatusRequest.DeletePD, () => {
+        return disksApi().deleteDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name);
       }],
       [RuntimeStatusRequest.Start, () => {
         return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
@@ -420,18 +438,26 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
       try {
+        console.log('NEEDS_DELETE_PD', runtime, requestedRuntime);
         if (runtime) {
           const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
           const pdExists = !!detachableDisk;
-          const pdSizeReduced = pdExists && (toRuntimeConfig(requestedRuntime).pdSize < detachableDisk.size);
+          const pdIncreased = pdExists && (toRuntimeConfig(requestedRuntime).pdSize > detachableDisk.size);
 
-          if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE)) {
-            if (runtime.status !== RuntimeStatus.Deleted) {
-              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, pdSizeReduced, {
+          if (enablePD && runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
+            if (runtime.status === RuntimeStatus.Deleted || runtime.dataprocConfig) {
+              await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
                 signal: aborter.signal
               });
-            } else if (enablePD && pdSizeReduced) {
-              await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
+            }
+            if (runtime.status !== RuntimeStatus.Deleted) {
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
+                signal: aborter.signal
+              });
+            }
+          } else if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME)) {
+            if (runtime.status !== RuntimeStatus.Deleted) {
+              await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
                 signal: aborter.signal
               });
             }
@@ -449,7 +475,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
-            } else if (runtime.status === RuntimeStatus.Deleted && pdExists && enablePD) {
+            } else if (runtime.status === RuntimeStatus.Deleted && enablePD && pdIncreased) {
               await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }

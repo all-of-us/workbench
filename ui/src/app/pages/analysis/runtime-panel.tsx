@@ -253,7 +253,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
     </div>
       <div>
         <div>If you want to save some files permanently, such as input data, analysis outputs,
-          or installed packages,<a href= 'https://support.terra.bio/hc/en-us/articles/360026639112'>move them to the workspace bucket.</a>
+          or installed packages,move them to the workspace bucket.
         </div>
         <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
     </div>
@@ -283,74 +283,143 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
   </Fragment>;
 };
 
-export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, pdSize}) => {
+export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pdSize}) => {
   const [deleting, setDeleting] = useState(false);
-  const [keepPD, setKeepPD] = useState(true);
-  return <Fragment>
-    <div style={{display: 'flex'}}>
-      <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
-               shape='exclamation-triangle' size='20'/>
-      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
-    </div>
+  const [runtimeStatusReq, setRuntimeStatusReq] = useState(RuntimeStatusRequest.DeleteRuntime);
+  if (computeType === ComputeType.Standard) {
+    return <Fragment>
+      <div style={{display: 'flex'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
+      </div>
 
-    <div style={styles.confirmWarning}>
-      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={keepPD === true} onChange={() => setKeepPD(true)}/>
-        Keep persistent disk, delete application configuration and compute profile</label>
-      </h3>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-        Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s stored on your disk.
-      </p>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-        Deletes your application configuration and cloud compute profile, but detaches your persistent disk and saves it for later.
-        The disk will be automatically reattached the next time you create a cloud environment using the standard VM compute type.
-      </p>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at ${diskPricePerMonth * pdSize} per month.
-      </p>
-    </div>
-    <div style={styles.confirmWarning}>
-      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={keepPD === false} onChange={() => setKeepPD(false)}/>
-        Delete everything, including persistent disk</label>
-      </h3>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-        Deletes your persistent disk, which will also delete all files on the disk.
-      </p>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-        Also deletes your application configuration and cloud compute profile
-      </p>
-    </div>
-    <div>
-      <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
-        move them to the workspace bucket.</div>
-      <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
-    </div>
-    <FlexRow style={{justifyContent: 'flex-end'}}>
-      <Button
-          type='secondaryLight'
-          aria-label={'Cancel'}
-          disabled={deleting}
-          style={{marginRight: '.6rem'}}
-          onClick={() => onCancel()}>
-        Cancel
-      </Button>
-      <Button
-          aria-label={'Delete'}
-          disabled={deleting}
-          onClick={async() => {
-            setDeleting(true);
-            try {
-              await onConfirm(keepPD);
-            } catch (err) {
-              setDeleting(false);
-              throw err;
-            }
-          }}>
-        Delete
-      </Button>
-    </FlexRow>
-  </Fragment>;
+      <div style={styles.confirmWarning}>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
+            Keep persistent disk, delete application configuration and compute profile</label>
+        </h3>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+          Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s stored on your disk.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+          Deletes your application configuration and cloud compute profile, but detaches your persistent disk and saves it for later.
+          The disk will be automatically reattached the next time you create a cloud environment using the standard VM compute type.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
+          You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
+        </p>
+      </div>
+      <div style={styles.confirmWarning}>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}/>
+            Delete everything, including persistent disk</label>
+        </h3>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+          Deletes your persistent disk, which will also delete all files on the disk.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+          Also deletes your application configuration and cloud compute profile
+        </p>
+      </div>
+      <div>
+        <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
+          move them to the workspace bucket.</div>
+        <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
+      </div>
+      <FlexRow style={{justifyContent: 'flex-end'}}>
+        <Button
+            type='secondaryLight'
+            aria-label={'Cancel'}
+            disabled={deleting}
+            style={{marginRight: '.6rem'}}
+            onClick={() => onCancel()}>
+          Cancel
+        </Button>
+        <Button
+            aria-label={'Delete'}
+            disabled={deleting}
+            onClick={async() => {
+              setDeleting(true);
+              try {
+                await onConfirm(runtimeStatusReq);
+              } catch (err) {
+                setDeleting(false);
+                throw err;
+              }
+            }}>
+          Delete
+        </Button>
+      </FlexRow>
+    </Fragment>;
+  } else if (computeType === ComputeType.Dataproc) {
+    return <Fragment>
+      <div style={{display: 'flex'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
+                 shape='exclamation-triangle' size='20'/>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
+      </div>
+
+      <div style={styles.confirmWarning}>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
+          Delete application configuration and cloud compute profile
+          </label></h3>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+          You’re about to delete your cloud analysis environment.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+          Deletes your application configuration and cloud compute profile. This will also delete all files on the built-in hard disk.
+        </p>
+      </div>
+      <div style={styles.confirmWarning}>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
+          <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
+            Delete unattached persistent disk</label>
+        </h3>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
+          Deletes your unattached persistent disk, which will also delete all files on the disk.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+          Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
+        </p>
+        <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
+          You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
+        </p>
+      </div>
+      <div>
+        <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
+          move them to the workspace bucket.</div>
+        <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
+      </div>
+      <FlexRow style={{justifyContent: 'flex-end'}}>
+        <Button
+            type='secondaryLight'
+            aria-label={'Cancel'}
+            disabled={deleting}
+            style={{marginRight: '.6rem'}}
+            onClick={() => onCancel()}>
+          Cancel
+        </Button>
+        <Button
+            aria-label={'Delete'}
+            disabled={deleting}
+            onClick={async() => {
+              setDeleting(true);
+              try {
+                await onConfirm(runtimeStatusReq);
+              } catch (err) {
+                setDeleting(false);
+                throw err;
+              }
+            }}>
+          Delete
+        </Button>
+      </FlexRow>
+    </Fragment>;
+
+  }
+
 };
 
 const MachineSelector = ({
@@ -728,6 +797,7 @@ const CostEstimator = ({
   const {
     computeType,
     diskSize,
+    pdSize,
     machine,
     dataprocConfig
   } = runtimeParameters;
@@ -738,9 +808,9 @@ const CostEstimator = ({
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
   const workerMachine = findMachineByName(workerMachineType);
-
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   const costConfig = {
-    computeType, masterMachine: machine, masterDiskSize: diskSize,
+    computeType, masterMachine: machine, masterDiskSize: enablePD && computeType === ComputeType.Standard ? pdSize : diskSize,
     numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
   };
   const runningCost = machineRunningCost(costConfig);
@@ -781,6 +851,15 @@ const CostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
+    <FlexColumn>
+      <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
+        <div
+            style={{fontSize: '20px', color: costTextColor}}
+            data-test-id='pd-cost'
+        >
+          {formatUsd(pdSize * diskPrice)}/hr
+        </div>
+    </FlexColumn>
   </FlexRow>;
 };
 
@@ -949,7 +1028,7 @@ export const RuntimePanel = fp.flow(
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
   const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
-  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
+  const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize ? gceConfig.diskSize : defaultDiskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
@@ -1202,12 +1281,12 @@ export const RuntimePanel = fp.flow(
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && runtimeCanBeCreated;
+      && runtimeCanBeCreated || pdSizeReduced;
 
   const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
-      disabled={!(runtimeCanBeUpdated || pdSizeReduced)}
+      disabled={!runtimeCanBeUpdated}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onClose();
@@ -1231,7 +1310,7 @@ export const RuntimePanel = fp.flow(
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
-      disabled={!(runtimeCanBeUpdated || pdSizeReduced)}
+      disabled={!runtimeCanBeUpdated}
       onClick={() => {
         setPanelContent(PanelContent.Confirm);
       }}>
@@ -1256,13 +1335,14 @@ export const RuntimePanel = fp.flow(
             </Fragment>
       ],
       [PanelContent.DeleteRuntime, () => {
-        if (enablePD && selectedCompute === ComputeType.Standard && pdExists) {
+        if (enablePD && pdExists) {
           return  <ConfirmDeleteRuntimeWithPD
-              onConfirm={async(keepPD) => {
-                await setRuntimeStatus(keepPD ? RuntimeStatusRequest.DeleteRuntime : RuntimeStatusRequest.DeleteRuntimeAndPD);
+              onConfirm={async(runtimeStatusReq) => {
+                await setRuntimeStatus(runtimeStatusReq);
                 onClose();
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
+              computeType = {initialCompute}
               pdSize = {selectedPdSize}
           />;
         } else {
@@ -1343,7 +1423,7 @@ export const RuntimePanel = fp.flow(
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              {enablePD && selectedCompute === ComputeType.Standard && !runtimeExistsWithoutPD ?
+              {enablePD && selectedCompute === ComputeType.Standard && !runtimeExistsWithoutPD &&
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
@@ -1353,7 +1433,7 @@ export const RuntimePanel = fp.flow(
                       }}
                       disabled={disableControls}
                       diskSize={pdSize}
-                  /> </div> : null
+                  /> </div>
               }
             </FlexRow>
             </div>
@@ -1372,7 +1452,7 @@ export const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {enablePD && selectedCompute === ComputeType.Standard && !runtimeExists && pdExists ?
+        {enablePD && !runtimeExists && pdExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(

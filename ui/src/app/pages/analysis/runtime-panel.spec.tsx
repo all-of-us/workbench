@@ -1,15 +1,22 @@
 import {mount} from 'enzyme';
-import {act} from 'react-dom/test-utils';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {act} from 'react-dom/test-utils';
 
 import {Button, Link} from 'app/components/buttons';
-import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
-import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
+import {Spinner} from 'app/components/spinners';
+import {ConfirmDelete, Props, RuntimePanel} from 'app/pages/analysis/runtime-panel';
 import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
-import {findMachineByName, ComputeType} from 'app/utils/machines';
+import {ComputeType, findMachineByName} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
+import {
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  profileStore,
+  runtimeStore,
+  serverConfigStore
+} from 'app/utils/stores';
 import {
   ProfileApi,
   RuntimeConfigurationType,
@@ -17,22 +24,15 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
+import {BillingAccountType, BillingStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {defaultDataprocConfig, defaultGceConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {BillingAccountType, BillingStatus} from 'generated/fetch';
-import {
-  cdrVersionStore,
-  clearCompoundRuntimeOperations,
-  serverConfigStore,
-  runtimeStore,
-  profileStore
-} from 'app/utils/stores';
 
 
 describe('RuntimePanel', () => {
@@ -44,13 +44,13 @@ describe('RuntimePanel', () => {
   const iconsDir = '/assets/icons';
 
   const component = async(propOverrides?: object) => {
-    const allProps = {...props, ...propOverrides}
+    const allProps = {...props, ...propOverrides};
     const c = mount(<RuntimePanel {...allProps}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };
 
-  beforeEach(async () => {
+  beforeEach(async() => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {...defaultServerConfig}});
 
@@ -107,7 +107,7 @@ describe('RuntimePanel', () => {
 
   const enterNumberInput = async(wrapper, id, value) => {
     // TODO: Find a way to invoke this without props.
-    act(() => {wrapper.find(id).first().prop('onChange')({value} as any);});
+    act(() => {wrapper.find(id).first().prop('onChange')({value} as any); });
     await waitOneTickAndUpdate(wrapper);
   };
 
@@ -171,7 +171,11 @@ describe('RuntimePanel', () => {
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
     // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 100GB disk
-    expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk')
+    if (!serverConfigStore.get().config.enablePersistentDisk) {
+      expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk');
+    } else {
+      expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB persistent disk');
+    }
   });
 
   it('should allow creation when no runtime exists with defaults', async() => {
@@ -183,7 +187,11 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
+    if (!serverConfigStore.get().config.enablePersistentDisk) {
+      expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
+    } else {
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual('n1-standard-4');
+    }
   });
 
   it('should show customize after create', async() => {
@@ -287,27 +295,29 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with GCE config', async() => {
-    runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});;
+    if (!serverConfigStore.get().config.enablePersistentDisk) {
+      runtimeApiStub.runtime = null;
+      runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
-    const wrapper = await component();
+      const wrapper = await component();
 
-    await mustClickButton(wrapper, 'Customize');
+      await mustClickButton(wrapper, 'Customize');
 
-    await pickMainCpu(wrapper, 8);
-    await pickMainRam(wrapper, 52);
-    await pickMainDiskSize(wrapper, 75);
+      await pickMainCpu(wrapper, 8);
+      await pickMainRam(wrapper, 52);
+      await pickMainDiskSize(wrapper, 75);
 
-    await mustClickButton(wrapper, 'Create');
+      await mustClickButton(wrapper, 'Create');
 
-    expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.configurationType)
-      .toEqual(RuntimeConfigurationType.UserOverride);
-    expect(runtimeApiStub.runtime.gceConfig).toEqual({
-      machineType: 'n1-highmem-8',
-      diskSize: 75
-    });
-    expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.configurationType)
+        .toEqual(RuntimeConfigurationType.UserOverride);
+      expect(runtimeApiStub.runtime.gceConfig).toEqual({
+        machineType: 'n1-highmem-8',
+        diskSize: 75
+      });
+      expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
+    }
   });
 
   it('should allow creation with Dataproc config', async() => {
@@ -318,12 +328,12 @@ describe('RuntimePanel', () => {
 
     await mustClickButton(wrapper, 'Customize');
 
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
     // master settings
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
     await pickMainDiskSize(wrapper, 100);
-
-    await pickComputeType(wrapper, ComputeType.Dataproc);
 
     // worker settings
     await pickWorkerCpu(wrapper, 8);
@@ -870,14 +880,14 @@ describe('RuntimePanel', () => {
 
   it('should display a compute-none when there is no runtime', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
     const wrapper = await component();
     expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
   });
 
   it('should prevent runtime creation when disk size is invalid', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -926,7 +936,7 @@ describe('RuntimePanel', () => {
 
   it('should prevent runtime creation when running cost is too high for free tier', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -943,13 +953,13 @@ describe('RuntimePanel', () => {
 
   it('should prevent runtime creation when running cost is too high for paid tier', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
     const wrapper = await component({workspace: {
-        ...workspaceStubs[0],
-        accessLevel: WorkspaceAccessLevel.WRITER,
-        billingAccountType: BillingAccountType.USERPROVIDED,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-      }});
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountType: BillingAccountType.USERPROVIDED,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+    }});
 
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -971,13 +981,13 @@ describe('RuntimePanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should render disabled panel when creator billing disabled', async () => {
+  it('should render disabled panel when creator billing disabled', async() => {
     const wrapper = await component({workspace: {
-        ...workspaceStubs[0],
-        accessLevel: WorkspaceAccessLevel.WRITER,
-        billingStatus: BillingStatus.INACTIVE,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-      }});
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingStatus: BillingStatus.INACTIVE,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+    }});
 
     const disabledPanel = wrapper.find({'data-test-id': 'runtime-disabled-panel'});
     expect(disabledPanel.exists()).toBeTruthy();

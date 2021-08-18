@@ -80,16 +80,16 @@ describe('runtime-utils', () => {
 
   test.each([
     [[], undefined],
-    [[RuntimeDiffState.NEEDS_DELETE], RuntimeDiffState.NEEDS_DELETE],
+    [[RuntimeDiffState.NEEDS_DELETE_RUNTIME], RuntimeDiffState.NEEDS_DELETE_RUNTIME],
     [
       [
         RuntimeDiffState.CAN_UPDATE_IN_PLACE,
-        RuntimeDiffState.NEEDS_DELETE,
+        RuntimeDiffState.NEEDS_DELETE_RUNTIME,
         RuntimeDiffState.NO_CHANGE,
         RuntimeDiffState.CAN_UPDATE_WITH_REBOOT,
         RuntimeDiffState.NO_CHANGE,
       ],
-      RuntimeDiffState.NEEDS_DELETE
+      RuntimeDiffState.NEEDS_DELETE_RUNTIME
     ],
     [
       [
