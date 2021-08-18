@@ -54,12 +54,12 @@ import {
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
-<<<<<<< HEAD
-import {getBillingAccountInfo, hasBillingScope} from 'app/utils/workbench-gapi-client';
-=======
+import {
+  ensureBillingScope,
+  getBillingAccountInfo,
+  hasBillingScope
+} from 'app/utils/workbench-gapi-client';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
->>>>>>> origin
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -279,6 +279,7 @@ export interface WorkspaceEditState {
   populationChecked: boolean;
   selectResearchPurpose: boolean;
   showCreateBillingAccountDropdown: boolean;
+  fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
   showCreateBillingAccountModal: boolean;
@@ -305,6 +306,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
         showCreateBillingAccountDropdown: false,
+        fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
         showCreateBillingAccountModal: false,
@@ -325,15 +327,44 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async initialBillingAccountLoad() {
-      if(!hasBillingScope()) {
-        const freeTierBillingAccount = {
-          billingAccountName: serverConfigStore.get().config
+      // If user hasn't grant GCP billing scope to workbench, we can not fetch billing account from Google
+      // or fetch user's available billing accounts.
+      // When creating/duplicating workspace, show free tier billing account.
+      // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
+      // if it is user's billing account.
+      if(serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
+        const freeTierBillingAccount : BillingAccount = {
+          name: serverConfigStore.get().config.freeTierBillingAccountId,
+          isFreeTier: true,
+          isOpen: true,
+          displayName: 'Use All of Us initial credits',
+        }
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          this.setState(prevState => fp.set(
+              ['workspace', 'billingAccountName'],
+              freeTierBillingAccount.name,
+              prevState));
+          this.setState({'billingAccounts': [freeTierBillingAccount]});
+        } else if (this.isMode(WorkspaceEditMode.Edit)) {
+          // If the user hasn't grant billing scope to workbench or they don't have permission on that billing
+          // account yet, keep the server's current value for billingAccountName and add a shim
+          // entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          this.setState({'billingAccounts': [{
+            name: this.props.workspace.billingAccountName,
+              displayName: 'User Provided Billing Account',
+              isFreeTier: false,
+              isOpen: true}]});
         }
       } else {
         await this.fetchBillingAccounts()
       }
     }
+
     async fetchBillingAccounts() {
+      this.setState({"fetchBillingAccountLoading": true});
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
@@ -383,15 +414,18 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       }
       this.setState({billingAccounts});
+      this.setState({"fetchBillingAccountLoading": false});
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
+      await ensureBillingScope();
       await this.fetchBillingAccounts();
       this.setState({"showCreateBillingAccountDropdown": true});
     }
 
     async componentDidMount() {
       this.props.hideSpinner();
+      await this.initialBillingAccountLoad();
     }
 
     createWorkspace(): Workspace {
@@ -1193,15 +1227,14 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </div>
             </OverlayPanel>
             <FlexRow>
-              <Dropdown style={{width: '20rem', overlayVisible: 'true'}}
+              {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>:
+                  <Dropdown style={{width: '20rem', overlayVisible: 'true'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
                           if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
-                            e.originalEvent.stopPropagation();
-                            this.requestBillingScopeThenFetchBillingAccount();
-                            this.buildBillingAccountOptions();
+                            async() => await this.requestBillingScopeThenFetchBillingAccount();
                           } else if(e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
                               showCreateBillingAccountModal: true
@@ -1210,7 +1243,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                             this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
                           }
                         }}
-              />
+              />}
               <div style={styles.freeCreditsBalanceClickable}>
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
               </div>
