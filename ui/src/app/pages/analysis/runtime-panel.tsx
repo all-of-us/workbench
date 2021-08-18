@@ -810,10 +810,8 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   // TODO eric: set correct default here
+  console.log(runtimeTemplate);
   const initialAutopauseThreshold = runtimeTemplate.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-
-  console.log(DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES);
-  console.log(initialAutopauseThreshold);
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -837,6 +835,7 @@ export const RuntimePanel = fp.flow(
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedAutopauseThreshold, setSelectedAutopauseThreshold] = useState(initialAutopauseThreshold);
 
+  console.log(diskSize, selectedDiskSize);
   // Note: while the Dataproc config does contain masterMachineType and masterDiskSize,
   // the source of truth for these values are selectedMachine, and selectedDiskSize, as
   // these UI components are used for both Dataproc and standard VMs.
@@ -860,7 +859,8 @@ export const RuntimePanel = fp.flow(
     computeType: initialCompute,
     machine: initialMasterMachine,
     diskSize: diskSize,
-    dataprocConfig: dataprocConfig
+    dataprocConfig: dataprocConfig,
+    autopauseThreshold: initialAutopauseThreshold
   };
 
   const newRuntimeConfig = {
@@ -871,6 +871,7 @@ export const RuntimePanel = fp.flow(
     autopauseThreshold: selectedAutopauseThreshold
   };
 
+  console.log(initialRuntimeConfig, newRuntimeConfig);
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
@@ -1062,6 +1063,7 @@ export const RuntimePanel = fp.flow(
   };
 
   console.log(Array.from(AutopauseMinuteThresholds.entries()).map((k, v) => ({label: v, value: k})));
+  console.log(selectedAutopauseThreshold);
 
   return <div id='runtime-panel'>
     {switchCase(panelContent,
@@ -1150,7 +1152,10 @@ export const RuntimePanel = fp.flow(
                            style={{width: '10rem'}}
                            options={Array.from(AutopauseMinuteThresholds.entries()).map(entry => ({label: entry[1], value: entry[0]}))}
                            value={selectedAutopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES}
-                           onChange={({value}) => {setSelectedAutopauseThreshold(value); }}
+                           onChange={({value}) => {
+                             console.log('Setting autopause threshold ' + value);
+                             setSelectedAutopauseThreshold(value);
+                           }}
                  />
                </FlexColumn>
              </FlexRow>

@@ -214,6 +214,25 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
   };
 };
 
+const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+  if (!oldRuntime.autopauseThreshold || !newRuntime.autopauseThreshold) {
+    return null;
+  }
+
+  const oldAutopauseThreshold = oldRuntime.autopauseThreshold;
+  const newAutopauseThreshold = newRuntime.autopauseThreshold;
+
+  console.log(oldAutopauseThreshold, newAutopauseThreshold);
+
+  return {
+    desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
+    previous: oldAutopauseThreshold.toString(),
+    new: newAutopauseThreshold.toString(),
+    differenceType: oldAutopauseThreshold === newAutopauseThreshold ?
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_IN_PLACE
+  };
+};
+
 const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
@@ -237,7 +256,8 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize,
+    compareAutopauseThreshold]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
