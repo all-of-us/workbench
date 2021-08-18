@@ -73,7 +73,6 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
   },
   "mandrill": {

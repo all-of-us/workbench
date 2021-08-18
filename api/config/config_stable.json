@@ -73,8 +73,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
-    "adminIdVerification": "support@researchallofus.org"
+    "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
