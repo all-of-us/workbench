@@ -135,8 +135,8 @@ public class MailServiceImplTest extends SpringTest {
                   List<String> receipts =
                       (((MandrillMessage) got.getMessage())
                           .getTo().stream()
-                          .map(RecipientAddress::getEmail)
-                          .collect(Collectors.toList()));
+                              .map(RecipientAddress::getEmail)
+                              .collect(Collectors.toList()));
                   assertThat(receipts).containsExactly(user.getContactEmail());
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
@@ -145,7 +145,7 @@ public class MailServiceImplTest extends SpringTest {
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
-                      "Is this work NIH-funded and eligible for the STRIDES Program?: No");
+                          "Is this work NIH-funded and eligible for the STRIDES Program?: No");
                 }));
   }
 
@@ -166,8 +166,8 @@ public class MailServiceImplTest extends SpringTest {
                   List<String> receipts =
                       (((MandrillMessage) got.getMessage())
                           .getTo().stream()
-                          .map(RecipientAddress::getEmail)
-                          .collect(Collectors.toList()));
+                              .map(RecipientAddress::getEmail)
+                              .collect(Collectors.toList()));
                   assertThat(receipts).containsExactly(user.getContactEmail());
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
@@ -176,7 +176,7 @@ public class MailServiceImplTest extends SpringTest {
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
-                      "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
+                          "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
   }
 
@@ -198,8 +198,8 @@ public class MailServiceImplTest extends SpringTest {
                   List<String> receipts =
                       (((MandrillMessage) got.getMessage())
                           .getTo().stream()
-                          .map(RecipientAddress::getEmail)
-                          .collect(Collectors.toList()));
+                              .map(RecipientAddress::getEmail)
+                              .collect(Collectors.toList()));
                   assertThat(receipts).containsExactly(user.getContactEmail(), "test@carasoft.com");
                   String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
                   // tags should be escaped, email addresses shouldn't.
@@ -208,7 +208,7 @@ public class MailServiceImplTest extends SpringTest {
                       && gotHtml.contains("given name family name")
                       && gotHtml.contains("user@contact.com")
                       && gotHtml.contains(
-                      "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
+                          "Is this work NIH-funded and eligible for the STRIDES Program?: Yes");
                 }));
   }
 
