@@ -34,8 +34,9 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
-  FeaturedWorkspacesConfigApi,
-  InstitutionApi, // internal
+  DiskApi,
+  FeaturedWorkspacesConfigApi, // internal
+  InstitutionApi,
   ProfileApi,
   RuntimeApi,
   StatusAlertApi,
@@ -44,7 +45,6 @@ import {
   UserMetricsApi,
   WorkspaceAdminApi,
   WorkspacesApi,
-  DiskApi,
 } from 'generated/fetch';
 
 import * as portableFetch from 'portable-fetch';
