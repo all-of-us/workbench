@@ -305,7 +305,7 @@ export const SidebarContent = fp.flow(
     const location = this.props.location;
     const {params: {ns, wsid, cid, pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
     const {cohortReview: {cohortReviewId}} = this.props;
-    this.getAnnotations(ns, wsid, cohortReviewId, +pid)
+    this.getAnnotations(ns, wsid, cohortReviewId, +pid);
     cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid)
     .then(({items}) => {
       this.setState({annotationDefinitions: items});
