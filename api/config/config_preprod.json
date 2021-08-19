@@ -74,7 +74,6 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
   "mandrill": {

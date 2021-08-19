@@ -11,24 +11,25 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
+import { logger } from 'libs/logger';
 
 // CSS selectors
-enum CssSelector {
-  body = 'body.notebook_app',
-  notebookContainer = '#notebook-container',
-  toolbarContainer = '#maintoolbar-container',
-  runCellButton = 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
-  saveNotebookButton = 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
-  kernelIcon = '#kernel_indicator_icon',
-  kernelName = '.kernel_indicator_name'
-}
+const CssSelector = {
+  body: 'body.notebook_app',
+  notebookContainer: '#notebook-container',
+  toolbarContainer: '#maintoolbar-container',
+  runCellButton: 'button[data-jupyter-action="jupyter-notebook:run-cell-and-select-next"]',
+  saveNotebookButton: 'button[data-jupyter-action="jupyter-notebook:save-notebook"]',
+  kernelIcon: '#kernel_indicator_icon',
+  kernelName: '.kernel_indicator_name'
+};
 
-enum Xpath {
-  fileMenuDropdown = './/a[text()="File"]',
-  downloadMenuDropdown = './/a[text()="Download as"]',
-  downloadIpynbButton = './/*[@id="download_script"]/a',
-  downloadMarkdownButton = './/*[@id="download_markdown"]/a'
-}
+const Xpath = {
+  fileMenuDropdown: './/a[text()="File"]',
+  downloadMenuDropdown: './/a[text()="Download as"]',
+  downloadIpynbButton: './/*[@id="download_script"]/a',
+  downloadMarkdownButton: './/*[@id="download_markdown"]/a'
+};
 
 export enum Mode {
   Command = 'command_mode',
@@ -51,9 +52,11 @@ export default class NotebookPage extends NotebookFrame {
       await this.findRunButton(120000);
     } catch (err) {
       console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
-      await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
+      await this.page.reload();
     }
-    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
+    // When open notebook for the first time, notebook websocket can close unexpectedly that causes kernel disconnect unexpectedly.
+    // Thus, a longer sleep interval is required.
+    await this.waitForKernelIdle(10 * 60 * 1000, 20000); // 10 minutes
     return true;
   }
 
@@ -94,9 +97,13 @@ export default class NotebookPage extends NotebookFrame {
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
   async run(): Promise<void> {
+    logger.info('Click notebook Run button.');
+    await this.waitForKernelIdle(60000, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
-    await this.page.waitForTimeout(1000);
+    // Click Run button turns notebook page into Command_mode from Edit mode.
+    // Short sleep to avoid check output too soon.
+    await this.page.waitForTimeout(500);
     await runButton.dispose();
   }
 
@@ -130,45 +137,36 @@ export default class NotebookPage extends NotebookFrame {
     return this.downloadAs(Xpath.downloadMarkdownButton);
   }
 
-  /**
-   * Wait for notebook kernel becomes ready (idle).
-   */
-  async waitForKernelIdle(timeOut?: number): Promise<void> {
+  async isIdle(timeout?: number): Promise<boolean> {
     const frame = await this.getIFrame();
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notificationSelector = '#notification_kernel';
-    const isIdle = async (timeout): Promise<boolean> => {
-      return Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
-        frame.waitForSelector(notificationSelector, { hidden: true, timeout })
-      ])
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-    };
+    return Promise.all([
+      frame.waitForSelector(idleIconSelector, { visible: true, timeout }),
+      frame.waitForSelector(notificationSelector, { hidden: true, timeout })
+    ])
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Wait for notebook kernel becomes ready (idle).
+   */
+  async waitForKernelIdle(timeOut = 300000, sleepInterval = 10000): Promise<boolean> {
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
-    while (Date.now() - startTime <= timeOut) {
-      const idle = await isIdle(30000);
+    while (Date.now() - startTime < timeOut) {
+      const idle = await this.isIdle(2000);
       if (ready && idle) {
-        break;
+        return true;
       }
       ready = idle;
-      await this.page.waitForTimeout(5000);
+      await this.page.waitForTimeout(sleepInterval);
     }
     // Throws exception if not ready.
-    try {
-      await Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout: 1000 }),
-        frame.waitForSelector(notificationSelector, { hidden: true, timeout: 1000 })
-      ]);
-    } catch (e) {
-      throw new Error(`Notebook kernel is ${await this.getKernelStatus()}. waitForKernelIdle() encountered ${e}`);
-    }
+    const status = await this.getKernelStatus();
+    throw new Error(`Notebook kernel is not idle. Actual kernel status is ${status}.`);
   }
 
   async getKernelStatus(): Promise<KernelStatus | string> {
@@ -226,41 +224,41 @@ export default class NotebookPage extends NotebookFrame {
     cellIndex: number,
     opts: { code?: string; codeFile?: string; timeOut?: number; markdownWorkaround?: boolean } = {}
   ): Promise<string> {
-    const cell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
-    const inputCell = await cell.focus();
-
     const { code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false } = opts;
-
-    let codeToRun;
-    if (code !== undefined) {
-      codeToRun = code;
-    } else if (codeFile !== undefined) {
-      codeToRun = fs.readFileSync(codeFile, 'ascii');
+    if (code !== undefined && codeFile !== undefined) {
+      throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
+    let notebookCode;
+    if (code !== undefined) {
+      notebookCode = code;
+    } else if (codeFile !== undefined) {
+      notebookCode = fs.readFileSync(codeFile, 'ascii');
+    }
+
+    await this.waitForKernelIdle(60000, 5000);
+    const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
+    const cellInputTextbox = await codeCell.focus();
 
     // autoCloseBrackets is true by default for R code cells.
     // Puppeteer types in every character of code, resulting in extra brackets.
     // Workaround: Type code in Markdown cell, then change to Code cell to run.
-    if (markdownWorkaround) {
-      await this.changeToMarkdownCell();
-      const markdownCell = this.findCell(cellIndex, CellType.Markdown);
-      const markdownCellInput = await markdownCell.focus();
-      await markdownCellInput.type(codeToRun);
-      await this.changeToCodeCell();
-    } else {
-      if (codeToRun) {
-        await inputCell.type(codeToRun);
+    if (notebookCode) {
+      if (markdownWorkaround) {
+        await this.changeToMarkdownCell();
+        const markdownCell = this.findCell(cellIndex, CellType.Markdown);
+        const markdownCellInput = await markdownCell.focus();
+        await markdownCellInput.type(notebookCode);
+        await this.changeToCodeCell();
+      } else {
+        await cellInputTextbox.type(notebookCode);
       }
+      logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
-    await inputCell.dispose();
     await this.run();
-    await this.waitForKernelIdle(timeOut);
-    const [output] = await Promise.all([
-      cell.waitForOutput(timeOut),
-      this.waitForKernelIdle(timeOut) // Wait for kernel idle again because sometimes kernel turns unexpectedly.
-    ]);
-    return output;
+    const codeOutput = await this.waitForKernelIdle(300000, 3000).then(() => codeCell.waitForOutput(timeOut));
+    logger.info(`Notebook code output:\n${codeOutput}`);
+    return codeOutput;
   }
 
   /**
@@ -318,6 +316,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToMarkdownCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('M');
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -326,6 +325,7 @@ export default class NotebookPage extends NotebookFrame {
   async changeToCodeCell(): Promise<void> {
     await this.toggleMode(Mode.Command);
     await this.page.keyboard.press('Y');
+    await this.page.waitForTimeout(500);
   }
 
   /**

@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static org.pmiops.workbench.access.AccessUtils.auditAccessModuleFromStorage;
 import static org.pmiops.workbench.access.AccessUtils.clientAccessModuleToStorage;
+import static org.pmiops.workbench.access.AccessUtils.storageAccessModuleToClient;
 
 import com.google.common.base.Preconditions;
 import java.sql.Timestamp;
@@ -15,6 +16,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
@@ -101,10 +103,39 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user) {
+  public List<AccessModuleStatus> getAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
         .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    // if the module is not enabled, the user is always compliant
+    if (!isModuleEnabledInEnvironment(storageAccessModuleToClient(dbAccessModule.getName()))) {
+      return true;
+    }
+    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
+    boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
+    boolean isCompleted = userAccessModule.getCompletionTime() != null;
+    boolean isExpired =
+        getExpirationTime(userAccessModule)
+            .map(x -> x.before(new Timestamp(clock.millis())))
+            .orElse(false);
+
+    // A module is completed when it is bypassed OR (completed but not expired).
+    return isBypassed || (isCompleted && !isExpired);
+  }
+
+  @Override
+  public boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    return dbAccessModule.getBypassable()
+        && retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule).getBypassTime() != null;
   }
 
   /**
@@ -166,5 +197,20 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         expiryDays, "expected value for config key accessRenewal.expiryDays.expiryDays");
     long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
     return new Timestamp(completionTime.getTime() + expiryDaysInMs);
+  }
+
+  private boolean isModuleEnabledInEnvironment(AccessModule module) {
+    final AccessConfig accessConfig = configProvider.get().access;
+
+    switch (module) {
+      case ERA_COMMONS:
+        return accessConfig.enableEraCommons;
+      case COMPLIANCE_TRAINING:
+        return accessConfig.enableComplianceTraining;
+      case RAS_LINK_LOGIN_GOV:
+        return accessConfig.enableRasLoginGovLinking;
+      default:
+        return true;
+    }
   }
 }

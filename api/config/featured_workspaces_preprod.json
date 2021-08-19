@@ -5,6 +5,60 @@
       "namespace": "aou-rw-preprod-edf20f2f",
       "id": "alpha0genomicsvalidation",
       "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How To Get Started With Registered Tier Data",
+      "namespace": "aou-rw-preprod-0a3bdc09",
+      "id": "howtogetstartedwithregisteredtierdata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How To Work With All of Us Physical Measurements Data",
+      "namespace": "aou-rw-preprod-077b7dba",
+      "id": "howtoworkwithallofusphysicalmeasurementsdata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How To Work With All of Us Survey Data",
+      "namespace": "aou-rw-preprod-78600b8a",
+      "id": "howtoworkwithallofussurveydata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How To Work With Wearable Device Data",
+      "namespace": "aou-rw-preprod-1bd91264",
+      "id": "howtoworkwithfitbitdata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Phenotype - Dementia",
+      "namespace": "aou-rw-preprod-3d427a93",
+      "id": "phenotypedementia",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Depression",
+      "namespace": "aou-rw-preprod-3e935046",
+      "id": "phenotypedepression",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Ischemic Heart Disease",
+      "namespace": "aou-rw-preprod-4848d53a",
+      "id": "phenotypeischemicheartdisease",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Type 2 Diabetes",
+      "namespace": "aou-rw-preprod-933bc54f",
+      "id": "phenotypetype2diabetes",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Breast Cancer",
+      "namespace": "aou-rw-preprod-3d26e8aa",
+      "id": "phenotypebreastcancer",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }

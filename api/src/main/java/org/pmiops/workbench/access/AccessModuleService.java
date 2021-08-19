@@ -15,5 +15,15 @@ public interface AccessModuleService {
   void updateCompletionTime(DbUser dbUser, AccessModuleName accessModuleName, Timestamp timestamp);
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */
-  List<AccessModuleStatus> getClientAccessModuleStatus(DbUser user);
+  List<AccessModuleStatus> getAccessModuleStatus(DbUser user);
+
+  /**
+   * Returns true is the access module compliant.
+   *
+   * <p>The module can be bypassed OR (completed but not expired).
+   */
+  boolean isModuleCompliant(DbUser dbUser, AccessModuleName accessModuleName);
+
+  /** Returns true is the access module is bypassable and bypassed */
+  boolean isModuleBypassed(DbUser dbUser, AccessModuleName accessModuleName);
 }

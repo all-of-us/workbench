@@ -104,7 +104,6 @@ const styles = reactStyles({
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  urlParams: any;
   runtimeStore: RuntimeStore;
 }
 
@@ -150,28 +149,39 @@ export const InteractiveNotebook = fp.flow(
 
     componentDidMount(): void {
       this.props.hideSpinner();
+
+      const {match: {params: {ns, wsid, nbName}}} = this.props;
+      if (ns && wsid && nbName) {
+        this.loadNotebook();
+      }
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
-      const {match: {params: {ns, wsid, nbName}}} = this.props;
-
-      if (!hasNewValidProps(this.props, prevProps, [p => p.match.params.ns, p => p.match.params.wsid, p => p.match.params.nbName])) {
-        return;
+      if (hasNewValidProps(this.props, prevProps, [p => p.match.params.ns, p => p.match.params.wsid, p => p.match.params.nbName])) {
+        this.loadNotebook();
       }
+    }
 
-      workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
-        this.setState({html: html.html});
-      }).catch((e) => {
+    componentWillUnmount(): void {
+      this.pollAborter.abort();
+    }
+
+    async loadNotebook() {
+      const {ns, wsid, nbName} = this.props.match.params;
+      try {
+        const {html} = await workspacesApi().readOnlyNotebook(ns, wsid, nbName);
+        this.setState({html: html});
+      } catch (e) {
         let previewErrorMode = PreviewErrorMode.ERROR;
         let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +
-          'please try reloading or opening the notebook in edit or playground mode.';
+            'please try reloading or opening the notebook in edit or playground mode.';
         if (e.status === 412) {
           previewErrorMode = PreviewErrorMode.INVALID;
           previewErrorMessage = 'Notebook is too large to display in preview mode, please use edit mode or ' +
-            'playground mode to view this notebook.';
+              'playground mode to view this notebook.';
         }
         this.setState({previewErrorMode, previewErrorMessage});
-      });
+      }
 
       workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
         this.setState({
@@ -181,12 +191,8 @@ export const InteractiveNotebook = fp.flow(
       });
     }
 
-    componentWillUnmount(): void {
-      this.pollAborter.abort();
-    }
-
     private async runRuntime(onRuntimeReady: Function): Promise<void> {
-      await maybeInitializeRuntime(this.props.urlParams.ns, this.pollAborter.signal);
+      await maybeInitializeRuntime(this.props.match.params.ns, this.pollAborter.signal);
       onRuntimeReady();
     }
 
@@ -226,8 +232,8 @@ export const InteractiveNotebook = fp.flow(
         playgroundMode: playgroundMode
       };
 
-      this.props.navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
-        'notebooks', this.props.urlParams.nbName], {'queryParams': queryParams});
+      this.props.navigate(['workspaces', this.props.match.params..ns, this.props.match.params.wsid,
+        'notebooks', this.props.match.params.nbName], {'queryParams': queryParams});
     }
 
     private navigatePlaygroundMode() {
@@ -256,7 +262,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private cloneNotebook() {
-      const {ns, wsid, nbName} = this.props.urlParams;
+      const {ns, wsid, nbName} = this.props.match.params;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
         this.props.navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
       });
