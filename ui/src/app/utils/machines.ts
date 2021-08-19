@@ -8,6 +8,15 @@ export enum ComputeType {
   Dataproc = 'Dataproc Cluster'
 }
 
+export const AutopauseMinuteThresholds = new Map([
+  [30, '30 minutes (default)'],
+  [60 * 8, '8 hours'],
+  [5 * 24 * 60, '5 days'],
+  [10 * 24 * 60, '10 days']
+]);
+
+export const DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES = 30;
+
 export interface Machine {
   name: string;
   cpu: number;
