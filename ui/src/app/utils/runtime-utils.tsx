@@ -2,7 +2,7 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
-import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
+import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
 import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, useStore} from 'app/utils/stores';
 
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
@@ -226,8 +226,8 @@ const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: Runtim
 
   return {
     desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
-    previous: oldAutopauseThreshold.toString(),
-    new: newAutopauseThreshold.toString(),
+    previous: AutopauseMinuteThresholds.get(oldAutopauseThreshold),
+    new: AutopauseMinuteThresholds.get(newAutopauseThreshold),
     differenceType: oldAutopauseThreshold === newAutopauseThreshold ?
       RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_IN_PLACE
   };
