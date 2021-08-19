@@ -434,7 +434,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
         if (runtime) {
           const oldRuntimeConfig = toRuntimeConfig(runtime);
           const newRuntimeConfig = toRuntimeConfig(requestedRuntime);
-          const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
+          const runtimeExists = (runtime.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
           const gceExists = runtimeExists &&  oldRuntimeConfig.computeType === ComputeType.Standard;
           const pdExists = !!detachableDisk;
           const runtimeDiffTypes = getRuntimeConfigDiffs(oldRuntimeConfig, newRuntimeConfig, gceExists, pdExists).map(diff => diff.differenceType);
