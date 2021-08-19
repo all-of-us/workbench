@@ -9,7 +9,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortReviewStore,
   NavigationProps

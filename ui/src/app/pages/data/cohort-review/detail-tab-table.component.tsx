@@ -9,6 +9,7 @@ import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -18,9 +19,8 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {Key} from 'ts-key-enum';
-import {RouteComponentProps, withRouter} from "react-router-dom";
-import {MatchParams} from "../../../utils/stores";
 
 const styles = reactStyles({
   container: {
