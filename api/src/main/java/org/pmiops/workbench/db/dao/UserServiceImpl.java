@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
@@ -50,13 +51,16 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.UserAccessExpiration;
@@ -107,6 +111,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
+  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -127,7 +132,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       ComplianceService complianceService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
-      MailService mailService) {
+      MailService mailService,
+      InstitutionService institutionService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -144,6 +150,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
+    this.institutionService = institutionService;
   }
 
   @VisibleForTesting
@@ -336,13 +343,36 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+
+    Institution institution = institutionService.getByUser(user).orElseThrow(() -> new ServerErrorException("Institution not found for the given user"));
+
+    // eRA is required when login.gov linking is not enabled or user institution requires that in
+    // tier requirement.
+    boolean eRARequiredForRegisteredTier = !configProvider.get().access.enableRasLoginGovLinking
+        || institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME);
+    boolean institutionalEmailValid = institutionService.validateInstitutionalEmail(institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println(institution);
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println("~~~~~~!!!!!!!");
+    System.out.println(configProvider.get().access.enableRasLoginGovLinking);
+    System.out.println(institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME));
+    System.out.println(eRARequiredForRegisteredTier);
+    System.out.println(eRACommonsComplete);
+    System.out.println("~~~~~~!!!!!!!22222");
+    System.out.println("~~~~~~!!!!!!!22222");
+    System.out.println((!eRARequiredForRegisteredTier || eRACommonsComplete));
+    System.out.println(institutionalEmailValid);
     return !user.getDisabled()
         && twoFactorAuthComplete
-        && eRACommonsComplete
+        && (!eRARequiredForRegisteredTier || eRACommonsComplete)
         && complianceTrainingComplete
         && dataUseAgreementTrainingComplete
         && publicationConfirmationComplete
-        && profileConfirmationComplete;
+        && profileConfirmationComplete && institutionalEmailValid;
   }
 
   private boolean isServiceAccount(DbUser user) {

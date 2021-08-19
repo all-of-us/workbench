@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -85,7 +87,7 @@ public class InstitutionController implements InstitutionApiDelegate {
         new CheckEmailResponse()
             .isValidMember(
                 institutionService.validateInstitutionalEmail(
-                    getInstitutionImpl(shortName), request.getContactEmail())));
+                    getInstitutionImpl(shortName), request.getContactEmail(), REGISTERED_TIER_SHORT_NAME)));
   }
 
   @Override

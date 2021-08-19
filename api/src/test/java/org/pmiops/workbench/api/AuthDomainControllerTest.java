@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AuthDomainCreatedResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
@@ -65,6 +66,7 @@ public class AuthDomainControllerTest extends SpringTest {
   @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
   @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Mock private InstitutionService mockInstitutionService;
 
   private AuthDomainController authDomainController;
 
@@ -98,7 +100,7 @@ public class AuthDomainControllerTest extends SpringTest {
             complianceService,
             directoryService,
             accessTierService,
-            mailService);
+            mailService, mockInstitutionService);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);

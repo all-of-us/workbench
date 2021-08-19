@@ -29,15 +29,25 @@ import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.InstitutionTierConfig;
+import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.test.FakeClock;
@@ -81,12 +91,17 @@ public class UserServiceAccessTest {
 
   private static List<DbAccessModule> accessModules;
 
+  private InstitutionTierConfig rtTierConfig;
+  private Institution institution;
+
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
   @Autowired private AccessModuleService accessModuleService;
+  @Autowired private InstitutionService institutionService;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @MockBean private MailService mailService;
 
@@ -96,6 +111,7 @@ public class UserServiceAccessTest {
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,
+      InstitutionServiceImpl.class,
   })
   @MockBean({
     ComplianceService.class,
@@ -146,10 +162,25 @@ public class UserServiceAccessTest {
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
-
     dbUser = new DbUser();
     dbUser.setUsername(USERNAME);
+    dbUser.setContactEmail("user@domain.com");
     dbUser = userDao.save(dbUser);
+    rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
+    institution =  new Institution()
+        .displayName("institution")
+        .shortName("shortname")
+        .tierConfigs(
+            ImmutableList.of(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                    .addEmailDomainsItem("domain.com")
+                    .eraRequired(true)
+                    .accessTierShortName(registeredTier.getShortName())))
+        .organizationTypeEnum(OrganizationType.INDUSTRY)
+        .userInstructions("Some user instructions");
+    institution = institutionService.createInstitution(institution);
+    createAffiliation(dbUser);
 
     // reset the clock so tests changing this don't affect each other
     PROVIDED_CLOCK.setInstant(START_INSTANT);
@@ -839,6 +870,127 @@ public class UserServiceAccessTest {
     assertThat(expirations.get(0).getExpirationDate()).isEqualTo(aYearFromNow);
   }
 
+  @Test
+  public void testInstitutionAddressInvalid_emailDomains() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Email domain not match
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(ImmutableList.of("test.com")))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+
+    // No email domains
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+
+    // No tier requirement
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddress() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    Institution emailAddressInst = institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+    .addEmailAddressesItem(dbUser.getContactEmail()).emailDomains(null)))).get();
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Email address not match
+    institutionService.updateInstitution(institution.getShortName(), emailAddressInst.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(ImmutableList.of("random@test.com")))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+
+    // No email address
+    institutionService.updateInstitution(institution.getShortName(), emailAddressInst.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+
+    // No tier requirement
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequriement_optionalEra() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierEnabled(dbUser);
+
+    // Now make user eRA not complete;
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+              return user;
+            });
+    assertRegisteredTierDisabled(dbUser);
+
+    // Make eRA is optional for that institution, verify user become registered
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+              return user;
+            });
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_optionalEra_loginGovFlagDisabled() {
+    // User not complete eRA, but it is optional for that institution
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+              return user;
+            });
+    assertRegisteredTierEnabled(dbUser);
+
+    // Now login.gov flag disabled, eRA is always required.
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    dbUser = updateUserWithRetries(registerUserNow);
+    assertRegisteredTierDisabled(dbUser);
+  }
+
+  @Test
+  public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
+    // When eRA flag is disabled, that means user completed eRA Commons
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
+    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+    dbUser =
+        updateUserWithRetries(
+            user -> {
+              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+              return user;
+            });
+    assertRegisteredTierDisabled(dbUser);
+
+    // Now login.gov flag disabled, eRA is always required.
+    providedWorkbenchConfig.access.enableEraCommons = false;;
+    assertRegisteredTierEnabled(dbUser);
+  }
+
   // adds `days` days plus most of another day (to demonstrate we are truncating, not rounding)
   private Duration daysPlusSome(long days) {
     return Duration.ofDays(days).plus(Duration.ofHours(18));
@@ -911,6 +1063,7 @@ public class UserServiceAccessTest {
     //        && dataUseAgreementCompliant
     //        && isPublicationsCompliant
     //        && isProfileCompliant
+    //        && institutionEmailValid
     accessModuleService.updateBypassTime(user.getUserId(), AccessModule.COMPLIANCE_TRAINING, true);
     accessModuleService.updateBypassTime(user.getUserId(), AccessModule.ERA_COMMONS, true);
     accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
@@ -921,6 +1074,22 @@ public class UserServiceAccessTest {
         user, AccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
     accessModuleService.updateCompletionTime(
         user, AccessModuleName.PROFILE_CONFIRMATION, timestamp);
-    return dbUser;
+
+    createAffiliation(user);
+    return user;
+  }
+
+  private void createAffiliation(
+      final DbUser user) {
+    final DbInstitution inst = institutionService.getDbInstitutionOrThrow(institution.getShortName());
+    if(institutionService.getByUser(user).isPresent()) {
+      return;
+    }
+    final DbVerifiedInstitutionalAffiliation affiliation =
+        new DbVerifiedInstitutionalAffiliation()
+            .setUser(user)
+            .setInstitution(inst)
+            .setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
+   verifiedInstitutionalAffiliationDao.save(affiliation);
   }
 }
