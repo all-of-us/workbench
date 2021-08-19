@@ -260,9 +260,9 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
-      diskSize: runtime.gceConfig.diskSize,
+      diskSize: diskStore.get().persistentDisk == null ? runtime.gceConfig.diskSize : null,
       dataprocConfig: null,
-      pdSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null
+      pdSize: runtime.diskConfig != null ? runtime.diskConfig.size : runtime.gceConfig.diskSize
     };
   } else if (runtime.gceWithPdConfig) {
     return {
@@ -278,7 +278,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
       diskSize: runtime.dataprocConfig.masterDiskSize,
       dataprocConfig: runtime.dataprocConfig,
-      pdSize: null
+      pdSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null
     };
   }
 };
@@ -441,12 +441,14 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
           const pdIncreased = pdExists && (toRuntimeConfig(requestedRuntime).pdSize > detachableDisk.size);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
+            // Directly call disk api to delete pd if there's no runtime or the runtime is dataproc
             if (runtime.status === RuntimeStatus.Deleted || runtime.dataprocConfig) {
               await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
                 signal: aborter.signal
               });
             }
-            if (runtime.status !== RuntimeStatus.Deleted) {
+            // Call runtime api to delete pd if the runtime is gce with pd
+            if (gceExists) {
               await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
                 signal: aborter.signal
               });
