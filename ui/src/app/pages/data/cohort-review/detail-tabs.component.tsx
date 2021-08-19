@@ -17,7 +17,7 @@ import { MatchParams } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
-import {RouteComponentProps} from 'react-router-dom';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 
 const styles = reactStyles({
   container: {
@@ -309,7 +309,7 @@ interface State {
   updateState: number;
 }
 
-export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
+export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
   class extends React.Component<Props, State> {
     private subscription;
     constructor(props: any) {

@@ -30,7 +30,6 @@ const styles = reactStyles({
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  urlParams: any;
 }
 
 interface State {
@@ -101,9 +100,9 @@ export const CohortReview = fp.flow(
 
     componentDidUpdate(prevProps: Readonly<Props>) {
       if (hasNewValidProps(this.props, prevProps, [
-        p => p.urlParams.ns,
-        p => p.urlParams.wsid,
-        p => p.urlParams.cid
+        p => p.match.params.ns,
+        p => p.match.params.wsid,
+        p => p.match.params.cid
       ])) {
         this.loadCohort();
       }

@@ -22,7 +22,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import Timeout = NodeJS.Timeout;
-import {matchPath, RouteComponentProps} from 'react-router-dom';
+import {matchPath, RouteComponentProps, withRouter} from 'react-router-dom';
 
 const styles = {
   header: {
@@ -100,6 +100,7 @@ interface AnnotationState {
 const AnnotationItem = fp.flow(
   withCurrentCohortReview(),
   withCurrentWorkspace(),
+  withRouter
 )(class extends React.Component<AnnotationProps, AnnotationState> {
   constructor(props) {
     super(props);
@@ -117,7 +118,7 @@ const AnnotationItem = fp.flow(
     const location = this.props.location;
     const {params: {pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
     const {timeout} = this.state;
-    if ((pid !== prevProps.annotation.participantId)) {
+    if ((prevProps.annotation && +pid !== prevProps.annotation.participantId)) {
       // get rid of spinners and save messages when switching participants
       clearTimeout(timeout);
       this.setState({saving: false, error: false, success: false});
@@ -283,7 +284,8 @@ interface SidebarState {
 
 export const SidebarContent = fp.flow(
   withCurrentCohortReview(),
-  withCurrentWorkspace()
+  withCurrentWorkspace(),
+  withRouter
 )(class extends React.Component<SidebarProps, SidebarState> {
   private subscription;
   constructor(props) {
@@ -303,11 +305,7 @@ export const SidebarContent = fp.flow(
     const location = this.props.location;
     const {params: {ns, wsid, cid, pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
     const {cohortReview: {cohortReviewId}} = this.props;
-    cohortReviewApi()
-    .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
-    .then(({items}) => {
-      this.setState({annotations: items});
-    });
+    this.getAnnotations(ns, wsid, cohortReviewId, +pid)
     cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid)
     .then(({items}) => {
       this.setState({annotationDefinitions: items});
@@ -323,18 +321,19 @@ export const SidebarContent = fp.flow(
         {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'}
     );
     const {cohortReview: {cohortReviewId}} = this.props;
-    if (pid !== prevState.participant.participantId && !isNaN(+pid)) {
+    if (+pid !== prevState.participant.participantId && !isNaN(+pid)) {
       // get values for annotations when switching participants
-      cohortReviewApi()
-      .getParticipantCohortAnnotations(ns, wsid, cohortReviewId, +pid)
-      .then(({items}) => {
-        this.setState({annotations: items});
-      });
+      this.getAnnotations(ns, wsid, cohortReviewId, +pid);
     }
   }
 
   componentWillUnmount(): void {
     this.subscription.unsubscribe();
+  }
+
+  async getAnnotations(ns, wsid, cohortReviewId, pid) {
+    const {items} = await cohortReviewApi().getParticipantCohortAnnotations(ns, wsid, cohortReviewId, pid);
+    this.setState({annotations: items});
   }
 
   async saveStatus(v) {

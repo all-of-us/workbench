@@ -161,8 +161,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
   {
     onClose: Function,
     annotationDefinitions: CohortAnnotationDefinition[],
-    setAnnotationDefinitions: Function,
-    urlParams: any
+    setAnnotationDefinitions: Function
   },
   {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
     renameError: boolean}
@@ -175,10 +174,8 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
 
   async delete(id) {
     try {
-      const {
-        annotationDefinitions, onClose, setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
-      } = this.props;
+      const {annotationDefinitions, onClose, setAnnotationDefinitions} = this.props;
+      const {params: {ns, wsid, cid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review'});
       this.setState({busy: true});
       await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, cid, id);
       setAnnotationDefinitions(
@@ -196,11 +193,8 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
 
   async rename() {
     try {
-      const {
-        annotationDefinitions,
-        setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
-      } = this.props;
+      const {annotationDefinitions, setAnnotationDefinitions} = this.props;
+      const {params: {ns, wsid, cid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review'});
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
         this.setState({busy: true});
