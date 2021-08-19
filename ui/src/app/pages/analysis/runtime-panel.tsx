@@ -41,7 +41,7 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {serverConfigStore} from 'app/utils/stores';
+import {runtimeStore, serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
@@ -789,6 +789,10 @@ export const RuntimePanel = fp.flow(
   withCurrentWorkspace(),
   withUserProfile()
 )(({ cdrVersionTiersResponse, workspace, profileState, onClose = () => {}}) => {
+  if (!runtimeStore.get().runtimeLoaded) {
+    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
+  }
+
   const {namespace, id, cdrVersionId, googleProject} = workspace;
 
   const {profile} = profileState;
@@ -887,10 +891,6 @@ export const RuntimePanel = fp.flow(
       aborter.abort();
     };
   }, []);
-
-  if (currentRuntime === undefined) {
-    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-  }
 
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
