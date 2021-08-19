@@ -869,7 +869,6 @@ export const RuntimePanel = fp.flow(
     autopauseThreshold: selectedAutopauseThreshold
   };
 
-  console.log(initialRuntimeConfig, newRuntimeConfig);
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
