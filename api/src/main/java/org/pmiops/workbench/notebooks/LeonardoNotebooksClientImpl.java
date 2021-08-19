@@ -128,6 +128,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         // pulling external images via GCR (since it counts as GCS traffic).
         .welderRegistry(WelderRegistryEnum.DOCKERHUB)
         .customEnvironmentVariables(customEnvironmentVariables)
+        .autopauseThreshold(runtime.getAutopauseThreshold())
+        .autopause(runtime.getAutopauseThreshold() != null)
         .runtimeConfig(buildRuntimeConfig(runtime));
   }
 
@@ -204,6 +206,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(buildRuntimeConfig(runtime))
+                      .autopause(runtime.getAutopauseThreshold() != null)
+                      .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
           return null;
         });
