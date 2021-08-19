@@ -1,9 +1,9 @@
 package org.pmiops.workbench.api;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import java.math.BigDecimal;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.ConfigResponse;
@@ -27,7 +27,6 @@ public class ConfigController implements ConfigApiDelegate {
     WorkbenchConfig config = configProvider.get();
     return ResponseEntity.ok(
         new ConfigResponse()
-            .accessRenewalExpiry(BigDecimal.valueOf(config.accessRenewal.expiryDays))
             .accessRenewalLookback(BigDecimal.valueOf(config.accessRenewal.lookbackPeriod))
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
