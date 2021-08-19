@@ -145,7 +145,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
     System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
     validateInstitution(institutionToCreate);
-    System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution2222222222");
+    System.out.println(
+        "~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution2222222222");
     try {
       final DbInstitution dbInstitution =
           institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
@@ -214,7 +215,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
     // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
     // to pull RT short name from config or database.
-    return validateInstitutionalEmail(toModel(dbAffiliation.getInstitution()), contactEmail, REGISTERED_TIER_SHORT_NAME);
+    return validateInstitutionalEmail(
+        toModel(dbAffiliation.getInstitution()), contactEmail, REGISTERED_TIER_SHORT_NAME);
   }
 
   @Override
@@ -225,7 +227,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public boolean validateInstitutionalEmail(Institution institution, String contactEmail, String accessTierShortName) {
+  public boolean validateInstitutionalEmail(
+      Institution institution, String contactEmail, String accessTierShortName) {
     try {
       // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
@@ -525,7 +528,9 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   public Optional<Institution> getFirstMatchingInstitution(final String contactEmail) {
     return getInstitutions().stream()
-        .filter(institution -> validateInstitutionalEmail(institution, contactEmail, REGISTERED_TIER_SHORT_NAME))
+        .filter(
+            institution ->
+                validateInstitutionalEmail(institution, contactEmail, REGISTERED_TIER_SHORT_NAME))
         .findFirst();
   }
 

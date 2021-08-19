@@ -87,7 +87,9 @@ public class InstitutionController implements InstitutionApiDelegate {
         new CheckEmailResponse()
             .isValidMember(
                 institutionService.validateInstitutionalEmail(
-                    getInstitutionImpl(shortName), request.getContactEmail(), REGISTERED_TIER_SHORT_NAME)));
+                    getInstitutionImpl(shortName),
+                    request.getContactEmail(),
+                    REGISTERED_TIER_SHORT_NAME)));
   }
 
   @Override

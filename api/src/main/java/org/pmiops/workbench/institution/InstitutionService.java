@@ -53,7 +53,8 @@ public interface InstitutionService {
    * @param accessTierShortName the name of the access tier to verify.
    * @return boolean – is the contact email a valid member
    */
-  boolean validateInstitutionalEmail(Institution institution, String contactEmail, String accessTierShortName);
+  boolean validateInstitutionalEmail(
+      Institution institution, String contactEmail, String accessTierShortName);
 
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after

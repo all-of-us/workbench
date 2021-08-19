@@ -41,7 +41,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Institution;
@@ -154,8 +153,11 @@ public class UserServiceTest extends SpringTest {
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
     when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
-    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME)).thenReturn(false);
-    when(mockInstitutionService.validateInstitutionalEmail(institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME)).thenReturn(true);
+    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
+        .thenReturn(false);
+    when(mockInstitutionService.validateInstitutionalEmail(
+            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
+        .thenReturn(true);
   }
 
   @Test

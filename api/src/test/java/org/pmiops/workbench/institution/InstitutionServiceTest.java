@@ -498,9 +498,14 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(
                                 ImmutableList.of(
                                     "external-researcher@sanger.uk", "science@aol.com")))));
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isTrue();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isTrue();
     // Fail even when domain matches, because the requirement is ADDRESSES.
-    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -521,9 +526,14 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(
                                 ImmutableList.of(
                                     "EXternal-rEsearcher@sanger.UK", "science@aol.com")))));
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isTrue();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isTrue();
     // Fail even when domain matches, because the requirement is ADDRESSES.
-    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -544,7 +554,8 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(
                                 ImmutableList.of(
                                     "external-researcher@sanger.uk", "science@aol.com")))));
-    assertThat(service.validateInstitutionalEmail(inst, null, REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(service.validateInstitutionalEmail(inst, null, REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -566,11 +577,19 @@ public class InstitutionServiceTest extends SpringTest {
                                 ImmutableList.of(
                                     "external-researcher@sanger.uk", "science@aol.com")))));
 
-    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME)).isTrue();
+    assertThat(
+            service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME))
+        .isTrue();
     // malformed
-    assertThat(service.validateInstitutionalEmail(inst, "yy@hacker@verily.org", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "yy@hacker@verily.org", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
     // Fail even when domain matches, because the requirement is DOMAINS.
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -593,8 +612,13 @@ public class InstitutionServiceTest extends SpringTest {
                                     "external-researcher@sanger.uk", "science@aol.com")))));
 
     // fail even if address or domain matches
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isFalse();
-    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -616,11 +640,19 @@ public class InstitutionServiceTest extends SpringTest {
                                 ImmutableList.of(
                                     "external-researcher@sanger.uk", "science@aol.com")))));
 
-    assertThat(service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME)).isTrue();
+    assertThat(
+            service.validateInstitutionalEmail(inst, "yy@verily.com", REGISTERED_TIER_SHORT_NAME))
+        .isTrue();
     // malformed
-    assertThat(service.validateInstitutionalEmail(inst, "yy@hacker@verily.org", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "yy@hacker@verily.org", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
     // Fail even when domain matches, because the requirement is DOMAINS.
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -631,7 +663,10 @@ public class InstitutionServiceTest extends SpringTest {
                 .shortName("Broad")
                 .displayName("The Broad Institute")
                 .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION));
-    assertThat(service.validateInstitutionalEmail(inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME)).isFalse();
+    assertThat(
+            service.validateInstitutionalEmail(
+                inst, "external-researcher@sanger.uk", REGISTERED_TIER_SHORT_NAME))
+        .isFalse();
   }
 
   @Test
@@ -884,7 +919,8 @@ public class InstitutionServiceTest extends SpringTest {
             .displayName("existingInst")
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME)).isEqualTo(false);
+    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
+        .isEqualTo(false);
   }
 
   @Test
@@ -899,7 +935,8 @@ public class InstitutionServiceTest extends SpringTest {
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME)).isEqualTo(false);
+    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
+        .isEqualTo(false);
   }
 
   @Test
@@ -915,7 +952,8 @@ public class InstitutionServiceTest extends SpringTest {
                     .accessTierShortName(registeredTier.getShortName()))
             .organizationTypeEnum(OrganizationType.INDUSTRY);
 
-    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME)).isEqualTo(true);
+    assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
+        .isEqualTo(true);
   }
 
   private DbUser createUser(String contactEmail) {

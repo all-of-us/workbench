@@ -344,35 +344,29 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
 
-    Institution institution = institutionService.getByUser(user).orElseThrow(() -> new ServerErrorException("Institution not found for the given user"));
+    Institution institution =
+        institutionService
+            .getByUser(user)
+            .orElseThrow(
+                () -> new ServerErrorException("Institution not found for the given user"));
 
     // eRA is required when login.gov linking is not enabled or user institution requires that in
     // tier requirement.
-    boolean eRARequiredForRegisteredTier = !configProvider.get().access.enableRasLoginGovLinking
-        || institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME);
-    boolean institutionalEmailValid = institutionService.validateInstitutionalEmail(institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+    boolean eRARequiredForRegisteredTier =
+        !configProvider.get().access.enableRasLoginGovLinking
+            || institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME);
+    boolean institutionalEmailValid =
+        institutionService.validateInstitutionalEmail(
+            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
 
-    System.out.println("~~~~~~!!!!!!!");
-    System.out.println("~~~~~~!!!!!!!");
-    System.out.println(institution);
-    System.out.println("~~~~~~!!!!!!!");
-    System.out.println("~~~~~~!!!!!!!");
-    System.out.println("~~~~~~!!!!!!!");
-    System.out.println(configProvider.get().access.enableRasLoginGovLinking);
-    System.out.println(institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME));
-    System.out.println(eRARequiredForRegisteredTier);
-    System.out.println(eRACommonsComplete);
-    System.out.println("~~~~~~!!!!!!!22222");
-    System.out.println("~~~~~~!!!!!!!22222");
-    System.out.println((!eRARequiredForRegisteredTier || eRACommonsComplete));
-    System.out.println(institutionalEmailValid);
     return !user.getDisabled()
         && twoFactorAuthComplete
         && (!eRARequiredForRegisteredTier || eRACommonsComplete)
         && complianceTrainingComplete
         && dataUseAgreementTrainingComplete
         && publicationConfirmationComplete
-        && profileConfirmationComplete && institutionalEmailValid;
+        && profileConfirmationComplete
+        && institutionalEmailValid;
   }
 
   private boolean isServiceAccount(DbUser user) {

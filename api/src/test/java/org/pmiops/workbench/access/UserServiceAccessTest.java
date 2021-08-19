@@ -111,7 +111,7 @@ public class UserServiceAccessTest {
     AccessModuleServiceImpl.class,
     UserAccessModuleMapperImpl.class,
     CommonMappers.class,
-      InstitutionServiceImpl.class,
+    InstitutionServiceImpl.class,
   })
   @MockBean({
     ComplianceService.class,
@@ -167,18 +167,19 @@ public class UserServiceAccessTest {
     dbUser.setContactEmail("user@domain.com");
     dbUser = userDao.save(dbUser);
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
-    institution =  new Institution()
-        .displayName("institution")
-        .shortName("shortname")
-        .tierConfigs(
-            ImmutableList.of(
-                rtTierConfig
-                    .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                    .addEmailDomainsItem("domain.com")
-                    .eraRequired(true)
-                    .accessTierShortName(registeredTier.getShortName())))
-        .organizationTypeEnum(OrganizationType.INDUSTRY)
-        .userInstructions("Some user instructions");
+    institution =
+        new Institution()
+            .displayName("institution")
+            .shortName("shortname")
+            .tierConfigs(
+                ImmutableList.of(
+                    rtTierConfig
+                        .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                        .addEmailDomainsItem("domain.com")
+                        .eraRequired(true)
+                        .accessTierShortName(registeredTier.getShortName())))
+            .organizationTypeEnum(OrganizationType.INDUSTRY)
+            .userInstructions("Some user instructions");
     institution = institutionService.createInstitution(institution);
     createAffiliation(dbUser);
 
@@ -871,51 +872,89 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void testInstitutionAddressInvalid_emailDomains() {
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // Email domain not match
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(ImmutableList.of("test.com")))));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
-
-    // No email domains
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null))));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
-
-    // No tier requirement
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
+  public void testInstitutionAddressInvalid_emailDomainsNotMatch() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(rtTierConfig.emailDomains(ImmutableList.of("test.com")))));
+          return userDao.save(user);
+        });
   }
 
   @Test
-  public void testInstitutionAddressInvalid_emailAddress() {
-    assertThat(userAccessTierDao.findAll()).isEmpty();
+  public void testInstitutionAddressInvalid_emailDomainsNull() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null))));
+          return userDao.save(user);
+        });
+  }
 
-    Institution emailAddressInst = institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-    .addEmailAddressesItem(dbUser.getContactEmail()).emailDomains(null)))).get();
+  @Test
+  public void testInstitutionAddressInvalid_emailDomainsTierRequirementEmpty() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+          return userDao.save(user);
+        });
+  }
+
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressMatch() {
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(
+            ImmutableList.of(
+                rtTierConfig
+                    .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                    .addEmailAddressesItem(dbUser.getContactEmail())
+                    .emailDomains(null))));
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
+  }
 
-    // Email address not match
-    institutionService.updateInstitution(institution.getShortName(), emailAddressInst.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(ImmutableList.of("random@test.com")))));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressNotMatch() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(
+                      rtTierConfig
+                          .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                          .addEmailAddressesItem("randmom@email.com")
+                          .emailDomains(null))));
+          return userDao.save(user);
+        });
+  }
 
-    // No email address
-    institutionService.updateInstitution(institution.getShortName(), emailAddressInst.tierConfigs(ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressNull() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(),
+              institution.tierConfigs(
+                  ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
+          ;
+          return userDao.save(user);
+        });
+  }
 
-    // No tier requirement
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierDisabled(dbUser);
+  @Test
+  public void testInstitutionAddressInvalid_emailAddressTierConfigNotExist() {
+    testUnregistration(
+        user -> {
+          institutionService.updateInstitution(
+              institution.getShortName(), institution.tierConfigs(ImmutableList.of()));
+          return userDao.save(user);
+        });
   }
 
   @Test
@@ -924,27 +963,23 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
 
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
-    // Now make user eRA not complete;
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
-              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-              return user;
-            });
+    // Now make user eRA not complete, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
     assertRegisteredTierDisabled(dbUser);
 
     // Make eRA is optional for that institution, verify user become registered
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-              return user;
-            });
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+    updateUserWithRetries(Function.identity());
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -954,19 +989,18 @@ public class UserServiceAccessTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
-              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-              return user;
-            });
+    updateUserWithRetries(registerUserNow);
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
     assertRegisteredTierEnabled(dbUser);
 
     // Now login.gov flag disabled, eRA is always required.
     providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
-    dbUser = updateUserWithRetries(registerUserNow);
+    updateUserWithRetries(Function.identity());
     assertRegisteredTierDisabled(dbUser);
   }
 
@@ -974,20 +1008,15 @@ public class UserServiceAccessTest {
   public void testInstitutionRequirement_optionalEra_loginGovFlagEnabled_eRAFlagDisabled() {
     // When eRA flag is disabled, that means user completed eRA Commons
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    institutionService.updateInstitution(institution.getShortName(), institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(false))));
-    dbUser =
-        updateUserWithRetries(
-            user -> {
-              accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
-              accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
-              return user;
-            });
-    assertRegisteredTierDisabled(dbUser);
-
-    // Now login.gov flag disabled, eRA is always required.
-    providedWorkbenchConfig.access.enableEraCommons = false;;
+    updateUserWithRetries(registerUserNow);
+    providedWorkbenchConfig.access.enableEraCommons = false;
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    institutionService.updateInstitution(
+        institution.getShortName(),
+        institution.tierConfigs(ImmutableList.of(rtTierConfig.eraRequired(true))));
+    accessModuleService.updateBypassTime(dbUser.getUserId(), AccessModule.ERA_COMMONS, false);
+    accessModuleService.updateCompletionTime(dbUser, AccessModuleName.ERA_COMMONS, null);
+    updateUserWithRetries(Function.identity());
     assertRegisteredTierEnabled(dbUser);
   }
 
@@ -1079,10 +1108,10 @@ public class UserServiceAccessTest {
     return user;
   }
 
-  private void createAffiliation(
-      final DbUser user) {
-    final DbInstitution inst = institutionService.getDbInstitutionOrThrow(institution.getShortName());
-    if(institutionService.getByUser(user).isPresent()) {
+  private void createAffiliation(final DbUser user) {
+    final DbInstitution inst =
+        institutionService.getDbInstitutionOrThrow(institution.getShortName());
+    if (institutionService.getByUser(user).isPresent()) {
       return;
     }
     final DbVerifiedInstitutionalAffiliation affiliation =
@@ -1090,6 +1119,6 @@ public class UserServiceAccessTest {
             .setUser(user)
             .setInstitution(inst)
             .setInstitutionalRoleEnum(InstitutionalRole.FELLOW);
-   verifiedInstitutionalAffiliationDao.save(affiliation);
+    verifiedInstitutionalAffiliationDao.save(affiliation);
   }
 }
