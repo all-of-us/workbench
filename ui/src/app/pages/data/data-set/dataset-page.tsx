@@ -529,6 +529,9 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (this.props.urlParams.dataSetId) {
         this.fetchDataset();
       }
+
+      const cdrVersion = getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse);
+
     }
 
     loadDataset(dataset) {
@@ -640,7 +643,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         this.setState(({domainValueSetIsLoading, domainValueSetLookup}) => {
           const newLoading = new Set(domainValueSetIsLoading);
           domainsToLoad.forEach((d) => {
-            if (!domainValueSetIsLoading.has(d) && !domainValueSetLookup.has(d)) {
+            if (d && !domainValueSetIsLoading.has(d) && !domainValueSetLookup.has(d)) {
               // This will also autoselect the newly loaded values.
               this.loadValueSetForDomain(d);
               newLoading.add(d);
