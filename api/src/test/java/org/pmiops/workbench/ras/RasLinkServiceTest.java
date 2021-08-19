@@ -109,7 +109,7 @@ public class RasLinkServiceTest extends SpringTest {
       new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_2);
 
   private long userId;
-  private Institution institution;
+  private Institution institution = new Institution();
   private static DbUser currentUser;
   private static List<DbAccessModule> accessModules;
 
@@ -123,9 +123,9 @@ public class RasLinkServiceTest extends SpringTest {
   @Autowired private AccessModuleService accessModuleService;
   @Mock private static OpenIdConnectClient mockOidcClient;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
-  @Mock private static InstitutionService mockInstitutionService;
   @Mock private static HttpTransport mockHttpTransport;
   @Mock private OpenIdConnectClient mockRasOidcClient;
+  @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
   @Import({
