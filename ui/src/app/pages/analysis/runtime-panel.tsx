@@ -19,7 +19,8 @@ import {
 } from 'app/utils';
 import {
   AutopauseMinuteThresholds,
-  ComputeType, DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  ComputeType,
+  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   findMachineByName,
   Machine,
   machineRunningCost,
@@ -802,16 +803,14 @@ export const RuntimePanel = fp.flow(
 
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
-  const runtimeTemplate = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
-  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = runtimeTemplate;
+  const existingRuntime = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
+  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = existingRuntime;
   const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
   const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  // TODO eric: set correct default here
-  console.log(runtimeTemplate);
-  const initialAutopauseThreshold = runtimeTemplate.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
+  const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -835,7 +834,6 @@ export const RuntimePanel = fp.flow(
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedAutopauseThreshold, setSelectedAutopauseThreshold] = useState(initialAutopauseThreshold);
 
-  console.log(diskSize, selectedDiskSize);
   // Note: while the Dataproc config does contain masterMachineType and masterDiskSize,
   // the source of truth for these values are selectedMachine, and selectedDiskSize, as
   // these UI components are used for both Dataproc and standard VMs.
@@ -1062,9 +1060,6 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
-  console.log(Array.from(AutopauseMinuteThresholds.entries()).map((k, v) => ({label: v, value: k})));
-  console.log(selectedAutopauseThreshold);
-
   return <div id='runtime-panel'>
     {switchCase(panelContent,
       [PanelContent.Create, () =>
@@ -1152,10 +1147,7 @@ export const RuntimePanel = fp.flow(
                            style={{width: '10rem'}}
                            options={Array.from(AutopauseMinuteThresholds.entries()).map(entry => ({label: entry[1], value: entry[0]}))}
                            value={selectedAutopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES}
-                           onChange={({value}) => {
-                             console.log('Setting autopause threshold ' + value);
-                             setSelectedAutopauseThreshold(value);
-                           }}
+                           onChange={({value}) => setSelectedAutopauseThreshold(value)}
                  />
                </FlexColumn>
              </FlexRow>

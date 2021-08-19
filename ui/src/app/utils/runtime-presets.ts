@@ -1,6 +1,6 @@
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import {AutopauseMinuteThresholds, DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from './machines';
+import {DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES} from './machines';
 
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
@@ -9,7 +9,7 @@ export const runtimePresets: {
     displayName: 'General Analysis',
     runtimeTemplate: {
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES, // TODO eric: explicitly declare default instead of using 0
+      autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
