@@ -10,6 +10,15 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {SidebarContent} from './sidebar-content.component';
 import { MemoryRouter, Route } from 'react-router-dom';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
+  matchPath: (location, match) => ({
+    params: {
+      pid: cohortReviewStubs[0].participantCohortStatuses[0].participantId
+    }
+  })
+}));
+
 describe('SidebarContent', () => {
   beforeEach(() => {
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
