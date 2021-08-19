@@ -529,9 +529,6 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       if (this.props.urlParams.dataSetId) {
         this.fetchDataset();
       }
-
-      const cdrVersion = getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse);
-
     }
 
     loadDataset(dataset) {
