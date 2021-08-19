@@ -351,7 +351,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at ${formatUsd(diskPricePerMonth * pdSize)} per month.
+        You will continue to incur persistent disk cost at {formatUsd(diskPricePerMonth * pdSize)} per month.
       </p>
     </div>
   </div>;
@@ -917,8 +917,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
   </div>;
 };
 
-const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton}) => {
-  const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
+const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, runtimeDiffs, onCancel, updateButton}) => {
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
   return <React.Fragment>
@@ -1063,10 +1062,10 @@ export const RuntimePanel = fp.flow(
     pdSize: selectedPdSize
   };
 
-  const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
+  const gceExists = runtimeExists && initialCompute === ComputeType.Standard;
+  const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig, gceExists, pdExists);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const pdSizeReduced = selectedPdSize < pdSize;
-  const gceWithoutPdExists = runtimeExists && initialCompute === ComputeType.Standard && !pdExists;
   const updateMessaging = diffsToUpdateMessaging(runtimeDiffs);
 
 
@@ -1092,9 +1091,8 @@ export const RuntimePanel = fp.flow(
     // The logic here is tricky to be compatible
     // Use gceConfig when (PD feature is not enabled) OR (increase PD size or update machineType of an existing runtime with PD attached)
     // OR (update an existing runtime with no PD attached).
-    // TODO(RW-): 'Update an existing runtime with no PD attached' will be cleaned up
     // post launch PD when all existing running Runtime shutdown.
-    if (!enablePD || (pdExists && !pdSizeReduced && runtimeExists) || gceWithoutPdExists) {
+    if (!enablePD || (gceExists && pdExists && !pdSizeReduced) || (gceExists && !pdExists)) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,
@@ -1104,7 +1102,6 @@ export const RuntimePanel = fp.flow(
     } else {
       return {
         gceWithPdConfig: {
-          bootDiskSize: 50,
           machineType: runtime.machine.name,
           persistentDisk: {
             // When reducing PD size, passing empty name to backend then API will create a new PD
@@ -1249,7 +1246,7 @@ export const RuntimePanel = fp.flow(
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && runtimeCanBeCreated || pdExists && pdSizeReduced;
+      && runtimeCanBeCreated || (pdExists && pdSizeReduced);
 
   const renderUpdateButton = () => {
     return <Button
@@ -1358,7 +1355,7 @@ export const RuntimePanel = fp.flow(
                   onChange={(value) => setSelectedMachine(value)}
                   validMachineTypes={validMainMachineTypes}
                   machineType={machineName}/>
-                {(gceWithoutPdExists || selectedCompute !== ComputeType.Standard) &&
+                {(selectedCompute !== ComputeType.Standard || !pdExists && gceExists) &&
                     <DiskSizeSelector
                         idPrefix='runtime'
                         selectedDiskSize={selectedDiskSize}
@@ -1390,7 +1387,7 @@ export const RuntimePanel = fp.flow(
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              {enablePD && selectedCompute === ComputeType.Standard && !gceWithoutPdExists &&
+              {enablePD && selectedCompute === ComputeType.Standard && (!gceExists || pdExists) &&
                   <div>
                   <PersistentDiskSizeSelector
                       idPrefix='runtime'
@@ -1440,12 +1437,13 @@ export const RuntimePanel = fp.flow(
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
                   onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
-              {!runtimeExists && (pdExists && !pdSizeReduced) ? renderCreateButton() : renderNextButton()}
+              {!runtimeExists && (!pdExists || !pdSizeReduced) ? renderCreateButton() : renderNextButton()}
             </FlexRow>
         }
          </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
                                                            newRuntimeConfig={newRuntimeConfig}
+                                                           runtimeDiffs = {runtimeDiffs}
                                                            onCancel={() => {
                                                              setPanelContent(PanelContent.Customize);
                                                            }}

@@ -283,18 +283,16 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   }
 };
 
-export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
-  const computeType = newRuntime.computeType;
+export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig, gceExists: boolean, pdExists: boolean): RuntimeDiff[] => {
+  // For the compatibility of panel switching between dataproc and running gce without PD
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
+  const isCmpDisk = !enablePD || (newRuntime.computeType === ComputeType.Standard) && gceExists && !pdExists || (newRuntime.computeType !== ComputeType.Standard);
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, computeType === ComputeType.Standard ? comparePdSize : compareDiskSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, isCmpDisk ? compareDiskSize : comparePdSize]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
-};
-
-const getRuntimeDiffs = (oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] => {
-  return getRuntimeConfigDiffs(toRuntimeConfig(oldRuntime), toRuntimeConfig(newRuntime));
 };
 
 // useRuntime hook is a simple hook to populate the runtime store.
@@ -358,10 +356,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
-  if (enablePD) {
-    useDisk(currentWorkspaceNamespace);
-  }
-
+  useDisk(currentWorkspaceNamespace);
   useEffect(() => {
     // Additional status changes can be put here
     const resolutionCondition: (r: Runtime) => boolean = switchCase(runtimeStatus,
@@ -425,7 +420,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
   const runtimeOps = useStore(compoundRuntimeOpStore);
   const {pendingRuntime = null} = runtimeOps[currentWorkspaceNamespace] || {};
   const [requestedRuntime, setRequestedRuntime] = useState<Runtime>();
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
 
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
@@ -439,11 +433,15 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
       // to reach a terminal status before attempting deletion.
       try {
         if (runtime) {
-          const runtimeDiffTypes = getRuntimeDiffs(runtime, requestedRuntime).map(diff => diff.differenceType);
+          const oldRuntimeConfig = toRuntimeConfig(runtime);
+          const newRuntimeConfig = toRuntimeConfig(requestedRuntime);
+          const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
+          const gceExists = runtimeExists &&  oldRuntimeConfig.computeType === ComputeType.Standard;
           const pdExists = !!detachableDisk;
+          const runtimeDiffTypes = getRuntimeConfigDiffs(oldRuntimeConfig, newRuntimeConfig, gceExists, pdExists).map(diff => diff.differenceType);
           const pdIncreased = pdExists && (toRuntimeConfig(requestedRuntime).pdSize > detachableDisk.size);
 
-          if (enablePD && runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
+          if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
             if (runtime.status === RuntimeStatus.Deleted || runtime.dataprocConfig) {
               await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
                 signal: aborter.signal
@@ -474,7 +472,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
                 pollAbortSignal: aborter.signal,
                 overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
-            } else if (runtime.status === RuntimeStatus.Deleted && enablePD && pdIncreased) {
+            } else if (runtime.status === RuntimeStatus.Deleted && pdIncreased) {
               await disksApi().updateDisk(currentWorkspaceNamespace, diskStore.get().persistentDisk.name,
                 requestedRuntime.gceWithPdConfig.persistentDisk.size);
             }
@@ -521,7 +519,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
 // This is only used by other disk hooks
 export const useDisk = (currentWorkspaceNamespace) => {
   useEffect(() => {
-    if (!currentWorkspaceNamespace) {
+    if (!enablePD || !currentWorkspaceNamespace) {
       return;
     }
     const getDisk = withAsyncErrorHandling(
