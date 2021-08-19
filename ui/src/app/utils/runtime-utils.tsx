@@ -353,7 +353,6 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   // Ensure that a runtime gets initialized, if it hasn't already been.
   useRuntime(currentWorkspaceNamespace);
   useDisk(currentWorkspaceNamespace);
@@ -518,6 +517,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
 // useDisk hook is a simple hook to populate the disk store.
 // This is only used by other disk hooks
 export const useDisk = (currentWorkspaceNamespace) => {
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   useEffect(() => {
     if (!enablePD || !currentWorkspaceNamespace) {
       return;
