@@ -170,7 +170,7 @@ export const InteractiveNotebook = fp.flow(
       const {ns, wsid, nbName} = this.props.urlParams;
       try {
         const {html} = await workspacesApi().readOnlyNotebook(ns, wsid, nbName);
-        await this.setState({html: html});
+        this.setState({html: html});
       } catch (e) {
         let previewErrorMode = PreviewErrorMode.ERROR;
         let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +

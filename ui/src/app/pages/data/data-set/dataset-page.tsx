@@ -635,12 +635,12 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       // If any of these domains has not yet been loaded, request the schema
       // (value sets) for them.
       const domainsToLoad = newDomains.filter(
-        d => !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
+        d => d && !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
       if (domainsToLoad.length > 0) {
         this.setState(({domainValueSetIsLoading, domainValueSetLookup}) => {
           const newLoading = new Set(domainValueSetIsLoading);
           domainsToLoad.forEach((d) => {
-            if (d && !domainValueSetIsLoading.has(d) && !domainValueSetLookup.has(d)) {
+            if (!domainValueSetIsLoading.has(d) && !domainValueSetLookup.has(d)) {
               // This will also autoselect the newly loaded values.
               this.loadValueSetForDomain(d);
               newLoading.add(d);
