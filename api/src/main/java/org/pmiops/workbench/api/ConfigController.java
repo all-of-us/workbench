@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
@@ -26,6 +27,7 @@ public class ConfigController implements ConfigApiDelegate {
     WorkbenchConfig config = configProvider.get();
     return ResponseEntity.ok(
         new ConfigResponse()
+            .accessRenewalLookback(BigDecimal.valueOf(config.accessRenewal.lookbackPeriod))
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
             .firecloudURL(config.firecloud.baseUrl)

@@ -29,10 +29,6 @@ import {AccessModule} from 'generated/fetch';
 
 const {useState, useEffect} = React;
 
-// Lookback period - at what point do we give users the option to update their compliance items?
-// In an effort to allow users to sync all of their training, we are setting at 330 to start.
-const LOOKBACK_PERIOD = 330;
-
 const renewalStyle = {
   h1: {
     fontSize: '0.83rem',
@@ -107,7 +103,7 @@ const syncAndReload = fp.flow(
 
 
 // Helper Functions
-const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= LOOKBACK_PERIOD;
+const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= serverConfigStore.get().config.accessRenewalLookback;
 
 const withInvalidDateHandling = date => {
   if (!date) {
