@@ -91,17 +91,6 @@ export const CohortActions = fp.flow(
     componentDidMount(): void {
       this.props.hideSpinner();
       this.setState({cohortLoading: true});
-    }
-
-    componentDidUpdate(prevProps: Readonly<Props>) {
-      if (!hasNewValidProps(this.props, prevProps, [
-        p => p.workspace.namespace,
-        p => p.workspace.id,
-        p => p.match.params.cid
-      ])) {
-        return;
-      }
-
       const {namespace, id} = this.props.workspace;
       cohortsApi().getCohort(namespace, id, +this.props.match.params.cid).then(c => {
         if (c) {
