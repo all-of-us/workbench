@@ -98,16 +98,6 @@ export const CohortReview = fp.flow(
       }
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>) {
-      if (hasNewValidProps(this.props, prevProps, [
-        p => p.match.params.ns,
-        p => p.match.params.wsid,
-        p => p.match.params.cid
-      ])) {
-        this.loadCohort();
-      }
-    }
-
     reviewCreated = () => {
       this.setState({reviewPresent: true});
     }

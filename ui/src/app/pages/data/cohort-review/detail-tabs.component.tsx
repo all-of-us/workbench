@@ -18,6 +18,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
+import { domainToTitle } from 'app/cohort-search/utils';
 
 const styles = reactStyles({
   container: {
@@ -305,7 +306,6 @@ interface State {
   chartData: any;
   conditionTitle: string;
   filterState: any;
-  participantId: number;
   updateState: number;
 }
 
@@ -319,7 +319,6 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
         chartData: {},
         conditionTitle: null,
         filterState: null,
-        participantId: null,
         updateState: 0,
       };
       this.filteredData = this.filteredData.bind(this);
@@ -332,6 +331,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
         updateState++;
         this.setState({filterState, updateState});
       });
+      this.loadParticipantChartData();
     }
 
     componentDidUpdate(prevProps) {
@@ -370,7 +370,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
             ...prevState.chartData,
             [domainName]: {
               loading: false,
-              conditionTitle: '',
+              conditionTitle: domainToTitle(domainName),
               items: items
             }
           }
@@ -397,7 +397,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
     }
 
     render() {
-      const {activeTab, chartData, filterState, participantId, updateState} = this.state;
+      const {activeTab, chartData, filterState, updateState} = this.state;
       return <React.Fragment>
         <style>{css}</style>
         <TabView style={{padding: 0}} activeIndex={activeTab} onTabChange={this.tabChange}>
@@ -427,7 +427,6 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
                 tabName={tab.name}
                 columns={tab.columns[filterState.vocab]}
                 domain={tab.domain}
-                participantId={participantId}
               />}
             </TabPanel>;
           })}
