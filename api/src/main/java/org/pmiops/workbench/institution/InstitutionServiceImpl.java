@@ -140,22 +140,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Institution createInstitution(final Institution institutionToCreate) {
-    System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
-    System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
-    System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
-    System.out.println("~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution");
     validateInstitution(institutionToCreate);
-    System.out.println(
-        "~~~~~~~!!!!!!!createInstitutioncreateInstitutioncreateInstitution2222222222");
     try {
       final DbInstitution dbInstitution =
           institutionDao.save(institutionMapper.modelToDb(institutionToCreate));
-      System.out.println("~~~~~~~!!!!!!!createInstitution33333333322222222");
-      System.out.println("~~~~~~~!!!!!!!createInstitution33333333322222222");
-      System.out.println("~~~~~~~!!!!!!!createInstitution33333333322222222");
-      System.out.println("~~~~~~~!!!!!!!createInstitution33333333322222222");
       populateAuxTables(institutionToCreate, dbInstitution);
-      System.out.println("~~~~~~~!!!!!!!createInstituti44444444444on33333333322222222");
       return toModel(dbInstitution);
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException(
