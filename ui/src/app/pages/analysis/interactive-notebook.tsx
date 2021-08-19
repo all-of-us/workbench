@@ -232,7 +232,7 @@ export const InteractiveNotebook = fp.flow(
         playgroundMode: playgroundMode
       };
 
-      this.props.navigate(['workspaces', this.props.match.params..ns, this.props.match.params.wsid,
+      this.props.navigate(['workspaces', this.props.match.params.ns, this.props.match.params.wsid,
         'notebooks', this.props.match.params.nbName], {'queryParams': queryParams});
     }
 
