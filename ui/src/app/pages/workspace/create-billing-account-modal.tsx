@@ -58,11 +58,14 @@ export const styles = reactStyles({
   },
   radioButton: {
     margin: '15px',
-    height: '17px',
-    width: '17px',
     lineHeight: '22px',
     letterSpacing: '0',
-    marginTop: '5px',
+    marginTop: '15px',
+    flexShrink: 0,
+    maxWidth: '17px',
+    maxHeight: '17px',
+    width: '17px',
+    height: '17px',
   },
 });
 
@@ -148,7 +151,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
   });
 
   return <Modal width={650} onRequestClose={() => onClose()}>
-        <ModalBody style={{marginTop: '-4'}}>
+        <ModalBody>
           <FlexColumn>
             <FlexRow style={{alignItems: 'center', width: '620px', marginBottom: '0.8rem'}}>
               <GoogleCloudLogoSvg style={{height: '33px', width: '207px', marginLeft: '-0.5rem', marginRight: '0.5rem'}}/>
@@ -156,12 +159,12 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
                 <div style={styles.textHeader}>Create billing account</div>
               </div>
-              {fp.range(1, 3).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
+              {fp.range(1, 4).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
             </FlexRow>
             {currentStep === 0 && <TextColumn>
               <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
               <div style={styles.textNormal}><a href={supportUrls.createBillingAccount}>Learn more</a>
-                on how to set up a billing account.
+                &nbsp;on how to set up a billing account.
               </div>
             </TextColumn>}
             {currentStep !== 0 && currentStep !== 4 && <TextColumn>
@@ -302,8 +305,8 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
                 </div>
               </FlexColumn>
             </FlexRow>
-            <FlexRow style={{marginTop: '20px'}}>
-              <CheckBox style={{margin: '15px', height: '1.063rem', width: '1.063rem'}}
+            <FlexRow style={{marginTop: '10px'}}>
+              <CheckBox style={{margin: '15px',  width: '17px', height: '17px', flexShrink: 0, maxWidth: '17px'}}
                         checked={nihFunded === true}
                         onChange={() => setNihFunded(false)}/>
               <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>

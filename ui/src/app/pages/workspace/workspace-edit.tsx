@@ -332,6 +332,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // When creating/duplicating workspace, show free tier billing account.
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
       // if it is user's billing account.
+      this.setState({fetchBillingAccountLoading: true});
       if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
         const freeTierBillingAccount: BillingAccount = {
           name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
@@ -364,6 +365,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       } else {
         await this.fetchBillingAccounts();
       }
+      this.setState({fetchBillingAccountLoading: false});
     }
 
     async fetchBillingAccounts() {
@@ -1246,7 +1248,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                             this.setState(fp.set(['workspace', 'billingAccountName'], e.value));
                           }
                         }}
-              />}
+              />
               <div style={styles.freeCreditsBalanceClickable}>
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
               </div>
