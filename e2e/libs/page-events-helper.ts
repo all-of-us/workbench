@@ -72,7 +72,8 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/config',
     '/user-recent-workspaces',
     '/user-recent-resources',
-    '/profile'
+    '/profile',
+    '/data-set/'
   ];
   return !filters.some((partialUrl) => request && request.url().includes(partialUrl));
 };

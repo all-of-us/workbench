@@ -53,6 +53,12 @@
       "namespace": "aou-rw-preprod-933bc54f",
       "id": "phenotypetype2diabetes",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Phenotype - Breast Cancer",
+      "namespace": "aou-rw-preprod-3d26e8aa",
+      "id": "phenotypebreastcancer",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }
