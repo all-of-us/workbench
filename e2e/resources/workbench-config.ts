@@ -14,7 +14,7 @@ const userCredential: ICredentialConfig = {
   READER_ACCESS_TOKEN_FILE: 'signin-tokens/reader-puppeteer-access-token.txt',
   WRITER_ACCESS_TOKEN_FILE: 'signin-tokens/writer-puppeteer-access-token.txt',
   ACCESS_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/access-test-puppeteer-access-token.txt',
-  ADMIN_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/admin-test-puppeteer-access-token.txt',
+  ADMIN_TEST_ACCESS_TOKEN_FILE: 'signin-tokens/admin-test-puppeteer-access-token.txt'
 };
 
 const urlPath: IPathConfig = {
