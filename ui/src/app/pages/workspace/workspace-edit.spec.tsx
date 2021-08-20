@@ -32,7 +32,7 @@ import {navigateSpy} from 'testing/navigation-mock';
 import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 import {Dropdown} from "primereact/dropdown";
 
-import * as Authentication from "../../utils/authentication";
+import * as Authentication from "app/utils/authentication";
 import SpyInstance = jest.SpyInstance;
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
@@ -595,9 +595,9 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     expect(billingDropDown.props.value).toEqual("billingAccounts/freetier");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['billingAccounts/freetier', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
+      .toEqual(['billingAccounts/freetier', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Use All of Us initial credits', 'Select or create a Google Cloud billing account']);
+      .toEqual(['Use All of Us initial credits', 'Select or create a Google Cloud billing account']);
 
     // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
     // real billing accounts user has access to.
@@ -613,9 +613,9 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props.value).toEqual("free-tier");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
+      .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
+      .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
   });
 
   it('should show free tier user account and create_billing_account when user granted billing scope', async () => {
@@ -628,9 +628,9 @@ describe('WorkspaceEdit', () => {
 
     expect(billingDropDown.props.value).toEqual("free-tier");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
+      .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
+      .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
   });
 
   it('should show free tier and user billing account when they grant billing scope when creating workspace', async () => {
@@ -644,9 +644,9 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     expect(billingDropDown.props.value).toEqual("free-tier");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
+      .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
+      .toEqual(['Free Tier', 'User Billing', 'Create a Google Cloud billing account']);
   });
 
   it('should show free tier and user billing account when they grant billing scope when editing workspace' +
@@ -663,9 +663,9 @@ describe('WorkspaceEdit', () => {
     // There would be 4 options: Free tier, user's billing account, workspace billing account, CREATE_BILLING_ACCOUNT_OPTION
     expect(billingDropDown.props.value).toEqual("billing-account");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
+      .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Free Tier', 'User Billing', 'User Provided Billing Account', 'Create a Google Cloud billing account']);
+      .toEqual(['Free Tier', 'User Billing', 'User Provided Billing Account', 'Create a Google Cloud billing account']);
   });
 
   it('should show user provided text when they not granting billing scope when editing workspace', async () => {
@@ -680,9 +680,9 @@ describe('WorkspaceEdit', () => {
     // There would be 4 options: Free tier, user's billing account, workspace billing account, CREATE_BILLING_ACCOUNT_OPTION
     expect(billingDropDown.props.value).toEqual("billing-account");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['billing-account', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
+      .toEqual(['billing-account', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['User Provided Billing Account', 'Select or create a Google Cloud billing account']);
+      .toEqual(['User Provided Billing Account', 'Select or create a Google Cloud billing account']);
 
 
     // Now select SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE, expect request billing scope then show the
@@ -699,8 +699,8 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props.value).toEqual("billing-account");
     expect(billingDropDown.props.options.map(o => o.value))
-    .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
+      .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
-    .toEqual(['Free Tier', 'User Billing', 'User Provided Billing Account', 'Create a Google Cloud billing account']);
+      .toEqual(['Free Tier', 'User Billing', 'User Provided Billing Account', 'Create a Google Cloud billing account']);
   });
 });

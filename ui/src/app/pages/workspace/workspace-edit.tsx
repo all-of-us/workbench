@@ -327,7 +327,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async initialBillingAccountLoad() {
-      // If user hasn't grant GCP billing scope to workbench, we can not fetch billing account from Google
+      // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
       // or fetch user's available billing accounts.
       // When creating/duplicating workspace, show free tier billing account.
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
@@ -344,7 +344,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               ['workspace', 'billingAccountName'],
             freeTierBillingAccount.name,
             prevState));
-          this.setState({'billingAccounts': [freeTierBillingAccount]});
+          this.setState({billingAccounts: [freeTierBillingAccount]});
         } else if (this.isMode(WorkspaceEditMode.Edit)) {
           // If the user hasn't grant billing scope to workbench yet, keep the server's current value for
           // billingAccountName and add a shim entry into billingAccounts so the dropdown entry is not empty.
@@ -352,9 +352,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           // The server will not perform an updateBillingInfo call if the received billingAccountName
           // is the same as what is currently stored.
           if (this.props.workspace.billingAccountName === freeTierBillingAccount.name) {
-            this.setState({'billingAccounts': [freeTierBillingAccount]});
+            this.setState({billingAccounts: [freeTierBillingAccount]});
           } else {
-            this.setState({'billingAccounts': [{
+            this.setState({billingAccounts: [{
               name: this.props.workspace.billingAccountName,
               displayName: 'User Provided Billing Account',
               isFreeTier: false,
@@ -419,10 +419,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
-      this.setState({'fetchBillingAccountLoading': true});
+      this.setState({fetchBillingAccountLoading: true});
       await ensureBillingScope();
       await this.fetchBillingAccounts();
-      this.setState({'fetchBillingAccountLoading': false});
+      this.setState({fetchBillingAccountLoading: false});
     }
 
     async componentDidMount() {
@@ -910,21 +910,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         value: a.name,
         disabled: !a.isOpen
       }));
-      if (enableBillingUpgrade && hasBillingScope()) {
-        options.push({
-          label: 'Create a Google Cloud billing account',
-          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-          disabled: false
-        });
+      if (enableBillingUpgrade) {
+        if (hasBillingScope()) {
+          options.push({
+            label: 'Create a Google Cloud billing account',
+            value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+            disabled: false
+          });
+        } else {
+          options.push({
+            label: 'Select or create a Google Cloud billing account',
+            value: SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+            disabled: false
+          });
+        }
       }
-      if (enableBillingUpgrade && !hasBillingScope()) {
-        options.push({
-          label: 'Select or create a Google Cloud billing account',
-          value: SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-          disabled: false
-        });
-      }
-
       return options;
     }
 

@@ -1,14 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {workspaceStubs} from 'testing/stubs/workspaces';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceCard} from './workspace-card';
 import {profileStore} from 'app/utils/stores';
-import defaultServerConfig from 'testing/default-server-config';
 import {CreateBillingAccountModal} from "./create-billing-account-modal";
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 

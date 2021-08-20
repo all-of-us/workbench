@@ -1,6 +1,7 @@
 import {AnalyticsTracker, setLoggedInState} from 'app/utils/analytics';
 import {LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN} from 'app/utils/cookies';
 import {authStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {delay} from 'app/utils/subscribable';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
 import {useEffect} from 'react';
@@ -101,11 +102,6 @@ const getAuthInstance = () => {
 
 export const hasBillingScope = () => {
   return getAuthInstance().currentUser.get().hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing');
-};
-
-
-export const delay = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 /*
