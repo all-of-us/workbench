@@ -56,6 +56,14 @@ export const styles = reactStyles({
     letterSpacing: '0',
     marginTop: '5px',
   },
+  radioButton: {
+    margin: '15px',
+    height: '17px',
+    width: '17px',
+    lineHeight: '22px',
+    letterSpacing: '0',
+    marginTop: '5px',
+  },
 });
 
 const stylesFunction = {
@@ -90,6 +98,13 @@ export interface CreateBillingAccountState {
 export interface Props {
   onClose: Function;
 }
+
+const BillingConfirmItem = ({title, value, dataTestId}) => {
+  return <FlexRow id = {`${dataTestId}-wrapper`} style={{marginTop: '5px'}}>
+    <div style={{width: '170px'}}>{title}:</div>
+    <div data-test-id={dataTestId}>{value}</div>
+  </FlexRow>;
+};
 
 export const CreateBillingAccountModal = ({onClose}: Props) => {
   const {profile: {
@@ -141,9 +156,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               <div style={{paddingTop: 5, marginLeft: '1rem', marginRight: '2rem'}}>
                 <div style={styles.textHeader}>Create billing account</div>
               </div>
-                <div style={stylesFunction.stepButtonCircle(currentStep, 1)}>1</div>
-                <div style={stylesFunction.stepButtonCircle(currentStep, 2)}>2</div>
-                <div style={stylesFunction.stepButtonCircle(currentStep, 3)}>3</div>
+              {fp.range(1, 3).map((i) => <div style={stylesFunction.stepButtonCircle(currentStep, i)}>{i}</div>)}
             </FlexRow>
             {currentStep === 0 && <TextColumn>
               <div style={styles.textNormal}>Billing accounts are managed via Google Cloud Platform™ service.</div>
@@ -162,9 +175,9 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
           marginTop: '0.5rem',
           marginBottom: '0.5rem'
         }}/>
+    <ModalFooter data-test-id={`step-${currentStep}-modal`} style={{marginTop: 0, justifyContent: 'flex-start'}}>
     {switchCase(currentStep,
-      [0, () => (<ModalFooter data-test-id='step-0-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
-        <FlexRow style={{justifyContent: 'space-evenly'}}>
+      [0, () => (<FlexRow style={{justifyContent: 'space-evenly'}}>
       <FlexColumn>
         <TextColumn>
           <p style={styles.textHeader}>Familiar with setting up a Google Cloud Platform account?</p>
@@ -188,9 +201,8 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
           USE A BILLING PARTNER
         </Button>
        </FlexColumn>
-      </FlexRow>
-      </ModalFooter>)
-      ], [1, () => (<ModalFooter data-test-id='step-1-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
+      </FlexRow>)
+      ], [1, () => (
         <FlexColumn style={{justifyContent: 'space-evenly', width: '37rem'}}>
           <div style={styles.textHeader}>Your Information</div>
           <FlexRow style={{marginTop: '20px'}}>
@@ -223,7 +235,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
                   value={contactEmail}/>
             </FlexColumn>
             <FlexColumn style={styles.textNormal}>
-              Your Researchallofus ID
+              Your researchallofus.org ID
               <TextInput
                   data-test-id='user-workbench-id'
                   style={styles.textInput}
@@ -255,16 +267,15 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               Next
             </Button>
           </FlexRow>
-        </FlexColumn>
-      </ModalFooter>)],
+        </FlexColumn>)],
       [
-        2, () => (<ModalFooter data-test-id='step-2-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
+        2, () => (
         <FlexColumn style={{justifyContent: 'space-evenly', width: '100%'}}>
           <div style={styles.textHeader}>What payment method would you like to use?</div>
           <FlexColumn style={{marginTop: '20px', width: '100%'}}>
             <FlexRow style={{boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #CCCFD4', marginBottom: '7px'}}>
               <RadioButton data-test-id='credit-card-radio'
-                           style={{margin: '15px', height: '17px', width: '17px'}}
+                           style={styles.radioButton}
                            checked={useCreditCard === true}
                            onChange={() => setUseCreditCard(true)}/>
               <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
@@ -278,7 +289,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
             </FlexRow>
             <FlexRow style={{boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #CCCFD4', marginBottom: '7px'}}>
               <RadioButton
-                  style={{margin: '15px', height: '1.063rem', width: '1.063rem'}}
+                  style={styles.radioButton}
                   checked={useCreditCard === false}
                   onChange={() => setUseCreditCard(false)}/>
               <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
@@ -325,41 +336,21 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               </Button>
             </FlexRow>
           </FlexRow>
-        </FlexColumn>
-      </ModalFooter>)
+        </FlexColumn>)
       ], [
-        3, () => (<ModalFooter data-test-id='step-3-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
+        3, () => (
         <FlexColumn style={{width: '100%'}}>
           <div style={styles.textHeader}>Please review your information</div>
           <TextColumn>
-            <FlexRow  style={{marginTop: '15px'}}>
-              <div style={{width: '170px'}}>Name: </div>
-              <div data-test-id='user-full-name-text'>{givenName + ' ' + familyName}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>Phone mumber: </div>
-              <div data-test-id='user-phone-number-text'>{phoneNumber}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>Contact email: </div>
-              <div data-test-id='user-contact-email-text'>{contactEmail}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>Researchallofus ID: </div>
-              <div data-test-id='user-workbench-id-text'>{username}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>Institution: </div>
-              <div data-test-id='user-institution-text'>{verifiedInstitutionalAffiliation.institutionDisplayName}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>Payment type: </div>
-              <div data-test-id='use-credit-card-text'>{useCreditCard ? 'Credit credit' : 'Purchase order/Other'}</div>
-            </FlexRow>
-            <FlexRow  style={{marginTop: '5px'}}>
-              <div style={{width: '170px'}}>NiH-funded: </div>
-              <div data-test-id='nih-funded-text'>{nihFunded ? 'NIH’s STRIDES initiative' : 'N/A'}</div>
-            </FlexRow>
+            <BillingConfirmItem title='Name' value={givenName + ' ' + familyName} dataTestId='user-full-name-text'/>
+            <BillingConfirmItem title='Phone number' value={phoneNumber} dataTestId='user-phone-number-text'/>
+            <BillingConfirmItem title='Contact email' value={contactEmail} dataTestId='user-contact-email-text'/>
+            <BillingConfirmItem title='Researchallofus.org ID' value={username} dataTestId='user-workbench-id-text'/>
+            <BillingConfirmItem title='Institution' value={verifiedInstitutionalAffiliation.institutionDisplayName}
+                                dataTestId='user-institution-text'/>
+            <BillingConfirmItem title='Payment type' value={useCreditCard ? 'Credit credit' : 'Purchase order/Other'}
+                                dataTestId='use-credit-card-text'/>
+            <BillingConfirmItem title='NiH-funded' value={nihFunded ? 'NIH’s STRIDES initiative' : 'N/A'} dataTestId='nih-funded-text'/>
           </TextColumn>
           <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
             <Button type='secondary'
@@ -381,10 +372,9 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               </Button>
             </FlexRow>
           </FlexRow>
-        </FlexColumn>
-      </ModalFooter>)
+        </FlexColumn>)
       ], [
-        4, () => (<ModalFooter data-test-id='step-4-modal' style={{marginTop: 0, justifyContent: 'flex-start'}}>
+        4, () => (
         <FlexColumn>
           <div style={styles.textHeader}>Your request has been sent to a Google billing partner.
             One of their representatives will contact you shortly.</div>
@@ -398,9 +388,9 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               OK
             </Button>
           </FlexRow>
-        </FlexColumn>
-      </ModalFooter>)
+        </FlexColumn>)
       ])}
+      </ModalFooter>
     {currentStep === 0 && <FontAwesomeIcon
         icon={faTimes}
         size='lg'
