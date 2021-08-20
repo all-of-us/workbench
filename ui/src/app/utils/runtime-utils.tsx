@@ -61,6 +61,15 @@ export interface UpdateMessaging {
   warnMore?: string;
 }
 
+// Used to wrap the sate of runtime panel
+export interface RuntimeCtx {
+  runtimeExists: boolean;
+  gceExists: boolean;
+  dataprocExists: boolean;
+  pdExists: boolean;
+  enablePD: boolean;
+}
+
 // Visible for testing only.
 export const findMostSevereDiffState = (states: RuntimeDiffState[]): RuntimeDiffState => {
   return fp.last([...states].sort());
@@ -283,13 +292,12 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   }
 };
 
-export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig, gceExists: boolean, pdExists: boolean): RuntimeDiff[] => {
+export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig, runtimeCtx: RuntimeCtx): RuntimeDiff[] => {
   // For the compatibility of panel switching between dataproc and running gce without PD
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
-  const isCmpDisk = !enablePD || (newRuntime.computeType === ComputeType.Standard) && gceExists && !pdExists || (newRuntime.computeType !== ComputeType.Standard);
+  const comparePD = runtimeCtx.enablePD && newRuntime.computeType === ComputeType.Standard;
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, isCmpDisk ? compareDiskSize : comparePdSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, comparePD ? comparePdSize : compareDiskSize]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
@@ -409,10 +417,26 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
   return [runtime ? runtime.status : undefined, setStatusRequest];
 };
 
+export const getRuntimeCtx = (runtime: Runtime, pendingRuntime: Runtime) => {
+  const pdFeatureFlag = serverConfigStore.get().config.enablePersistentDisk;
+  const runtimeExists = (runtime.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
+  const {dataprocConfig = null} = pendingRuntime || runtime || {} as Partial<Runtime>;
+  const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
+  const gceExists = runtimeExists &&  initialCompute === ComputeType.Standard;
+  const persistentDisk = diskStore.get().persistentDisk;
+  return {
+    runtimeExists: runtimeExists,
+    gceExists: runtimeExists && initialCompute === ComputeType.Standard,
+    dataprocExists: dataprocConfig !== null,
+    pdExists: !!persistentDisk,
+    enablePD: pdFeatureFlag && (!!persistentDisk || !gceExists)
+  };
+};
+
 // useCustomRuntime Hook can request a new runtime config
 // The LeoRuntimeInitializer could potentially be rolled into this code to completely manage
 // all runtime state.
-export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
+export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
     [{currentRuntime: Runtime, pendingRuntime: Runtime}, (runtime: Runtime) => void] => {
 
   const {runtime, workspaceNamespace} = useStore(runtimeStore);
@@ -434,21 +458,19 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachableDisk):
         if (runtime) {
           const oldRuntimeConfig = toRuntimeConfig(runtime);
           const newRuntimeConfig = toRuntimeConfig(requestedRuntime);
-          const runtimeExists = (runtime.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
-          const gceExists = runtimeExists &&  oldRuntimeConfig.computeType === ComputeType.Standard;
-          const pdExists = !!detachableDisk;
-          const runtimeDiffTypes = getRuntimeConfigDiffs(oldRuntimeConfig, newRuntimeConfig, gceExists, pdExists).map(diff => diff.differenceType);
-          const pdIncreased = pdExists && (toRuntimeConfig(requestedRuntime).pdSize > detachableDisk.size);
+          const runtimeCtx = getRuntimeCtx(runtime, pendingRuntime);
+          const runtimeDiffTypes = getRuntimeConfigDiffs(oldRuntimeConfig, newRuntimeConfig, runtimeCtx).map(diff => diff.differenceType);
+          const pdIncreased = runtimeCtx.pdExists && (newRuntimeConfig.pdSize > detachablePd.size);
 
           if (runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD)) {
             // Directly call disk api to delete pd if there's no runtime or the runtime is dataproc
-            if (runtime.status === RuntimeStatus.Deleted || runtime.dataprocConfig) {
-              await disksApi().deleteDisk(currentWorkspaceNamespace, detachableDisk.name, {
+            if (runtime.status === RuntimeStatus.Deleted || runtimeCtx.dataprocExists) {
+              await disksApi().deleteDisk(currentWorkspaceNamespace, detachablePd.name, {
                 signal: aborter.signal
               });
             }
             // Call runtime api to delete pd if the runtime is gce with pd
-            if (gceExists) {
+            if (runtimeCtx.gceExists) {
               await runtimeApi().deleteRuntime(currentWorkspaceNamespace, true, {
                 signal: aborter.signal
               });
