@@ -42,14 +42,12 @@ import {
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
 import {runtimeStore, serverConfigStore, withStore} from 'app/utils/stores';
-import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   BillingAccountType,
   BillingStatus,
-  CdrVersionTiersResponse,
   DataprocConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -179,8 +177,6 @@ enum PanelContent {
 
 // this is only used in the test.
 export interface Props {
-  workspace: WorkspaceData;
-  cdrVersionTiersResponse?: CdrVersionTiersResponse;
   onClose: () => void;
 }
 
