@@ -125,7 +125,7 @@ export const clearCompoundRuntimeOperations = () => {
 export interface RuntimeStore {
   workspaceNamespace: string | null | undefined;
   runtime: Runtime | null | undefined;
-  runtimeLoaded: boolean
+  runtimeLoaded: boolean;
 }
 
 export const runtimeStore = atom<RuntimeStore>({

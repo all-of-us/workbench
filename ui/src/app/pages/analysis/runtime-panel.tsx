@@ -41,7 +41,7 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {runtimeStore, serverConfigStore} from 'app/utils/stores';
+import {runtimeStore, serverConfigStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
@@ -784,15 +784,11 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
   </React.Fragment>;
 };
 
-export const RuntimePanel = fp.flow(
+const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
 )(({ cdrVersionTiersResponse, workspace, profileState, onClose = () => {}}) => {
-  if (!runtimeStore.get().runtimeLoaded) {
-    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-  }
-
   const {namespace, id, cdrVersionId, googleProject} = workspace;
 
   const {profile} = profileState;
@@ -1187,4 +1183,12 @@ export const RuntimePanel = fp.flow(
           />],
       [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
+});
+
+export const RuntimePanelWrapper = withStore(runtimeStore, 'runtime')(({runtime, onClose = () => {}}) => {
+  if (!runtime.runtimeLoaded) {
+    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
+  }
+
+  return <RuntimePanel onClose={onClose}/>;
 });
