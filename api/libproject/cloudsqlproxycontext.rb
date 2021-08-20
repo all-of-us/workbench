@@ -24,11 +24,10 @@ class CloudSqlProxyContext < ServiceAccountContext
         # Containerize mysql usage if we're not inside docker already. This
         # avoids the requirement for devs to have mysql installed on their workstations.
         mysqladmin_cmd = "docker run --rm --network host --entrypoint '' mysql:5.7.27 mysqladmin "
-        print("docker run -d -u #{ENV["UID"]} -v #{@keyfile_path}:/config " +
+        print("docker run -d -v #{@keyfile_path}:/config " +
               "-p 0.0.0.0:3307:3307 gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy "+
               "-instances=#{instance} -credential_file=/config\n\n")
         docker_container_id = common.capture_stdout(%W{docker run -d
-             -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
              -p 0.0.0.0:3307:3307
              gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy
