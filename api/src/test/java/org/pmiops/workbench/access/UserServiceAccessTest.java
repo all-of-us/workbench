@@ -942,7 +942,6 @@ public class UserServiceAccessTest {
               institution.getShortName(),
               institution.tierConfigs(
                   ImmutableList.of(rtTierConfig.emailDomains(null).emailAddresses(null))));
-          ;
           return userDao.save(user);
         });
   }

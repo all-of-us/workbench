@@ -51,7 +51,6 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
@@ -344,20 +343,22 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
 
-    Institution institution =
-        institutionService
-            .getByUser(user)
-            .orElseThrow(
-                () -> new ServerErrorException("Institution not found for the given user"));
-
-    // eRA is required when login.gov linking is not enabled or user institution requires that in
-    // tier requirement.
-    boolean eRARequiredForRegisteredTier =
-        !configProvider.get().access.enableRasLoginGovLinking
-            || institutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME);
-    boolean institutionalEmailValid =
-        institutionService.validateInstitutionalEmail(
-            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+    boolean eRARequiredForRegisteredTier = true;
+    boolean institutionalEmailValid = false;
+    Optional<Institution> institution = institutionService.getByUser(user);
+    if (institution.isPresent()) {
+      // eRA is required when login.gov linking is not enabled or user institution requires that in
+      // tier requirement.
+      eRARequiredForRegisteredTier =
+          !configProvider.get().access.enableRasLoginGovLinking
+              || institutionService.eRaRequiredForTier(
+                  institution.get(), REGISTERED_TIER_SHORT_NAME);
+      institutionalEmailValid =
+          institutionService.validateInstitutionalEmail(
+              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+    } else {
+      log.warning(String.format("Institution not found for user %s", user.getUsername()));
+    }
 
     return !user.getDisabled()
         && twoFactorAuthComplete
