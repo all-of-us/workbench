@@ -83,6 +83,7 @@ import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.GpuConfig;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -1102,6 +1103,86 @@ public class RuntimeControllerTest extends SpringTest {
     LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("user-override");
+  }
+
+  @Test
+  public void testCreateRuntime_gceWithGpu() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceConfig(
+                new GceConfig()
+                    .diskSize(50)
+                    .machineType("standard")
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceConfig createLeonardoGceConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+    assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
+    assertThat(createLeonardoGceConfig.getGpuConfig().getGpuType()).isEqualTo("nvidia-tesla-t4");
+    assertThat(createLeonardoGceConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
+  }
+
+  @Test
+  public void testCreateRuntime_gceWithPD_wihGpu() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    runtimeController.createRuntime(
+        WORKSPACE_NS,
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .bootDiskSize(50)
+                    .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest()
+                            .diskType(DiskType.SSD)
+                            .name(getPdName())
+                            .size(500))
+                    .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
+
+    verify(userRuntimesApi)
+        .createRuntime(
+            eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+
+    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+
+    Gson gson = new Gson();
+    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
+        gson.fromJson(
+            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+
+    assertThat(
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    LeonardoRuntimeConfig.class)
+                .getCloudService())
+        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())
+        .isEqualTo("nvidia-tesla-t4");
+    assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
   }
 
   @Test

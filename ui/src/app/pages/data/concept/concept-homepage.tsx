@@ -23,6 +23,7 @@ import {
   currentConceptStore,
   NavigationProps
 } from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
@@ -217,7 +218,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       });
       const promises = [];
       conceptDomainList.forEach(conceptDomain => {
-        promises.push(cohortBuilderApi().findDomainCount(namespace, id, conceptDomain.domain.toString(), currentInputString)
+        promises.push(this.getDomainCounts(conceptDomain.domain.toString())
           .then(domainCount => {
             conceptDomain.allConceptCount = domainCount.conceptCount;
             this.setState({domainsLoading: this.state.domainsLoading.filter(domain => domain !== conceptDomain.domain)});
@@ -233,6 +234,15 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       });
       await Promise.all(promises);
       this.setState({conceptDomainList, conceptSurveysList});
+    }
+
+    // Temp function to use the correct endpoint based on the enableStandardSourceDomains config flag
+    getDomainCounts(domain: string) {
+      const {id, namespace} = this.props.workspace;
+      const {currentInputString} = this.state;
+      return serverConfigStore.get().config.enableStandardSourceDomains
+        ? cohortBuilderApi().findDomainCountByStandardSource(namespace, id, domain, true, currentInputString)
+        : cohortBuilderApi().findDomainCount(namespace, id, domain, currentInputString);
     }
 
     handleSearchKeyPress(e) {
