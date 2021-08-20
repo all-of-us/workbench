@@ -1130,15 +1130,8 @@ export const RuntimePanel = fp.flow(
                            value={selectedCompute || ComputeType.Standard}
                            onChange={({value}) => {setSelectedCompute(value); }}
                  />
-                 {
-                   selectedCompute === ComputeType.Dataproc &&
-                   <DataProcConfigSelector
-                       disabled={disableControls}
-                       onChange={config => setSelectedDataprocConfig(config)}
-                       dataprocConfig={selectedDataprocConfig} />
-                 }
-               </FlexColumn>
 
+               </FlexColumn>
                <FlexColumn>
                  <label style={styles.label} htmlFor='runtime-autopause'>Automatically pause after idle for</label>
                  <Dropdown id='runtime-autopause'
@@ -1150,6 +1143,13 @@ export const RuntimePanel = fp.flow(
                  />
                </FlexColumn>
              </FlexRow>
+             {
+               selectedCompute === ComputeType.Dataproc &&
+               <DataProcConfigSelector
+                   disabled={disableControls}
+                   onChange={config => setSelectedDataprocConfig(config)}
+                   dataprocConfig={selectedDataprocConfig} />
+             }
            </div>
            {runtimeExists && updateMessaging.warn &&
             <WarningMessage iconSize={30} iconPosition={'center'}>
