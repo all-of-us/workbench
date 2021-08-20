@@ -15,6 +15,11 @@ declare global {
   interface Window { setTestAccessTokenOverride: (token: string) => void; }
 }
 
+/** Returns true if use access token, this is used by Puppeteer test. */
+export const useAccessToken = () => {
+  return environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+};
+
 const makeAuth2 = (config: ConfigResponse): Promise<any> => {
   return new Promise((resolve) => {
     gapi.load('auth2', () => {
@@ -70,7 +75,7 @@ export function useAuthentication() {
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    if (config && (!environment.allowTestAccessTokenOverride || !window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN))) {
+    if (config && !useAccessToken) {
       makeAuth2(config);
     }
   }, [config]);
@@ -81,7 +86,7 @@ export function useAuthentication() {
     } else if (authLoaded) {
       // If we're in puppeteer, we never call gapi.auth2.init, so we can't sign out normally.
       // Instead, we revoke all the access tokens and reset all the state.
-      if (environment.allowTestAccessTokenOverride && window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)) {
+      if (useAccessToken) {
         window.setTestAccessTokenOverride('');
       } else {
         gapi.auth2.getAuthInstance().signOut();
@@ -101,7 +106,7 @@ const getAuthInstance = () => {
 };
 
 export const hasBillingScope = () => {
-  return getAuthInstance().currentUser.get().hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing');
+  return useAccessToken || getAuthInstance().currentUser.get().hasGrantedScopes('https://www.googleapis.com/auth/cloud-billing');
 };
 
 /*
