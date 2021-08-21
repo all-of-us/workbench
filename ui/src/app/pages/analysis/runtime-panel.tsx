@@ -19,7 +19,6 @@ import {
 } from 'app/utils';
 import {
   ComputeType,
-  diskPrice,
   diskPricePerMonth,
   findMachineByName,
   Machine,
@@ -41,7 +40,7 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {diskStore, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {diskStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
@@ -61,7 +60,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {supportUrls} from "../../utils/zendesk";
+import {supportUrls} from '../../utils/zendesk';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -489,14 +488,14 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
     </FlexRow>;
 };
 
-const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
+const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize}) => {
   return <div>
     <h3 style={{...styles.sectionHeader, ...styles.bold}} >Persistent Disk (GB)</h3>
     <div> Persistent disks store analysis data.
       <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'> Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
-    <InputNumber id={`${idPrefix}-disk`}
+    <InputNumber id={`persistent-disk`}
                  showButtons
                  disabled={disabled}
                  decrementButtonClassName='p-button-secondary'
@@ -783,7 +782,7 @@ const CostEstimator = ({
   } = dataprocConfig || {};
   const workerMachine = findMachineByName(workerMachineType);
   const costConfig = {
-    computeType, masterMachine: machine, masterDiskSize: runtimeCtx.enablePD ? pdSize : diskSize,
+    computeType, masterMachine: machine, masterDiskSize: runtimeCtx.enablePD && !runtimeCtx.dataprocExists ? pdSize : diskSize,
     numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
   };
   const runningCost = machineRunningCost(costConfig);
@@ -1067,14 +1066,20 @@ export const RuntimePanel = fp.flow(
 
   const gceExists = runtimeExists && initialCompute === ComputeType.Standard;
   const dataprocExists = dataprocConfig !== null;
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk && (!!persistentDisk || !gceExists);
-  const unattachedPdExists = enablePD && !runtimeExists;
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk && (pdExists || !gceExists);
+  const unattachedPdExists = enablePD && !gceExists && pdExists;
   const pdSizeReduced = selectedPdSize < pdSize;
+  // A runtime context can wrap/pass complex runtime context and also make the code cleaner
   const runtimeCtx = {
     runtimeExists: runtimeExists,
     gceExists: gceExists,
     dataprocExists: dataprocExists,
     pdExists: pdExists,
+    // Here the enablePD is not simply the pd feature flag.
+    // It stands for the point when user has no old version gce instances exists and the pd feature flag is also True at the same time.
+    // By using this predicate, we can differentiate the old version and pd version panel much more easily. The code is also cleaner.
+    // In addition, after all the old users change to the new pd version, we can simply replace all occurrences of this variable to True.
+    // The code refactor cost is low.
     enablePD: enablePD,
     unattachedPdExists: unattachedPdExists
   };
@@ -1231,11 +1236,10 @@ export const RuntimePanel = fp.flow(
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
-    if (standardDiskErrors) {
-      errorDivs.push(summarizeErrors(standardDiskErrors));
-    }
-    if (standardPdErrors) {
+    if (standardPdErrors && selectedCompute === ComputeType.Standard) {
       errorDivs.push(summarizeErrors(standardPdErrors));
+    } else if (standardDiskErrors && (!runtimeCtx.enablePD || selectedCompute === ComputeType.Dataproc)) {
+      errorDivs.push(summarizeErrors(standardDiskErrors));
     }
     if (dataprocErrors) {
       errorDivs.push(summarizeErrors(dataprocErrors));
@@ -1257,9 +1261,9 @@ export const RuntimePanel = fp.flow(
   const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
-  const runtimeCanBeUpdated = runtimeChanged
-      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && runtimeCanBeCreated || (pdExists && pdSizeReduced);
+  const runtimeCanBeUpdated = (runtimeChanged
+      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) || (pdExists && pdSizeReduced))
+      && runtimeCanBeCreated;
 
   const renderUpdateButton = () => {
     return <Button
@@ -1405,7 +1409,6 @@ export const RuntimePanel = fp.flow(
               {runtimeCtx.enablePD && selectedCompute === ComputeType.Standard &&
                   <div>
                   <PersistentDiskSizeSelector
-                      idPrefix='runtime'
                       selectedDiskSize={selectedPdSize}
                       onChange={(value) => {
                         setSelectedPdSize(value);
