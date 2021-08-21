@@ -354,8 +354,10 @@ def drop_cloud_db(cmd_name, *args)
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
-        "cat db/drop_db.sql | envsubst | " \
-        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        "cat db/drop_db.sql | envsubst | " +
+        maybe_dockerize_mysql_cmd(
+          "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+          interactive=True),
         pw)
   end
 end
@@ -2095,10 +2097,13 @@ def connect_to_cloud_db(cmd_name, *args)
       common.status ""
     end
     common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
-    common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
-      --database=#{env["DB_NAME"]} --password=#{db_password}},
-      db_password
+    common.run_inline(
+      maybe_dockerize_mysql_cmd(
+        "mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
+        "--database=#{env["DB_NAME"]} --password=#{db_password}",
+        interactive=true
+      ),
+      db_password)
   end
 
 end
@@ -2123,8 +2128,11 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
     password = env["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
       "echo 'SHOW BINARY LOGS;' | " +
-      "mysql --host=127.0.0.1 --port=3307 --user=root " +
-      "--database=#{env['DB_NAME']} --password=#{password}", password)
+      maybe_dockerize_mysql_cmd(
+        "mysql --host=127.0.0.1 --port=3307 --user=root " +
+        "--database=#{env['DB_NAME']} --password=#{password}",
+        interactive=true),
+      password)
     common.status "*" * 80
 
     common.status "\n" + "*" * 80
@@ -2225,8 +2233,10 @@ def create_or_update_workbench_db()
   # This method assumes that a cloud SQL proxy is active, and that appropriate
   # env variables are exported to correspond to the target environment.
   run_with_redirects(
-    "cat db/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    "cat db/create_db.sql | envsubst | " +
+    maybe_dockerize_mysql_cmd(
+      "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+      interactive=true),
     ENV["MYSQL_ROOT_PASSWORD"]
   )
 end
