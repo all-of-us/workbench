@@ -1212,10 +1212,6 @@ export const RuntimePanel = fp.flow(
     selectedDiskSize: diskSizeValidatorWithMessage('standard')
   };
 
-  const standardPdValidator = {
-    selectedPdSize: diskSizeValidatorWithMessage('standard')
-  };
-
   const runningCostValidator = {
     currentRunningCost: runningCostValidatorWithMessage()
   };
@@ -1228,7 +1224,7 @@ export const RuntimePanel = fp.flow(
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
   const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
-  const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
+  const standardPdErrors = validate({selectedPdSize}, standardDiskValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
