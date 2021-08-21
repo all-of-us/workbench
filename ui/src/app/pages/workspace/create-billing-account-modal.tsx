@@ -62,8 +62,6 @@ export const styles = reactStyles({
     letterSpacing: '0',
     marginTop: '15px',
     flexShrink: 0,
-    maxWidth: '17px',
-    maxHeight: '17px',
     width: '17px',
     height: '17px',
   },
@@ -306,7 +304,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
               </FlexColumn>
             </FlexRow>
             <FlexRow style={{marginTop: '10px'}}>
-              <CheckBox style={{margin: '15px',  width: '17px', height: '17px', flexShrink: 0, maxWidth: '17px'}}
+              <CheckBox style={styles.radioButton}
                         checked={nihFunded === true}
                         onChange={() => setNihFunded(false)}/>
               <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
