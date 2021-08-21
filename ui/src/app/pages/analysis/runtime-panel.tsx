@@ -808,15 +808,12 @@ const RuntimePanel = fp.flow(
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
 
-  // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
-  // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     [([b, , ]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
-    // currentRuntime being undefined means the first `getRuntime` has still not completed.
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [() => !!pendingRuntime, () => PanelContent.Customize],
     [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
