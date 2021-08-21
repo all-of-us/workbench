@@ -1,17 +1,18 @@
 import {act} from 'react-dom/test-utils';
 import {mount} from 'enzyme';
 import {useCustomRuntime, RuntimeDiffState, findMostSevereDiffState} from 'app/utils/runtime-utils';
-import {runtimeStore} from 'app/utils/stores';
+import {runtimeStore, diskStore,serverConfigStore} from 'app/utils/stores';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {RuntimeApi} from 'generated/fetch/api';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import * as React from 'react';
+import defaultServerConfig from "../../testing/default-server-config";
 
 const WORKSPACE_NS = 'test';
 
 const Runtime = ({id}) => {
-  const [{currentRuntime}, ] = useCustomRuntime(WORKSPACE_NS)
+  const [{currentRuntime}, ] = useCustomRuntime(WORKSPACE_NS, diskStore.get().persistentDisk)
   const {runtimeName = ''} = currentRuntime || {};
   return <div id={id}>{runtimeName}</div>
 }
@@ -25,16 +26,22 @@ const TestComponent = () => {
 
 describe('runtime-utils', () => {
   let runtimeApiStub: RuntimeApiStub;
+  let enablePd: boolean;
 
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
+    serverConfigStore.set({config: {...defaultServerConfig}});
+    enablePd = serverConfigStore.get().config.enablePersistentDisk;
 
     // For a component using the runtime store to function properly, there must
     // be an active workspace context provided - in the real application this is
     // configured by a central component. This line simulates what would
     // normally happen in WorkspaceWrapper.
     runtimeStore.set({workspaceNamespace: WORKSPACE_NS, runtime: undefined});
+    if (enablePd) {
+      diskStore.set({workspaceNamespace: WORKSPACE_NS, persistentDisk: undefined});
+    }
     jest.useFakeTimers();
   });
 

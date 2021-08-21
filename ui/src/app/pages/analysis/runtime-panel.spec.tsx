@@ -176,11 +176,7 @@ describe('RuntimePanel', () => {
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
     // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 100GB disk
-    if (enablePd) {
-      expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB persistent disk');
-    } else {
-      expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk');
-    }
+    expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk')
   });
 
   it('should allow creation when no runtime exists with defaults', async() => {
@@ -925,7 +921,6 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
 
-    // skip this test after enabling pd
     if (enablePd) {
       await pickPdSize(wrapper, 49);
       expect(getCreateButton().prop('disabled')).toBeTruthy();

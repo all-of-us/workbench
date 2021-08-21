@@ -903,7 +903,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
     <div id='compute-resources'>- Default: compute size of
       <b> {runtimeConfig.machine.cpu} CPUs</b>,
       <b> {runtimeConfig.machine.memory} GB memory</b>, and a
-      <b> {runtimeConfig.diskSize} GB persistent disk</b>
+      <b> {runtimeConfig.diskSize} GB disk</b>
     </div>
     {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
       <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
@@ -1222,6 +1222,10 @@ export const RuntimePanel = fp.flow(
     selectedDiskSize: diskSizeValidatorWithMessage('standard')
   };
 
+  const standardPdValidator = {
+    selectedPdSize: diskSizeValidatorWithMessage('standard')
+  };
+
   const runningCostValidator = {
     currentRunningCost: runningCostValidatorWithMessage()
   };
@@ -1234,7 +1238,7 @@ export const RuntimePanel = fp.flow(
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
   const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
-  const standardPdErrors = validate({selectedPdSize}, standardDiskValidator);
+  const standardPdErrors = validate({selectedPdSize}, standardPdValidator);
   const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)

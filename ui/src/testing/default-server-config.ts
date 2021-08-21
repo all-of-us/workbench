@@ -14,7 +14,7 @@ const defaultServerConfig: ConfigResponse = {
   rasHost: 'https://stsstg.nih.gov/',
   rasClientId: '903cfaeb-57d9-4ef6-5659-04377794ed65',
   enableRasLoginGovLinking: true,
-  enablePersistentDisk: false,
+  enablePersistentDisk: true,
   accessRenewalLookback: 330
 };
 
