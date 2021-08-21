@@ -357,7 +357,7 @@ def drop_cloud_db(cmd_name, *args)
         "cat db/drop_db.sql | envsubst | " +
         maybe_dockerize_mysql_cmd(
           "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-          interactive=True),
+          interactive=true),
         pw)
   end
 end
@@ -2101,7 +2101,8 @@ def connect_to_cloud_db(cmd_name, *args)
       maybe_dockerize_mysql_cmd(
         "mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
         "--database=#{env["DB_NAME"]} --password=#{db_password}",
-        interactive=true
+        interactive=true,
+        tty=true
       ),
       db_password)
   end
