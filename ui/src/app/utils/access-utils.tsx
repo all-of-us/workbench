@@ -4,7 +4,11 @@ import {convertAPIError} from 'app/utils/errors';
 import {queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
+import {
+  AccessModule,
+  AccessModuleStatus,
+  Profile
+} from 'generated/fetch';
 import {ErrorCode} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -26,8 +30,8 @@ export const NOTIFICATION_THRESHOLD_DAYS = 30;
 // if it is not, or no expiration dates are present in the profile: return undefined.
 export const maybeDaysRemaining = (profile: Profile): number | undefined => {
   const earliestExpiration: number = fp.flow(
-    fp.get(['renewableAccessModules', 'modules']),
-    fp.map<RenewableAccessModuleStatus, number>(m => m.expirationEpochMillis),
+    fp.get(['accessModules', 'modules']),
+    fp.map<AccessModuleStatus, number>(m => m.expirationEpochMillis),
     // remove the undefined expirationEpochMillis
     fp.compact,
     fp.min)(profile);
@@ -72,4 +76,8 @@ export const useIsUserDisabled = () => {
     return () => mounted = false;
   }, [authLoaded, isSignedIn]);
   return disabled;
+};
+
+export const getAccessModuleStatusByName = (profile: Profile, moduleName: AccessModule): AccessModuleStatus => {
+  return profile.accessModules.modules.find(a => a.moduleName === moduleName);
 };

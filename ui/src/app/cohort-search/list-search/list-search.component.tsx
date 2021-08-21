@@ -21,6 +21,7 @@ import {
   currentCohortSearchContextStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {
@@ -326,13 +327,21 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       }
     }
 
+    getCriteriaInfoByDomain(domain, value, surveyName) {
+      const {workspace: {id, namespace}, searchContext: {standard}} = this.props;
+      // Remove the standard null check once https://precisionmedicineinitiative.atlassian.net/browse/RW-6982 is done
+      return serverConfigStore.get().config.enableStandardSourceDomains
+          ? cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, standard == null ? true : standard, value, surveyName)
+          : cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value, surveyName);
+    }
+
     getResults = async(value: string) => {
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
         const surveyName = selectedSurvey || 'All';
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value.trim(), surveyName);
+        const resp = await this.getCriteriaInfoByDomain(domain, value.trim(), surveyName);
         const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;

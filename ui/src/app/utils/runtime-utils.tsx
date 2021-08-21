@@ -1,21 +1,9 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
-import {
-  ExceededActionCountError,
-  LeoRuntimeInitializationAbortedError,
-  LeoRuntimeInitializer,
-} from 'app/utils/leo-runtime-initializer';
-import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {
-  compoundRuntimeOpStore,
-  diskStore,
-  markCompoundRuntimeOperationCompleted,
-  registerCompoundRuntimeOperation,
-  runtimeStore,
-  serverConfigStore,
-  useStore
-} from 'app/utils/stores';
+import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
+import {compoundRuntimeOpStore, diskStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
 
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -53,6 +41,7 @@ export interface RuntimeConfig {
   diskSize: number;
   dataprocConfig: DataprocConfig;
   pdSize: number;
+  autopauseThreshold: number;
 }
 
 export interface UpdateMessaging {
@@ -264,12 +253,30 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
   };
 };
 
+const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+  const oldAutopauseThreshold = oldRuntime.autopauseThreshold;
+  const newAutopauseThreshold = newRuntime.autopauseThreshold;
+
+  if (!oldAutopauseThreshold || !newAutopauseThreshold) {
+    return null;
+  }
+
+  return {
+    desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
+    previous: AutopauseMinuteThresholds.get(oldAutopauseThreshold),
+    new: AutopauseMinuteThresholds.get(newAutopauseThreshold),
+    differenceType: oldAutopauseThreshold === newAutopauseThreshold ?
+      RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_IN_PLACE
+  };
+};
+
 const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceConfig.machineType),
       diskSize: diskStore.get().persistentDisk == null ? runtime.gceConfig.diskSize : null,
+      autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       pdSize: runtime.diskConfig != null ? runtime.diskConfig.size : runtime.gceConfig.diskSize
     };
@@ -278,6 +285,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       computeType: ComputeType.Standard,
       machine: findMachineByName(runtime.gceWithPdConfig.machineType),
       diskSize: null,
+      autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
       pdSize: runtime.gceWithPdConfig.persistentDisk.size
     };
@@ -286,6 +294,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       computeType: ComputeType.Dataproc,
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
       diskSize: runtime.dataprocConfig.masterDiskSize,
+      autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig,
       pdSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null
     };
@@ -297,7 +306,7 @@ export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: Run
   const comparePD = runtimeCtx.enablePD && newRuntime.computeType === ComputeType.Standard;
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, comparePD ? comparePdSize : compareDiskSize]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, comparePD ? comparePdSize : compareDiskSize, compareAutopauseThreshold]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);

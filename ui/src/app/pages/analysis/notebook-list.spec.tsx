@@ -1,5 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
+import {MemoryRouter} from 'react-router';
 import {NotebookList} from './notebook-list';
 
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -18,7 +19,7 @@ describe('NotebookList', () => {
 
   it('should render notebooks', async () => {
     currentWorkspaceStore.next(workspaceDataStub);
-    const wrapper = mount(<NotebookList hideSpinner={() => {}} />);
+    const wrapper = mount(<MemoryRouter><NotebookList hideSpinner={() => {}} /></MemoryRouter>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.text()).toMatch('mockFile');
   });

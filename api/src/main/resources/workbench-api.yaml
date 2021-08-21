@@ -314,6 +314,26 @@ paths:
           description: Welcome Email sent.
         500:
           description: Internal Server Error
+  "/v1/send-billing-setup-email":
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Send billing setup email to GCP partner
+      operationId: sendBillingSetupEmail
+      parameters:
+        - in: body
+          name: sendBillingSetupEmail
+          schema:
+            "$ref": "#/definitions/SendBillingSetupEmailRequest"
+      responses:
+        200:
+          description: Billing setup email sent.
+        403:
+          description: Forbidden
+        500:
+          description: Internal Server Error
   "/v1/google-account":
     post:
       tags:
@@ -3331,27 +3351,6 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuListResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/CbMenu/{parentId}":
-    parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-    get:
-      tags:
-        - cohortBuilder
-      description: 'Returns criteria menu with source and standard info'
-      operationId: findCbMenu
-      parameters:
-        - in: path
-          name: parentId
-          type: integer
-          format: int64
-          required: true
-          description: the parent id
-      responses:
-        200:
-          description: A collection of criteria menu options
-          schema:
-            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaininfo":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3407,6 +3406,36 @@ paths:
           description: A count of matching concepts in this domain
           schema:
             "$ref": "#/definitions/DomainCount"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/domaincard/{domain}/{standard}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns a count of term matches per domain per standard flag'
+      operationId: findDomainCountByStandardSource
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: is domain standard or Source
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+      responses:
+        200:
+          description: A count of matching concepts in this domain
+          schema:
+            "$ref": "#/definitions/DomainCount"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/surveymodule":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -3447,6 +3476,46 @@ paths:
           description: A count of matching concepts per survey
           schema:
             "$ref": "#/definitions/SurveyCount"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: 'Returns a collection of criteria per search term'
+      operationId: findCriteriaByDomain
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: standard
+          type: boolean
+          required: true
+          description: True if standard else false
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: surveyName
+          type: string
+          required: false
+          description: name for the survey to search
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: number of criteria matches to return
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListWithCountResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/search/term":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4283,6 +4352,9 @@ definitions:
       accessRenewalExpiry:
         type: number
         description: Days a user's module completion is good for until it expires.
+      accessRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
@@ -4290,6 +4362,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/RuntimeImage"
+      freeTierBillingAccountId:
+        type: string
+        description: The free tier billing account id
 
   RuntimeImage:
     type: object
@@ -5474,6 +5549,29 @@ definitions:
       creationNonce:
         type: string
         description: The nonce returned from the account creation API.
+  SendBillingSetupEmailRequest:
+    type: object
+    required:
+      - paymentMethod
+    properties:
+      phone:
+        type: string
+        description: User contact phone
+      institution:
+        type: string
+        description: The insitution of the user.
+      paymentMethod:
+        description: The payment to use, credit card or purchase order
+        "$ref": "#/definitions/BillingPaymentMethod"
+      isNihFunded:
+        type: boolean
+        description: Whether its NIH Funded research
+  BillingPaymentMethod:
+    type: string
+    description: 'The payment to use when setting up billing with billing parners, credit card or purchase order'
+    enum:
+      - CREDIT_CARD
+      - PURCHASE_ORDER
   UpdateContactEmailRequest:
     type: object
     required:
@@ -6024,6 +6122,10 @@ definitions:
           for the master node. For example "n1-standard-16"
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   GceWithPdConfig:
     description: Configuration for Google Compute Engine instances with Persistent Disk.
     properties:
@@ -6041,6 +6143,10 @@ definitions:
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   DataprocConfig:
     description: Configuration for a single Dataproc cluster.
     properties:
@@ -6086,6 +6192,19 @@ definitions:
           Optional, the number of preemptible workers. If unspecified, the
           default number is 0. Ignored if numberOfWorkers is 0.
           For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+  GpuConfig:
+    description: A config that describes the gpus associated with a runtime
+    type: object
+    required:
+      - gpuType
+      - numOfGpus
+    properties:
+      gpuType:
+        type: string
+        description: The google identifier for the gpu specs associated with this runtime, ex `nvidia-tesla-t4`. See https://cloud.google.com/compute/docs/gpus
+      numOfGpus:
+        type: integer
+        description: The number of gpus associated with this runtime
   FileDetail:
     type: object
     required:
@@ -7797,7 +7916,6 @@ definitions:
     - domainId
     - name
     - group
-    - standard
     - sortOrder
     properties:
       id:
@@ -7822,10 +7940,6 @@ definitions:
         type: string
       group:
         description: Is this a parent
-        type: boolean
-        default: false
-      standard:
-        description: True if standard, false for source
         type: boolean
         default: false
       sortOrder:
@@ -9186,6 +9300,10 @@ definitions:
         description: |-
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
+      registeredTierRequirement:
+        description: Institution tegisted tier requirement.
+        "$ref": "#/definitions/InstitutionMembershipRequirement"
+
   ReportingDataset:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-11-18T10:38:12-05:00.

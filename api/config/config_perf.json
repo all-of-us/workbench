@@ -31,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -73,8 +74,7 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
-    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login"
   },
   "mandrill": {
     "fromEmail": "support@researchallofus.org",
@@ -131,7 +131,8 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
+    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "lookbackPeriod": 330
   },
   "offlineBatch": {
     "usersPerAuditTask": 20

@@ -80,11 +80,11 @@ public class RasLinkServiceTest extends SpringTest {
           + "\",\"email\":\"foo@gmail.com\","
           + "\"federated_identities\":"
           + "{\"identities\":"
-          + "[{\"login.gov\":"
+          + "{\"login.gov\":"
           + "{\"firstname\":\"\",\"lastname\":\"\",\"userid\":\"123\",\"mail\":\"foo@gmail.com\"},"
           + "\"era\":"
           + "{\"firstname\":\"\",\"lastname\":\"\",\"userid\":\"eraUserId\"}"
-          + "}]}}";
+          + "}}}";
   private static final String ID_TOKEN_JWT_IAL_1 =
       JWT.create()
           .withClaim(
@@ -159,6 +159,8 @@ public class RasLinkServiceTest extends SpringTest {
     public WorkbenchConfig getWorkbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
       config.accessRenewal.expiryDays = (long) 365;
+      config.access.enableEraCommons = true;
+      config.access.enableRasLoginGovLinking = true;
       return config;
     }
 

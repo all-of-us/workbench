@@ -1,6 +1,10 @@
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
+if(JavaVersion.current() != JavaVersion.VERSION_1_8){
+  throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
+}
+
 // Runs before all tasks. Sets up properties and dependencies for the build
 // process itself.
 buildscript {
@@ -677,16 +681,6 @@ task fetchWorkspaceDetails(type: JavaExec) {
   }
 }
 
-// See project.rb command: export-workspace-data
-task exportWorkspaceData(type: JavaExec) {
-  classpath = sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ExportWorkspaceData"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: generate-impersonated-user-tokens
 task generateImpersonatedUserTokens(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
@@ -807,6 +801,16 @@ task loadInstitutions(type: JavaExec) {
 task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
   main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: set-access-module-timestamps
+task setAccessModuleTimestamps(type: JavaExec) {
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

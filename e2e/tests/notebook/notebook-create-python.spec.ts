@@ -81,16 +81,23 @@ describe('Create python kernel notebook', () => {
       })
     ).toMatch(/success$/);
 
-    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    expect(
+      await notebook.runCodeCell(5, {
+        codeFile: 'resources/python-code/gsutil.py',
+        markdownWorkaround: true
+      })
+    ).toMatch(/success$/);
+
+    await notebook.runCodeCell(6, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(5);
+    const cell = notebook.findCell(6);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
     const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(6, { code: codeSnippet });
+    const codeSnippetOutput = await notebook.runCodeCell(7, { code: codeSnippet });
     expect(codeSnippetOutput).toEqual(expect.stringContaining('python3'));
 
     // Save, exit notebook then come back from Analysis page.

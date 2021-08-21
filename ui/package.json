@@ -22,7 +22,8 @@
     "clearMocks": true,
     "setupFiles": [
       "./test-shim.js",
-      "./test-setup.js"
+      "./test-setup.js",
+      "./src/testing/navigation-mock.ts"
     ],
     "setupFilesAfterEnv": [
       "./test-setup-script.js"

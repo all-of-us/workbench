@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -95,42 +96,41 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     WorkbenchConfig config = workbenchConfigProvider.get();
     String assetsBaseUrl = config.server.apiBaseUrl + "/static";
 
-    Map<String, String> nbExtensions = new HashMap<>();
-    nbExtensions.put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js");
-    nbExtensions.put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js");
-    nbExtensions.put(
-        "aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js");
-    nbExtensions.put(
-        "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
+    Map<String, String> nbExtensions =
+        new ImmutableMap.Builder<String, String>()
+            .put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js")
+            .put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js")
+            .put("aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js")
+            .put("aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js")
+            .build();
 
-    Map<String, String> runtimeLabels = new HashMap<>();
-    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
-    runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
+    Map<String, String> runtimeLabels =
+        new ImmutableMap.Builder<String, String>()
+            .put(LeonardoMapper.RUNTIME_LABEL_AOU, "true")
+            .put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail)
+            .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
+            .build();
 
-    runtimeLabels.putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()));
-
-    LeonardoCreateRuntimeRequest request =
-        new LeonardoCreateRuntimeRequest()
-            .labels(runtimeLabels)
-            .defaultClientId(config.server.oauthClientId)
-            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-            .userJupyterExtensionConfig(
-                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-            // Matches Terra UI's scopes, see RW-3531 for rationale.
-            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-            // Note: DockerHub must be used over GCR here, since VPC-SC restricts
-            // pulling external images via GCR (since it counts as GCS traffic).
-            .welderRegistry(WelderRegistryEnum.DOCKERHUB)
-            .customEnvironmentVariables(customEnvironmentVariables);
-
-    request.setRuntimeConfig(buildRuntimeConfig(runtime));
-
-    return request;
+    return new LeonardoCreateRuntimeRequest()
+        .labels(runtimeLabels)
+        .defaultClientId(config.server.oauthClientId)
+        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+        .userJupyterExtensionConfig(
+            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+        // Matches Terra UI's scopes, see RW-3531 for rationale.
+        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+        // Note: DockerHub must be used over GCR here, since VPC-SC restricts
+        // pulling external images via GCR (since it counts as GCS traffic).
+        .welderRegistry(WelderRegistryEnum.DOCKERHUB)
+        .customEnvironmentVariables(customEnvironmentVariables)
+        .autopauseThreshold(runtime.getAutopauseThreshold())
+        .autopause(runtime.getAutopauseThreshold() != null)
+        .runtimeConfig(buildRuntimeConfig(runtime));
   }
 
   private Object buildRuntimeConfig(Runtime runtime) {
@@ -178,6 +178,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // See RW-6079
     customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
 
+    // See RW-7107
+    customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
+
     leonardoRetryHandler.run(
         (context) -> {
           runtimesApi.createRuntime(
@@ -203,6 +206,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(buildRuntimeConfig(runtime))
+                      .autopause(runtime.getAutopauseThreshold() != null)
+                      .autopauseThreshold(runtime.getAutopauseThreshold())
                       .labelsToUpsert(runtimeLabels));
           return null;
         });

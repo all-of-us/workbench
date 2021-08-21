@@ -180,7 +180,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
 
     getMenuOptions() {
       this.setState({loadingMenuOptions: true});
-      const {workspace: {id, cdrVersionId, namespace}} = this.props;
+      const {workspace: {cdrVersionId, id, namespace}} = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
       cohortBuilderApi().findCriteriaMenu(namespace, id, 0).then(async res => {
         const menuOptions = await Promise.all(res.items.map(async item => {

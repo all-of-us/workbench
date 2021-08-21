@@ -20,6 +20,7 @@ export interface RouteDataStore {
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
   contentFullHeightOverride?: boolean;
+  workspaceNavBarTab?: string;
 }
 
 export const routeDataStore = atom<RouteDataStore>({});
@@ -151,12 +152,6 @@ export const serverConfigStore = atom<ServerConfigStore>({});
 export interface CanComponentDeactivate {
   canDeactivate: () => Promise<boolean> | boolean;
 }
-
-export interface NavigationGuardStore {
-  component?: CanComponentDeactivate;
-}
-
-export const navigationGuardStore = atom<NavigationGuardStore>({});
 
 /**
  * @name useStore

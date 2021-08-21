@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {CreateModal} from 'app/components/create-modal';
@@ -21,7 +16,9 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
-  reactStyles, switchCase,
+  hasNewValidProps,
+  reactStyles,
+  switchCase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
@@ -30,10 +27,7 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentWorkspaceStore,
-  navigateAndPreventDefaultIfNoKeysPressed
-} from 'app/utils/navigation';
+import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -46,15 +40,21 @@ import {
   DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
-  DataSetPreviewValueList, DataSetRequest,
+  DataSetPreviewValueList,
+  DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile, ResourceType,
+  Profile,
+  ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -374,14 +374,21 @@ export class ValueListItem extends React.Component<
   }
 }
 
-const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
+const PlusLink = ({dataTestId, path, disable}: {dataTestId: string, path: string, disable?: boolean}) => {
+  const [, navigateByUrl] = useNavigation();
+
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
                          content='Requires Owner or Writer permission'>
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
-            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
-    <ClrIcon shape='plus-circle' class='is-solid' size={16}
-             style={stylesFunction.plusIconColor(disable)}/>
-  </Clickable></TooltipTrigger>;
+               onClick={e => {
+                 navigateByUrl(path, {
+                   preventDefaultIfNoKeysPressed: true,
+                   event: e
+                 });
+               }}>
+      <ClrIcon shape='plus-circle' class='is-solid' size={16}
+               style={stylesFunction.plusIconColor(disable)}/>
+    </Clickable></TooltipTrigger>;
 };
 
 const StepNumber = ({step, style = {}}) => {
@@ -516,32 +523,11 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     async componentDidMount() {
       this.props.hideSpinner();
-      const {namespace, id} = this.props.workspace;
-      const resourcesPromise = this.loadResources();
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
-        PREPACKAGED_DOMAINS =   {
-          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-          ...PREPACKAGED_WITH_FITBIT_DOMAINS
-        };
-      }
-      // Only allow selection of genomics prepackaged concept sets if genomics
-      // data extraction is possible, since extraction is the only action that
-      // can be taken on genomics variant data from the dataset builder.
-      if (serverConfigStore.get().config.enableGenomicExtraction &&
-          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
-        PREPACKAGED_DOMAINS = {
-          ...PREPACKAGED_DOMAINS,
-          ...PREPACKAGED_WITH_WHOLE_GENOME
-        };
-      }
+      await this.loadResources();
 
-      if (this.props.urlParams.dataSetId !== undefined) {
-        const [, dataset] = await Promise.all([
-          resourcesPromise,
-          dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
-        ]);
-
-        this.loadDataset(dataset);
+      this.updatePrepackagedDomains();
+      if (this.props.urlParams.dataSetId) {
+        this.fetchDataset();
       }
     }
 
@@ -564,7 +550,50 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       });
     }
 
-    async componentDidUpdate({}, prevState: State) {
+    updatePrepackagedDomains() {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+        PREPACKAGED_DOMAINS =   {
+          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_WITH_FITBIT_DOMAINS
+        };
+      }
+      // Only allow selection of genomics prepackaged concept sets if genomics
+      // data extraction is possible, since extraction is the only action that
+      // can be taken on genomics variant data from the dataset builder.
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+        getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+      }
+    }
+
+    async fetchDataset() {
+      const dataset = await dataSetApi().getDataSet(
+        this.props.workspace.namespace, this.props.workspace.id, this.props.urlParams.dataSetId);
+      this.loadDataset(dataset);
+    }
+
+    async componentDidUpdate(prevProps, prevState: State) {
+      if (hasNewValidProps(this.props, prevProps, [
+        (props) => props.workspace.namespace,
+        (props) => props.workspace.id,
+        (props) => props.cdrVersionTiersResponse
+      ])) {
+        this.updatePrepackagedDomains();
+      }
+
+      if (hasNewValidProps(this.props, prevProps, [
+        (props) => props.workspace.namespace,
+        (props) => props.workspace.id,
+        (props) => props.urlParams.dataSetId])) {
+
+        if (hasNewValidProps(this.props, prevProps, [(props) => props.urlParams.dataSetId])) {
+          this.fetchDataset();
+        }
+      }
+
       // If any domains were dropped, we want to drop any domain/value pair selections.
       const droppedDomains = Array.from(prevState.selectedDomains)
           .filter(d => !this.state.selectedDomains.has(d));
@@ -606,7 +635,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       // If any of these domains has not yet been loaded, request the schema
       // (value sets) for them.
       const domainsToLoad = newDomains.filter(
-        d => !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
+        d => d && !this.state.domainValueSetIsLoading.has(d) && !this.state.domainValueSetLookup.has(d));
       if (domainsToLoad.length > 0) {
         this.setState(({domainValueSetIsLoading, domainValueSetLookup}) => {
           const newLoading = new Set(domainValueSetIsLoading);
@@ -1171,7 +1200,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             <div style={{width: '33%', height: '80%', minWidth: styles.selectBoxHeader.minWidth}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader step='1' header='Select Cohorts' subHeader='Participants'>
-                  {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
+                  <PlusLink dataTestId='cohorts-link' path={cohortsPath} disable={!this.canWrite}/>
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -1202,7 +1231,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
                     <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
+                      <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
@@ -1409,3 +1438,4 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       </React.Fragment>;
     }
   });
+

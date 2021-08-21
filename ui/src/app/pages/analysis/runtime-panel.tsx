@@ -18,8 +18,10 @@ import {
   withUserProfile
 } from 'app/utils';
 import {
+  AutopauseMinuteThresholds,
   ComputeType,
   diskPricePerMonth,
+  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   findMachineByName,
   Machine,
   machineRunningCost,
@@ -997,7 +999,8 @@ export const RuntimePanel = fp.flow(
 
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
-  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
+  const existingRuntime = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
+  const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = existingRuntime;
   const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
   const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize ? gceConfig.diskSize : defaultDiskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
@@ -1005,6 +1008,7 @@ export const RuntimePanel = fp.flow(
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const pdExists = !!persistentDisk;
   const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
+  const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -1026,6 +1030,8 @@ export const RuntimePanel = fp.flow(
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
+  const [selectedAutopauseThreshold, setSelectedAutopauseThreshold] = useState(initialAutopauseThreshold);
+
   // Note: while the Dataproc config does contain masterMachineType and masterDiskSize,
   // the source of truth for these values are selectedMachine, and selectedDiskSize, as
   // these UI components are used for both Dataproc and standard VMs.
@@ -1052,7 +1058,8 @@ export const RuntimePanel = fp.flow(
     machine: initialMasterMachine,
     diskSize: diskSize,
     dataprocConfig: dataprocConfig,
-    pdSize: pdSize
+    pdSize: pdSize,
+    autopauseThreshold: initialAutopauseThreshold
   };
 
   const newRuntimeConfig = {
@@ -1060,7 +1067,8 @@ export const RuntimePanel = fp.flow(
     machine: selectedMachine,
     diskSize: selectedDiskSize,
     dataprocConfig: selectedDataprocConfig,
-    pdSize: selectedPdSize
+    pdSize: selectedPdSize,
+    autopauseThreshold: selectedAutopauseThreshold
   };
 
 
@@ -1148,6 +1156,8 @@ export const RuntimePanel = fp.flow(
         ({runtimeTemplate}) => presetEquals(runtimeRequest, runtimeTemplate),
         runtimePresets)
     ) || RuntimeConfigurationType.UserOverride;
+
+    runtimeRequest.autopauseThreshold = runtime.autopauseThreshold;
 
     return runtimeRequest;
   };
@@ -1381,24 +1391,36 @@ export const RuntimePanel = fp.flow(
                         diskSize={diskSize}
                     />}
              </div>
-             <FlexColumn style={{marginTop: '1rem'}}>
-               <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
-               <Dropdown id='runtime-compute'
-                         disabled={!allowDataproc || disableControls}
-                         style={{width: '10rem'}}
-                         options={[ComputeType.Standard, ComputeType.Dataproc]}
-                         value={selectedCompute || ComputeType.Standard}
-                         onChange={({value}) => {setSelectedCompute(value); }}
-                         />
-               {
-                 selectedCompute === ComputeType.Dataproc &&
-                 <DataProcConfigSelector
-                   disabled={disableControls}
-                   onChange={config => setSelectedDataprocConfig(config)}
-                   dataprocConfig={selectedDataprocConfig} />
-               }
+             <FlexRow style={{marginTop: '1rem', justifyContent: 'space-between'}}>
+               <FlexColumn>
+                 <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
+                 <Dropdown id='runtime-compute'
+                           disabled={!allowDataproc || disableControls}
+                           style={{width: '10rem'}}
+                           options={[ComputeType.Standard, ComputeType.Dataproc]}
+                           value={selectedCompute || ComputeType.Standard}
+                           onChange={({value}) => {setSelectedCompute(value); }}
+                 />
+                 {
+                   selectedCompute === ComputeType.Dataproc &&
+                   <DataProcConfigSelector
+                       disabled={disableControls}
+                       onChange={config => setSelectedDataprocConfig(config)}
+                       dataprocConfig={selectedDataprocConfig} />
+                 }
+               </FlexColumn>
 
-             </FlexColumn>
+               <FlexColumn>
+                 <label style={styles.label} htmlFor='runtime-autopause'>Automatically pause after idle for</label>
+                 <Dropdown id='runtime-autopause'
+                           disabled={disableControls}
+                           style={{width: '10rem'}}
+                           options={Array.from(AutopauseMinuteThresholds.entries()).map(entry => ({label: entry[1], value: entry[0]}))}
+                           value={selectedAutopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES}
+                           onChange={({value}) => setSelectedAutopauseThreshold(value)}
+                 />
+               </FlexColumn>
+             </FlexRow>
            </div>
             <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>

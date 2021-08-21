@@ -117,6 +117,22 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomain(
+      String workspaceNamespace,
+      String workspaceId,
+      String domain,
+      Boolean standard,
+      String term,
+      String surveyName,
+      Integer limit) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateDomain(domain, surveyName);
+    return ResponseEntity.ok(
+        cohortBuilderService.findCriteriaByDomain(domain, term, surveyName, standard, limit));
+  }
+
+  @Override
   public ResponseEntity<CriteriaListWithCountResponse> findCriteriaByDomainAndSearchTerm(
       String workspaceNamespace,
       String workspaceId,
@@ -146,17 +162,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaMenuListResponse> findCriteriaMenu(
-      String workspaceNamespace, String workspaceId, Long parentId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CriteriaMenuListResponse response =
-        new CriteriaMenuListResponse()
-            .items(cohortBuilderService.findCriteriaMenuByParentId_old(parentId));
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaMenuListResponse> findCbMenu(
       String workspaceNamespace, String workspaceId, Long parentId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -206,6 +211,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         response.items(cohortBuilderService.findDemoChartInfo(genderOrSexType, ageType, request)));
   }
 
+  //  TODO: Remove this method call once the enableStandardSource flag is enabled
   @Override
   public ResponseEntity<DomainCount> findDomainCount(
       String workspaceNamespace, String workspaceId, String domain, String term) {
@@ -214,6 +220,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain);
     validateTerm(term);
     Long count = cohortBuilderService.findDomainCount(domain, term);
+    return ResponseEntity.ok(
+        new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
+  }
+
+  @Override
+  public ResponseEntity<DomainCount> findDomainCountByStandardSource(
+      String workspaceNamespace, String workspaceId, String domain, Boolean standard, String term) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateDomain(domain);
+    validateTerm(term);
+    Long count = cohortBuilderService.findDomainCountByStandard(domain, term, standard);
     return ResponseEntity.ok(
         new DomainCount().conceptCount(count).domain(Domain.valueOf(domain)).name(domain));
   }

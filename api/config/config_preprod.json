@@ -31,7 +31,8 @@
     "freeTierCostAlertThresholds": [
       0.5,
       0.75
-    ]
+    ],
+    "carahsoftEmail": "NIHStrides@Carahsoft.com"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -73,7 +74,6 @@
     "appEngineLocationId": "us-central"
   },
   "admin": {
-    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/preprod-workbench.researchallofus.org/login"
   },
   "mandrill": {
@@ -126,7 +126,8 @@
   },
   "accessRenewal": {
     "expiryDays": 3650,
-    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ]
+    "expiryDaysWarningThresholds": [ 1, 3, 7, 15, 30 ],
+    "lookbackPeriod": 330
   },
   "offlineBatch": {
     "usersPerAuditTask": 20

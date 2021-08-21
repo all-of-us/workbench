@@ -324,21 +324,15 @@ export default class BaseElement {
    * Click on element then wait for page navigation to finish.
    */
   async clickAndWait(timeout = 2 * 60 * 1000): Promise<void> {
-    try {
-      const navigationPromise = this.page.waitForNavigation({
-        waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
-        timeout
-      });
-      await this.click({ delay: 10 });
-      await navigationPromise;
-    } catch (err) {
+    const navigationPromise = this.page.waitForNavigation({
+      waitUntil: ['domcontentloaded'],
+      timeout
+    });
+    await this.click({ delay: 10 });
+    await navigationPromise.catch((err) => {
       // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.
-      logger.error(`Failed click (${this.xpath}) and wait for navigation to complete.`);
-      logger.error(err);
-      if (err instanceof Error) {
-        logger.error(err.stack);
-      }
-    }
+      logger.error(`Encountered error when click (${this.xpath}) and wait for navigation to complete.\n${err.stack}`);
+    });
   }
 
   /**
