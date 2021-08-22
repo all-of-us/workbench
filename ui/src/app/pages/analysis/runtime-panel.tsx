@@ -875,7 +875,7 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-  const gpuConfig = gceConfig ? gceConfig.gpuConfig : null;
+  const gpuConfig = !!gceConfig && !!gceConfig.gpuConfig ? gceConfig.gpuConfig : null;
   const enableGpu = serverConfigStore.get().config.enableGpu;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
