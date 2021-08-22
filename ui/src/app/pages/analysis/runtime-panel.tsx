@@ -22,6 +22,7 @@ import {
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   findMachineByName,
+  gpuTypes,
   Machine,
   machineRunningCost,
   machineRunningCostBreakdown,
@@ -51,6 +52,7 @@ import {
   BillingStatus,
   CdrVersionTiersResponse,
   DataprocConfig,
+  GpuConfig,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus
@@ -157,6 +159,7 @@ const styles = reactStyles({
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 100;
+const defaultGpuConfig = {gpuType: 'nvidia-tesla-t4', numOfGpus: 1};
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
@@ -322,6 +325,57 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
                    onChange={({value}) => onChange(value)}
       />
     </FlexRow>;
+};
+
+const GpuConfigSelector = ({disabled, onChange, gpuConfig})  => {
+  const {
+    gpuType = 'nvidia-tesla-t4',
+    numOfGpus = 1,
+  } = gpuConfig || {};
+  const [selectedGpuType, setSelectedGpuType] = useState<string>(gpuType);
+  const [selectedNumOfGpus, setSelectedNumOfGpus] = useState<number>(numOfGpus);
+  const [enableGpu, setEnableGpu] = useState<boolean>(!!gpuConfig);
+
+  useEffect(() => {
+    onChange(enableGpu ? {
+      gpuType: selectedGpuType,
+      numOfGpus: selectedNumOfGpus,
+    } : null);
+  }, [enableGpu, selectedGpuType, selectedNumOfGpus]);
+
+  return <fieldset style={{marginTop: '0.75rem'}}>
+    <div >
+      <div >
+      <input name='enable-gpu'
+             type='checkbox'  checked={enableGpu}
+             onChange={() => {setEnableGpu(!enableGpu); }}/>Enable GPUs
+      </div >
+      {enableGpu &&
+      <FlexRow style={styles.labelAndInput}>
+        <label style={styles.label} htmlFor='gpu-type'>GpuType</label>
+        <Dropdown id='gpu-type'
+                  disabled={disabled}
+                  style={{width: '8rem'}}
+                  options={[gpuTypes.NVDIATeslaT4, gpuTypes.NVDIATeslaK80, gpuTypes.NVDIATeslaV100, gpuTypes.NVDIATeslaP4]}
+                  value={selectedGpuType}
+                  onChange={({value}) => {
+                    setSelectedGpuType(value);
+                  }}
+        />
+        <label style={styles.label} htmlFor='gpu-num'>GPUs</label>
+        <Dropdown id='gpu-num'
+                  disabled={disabled}
+                  style={{width: '3rem'}}
+                  options={[1, 2, 4, 8]}
+                  value={selectedNumOfGpus}
+                  onChange={({value}) => {
+                    setSelectedNumOfGpus(value);
+                  }}
+        />
+      </FlexRow>
+    }
+    </div>
+  </fieldset>;
 };
 
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
@@ -811,6 +865,7 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
+  const gpuConfig = gceConfig ? gceConfig.gpuConfig : defaultGpuConfig;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -839,6 +894,8 @@ export const RuntimePanel = fp.flow(
   // these UI components are used for both Dataproc and standard VMs.
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
+  const [selectedGpuConfig, setSelectedGpuConfig] = useState<GpuConfig | null>(gpuConfig);
+
   const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
       validLeoGceMachineTypes : validLeoDataprocMasterMachineTypes;
   // The compute type affects the set of valid machine types, so revert to the
@@ -858,6 +915,7 @@ export const RuntimePanel = fp.flow(
     machine: initialMasterMachine,
     diskSize: diskSize,
     dataprocConfig: dataprocConfig,
+    gpuConfig: gpuConfig,
     autopauseThreshold: initialAutopauseThreshold
   };
 
@@ -866,6 +924,7 @@ export const RuntimePanel = fp.flow(
     machine: selectedMachine,
     diskSize: selectedDiskSize,
     dataprocConfig: selectedDataprocConfig,
+    gpuConfig:  selectedCompute === ComputeType.Standard ? selectedGpuConfig : null,
     autopauseThreshold: selectedAutopauseThreshold
   };
 
@@ -902,7 +961,8 @@ export const RuntimePanel = fp.flow(
     } : runtime.computeType === ComputeType.Standard ? {
       gceConfig: {
         machineType: runtime.machine.name,
-        diskSize: runtime.diskSize
+        diskSize: runtime.diskSize,
+        gpuConfig: runtime.gpuConfig
       }
     } : null;
 
@@ -1119,6 +1179,15 @@ export const RuntimePanel = fp.flow(
                     }}
                     disabled={disableControls}
                     diskSize={diskSize}/>
+                {
+                  selectedCompute === ComputeType.Standard &&
+                  <GpuConfigSelector
+                      disabled={disableControls}
+                      onChange={config => {
+                        setSelectedGpuConfig(config);
+                      }}
+                      gpuConfig={selectedGpuConfig}/>
+                }
              </div>
              <FlexRow style={{marginTop: '1rem', justifyContent: 'space-between'}}>
                <FlexColumn>

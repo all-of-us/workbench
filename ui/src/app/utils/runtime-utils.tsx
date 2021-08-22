@@ -1,11 +1,21 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import {
+  ExceededActionCountError,
+  LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializer,
+} from 'app/utils/leo-runtime-initializer';
 import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, useStore} from 'app/utils/stores';
+import {
+  compoundRuntimeOpStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  useStore
+} from 'app/utils/stores';
 
-import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
+import {DataprocConfig, GpuConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -37,6 +47,7 @@ export interface RuntimeConfig {
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
+  gpuConfig: GpuConfig;
   autopauseThreshold: number;
 }
 
@@ -106,6 +117,18 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
+  };
+};
+
+const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+  const oldGpuExists = !!oldRuntime.gpuConfig;
+  const newGpuExists = !!newRuntime.gpuConfig;
+  return {
+    desc: 'Change GPU config',
+    previous: oldGpuExists ? `${oldRuntime.gpuConfig.numOfGpus} ${oldRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
+    new: newGpuExists ?  `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
+    differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists) && (oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
+    oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
 };
 
@@ -238,7 +261,8 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       machine: findMachineByName(runtime.gceConfig.machineType),
       diskSize: runtime.gceConfig.diskSize,
       autopauseThreshold: runtime.autopauseThreshold,
-      dataprocConfig: null
+      dataprocConfig: null,
+      gpuConfig: runtime.gceConfig.gpuConfig
     };
   } else if (runtime.dataprocConfig) {
     return {
@@ -246,7 +270,8 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       machine: findMachineByName(runtime.dataprocConfig.masterMachineType),
       diskSize: runtime.dataprocConfig.masterDiskSize,
       autopauseThreshold: runtime.autopauseThreshold,
-      dataprocConfig: runtime.dataprocConfig
+      dataprocConfig: runtime.dataprocConfig,
+      gpuConfig: null
     };
   }
 };
@@ -255,7 +280,7 @@ export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: Run
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
     compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize,
-    compareAutopauseThreshold]
+    compareAutopauseThreshold, compareGpu]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);

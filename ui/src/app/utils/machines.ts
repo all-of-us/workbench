@@ -8,6 +8,13 @@ export enum ComputeType {
   Dataproc = 'Dataproc Cluster'
 }
 
+export enum gpuTypes {
+  NVDIATeslaT4 = 'nvidia-tesla-t4',
+  NVDIATeslaV100 = 'nvidia-tesla-v100',
+  NVDIATeslaK80 = 'nvidia-tesla-k80',
+  NVDIATeslaP4 = 'nvidia-tesla-p4',
+}
+
 export const AutopauseMinuteThresholds = new Map([
   [30, '30 minutes (default)'],
   [60 * 8, '8 hours'],
