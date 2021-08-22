@@ -305,7 +305,8 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
     expect(runtimeApiStub.runtime.gceConfig).toEqual({
       machineType: 'n1-highmem-8',
-      diskSize: 75
+      diskSize: 75,
+      gpuConfig: null
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
