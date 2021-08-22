@@ -259,6 +259,8 @@ public class WorkbenchConfig {
     public boolean enableAccessModuleRewrite;
     // If true, cohort and concept set will show source domains and standard domains options
     public boolean enableStandardSourceDomains;
+    // If true, the backend and UI will support gpu for standard vm
+    public boolean enableGpu;
   }
 
   public static class ActionAuditConfig {

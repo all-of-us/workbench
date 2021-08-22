@@ -876,6 +876,7 @@ export const RuntimePanel = fp.flow(
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
   const gpuConfig = gceConfig ? gceConfig.gpuConfig : null;
+  const enableGpu = serverConfigStore.get().config.enableGpu;
 
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
@@ -1191,7 +1192,7 @@ export const RuntimePanel = fp.flow(
                     disabled={disableControls}
                     diskSize={diskSize}/>
                 {
-                  selectedCompute === ComputeType.Standard &&
+                  enableGpu && selectedCompute === ComputeType.Standard &&
                   <GpuConfigSelector
                       disabled={disableControls}
                       onChange={config => {

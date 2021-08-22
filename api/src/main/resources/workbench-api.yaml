@@ -4342,6 +4342,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show separate source and standard domains
+      enableGpu:
+        type: boolean
+        default: false
+        description: Whether to enable GPU for standard vm
       rasHost:
         type: string
         description: The RAS base host name.
