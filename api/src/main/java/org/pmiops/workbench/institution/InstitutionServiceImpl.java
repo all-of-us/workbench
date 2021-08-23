@@ -372,8 +372,6 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<String> getUserEligabledAccessTiers(DbUser user) {
     Optional<Institution> institution = getByUser(user);
-    System.out.println("~~~~~~~institution");
-    System.out.println(institution.get());
     if (!institution.isPresent()) {
       return new ArrayList<String>();
     }

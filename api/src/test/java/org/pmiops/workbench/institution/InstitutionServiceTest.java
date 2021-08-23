@@ -958,19 +958,6 @@ public class InstitutionServiceTest extends SpringTest {
 
   @Test
   public void testEligableTiers_institutionNotFound() {
-    final Institution inst =
-        service.createInstitution(
-            new Institution()
-                .shortName("Broad")
-                .displayName("The Broad Institute")
-                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
-                .tierConfigs(
-                    ImmutableList.of(
-                        rtTierConfig
-                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
-                            .eraRequired(false)
-                            .accessTierShortName(registeredTier.getShortName())
-                            .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
     final DbUser user = createUser("user@broad.org");
     assertThat(service.getUserEligabledAccessTiers(user)).isEmpty();
   }
@@ -991,8 +978,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .accessTierShortName(registeredTier.getShortName())
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
     final DbUser user = createUser("user@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
+    createAffiliation(user, inst.getShortName());
     assertThat(service.getUserEligabledAccessTiers(user))
         .containsExactly(REGISTERED_TIER_SHORT_NAME);
   }
