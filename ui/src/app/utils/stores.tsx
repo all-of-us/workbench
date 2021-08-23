@@ -125,9 +125,14 @@ export const clearCompoundRuntimeOperations = () => {
 export interface RuntimeStore {
   workspaceNamespace: string | null | undefined;
   runtime: Runtime | null | undefined;
+  runtimeLoaded: boolean;
 }
 
-export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: undefined});
+export const runtimeStore = atom<RuntimeStore>({
+  workspaceNamespace: undefined,
+  runtime: undefined,
+  runtimeLoaded: false
+});
 
 export interface StackdriverErrorReporterStore {
   reporter?: StackdriverErrorReporter;

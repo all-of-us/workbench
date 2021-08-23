@@ -46,8 +46,7 @@ function run_mysql() {
     mysql $@
   else
     echo "Outside docker: invoking mysql via docker for portability"
-    docker run --rm --network host --entrypoint '' \
-      -v "${CREATE_DB_FILE}:${CREATE_DB_FILE}" \
+    docker run -i --rm --network host --entrypoint '' \
       mysql:5.7.27 \
       mysql $@
   fi
@@ -60,7 +59,7 @@ then
   run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" -e "drop database if exists ${CDR_DB_NAME}"
 fi
 echo "Creating database ..."
-run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" < "${CREATE_DB_FILE}"
+cat "${CREATE_DB_FILE}" | run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}"
 
 if [ "${RUN_LIST}" == "data" ]
 then

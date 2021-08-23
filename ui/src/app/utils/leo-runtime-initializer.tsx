@@ -149,7 +149,7 @@ export class LeoRuntimeInitializer {
     this.currentRuntimeValue = nextRuntime;
     const storeWorkspaceNamespace = runtimeStore.get().workspaceNamespace;
     if (storeWorkspaceNamespace === this.workspaceNamespace || storeWorkspaceNamespace === undefined ) {
-      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue});
+      runtimeStore.set({workspaceNamespace: this.workspaceNamespace, runtime: this.currentRuntimeValue, runtimeLoaded: true});
     }
   }
 
