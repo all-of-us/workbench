@@ -999,8 +999,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .accessTierShortName(registeredTier.getShortName())
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user2@broad.org");
-    final DbVerifiedInstitutionalAffiliation affiliation =
-        createAffiliation(user, inst.getShortName());
+    createAffiliation(user, inst.getShortName());
     assertThat(service.getUserEligabledAccessTiers(user)).isEmpty();
   }
 
