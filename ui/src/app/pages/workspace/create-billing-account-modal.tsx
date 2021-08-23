@@ -306,7 +306,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
             <FlexRow style={{marginTop: '10px'}}>
               <CheckBox style={styles.radioButton}
                         checked={nihFunded === true}
-                        onChange={() => setNihFunded(false)}/>
+                        onChange={(v) => setNihFunded(v)}/>
               <FlexColumn style={{marginTop: '9px', marginLeft: '15px', marginBottom: '15px'}}>
                 <div style={styles.textHeader}>NIH-funded Research.</div>
                 <div style={styles.textNormal}>My research is funded by the National Institute of Health, (NIH).
@@ -356,7 +356,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
           <FlexRow style={{marginTop: '100px', justifyContent: 'space-between'}}>
             <Button type='secondary'
                     style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                    onClick={() => {setCurrentStep(1); }}>
+                    onClick={() => {setCurrentStep(2); }}>
               Back
             </Button>
             <FlexRow style={{justifyContent: 'flex-end'}}>

@@ -75,7 +75,7 @@ export function useAuthentication() {
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    if (config && !isTestAccessTokenActive()) {
+    if (config && !(isTestAccessTokenActive())) {
       makeAuth2(config);
     }
   }, [config]);
