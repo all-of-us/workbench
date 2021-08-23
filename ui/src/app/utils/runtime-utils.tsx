@@ -117,7 +117,8 @@ const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): Runti
     desc: 'Change GPU config',
     previous: oldGpuExists ? `${oldRuntime.gpuConfig.numOfGpus} ${oldRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
     new: newGpuExists ?  `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
-    differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists) && (oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
+    differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists)
+    && (oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
     oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
   };
 };

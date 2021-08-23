@@ -22,7 +22,6 @@ import {
   ComputeType,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES, findGpu,
   findMachineByName, gpuBases,
-  gpuTypes,
   Machine,
   machineRunningCost,
   machineRunningCostBreakdown,
@@ -159,7 +158,6 @@ const styles = reactStyles({
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 100;
-const defaultGpuConfig = {gpuType: 'nvidia-tesla-t4', numOfGpus: 1};
 
 // Returns true if two runtimes are equivalent in terms of the fields which are
 // affected by runtime presets.
