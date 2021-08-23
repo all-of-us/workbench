@@ -538,9 +538,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
-    // Dual write then deprecate the one in userService
     userService.updateBypassTime(userId, request);
-    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
