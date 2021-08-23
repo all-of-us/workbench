@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -39,8 +40,10 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
@@ -79,6 +82,7 @@ public class UserServiceTest extends SpringTest {
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+  @MockBean private InstitutionService mockInstitutionService;
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
@@ -147,6 +151,13 @@ public class UserServiceTest extends SpringTest {
     // is the only working approach I've seen.
     PROVIDED_CLOCK.setInstant(START_INSTANT);
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+    Institution institution = new Institution();
+    when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
+    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
+        .thenReturn(false);
+    when(mockInstitutionService.validateInstitutionalEmail(
+            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
+        .thenReturn(true);
   }
 
   @Test

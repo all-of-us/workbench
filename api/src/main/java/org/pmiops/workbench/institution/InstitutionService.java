@@ -50,9 +50,11 @@ public interface InstitutionService {
    *
    * @param institution the institution to validate against
    * @param contactEmail contact email to validate
+   * @param accessTierShortName the name of the access tier to verify.
    * @return boolean – is the contact email a valid member
    */
-  boolean validateInstitutionalEmail(Institution institution, String contactEmail);
+  boolean validateInstitutionalEmail(
+      Institution institution, String contactEmail, String accessTierShortName);
 
   /**
    * Retrieve the optional text block of user instructions to fill the instructions email sent after
@@ -109,4 +111,7 @@ public interface InstitutionService {
    * @return the list of {@link InstitutionTierConfig} for each tier.
    */
   List<InstitutionTierConfig> getTierConfigs(String institutionShortName);
+
+  /** Returns {@code true} if eRA commons is required for given tier. */
+  boolean eRaRequiredForTier(Institution institution, String accessTierShortName);
 }
