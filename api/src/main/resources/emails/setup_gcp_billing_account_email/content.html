@@ -25,11 +25,11 @@
       margin-bottom: 6px;
     }
     .text {
-        color: rgba(0,0,0,0.87);
-        font-size: 16px;
-        font-weight: 300;
-        line-height: 22px;
-        margin-bottom: 1rem;
+      color: rgba(0,0,0,0.87);
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 22px;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -73,8 +73,11 @@
   Instructions:
   <ol>
     <li>Set up a Google Cloud (GCP) billing account
-    <li>Link the following user IDs to that billing account:  ${USERNAME} <br/>
-      <a href="mailto:terra-billing@terra.bio">terra-billing@terra.bio</a>
+    <li>Link the following user IDs to that billing account:
+    <ul>
+      <li>${USERNAME}</li>
+      <li><a href="mailto:terra-billing@terra.bio">terra-billing@terra.bio</a></li>
+    </ul>
   </ol>
 </div>
 <div class="text">
@@ -84,7 +87,7 @@
   and select "Add member". Add terra-billing@terra.bio and ${USERNAME}.  In the dropdown for that member,
   select role "Billing" -> "Billing Account User". Don't forget the "Save" button!
 </div>
- <div class="text">
+<div class="text">
   It is also through this Billing Portal that you can <a href="https://support.terra.bio/hc/en-us/articles/360057589931-How-to-set-up-and-use-GCP-budget-alerts"> set up billing alerts</a> to notify you when you reach a
   certain spending threshold! Please work with your representative to set this up.
 </div>
