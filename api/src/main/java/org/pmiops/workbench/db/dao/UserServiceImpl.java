@@ -1012,7 +1012,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     // Dual write then deprecate the one in userService
     accessModuleService.updateBypassTime(user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
-    updateUserAccessTiers(user, Agent.asUser(dbUser));
+    updateUserAccessTiers(user, Agent.asUser(user));
   }
 
   @Override
