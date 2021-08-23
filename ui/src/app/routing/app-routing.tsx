@@ -1,8 +1,9 @@
-import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
 import {useEffect, useState} from 'react';
-import * as React from 'react';
 import {Switch, useHistory} from 'react-router-dom';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 

@@ -1,3 +1,6 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {
   AppRoute,
   withFullHeight,
@@ -16,6 +19,7 @@ import {AdminWorkspace} from 'app/pages/admin/admin-workspace';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {AdminWorkspaceSearch} from 'app/pages/admin/admin-workspace-search';
 import {UserAudit} from 'app/pages/admin/user-audit';
+import {DataAccessRequirements} from 'app/pages/homepage/data-access-requirements';
 import {Homepage} from 'app/pages/homepage/homepage';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {ProfileComponent} from 'app/pages/profile/profile-component';
@@ -24,8 +28,6 @@ import {WorkspaceLibrary} from 'app/pages/workspace/workspace-library';
 import {WorkspaceList} from 'app/pages/workspace/workspace-list';
 import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
 import {BreadcrumbType} from 'app/utils/navigation';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
@@ -33,6 +35,7 @@ const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenew
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const DataAccessRequirementsPage = fp.flow(withRouteData, withRoutingSpinner)(DataAccessRequirements);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
@@ -51,7 +54,7 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
 
 export const SignedInRoutes = () => {
   return <Switch>
-    <AppRoute exact path='/' guards={[expiredGuard]}>
+    <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path='/access-renewal'>
@@ -101,6 +104,9 @@ export const SignedInRoutes = () => {
     </AppRoute>
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
+    </AppRoute>
+    <AppRoute exact path='/data-access-requirements'>
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
