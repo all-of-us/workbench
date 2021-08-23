@@ -7,13 +7,7 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsB
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -372,6 +366,24 @@ public class InstitutionServiceImpl implements InstitutionService {
                     t,
                     emailAddressMapByTier.get(t.getAccessTier().getShortName()),
                     emailDomainMapByTier.get(t.getAccessTier().getShortName())))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<String> getUserEligabledAccessTiers(DbUser user) {
+    Optional<Institution> institution = getByUser(user);
+    System.out.println("~~~~~~~institution");
+    System.out.println(institution.get());
+    if (!institution.isPresent()) {
+      return new ArrayList<String>();
+    }
+    System.out.println(accessTierDao.findAll());
+    return accessTierDao.findAll().stream()
+        .filter(
+            a ->
+                validateInstitutionalEmail(
+                    institution.get(), user.getContactEmail(), a.getShortName()))
+        .map(DbAccessTier::getShortName)
         .collect(Collectors.toList());
   }
 

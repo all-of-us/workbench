@@ -42,6 +42,7 @@ public interface ProfileMapper {
       Double freeTierUsage,
       Double freeTierDollarQuota,
       List<String> accessTierShortNames,
+      List<String> eligabledAccessTierShortNames,
       ProfileRenewableAccessModules renewableAccessModules,
       ProfileAccessModules accessModules);
 

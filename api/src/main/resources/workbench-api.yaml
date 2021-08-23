@@ -5698,6 +5698,12 @@ definitions:
         type: array
         items:
           type: string
+      eligabledAccessTierShortNames:
+        description: Short names of access tiers that user is eligabled. User beomes eligable if their institution allows it
+          in tier requirement, but does not mean user gains tier access. They still need to finish tier required registeraton tasks.
+        type: array
+        items:
+          type: string
       degrees:
         type: array
         items:
