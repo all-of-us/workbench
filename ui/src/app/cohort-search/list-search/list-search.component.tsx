@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import {CSSProperties} from 'react';
 import {Key} from 'ts-key-enum';
@@ -253,6 +254,7 @@ interface State {
   inputErrors: Array<string>;
   loading: boolean;
   searching: boolean;
+  searchSource: boolean;
   searchTerms: string;
   standardOnly: boolean;
   sourceMatch: any;
@@ -279,6 +281,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         hoverId: undefined,
         loading: false,
         searching: false,
+        searchSource: false,
         searchTerms: props.searchTerms,
         standardOnly: false,
         sourceMatch: undefined,
@@ -542,11 +545,17 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     render() {
       const {concept, searchContext: {domain, source}} = this.props;
-      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchTerms, standardOnly, sourceMatch, standardData,
-        totalCount} = this.state;
+      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchSource, searchTerms, standardOnly, sourceMatch,
+        standardData, totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
+        <style>{`
+          body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider,
+          body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:hover {
+            background: ${colors.select}
+          }
+        `}</style>
         {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
           NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding more.
         </div>}
@@ -597,6 +606,12 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                 There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
               </div>}
             </React.Fragment>}
+            {!serverConfigStore.get().config.enableStandardSourceDomains && this.checkSource &&
+              <InputSwitch checked={searchSource}
+                           onChange={() => this.setState((state) => ({searchSource: !state.searchSource}))}
+                           style={{float: 'right'}}
+              />
+            }
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
