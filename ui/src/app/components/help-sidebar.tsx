@@ -20,7 +20,7 @@ import {SelectionList} from 'app/cohort-search/selection-list/selection-list.com
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
-import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
+import {RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
@@ -729,7 +729,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () =>
-             <RuntimePanel onClose={() => this.setActiveIcon(null)}/>,
+             <RuntimePanelWrapper onClose={() => this.setActiveIcon(null)}/>,
             showFooter: false
           };
         case 'notebooksHelp':

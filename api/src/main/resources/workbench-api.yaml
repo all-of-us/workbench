@@ -4348,6 +4348,9 @@ definitions:
       accessRenewalExpiry:
         type: number
         description: Days a user's module completion is good for until it expires.
+      accessRenewalLookback:
+        type: number
+        description: the point when we give users the option to update their compliance items.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
@@ -6100,6 +6103,10 @@ definitions:
           for the master node. For example "n1-standard-16"
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   GceWithPdConfig:
     description: Configuration for Google Compute Engine instances with Persistent Disk.
     properties:
@@ -6117,6 +6124,10 @@ definitions:
           or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
 
           see https://cloud.google.com/compute/docs/machine-types
+      gpuConfig:
+        $ref: "#/definitions/GpuConfig"
+        description: >
+          Optional, a config that describes the gpus associated with a runtime
   DataprocConfig:
     description: Configuration for a single Dataproc cluster.
     properties:
@@ -6162,6 +6173,19 @@ definitions:
           Optional, the number of preemptible workers. If unspecified, the
           default number is 0. Ignored if numberOfWorkers is 0.
           For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+  GpuConfig:
+    description: A config that describes the gpus associated with a runtime
+    type: object
+    required:
+      - gpuType
+      - numOfGpus
+    properties:
+      gpuType:
+        type: string
+        description: The google identifier for the gpu specs associated with this runtime, ex `nvidia-tesla-t4`. See https://cloud.google.com/compute/docs/gpus
+      numOfGpus:
+        type: integer
+        description: The number of gpus associated with this runtime
   FileDetail:
     type: object
     required:

@@ -301,6 +301,9 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
             (() => !!(this.getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
+        rasLoginGovLinked: (serverConfigStore.get().config.enableRasLoginGovLinking ?
+            (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
+              .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
           (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()

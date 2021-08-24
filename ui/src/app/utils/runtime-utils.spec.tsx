@@ -34,7 +34,7 @@ describe('runtime-utils', () => {
     // be an active workspace context provided - in the real application this is
     // configured by a central component. This line simulates what would
     // normally happen in WorkspaceWrapper.
-    runtimeStore.set({workspaceNamespace: WORKSPACE_NS, runtime: undefined});
+    runtimeStore.set({workspaceNamespace: WORKSPACE_NS, runtime: undefined, runtimeLoaded: true});
     jest.useFakeTimers();
   });
 

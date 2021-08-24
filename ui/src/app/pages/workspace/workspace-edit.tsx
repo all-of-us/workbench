@@ -46,6 +46,10 @@ import {
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {
+  ensureBillingScope,
+  hasBillingScope
+} from 'app/utils/authentication';
+import {
   getCdrVersion,
   getCdrVersionTier,
   getDefaultCdrVersionForTier,
@@ -55,7 +59,9 @@ import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, NavigationProps, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+import {
+  getBillingAccountInfo
+} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
@@ -216,6 +222,7 @@ export const styles = reactStyles({
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
+const SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE';
 
 // default to creating workspaces in the Registered Tier
 const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
@@ -273,6 +280,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   populationChecked: boolean;
   selectResearchPurpose: boolean;
+  fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
   showCreateBillingAccountModal: boolean;
@@ -298,6 +306,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
         showCreateBillingAccountModal: false,
@@ -317,9 +326,48 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       history.back();
     }
 
+    async initialBillingAccountLoad() {
+      // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
+      // or fetch user's available billing accounts.
+      // When creating/duplicating workspace, show free tier billing account.
+      // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
+      // if it is user's billing account.
+      if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
+        const freeTierBillingAccount: BillingAccount = {
+          name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
+          isFreeTier: true,
+          isOpen: true,
+          displayName: 'Use All of Us initial credits',
+        };
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          this.setState(prevState => fp.set(
+              ['workspace', 'billingAccountName'],
+            freeTierBillingAccount.name,
+            prevState));
+          this.setState({billingAccounts: [freeTierBillingAccount]});
+        } else if (this.isMode(WorkspaceEditMode.Edit)) {
+          // If the user hasn't grant billing scope to workbench yet, keep the server's current value for
+          // billingAccountName and add a shim entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          if (this.props.workspace.billingAccountName === freeTierBillingAccount.name) {
+            this.setState({billingAccounts: [freeTierBillingAccount]});
+          } else {
+            this.setState({billingAccounts: [{
+              name: this.props.workspace.billingAccountName,
+              displayName: 'User Provided Billing Account',
+              isFreeTier: false,
+              isOpen: true}]});
+          }
+        }
+      } else {
+        await this.fetchBillingAccounts();
+      }
+    }
+
     async fetchBillingAccounts() {
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
-
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
@@ -370,9 +418,16 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       this.setState({billingAccounts});
     }
 
+    async requestBillingScopeThenFetchBillingAccount() {
+      this.setState({fetchBillingAccountLoading: true});
+      await ensureBillingScope();
+      await this.fetchBillingAccounts();
+      this.setState({fetchBillingAccountLoading: false});
+    }
+
     async componentDidMount() {
       this.props.hideSpinner();
-      await this.fetchBillingAccounts();
+      await this.initialBillingAccountLoad();
     }
 
     createWorkspace(): Workspace {
@@ -856,13 +911,20 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         disabled: !a.isOpen
       }));
       if (enableBillingUpgrade) {
-        options.push({
-          label: 'Create a new billing account',
-          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-          disabled: false
-        });
+        if (hasBillingScope()) {
+          options.push({
+            label: 'Create a Google Cloud billing account',
+            value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+            disabled: false
+          });
+        } else {
+          options.push({
+            label: 'Select or create a Google Cloud billing account',
+            value: SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+            disabled: false
+          });
+        }
       }
-
       return options;
     }
 
@@ -1158,6 +1220,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
+            {this.state.fetchBillingAccountLoading ? <SpinnerOverlay overrideStylesOverlay={styles.spinner}/> : <div>
             <div style={styles.fieldHeader}>
               Select account
             </div>
@@ -1167,12 +1230,15 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </div>
             </OverlayPanel>
             <FlexRow>
-              <Dropdown style={{width: '14rem'}}
+                  <Dropdown data-test-id = 'billing-dropdown'
+                      style={{width: '20rem'}}
                         value={billingAccountName}
                         options={this.buildBillingAccountOptions()}
                         disabled={(freeTierCreditsBalance < 0.0) && !enableBillingUpgrade}
                         onChange={e => {
-                          if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                          if (e.value === SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
+                            this.requestBillingScopeThenFetchBillingAccount();
+                          } else if (e.value === CREATE_BILLING_ACCOUNT_OPTION_VALUE) {
                             this.setState({
                               showCreateBillingAccountModal: true
                             });
@@ -1185,6 +1251,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 <Clickable onClick={(e) => freeTierBalancePanel.toggle(e)}>View free credits balance</Clickable>
               </div>
             </FlexRow>
+            </div>}
           </WorkspaceEditSection>}
         <hr style={{marginTop: '1rem'}}/>
         <WorkspaceEditSection header={<FlexRow style={{alignItems: 'center'}}>
