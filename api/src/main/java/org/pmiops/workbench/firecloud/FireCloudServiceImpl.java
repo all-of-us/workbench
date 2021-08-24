@@ -93,7 +93,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-  private static final String GOOGLE_BUCKETS_LOCATION = "US;
+  // The defaul location for AoU buckets. Setting this location when cloning workspaces to avoid destional workspace
+  // to source workspace check. See http://shortn/_n0AEAdujef for more details.
+  private static final String GOOGLE_BUCKETS_LOCATION = "US";
 
   // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
   // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
@@ -411,7 +413,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
     if(isFireCloudBillingV2ApiEnabled()) {
-      cloneRequest.
+      cloneRequest.bucketLocation(GOOGLE_BUCKETS_LOCATION);
     }
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
