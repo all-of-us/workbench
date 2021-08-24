@@ -5,7 +5,7 @@ module.exports = {
   testRunner: 'jest-circus/runner',
   testEnvironment: '<rootDir>/puppeteer-custom-environment.ts',
   setupFilesAfterEnv: ['<rootDir>/jest-circus.setup.ts', '<rootDir>/jest.test-setup.ts'],
-  setupFiles: ['dotenv/config'],
+  setupFiles: ['<rootDir>/jest.setup.ts'],
   reporters: [
     'default',
     [

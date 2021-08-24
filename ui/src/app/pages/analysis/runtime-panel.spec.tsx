@@ -6,7 +6,7 @@ import * as fp from 'lodash/fp';
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
-import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
+import {ConfirmDelete, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -33,6 +33,7 @@ import {
   runtimeStore,
   profileStore
 } from 'app/utils/stores';
+import {currentWorkspaceStore} from '../../utils/navigation';
 
 
 describe('RuntimePanel', () => {
@@ -46,10 +47,12 @@ describe('RuntimePanel', () => {
 
   const component = async(propOverrides?: object) => {
     const allProps = {...props, ...propOverrides}
-    const c = mount(<RuntimePanel {...allProps}/>);
+    const c = mount(<RuntimePanelWrapper {...allProps}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };
+
+  let runtimeStoreStub;
 
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -71,17 +74,21 @@ describe('RuntimePanel', () => {
     });
 
     onClose = jest.fn();
-    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
-      workspace: {
-        ...workspaceStubs[0],
-        accessLevel: WorkspaceAccessLevel.WRITER,
-        billingAccountType: BillingAccountType.FREETIER,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-      },
-      cdrVersionTiersResponse,
       onClose
     };
+
+    cdrVersionStore.set(cdrVersionTiersResponse);
+
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountType: BillingAccountType.FREETIER,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+    });
+
+    runtimeStoreStub = {runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace, runtimeLoaded: true};
+    runtimeStore.set(runtimeStoreStub);
 
     jest.useFakeTimers();
   });
@@ -168,7 +175,7 @@ describe('RuntimePanel', () => {
 
   it('should show Create panel when no runtime', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -181,7 +188,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation when no runtime exists with defaults', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -197,7 +204,7 @@ describe('RuntimePanel', () => {
 
   it('should show customize after create', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapperBefore = await component();
 
@@ -226,7 +233,7 @@ describe('RuntimePanel', () => {
       dataprocConfig: null
     };
     runtimeApiStub.runtime = runtime;
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
@@ -257,7 +264,7 @@ describe('RuntimePanel', () => {
       }
     };
     runtimeApiStub.runtime = runtime;
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
@@ -277,7 +284,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
-    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtimeApiStub.runtime;
 
     const wrapper = await component();
 
@@ -289,7 +296,7 @@ describe('RuntimePanel', () => {
 
   it('should disable controls when runtime has non-updateable status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
-    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtimeApiStub.runtime;
 
     const wrapper = await component();
 
@@ -304,7 +311,7 @@ describe('RuntimePanel', () => {
       return;
     }
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});;
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -328,7 +335,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation with Dataproc config', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -376,7 +383,7 @@ describe('RuntimePanel', () => {
       return;
     }
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -401,7 +408,7 @@ describe('RuntimePanel', () => {
 
   it('should allow configuration via dataproc preset', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -437,7 +444,7 @@ describe('RuntimePanel', () => {
         dataprocConfig: null
       };
       runtimeApiStub.runtime = runtime;
-      runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+      runtimeStoreStub.runtime = runtime;
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
@@ -462,7 +469,7 @@ describe('RuntimePanel', () => {
         }
       };
       runtimeApiStub.runtime = runtime;
-      runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+      runtimeStoreStub.runtime = runtime;
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
@@ -478,7 +485,7 @@ describe('RuntimePanel', () => {
 
   it('should allow configuration via dataproc preset from modified form', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -515,7 +522,7 @@ describe('RuntimePanel', () => {
 
   it('should tag as user override after preset modification', async() => {
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
 
@@ -538,7 +545,7 @@ describe('RuntimePanel', () => {
       return;
     }
     runtimeApiStub.runtime = null;
-    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = null;
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
@@ -619,7 +626,7 @@ describe('RuntimePanel', () => {
         dataprocConfig: defaultDataprocConfig(),
         configurationType: RuntimeConfigurationType.UserOverride
       };
-      runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+      runtimeStoreStub.runtime = runtime;
 
       const wrapper = await component();
 
@@ -631,7 +638,7 @@ describe('RuntimePanel', () => {
 
   it('should not warn user for updates where not needed - number of preemptibles', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -680,7 +687,7 @@ describe('RuntimePanel', () => {
 
   it('should warn the user about deletion if there are updates that require one - Worker CPU', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -693,7 +700,7 @@ describe('RuntimePanel', () => {
 
   it('should warn the user about deletion if there are updates that require one - Worker RAM', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -706,7 +713,7 @@ describe('RuntimePanel', () => {
 
   it('should warn the user about deletion if there are updates that require one - Worker Disk', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
@@ -717,7 +724,7 @@ describe('RuntimePanel', () => {
 
   it('should retain original inputs when hitting cancel from the Confirm panel', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -745,7 +752,7 @@ describe('RuntimePanel', () => {
 
   it('should disable Next button if Runtime is in between states', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), status: RuntimeStatus.Creating};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
@@ -781,7 +788,7 @@ describe('RuntimePanel', () => {
 
   it('should show create button if runtime is deleted', async() => {
     const runtime = {...runtimeApiStub.runtime, status: RuntimeStatus.Deleted};
-    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -854,7 +861,7 @@ describe('RuntimePanel', () => {
       }
     };
     runtimeApiStub.runtime = runtime;
-    runtimeStore.set({runtime, workspaceNamespace: workspaceStubs[0].namespace});
+    runtimeStoreStub.runtime = runtime;
 
     const wrapper = await component();
 
@@ -909,14 +916,14 @@ describe('RuntimePanel', () => {
 
   it('should display a compute-none when there is no runtime', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStoreStub.runtime = null;
     const wrapper = await component();
     expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
   });
 
   it('should prevent runtime creation when disk size is invalid', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStoreStub.runtime = null;
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -975,7 +982,7 @@ describe('RuntimePanel', () => {
 
   it('should prevent runtime creation when running cost is too high for free tier', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStoreStub.runtime = null;
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -992,13 +999,14 @@ describe('RuntimePanel', () => {
 
   it('should prevent runtime creation when running cost is too high for paid tier', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
-    const wrapper = await component({workspace: {
-        ...workspaceStubs[0],
-        accessLevel: WorkspaceAccessLevel.WRITER,
-        billingAccountType: BillingAccountType.USERPROVIDED,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-      }});
+    runtimeStoreStub.runtime = null;
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountType: BillingAccountType.USERPROVIDED,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+    });
+    const wrapper = await component();
 
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
@@ -1021,12 +1029,13 @@ describe('RuntimePanel', () => {
   });
 
   it('should render disabled panel when creator billing disabled', async () => {
-    const wrapper = await component({workspace: {
-        ...workspaceStubs[0],
-        accessLevel: WorkspaceAccessLevel.WRITER,
-        billingStatus: BillingStatus.INACTIVE,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
-      }});
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingStatus: BillingStatus.INACTIVE,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+    });
+    const wrapper = await component();
 
     const disabledPanel = wrapper.find({'data-test-id': 'runtime-disabled-panel'});
     expect(disabledPanel.exists()).toBeTruthy();

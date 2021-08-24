@@ -103,9 +103,9 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
-    "enableStandardSourceDomains": false,
-    "enablePersistentDisk": true
+    "enablePersistentDisk": true,
+    "enableAccessModuleRewrite" : true,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

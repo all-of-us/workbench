@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
@@ -53,10 +54,12 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.UserAccessExpiration;
@@ -107,6 +110,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
+  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -127,7 +131,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       ComplianceService complianceService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
-      MailService mailService) {
+      MailService mailService,
+      InstitutionService institutionService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -144,6 +149,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
+    this.institutionService = institutionService;
   }
 
   @VisibleForTesting
@@ -336,13 +342,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+
+    boolean eRARequiredForRegisteredTier = true;
+    boolean institutionalEmailValid = false;
+    Optional<Institution> institution = institutionService.getByUser(user);
+    if (institution.isPresent()) {
+      // eRA is required when login.gov linking is not enabled or user institution requires that in
+      // tier requirement.
+      eRARequiredForRegisteredTier =
+          !configProvider.get().access.enableRasLoginGovLinking
+              || institutionService.eRaRequiredForTier(
+                  institution.get(), REGISTERED_TIER_SHORT_NAME);
+      institutionalEmailValid =
+          institutionService.validateInstitutionalEmail(
+              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+    } else {
+      log.warning(String.format("Institution not found for user %s", user.getUsername()));
+    }
+
     return !user.getDisabled()
         && twoFactorAuthComplete
-        && eRACommonsComplete
+        && (!eRARequiredForRegisteredTier || eRACommonsComplete)
         && complianceTrainingComplete
         && dataUseAgreementTrainingComplete
         && publicationConfirmationComplete
-        && profileConfirmationComplete;
+        && profileConfirmationComplete
+        && institutionalEmailValid;
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -985,6 +1010,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         throw new BadRequestException(
             "There is no access module named: " + accessBypassRequest.getModuleName().toString());
     }
+    // Dual write then deprecate the one in userService
+    accessModuleService.updateBypassTime(
+        user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+    updateUserAccessTiers(user, Agent.asUser(user));
   }
 
   @Override

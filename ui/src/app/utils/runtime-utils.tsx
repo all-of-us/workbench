@@ -323,7 +323,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
     }
 
     const getRuntime = withAsyncErrorHandling(
-      () => runtimeStore.set({workspaceNamespace: null, runtime: null}),
+      () => runtimeStore.set({workspaceNamespace: null, runtime: null, runtimeLoaded: false}),
       async() => {
         let leoRuntime;
         try {
@@ -338,7 +338,8 @@ const useRuntime = (currentWorkspaceNamespace) => {
         if (currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace) {
           runtimeStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
-            runtime: leoRuntime
+            runtime: leoRuntime,
+            runtimeLoaded: true
           });
         }
       });

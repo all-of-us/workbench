@@ -122,3 +122,4 @@ export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircl
 };
 export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
 export const ExclamationTriangle = props => <Icon shape={faExclamationTriangle} color={colors.danger} {...props}/>;
+export const GoogleCloudLogoSvg = svgIcon('/assets/icons/google-cloud.svg');

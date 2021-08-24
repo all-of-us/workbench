@@ -300,7 +300,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               return;
             }
             currentWorkspaceStore.next(workspace);
-            runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+            runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: false});
             diskStore.set({workspaceNamespace: workspace.namespace, persistentDisk: undefined});
             pollAborter.abort();
             const newPollAborter = new AbortController();
