@@ -15,7 +15,7 @@ import {
 } from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
@@ -161,6 +161,20 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
       });
     } else {
       this.setState({institutionMode: InstitutionMode.ADD, title: 'Add new Institution'});
+    }
+  }
+
+  async componentDidUpdate(prevProps: Props) {
+    // If institution short Name is passed in the URL get the institution details
+    if (hasNewValidProps(this.props, prevProps, [p => p.urlParams.institutionId])) {
+      const loadedInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
+      this.setState({
+        institutionMode: InstitutionMode.EDIT,
+        institution: loadedInstitution,
+        institutionToEdit: loadedInstitution,
+        showOtherInstitutionTextBox: loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
+        title: loadedInstitution.displayName
+      });
     }
   }
 
