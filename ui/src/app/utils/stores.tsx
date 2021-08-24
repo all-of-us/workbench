@@ -141,6 +141,9 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
+// These fields come from the colon-prefixed params declared on router paths.
+// See app-routing, signed-in-app-routing, and workspace-app-routing for examples.
+// If you want to add a new route param, you will need to define it here as well.
 export interface MatchParams {
   cid?: string;
   csid?: string;

@@ -58,29 +58,6 @@ export const useNavigation = () => {
   return [navigate, navigateByUrl];
 };
 
-export const startTitleSetter = () => {
-  document.title = buildPageTitleForEnvironment();
-  routeDataStore.subscribe(({title}) => {
-    // Currently, the only path element we use in the title is notebook name.
-    // We'll need to revert to using pathElementForTitle in route data and
-    // put more matchPath if this ever changes.
-    let nbName;
-    const notebookMatch = matchPath<MatchParams>(location.pathname, {
-      path: '/workspaces/:ns/:wsid/notebooks/:nbName'
-    });
-    const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
-      path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName'
-    });
-    nbName = notebookMatch
-        ? notebookMatch.params.nbName
-        : notebookPreviewMatch
-            ? notebookPreviewMatch.params.nbName
-            : undefined;
-
-    document.title = buildPageTitleForEnvironment(title || nbName);
-  });
-};
-
 interface NavigateExtras {
   queryParams?: object;
   preventDefaultIfNoKeysPressed?: boolean;

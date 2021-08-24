@@ -236,7 +236,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   async getFederatedWorkspaceInformation() {
-    const {match: {params: {ns}}} = this.props;
+    const {ns} = this.props.match.params;
 
     this.setState({
       loadingData: true,

@@ -83,6 +83,7 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/preview/:nbName`}>
       <InteractiveNotebookPage routeData={{
+        pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
         pageKey: NOTEBOOK_PAGE_KEY,
         workspaceNavBarTab: 'notebooks',
@@ -91,6 +92,7 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
       <NotebookRedirectPage routeData={{
+        pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
         // The iframe we use to display the Jupyter notebook does something strange
         // to the height calculation of the container, which is normally set to auto.

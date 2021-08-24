@@ -9,7 +9,6 @@ import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentCohortReview, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {MatchParams} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -19,7 +18,6 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
@@ -227,13 +225,14 @@ class NameContainer extends React.Component<{data: any, vocab: string}, {showMor
   }
 }
 
-interface Props extends RouteComponentProps<MatchParams> {
+interface Props {
   tabName: string;
   cohortReview: CohortReview;
   columns: Array<any>;
   domain: Domain;
   workspace: WorkspaceData;
   filterState: any;
+  participantId: number;
   getFilteredData: Function;
   updateState: number;
 }
@@ -258,7 +257,7 @@ interface State {
   tabFilterState: any;
 }
 
-export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace(), withRouter)(
+export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     codeInputChange: Function;
     private countAborter = new AbortController();
@@ -292,9 +291,9 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
     }
 
     componentDidUpdate(prevProps: any) {
-      const {domain, filterState, updateState, match: {params: {pid}}} = this.props;
+      const {domain, filterState, updateState, participantId} = this.props;
       const {lazyLoad, loading} = this.state;
-      if (prevProps.match.params.pid !== pid) {
+      if (prevProps.participantId !== participantId) {
         if (loading) {
           // cancel any pending count or data calls
           this.abortPendingApiCalls(true);
@@ -440,10 +439,10 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
     }
 
     async callDataApi(request: PageFilterRequest) {
-      const {cohortReview: {cohortReviewId}, domain, match: {params: {pid}}, workspace: {id, namespace}} = this.props;
+      const {cohortReview: {cohortReviewId}, domain, participantId, workspace: {id, namespace}} = this.props;
       let data = [];
       await cohortReviewApi()
-        .getParticipantData(namespace, id, cohortReviewId, +pid, request, {signal: this.dataAborter.signal})
+        .getParticipantData(namespace, id, cohortReviewId, participantId, request, {signal: this.dataAborter.signal})
         .then(response => {
           data = response.items.map(item => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
@@ -457,10 +456,10 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
     }
 
     async callCountApi(request: PageFilterRequest) {
-      const {cohortReview: {cohortReviewId}, match: {params: {pid}}, workspace: {id, namespace}} = this.props;
+      const {cohortReview: {cohortReviewId}, participantId, workspace: {id, namespace}} = this.props;
       let count = null;
       await cohortReviewApi()
-        .getParticipantCount(namespace, id, cohortReviewId, +pid, request, {signal: this.countAborter.signal})
+        .getParticipantCount(namespace, id, cohortReviewId, participantId, request, {signal: this.countAborter.signal})
         .then(response => {
           count = response.count;
         });

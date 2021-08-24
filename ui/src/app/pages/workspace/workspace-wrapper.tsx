@@ -20,6 +20,7 @@ export const WorkspaceWrapper = fp.flow(
 
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const params = useParams<MatchParams>();
+  const {ns, wsid} = params;
 
   useEffect(() => {
     const getWorkspaceAndUpdateStores = async(namespace, id) => {
@@ -53,12 +54,6 @@ export const WorkspaceWrapper = fp.flow(
       }
     };
 
-    const {ns, wsid} = params;
-
-    if (!ns || !wsid) {
-      return;
-    }
-
     if (
         !currentWorkspaceStore.getValue()
         || currentWorkspaceStore.getValue().namespace !== ns
@@ -77,14 +72,11 @@ export const WorkspaceWrapper = fp.flow(
         getWorkspaceAndUpdateStores(ns, wsid);
       }
     }
-  }, [params]);
+  }, [ns, wsid]);
 
   useEffect(() => {
-    const {ns, wsid} = params;
-    if (ns && wsid) {
-      workspacesApi().updateRecentWorkspaces(ns, wsid);
-    }
-  }, [params]);
+    workspacesApi().updateRecentWorkspaces(ns, wsid);
+  }, [ns, wsid]);
 
   return <React.Fragment>
     {workspace

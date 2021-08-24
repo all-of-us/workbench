@@ -57,10 +57,10 @@ export const InactivityMonitor = () => {
 
   // Signal user activity.
   useEffect(() => {
-    let getUserActivityTimer: () => Timeout;
-    let inactivityInterval: Timeout;
-    let logoutTimer: Timeout;
-    let inactivityModalTimer: Timeout;
+    let getUserActivityTimer: () => NodeJS.Timeout;
+    let inactivityInterval: NodeJS.Timeout;
+    let logoutTimer: NodeJS.Timeout;
+    let inactivityModalTimer: NodeJS.Timeout;
 
     const startUserActivityTracker = () => {
       const signalUserActivity = debouncer(() => {
@@ -75,12 +75,12 @@ export const InactivityMonitor = () => {
 
     const startInactivityTimers = (elapsedMs: number = 0) => {
       clearTimeout(logoutTimer);
-      logoutTimer = setTimeout(
+      logoutTimer = global.setTimeout(
         () => invalidateInactivityCookieAndSignOut('/session-expired'),
         Math.max(0, environment.inactivityTimeoutSeconds * 1000 - elapsedMs));
 
       clearTimeout(inactivityModalTimer);
-      inactivityModalTimer = setTimeout(
+      inactivityModalTimer = global.setTimeout(
         () => setShowModal(true),
         Math.max(0, 1000 * (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) - elapsedMs));
     };
@@ -99,7 +99,7 @@ export const InactivityMonitor = () => {
       // setTimeout does not necessary track real wall-time. Periodically
       // clear/restart the timers so that they reflect the time which has elapsed
       // since we last saw activity, as tracked in local storage.
-      inactivityInterval = setInterval(() => {
+      inactivityInterval = global.setInterval(() => {
         startInactivityTimers(getInactivityElapsedMs());
       }, 60 * 1000);
 

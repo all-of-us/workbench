@@ -5,9 +5,10 @@ import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter, Link, Redirect, Route, useLocation, useRouteMatch} from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, useLocation, useRouteMatch, useParams} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
+import {buildPageTitleForEnvironment} from "../utils/title";
 
 export interface Guard {
   allowed: () => boolean;
@@ -28,6 +29,7 @@ const useQuery = () => {
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const query = useQuery();
+  const params = useParams();
 
   useEffect(() => {
     if (!intermediaryRoute) {
@@ -37,6 +39,8 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
         routeDataStore.set(routeData);
       }
     }
+
+    document.title = buildPageTitleForEnvironment(routeData.title || params[routeData.pathElementForTitle]);
   }, [routeData]);
 
   useEffect(() => {

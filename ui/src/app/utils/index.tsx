@@ -386,7 +386,7 @@ export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
 export function debouncer(action, sensitivityMs) {
   let t = Date.now();
 
-  const timer = setInterval(() => {
+  const timer = global.setInterval(() => {
     if (Date.now() - t < sensitivityMs) {
       action();
     }

@@ -14,6 +14,7 @@ import {reactStyles, summarizeErrors} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
 import {Key} from 'ts-key-enum';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
   editRow: {
@@ -35,8 +36,10 @@ const styles = reactStyles({
 
 interface ModalProps extends RouteComponentProps {
   annotationDefinitions: CohortAnnotationDefinition[];
+  cohortId: number;
   onCancel: Function;
   onCreate: Function;
+  workspace: WorkspaceData;
 }
 
 interface ModalState {
@@ -59,14 +62,12 @@ export const AddAnnotationDefinitionModal = withRouter(class extends React.Compo
 
   async create() {
     try {
-      const location = this.props.location;
-      const {params: {ns, wsid, cid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review'});
-      const {onCreate} = this.props;
+      const {onCreate, cohortId, workspace: {namespace, id}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
       const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
-        ns, wsid, cid, {
-          cohortId: cid,
+        namespace, id, cohortId, {
+          cohortId: cohortId,
           columnName: name,
           annotationType,
           enumValues: annotationType === AnnotationType.ENUM ? enumValues : undefined

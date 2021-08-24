@@ -85,6 +85,7 @@ interface AnnotationProps extends RouteComponentProps {
   setAnnotation: Function;
   cohortReview: CohortReview;
   definition: CohortAnnotationDefinition;
+  participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
 }
 
@@ -115,10 +116,8 @@ const AnnotationItem = fp.flow(
   }
 
   componentDidUpdate(prevProps: AnnotationProps): void {
-    const location = this.props.location;
-    const {params: {pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
     const {timeout} = this.state;
-    if ((prevProps.annotation && +pid !== prevProps.annotation.participantId)) {
+    if ((this.props.participant.participantId !== prevProps.participant.participantId)) {
       // get rid of spinners and save messages when switching participants
       clearTimeout(timeout);
       this.setState({saving: false, error: false, success: false});
@@ -269,6 +268,7 @@ const AnnotationItem = fp.flow(
 
 interface SidebarProps extends RouteComponentProps {
   cohortReview: CohortReview;
+  participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
 }
 
@@ -279,7 +279,6 @@ interface SidebarState {
   annotations: ParticipantCohortAnnotation[];
   annotationDefinitions: CohortAnnotationDefinition[];
   annotationDeleted: boolean;
-  participant: ParticipantCohortStatus;
 }
 
 export const SidebarContent = fp.flow(
@@ -287,7 +286,6 @@ export const SidebarContent = fp.flow(
   withCurrentWorkspace(),
   withRouter
 )(class extends React.Component<SidebarProps, SidebarState> {
-  private subscription;
   constructor(props) {
     super(props);
     this.state = {
@@ -296,39 +294,27 @@ export const SidebarContent = fp.flow(
       editingDefinitions: false,
       annotations: null,
       annotationDefinitions: null,
-      annotationDeleted: false,
-      participant: {} as ParticipantCohortStatus
+      annotationDeleted: false
     };
   }
 
   componentDidMount(): void {
-    const location = this.props.location;
-    const {params: {ns, wsid, cid, pid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
-    const {cohortReview: {cohortReviewId}} = this.props;
-    this.getAnnotations(ns, wsid, cohortReviewId, +pid);
-    cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid)
+    const {cohortReview: {cohortId, cohortReviewId}, participant} = this.props;
+    const {namespace, id} = this.props.workspace;
+    this.getAnnotations(namespace, id, cohortReviewId, participant.participantId);
+    cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(namespace, id, cohortId)
     .then(({items}) => {
       this.setState({annotationDefinitions: items});
     });
-    this.subscription = participantStore
-      .subscribe(participant => this.setState({participant: participant || {} as ParticipantCohortStatus}));
   }
 
   componentDidUpdate(prevProps: SidebarProps, prevState: SidebarState): void {
-    const location = this.props.location;
-    const {params: {ns, wsid, pid}} = matchPath(
-      location.pathname,
-        {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'}
-    );
-    const {cohortReview: {cohortReviewId}} = this.props;
-    if (+pid !== prevState.participant.participantId && !isNaN(+pid)) {
+    const {cohortReview: {cohortReviewId}, participant} = this.props;
+    const {namespace, id} = this.props.workspace;
+    if (participant.participantId !== prevProps.participant.participantId && !isNaN(participant.participantId)) {
       // get values for annotations when switching participants
-      this.getAnnotations(ns, wsid, cohortReviewId, +pid);
+      this.getAnnotations(namespace, id, cohortReviewId, participant.participantId);
     }
-  }
-
-  componentWillUnmount(): void {
-    this.subscription.unsubscribe();
   }
 
   async getAnnotations(ns, wsid, cohortReviewId, pid) {
@@ -370,11 +356,9 @@ export const SidebarContent = fp.flow(
   }
 
   render() {
-    const {pathname} = this.props.location;
-    const {params: {pid}} = matchPath(pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'});
-    const {workspace: {accessLevel}} = this.props;
-    const {annotations, annotationDefinitions, annotationDeleted, savingStatus, creatingDefinition, editingDefinitions,
-      participant: {participantId, birthDate, gender, race, ethnicity, deceased, status}} = this.state;
+    const {workspace: {accessLevel}, cohortReview, participant} = this.props;
+    const {participantId, birthDate, gender, race, ethnicity, deceased, status} = participant;
+    const {annotations, annotationDefinitions, annotationDeleted, savingStatus, creatingDefinition, editingDefinitions} = this.state;
     const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
       accessLevel === WorkspaceAccessLevel.READER;
     const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
@@ -423,14 +407,15 @@ export const SidebarContent = fp.flow(
         const {cohortAnnotationDefinitionId} = def;
         const annotation = fp.find({cohortAnnotationDefinitionId}, annotations);
         return <AnnotationItem
-          key={cohortAnnotationDefinitionId} annotation={annotation} definition={def}
+          key={cohortAnnotationDefinitionId}
+          annotation={annotation}
+          definition={def}
           setAnnotation={update => {
-            // make sure we're still on the same page before updating
-            if (participantId === +pid) {
               const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
               this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
             }
-          }}
+          }
+          participant={participant}
         />;
       })}
       {editingDefinitions && <EditAnnotationDefinitionsModal
@@ -440,8 +425,10 @@ export const SidebarContent = fp.flow(
       </EditAnnotationDefinitionsModal>}
       {creatingDefinition && <AddAnnotationDefinitionModal
           annotationDefinitions={annotationDefinitions}
+          cohordId={cohortReview.cohortId}
           onCancel={() => this.setState({creatingDefinition: false})}
-          onCreate={(ad) => this.definitionCreated(ad)}>
+          onCreate={(ad) => this.definitionCreated(ad)}
+          workspace={this.props.workspace}>
       </AddAnnotationDefinitionModal>}
     </React.Fragment>;
   }

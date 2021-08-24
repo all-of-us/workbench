@@ -427,6 +427,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
                 tabName={tab.name}
                 columns={tab.columns[filterState.vocab]}
                 domain={tab.domain}
+                participantId={this.props.match.params.pid}
               />}
             </TabPanel>;
           })}

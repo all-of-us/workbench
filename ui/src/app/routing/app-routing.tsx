@@ -30,7 +30,6 @@ import {
   LOCAL_STORAGE_API_OVERRIDE_KEY,
   LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
 } from 'app/utils/cookies';
-import {startTitleSetter, } from 'app/utils/navigation';
 import {
   authStore,
   serverConfigStore,
@@ -245,7 +244,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
   useEffect(() => {
     exposeAccessTokenSetter();
     checkBrowserSupport();
-    startTitleSetter();
   }, []);
 
   useEffect(() => {
