@@ -11,10 +11,10 @@ import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
 import {Key} from 'ts-key-enum';
-import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
   editRow: {

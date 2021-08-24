@@ -411,9 +411,9 @@ export const SidebarContent = fp.flow(
           annotation={annotation}
           definition={def}
           setAnnotation={update => {
-              const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
-              this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
-            }
+            const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
+            this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
+          }
           }
           participant={participant}
         />;

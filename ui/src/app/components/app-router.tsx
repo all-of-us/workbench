@@ -1,14 +1,14 @@
 import {queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter, Link, Redirect, Route, useLocation, useRouteMatch, useParams} from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import {buildPageTitleForEnvironment} from "../utils/title";
 
 export interface Guard {
   allowed: () => boolean;

@@ -1,4 +1,3 @@
-import Timeout = NodeJS.Timeout;
 import {TextModal} from 'app/components/text-modal';
 import {debouncer} from 'app/utils';
 import {signOut} from 'app/utils/authentication';

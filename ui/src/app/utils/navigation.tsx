@@ -4,11 +4,9 @@ import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generat
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useLocation} from 'react-router';
-import {matchPath, useHistory} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {URLSearchParams} from 'url';
-import {MatchParams, routeDataStore} from './stores';
-import {buildPageTitleForEnvironment} from './title';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It
