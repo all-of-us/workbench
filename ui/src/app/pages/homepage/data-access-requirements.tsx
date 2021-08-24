@@ -1,18 +1,19 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect} from 'react';
 
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
+import {ArrowRight, CheckCircle, DARIcons, MinusCircle, RegisteredTierBadge} from 'app/components/icons';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
 import {getAccessModuleStatusByName} from 'app/utils/access-utils';
 import {profileStore, useStore} from 'app/utils/stores';
-import {AccessModule} from 'generated/fetch';
-import {useEffect} from 'react';
+import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -78,13 +79,105 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 100,
     marginBottom: '0.5em',
+  },
+  modulesContainer: {
+    marginLeft: 'auto',
+  },
+  moduleCTA: {
+    fontSize: '10px',
+    width: '60px',
+    alignSelf: 'center',
+    paddingRight: '0.5em',
+  },
+  moduleBox: {
+    padding: '0.5em',
+    margin: '0.2em',
+    width: '593px',
+    borderRadius: '0.2rem',
+    backgroundColor: colorWithWhiteness(colors.accent, 0.95),
+  },
+  moduleIcon: {
+    marginLeft: '0.2em',
+    marginRight: '1em',
+  },
+  moduleText: {
+    opacity: '0.5',
+  },
+  moduleDate: {
+    opacity: '0.5',
+    fontSize: '12px',
+  },
+  inverseRightArrow: {
+    color: colors.white,
+    background: colors.success,
+    paddingRight: '0.2em',
+    paddingLeft: '0.2em',
   }
 });
 
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerRW}>Researcher Workbench</Header>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
-  </FlexColumn>;
+</FlexColumn>;
+
+const InverseRightArrow = () => <ArrowRight style={styles.inverseRightArrow}/>;
+
+const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
+  [AccessModule.TWOFACTORAUTH, <div style={styles.moduleText}>Turn on Google 2-Step Verification</div>],
+  [AccessModule.RASLINKLOGINGOV, <div style={styles.moduleText}>Verify your identity with Login.gov</div>],
+  [AccessModule.ERACOMMONS, <div style={styles.moduleText}>Connect your eRA Commons account</div>],
+  [AccessModule.COMPLIANCETRAINING, <div style={styles.moduleText}>Complete <AoU/> research Registered Tier training</div>],
+  [AccessModule.DATAUSERCODEOFCONDUCT, <div style={styles.moduleText}>Sign Data User Code of Conduct</div>],
+]);
+
+const bypassedOrCompletedText = (status: AccessModuleStatus) => {
+  const {completionEpochMillis, bypassEpochMillis} = status;
+  const userCompletedModule = !!completionEpochMillis;
+  const userBypassedModule = !!bypassEpochMillis;
+
+  return cond(
+      [userCompletedModule, () => `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`],
+      [userBypassedModule, () => `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`],
+      // return nothing if there's no text
+    () => null
+  );
+};
+
+interface ModuleProps {
+  module: AccessModule;
+  eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
+  next: boolean;      // is this the next module that the user should complete
+}
+const Module = (props: ModuleProps): JSX.Element => {
+  const {profile} = useStore(profileStore);
+  const {module, eligible, next} = props;
+  const status = getAccessModuleStatusByName(profile, module);
+  const statusTextMaybe = bypassedOrCompletedText(status);
+
+  const ModuleIcon = () => cond(
+      // not eligible to complete module
+      [!eligible, () => <MinusCircle style={{color: colors.disabled}}/>],
+      // eligible and completed or bypassed
+      [eligible && !!statusTextMaybe, () => <CheckCircle style={{color: colors.success}}/>],
+      // eligible and incomplete and unbypassed
+      [eligible && !statusTextMaybe, () => <CheckCircle style={{color: colors.disabled}}/>]
+  );
+
+  return <FlexRow>
+    <FlexRow style={styles.moduleCTA}>
+      {next && <div style={{marginLeft: 'auto'}}>NEXT <InverseRightArrow/></div>}
+    </FlexRow>
+    <FlexRow style={styles.moduleBox}>
+      <div style={styles.moduleIcon}>
+        <ModuleIcon/>
+      </div>
+      <FlexColumn>
+        {moduleLabels.get(module)}
+        {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+      </FlexColumn>
+    </FlexRow>
+  </FlexRow>;
+};
 
 const RegisteredTierCard = () => {
   // in display order
@@ -95,48 +188,39 @@ const RegisteredTierCard = () => {
     AccessModule.COMPLIANCETRAINING,
   ];
 
-  const {profile} = useStore(profileStore);
-
-  return <FlexColumn style={styles.stepCard}>
+  const LeftColumn = () => <FlexColumn>
     <div style={styles.stepCardStep}>Step 1</div>
-    <FlexRow>
-      <FlexColumn>
-        <div style={styles.stepCardHeader}>Complete Registration</div>
-        <div style={styles.rtData}>Registered Tier data</div>
-        <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-        <FlexRow style={styles.rtDataDetails}>Individual (not aggregated) data</FlexRow>
-        <FlexRow style={styles.rtDataDetails}>Identifying information removed</FlexRow>
-        <FlexRow style={styles.rtDataDetails}>Electronic health records</FlexRow>
-        <FlexRow style={styles.rtDataDetails}>Survey responses</FlexRow>
-        <FlexRow style={styles.rtDataDetails}>Physical measurements</FlexRow>
-        <FlexRow style={styles.rtDataDetails}>Wearable devices</FlexRow>
-      </FlexColumn>
-      <FlexColumn style={{padding: '1em'}}>
-        <div>Not the real RT tasks UI (TODO) but some output for debugging</div>
-        {rtModules.map(module => {
-          const {completionEpochMillis, bypassEpochMillis} = getAccessModuleStatusByName(profile, module);
-          return <React.Fragment key={module}>
-            <hr/>
-            <FlexRow>
-              <div>{module}</div>
-              <FlexColumn style={{paddingLeft: '1em'}}>
-                <div>Completion Time {completionEpochMillis || '(none)'}</div>
-                <div>Bypass Time {bypassEpochMillis || '(none)'}</div>
-              </FlexColumn>
-            </FlexRow>
-          </React.Fragment>; })}
-      </FlexColumn>
-    </FlexRow>
+    <div style={styles.stepCardHeader}>Complete Registration</div>
+    <FlexRow style={styles.rtData}><RegisteredTierBadge/> Registered Tier data</FlexRow>
+    <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.individual/> Individual (not aggregated) data</FlexRow>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.identifying/> Identifying information removed</FlexRow>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.electronic/> Electronic health records</FlexRow>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.survey/> Survey responses</FlexRow>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.physical/> Physical measurements</FlexRow>
+    <FlexRow style={styles.rtDataDetails}><DARIcons.wearable/> Wearable devices</FlexRow>
   </FlexColumn>;
+
+  return <FlexRow style={styles.stepCard}>
+    <LeftColumn/>
+    <FlexColumn style={styles.modulesContainer}>
+      {rtModules.map(module =>
+          <Module key={module} module={module} eligible={true} next={module === AccessModule.ERACOMMONS}/>
+      )}
+    </FlexColumn>
+  </FlexRow>;
 };
 
-const DuccCard = () => <FlexColumn style={styles.stepCard}>
-  {/* This will be Step 3 when CT becomes the new Step 2 */}
-  <div style={styles.stepCardStep}>Step 2</div>
-  <FlexRow>
+const DuccCard = () => <FlexRow style={{...styles.stepCard, height: '125px'}}>
+  <FlexColumn>
+    {/* This will be Step 3 when CT becomes the new Step 2 */}
+    <div style={styles.stepCardStep}>Step 2</div>
     <div style={styles.stepCardHeader}>Sign the Code of Conduct</div>
-  </FlexRow>
-</FlexColumn>;
+  </FlexColumn>
+  <FlexColumn style={styles.modulesContainer}>
+    <Module module={AccessModule.DATAUSERCODEOFCONDUCT} eligible={true} next={false}/>
+  </FlexColumn>
+</FlexRow>;
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
