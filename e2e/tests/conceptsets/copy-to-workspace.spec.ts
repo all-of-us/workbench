@@ -25,7 +25,7 @@ async function createConceptSet(): Promise<{ dataPage: WorkspaceDataPage; concep
 
   await conceptSearchPage.reviewAndSaveConceptSet();
 
-  const conceptSetName: string = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+  const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
   // Click on link to open Concept Set page.
   const conceptSetActionPage = new ConceptSetActionsPage(page);
@@ -35,7 +35,7 @@ async function createConceptSet(): Promise<{ dataPage: WorkspaceDataPage; concep
 }
 
 describe('Copy Concept Set to another workspace', () => {
-  const destWorkspace = 'conceptsets-copyto-workspace'; // The copy-to workspace with default CDR version
+  const destWorkspace = 'e2eTestCopyConceptSetToWorkspace'; // The copy-to workspace with default CDR version
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -70,7 +70,7 @@ describe('Copy Concept Set to another workspace', () => {
 
     // Verify destWorkspace is open.
     const url = page.url();
-    expect(url).toContain(destWorkspace.replace(/-/g, ''));
+    expect(url).toContain(destWorkspace.toLowerCase());
 
     const resourceCard = new DataResourceCard(page);
     const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);

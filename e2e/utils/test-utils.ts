@@ -118,12 +118,8 @@ export async function performAction(
  */
 export async function createWorkspace(
   page: Page,
-  options: { cdrVersionName?: string; workspaceName?: string } = {
-    cdrVersionName: config.DEFAULT_CDR_VERSION_NAME,
-    workspaceName: makeWorkspaceName()
-  }
+  { cdrVersionName = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = {}
 ): Promise<string> {
-  const { cdrVersionName, workspaceName } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
