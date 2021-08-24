@@ -41,15 +41,13 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {serverConfigStore} from 'app/utils/stores';
-import {WorkspaceData} from 'app/utils/workspace-data';
+import {runtimeStore, serverConfigStore, withStore} from 'app/utils/stores';
 
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   BillingAccountType,
   BillingStatus,
-  CdrVersionTiersResponse,
   DataprocConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -179,8 +177,6 @@ enum PanelContent {
 
 // this is only used in the test.
 export interface Props {
-  workspace: WorkspaceData;
-  cdrVersionTiersResponse?: CdrVersionTiersResponse;
   onClose: () => void;
 }
 
@@ -784,7 +780,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
   </React.Fragment>;
 };
 
-export const RuntimePanel = fp.flow(
+const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
@@ -812,15 +808,12 @@ export const RuntimePanel = fp.flow(
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
 
-  // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
-  // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     [([b, , ]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
-    // currentRuntime being undefined means the first `getRuntime` has still not completed.
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [() => !!pendingRuntime, () => PanelContent.Customize],
     [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
@@ -887,10 +880,6 @@ export const RuntimePanel = fp.flow(
       aborter.abort();
     };
   }, []);
-
-  if (currentRuntime === undefined) {
-    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
-  }
 
   const createRuntimeRequest = (runtime: RuntimeConfig) => {
     const runtimeRequest: Runtime = runtime.computeType === ComputeType.Dataproc ? {
@@ -1130,15 +1119,8 @@ export const RuntimePanel = fp.flow(
                            value={selectedCompute || ComputeType.Standard}
                            onChange={({value}) => {setSelectedCompute(value); }}
                  />
-                 {
-                   selectedCompute === ComputeType.Dataproc &&
-                   <DataProcConfigSelector
-                       disabled={disableControls}
-                       onChange={config => setSelectedDataprocConfig(config)}
-                       dataprocConfig={selectedDataprocConfig} />
-                 }
-               </FlexColumn>
 
+               </FlexColumn>
                <FlexColumn>
                  <label style={styles.label} htmlFor='runtime-autopause'>Automatically pause after idle for</label>
                  <Dropdown id='runtime-autopause'
@@ -1150,6 +1132,13 @@ export const RuntimePanel = fp.flow(
                  />
                </FlexColumn>
              </FlexRow>
+             {
+               selectedCompute === ComputeType.Dataproc &&
+               <DataProcConfigSelector
+                   disabled={disableControls}
+                   onChange={config => setSelectedDataprocConfig(config)}
+                   dataprocConfig={selectedDataprocConfig} />
+             }
            </div>
            {runtimeExists && updateMessaging.warn &&
             <WarningMessage iconSize={30} iconPosition={'center'}>
@@ -1187,4 +1176,12 @@ export const RuntimePanel = fp.flow(
           />],
       [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
+});
+
+export const RuntimePanelWrapper = withStore(runtimeStore, 'runtime')(({runtime, onClose = () => {}}) => {
+  if (!runtime.runtimeLoaded) {
+    return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
+  }
+
+  return <RuntimePanel onClose={onClose}/>;
 });
