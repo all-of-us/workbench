@@ -93,6 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
+  private static final String GOOGLE_BUCKETS_LOCATION = "US;
 
   // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
   // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
@@ -409,7 +410,9 @@ public class FireCloudServiceImpl implements FireCloudService {
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
-
+    if(isFireCloudBillingV2ApiEnabled()) {
+      cloneRequest.
+    }
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
   }

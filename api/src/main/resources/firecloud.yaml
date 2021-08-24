@@ -2111,6 +2111,11 @@ components:
             if no Authorization Domain is set)
           items:
             $ref: '#/components/schemas/ManagedGroupRef'
+        bucketLocation:
+          type: string
+          required: false
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not
+            provided, the bucket will be created in the 'US' multi-region.
     WorkspaceRequestClone:
       required:
         - attributes
@@ -2138,6 +2143,11 @@ components:
           type: string
           description: Used for clone operations only; the prefix for files to copy
             between source and destination workspace buckets
+        bucketLocation:
+          type: string
+          required: false
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not
+            provided, the bucket will be created in the 'US' multi-region.
       description: ""
     WorkspaceResponse:
       type: object
