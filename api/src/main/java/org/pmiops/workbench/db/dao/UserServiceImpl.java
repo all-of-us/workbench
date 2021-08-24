@@ -1010,6 +1010,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         throw new BadRequestException(
             "There is no access module named: " + accessBypassRequest.getModuleName().toString());
     }
+    // Dual write then deprecate the one in userService
+    accessModuleService.updateBypassTime(
+        user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+    updateUserAccessTiers(user, Agent.asUser(user));
   }
 
   @Override

@@ -518,12 +518,6 @@ public class ProfileService {
     // update.
     request
         .getAccessBypassRequests()
-        .forEach(
-            bypass ->
-                accessModuleService.updateBypassTime(
-                    dbUser.getUserId(), bypass.getModuleName(), bypass.getIsBypassed()));
-    request
-        .getAccessBypassRequests()
         .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
 
     // refetch from the DB
