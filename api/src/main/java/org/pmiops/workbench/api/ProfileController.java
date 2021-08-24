@@ -539,8 +539,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
     // Dual write then deprecate the one in userService
-    userService.updateBypassTime(userId, request);
     accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -552,8 +552,8 @@ public class ProfileController implements ProfileApiDelegate {
     }
     long userId = userProvider.get().getUserId();
     // Dual write then deprecate the one in userService
-    userService.updateBypassTime(userId, request);
     accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
+    userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
