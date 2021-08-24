@@ -255,7 +255,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       loadLocalStorageAccessToken();
     }
   }, [config]);
-  
+
   const isCookiesEnabled = cookiesEnabled();
 
   return authLoaded && isUserDisabled !== undefined && <React.Fragment>
