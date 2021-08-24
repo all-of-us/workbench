@@ -1005,7 +1005,7 @@ public class InstitutionServiceTest extends SpringTest {
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
                             .eraRequired(false)
-                            .accessTierShortName(registeredTier.getShortName())
+                            .accessTierShortName(controlledTier.getShortName())
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
