@@ -93,7 +93,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-  // The defaul location for AoU buckets. Setting this location when cloning workspaces to avoid destional workspace
+  // The defaul location for AoU buckets. Setting this location when cloning workspaces to avoid
+  // destional workspace
   // to source workspace check. See http://shortn/_n0AEAdujef for more details.
   private static final String GOOGLE_BUCKETS_LOCATION = "US";
 
@@ -412,7 +413,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
-    if(isFireCloudBillingV2ApiEnabled()) {
+    if (isFireCloudBillingV2ApiEnabled()) {
       cloneRequest.bucketLocation(GOOGLE_BUCKETS_LOCATION);
     }
     return retryHandler.run(
