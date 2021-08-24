@@ -5698,9 +5698,10 @@ definitions:
         type: array
         items:
           type: string
-      eligabledAccessTierShortNames:
-        description: Short names of access tiers that user is eligabled. User beomes eligable if their institution allows it
-          in tier requirement, but does not mean user gains tier access. They still need to finish tier required registeraton tasks.
+      eligibledAccessTierShortNames:
+        description: The short names of the access tiers which a user is eligible for. User eligibility for tiers is
+          based on their institution's tier requirements. This does not mean the user has access to these tiers; to gain
+          access, the user must still complete all the necessary access requirement steps for each tier.
         type: array
         items:
           type: string

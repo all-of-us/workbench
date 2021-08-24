@@ -7,7 +7,13 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsB
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -370,12 +376,11 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public List<String> getUserEligabledAccessTiers(DbUser user) {
+  public List<String> getUserEligibledAccessTiers(DbUser user) {
     Optional<Institution> institution = getByUser(user);
     if (!institution.isPresent()) {
       return new ArrayList<String>();
     }
-    System.out.println(accessTierDao.findAll());
     return accessTierDao.findAll().stream()
         .filter(
             a ->
