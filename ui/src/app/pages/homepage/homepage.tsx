@@ -303,7 +303,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
               .completionTimestamp(profile)))() : true),
         rasLoginGovLinked: (serverConfigStore.get().config.enableRasLoginGovLinking ?
             (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
-                .completionTimestamp(profile)))() : true),
+              .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
           (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()
