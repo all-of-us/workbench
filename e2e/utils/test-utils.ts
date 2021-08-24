@@ -118,12 +118,16 @@ export async function performAction(
  */
 export async function createWorkspace(
   page: Page,
-  options: { cdrVersion?: string; workspaceName?: string } = {}
+  options: { cdrVersionName?: string; workspaceName?: string } = {
+    cdrVersionName: config.DEFAULT_CDR_VERSION_NAME,
+    workspaceName: makeWorkspaceName()
+  }
 ): Promise<string> {
-  const { cdrVersion = config.DEFAULT_CDR_VERSION_NAME, workspaceName = makeWorkspaceName() } = options;
+  const { cdrVersionName, workspaceName } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
-  await workspacesPage.createWorkspace(workspaceName, cdrVersion);
+  await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
+  console.log(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
   return workspaceName;
 }
 
@@ -156,7 +160,7 @@ export async function findOrCreateWorkspace(
       await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
     }
-    return createWorkspace(page, { workspaceName, cdrVersion });
+    return createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion });
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
@@ -208,7 +212,7 @@ export async function findOrCreateWorkspaceCard(
     logger.info(`Not finding workspace card name: ${workspaceName}`);
   }
 
-  await createWorkspace(page, { workspaceName, cdrVersion });
+  await createWorkspace(page, { workspaceName, cdrVersionName: cdrVersion });
 
   cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound === null) {
