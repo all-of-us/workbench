@@ -69,7 +69,7 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/institution/edit/:institutionId'>
       <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/user'> // included for backwards compatibility
+    <AppRoute exact path='/admin/user'> {/* included for backwards compatibility */}
       <UsersAdminPage routeData={{title: 'User Admin Table'}}/>
     </AppRoute>
     <AppRoute exact path='/admin/review-workspace'>
