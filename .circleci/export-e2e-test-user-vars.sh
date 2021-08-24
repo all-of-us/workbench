@@ -19,6 +19,7 @@ do
        echo "export COLLABORATOR_USER=$PUPPETEER_COLLABORATOR_STAGING" >> "$BASH_ENV"
        echo "export USER_NAME=$PUPPETEER_USER_STAGING" >> "$BASH_ENV"
        echo "export ACCESS_TEST_USER=$PUPPETEER_ACCESS_STAGING" >> "$BASH_ENV"
+       echo "export ADMIN_TEST_USER=$PUPPETEER_ADMIN_STAGING" >> "$BASH_ENV"
        ;;
     "test")
        echo "export READER_USER=$PUPPETEER_READER_TEST" >> "$BASH_ENV"
@@ -26,6 +27,7 @@ do
        echo "export COLLABORATOR_USER=$PUPPETEER_COLLABORATOR_TEST" >> "$BASH_ENV"
        echo "export USER_NAME=$PUPPETEER_USER_TEST" >> "$BASH_ENV"
        echo "export ACCESS_TEST_USER=$PUPPETEER_ACCESS_TEST" >> "$BASH_ENV"
+       echo "export ADMIN_TEST_USER=$PUPPETEER_ADMIN_TEST" >> "$BASH_ENV"
        ;;
     "local")
        echo "export READER_USER=$PUPPETEER_READER_LOCAL" >> "$BASH_ENV"
@@ -33,6 +35,7 @@ do
        echo "export COLLABORATOR_USER=$PUPPETEER_COLLABORATOR_LOCAL" >> "$BASH_ENV"
        echo "export USER_NAME=$PUPPETEER_USER_LOCAL" >> "$BASH_ENV"
        echo "export ACCESS_TEST_USER=$PUPPETEER_ACCESS_LOCAL" >> "$BASH_ENV"
+       echo "export ADMIN_TEST_USER=$PUPPETEER_ADMIN_LOCAL" >> "$BASH_ENV"
        ;;
    esac
    echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
