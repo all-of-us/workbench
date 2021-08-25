@@ -280,6 +280,7 @@ commands:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
       - restore_cache:
+          name: "Restore UI cache"
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - gcloud-auth-login
       - run:
