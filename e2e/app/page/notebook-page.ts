@@ -257,7 +257,7 @@ export default class NotebookPage extends NotebookFrame {
     if (code !== undefined && codeFile !== undefined) {
       throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
-    let notebookCode;
+    let notebookCode: string;
     if (code !== undefined) {
       notebookCode = code;
     } else if (codeFile !== undefined) {

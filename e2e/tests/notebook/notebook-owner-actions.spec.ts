@@ -26,7 +26,7 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
   let notebookName: string;
 
   test('Notebook name is unique', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.openAnalysisPage();
@@ -66,7 +66,7 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
   });
 
   test('Duplicate rename delete notebook', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
