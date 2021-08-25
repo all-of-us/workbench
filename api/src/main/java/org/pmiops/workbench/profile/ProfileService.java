@@ -129,8 +129,8 @@ public class ProfileService {
 
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
-    final List<String> eligibledAccessTierShortNames =
-        institutionService.getUserEligibledAccessTiers(user);
+    final List<String> EligibleAccessTierShortNames =
+        institutionService.getUserEligibleAccessTiers(user);
 
     // renewableAccessModuleStatus is deprecated and will be replaced by accessModules.
     final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
@@ -161,7 +161,7 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        eligibledAccessTierShortNames,
+        EligibleAccessTierShortNames,
         renewableAccessModules,
         accessModules);
   }

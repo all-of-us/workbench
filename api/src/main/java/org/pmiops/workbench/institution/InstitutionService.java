@@ -120,5 +120,5 @@ public interface InstitutionService {
    *
    * @return
    */
-  List<String> getUserEligibledAccessTiers(DbUser user);
+  List<String> getUserEligibleAccessTiers(DbUser user);
 }

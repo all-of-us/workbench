@@ -963,7 +963,7 @@ public class InstitutionServiceTest extends SpringTest {
   @Test
   public void testEligibleTiers_institutionNotFound() {
     final DbUser user = createUser("user@broad.org");
-    assertThat(service.getUserEligibledAccessTiers(user)).isEmpty();
+    assertThat(service.getUserEligibleAccessTiers(user)).isEmpty();
   }
 
   @Test
@@ -983,7 +983,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibledAccessTiers(user))
+    assertThat(service.getUserEligibleAccessTiers(user))
         .containsExactly(REGISTERED_TIER_SHORT_NAME);
   }
 
@@ -1009,7 +1009,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibledAccessTiers(user))
+    assertThat(service.getUserEligibleAccessTiers(user))
         .containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
   }
 
@@ -1035,7 +1035,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user2@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibledAccessTiers(user))
+    assertThat(service.getUserEligibleAccessTiers(user))
         .containsExactly(registeredTier.getShortName());
   }
 
@@ -1056,7 +1056,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user2@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibledAccessTiers(user)).isEmpty();
+    assertThat(service.getUserEligibleAccessTiers(user)).isEmpty();
   }
 
   private DbUser createUser(String contactEmail) {
