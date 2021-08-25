@@ -4342,6 +4342,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show separate source and standard domains
+      enablePersistentDisk:
+        type: boolean
+        default: false
+        description: Whether to persistent disk as the notebook storage
       rasHost:
         type: string
         description: The RAS base host name.
@@ -6041,6 +6045,21 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+  UpdateDiskRequest:
+    description: "Updates an existing persistent disk"
+    type: object
+    properties:
+      labels:
+        type: object
+        description: The labels to be added or updated on the persistent disk. Of type Map[String,String]
+      size:
+        type: integer
+        description: The size in GB that the persistent disk is to be updated to.
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: The block size in bytes that the persistent disk is to be updated to.
   PersistentDiskRequest:
     description: configuration to create a disk
     type: object
