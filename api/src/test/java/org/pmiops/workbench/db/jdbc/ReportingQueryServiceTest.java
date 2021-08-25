@@ -2,12 +2,14 @@ package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.FakeClockConfiguration.CLOCK;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -107,8 +110,6 @@ public class ReportingQueryServiceTest extends SpringTest {
   private DbInstitution dbInstitution;
   private DbAccessTier registeredTier;
   private DbAccessTier controlledTier;
-  private DbAccessModule twoFactorAuthModule;
-  private DbAccessModule rtTrainingModule;
 
   @BeforeEach
   public void setup() {
@@ -116,8 +117,6 @@ public class ReportingQueryServiceTest extends SpringTest {
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     TestMockFactory.createAccessModules(accessModuleDao);
     dbInstitution = createDbInstitution();
-    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
-    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
   }
 
   @Test
@@ -396,20 +395,30 @@ public class ReportingQueryServiceTest extends SpringTest {
 
   @Test
   public void testQueryUser_withAccessModule() {
-    final DbAccessTier tier2 =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(controlledTier.getAccessTierId())
-                .setShortName("tier2")
-                .setDisplayName("Tier Two")
-                .setAuthDomainName("t2-auth-domain")
-                .setAuthDomainGroupEmail("t2-auth-domain@email.com")
-                .setServicePerimeter("t2/service/perimeter"));
+    final DbAccessModule twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    final DbAccessModule rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    final DbAccessModule eRACommonsModule = accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    final DbAccessModule duccModule = accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    final DbAccessModule profileConfirmModule = accessModuleDao.findOneByName(AccessModuleName.PROFILE_CONFIRMATION).get();
+    Instant now = Instant.now();
+    Timestamp twoFactorAuthBypassTime = Timestamp.from(now.minusSeconds(10));
+    Timestamp twoFactorAuthCompleteTime = Timestamp.from(now.minusSeconds(20));
+    Timestamp rtTrainingBypassTime = Timestamp.from(now.minusSeconds(30));
+    Timestamp rtTrainingCompleteTime = Timestamp.from(now.minusSeconds(40));
+    Timestamp eRABypassTime = Timestamp.from(now.minusSeconds(50));
+    Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
+    Timestamp duccypassTime = Timestamp.from(now.minusSeconds(70));
+    Timestamp duccCompleteTime = null;
+    Timestamp profileConfirmBypassTime = Timestamp.from(now.minusSeconds(80));
+    Timestamp profileConfirmBCompleteTime = Timestamp.from(now);
 
     final DbUser user = createDbUserWithInstitute();
     addUserToTier(user, registeredTier);
-    addUserToTier(user, tier2);
-    addUserAccessModule(twoFactorAuthModule, NOW)
+    addUserAccessModule(user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
+    addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
+    addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
+    addUserAccessModule(user, duccModule, duccypassTime, duccCompleteTime);
+    addUserAccessModule(user, profileConfirmModule, profileConfirmBypassTime, profileConfirmBCompleteTime);
 
     entityManager.flush();
 
@@ -421,7 +430,14 @@ public class ReportingQueryServiceTest extends SpringTest {
 
     ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
     assertThat(reportingUser.getAccessTierShortNames()).contains(registeredTier.getShortName());
-    assertThat(reportingUser.getAccessTierShortNames()).contains(tier2.getShortName());
+    assertThat(reportingUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
+    assertThat(reportingUser.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompleteTime);
+    assertThat(reportingUser.getEraCommonsBypassTime()).isEqualTo(eRABypassTime);
+    assertThat(reportingUser.getEraCommonsCompletionTime()).isEqualTo(eRACompleteTime);
+    assertThat(reportingUser.getComplianceTrainingBypassTime()).isEqualTo(rtTrainingBypassTime);
+    assertThat(reportingUser.getComplianceTrainingCompletionTime()).isEqualTo(rtTrainingCompleteTime);
+    assertThat(reportingUser.getDataUseAgreementBypassTime()).isEqualTo(duccypassTime);
+    assertThat(reportingUser.getDataUseAgreementCompletionTime()).isEqualTo(duccCompleteTime);
   }
 
   @Test
