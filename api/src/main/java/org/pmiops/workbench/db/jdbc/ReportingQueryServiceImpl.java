@@ -273,7 +273,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
                 + "  ) uat ON u.user_id = uat.user_id "
                 + "  LEFT OUTER JOIN ( "
-                + "    SELECT uame.user_id, "
+                + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS era_commons_bypass_time, "
                 + "      uam.completion_time AS era_commons_completion_time "
                 + "    FROM user_access_module uam "
