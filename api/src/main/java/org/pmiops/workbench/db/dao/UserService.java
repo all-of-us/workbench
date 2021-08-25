@@ -21,8 +21,6 @@ import org.springframework.data.domain.Sort;
 public interface UserService {
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
-  List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser dbUser);
-
   DbUser createServiceAccountUser(String email);
 
   // version used by DevUserRegistrationService

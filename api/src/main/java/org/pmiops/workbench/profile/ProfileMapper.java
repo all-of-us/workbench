@@ -42,7 +42,6 @@ public interface ProfileMapper {
       Double freeTierUsage,
       Double freeTierDollarQuota,
       List<String> accessTierShortNames,
-      ProfileRenewableAccessModules renewableAccessModules,
       ProfileAccessModules accessModules);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);

@@ -246,79 +246,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  private class ModuleTimes {
-    public Optional<Timestamp> completion;
-    public Optional<Timestamp> bypass;
-
-    public ModuleTimes(Timestamp nullableCompletion, Timestamp nullableBypass) {
-      completion = Optional.ofNullable(nullableCompletion);
-      bypass = Optional.ofNullable(nullableBypass);
-    }
-
-    public boolean isBypassed() {
-      return bypass.isPresent();
-    }
-
-    public boolean isComplete() {
-      return completion.isPresent();
-    }
-
-    public Optional<Timestamp> getExpiration() {
-      if (isBypassed()) {
-        return Optional.empty();
-      }
-      return completion.map(
-          c -> deriveExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
-    }
-
-    public boolean hasExpired() {
-      Preconditions.checkArgument(
-          isComplete(), "Cannot check expiration on module that has not been completed");
-      final Timestamp now = new Timestamp(clock.millis());
-      return getExpiration().map(x -> x.before(now)).orElse(false);
-    }
-  }
-
-  // TODO split into registered tier and controlled tier versions, when available
-  private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
-    final Map<ModuleNameEnum, ModuleTimes> moduleMap =
-        new HashMap<>(
-            ImmutableMap.of(
-                ModuleNameEnum.PROFILECONFIRMATION,
-                new ModuleTimes(user.getProfileLastConfirmedTime(), null),
-                ModuleNameEnum.PUBLICATIONCONFIRMATION,
-                new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
-
-    if (isModuleEnabledInEnvironment(ModuleNameEnum.COMPLIANCETRAINING)) {
-      moduleMap.put(
-          ModuleNameEnum.COMPLIANCETRAINING,
-          new ModuleTimes(
-              user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()));
-    }
-
-    if (isModuleEnabledInEnvironment(ModuleNameEnum.DATAUSEAGREEMENT)) {
-      moduleMap.put(
-          ModuleNameEnum.DATAUSEAGREEMENT,
-          new ModuleTimes(
-              user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()));
-    }
-
-    return moduleMap;
-  }
-
-  private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
-    return new RenewableAccessModuleStatus()
-        .moduleName(name)
-        .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
-        .hasExpired(times.isComplete() && times.hasExpired());
-  }
-
-  public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
-    return getRenewableAccessModules(user).entrySet().stream()
-        .map(x -> mkStatus(x.getKey(), x.getValue()))
-        .collect(Collectors.toList());
-  }
-
   private boolean isDataUseAgreementCompliant(DbUser user) {
     if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
       return true;
@@ -1175,17 +1102,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // which is also an indicator that we should not send an email
           .min(Long::compareTo)
           .map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
-    }
-  }
-
-  private boolean isModuleEnabledInEnvironment(ModuleNameEnum moduleName) {
-    final AccessConfig accessConfig = configProvider.get().access;
-
-    switch (moduleName) {
-      case COMPLIANCETRAINING:
-        return accessConfig.enableComplianceTraining;
-      default:
-        return true;
     }
   }
 
