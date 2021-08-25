@@ -99,10 +99,11 @@ executors:
   puppeteer-executor:
     docker:
       - image: << pipeline.parameters.workbench-image >>
-        environment:
-          TZ: "America/New_York"
+      - image: << pipeline.parameters.db-image >>
     working_directory: ~/workbench
     environment:
+      <<: *env-default
+      <<: *env-db
       CI: true
       NODE_ENV: development
       WORKBENCH_ENV: test
@@ -208,7 +209,7 @@ commands:
       - run:
           # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 5m
+          command: dockerize -wait tcp://localhost:3306 -timeout 5m
       - when:
           condition: << parameters.run_migration >>
           steps:
