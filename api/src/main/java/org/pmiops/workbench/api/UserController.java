@@ -226,7 +226,7 @@ public class UserController implements UserApiDelegate {
     return Stream.of(
         new BillingAccount()
             .isFreeTier(true)
-            .displayName("Use All of Us free credits")
+            .displayName("Use All of Us initial credits")
             .name(configProvider.get().billing.freeTierBillingAccountName())
             .isOpen(true));
   }

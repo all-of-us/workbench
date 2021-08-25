@@ -14,7 +14,7 @@ import BaseElement from 'app/element/base-element';
 import ShareModal from 'app/modal/share-modal';
 import { logger } from 'libs/logger';
 
-export const UseFreeCredits = 'Use All of Us free credits';
+export const UseFreeCredits = 'Use All of Us initial credits';
 
 export enum TabLabels {
   Data = 'Data',

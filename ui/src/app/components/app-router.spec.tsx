@@ -86,8 +86,12 @@ const makeAppRouter = () => {
       <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
       <AppRoute exact path='/protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Protected Route'}/></AppRoute>
       <AppRoute exact path='/other-protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Other Protected Route'}/></AppRoute>
-      <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}><TestComponent text={'Nested Protected Route'}/></AppRoute>
-      <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
+      <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}>
+        <TestComponent text={'Nested Protected Route'}/>
+      </AppRoute>
+      <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}>
+        <TestComponent text={'Unreachable Path'}/>
+      </AppRoute>
       <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
       <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
     </Switch>

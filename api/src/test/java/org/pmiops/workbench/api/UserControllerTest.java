@@ -354,7 +354,7 @@ public class UserControllerTest extends SpringTest {
   static final BillingAccount freeTierBillingAccount =
       new BillingAccount()
           .isFreeTier(true)
-          .displayName("Use All of Us free credits")
+          .displayName("Use All of Us initial credits")
           .name("billingAccounts/free-tier")
           .isOpen(true);
 
