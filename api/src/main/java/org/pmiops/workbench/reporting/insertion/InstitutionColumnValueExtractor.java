@@ -14,7 +14,7 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
       "organization_type_other_text", ReportingInstitution::getOrganizationTypeOtherText),
   SHORT_NAME("short_name", ReportingInstitution::getShortName),
   REGISTERED_TIER_REQUIREMENT(
-      "registered_tier_requirement", ReportingInstitution::getRegisteredTierRequirement);
+      "registered_tier_requirement", i -> enumToString(i.getRegisteredTierRequirement()));
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
