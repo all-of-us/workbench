@@ -2,7 +2,7 @@ import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import Link from 'app/element/link';
-import { MenuOption, Language, LinkText, ResourceCard } from 'app/text-labels';
+import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
@@ -29,7 +29,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {string} notebookName New notebook name.
    * @param {Language} language Notebook language.
    */
-  async createNotebook(notebookName: string, language: Language): Promise<NotebookPage> {
+  async createNotebook(notebookName: string, language: Language = Language.Python): Promise<NotebookPage> {
     const link = this.createNewNotebookLink();
     await link.click();
     const modal = new NewNotebookModal(this.page);
@@ -87,11 +87,12 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {string} notebookName The notebook name to clone from.
    */
   async duplicateNotebook(notebookName: string): Promise<string> {
-    const resourceCard = new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
+    const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
     await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: false });
     await waitWhileLoading(this.page);
-    return `Duplicate of ${notebookName}`; // name of clone notebook
+    const cloneName = `Duplicate of ${notebookName}`; // name of clone notebook
+    await DataResourceCard.findCard(this.page, cloneName);
+    return cloneName;
   }
 
   /**
@@ -113,5 +114,17 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const copyModal = new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
+  }
+
+  /**
+   *  Find Notebook that match specified notebook name.
+   * @param notebookName
+   */
+  async findNotebookCard(notebookName?: string): Promise<DataResourceCard> {
+    if (notebookName) {
+      return new DataResourceCard(this.page).findCard(notebookName, ResourceCard.Notebook);
+    }
+    // if notebook name isn't specified, find any existing notebook.
+    return new DataResourceCard(this.page).findAnyCard(ResourceCard.Notebook);
   }
 }

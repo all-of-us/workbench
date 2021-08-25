@@ -1,13 +1,11 @@
 import { Page } from 'puppeteer';
 import Button from 'app/element/button';
-import { Language, LinkText, PageUrl } from 'app/text-labels';
+import { LinkText, PageUrl } from 'app/text-labels';
 import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
-import { findOrCreateWorkspace } from 'utils/test-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
-import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { config } from 'resources/workbench-config';
 import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
@@ -154,27 +152,6 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
     return editPage;
-  }
-
-  /**
-   * Create a new notebook in a selected Workspace.
-   * @param {string} workspaceName Workspace name.
-   * @param {string} notebookName Notebook name
-   * @param {Language} lang Notebook language.
-   */
-  async createNotebook(opts: {
-    workspaceName: string;
-    notebookName: string;
-    lang?: Language;
-  }): Promise<WorkspaceAnalysisPage> {
-    const { workspaceName, notebookName, lang } = opts;
-    await findOrCreateWorkspace(this.page, { workspaceName });
-
-    const dataPage = new WorkspaceDataPage(this.page);
-    const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
-
-    // Do not run any code. Simply returns to the Workspace Analysis tab.
-    return notebookPage.goAnalysisPage();
   }
 
   async filterByAccessLevel(level: string): Promise<string> {
