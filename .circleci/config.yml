@@ -237,6 +237,8 @@ commands:
           condition: << parameters.connect_local_api >>
           # connect_local_api = true.  run against Local->Local.
           steps:
+            - launch-local-api:
+                run_migration: true
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
