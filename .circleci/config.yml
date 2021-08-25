@@ -543,7 +543,7 @@ jobs:
       - restore_cache:
           name: "Restore e2e cache"
           keys:
-            - v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - vxyz1-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - browser-tools/install-browser-tools
       - run:
           name: "Set environment variables for e2e test users"
@@ -614,7 +614,7 @@ jobs:
           paths:
             - ~/.cache/yarn
             - ~/workbench/e2e/node_modules
-          key: v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: vxyz1-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   puppeteer-access-test-user-setup:
     executor: workbench-executor
