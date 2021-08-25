@@ -20,8 +20,8 @@ import {
 import {
   AutopauseMinuteThresholds,
   ComputeType,
-  diskPricePerMonth,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  diskPricePerMonth,
   findMachineByName,
   Machine,
   machineRunningCost,
@@ -42,10 +42,11 @@ import {
   useCustomRuntime,
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
-import {diskStore, runtimeStore, serverConfigStore, withStore, useStore} from 'app/utils/stores';
+import {diskStore, runtimeStore, serverConfigStore, useStore, withStore} from 'app/utils/stores';
 
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
+import {supportUrls} from 'app/utils/zendesk';
 import {
   BillingAccountType,
   BillingStatus,
@@ -60,7 +61,6 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {supportUrls} from '../../utils/zendesk';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -254,8 +254,8 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
     </div>
       <div>
         <div>If you want to save some files permanently, such as input data, analysis outputs,
-          or installed packages, <StyledAnchorTag href={supportUrls.workspaceBucket} target='_blank'> &nbsp;move them to the workspace bucket.
-          </StyledAnchorTag>
+          or installed packages,
+          <StyledAnchorTag href={supportUrls.workspaceBucket} target='_blank'> &nbsp;move them to the workspace bucket.</StyledAnchorTag>
         </div>
         <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
     </div>
@@ -327,7 +327,10 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const dataprocDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
+        <label >
+          <input type= 'radio'
+                 checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
+                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
           Delete application configuration and cloud compute profile
         </label></h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
@@ -339,7 +342,10 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD} onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
+        <label >
+          <input type= 'radio'
+                 checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}
+                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
           Delete unattached persistent disk</label>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>

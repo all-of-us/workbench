@@ -364,6 +364,38 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
   return await LeoRuntimeInitializer.initialize({workspaceNamespace, pollAbortSignal: signal});
 };
 
+// useDisk hook is a simple hook to populate the disk store.
+// This is only used by other disk hooks
+export const useDisk = (currentWorkspaceNamespace) => {
+  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
+  useEffect(() => {
+    if (!enablePD || !currentWorkspaceNamespace) {
+      return;
+    }
+    const getDisk = withAsyncErrorHandling(
+      () => diskStore.set({workspaceNamespace: null, persistentDisk: null}),
+      async() => {
+        let pd;
+        try {
+          pd = await disksApi().getDisk(currentWorkspaceNamespace);
+        } catch (e) {
+          if (!(e instanceof Response && e.status === 404)) {
+            throw e;
+          }
+            // null on the disk store indicates no existing persistent disk
+          pd = null;
+        }
+        if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
+          diskStore.set({
+            workspaceNamespace: currentWorkspaceNamespace,
+            persistentDisk: pd
+          });
+        }
+      });
+    getDisk();
+  }, [currentWorkspaceNamespace]);
+};
+
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
@@ -546,38 +578,6 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
   }, [requestedRuntime]);
 
   return [{currentRuntime: runtime, pendingRuntime}, setRequestedRuntime];
-};
-
-// useDisk hook is a simple hook to populate the disk store.
-// This is only used by other disk hooks
-export const useDisk = (currentWorkspaceNamespace) => {
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
-  useEffect(() => {
-    if (!enablePD || !currentWorkspaceNamespace) {
-      return;
-    }
-    const getDisk = withAsyncErrorHandling(
-      () => diskStore.set({workspaceNamespace: null, persistentDisk: null}),
-      async() => {
-        let pd;
-        try {
-          pd = await disksApi().getDisk(currentWorkspaceNamespace);
-        } catch (e) {
-          if (!(e instanceof Response && e.status === 404)) {
-            throw e;
-          }
-          // null on the disk store indicates no existing persistent disk
-          pd = null;
-        }
-        if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
-          diskStore.set({
-            workspaceNamespace: currentWorkspaceNamespace,
-            persistentDisk: pd
-          });
-        }
-      });
-    getDisk();
-  }, [currentWorkspaceNamespace]);
 };
 
 export const withRuntimeStore = () => WrappedComponent => {
