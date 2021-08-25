@@ -237,6 +237,7 @@ commands:
           condition: << parameters.connect_local_api >>
           # connect_local_api = true.  run against Local->Local.
           steps:
+            - gcloud-auth-login
             - launch-local-api:
                 run_migration: true
             - run:
