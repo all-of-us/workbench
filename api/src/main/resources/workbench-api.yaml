@@ -5698,7 +5698,7 @@ definitions:
         type: array
         items:
           type: string
-      EligibleAccessTierShortNames:
+      eligibleAccessTierShortNames:
         description: The short names of the access tiers which a user is eligible for. User eligibility for tiers is
           based on their institution's tier requirements. This does not mean the user has access to these tiers; to gain
           access, the user must still complete all the necessary access requirement steps for each tier.
