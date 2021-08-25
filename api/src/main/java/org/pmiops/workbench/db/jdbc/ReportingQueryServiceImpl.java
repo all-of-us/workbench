@@ -267,7 +267,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  ) as t ON t.user_id = u.user_id "
                 // temporary solution to RW-6566: retrieve first_enabled from user_access_tier
                 // for 'registered' entries as a substitute for first_registration_completion_time
-                // end temporary solution for RW-6566
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
                 + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
