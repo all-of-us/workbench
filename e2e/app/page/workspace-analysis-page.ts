@@ -120,7 +120,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    *  Find Notebook that match specified notebook name.
    * @param notebookName
    */
-  async findNotebookCard(notebookName?: string): Promise<DataResourceCard> {
+  async findNotebookCard(notebookName?: string): Promise<DataResourceCard | null> {
     if (notebookName) {
       return new DataResourceCard(this.page).findCard(notebookName, ResourceCard.Notebook);
     }
