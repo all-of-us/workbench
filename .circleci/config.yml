@@ -200,19 +200,30 @@ commands:
 
   launch-local-api:
     description: "Launch local API server"
+    parameters:
+      run_migration:
+        type: boolean
+        default: false
     steps:
       - run:
           # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - when:
+          condition: << parameters.run_migration >>
+          steps:
+            - run:
+                name: Loads all data for local deployment/development
+                working_directory: ~/workbench/api
+                command: ./project.rb run-local-all-migrations
       - run:
           name: Launch local API server
           working_directory: ~/workbench/api
-          command: ./project.rb dev-up --nostart-db
+          command: ./project.rb dev-up --nostart-db && tail -f build/dev-appserver-out/dev_appserver.out
           background: true
       - run:
           name: Wait for local API server to start
-          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 5m
 
   launch-local-ui:
     description: "Launch local UI server"
@@ -558,7 +569,8 @@ jobs:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
-            - launch-local-ui
+            - launch-local-ui:
+                connect_local_api: true
       - gcloud-auth-login:
           # Needed for yarn test, which invokes generate-impersonated-user-token
           with_application_default_credentials: true
