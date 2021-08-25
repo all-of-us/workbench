@@ -208,7 +208,7 @@ commands:
       - run:
           # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 5m
       - when:
           condition: << parameters.run_migration >>
           steps:
@@ -257,7 +257,7 @@ commands:
       - run: sleep 30 # sleep for 30 seconds
       - run:
           name: "Watch the port for 4m for local UI server start up"
-          command: dockerize -wait http://localhost:4200 -timeout 4m
+          command: dockerize -wait http://localhost:4200 -timeout 4m -wait-retry-interval 5s
 
   run-api-test:
     description: "Run api tests, reused in api-*-test jobs"
