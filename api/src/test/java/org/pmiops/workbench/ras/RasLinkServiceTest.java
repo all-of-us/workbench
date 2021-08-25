@@ -2,7 +2,11 @@ package org.pmiops.workbench.ras;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
@@ -44,7 +48,9 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -103,6 +109,7 @@ public class RasLinkServiceTest extends SpringTest {
       new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_2);
 
   private long userId;
+  private Institution institution = new Institution();
   private static DbUser currentUser;
   private static List<DbAccessModule> accessModules;
 
@@ -118,6 +125,7 @@ public class RasLinkServiceTest extends SpringTest {
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static HttpTransport mockHttpTransport;
   @Mock private OpenIdConnectClient mockRasOidcClient;
+  @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
   @Import({
@@ -181,6 +189,10 @@ public class RasLinkServiceTest extends SpringTest {
   public void setUp() throws Exception {
     rasLinkService = new RasLinkService(accessModuleService, userService, mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
+    when(mockInstitutionService.getByUser(any(DbUser.class))).thenReturn(Optional.of(institution));
+    when(mockInstitutionService.validateInstitutionalEmail(
+            eq(institution), anyString(), eq(REGISTERED_TIER_SHORT_NAME)))
+        .thenReturn(true);
 
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");

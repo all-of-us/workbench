@@ -69,7 +69,7 @@ describe('NotebookRedirect', () => {
     });
     currentWorkspaceStore.next(workspace);
     profileStore.set({profile, load, reload, updateCache});
-    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
+    runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: true});
 
     jest.useFakeTimers();
   });
@@ -237,7 +237,8 @@ describe('NotebookRedirect', () => {
       runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Deleting};
       runtimeStore.set({
         workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true
       });
     });
     await waitForFakeTimersAndUpdate(wrapper);
@@ -273,7 +274,8 @@ describe('NotebookRedirect', () => {
       runtimeStub.runtime = {...runtimeStub.runtime, status: RuntimeStatus.Updating};
       runtimeStore.set({
         workspaceNamespace: workspace.namespace,
-        runtime: runtimeStub.runtime
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true
       });
     });
     await waitForFakeTimersAndUpdate(wrapper);

@@ -3,7 +3,7 @@ import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {
   CdrVersionTier,
-  ConfigResponse,
+  ConfigResponse, Disk,
   GenomicExtractionJob,
   Profile,
   Runtime,
@@ -125,9 +125,22 @@ export const clearCompoundRuntimeOperations = () => {
 export interface RuntimeStore {
   workspaceNamespace: string | null | undefined;
   runtime: Runtime | null | undefined;
+  runtimeLoaded: boolean;
 }
 
-export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: undefined});
+export const runtimeStore = atom<RuntimeStore>({
+  workspaceNamespace: undefined,
+  runtime: undefined,
+  runtimeLoaded: false
+});
+
+// runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
+export interface DiskStore {
+  workspaceNamespace: string | null | undefined;
+  persistentDisk: Disk | null | undefined;
+}
+
+export const diskStore = atom<DiskStore>({workspaceNamespace: undefined, persistentDisk: undefined});
 
 export interface StackdriverErrorReporterStore {
   reporter?: StackdriverErrorReporter;

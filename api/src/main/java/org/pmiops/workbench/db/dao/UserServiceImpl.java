@@ -1,18 +1,15 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +34,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -53,12 +49,12 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -107,6 +103,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
+  private final InstitutionService institutionService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -127,7 +124,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       ComplianceService complianceService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
-      MailService mailService) {
+      MailService mailService,
+      InstitutionService institutionService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -144,6 +142,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
+    this.institutionService = institutionService;
   }
 
   @VisibleForTesting
@@ -240,79 +239,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  private class ModuleTimes {
-    public Optional<Timestamp> completion;
-    public Optional<Timestamp> bypass;
-
-    public ModuleTimes(Timestamp nullableCompletion, Timestamp nullableBypass) {
-      completion = Optional.ofNullable(nullableCompletion);
-      bypass = Optional.ofNullable(nullableBypass);
-    }
-
-    public boolean isBypassed() {
-      return bypass.isPresent();
-    }
-
-    public boolean isComplete() {
-      return completion.isPresent();
-    }
-
-    public Optional<Timestamp> getExpiration() {
-      if (isBypassed()) {
-        return Optional.empty();
-      }
-      return completion.map(
-          c -> deriveExpirationTimestamp(c, configProvider.get().accessRenewal.expiryDays));
-    }
-
-    public boolean hasExpired() {
-      Preconditions.checkArgument(
-          isComplete(), "Cannot check expiration on module that has not been completed");
-      final Timestamp now = new Timestamp(clock.millis());
-      return getExpiration().map(x -> x.before(now)).orElse(false);
-    }
-  }
-
-  // TODO split into registered tier and controlled tier versions, when available
-  private Map<ModuleNameEnum, ModuleTimes> getRenewableAccessModules(DbUser user) {
-    final Map<ModuleNameEnum, ModuleTimes> moduleMap =
-        new HashMap<>(
-            ImmutableMap.of(
-                ModuleNameEnum.PROFILECONFIRMATION,
-                new ModuleTimes(user.getProfileLastConfirmedTime(), null),
-                ModuleNameEnum.PUBLICATIONCONFIRMATION,
-                new ModuleTimes(user.getPublicationsLastConfirmedTime(), null)));
-
-    if (isModuleEnabledInEnvironment(ModuleNameEnum.COMPLIANCETRAINING)) {
-      moduleMap.put(
-          ModuleNameEnum.COMPLIANCETRAINING,
-          new ModuleTimes(
-              user.getComplianceTrainingCompletionTime(), user.getComplianceTrainingBypassTime()));
-    }
-
-    if (isModuleEnabledInEnvironment(ModuleNameEnum.DATAUSEAGREEMENT)) {
-      moduleMap.put(
-          ModuleNameEnum.DATAUSEAGREEMENT,
-          new ModuleTimes(
-              user.getDataUseAgreementCompletionTime(), user.getDataUseAgreementBypassTime()));
-    }
-
-    return moduleMap;
-  }
-
-  private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
-    return new RenewableAccessModuleStatus()
-        .moduleName(name)
-        .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
-        .hasExpired(times.isComplete() && times.hasExpired());
-  }
-
-  public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser user) {
-    return getRenewableAccessModules(user).entrySet().stream()
-        .map(x -> mkStatus(x.getKey(), x.getValue()))
-        .collect(Collectors.toList());
-  }
-
   private boolean isDataUseAgreementCompliant(DbUser user) {
     if (accessModuleService.isModuleBypassed(user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT)) {
       return true;
@@ -336,13 +262,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         accessModuleService.isModuleCompliant(user, AccessModuleName.PUBLICATION_CONFIRMATION);
     boolean profileConfirmationComplete =
         accessModuleService.isModuleCompliant(user, AccessModuleName.PROFILE_CONFIRMATION);
+
+    boolean eRARequiredForRegisteredTier = true;
+    boolean institutionalEmailValid = false;
+    Optional<Institution> institution = institutionService.getByUser(user);
+    if (institution.isPresent()) {
+      // eRA is required when login.gov linking is not enabled or user institution requires that in
+      // tier requirement.
+      eRARequiredForRegisteredTier =
+          !configProvider.get().access.enableRasLoginGovLinking
+              || institutionService.eRaRequiredForTier(
+                  institution.get(), REGISTERED_TIER_SHORT_NAME);
+      institutionalEmailValid =
+          institutionService.validateInstitutionalEmail(
+              institution.get(), user.getContactEmail(), REGISTERED_TIER_SHORT_NAME);
+    } else {
+      log.warning(String.format("Institution not found for user %s", user.getUsername()));
+    }
+
     return !user.getDisabled()
         && twoFactorAuthComplete
-        && eRACommonsComplete
+        && (!eRARequiredForRegisteredTier || eRACommonsComplete)
         && complianceTrainingComplete
         && dataUseAgreementTrainingComplete
         && publicationConfirmationComplete
-        && profileConfirmationComplete;
+        && profileConfirmationComplete
+        && institutionalEmailValid;
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -985,6 +930,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         throw new BadRequestException(
             "There is no access module named: " + accessBypassRequest.getModuleName().toString());
     }
+    // Dual write then deprecate the one in userService
+    accessModuleService.updateBypassTime(
+        user.getUserId(), accessBypassRequest.getModuleName(), accessBypassRequest.getIsBypassed());
+    updateUserAccessTiers(user, Agent.asUser(user));
   }
 
   @Override
@@ -1146,17 +1095,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // which is also an indicator that we should not send an email
           .min(Long::compareTo)
           .map(t -> Timestamp.from(Instant.ofEpochMilli(t)));
-    }
-  }
-
-  private boolean isModuleEnabledInEnvironment(ModuleNameEnum moduleName) {
-    final AccessConfig accessConfig = configProvider.get().access;
-
-    switch (moduleName) {
-      case COMPLIANCETRAINING:
-        return accessConfig.enableComplianceTraining;
-      default:
-        return true;
     }
   }
 

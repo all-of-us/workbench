@@ -103,9 +103,10 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
-    "enableStandardSourceDomains": false,
-    "enableGpu": true
+    "enableGpu": true,
+    "enablePersistentDisk": true,
+    "enableAccessModuleRewrite" : true,
+    "enableStandardSourceDomains": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

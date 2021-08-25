@@ -280,6 +280,7 @@ export const findGpu = (machineToFind: string, type: string, num: number) =>
     fp.find(({machineName, gpuType, gpuNum}) => machineName === machineToFind && gpuType === type && gpuNum === num, gpuBases);
 
 export const diskPrice = 0.04 / 730; // per GB hour, from https://cloud.google.com/compute/pricing
+export const diskPricePerMonth = 0.04; // per GB month
 export const dataprocCpuPrice = 0.01; // dataproc costs $0.01 per cpu per hour
 
 const dataprocSurcharge = ({masterMachine, numberOfWorkers, numberOfPreemptibleWorkers, workerMachine}) => {

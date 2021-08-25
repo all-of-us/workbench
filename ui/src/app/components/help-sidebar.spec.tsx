@@ -94,12 +94,12 @@ describe('HelpSidebar', () => {
   const setRuntimeStatus = (status) => {
     const runtime = {...defaultRuntime(), status};
     runtimeStub.runtime = runtime;
-    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime});
+    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime, runtimeLoaded: true});
   };
 
   const clearRuntime = () => {
     runtimeStub.runtime = null;
-    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: null});
+    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: null, runtimeLoaded: false});
   };
 
   const setActiveIcon = async(wrapper, activeIconKey) => {
@@ -120,7 +120,7 @@ describe('HelpSidebar', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({config: {...defaultServerConfig, enableGenomicExtraction: true}});
-    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
+    runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime, runtimeLoaded: true});
     cdrVersionStore.set(cdrVersionTiersResponse);
 
     // mock timers

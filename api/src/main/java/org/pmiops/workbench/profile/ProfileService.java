@@ -42,8 +42,6 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
-import org.pmiops.workbench.model.ProfileRenewableAccessModules;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -130,16 +128,6 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
-    // renewableAccessModuleStatus is deprecated and will be replaced by accessModules.
-    final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
-        userService.getRenewableAccessModuleStatus(userLite);
-    final ProfileRenewableAccessModules renewableAccessModules =
-        new ProfileRenewableAccessModules()
-            .modules(renewableAccessModuleStatus)
-            .anyModuleHasExpired(
-                renewableAccessModuleStatus.stream()
-                    .anyMatch(RenewableAccessModuleStatus::getHasExpired));
-
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
     final ProfileAccessModules accessModules =
@@ -159,7 +147,6 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        renewableAccessModules,
         accessModules);
   }
 
@@ -519,12 +506,6 @@ public class ProfileService {
     request
         .getAccessBypassRequests()
         .forEach(bypass -> userService.updateBypassTime(dbUser.getUserId(), bypass));
-    request
-        .getAccessBypassRequests()
-        .forEach(
-            bypass ->
-                accessModuleService.updateBypassTime(
-                    dbUser.getUserId(), bypass.getModuleName(), bypass.getIsBypassed()));
 
     // refetch from the DB
     Profile updatedProfile = getProfile(userService.getByUsernameOrThrow(request.getUsername()));

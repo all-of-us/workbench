@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -201,11 +202,22 @@ public class InstitutionServiceImpl implements InstitutionService {
     if (dbAffiliation == null) {
       return false;
     }
-    return validateInstitutionalEmail(toModel(dbAffiliation.getInstitution()), contactEmail);
+    // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
+    // to pull RT short name from config or database.
+    return validateInstitutionalEmail(
+        toModel(dbAffiliation.getInstitution()), contactEmail, REGISTERED_TIER_SHORT_NAME);
   }
 
   @Override
-  public boolean validateInstitutionalEmail(Institution institution, String contactEmail) {
+  public boolean eRaRequiredForTier(Institution institution, String accessTierShortName) {
+    Optional<InstitutionTierConfig> tierConfig =
+        getTierConfigByTier(institution, accessTierShortName);
+    return tierConfig.isPresent() && BooleanUtils.isTrue(tierConfig.get().getEraRequired());
+  }
+
+  @Override
+  public boolean validateInstitutionalEmail(
+      Institution institution, String contactEmail, String accessTierShortName) {
     try {
       // TODO RW-4489: UserService should handle initial email validation
       new InternetAddress(contactEmail).validate();
@@ -222,9 +234,6 @@ public class InstitutionServiceImpl implements InstitutionService {
       return false;
     }
 
-    // As of now, RT's short name is hard coded in AccessTierService. We may need a better way
-    // to pull RT short name from config or database.
-    final String accessTierShortName = REGISTERED_TIER_SHORT_NAME;
     Optional<InstitutionTierConfig> tierConfig =
         getTierConfigByTier(institution, accessTierShortName);
     final boolean validated;
@@ -508,7 +517,9 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   public Optional<Institution> getFirstMatchingInstitution(final String contactEmail) {
     return getInstitutions().stream()
-        .filter(institution -> validateInstitutionalEmail(institution, contactEmail))
+        .filter(
+            institution ->
+                validateInstitutionalEmail(institution, contactEmail, REGISTERED_TIER_SHORT_NAME))
         .findFirst();
   }
 

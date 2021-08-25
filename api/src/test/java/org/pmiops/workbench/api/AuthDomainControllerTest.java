@@ -2,10 +2,14 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import java.time.Instant;
+import java.util.Optional;
 import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,8 +32,10 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AuthDomainCreatedResponse;
+import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -65,8 +71,10 @@ public class AuthDomainControllerTest extends SpringTest {
   @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
   @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Mock private InstitutionService mockInstitutionService;
 
   private AuthDomainController authDomainController;
+  private Institution institution = new Institution();
 
   private final String testGroupEmail = "test-group@google.com";
   private final FirecloudManagedGroupWithMembers testGroup =
@@ -78,6 +86,10 @@ public class AuthDomainControllerTest extends SpringTest {
     adminUser.setUserId(0L);
     when(fireCloudService.createGroup(any())).thenReturn(testGroup);
     when(userProvider.get()).thenReturn(adminUser);
+    when(mockInstitutionService.getByUser(any(DbUser.class))).thenReturn(Optional.of(institution));
+    when(mockInstitutionService.validateInstitutionalEmail(
+            eq(institution), anyString(), eq(REGISTERED_TIER_SHORT_NAME)))
+        .thenReturn(true);
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.accessRenewal.expiryDays = (long) 365;
     FakeClock clock = new FakeClock(Instant.now());
@@ -98,7 +110,8 @@ public class AuthDomainControllerTest extends SpringTest {
             complianceService,
             directoryService,
             accessTierService,
-            mailService);
+            mailService,
+            mockInstitutionService);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);

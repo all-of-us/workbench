@@ -261,6 +261,8 @@ public class WorkbenchConfig {
     public boolean enableStandardSourceDomains;
     // If true, the backend and UI will support gpu for standard vm
     public boolean enableGpu;
+    // If true, the backend and UI will support persistent disk as the default notebook storage
+    public boolean enablePersistentDisk;
   }
 
   public static class ActionAuditConfig {
