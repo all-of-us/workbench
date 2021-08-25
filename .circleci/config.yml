@@ -290,6 +290,7 @@ commands:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
       - save_cache:
+          name: "Save UI cache"
           paths:
             - ~/.cache/yarn
             - ui/node_modules
@@ -538,11 +539,12 @@ jobs:
     parallelism: << parameters.parallel_num >>
     steps:
       - checkout-code
+      - steps: << parameters.optional_steps >>
       - restore_cache:
+          name: "Restore e2e cache"
           keys:
             - v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - browser-tools/install-browser-tools
-      - steps: << parameters.optional_steps >>
       - run:
           name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
@@ -550,7 +552,8 @@ jobs:
             cp .env.circleci.<< parameters.env_name >> .env
             echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
             source $BASH_ENV
-            echo "$BASH_ENV"
+            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
+            echo "TEST_MODE=${TEST_MODE}"
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
@@ -607,8 +610,9 @@ jobs:
           working_directory: ~/workbench/e2e
           command: yarn build && yarn lint
       - save_cache:
+          name: "Save e2e cache"
           paths:
-            - ~/workbench/e2e/.cache/yarn
+            - ~/.cache/yarn
             - ~/workbench/e2e/node_modules
           key: v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
