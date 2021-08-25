@@ -45,6 +45,7 @@ import {
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 declare const gapi: any;
 
@@ -294,7 +295,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
               };
             });
           })
-          .subscribe(async(workspace) => {
+          .subscribe(async(workspace: WorkspaceData) => {
             if (workspace === null) {
               // This handles the empty urlParamsStore story.
               return;

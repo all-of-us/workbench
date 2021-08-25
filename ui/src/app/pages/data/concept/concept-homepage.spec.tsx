@@ -14,13 +14,12 @@ import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {Key} from 'ts-key-enum';
 
 function searchTable(searchTerm: string, wrapper) {
   wrapper.find('[data-test-id="concept-search-input"]')
     .find('input').simulate('change', {target: {value: searchTerm}});
   wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keypress', {key: Key.Enter});
+    .find('input').simulate('keypress', {key: 'Enter'});
 }
 
 const defaultSearchTerm = 'test';

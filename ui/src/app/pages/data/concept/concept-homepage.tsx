@@ -27,7 +27,6 @@ import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
-import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   searchBar: {
@@ -248,7 +247,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     handleSearchKeyPress(e) {
       const {currentInputString} = this.state;
       // search on enter key if no forbidden characters are present
-      if (e.key === Key.Enter) {
+      if (e.key === 'Enter') {
         if (currentInputString.trim().length < 3) {
           this.setState({inputErrors: [], showSearchError: true});
         } else {

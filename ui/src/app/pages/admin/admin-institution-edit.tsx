@@ -45,7 +45,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   label: {

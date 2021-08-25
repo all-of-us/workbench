@@ -25,7 +25,7 @@ import {
   SortOrder
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import * as React from 'react';
 
 const css = `

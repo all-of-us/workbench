@@ -16,17 +16,17 @@
     ],
     "module": "esnext",
     "baseUrl": "./src",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "strict": false,
+    "isolatedModules": true
   },
   "include": [
     "src"

@@ -1,4 +1,3 @@
-import Timeout = NodeJS.Timeout;
 import {TextModal} from 'app/components/text-modal';
 import {debouncer} from 'app/utils';
 import {signOut} from 'app/utils/authentication';
@@ -57,10 +56,10 @@ export const InactivityMonitor = () => {
 
   // Signal user activity.
   useEffect(() => {
-    let getUserActivityTimer: () => Timeout;
-    let inactivityInterval: Timeout;
-    let logoutTimer: Timeout;
-    let inactivityModalTimer: Timeout;
+    let getUserActivityTimer: () => NodeJS.Timeout;
+    let inactivityInterval: NodeJS.Timeout;
+    let logoutTimer: NodeJS.Timeout;
+    let inactivityModalTimer: NodeJS.Timeout;
 
     const startUserActivityTracker = () => {
       const signalUserActivity = debouncer(() => {
