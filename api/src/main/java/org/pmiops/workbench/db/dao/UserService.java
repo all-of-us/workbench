@@ -14,7 +14,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus;
 import org.pmiops.workbench.model.UserAccessExpiration;
 import org.springframework.data.domain.Sort;
 
