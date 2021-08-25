@@ -291,7 +291,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS compliance_training_bypass_time, "
-                + "      uam.completion_time AS compliance_training_bypass_time "
+                + "      uam.completion_time AS compliance_training_completion_time "
                 + "    FROM user_access_module uam "
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
                 + "    WHERE am.name = 'RT_COMPLIANCE_TRAINING' "
