@@ -383,11 +383,8 @@ public class InstitutionServiceImpl implements InstitutionService {
       return new ArrayList<String>();
     }
     return accessTierDao.findAll().stream()
-        .filter(
-            a ->
-                validateInstitutionalEmail(
-                    institution.get(), user.getContactEmail(), a.getShortName()))
         .map(DbAccessTier::getShortName)
+        .filter(a -> validateInstitutionalEmail(institution.get(), user.getContactEmail(), a))
         .collect(Collectors.toList());
   }
 
