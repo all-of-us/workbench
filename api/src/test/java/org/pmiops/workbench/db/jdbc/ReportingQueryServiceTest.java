@@ -432,7 +432,6 @@ public class ReportingQueryServiceTest extends SpringTest {
     final List<List<ReportingUser>> stream =
         reportingQueryService.getUserStream().collect(Collectors.toList());
 
-    // regression test against one row per user/tier pair (i.e. we don't want 2 here)
     assertThat(stream.size()).isEqualTo(1);
 
     ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
