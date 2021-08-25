@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -48,7 +48,7 @@ const styles = reactStyles({
     fontSize: '14px',
     color: colors.primary,
   },
-  stepCard: {
+  card: {
     height: '375px',
     width: '1195px',
     borderRadius: '0.4rem',
@@ -59,11 +59,11 @@ const styles = reactStyles({
     padding: '1em',
     fontWeight: 500,
   },
-  stepCardStep: {
+  cardStep: {
     height: '19px',
     marginBottom: '0.5em',
   },
-  stepCardHeader: {
+  cardHeader: {
     fontSize: '24px',
     fontWeight: 600,
     letterSpacing: 0,
@@ -96,11 +96,19 @@ const styles = reactStyles({
     borderRadius: '0.2rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.95),
   },
+  active: {
+    backgroundColor: colors.white,
+    border: '1px solid',
+    borderColor: colors.accent,
+  },
   moduleIcon: {
     marginLeft: '0.2em',
     marginRight: '1em',
   },
-  moduleText: {
+  activeModuleText: {
+    color: colors.primary,
+  },
+  inactiveModuleText: {
     opacity: '0.5',
   },
   moduleDate: {
@@ -115,21 +123,46 @@ const styles = reactStyles({
   }
 });
 
+// in display order
+const rtModules = [
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.ERACOMMONS,
+  AccessModule.COMPLIANCETRAINING,
+];
+
+// TODO
+const ctModules = [];
+
+const duccModule = [
+  AccessModule.DATAUSERCODEOFCONDUCT,
+];
+
+// in display order
+const allModules: AccessModule[] = [
+  ...rtModules,
+  ...ctModules,
+  ...duccModule,
+];
+
 const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerRW}>Researcher Workbench</Header>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
 </FlexColumn>;
 
-const InverseRightArrow = () => <ArrowRight style={styles.inverseRightArrow}/>;
+const NextArrow = () => <ArrowRight style={styles.inverseRightArrow}/>;
 
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
-  [AccessModule.TWOFACTORAUTH, <div style={styles.moduleText}>Turn on Google 2-Step Verification</div>],
-  [AccessModule.RASLINKLOGINGOV, <div style={styles.moduleText}>Verify your identity with Login.gov</div>],
-  [AccessModule.ERACOMMONS, <div style={styles.moduleText}>Connect your eRA Commons account</div>],
-  [AccessModule.COMPLIANCETRAINING, <div style={styles.moduleText}>Complete <AoU/> research Registered Tier training</div>],
-  [AccessModule.DATAUSERCODEOFCONDUCT, <div style={styles.moduleText}>Sign Data User Code of Conduct</div>],
+  [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
+  [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov</div>],
+  [AccessModule.ERACOMMONS, <div>Connect your eRA Commons account</div>],
+  [AccessModule.COMPLIANCETRAINING, <div>Complete <AoU/> research Registered Tier training</div>],
+  [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
 ]);
 
+// this function does double duty:
+// - returns appropriate text for completed and bypassed modules and null for incomplete modules
+// - because of this, truthy return values indicate that a module is either complete or bypassed
 const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   const {completionEpochMillis, bypassEpochMillis} = status;
   const userCompletedModule = !!completionEpochMillis;
@@ -146,11 +179,11 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
 interface ModuleProps {
   module: AccessModule;
   eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
-  next: boolean;      // is this the next module that the user should complete
+  active: boolean;    // is this the currently-active module that the user should complete
 }
 const Module = (props: ModuleProps): JSX.Element => {
   const {profile} = useStore(profileStore);
-  const {module, eligible, next} = props;
+  const {module, eligible, active} = props;
   const status = getAccessModuleStatusByName(profile, module);
   const statusTextMaybe = bypassedOrCompletedText(status);
 
@@ -165,32 +198,36 @@ const Module = (props: ModuleProps): JSX.Element => {
 
   return <FlexRow>
     <FlexRow style={styles.moduleCTA}>
-      {next && <div style={{marginLeft: 'auto'}}>NEXT <InverseRightArrow/></div>}
+      {active && <div style={{marginLeft: 'auto'}}>NEXT <NextArrow/></div>}
     </FlexRow>
-    <FlexRow style={styles.moduleBox}>
+    <FlexRow style={active ? {...styles.moduleBox, ...styles.active} : styles.moduleBox}>
       <div style={styles.moduleIcon}>
         <ModuleIcon/>
       </div>
       <FlexColumn>
-        {moduleLabels.get(module)}
+        <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+          {moduleLabels.get(module)}
+        </div>
         {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
       </FlexColumn>
     </FlexRow>
   </FlexRow>;
 };
 
-const RegisteredTierCard = () => {
-  // in display order
-  const rtModules = [
-    AccessModule.TWOFACTORAUTH,
-    AccessModule.RASLINKLOGINGOV,
-    AccessModule.ERACOMMONS,
-    AccessModule.COMPLIANCETRAINING,
-  ];
+const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
+  const {modules, activeModule} = props;
 
+  return <FlexColumn style={styles.modulesContainer}>
+    {modules.map(module =>
+        <Module key={module} module={module} eligible={true} active={module === activeModule}/>
+    )}
+  </FlexColumn>;
+};
+
+const RegisteredTierCard = (props: {activeModule: AccessModule}) => {
   const LeftColumn = () => <FlexColumn>
-    <div style={styles.stepCardStep}>Step 1</div>
-    <div style={styles.stepCardHeader}>Complete Registration</div>
+    <div style={styles.cardStep}>Step 1</div>
+    <div style={styles.cardHeader}>Complete Registration</div>
     <FlexRow style={styles.rtData}><RegisteredTierBadge/> Registered Tier data</FlexRow>
     <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
     <FlexRow style={styles.rtDataDetails}><DARIcons.individual/> Individual (not aggregated) data</FlexRow>
@@ -201,29 +238,41 @@ const RegisteredTierCard = () => {
     <FlexRow style={styles.rtDataDetails}><DARIcons.wearable/> Wearable devices</FlexRow>
   </FlexColumn>;
 
-  return <FlexRow style={styles.stepCard}>
+  return <FlexRow style={styles.card}>
     <LeftColumn/>
-    <FlexColumn style={styles.modulesContainer}>
-      {rtModules.map(module =>
-          <Module key={module} module={module} eligible={true} next={module === AccessModule.ERACOMMONS}/>
-      )}
-    </FlexColumn>
+    <ModulesForCard modules={rtModules} activeModule={props.activeModule}/>
   </FlexRow>;
 };
 
-const DuccCard = () => <FlexRow style={{...styles.stepCard, height: '125px'}}>
-  <FlexColumn>
-    {/* This will be Step 3 when CT becomes the new Step 2 */}
-    <div style={styles.stepCardStep}>Step 2</div>
-    <div style={styles.stepCardHeader}>Sign the Code of Conduct</div>
-  </FlexColumn>
-  <FlexColumn style={styles.modulesContainer}>
-    <Module module={AccessModule.DATAUSERCODEOFCONDUCT} eligible={true} next={false}/>
-  </FlexColumn>
+const DuccCard = (props: {activeModule: AccessModule}) => <FlexRow style={{...styles.card, height: '125px'}}>
+    <FlexColumn>
+      {/* This will be Step 3 when CT becomes the new Step 2 */}
+      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardHeader}>Sign the code of conduct</div>
+    </FlexColumn>
+  <ModulesForCard modules={duccModule} activeModule={props.activeModule}/>
 </FlexRow>;
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
+  // clear spinner on mount
   useEffect(() => spinnerProps.hideSpinner(), []);
+
+  // which module are we currently guiding the user to complete?
+  const [activeModule, setActiveModule] = useState(null);
+
+  const {profile} = useStore(profileStore);
+
+  // whenever the profile changes, find the first incomplete module and setActiveModule
+  useEffect(() => {
+    fp.flow(
+      fp.find(module => {
+        const status = getAccessModuleStatusByName(profile, module as AccessModule);
+        return !bypassedOrCompletedText(status);
+      }),
+      setActiveModule
+    )
+    (allModules);
+  }, [profile]);
 
   return <FlexColumn style={styles.pageWrapper}>
     <DARHeader/>
@@ -231,9 +280,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
       <div style={styles.pleaseComplete}>
         Please complete the necessary steps to gain access to the <AoU/> datasets.
       </div>
-      <RegisteredTierCard/>
+      <RegisteredTierCard activeModule={activeModule}/>
       {/* TODO - Step 2 ControlledTierCard */}
-      <DuccCard/>
+      <DuccCard activeModule={activeModule}/>
     </FadeBox>
     </FlexColumn>;
 });
