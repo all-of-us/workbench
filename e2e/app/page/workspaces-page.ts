@@ -51,7 +51,10 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Load 'Your Workspaces' page and ensure page load is completed.
    */
   async load(): Promise<this> {
-    await this.loadPageUrl(PageUrl.Workspaces);
+    const title = await this.page.title();
+    if (title !== PageTitle) {
+      await this.loadPageUrl(PageUrl.Workspaces);
+    }
     await waitWhileLoading(this.page);
     return this;
   }
