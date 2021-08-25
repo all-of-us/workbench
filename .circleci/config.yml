@@ -5,7 +5,7 @@ version: 2.1
 # -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.1.1
+  browser-tools: circleci/browser-tools@1.2.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -537,23 +537,20 @@ jobs:
       TEST_MODE: << parameters.test_mode >>
     parallelism: << parameters.parallel_num >>
     steps:
-      - attach_workspace:
-          at: .
+      - checkout-code
+      - restore_cache:
+          keys:
+            - v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - browser-tools/install-browser-tools
       - steps: << parameters.optional_steps >>
       - run:
-          name: "Override environment variables for e2e test users"
+          name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
-          command: cp .env.circleci.<< parameters.env_name >> .env
-      - run:
-          name: "Echo environment variables"
           command: |
-            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
-            echo "TEST_MODE=${TEST_MODE}"
-      - run:
-          name: "Export user password"
-          command: |
+            cp .env.circleci.<< parameters.env_name >> .env
             echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
             source $BASH_ENV
+            echo "$BASH_ENV"
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
@@ -602,13 +599,9 @@ jobs:
     executor: puppeteer-executor
     steps:
       - checkout-code
-      - browser-tools/install-browser-tools
-      - restore_cache:
-          keys:
-            - v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           working_directory: ~/workbench/e2e
-          command: yarn install --frozen-lockfile --non-interactive
+          command: yarn install --non-interactive
       - run:
           name: Build and lint Puppeteer code
           working_directory: ~/workbench/e2e
@@ -617,11 +610,7 @@ jobs:
           paths:
             - ~/workbench/e2e/.cache/yarn
             - ~/workbench/e2e/node_modules
-          key: v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
+          key: v3-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
   puppeteer-access-test-user-setup:
     executor: workbench-executor
