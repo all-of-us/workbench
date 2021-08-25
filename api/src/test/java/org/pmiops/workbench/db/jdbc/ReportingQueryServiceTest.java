@@ -2,9 +2,17 @@ package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -20,16 +28,20 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionTierRequirementDao;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -38,6 +50,7 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement;
 import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequirement;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -75,12 +88,14 @@ public class ReportingQueryServiceTest extends SpringTest {
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private InstitutionDao institutionDao;
   @Autowired InstitutionTierRequirementDao institutionTierRequirementDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired private EntityManager entityManager;
@@ -100,11 +115,21 @@ public class ReportingQueryServiceTest extends SpringTest {
   private DbAccessTier registeredTier;
   private DbAccessTier controlledTier;
 
+  private DbAccessModule twoFactorAuthModule;
+  private DbAccessModule rtTrainingModule;
+  private DbAccessModule eRACommonsModule;
+  private DbAccessModule duccModule;
+
   @BeforeEach
   public void setup() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    TestMockFactory.createAccessModules(accessModuleDao);
     dbInstitution = createDbInstitution();
+    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    eRACommonsModule = accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    duccModule = accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
 
   @Test
@@ -220,6 +245,17 @@ public class ReportingQueryServiceTest extends SpringTest {
             .setTierAccessStatus(TierAccessStatus.ENABLED)
             .setFirstEnabled(Timestamp.from(Instant.now()))
             .setLastUpdated(Timestamp.from(Instant.now())));
+  }
+
+  @Transactional
+  public DbUserAccessModule addUserAccessModule(
+      DbUser user, DbAccessModule accessModule, Timestamp bypassTime, Timestamp completionTime) {
+    return userAccessModuleDao.save(
+        new DbUserAccessModule()
+            .setUser(user)
+            .setAccessModule(accessModule)
+            .setBypassTime(bypassTime)
+            .setCompletionTime(completionTime));
   }
 
   @Transactional
@@ -412,6 +448,23 @@ public class ReportingQueryServiceTest extends SpringTest {
     for (int i = 0; i < count; ++i) {
       final DbUser user = createDbUserWithInstitute();
       addUserToTier(user, registeredTier);
+      addUserAccessModule(
+          user,
+          twoFactorAuthModule,
+          USER__TWO_FACTOR_AUTH_BYPASS_TIME,
+          USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          rtTrainingModule,
+          USER__COMPLIANCE_TRAINING_BYPASS_TIME,
+          USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+      addUserAccessModule(
+          user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          duccModule,
+          USER__DATA_USE_AGREEMENT_BYPASS_TIME,
+          USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     }
     entityManager.flush();
   }
