@@ -321,6 +321,14 @@ commands:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
 
+  puppeteer-access-test-user-setup:
+    steps:
+      - gcloud-auth-login
+      - run:
+          working_directory: ~/workbench/api
+          name: Prep the e2e access test user (in Test env) by setting access module timestamps
+          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -544,7 +552,7 @@ jobs:
       - restore_cache:
           name: "Restore e2e cache"
           keys:
-            - vxyz1-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+            - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - browser-tools/install-browser-tools
       - run:
           name: "Set environment variables for e2e test users"
@@ -615,19 +623,8 @@ jobs:
           paths:
             - ~/.cache/yarn
             - ~/workbench/e2e/node_modules
-          key: vxyz1-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+          key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
-  puppeteer-access-test-user-setup:
-    executor: workbench-executor
-    steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - run:
-          working_directory: ~/workbench/api
-          name: Prep the e2e access test user (in Test env) by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
 
 workflows:
   build-test-deploy:
@@ -658,10 +655,12 @@ workflows:
       - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
+          test_mode: "nightly-integration"
           env_name: "local"
           parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
@@ -731,14 +730,14 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
-      - puppeteer-access-test-user-setup
       - puppeteer-test:
           parallel_num: 1
           env_name: "test"
           test_mode: "nightly-integration"
+          optional_steps:
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
-            - puppeteer-access-test-user-setup
 
 experimental:
   notify:
