@@ -109,7 +109,7 @@ describe('Duplicate workspace', () => {
     expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
 
     // Try again. This time consent to restriction.
-    // Allow duplicate workspace to an older CDR Version after consenting to restrictions.
+    // Duplicate workspace with an older CDR Version can proceed after consenting to restrictions.
     await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
     await modal.consentToOldCdrRestrictions();
 
