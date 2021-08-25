@@ -2,9 +2,17 @@ package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__COMPLIANCE_TRAINING_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USE_AGREEMENT_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -57,7 +65,6 @@ import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -108,12 +115,21 @@ public class ReportingQueryServiceTest extends SpringTest {
   private DbAccessTier registeredTier;
   private DbAccessTier controlledTier;
 
+  private DbAccessModule twoFactorAuthModule;
+  private DbAccessModule rtTrainingModule;
+  private DbAccessModule eRACommonsModule;
+  private DbAccessModule duccModule;
+
   @BeforeEach
   public void setup() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     TestMockFactory.createAccessModules(accessModuleDao);
     dbInstitution = createDbInstitution();
+    twoFactorAuthModule = accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    rtTrainingModule = accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    eRACommonsModule = accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    duccModule = accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
 
   @Test
@@ -394,67 +410,6 @@ public class ReportingQueryServiceTest extends SpringTest {
   }
 
   @Test
-  public void testQueryUser_withAccessModule() {
-    final DbAccessModule twoFactorAuthModule =
-        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
-    final DbAccessModule rtTrainingModule =
-        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
-    final DbAccessModule eRACommonsModule =
-        accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
-    final DbAccessModule duccModule =
-        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
-    final DbAccessModule profileConfirmModule =
-        accessModuleDao.findOneByName(AccessModuleName.PROFILE_CONFIRMATION).get();
-    Instant now = Instant.now();
-    Timestamp twoFactorAuthBypassTime = Timestamp.from(now.minusSeconds(10));
-    Timestamp twoFactorAuthCompleteTime = Timestamp.from(now.minusSeconds(20));
-    Timestamp rtTrainingBypassTime = Timestamp.from(now.minusSeconds(30));
-    Timestamp rtTrainingCompleteTime = Timestamp.from(now.minusSeconds(40));
-    Timestamp eRABypassTime = Timestamp.from(now.minusSeconds(50));
-    Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
-    Timestamp duccypassTime = Timestamp.from(now.minusSeconds(70));
-    Timestamp duccCompleteTime = null;
-    Timestamp profileConfirmBypassTime = Timestamp.from(now.minusSeconds(80));
-    Timestamp profileConfirmBCompleteTime = Timestamp.from(now);
-
-    final DbUser user = createDbUserWithInstitute();
-    addUserToTier(user, registeredTier);
-    addUserAccessModule(
-        user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
-    addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
-    addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
-    addUserAccessModule(user, duccModule, duccypassTime, duccCompleteTime);
-    addUserAccessModule(
-        user, profileConfirmModule, profileConfirmBypassTime, profileConfirmBCompleteTime);
-
-    entityManager.flush();
-
-    final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
-
-    assertThat(stream.size()).isEqualTo(1);
-
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
-    assertThat(reportingUser.getAccessTierShortNames()).contains(registeredTier.getShortName());
-    assertThat(reportingUser.getTwoFactorAuthBypassTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(twoFactorAuthBypassTime));
-    assertThat(reportingUser.getTwoFactorAuthCompletionTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(twoFactorAuthCompleteTime));
-    assertThat(reportingUser.getEraCommonsBypassTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(eRABypassTime));
-    assertThat(reportingUser.getEraCommonsCompletionTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(eRACompleteTime));
-    assertThat(reportingUser.getComplianceTrainingBypassTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(rtTrainingBypassTime));
-    assertThat(reportingUser.getComplianceTrainingCompletionTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(rtTrainingCompleteTime));
-    assertThat(reportingUser.getDataUseAgreementBypassTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(duccypassTime));
-    assertThat(reportingUser.getDataUseAgreementCompletionTime())
-        .isEqualTo(CommonMappers.offsetDateTimeUtc(duccCompleteTime));
-  }
-
-  @Test
   public void testUserStream_twoAndAHalfBatches() {
     createUsers(5);
 
@@ -493,6 +448,23 @@ public class ReportingQueryServiceTest extends SpringTest {
     for (int i = 0; i < count; ++i) {
       final DbUser user = createDbUserWithInstitute();
       addUserToTier(user, registeredTier);
+      addUserAccessModule(
+          user,
+          twoFactorAuthModule,
+          USER__TWO_FACTOR_AUTH_BYPASS_TIME,
+          USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          rtTrainingModule,
+          USER__COMPLIANCE_TRAINING_BYPASS_TIME,
+          USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
+      addUserAccessModule(
+          user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
+      addUserAccessModule(
+          user,
+          duccModule,
+          USER__DATA_USE_AGREEMENT_BYPASS_TIME,
+          USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     }
     entityManager.flush();
   }

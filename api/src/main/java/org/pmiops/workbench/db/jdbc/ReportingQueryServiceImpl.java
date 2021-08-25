@@ -267,11 +267,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  ) as t ON t.user_id = u.user_id "
                 // temporary solution to RW-6566: retrieve first_enabled from user_access_tier
                 // for 'registered' entries as a substitute for first_registration_completion_time
+                // end temporary solution for RW-6566
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
                 + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
                 + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
                 + "  ) uat ON u.user_id = uat.user_id "
+                // end temporary solution for RW-6566
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS era_commons_bypass_time, "
@@ -304,7 +306,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
                 + "    WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
                 + "  ) uamd ON u.user_id = uamd.user_id "
-                // end temporary solution for RW-6566
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
