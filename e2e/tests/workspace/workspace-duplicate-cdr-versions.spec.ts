@@ -25,6 +25,9 @@ describe('Duplicate workspace, changing CDR versions', () => {
     await workspaceEditPage.getWorkspaceNameTextbox().clear();
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
+    const createButton = workspaceEditPage.getCreateWorkspaceButton();
+    expect(await createButton.isCursorNotAllowed()).toBe(true);
+
     // change CDR Version
     await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
 

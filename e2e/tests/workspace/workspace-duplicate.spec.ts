@@ -5,13 +5,15 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import WorkspacesPage from 'app/page/workspaces-page';
+import { config } from 'resources/workbench-config';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'e2eCloneWorkspaceTest';
+  const workspaceName = 'e2eCloneWorkspaceTest';
 
   /**
    * Test:
@@ -21,7 +23,7 @@ describe('Duplicate workspace', () => {
    * - Delete duplicate workspace.
    */
   test('OWNER can duplicate workspace via Workspace card', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
@@ -55,7 +57,7 @@ describe('Duplicate workspace', () => {
   });
 
   test('OWNER can access workspace duplicate page via Workspace action menu', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
@@ -80,5 +82,30 @@ describe('Duplicate workspace', () => {
     await cancelButton.clickAndWait();
 
     await dataPage.waitForLoad();
+  });
+
+  test('OWNER cannot bypass older CDR Version restrictions by clicking cancel', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
+    await workspaceCard.asElementHandle().hover();
+    await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
+
+    const workspaceEditPage = new WorkspaceEditPage(page);
+
+    // fill out the fields required for duplication and observe that duplication is enabled
+    await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const duplicateButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await duplicateButton.waitUntilEnabled();
+
+    // change CDR Version
+    await workspaceEditPage.selectCdrVersion(config.ALTERNATIVE_CDR_VERSION_NAME);
+    expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
+
+    const modal = new OldCdrVersionModal(page);
+    const cancelButton = modal.getCancelButton();
+    await cancelButton.click();
+
+    // the CDR version is forcibly reverted back to the default
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.DEFAULT_CDR_VERSION_NAME);
   });
 });
