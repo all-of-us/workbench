@@ -9,7 +9,7 @@ import {
   faMinusCircle,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
-import {faAlarmExclamation} from '@fortawesome/pro-solid-svg-icons';
+import {faAlarmExclamation, faRepeat} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import colors, {addOpacity} from 'app/styles/colors';
@@ -127,6 +127,7 @@ export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const ExclamationTriangle = props => <Icon shape={faExclamationTriangle} color={colors.danger} {...props}/>;
 export const MinusCircle = props => <Icon shape={faMinusCircle} {...props}/>;
+export const Repeat = props => <Icon shape={faRepeat} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
 
 const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;

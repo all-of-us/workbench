@@ -8,18 +8,14 @@ import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {
-  AccessModule,
-  AccessModuleStatus,
-  Profile
-} from 'generated/fetch';
-import {ErrorCode} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
 
 const {useState, useEffect} = React;
 
 interface RegistrationTask {
-  key: string;
+  key: string;    // legacy accessor text
+  module: AccessModule;
   completionPropsKey: string;
   loadingPropsKey?: string;
   title: React.ReactNode;
@@ -87,9 +83,10 @@ const redirectToRas = (): void => {
 //
 // Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
 // can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate) => serverConfigStore.get().config ? ([
+export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
+    module: AccessModule.TWOFACTORAUTH,
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
     description: 'Add an extra layer of security to your account by providing your phone number' +
@@ -102,6 +99,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToTwoFactorSetup
   }, {
     key: 'rasLoginGov',
+    module: AccessModule.RASLINKLOGINGOV,
     completionPropsKey: 'rasLoginGovLinked',
     loadingPropsKey: 'rasLoginGovLoading',
     title: 'Connect Your Login.Gov Account',
@@ -116,6 +114,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
   },
   {
     key: 'eraCommons',
+    module: AccessModule.ERACOMMONS,
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
@@ -130,6 +129,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToNiH
   }, {
     key: 'complianceTraining',
+    module: AccessModule.COMPLIANCETRAINING,
     completionPropsKey: 'trainingCompleted',
     title: <span><AoU/> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
@@ -143,6 +143,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToTraining
   }, {
     key: 'dataUserCodeOfConduct',
+    module: AccessModule.DATAUSERCODEOFCONDUCT,
     completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
     description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
@@ -165,7 +166,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
       navigate(['data-code-of-conduct']);
     }
   }
-] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
+]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
       throw new Error('Cannot load registration tasks before config loaded');
     })();
@@ -174,6 +175,10 @@ export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(naviga
   acc[curr.key] = curr;
   return acc;
 }, {});
+
+export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
+  return getRegistrationTasks(navigate).find(task => task.module === module);
+};
 
 export const wasReferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;

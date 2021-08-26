@@ -2,16 +2,18 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
+import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
-import {ArrowRight, CheckCircle, DARIcons, MinusCircle, RegisteredTierBadge} from 'app/components/icons';
+import {ArrowRight, CheckCircle, DARIcons, MinusCircle, RegisteredTierBadge, Repeat} from 'app/components/icons';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
-import {getAccessModuleStatusByName} from 'app/utils/access-utils';
+import {getAccessModuleStatusByName, getRegistrationTask} from 'app/utils/access-utils';
+import {useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 
@@ -85,7 +87,7 @@ const styles = reactStyles({
   },
   moduleCTA: {
     fontSize: '10px',
-    width: '60px',
+    width: '100px',
     alignSelf: 'center',
     paddingRight: '0.5em',
   },
@@ -96,7 +98,11 @@ const styles = reactStyles({
     borderRadius: '0.2rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.95),
   },
-  active: {
+  activeModuleBox: {
+    padding: '0.5em',
+    margin: '0.2em',
+    width: '593px',
+    borderRadius: '0.2rem',
     backgroundColor: colors.white,
     border: '1px solid',
     borderColor: colors.accent,
@@ -120,6 +126,12 @@ const styles = reactStyles({
     background: colors.success,
     paddingRight: '0.2em',
     paddingLeft: '0.2em',
+  },
+  refresh: {
+    height: '25px',
+    width: '81px',
+    fontSize: '10px',
+    borderRadius: '3px',
   }
 });
 
@@ -150,8 +162,6 @@ const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
 </FlexColumn>;
 
-const NextArrow = () => <ArrowRight style={styles.inverseRightArrow}/>;
-
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
   [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov</div>],
@@ -176,16 +186,30 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   );
 };
 
+const Next = () => <div style={{marginLeft: 'auto'}}>
+  NEXT <ArrowRight style={styles.inverseRightArrow}/>;
+</div>;
+
 interface ModuleProps {
   module: AccessModule;
   eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
   active: boolean;    // is this the currently-active module that the user should complete
 }
 const Module = (props: ModuleProps): JSX.Element => {
-  const {profile} = useStore(profileStore);
+  const {profile, reload} = useStore(profileStore);
+  const [navigate, ] = useNavigation();
+
   const {module, eligible, active} = props;
   const status = getAccessModuleStatusByName(profile, module);
   const statusTextMaybe = bypassedOrCompletedText(status);
+  const {onClick} = getRegistrationTask(navigate, module);
+
+  // whether this module needs a profile reload
+  const [needsReload, setNeedsReload] = useState(false);
+
+  const Refresh = () => <Button type='primary' onClick={reload} style={styles.refresh}>
+    <Repeat/> Refresh
+  </Button>;
 
   const ModuleIcon = () => cond(
       // not eligible to complete module
@@ -196,11 +220,22 @@ const Module = (props: ModuleProps): JSX.Element => {
       [eligible && !statusTextMaybe, () => <CheckCircle style={{color: colors.disabled}}/>]
   );
 
+  const ModuleBox = ({children}) => {
+    return active ?
+        <Link onClick={() => {
+          setNeedsReload(true);
+          onClick();
+        }}>
+          <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
+        </Link> :
+        <FlexRow style={styles.moduleBox}>{children}</FlexRow>;
+  };
+
   return <FlexRow>
     <FlexRow style={styles.moduleCTA}>
-      {active && <div style={{marginLeft: 'auto'}}>NEXT <NextArrow/></div>}
+      {active && (needsReload ? <Refresh/> : <Next/>)}
     </FlexRow>
-    <FlexRow style={active ? {...styles.moduleBox, ...styles.active} : styles.moduleBox}>
+    <ModuleBox>
       <div style={styles.moduleIcon}>
         <ModuleIcon/>
       </div>
@@ -210,7 +245,7 @@ const Module = (props: ModuleProps): JSX.Element => {
         </div>
         {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
       </FlexColumn>
-    </FlexRow>
+    </ModuleBox>
   </FlexRow>;
 };
 
