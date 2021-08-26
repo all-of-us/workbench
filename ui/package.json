@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "license": "BSD",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=4200 react-scripts start",
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "react-scripts build",
     "test": "yarn jest",
