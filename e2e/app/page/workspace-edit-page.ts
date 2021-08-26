@@ -430,7 +430,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * @return {string} new workspace name
    */
   async fillOutWorkspaceName(): Promise<string> {
-    const newWorkspaceName = makeWorkspaceName();
+    const newWorkspaceName = makeWorkspaceName({ includeHyphen: false });
     await this.getWorkspaceNameTextbox().type(newWorkspaceName);
     await this.getWorkspaceNameTextbox().pressTab();
     return newWorkspaceName;

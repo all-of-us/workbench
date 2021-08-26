@@ -42,8 +42,7 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
-import org.pmiops.workbench.model.ProfileRenewableAccessModules;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,16 +128,8 @@ public class ProfileService {
 
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
-
-    // renewableAccessModuleStatus is deprecated and will be replaced by accessModules.
-    final List<RenewableAccessModuleStatus> renewableAccessModuleStatus =
-        userService.getRenewableAccessModuleStatus(userLite);
-    final ProfileRenewableAccessModules renewableAccessModules =
-        new ProfileRenewableAccessModules()
-            .modules(renewableAccessModuleStatus)
-            .anyModuleHasExpired(
-                renewableAccessModuleStatus.stream()
-                    .anyMatch(RenewableAccessModuleStatus::getHasExpired));
+    final List<UserTierEligibility> userTierEligibilities =
+        institutionService.getUserTierEligibilities(user);
 
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
@@ -159,7 +150,7 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        renewableAccessModules,
+        userTierEligibilities,
         accessModules);
   }
 
