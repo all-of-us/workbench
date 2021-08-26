@@ -169,7 +169,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
               + "  WHERE uat.access_status = 1 " // ENABLED
               + "  GROUP BY u.user_id"
-              + ") as t ON t.user_id = u.user_id"
+              + ") as t ON t.user_id = u.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
               + "    uam.bypass_time AS era_commons_bypass_time, "
@@ -204,12 +204,11 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + ") as uamd ON u.user_id = uamd.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
-              + "    uam.bypass_time AS rasLinkLoginGovBypassTime, "
+              + "    uam.bypass_time AS ras_link_login_gov_bypass_time, "
               + "    uam.completion_time AS ras_link_login_gov_completion_time "
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'RAS_LOGIN_GOV' "
               + ") as uamr ON u.user_id = uamr.user_id ")
-
   List<DbAdminTableUser> getAdminTableUsers();
 }
