@@ -36,7 +36,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isSignedIn();
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) {
+      throw new Error(`Failed to find signed-in web-element. xpath="${signedInIndicator}"`);
+    }
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
     const pageTitle = await this.page.title();
