@@ -3,11 +3,12 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
+import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {getTwoFactorSetupUrl} from 'app/utils/access-utils';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;

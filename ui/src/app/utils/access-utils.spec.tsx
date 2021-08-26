@@ -1,11 +1,11 @@
 import * as React from "react";
 import {mount, ReactWrapper} from 'enzyme';
-import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 
+import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {authStore, profileStore} from 'app/utils/stores';
 import {AccessModule, ErrorCode} from 'generated/fetch';
-import {Profile, AccessModuleStatus} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import {
   maybeDaysRemaining,
   MILLIS_PER_DAY,
