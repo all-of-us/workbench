@@ -23,7 +23,7 @@ describe('Workspace Share Modal', () => {
   // Create new workspace with default CDR version
   const workspace = makeWorkspaceName();
 
-  test.each(assignAccess)('Share workspace %s', async (assign) => {
+  test('Share workspace to READER and WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
@@ -34,23 +34,23 @@ describe('Workspace Share Modal', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    let collaborators = await aboutPage.findUsersInCollaboratorList();
-
-    // Verify No WRITER or READER exists.
-    expect(collaborators.has(assign.accessRole)).toBeFalsy();
-
-    const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
-    await aboutPage.waitForLoad();
+    for (const assign of assignAccess) {
+      const shareWorkspaceModal = await aboutPage.shareWorkspace();
+      await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
+      await aboutPage.waitForLoad();
+    }
 
     await reloadAboutPage();
-    collaborators = await aboutPage.findUsersInCollaboratorList();
+    const collaborators = await aboutPage.findUsersInCollaboratorList();
+
     // Verify OWNER (login user) information.
     expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
       true
     );
     // Verify WRITER or READER information.
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+    for (const assign of assignAccess) {
+      expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+    }
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
