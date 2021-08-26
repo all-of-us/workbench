@@ -37,34 +37,7 @@ export async function redirectToTraining() {
   window.open(environment.trainingUrl + '/static/data-researcher.html?saml=on', '_blank');
 }
 
-export function redirectToTwoFactorSetup(): void {
-  AnalyticsTracker.Registration.TwoFactorAuth();
-  window.open(getTwoFactorSetupUrl(), '_blank');
-}
-
-function redirectToNiH(): void {
-  AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + '/nih-callback?token=<token>');
-  window.open(url, '_blank');
-}
-
-/** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
-export const buildRasRedirectUrl = (): string => {
-  return encodeURIComponentStrict(window.location.origin.toString() + '/ras-callback');
-};
-
-function redirectToRas(): void {
-  AnalyticsTracker.Registration.RasLoginGov();
-  // The scopes are also used in backend for fetching user info.
-  const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
-      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
-  window.open(url, '_blank');
-}
-
-export function getTwoFactorSetupUrl(): string {
+export const getTwoFactorSetupUrl = (): string => {
   const accountChooserBase = 'https://accounts.google.com/AccountChooser';
   const url = new URL(accountChooserBase);
   // If available, set the 'Email' param to give Google a hint that we want to access the
@@ -74,7 +47,34 @@ export function getTwoFactorSetupUrl(): string {
   }
   url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
   return url.toString();
-}
+};
+
+export const redirectToTwoFactorSetup = (): void => {
+  AnalyticsTracker.Registration.TwoFactorAuth();
+  window.open(getTwoFactorSetupUrl(), '_blank');
+};
+
+const redirectToNiH = (): void => {
+  AnalyticsTracker.Registration.ERACommons();
+  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
+      encodeURIComponent(
+        window.location.origin.toString() + '/nih-callback?token=<token>');
+  window.open(url, '_blank');
+};
+
+/** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
+export const buildRasRedirectUrl = (): string => {
+  return encodeURIComponentStrict(window.location.origin.toString() + '/ras-callback');
+};
+
+const redirectToRas = (): void => {
+  AnalyticsTracker.Registration.RasLoginGov();
+  // The scopes are also used in backend for fetching user info.
+  const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
+      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
+      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
+  window.open(url, '_blank');
+};
 
 // This needs to be a function, because we want it to evaluate at call time,
 // not at compile time, to ensure that we make use of the server config store.

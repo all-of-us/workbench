@@ -3,7 +3,7 @@ import {mount, ReactWrapper} from 'enzyme';
 
 import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {authStore, profileStore, serverConfigStore} from 'app/utils/stores';
+import {authStore, profileStore} from 'app/utils/stores';
 import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
 import {Profile} from 'generated/fetch';
 import {
@@ -14,7 +14,7 @@ import {
   NOTIFICATION_THRESHOLD_DAYS,
   useIsUserDisabled
 } from "app/utils/access-utils";
-import {profileApi, registerApiClient} from "../services/swagger-fetch-clients";
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;
@@ -210,7 +210,7 @@ describe('getTwoFactorSetupUrl', () => {
       updateCache: jest.fn()
     });
   });
-  
+
   it('should generate expected 2FA redirect URL', () => {
     expect(getTwoFactorSetupUrl()).toMatch(/https:\/\/accounts\.google\.com\/AccountChooser/);
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
