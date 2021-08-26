@@ -1,5 +1,6 @@
 import UserAdminPage from 'app/page/admin-user-list-page';
 import { signInWithAccessToken } from 'utils/test-utils';
+import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 import UserProfileInfo from 'app/page/admin-user-profile-info';
@@ -8,7 +9,7 @@ describe('Admin', () => {
   const userEmail = 'admin_test';
 
   beforeEach(async () => {
-    await signInWithAccessToken(page);
+    await signInWithAccessToken(page, config.ADMIN_TEST_ACCESS_TOKEN_FILE);
     await navigation.navMenu(page, NavLink.USER_ADMIN);
   });
 
