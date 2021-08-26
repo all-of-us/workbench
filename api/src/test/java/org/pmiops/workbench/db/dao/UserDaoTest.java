@@ -8,16 +8,20 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import javax.jdo.annotations.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
+import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.model.DuaType;
@@ -42,8 +46,10 @@ public class UserDaoTest extends SpringTest {
   private DbAccessTier registeredTier;
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private InstitutionDao institutionDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @Autowired private UserDao userDao;
@@ -51,6 +57,7 @@ public class UserDaoTest extends SpringTest {
   @BeforeEach
   public void setup() {
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    TestMockFactory.createAccessModules(accessModuleDao);
   }
 
   @Test
@@ -159,17 +166,6 @@ public class UserDaoTest extends SpringTest {
     user.setContactEmail(contactEmail);
     user.setGivenName("givenName");
     user.setFamilyName("familyName");
-    user.setDataUseAgreementCompletionTime(nowTime);
-    user.setDataUseAgreementBypassTime(nowTime);
-    user.setEraCommonsBypassTime(nowTime);
-    user.setEraCommonsCompletionTime(nowTime);
-    user.setRasLinkLoginGovCompletionTime(nowTime);
-    user.setRasLinkLoginGovBypassTime(nowTime);
-    user.setComplianceTrainingCompletionTime(nowTime);
-    user.setComplianceTrainingBypassTime(nowTime);
-    user.setDataUseAgreementBypassTime(nowTime);
-    user.setTwoFactorAuthBypassTime(nowTime);
-    user.setTwoFactorAuthCompletionTime(nowTime);
     user.setCreationTime(nowTime);
     user.setFirstSignInTime(nowTime);
 
@@ -178,6 +174,34 @@ public class UserDaoTest extends SpringTest {
     createAffiliation(user, institution);
     addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
 
+    final DbAccessModule twoFactorAuthModule =
+        accessModuleDao.findOneByName(AccessModuleName.TWO_FACTOR_AUTH).get();
+    final DbAccessModule rtTrainingModule =
+        accessModuleDao.findOneByName(AccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    final DbAccessModule eRACommonsModule =
+        accessModuleDao.findOneByName(AccessModuleName.ERA_COMMONS).get();
+    final DbAccessModule duccModule =
+        accessModuleDao.findOneByName(AccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
+    final DbAccessModule profileConfirmModule =
+        accessModuleDao.findOneByName(AccessModuleName.PROFILE_CONFIRMATION).get();
+    Instant now = Instant.now();
+    Timestamp twoFactorAuthBypassTime = Timestamp.from(now.minusSeconds(10));
+    Timestamp twoFactorAuthCompleteTime = Timestamp.from(now.minusSeconds(20));
+    Timestamp rtTrainingBypassTime = Timestamp.from(now.minusSeconds(30));
+    Timestamp rtTrainingCompleteTime = Timestamp.from(now.minusSeconds(40));
+    Timestamp eRABypassTime = Timestamp.from(now.minusSeconds(50));
+    Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
+    Timestamp duccypassTime = Timestamp.from(now.minusSeconds(70));
+    Timestamp duccCompleteTime = null;
+    Timestamp profileConfirmBypassTime = Timestamp.from(now.minusSeconds(80));
+    Timestamp profileConfirmBCompleteTime = Timestamp.from(now);
+    addUserAccessModule(
+        user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
+    addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
+    addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
+    addUserAccessModule(user, duccModule, duccypassTime, duccCompleteTime);
+    addUserAccessModule(
+        user, profileConfirmModule, profileConfirmBypassTime, profileConfirmBCompleteTime);
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     final DbAdminTableUser row = rows.get(0);
@@ -361,6 +385,17 @@ public class UserDaoTest extends SpringTest {
             .setFirstEnabled(now())
             .setLastUpdated(now());
     return userAccessTierDao.save(entryToInsert);
+  }
+
+  @Transactional
+  public DbUserAccessModule addUserAccessModule(
+      DbUser user, DbAccessModule accessModule, Timestamp bypassTime, Timestamp completionTime) {
+    return userAccessModuleDao.save(
+        new DbUserAccessModule()
+            .setUser(user)
+            .setAccessModule(accessModule)
+            .setBypassTime(bypassTime)
+            .setCompletionTime(completionTime));
   }
 
   private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
