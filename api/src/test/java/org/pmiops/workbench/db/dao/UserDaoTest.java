@@ -193,7 +193,6 @@ public class UserDaoTest extends SpringTest {
     Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
     Timestamp duccypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
-    ;
     Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
     Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
