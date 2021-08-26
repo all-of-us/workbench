@@ -9424,7 +9424,3 @@ definitions:
       eraRequired:
          type: boolean
          description: If eRA Commons linking is required for this access tier.
-      institutionHasSignedAgreeement:
-        type: boolean
-        description: If user's institution has signed agreement for this tier.
-

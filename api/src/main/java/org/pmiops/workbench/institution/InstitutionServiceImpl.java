@@ -390,20 +390,16 @@ public class InstitutionServiceImpl implements InstitutionService {
         accessTierDao.findAll().stream()
             .map(DbAccessTier::getShortName)
             .collect(Collectors.toList())) {
-      Optional<InstitutionTierConfig> tierConfig = getTierConfigByTier(institution.get(), tierName);
-      if (tierConfig.isPresent()) {
-        UserTierEligibility tierEligibility =
-            new UserTierEligibility().accessTierShortNames(tierName);
-        tierEligibility
-            .eraRequired(tierConfig.get().getEraRequired())
-            .institutionHasSignedAgreeement(
-                tierConfig.get().getMembershipRequirement() != null
-                    && tierConfig.get().getMembershipRequirement()
-                        != InstitutionMembershipRequirement.NO_ACCESS)
-            .eligible(
-                validateInstitutionalEmail(institution.get(), user.getContactEmail(), tierName));
-        userTierEligibilities.add(tierEligibility);
-      }
+      getTierConfigByTier(institution.get(), tierName)
+          .ifPresent(
+              t ->
+                  userTierEligibilities.add(
+                      new UserTierEligibility()
+                          .accessTierShortNames(tierName)
+                          .eraRequired(t.getEraRequired())
+                          .eligible(
+                              validateInstitutionalEmail(
+                                  institution.get(), user.getContactEmail(), tierName))));
     }
     return userTierEligibilities;
   }

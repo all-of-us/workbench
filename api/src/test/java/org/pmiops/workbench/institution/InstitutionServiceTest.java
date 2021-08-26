@@ -989,8 +989,7 @@ public class InstitutionServiceTest extends SpringTest {
             new UserTierEligibility()
                 .accessTierShortNames(registeredTier.getShortName())
                 .eraRequired(false)
-                .eligible(true)
-                .institutionHasSignedAgreeement(true));
+                .eligible(true));
   }
 
   @Test
@@ -1020,13 +1019,11 @@ public class InstitutionServiceTest extends SpringTest {
             new UserTierEligibility()
                 .accessTierShortNames(registeredTier.getShortName())
                 .eraRequired(false)
-                .eligible(true)
-                .institutionHasSignedAgreeement(true),
+                .eligible(true),
             new UserTierEligibility()
                 .accessTierShortNames(controlledTier.getShortName())
                 .eraRequired(true)
-                .eligible(true)
-                .institutionHasSignedAgreeement(true));
+                .eligible(true));
   }
 
   @Test
@@ -1047,7 +1044,7 @@ public class InstitutionServiceTest extends SpringTest {
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
                             .eraRequired(false)
-                            .accessTierShortName(registeredTier.getShortName())
+                            .accessTierShortName(controlledTier.getShortName())
                             .emailAddresses(ImmutableList.of("user2@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
@@ -1056,8 +1053,11 @@ public class InstitutionServiceTest extends SpringTest {
             new UserTierEligibility()
                 .accessTierShortNames(registeredTier.getShortName())
                 .eraRequired(false)
-                .eligible(true)
-                .institutionHasSignedAgreeement(true));
+                .eligible(true),
+            new UserTierEligibility()
+                .accessTierShortNames(controlledTier.getShortName())
+                .eraRequired(false)
+                .eligible(false));
   }
 
   @Test
@@ -1086,8 +1086,7 @@ public class InstitutionServiceTest extends SpringTest {
             new UserTierEligibility()
                 .accessTierShortNames(registeredTier.getShortName())
                 .eraRequired(false)
-                .eligible(true)
-                .institutionHasSignedAgreeement(true));
+                .eligible(true));
   }
 
   @Test
