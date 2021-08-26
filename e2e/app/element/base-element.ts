@@ -175,9 +175,10 @@ export default class BaseElement {
    * @param textValue The text string.
    * @param options The typing options.
    */
-  async type(textValue: string, options: { delay?: number } = {}): Promise<this> {
-    const { delay = 10 } = options;
-
+  async type(textValue: string, { delay = 10 } = {}): Promise<this> {
+    if (textValue === undefined) {
+      throw new Error('type() function parameter "textValue" is undefined.');
+    }
     const clearAndType = async (txt: string): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));

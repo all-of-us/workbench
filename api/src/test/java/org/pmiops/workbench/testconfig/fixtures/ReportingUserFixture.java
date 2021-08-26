@@ -161,26 +161,18 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public DbUser createEntity() {
     final DbUser user = new DbUser();
     user.setAreaOfResearch(USER__AREA_OF_RESEARCH);
-    user.setComplianceTrainingBypassTime(USER__COMPLIANCE_TRAINING_BYPASS_TIME);
-    user.setComplianceTrainingCompletionTime(USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
     user.setComplianceTrainingExpirationTime(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
-    user.setDataUseAgreementBypassTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
-    user.setDataUseAgreementCompletionTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
     user.setDemographicSurveyCompletionTime(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
     user.setDisabled(USER__DISABLED);
-    user.setEraCommonsBypassTime(USER__ERA_COMMONS_BYPASS_TIME);
-    user.setEraCommonsCompletionTime(USER__ERA_COMMONS_COMPLETION_TIME);
     user.setFamilyName(USER__FAMILY_NAME);
     user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
     user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     user.setGivenName(USER__GIVEN_NAME);
     user.setLastModifiedTime(USER__LAST_MODIFIED_TIME);
     user.setProfessionalUrl(USER__PROFESSIONAL_URL);
-    user.setTwoFactorAuthBypassTime(USER__TWO_FACTOR_AUTH_BYPASS_TIME);
-    user.setTwoFactorAuthCompletionTime(USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
     user.setUsername(USER__USERNAME);
     user.setDegreesEnum(USER__DEGREES);
     DbDemographicSurvey dbDemographicSurvey = createDbDemographicSurvey();
