@@ -93,7 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-  // The defaul location for AoU buckets. Setting this location when cloning workspaces to make it
+  // The default location for AoU buckets. Setting this location when cloning workspaces to make it
   // work in service perimter environment. See shorturl.at/mAHQY for more details.
   private static final String GOOGLE_BUCKETS_LOCATION = "US";
 
