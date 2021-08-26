@@ -1087,12 +1087,7 @@ public class InstitutionServiceTest extends SpringTest {
                 .accessTierShortNames(registeredTier.getShortName())
                 .eraRequired(false)
                 .eligible(true)
-                .institutionHasSignedAgreeement(true),
-            new UserTierEligibility()
-                .accessTierShortNames(controlledTier.getShortName())
-                .eraRequired(false)
-                .eligible(true)
-                .institutionHasSignedAgreeement(false));
+                .institutionHasSignedAgreeement(true));
   }
 
   @Test
