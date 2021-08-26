@@ -118,9 +118,6 @@ describe('Create python kernel notebook', () => {
     const [, newCellOutput] = await notebook.getCellInputOutput(1);
     expect(newCellOutput).toEqual(cell1OutputText);
 
-    // Save and download.
-    await notebook.save();
-
     console.log('downloading as ipynb');
     await testDownloadModal(await notebook.downloadAsIpynb());
 
