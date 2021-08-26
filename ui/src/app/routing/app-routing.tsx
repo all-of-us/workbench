@@ -47,6 +47,8 @@ import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import logo from 'assets/images/all-of-us-logo.svg'
+
 declare const gapi: any;
 
 const CookiePolicyPage = fp.flow(withRouteData, withRoutingSpinner)(CookiePolicy);
@@ -400,7 +402,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
-              <img alt='logo' src='/assets/images/all-of-us-logo.svg' width='155px'/>
+              <img alt='logo' src={logo} width='155px'/>
           </div>
           <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
           <div style={{fontSize: '14pt', color: '#000000'}}>

@@ -73,12 +73,16 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
+import arrowLeft from 'assets/icons/arrow-left-regular.svg';
+import runtime from 'assets/icons/thunderstorm-solid.svg';
+import times from 'assets/icons/times-light.svg';
+
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
-  arrowLeft: '/assets/icons/arrow-left-regular.svg',
-  runtime: '/assets/icons/thunderstorm-solid.svg',
-  times: '/assets/icons/times-light.svg'
+  arrowLeft: arrowLeft,
+  runtime: runtime,
+  times: times
 };
 
 const styles = reactStyles({

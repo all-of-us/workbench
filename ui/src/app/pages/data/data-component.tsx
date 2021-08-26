@@ -16,6 +16,9 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
 
+import cohortImg from 'assets/images/cohort-diagram.svg';
+import dataSetImg from 'assets/images/dataset-diagram.svg';
+
 const styles = {
   cardButtonArea: {
     display: 'flex',
@@ -72,10 +75,6 @@ const descriptions = {
   be exported for analysis. `,
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
-
-const cohortImg = '/assets/images/cohort-diagram.svg';
-
-const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 

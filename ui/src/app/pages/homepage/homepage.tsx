@@ -30,6 +30,10 @@ import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
 
+import workspaceIcon from 'assets/images/workspace-icon.svg';
+import cohortIcon from 'assets/images/cohort-icon.svg';
+import analysisIcon from 'assets/images/analysis-icon.svg';
+
 export const styles = reactStyles({
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
@@ -72,9 +76,9 @@ const WelcomeHeader = () => {
           Researcher Workbench</Header>
       </FlexColumn>
       <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
+        <img style={styles.welcomeMessageIcon} src={workspaceIcon}/>
+        <img style={styles.welcomeMessageIcon} src={cohortIcon}/>
+        <img style={styles.welcomeMessageIcon} src={analysisIcon}/>
       </FlexRow>
     </FlexRow>
     <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>

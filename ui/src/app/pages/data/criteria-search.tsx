@@ -23,6 +23,8 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
+import arrowIcon from 'assets/icons/arrow-left-regular.svg';
+
 export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
 
@@ -117,8 +119,6 @@ export const growlCSS = `
     margin-top: 0.1rem;
   }
  `;
-
-const arrowIcon = '/assets/icons/arrow-left-regular.svg';
 
 interface Props {
   backFn?: () => void;

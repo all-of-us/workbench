@@ -21,6 +21,8 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, Profile} from 'generated/fetch';
 
+import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
+
 const styles = reactStyles({
   mainHeader: {
     color: colors.primary, fontSize: '18px', fontWeight: 600,
@@ -445,7 +447,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
                   need to login with your <span style={{fontWeight: 600}}>researchallofus.org</span> account and turn
                   on 2-Step Verification. Once you complete this step, you will see the screen shown below. At that
                   point, you can return to this page and click 'Refresh’.</div>
-              <img style={styles.twoFactorAuthModalImage} src='assets/images/2sv-image.png' />
+              <img style={styles.twoFactorAuthModalImage} src={twoFactorAuthModalImage} />
           </ModalBody>
           <ModalFooter>
               <Button onClick = {() => this.setState({twoFactorAuthModalOpen: false})}
