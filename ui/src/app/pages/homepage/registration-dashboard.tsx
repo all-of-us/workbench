@@ -8,18 +8,14 @@ import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {getRegistrationTasksMap, redirectToTwoFactorSetup, getRegistrationTasks} from 'app/utils/access-utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
-import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
+import {getRegistrationTasks, redirectToTwoFactorSetup} from 'app/utils/access-utils';
 import {NavigationProps} from 'app/utils/navigation';
-import {buildRasRedirectUrl} from 'app/utils/ras';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {AccessModule, Profile} from 'generated/fetch';
+import {AccessModule} from 'generated/fetch';
 
 const styles = reactStyles({
   mainHeader: {

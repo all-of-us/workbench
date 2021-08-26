@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {
   StyledAnchorTag,
 } from 'app/components/buttons';
@@ -20,7 +19,9 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
@@ -28,7 +29,6 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-import { getRegistrationTasksMap } from 'app/utils/access-utils';
 
 export const styles = reactStyles({
   bottomBanner: {

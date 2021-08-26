@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
@@ -13,9 +14,8 @@ import {
   Profile
 } from 'generated/fetch';
 import {ErrorCode} from 'generated/fetch';
-import {buildRasRedirectUrl} from "./ras";
-import {AoU} from 'app/components/text-wrappers';
-import {getLiveDUCCVersion} from "./code-of-conduct";
+import {getLiveDUCCVersion} from './code-of-conduct';
+import {buildRasRedirectUrl} from './ras';
 
 const {useState, useEffect} = React;
 
@@ -47,7 +47,7 @@ function redirectToNiH(): void {
   AnalyticsTracker.Registration.ERACommons();
   const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
-          window.location.origin.toString() + '/nih-callback?token=<token>');
+        window.location.origin.toString() + '/nih-callback?token=<token>');
   window.open(url, '_blank');
 }
 
@@ -163,8 +163,8 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
   }
 ] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
-  throw new Error('Cannot load registration tasks before config loaded');
-})();
+      throw new Error('Cannot load registration tasks before config loaded');
+    })();
 
 export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
   acc[curr.key] = curr;
