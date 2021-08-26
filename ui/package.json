@@ -6,46 +6,12 @@
     "start": "PORT=4200 react-scripts start",
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "react-scripts build",
-    "test": "yarn jest",
+    "test": "react-scripts test -- --config=jest.config.js",
     "lint": "yarn eslint src --ext .ts,.tsx",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "clearMocks": true,
-    "setupFiles": [
-      "./test-shim.js",
-      "./test-setup.js",
-      "./src/testing/navigation-mock.ts"
-    ],
-    "setupFilesAfterEnv": [
-      "./test-setup-script.js"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json",
-      "node"
-    ],
-    "moduleDirectories": [
-      "node_modules",
-      "src"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testMatch": [
-      "**/*.spec.tsx"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "<rootDir>/src/tsconfig.jest.json"
-      }
-    }
   },
   "browserslist": [
     "chrome >= 67"
