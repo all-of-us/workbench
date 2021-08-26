@@ -5,7 +5,7 @@ import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
-import {queryParamsStore} from 'app/utils/navigation';
+import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {
@@ -15,7 +15,6 @@ import {
 } from 'generated/fetch';
 import {ErrorCode} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
-import {buildRasRedirectUrl} from './ras';
 
 const {useState, useEffect} = React;
 
@@ -50,6 +49,11 @@ function redirectToNiH(): void {
         window.location.origin.toString() + '/nih-callback?token=<token>');
   window.open(url, '_blank');
 }
+
+/** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
+export const buildRasRedirectUrl = (): string => {
+  return encodeURIComponentStrict(window.location.origin.toString() + '/ras-callback');
+};
 
 function redirectToRas(): void {
   AnalyticsTracker.Registration.RasLoginGov();

@@ -6,9 +6,7 @@ import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {getTwoFactorSetupUrl} from 'app/utils/access-utils';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
@@ -119,15 +117,5 @@ describe('RegistrationDashboard', () => {
     serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(1);
-  });
-
-  it('should generate expected 2FA redirect URL', () => {
-    expect(getTwoFactorSetupUrl()).toMatch(/https:\/\/accounts\.google\.com\/AccountChooser/);
-    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
-    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
-  });
-
-  it('should generate expected RAS redirect URL', () => {
-    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
   });
 });
