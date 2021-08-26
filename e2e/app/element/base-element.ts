@@ -181,12 +181,9 @@ export default class BaseElement {
     if (newValue === undefined) {
       throw new Error('type() function parameter "newValue" is undefined.');
     }
+
     const clearAndType = async (txt: string): Promise<string> => {
-      await waitForFn(() => this.isVisible());
-      const text = await this.getProperty<string>('value');
-      if (text.trim().length > 0) {
-        await this.clear();
-      }
+      await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));
       return this.getProperty<string>('value');
     };
@@ -199,12 +196,13 @@ export default class BaseElement {
         return; // success
       }
       if (maxRetries <= 0) {
-        throw new Error(`BaseElement.type("${newValue}") failed. Actual text: "${actualValue}"`);
+        throw new Error(`Failed to type "${newValue}". Actual text: "${actualValue}"`);
       }
       maxRetries--;
-      await this.page.waitForTimeout(1000).then(typeAndCheck); // one second pause and retry type
+      await this.page.waitForTimeout(2000).then(typeAndCheck); // 2 seconds pause and retry type
     };
 
+    await waitForFn(() => this.isVisible());
     await typeAndCheck();
     return this;
   }
@@ -227,17 +225,42 @@ export default class BaseElement {
   }
 
   /**
-   * Clear value in textbox.
+   * Clear value in textbox. Retries up to 3 times.
    */
-  async clear(options: ClickOptions = { clickCount: 3 }): Promise<void> {
+  async clear(): Promise<void> {
+    const getTextLength = async (): Promise<number> => {
+      const text = await this.getProperty<string>('value');
+      return text.trim().length;
+    };
+
+    const deleteText = async (element: ElementHandle): Promise<void> => {
+      await element.focus();
+      await element.click({ clickCount: 3 });
+      await this.page.keyboard.press('Backspace');
+      await this.page.waitForTimeout(500);
+    };
+
+    let maxRetries = 3;
+    const clearAndCheck = async (element: ElementHandle) => {
+      await deleteText(element);
+      const textLength = await getTextLength();
+      if (textLength === 0) {
+        await this.pressTab();
+        return; // success
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to clear text."');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(2000).then(() => clearAndCheck(element)); // 2 seconds pause and retry clear
+    };
+
+    const text = await getTextLength();
+    if (text === 0) {
+      return; // No text to clear.
+    }
     const element = await this.asElementHandle();
-    // Click to make the input field active. A short sleep that should wait for mouse cursor blinking.
-    await element.click();
-    await this.page.waitForTimeout(200);
-    // To select all text, click 3 times.
-    await element.click(options);
-    await this.page.waitForTimeout(200);
-    await this.page.keyboard.press('Backspace');
+    await clearAndCheck(element);
   }
 
   async clearTextInput(): Promise<void> {
