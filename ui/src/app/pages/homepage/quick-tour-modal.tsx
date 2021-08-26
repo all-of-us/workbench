@@ -14,6 +14,9 @@ import cohorts from 'assets/images/quick-tour/cohorts.png';
 import conceptSets from 'assets/images/quick-tour/concept-sets.png';
 import datasets from 'assets/images/quick-tour/datasets.png';
 import notebooks from 'assets/images/quick-tour/notebooks.png';
+import checkImg from 'assets/images/check.svg';
+import expandIcon from 'assets/icons/expand.svg';
+import shrinkIcon from 'assets/icons/shrink.svg';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';
@@ -281,10 +284,6 @@ export interface QuickTourReactProps {
 }
 
 export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
-  checkImg = '/assets/images/check.svg';
-  expandIcon = '/assets/icons/expand.svg';
-  shrinkIcon = '/assets/icons/shrink.svg';
-
   constructor(props: QuickTourReactProps) {
     super(props);
     this.state = {selected: 0, fullImage: false};
@@ -333,7 +332,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                data-test-id='shrink-icon'
                style={{position: 'absolute', right: '5%', bottom: '5%',
                  cursor: 'pointer', width: '28px'}}>
-            <img src={this.shrinkIcon}/>
+            <img src={shrinkIcon}/>
           </div>
         </div>
       </div> :
@@ -352,7 +351,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                        data-test-id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
                     {(i < selected) && <div style={styles.check}>
-                        <img src={this.checkImg}/>
+                        <img src={checkImg}/>
                     </div>}
                     {(i === selected) && <div style={styles.current}/>}
                   </div>
@@ -395,7 +394,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                   <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
                        data-test-id='expand-icon'
                        onClick={() => this.toggleImage()}>
-                      <img src={this.expandIcon}/>
+                      <img src={expandIcon}/>
                   </div>
               </div>}
             </div>
