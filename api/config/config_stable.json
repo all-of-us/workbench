@@ -125,8 +125,8 @@
     "maxRowsPerInsert": 800
   },
   "ras": {
-    "host": "",
-    "clientId": ""
+    "host": "https:\/\/sts.nih.gov",
+    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0"
   },
   "accessRenewal": {
     "expiryDays": 365,
