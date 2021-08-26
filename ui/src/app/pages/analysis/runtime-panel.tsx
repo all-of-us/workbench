@@ -566,14 +566,24 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
-            <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+            <img
+                alt={altText}
+                src={iconSrc}
+                style={styleOverrides}
+                data-test-id={`runtime-status-icon-${status}`}
+            />
           </Clickable>
         </FlexRow>
       </TooltipTrigger>
     }
     {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
-          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+          <img
+              alt={altText}
+              src={iconSrc}
+              style={styleOverrides}
+              data-test-id={`runtime-status-icon-${status}`}
+          />
         </FlexRow>
       </TooltipTrigger>
     }
