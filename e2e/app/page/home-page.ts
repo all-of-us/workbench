@@ -20,22 +20,19 @@ export default class HomePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
-    await waitWhileLoading(this.page);
     // Look for "See All Workspaces" link.
     await this.getSeeAllWorkspacesLink().asElementHandle();
-    // Look for either a workspace card or the "Create your first workspace" msg.
+    // Look for either a workspace card or "Create your first workspace" msg.
     const createWorkspaceXpath = '//text()[contains(., "Create your first workspace")]';
     const workspaceCardXpath = '//*[@data-test-id="workspace-card"]';
     await Promise.race([
       this.page.waitForXPath(workspaceCardXpath, { visible: true }),
       this.page.waitForXPath(createWorkspaceXpath, { visible: true })
     ]);
-    // Look for either the recent-resources table or the getting-started msg.
-    await Promise.race([
-      this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true, timeout: 2000 }),
-      this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true, timeout: 2000 })
-    ]).catch();
-    await waitWhileLoading(this.page);
+    await Promise.all([
+      this.getSeeAllWorkspacesLink().asElementHandle({ timeout: 120000, visible: true }),
+      waitWhileLoading(this.page, 120000)
+    ]);
     return true;
   }
 
