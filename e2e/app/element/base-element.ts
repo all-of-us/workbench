@@ -326,7 +326,6 @@ export default class BaseElement {
    */
   async clickAndWait(timeout = 2 * 60 * 1000): Promise<void> {
     const navigationPromise = this.page.waitForNavigation({
-      waitUntil: ['domcontentloaded'],
       timeout
     });
     await this.click({ delay: 10 });

@@ -4,6 +4,7 @@ import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
+import WorkspacesPage from './workspaces-page';
 
 export const PageTitle = 'Homepage';
 
@@ -23,20 +24,18 @@ export default class HomePage extends AuthenticatedPage {
     // Look for "See All Workspaces" link.
     await this.getSeeAllWorkspacesLink().asElementHandle();
     // Look for either a workspace card or the "Create your first workspace" msg.
+    const createWorkspaceXpath = '//text()[contains(., "Create your first workspace")]';
+    const workspaceCardXpath = '//*[@data-test-id="workspace-card"]';
     await Promise.race([
-      this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { visible: true }),
-      this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', { visible: true })
+      this.page.waitForXPath(workspaceCardXpath, { visible: true }),
+      this.page.waitForXPath(createWorkspaceXpath, { visible: true })
     ]);
-    try {
-      // Look for either the recent-resources table or the getting-started msg.
-      await Promise.race([
-        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
-        this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
-      ]);
-    } catch (err) {
-      // Bug https://precisionmedicineinitiative.atlassian.net/browse/RW-6005
-      // ignore error
-    }
+    // Look for either the recent-resources table or the getting-started msg.
+    await Promise.race([
+      this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true, timeout: 2000 }),
+      this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true, timeout: 2000 })
+    ]).catch();
+    await waitWhileLoading(this.page);
     return true;
   }
 
@@ -54,5 +53,12 @@ export default class HomePage extends AuthenticatedPage {
 
   getSeeAllWorkspacesLink(): Link {
     return Link.findByName(this.page, { name: LabelAlias.SeeAllWorkspaces });
+  }
+
+  async goToAllWorkspacesPage(): Promise<WorkspacesPage> {
+    await this.getCreateNewWorkspaceLink().clickAndWait();
+    const workspacesPage = new WorkspacesPage(this.page);
+    await workspacesPage.waitForLoad();
+    return workspacesPage;
   }
 }

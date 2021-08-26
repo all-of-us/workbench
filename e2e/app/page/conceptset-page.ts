@@ -53,13 +53,18 @@ export default class ConceptSetPage extends AuthenticatedPage {
 
   async edit(newConceptName?: string, newDescription?: string): Promise<void> {
     await this.getEditButton().then((butn) => butn.click());
-    // edit name
+
+    // Find the input element. Value should not be empty.
+    const nameInputXpath = '//input[@data-test-id="edit-name" and string-length(@value) > 0]';
+    await new Textbox(this.page, nameInputXpath).waitForXPath({ visible: true });
+
+    // Enter name
     if (newConceptName !== undefined) {
       const nameInputXpath = '//*[@data-test-id="edit-name"]';
       const nameInput = new Textbox(this.page, nameInputXpath);
       await nameInput.type(newConceptName);
     }
-    // edit description
+    // Enter description
     if (newDescription !== undefined) {
       const descInputXpath = '//*[@id="edit-description"]';
       const descInput = new Textbox(this.page, descInputXpath);
