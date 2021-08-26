@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
-
 import {
   StyledAnchorTag,
 } from 'app/components/buttons';
@@ -16,7 +15,7 @@ import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
-import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
+import {RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
@@ -29,6 +28,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
+import { getRegistrationTasksMap } from 'app/utils/access-utils';
 
 export const styles = reactStyles({
   bottomBanner: {
