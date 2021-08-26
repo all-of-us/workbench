@@ -201,6 +201,15 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'DATA_USER_CODE_OF_CONDUCT' "
-              + ") as uamd ON u.user_id = uamd.user_id ")
+              + ") as uamd ON u.user_id = uamd.user_id "
+              + "LEFT JOIN ( "
+              + "  SELECT uam.user_id, "
+              + "    uam.bypass_time AS rasLinkLoginGovBypassTime, "
+              + "    uam.completion_time AS ras_link_login_gov_completion_time "
+              + "  FROM user_access_module uam "
+              + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
+              + "  WHERE am.name = 'RAS_LOGIN_GOV' "
+              + ") as uamd ON u.user_id = uamr.user_id ")
+
   List<DbAdminTableUser> getAdminTableUsers();
 }
