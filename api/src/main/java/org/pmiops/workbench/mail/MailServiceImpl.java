@@ -94,7 +94,7 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendInstitutionUserInstructions(String contactEmail, String userInstructions)
+  public void sendInstitutionUserInstructions(String contactEmail, String userInstructions, final String username)
       throws MessagingException {
 
     // TODO(RW-6482): Use a templating system rather than manual oneoff escaping.
@@ -102,7 +102,7 @@ public class MailServiceImpl implements MailService {
     // the strings should not be trusted as HTML.
     String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
     final String htmlMessage =
-        buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions));
+        buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions, username));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -248,11 +248,12 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
-      final String instructions) {
+      final String instructions, final String username) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
+        .put(EmailSubstitutionField.USED_CREDITS, username)
         .build();
   }
 

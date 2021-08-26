@@ -10,7 +10,7 @@ public interface MailService {
   void sendWelcomeEmail(final String contactEmail, final String password, final User user)
       throws MessagingException;
 
-  void sendInstitutionUserInstructions(final String contactEmail, final String userInstructions)
+  void sendInstitutionUserInstructions(final String contactEmail, final String userInstructions, final String username)
       throws MessagingException;
 
   void alertUserFreeTierDollarThreshold(

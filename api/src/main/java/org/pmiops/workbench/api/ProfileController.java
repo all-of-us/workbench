@@ -310,7 +310,7 @@ public class ProfileController implements ProfileApiDelegate {
         .ifPresent(
             instructions -> {
               try {
-                mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions);
+                mail.sendInstitutionUserInstructions(profile.getContactEmail(), instructions, profile.getUsername());
               } catch (MessagingException e) {
                 throw new WorkbenchException(e);
               }
