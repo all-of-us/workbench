@@ -139,18 +139,21 @@ export default class RuntimePanel extends BaseHelpSidebar {
     startStopIconState: StartStopIconState,
     timeout: number = 20 * 60 * 1000
   ): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@data-test-id="${this.buildStatusIconDataTestId(startStopIconState)}"]`;
+    const xpath = `${this.getXpath()}${statusIconXpath}` +
+        `[@data-test-id="${this.buildStatusIconDataTestId(startStopIconState)}"]`;
     await this.page.waitForXPath(xpath, { visible: true, timeout });
   }
 
   async clickPauseRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Running)}"]`;
+    const xpath = `${this.getXpath()}${statusIconXpath}`
+        + `[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Running)}"]`;
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
 
   async clickResumeRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Stopped)}"]`;
+    const xpath = `${this.getXpath()}${statusIconXpath}`
+        + `[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Stopped)}"]`;
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
