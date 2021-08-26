@@ -127,7 +127,6 @@ export default class NotebookPage extends NotebookFrame {
 
     let maxRetries = 3;
     const clickAndCheck = async (iframe: Frame) => {
-      console.log(`maxRetries: ${maxRetries}`);
       await clickFileMenuIcon(iframe);
       const succeeded = await iframe
         .waitForXPath(Xpath.downloadMenuDropdown, { visible: true, timeout: 2000 })
