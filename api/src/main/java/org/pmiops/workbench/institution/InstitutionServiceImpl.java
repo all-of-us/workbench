@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -377,15 +378,34 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public List<String> getUserEligibleAccessTiers(DbUser user) {
+  public List<UserTierEligibility> getUserTierEligibilities(DbUser user) {
+    List<UserTierEligibility> userTierEligibilities = new ArrayList<>();
+
     Optional<Institution> institution = getByUser(user);
     if (!institution.isPresent()) {
-      return new ArrayList<String>();
+      return userTierEligibilities;
     }
-    return accessTierDao.findAll().stream()
-        .map(DbAccessTier::getShortName)
-        .filter(a -> validateInstitutionalEmail(institution.get(), user.getContactEmail(), a))
-        .collect(Collectors.toList());
+
+    for (String tierName :
+        accessTierDao.findAll().stream()
+            .map(DbAccessTier::getShortName)
+            .collect(Collectors.toList())) {
+      Optional<InstitutionTierConfig> tierConfig = getTierConfigByTier(institution.get(), tierName);
+      if (tierConfig.isPresent()) {
+        UserTierEligibility tierEligibility =
+            new UserTierEligibility().accessTierShortNames(tierName);
+        tierEligibility
+            .eraRequired(tierConfig.get().getEraRequired())
+            .institutionHasSignedAgreeement(
+                tierConfig.get().getMembershipRequirement() != null
+                    && tierConfig.get().getMembershipRequirement()
+                        != InstitutionMembershipRequirement.NO_ACCESS)
+            .eligible(
+                validateInstitutionalEmail(institution.get(), user.getContactEmail(), tierName));
+        userTierEligibilities.add(tierEligibility);
+      }
+    }
+    return userTierEligibilities;
   }
 
   private Institution toModel(DbInstitution dbInstitution) {

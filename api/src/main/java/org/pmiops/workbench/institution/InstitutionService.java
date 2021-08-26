@@ -10,6 +10,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserTierEligibility;
 
 public interface InstitutionService {
   List<Institution> getInstitutions();
@@ -120,5 +121,5 @@ public interface InstitutionService {
    *
    * @return
    */
-  List<String> getUserEligibleAccessTiers(DbUser user);
+  List<UserTierEligibility> getUserTierEligibilities(DbUser user);
 }

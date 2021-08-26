@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -963,7 +964,7 @@ public class InstitutionServiceTest extends SpringTest {
   @Test
   public void testEligibleTiers_institutionNotFound() {
     final DbUser user = createUser("user@broad.org");
-    assertThat(service.getUserEligibleAccessTiers(user)).isEmpty();
+    assertThat(service.getUserTierEligibilities(user)).isEmpty();
   }
 
   @Test
@@ -983,8 +984,13 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibleAccessTiers(user))
-        .containsExactly(REGISTERED_TIER_SHORT_NAME);
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortNames(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true)
+                .institutionHasSignedAgreeement(true));
   }
 
   @Test
@@ -1004,13 +1010,23 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailDomains(ImmutableList.of("broad.org", "verily.com")),
                         ctTierConfig
                             .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
-                            .eraRequired(false)
+                            .eraRequired(true)
                             .accessTierShortName(controlledTier.getShortName())
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibleAccessTiers(user))
-        .containsExactly(registeredTier.getShortName(), controlledTier.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortNames(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true)
+                .institutionHasSignedAgreeement(true),
+            new UserTierEligibility()
+                .accessTierShortNames(controlledTier.getShortName())
+                .eraRequired(true)
+                .eligible(true)
+                .institutionHasSignedAgreeement(true));
   }
 
   @Test
@@ -1035,8 +1051,48 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user2@broad.org")))));
     final DbUser user = createUser("user@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibleAccessTiers(user))
-        .containsExactly(registeredTier.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortNames(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true)
+                .institutionHasSignedAgreeement(true));
+  }
+
+  @Test
+  public void testEligibleTiers_institutionHasRtAndCt_institutionNotSignedForCt() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")),
+                        ctTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName()))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortNames(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true)
+                .institutionHasSignedAgreeement(true),
+            new UserTierEligibility()
+                .accessTierShortNames(controlledTier.getShortName())
+                .eraRequired(false)
+                .eligible(true)
+                .institutionHasSignedAgreeement(false));
   }
 
   @Test
@@ -1056,7 +1112,7 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user2@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserEligibleAccessTiers(user)).isEmpty();
+    assertThat(service.getUserTierEligibilities(user)).isEmpty();
   }
 
   private DbUser createUser(String contactEmail) {
