@@ -52,7 +52,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async load(): Promise<this> {
     const title = await this.page.title();
-    if (title !== PageTitle) {
+    if (!title.includes(PageTitle)) {
       await this.loadPageUrl(PageUrl.Workspaces);
     }
     await waitWhileLoading(this.page);

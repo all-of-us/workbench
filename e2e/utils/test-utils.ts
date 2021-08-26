@@ -182,7 +182,6 @@ export async function findOrCreateWorkspace(
  */
 export async function findWorkspaceCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
   const workspacesPage = new WorkspacesPage(page);
-  const 
   await workspacesPage.load();
   const workspaceCard = new WorkspaceCard(page);
   return workspaceCard.findCard(workspaceName);
