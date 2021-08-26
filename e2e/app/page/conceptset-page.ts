@@ -60,7 +60,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
 
     // Enter name
     if (newConceptName !== undefined) {
-      const nameInputXpath = '//*[@data-test-id="edit-name"]';
+      const nameInputXpath = '//input[@data-test-id="edit-name"]';
       const nameInput = new Textbox(this.page, nameInputXpath);
       await nameInput.type(newConceptName);
     }
