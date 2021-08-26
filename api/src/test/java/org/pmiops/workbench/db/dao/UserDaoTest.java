@@ -191,7 +191,7 @@ public class UserDaoTest extends SpringTest {
     Timestamp rtTrainingCompleteTime = Timestamp.from(now.minusSeconds(40));
     Timestamp eRABypassTime = Timestamp.from(now.minusSeconds(50));
     Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
-    Timestamp duccypassTime = Timestamp.from(now.minusSeconds(70));
+    Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
     Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
     Timestamp rasCompleteTime = Timestamp.from(now);
@@ -199,7 +199,7 @@ public class UserDaoTest extends SpringTest {
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
     addUserAccessModule(user, rtTrainingModule, rtTrainingBypassTime, rtTrainingCompleteTime);
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
-    addUserAccessModule(user, duccModule, duccypassTime, duccCompleteTime);
+    addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
     addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
@@ -207,7 +207,7 @@ public class UserDaoTest extends SpringTest {
     assertThat(rows.get(0).getEraCommonsCompletionTime()).isEqualTo(eRACompleteTime);
     assertThat(rows.get(0).getComplianceTrainingBypassTime()).isEqualTo(rtTrainingBypassTime);
     assertThat(rows.get(0).getComplianceTrainingCompletionTime()).isEqualTo(rtTrainingCompleteTime);
-    assertThat(rows.get(0).getDataUseAgreementBypassTime()).isEqualTo(duccypassTime);
+    assertThat(rows.get(0).getDataUseAgreementBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getDataUseAgreementCompletionTime()).isEqualTo(duccCompleteTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
     assertThat(rows.get(0).getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompleteTime);
