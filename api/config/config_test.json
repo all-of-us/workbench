@@ -103,7 +103,8 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
+    "enablePersistentDisk": true,
+    "enableAccessModuleRewrite" : true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {

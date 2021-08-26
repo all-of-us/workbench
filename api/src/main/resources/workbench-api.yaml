@@ -4342,6 +4342,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show separate source and standard domains
+      enablePersistentDisk:
+        type: boolean
+        default: false
+        description: Whether to persistent disk as the notebook storage
       rasHost:
         type: string
         description: The RAS base host name.
@@ -5825,18 +5829,6 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user last confirmed their profile.
-      renewableAccessModules:
-        type: object
-        properties:
-          modules:
-            type: array
-            items:
-              "$ref": "#/definitions/RenewableAccessModuleStatus"
-          anyModuleHasExpired:
-            type: boolean
-            description: >
-              Whether any modules have expired. Each expired module will have
-              the corresponding hasExpired flag set in the modules array.
       accessModules:
         type: object
         properties:
@@ -5849,24 +5841,6 @@ definitions:
             description: >
               Whether any modules have expired. Expiration information is also included with each
               module in the array; this field is provided for convenience.
-
-  RenewableAccessModuleStatus:
-    type: object
-    properties:
-      moduleName:
-        type: string
-        enum:
-          - complianceTraining
-          - dataUseAgreement
-          - profileConfirmation
-          - publicationConfirmation
-      expirationEpochMillis:
-        type: integer
-        format: int64
-        description: When this module expired or will expire.
-      hasExpired:
-        type: boolean
-        description: Whether this module has expired according to the server's clock.
 
   AccessModuleStatus:
     type: object
@@ -6071,6 +6045,21 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+  UpdateDiskRequest:
+    description: "Updates an existing persistent disk"
+    type: object
+    properties:
+      labels:
+        type: object
+        description: The labels to be added or updated on the persistent disk. Of type Map[String,String]
+      size:
+        type: integer
+        description: The size in GB that the persistent disk is to be updated to.
+      diskType:
+        $ref: "#/definitions/DiskType"
+      blockSize:
+        type: integer
+        description: The block size in bytes that the persistent disk is to be updated to.
   PersistentDiskRequest:
     description: configuration to create a disk
     type: object

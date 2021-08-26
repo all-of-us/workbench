@@ -11,6 +11,7 @@ interface ZendeskUrls {
   helpCenter: string;
   tableOfContents: string;
   researchPurpose: string;
+  workspaceBucket: string;
 }
 
 const zendeskConfigs = {
@@ -59,6 +60,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       gettingStarted: category('360002157352'),
       tableOfContents: category('360002625291'),
       researchPurpose: article('360042673211'),
+      workspaceBucket: article('360040043072'),
     },
     [ZendeskEnv.Preprod]: {
       ...commonUrls,
@@ -69,6 +71,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       gettingStarted: category('360005884571'),
       tableOfContents: category('360005884591'),
       researchPurpose: article('360058861612'),
+      workspaceBucket: article('360044796611'),
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,
@@ -79,6 +82,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       gettingStarted: category('360003430652'),
       tableOfContents: category('360003430672'),
       researchPurpose: article('360044334652'),
+      workspaceBucket: article('360044796611'),
     }
   };
   return urls[env];

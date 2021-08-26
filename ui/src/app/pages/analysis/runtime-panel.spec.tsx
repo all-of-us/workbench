@@ -41,6 +41,7 @@ describe('RuntimePanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
+  let enablePd: boolean;
 
   const iconsDir = '/assets/icons';
 
@@ -56,6 +57,7 @@ describe('RuntimePanel', () => {
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {...defaultServerConfig}});
+    enablePd = serverConfigStore.get().config.enablePersistentDisk;
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -127,6 +129,9 @@ describe('RuntimePanel', () => {
   const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
   const pickMainDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#runtime-disk', diskSize);
 
+  const getPdSize = (wrapper) => getInputValue(wrapper, '#persistent-disk');
+  const pickPdSize = (wrapper, pdSize) => enterNumberInput(wrapper, '#persistent-disk', pdSize);
+
   const pickComputeType = (wrapper, computeType) => pickDropdownOption(wrapper, '#runtime-compute', computeType);
 
   const getWorkerCpu = (wrapper) => getInputValue(wrapper, '#worker-cpu');
@@ -190,7 +195,11 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
+    if (enablePd) {
+      expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual('n1-standard-4');
+    } else {
+      expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
+    }
   });
 
   it('should show customize after create', async() => {
@@ -209,7 +218,10 @@ describe('RuntimePanel', () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
-
+    // skip this test after enabling pd
+    if (enablePd) {
+      return;
+    }
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
@@ -294,6 +306,10 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow creation with GCE config', async() => {
+    // skip this test after enabling pd
+    if (enablePd) {
+      return;
+    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -328,10 +344,16 @@ describe('RuntimePanel', () => {
     // master settings
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    await pickMainDiskSize(wrapper, 100);
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    if (enablePd) {
+      await pickComputeType(wrapper, ComputeType.Dataproc);
 
+      await pickMainDiskSize(wrapper, 100);
+    } else {
+      await pickMainDiskSize(wrapper, 100);
+
+      await pickComputeType(wrapper, ComputeType.Dataproc);
+    }
     // worker settings
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
@@ -356,6 +378,10 @@ describe('RuntimePanel', () => {
   });
 
   it('should allow configuration via GCE preset', async() => {
+    // skip this test after enabling pd
+    if (enablePd) {
+      return;
+    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -402,6 +428,10 @@ describe('RuntimePanel', () => {
 
   it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis',
     async() => {
+      // skip this test after enabling pd
+      if (enablePd) {
+        return;
+      }
       const runtime = {
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
@@ -465,8 +495,13 @@ describe('RuntimePanel', () => {
     // the Hail preset selection.
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    await pickMainDiskSize(wrapper, 100);
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    if (enablePd) {
+      await pickComputeType(wrapper, ComputeType.Dataproc);
+      await pickMainDiskSize(wrapper, 100);
+    } else {
+      await pickMainDiskSize(wrapper, 100);
+      await pickComputeType(wrapper, ComputeType.Dataproc);
+    }
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
@@ -505,6 +540,10 @@ describe('RuntimePanel', () => {
   });
 
   it('should tag as preset if configuration matches', async() => {
+    // skip this test after enabling pd
+    if (enablePd) {
+      return;
+    }
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -889,13 +928,23 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
 
-    await pickMainDiskSize(wrapper, 49);
-    expect(getCreateButton().prop('disabled')).toBeTruthy();
+    if (enablePd) {
+      await pickPdSize(wrapper, 49);
+      expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 4900);
-    expect(getCreateButton().prop('disabled')).toBeTruthy();
+      await pickPdSize(wrapper, 4900);
+      expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 50);
+      await pickPdSize(wrapper, 50);
+    } else {
+      await pickMainDiskSize(wrapper, 49);
+      expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+      await pickMainDiskSize(wrapper, 4900);
+      expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+      await pickMainDiskSize(wrapper, 50);
+    }
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
