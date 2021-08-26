@@ -201,7 +201,6 @@ export default class BaseElement {
       maxRetries--;
       await this.page.waitForTimeout(2000).then(typeAndCheck); // 2 seconds pause and retry type
     };
-
     await waitForFn(() => this.isVisible());
     await typeAndCheck();
     return this;
@@ -235,9 +234,10 @@ export default class BaseElement {
 
     const deleteText = async (element: ElementHandle): Promise<void> => {
       await element.focus();
+      await element.hover();
       await element.click({ clickCount: 3 });
       await this.page.keyboard.press('Backspace');
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(100);
     };
 
     let maxRetries = 3;
@@ -245,7 +245,6 @@ export default class BaseElement {
       await deleteText(element);
       const textLength = await getTextLength();
       if (textLength === 0) {
-        await this.pressTab();
         return; // success
       }
       if (maxRetries <= 0) {
