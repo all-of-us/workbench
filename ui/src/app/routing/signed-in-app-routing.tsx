@@ -19,7 +19,6 @@ import {AdminWorkspace} from 'app/pages/admin/admin-workspace';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {AdminWorkspaceSearch} from 'app/pages/admin/admin-workspace-search';
 import {UserAudit} from 'app/pages/admin/user-audit';
-import {DataAccessRequirements} from 'app/pages/homepage/data-access-requirements';
 import {Homepage} from 'app/pages/homepage/homepage';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {ProfileComponent} from 'app/pages/profile/profile-component';
@@ -30,6 +29,7 @@ import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
+import {DataAccessRequirements} from 'app/pages/homepage/data-access-requirements';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -54,7 +54,7 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
 
 export const SignedInRoutes = () => {
   return <Switch>
-    <AppRoute exact path='/' guards={[expiredGuard, registrationGuard]}>
+    <AppRoute exact path='/' guards={[expiredGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path='/access-renewal'>

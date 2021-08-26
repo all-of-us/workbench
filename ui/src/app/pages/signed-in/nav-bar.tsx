@@ -198,7 +198,6 @@ export const NavBar = () => {
     </div>
     <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
-    {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
@@ -213,6 +212,7 @@ export const NavBar = () => {
           onClose={onStatusAlertBannerUnmount}
       />
     }
+    {<LoginGovIAL2NotificationMaybe/>}
     {
       showSideNav
       && <SideNav

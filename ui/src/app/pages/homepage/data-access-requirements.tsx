@@ -16,6 +16,7 @@ import {getAccessModuleStatusByName, getRegistrationTask} from 'app/utils/access
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -121,18 +122,33 @@ const styles = reactStyles({
     opacity: '0.5',
     fontSize: '12px',
   },
-  inverseRightArrow: {
+  nextElement: {
+    marginLeft: 'auto',
+  },
+  nextText: {
+    marginLeft: 'auto',
+    alignSelf: 'center',
+    paddingRight: '0.5em',
+  },
+  nextIcon: {
+    fontSize: '18px',
     color: colors.white,
     background: colors.success,
     paddingRight: '0.2em',
     paddingLeft: '0.2em',
+    alignSelf: 'center',
   },
-  refresh: {
+  refreshButton: {
     height: '25px',
     width: '81px',
     fontSize: '10px',
     borderRadius: '3px',
-  }
+    marginLeft: 'auto',
+  },
+  refreshIcon: {
+    fontSize: '18px',
+    paddingRight: '4px',
+  },
 });
 
 // in display order
@@ -186,9 +202,9 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   );
 };
 
-const Next = () => <div style={{marginLeft: 'auto'}}>
-  NEXT <ArrowRight style={styles.inverseRightArrow}/>;
-</div>;
+const Next = () => <FlexRow style={styles.nextElement}>
+  <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
+</FlexRow>;
 
 interface ModuleProps {
   module: AccessModule;
@@ -207,18 +223,19 @@ const Module = (props: ModuleProps): JSX.Element => {
   // whether this module needs a profile reload
   const [needsReload, setNeedsReload] = useState(false);
 
-  const Refresh = () => <Button type='primary' onClick={reload} style={styles.refresh}>
-    <Repeat/> Refresh
+  const Refresh = () => <Button type='primary' onClick={reload} style={styles.refreshButton}>
+    <Repeat style={styles.refreshIcon}/> Refresh
   </Button>;
 
-  const ModuleIcon = () => cond(
+  const ModuleIcon = () => <div style={styles.moduleIcon}>
+    {cond(
       // not eligible to complete module
       [!eligible, () => <MinusCircle style={{color: colors.disabled}}/>],
       // eligible and completed or bypassed
       [eligible && !!statusTextMaybe, () => <CheckCircle style={{color: colors.success}}/>],
       // eligible and incomplete and unbypassed
-      [eligible && !statusTextMaybe, () => <CheckCircle style={{color: colors.disabled}}/>]
-  );
+      [eligible && !statusTextMaybe, () => <CheckCircle style={{color: colors.disabled}}/>])}
+  </div>;
 
   const ModuleBox = ({children}) => {
     return active ?
@@ -236,9 +253,7 @@ const Module = (props: ModuleProps): JSX.Element => {
       {active && (needsReload ? <Refresh/> : <Next/>)}
     </FlexRow>
     <ModuleBox>
-      <div style={styles.moduleIcon}>
-        <ModuleIcon/>
-      </div>
+      <ModuleIcon/>
       <FlexColumn>
         <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
           {moduleLabels.get(module)}
