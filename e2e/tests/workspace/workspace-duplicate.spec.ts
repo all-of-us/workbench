@@ -121,7 +121,7 @@ describe('Duplicate workspace', () => {
     // Duplicate workspace Data page is loaded.
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
-    expect(page.url()).toContain(duplicateWorkspaceName.toLowerCase());
+    expect(page.url()).toContain(`/${duplicateWorkspaceName.toLowerCase()}/data`);
 
     // Delete duplicate workspace via Workspace card in Your Workspaces page.
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
