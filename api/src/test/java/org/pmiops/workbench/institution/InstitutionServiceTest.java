@@ -987,7 +987,7 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getUserTierEligibilities(user))
         .containsExactly(
             new UserTierEligibility()
-                .accessTierShortNames(registeredTier.getShortName())
+                .accessTierShortName(registeredTier.getShortName())
                 .eraRequired(false)
                 .eligible(true));
   }
@@ -1017,11 +1017,11 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getUserTierEligibilities(user))
         .containsExactly(
             new UserTierEligibility()
-                .accessTierShortNames(registeredTier.getShortName())
+                .accessTierShortName(registeredTier.getShortName())
                 .eraRequired(false)
                 .eligible(true),
             new UserTierEligibility()
-                .accessTierShortNames(controlledTier.getShortName())
+                .accessTierShortName(controlledTier.getShortName())
                 .eraRequired(true)
                 .eligible(true));
   }
@@ -1051,11 +1051,11 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getUserTierEligibilities(user))
         .containsExactly(
             new UserTierEligibility()
-                .accessTierShortNames(registeredTier.getShortName())
+                .accessTierShortName(registeredTier.getShortName())
                 .eraRequired(false)
                 .eligible(true),
             new UserTierEligibility()
-                .accessTierShortNames(controlledTier.getShortName())
+                .accessTierShortName(controlledTier.getShortName())
                 .eraRequired(false)
                 .eligible(false));
   }
@@ -1084,7 +1084,7 @@ public class InstitutionServiceTest extends SpringTest {
     assertThat(service.getUserTierEligibilities(user))
         .containsExactly(
             new UserTierEligibility()
-                .accessTierShortNames(registeredTier.getShortName())
+                .accessTierShortName(registeredTier.getShortName())
                 .eraRequired(false)
                 .eligible(true));
   }
@@ -1106,7 +1106,12 @@ public class InstitutionServiceTest extends SpringTest {
                             .emailAddresses(ImmutableList.of("user@broad.org")))));
     final DbUser user = createUser("user2@broad.org");
     createAffiliation(user, inst.getShortName());
-    assertThat(service.getUserTierEligibilities(user)).isEmpty();
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(false));
   }
 
   private DbUser createUser(String contactEmail) {

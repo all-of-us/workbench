@@ -395,7 +395,7 @@ public class InstitutionServiceImpl implements InstitutionService {
               t ->
                   userTierEligibilities.add(
                       new UserTierEligibility()
-                          .accessTierShortNames(tierName)
+                          .accessTierShortName(tierName)
                           .eraRequired(t.getEraRequired())
                           .eligible(
                               validateInstitutionalEmail(

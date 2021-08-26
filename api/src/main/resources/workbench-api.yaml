@@ -9411,9 +9411,8 @@ definitions:
   UserTierEligibility:
     type: object
     properties:
-      accessTierShortNames:
-        description: |-
-          Short names of access tiers available to the user, comma-delimited if multiple.
+      accessTierShortName:
+        description: Short name of access tier.
         type: string
       eligible:
          type: boolean
