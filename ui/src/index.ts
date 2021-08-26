@@ -21,6 +21,10 @@ import "styles.css";
 import "app/styles/sidebar.css";
 import "app/styles/genome-extraction-datatable.css";
 
+import "../node_modules/mutationobserver-shim/dist/mutationobserver.min.js";
+import "../node_modules/@webcomponents/custom-elements/custom-elements.min.js";
+import "../node_modules/@clr/icons/clr-icons.min.js";
+
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
