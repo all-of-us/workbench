@@ -5702,6 +5702,11 @@ definitions:
         type: array
         items:
           type: string
+      tierEligibilities:
+        type: array
+        description: User eligibility of each acces tier based on their institution's tier requirements.
+        items:
+          "$ref": "#/definitions/UserTierEligibility"
       degrees:
         type: array
         items:
@@ -9422,3 +9427,18 @@ definitions:
     enum:
       - DISABLED
       - ENABLED
+  UserTierEligibility:
+    type: object
+    properties:
+      accessTierShortName:
+        description: Short name of access tier.
+        type: string
+      eligible:
+         type: boolean
+         description: |-
+          User eligibility for tiers is based on their contact emails and their institution's tier
+          requirements. This does not mean the user has access to these tiers; to gain
+          access, the user must still complete all the necessary access requirement steps for each tier.
+      eraRequired:
+         type: boolean
+         description: If eRA Commons linking is required for this access tier.
