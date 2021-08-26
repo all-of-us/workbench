@@ -47,7 +47,7 @@ export default class DataResourceCard extends CardBase {
     return fp.shuffle(cards)[0];
   }
 
-  static async findCard(page: Page, resourceName: string, timeout = 30000): Promise<DataResourceCard | null> {
+  static async findCard(page: Page, resourceName: string, timeout = 2000): Promise<DataResourceCard | null> {
     const selector =
       `${DataResourceCardSelector.cardRootXpath}[.//*[${DataResourceCardSelector.cardNameXpath}` +
       ` and normalize-space(text())="${resourceName}"]]`;
@@ -67,7 +67,7 @@ export default class DataResourceCard extends CardBase {
     super(page);
   }
 
-  async findCard(resourceName: string, cardType: ResourceCard, timeout = 30000): Promise<DataResourceCard | null> {
+  async findCard(resourceName: string, cardType: ResourceCard, timeout = 2000): Promise<DataResourceCard | null> {
     const selector =
       DataResourceCardSelector.cardRootXpath +
       `[.//*[${DataResourceCardSelector.cardTypeXpath} and text()="${cardType}"]]` +
