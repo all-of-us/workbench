@@ -7,16 +7,17 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {ArrowRight, CheckCircle, DARIcons, MinusCircle, RegisteredTierBadge, Repeat} from 'app/components/icons';
+import {withErrorModal} from 'app/components/modals';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
-import {getAccessModuleStatusByName, getRegistrationTask} from 'app/utils/access-utils';
-import {useNavigation} from 'app/utils/navigation';
+import {buildRasRedirectUrl, getAccessModuleStatusByName, getRegistrationTask} from 'app/utils/access-utils';
+import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
-import {profileApi} from 'app/services/swagger-fetch-clients';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -208,14 +209,17 @@ const Next = () => <FlexRow style={styles.nextElement}>
 
 interface ModuleProps {
   module: AccessModule;
-  eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
   active: boolean;    // is this the currently-active module that the user should complete
+
+  // TODO
+  // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
 const Module = (props: ModuleProps): JSX.Element => {
   const {profile, reload} = useStore(profileStore);
   const [navigate, ] = useNavigation();
 
-  const {module, eligible, active} = props;
+  const {module, active} = props;
+  const eligible = true; // TODO
   const status = getAccessModuleStatusByName(profile, module);
   const statusTextMaybe = bypassedOrCompletedText(status);
   const {onClick} = getRegistrationTask(navigate, module);
@@ -269,7 +273,7 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
 
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(module =>
-        <Module key={module} module={module} eligible={true} active={module === activeModule}/>
+        <Module key={module} module={module} active={module === activeModule}/>
     )}
   </FlexColumn>;
 };
@@ -303,9 +307,55 @@ const DuccCard = (props: {activeModule: AccessModule}) => <FlexRow style={{...st
   <ModulesForCard modules={duccModule} activeModule={props.activeModule}/>
 </FlexRow>;
 
+const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps) => {
+  const handler = withErrorModal({
+    title: 'Error saving NIH Authentication status.',
+    message: 'An error occurred trying to save your NIH Authentication status. Please try again.',
+    onDismiss: () => {
+      spinnerProps.hideSpinner();
+    }
+  })(async() => {
+    spinnerProps.showSpinner();
+    await profileApi().updateNihToken({jwt: token});
+    spinnerProps.hideSpinner();
+  });
+
+  return handler();
+};
+
+const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) => {
+  const handler = withErrorModal({
+    title: 'Error saving RAS Login.Gov linkage status.',
+    message: 'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
+    onDismiss: () => {
+      spinnerProps.hideSpinner();
+    }
+  })(async() => {
+    spinnerProps.showSpinner();
+    await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl()});
+    spinnerProps.hideSpinner();
+  });
+
+  return handler();
+};
+
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   // clear spinner on mount
   useEffect(() => spinnerProps.hideSpinner(), []);
+
+  // handle the route /nih-callback?token=<token>
+  // handle the route /ras-callback?code=<code>
+  const {token, code} = queryParamsStore.getValue();
+  useEffect(() => {
+    if (token) {
+      handleTerraShibbolethCallback(token, spinnerProps);
+    }
+  }, [token] );
+  useEffect(() => {
+    if (code) {
+      handleRasCallback(code, spinnerProps);
+    }
+  }, [code] );
 
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
