@@ -10,6 +10,7 @@ describe('Dataset UI Test', () => {
     await signInWithAccessToken(page);
   });
 
+  // Test reuse workspace that is older than 10 min. Test does not create new workspace.
   test('Cannot Create Dataset if Required Fields are Empty', async () => {
     // Find all workspaces that are older than 10 min.
     const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 10);
