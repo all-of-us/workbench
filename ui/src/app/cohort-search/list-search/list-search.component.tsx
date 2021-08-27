@@ -330,21 +330,23 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       }
     }
 
-    getCriteriaInfoByDomain(domain, value, surveyName) {
-      const {workspace: {id, namespace}, searchContext: {standard}} = this.props;
-      // Remove the standard null check once https://precisionmedicineinitiative.atlassian.net/browse/RW-6982 is done
-      return serverConfigStore.get().config.enableStandardSourceDomains
-          ? cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, standard == null ? true : standard, value, surveyName)
-          : cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value, surveyName);
+    // Temp function to get the correct results based on enableStandardSourceDomains config flag
+    getResults(value: string) {
+      if (serverConfigStore.get().config.enableStandardSourceDomains) {
+        this.getResultsBySourceOrStandard(value);
+      } else {
+        this.getAllResults(value);
+      }
     }
 
-    getResults = async(value: string) => {
+    // Old function that searches both source and standard
+    getAllResults = async(value: string) => {
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
         const surveyName = selectedSurvey || 'All';
-        const resp = await this.getCriteriaInfoByDomain(domain, value.trim(), surveyName);
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(namespace, id, domain, value.trim(), surveyName);
         const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
@@ -357,9 +359,30 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         }
         this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
+        console.error(err);
         this.setState({apiError: true});
       } finally {
         this.setState({loading: false, sourceMatch});
+      }
+    }
+
+    // Searches either source or standard based on value of searchSource in state
+    getResultsBySourceOrStandard = async(value: string) => {
+      try {
+        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true});
+        const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;
+        const {searchSource} = this.state;
+        const surveyName = selectedSurvey || 'All';
+        const resp = await cohortBuilderApi().findCriteriaByDomain(namespace, id, domain, !searchSource, value.trim(), surveyName);
+        const data = source !== 'cohort' && this.isSurvey
+          ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
+          : resp.items;
+        this.setState({data, totalCount: resp.totalCount});
+      } catch (err) {
+        console.error(err);
+        this.setState({apiError: true});
+      } finally {
+        this.setState({loading: false});
       }
     }
 
@@ -473,6 +496,13 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       return environment.publicUiUrl + '/ehr/' + this.dataBrowserDomainTitle() + '/' + conceptId;
     }
 
+    toggleSearchSource() {
+      this.setState(
+        (state) => ({searchSource: !state.searchSource}),
+        () => this.getResults(this.state.searchTerms || '')
+        );
+    }
+
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
       const attributes = this.props.searchContext.source === 'cohort' && row.hasAttributes;
@@ -551,9 +581,8 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
         <style>{`
-          body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider,
-          body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:hover {
-            background: ${colors.select}
+          body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
+            box-shadow: none
           }
         `}</style>
         {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
@@ -602,16 +631,21 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
                   Return to source code
                 </Clickable>.
               </div>}
-              {!!totalCount && <div>
-                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
-              </div>}
             </React.Fragment>}
-            {!serverConfigStore.get().config.enableStandardSourceDomains && this.checkSource &&
-              <InputSwitch checked={searchSource}
-                           onChange={() => this.setState((state) => ({searchSource: !state.searchSource}))}
-                           style={{float: 'right'}}
-              />
-            }
+            <div>
+              {!loading && !!totalCount && <span>
+                There are {totalCount.toLocaleString()} results{!!cdrVersion && <span> in {cdrVersion.name}</span>}
+              </span>}
+              {serverConfigStore.get().config.enableStandardSourceDomains && this.checkSource &&
+                <span style={{float: 'right'}}>
+                  <span style={{display: 'table-cell', paddingRight: '0.35rem'}}>Show as concept sources</span>
+                  <InputSwitch checked={searchSource}
+                               disabled={loading}
+                               onChange={() => this.toggleSearchSource()}
+                               style={{display: 'table-cell', boxShadow: 0}}/>
+                </span>
+              }
+            </div>
           </div>
         </div>
         {!loading && !!displayData && <div style={styles.listContainer}>
