@@ -22,10 +22,12 @@ describe('Duplicate workspace', () => {
    * - Enter a new workspace name and save the duplicate.
    * - Delete duplicate workspace.
    */
-  test('OWNER can duplicate workspace via Workspace card', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
-    await workspaceCard.asElementHandle().hover();
-    await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
+  test('Duplicate workspace', async () => {
+    await findOrCreateWorkspace(page, { workspaceName });
+
+    // Access Workspace Duplicate page via Workspace action menu.
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
 
     // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -42,7 +44,6 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     // Duplicate workspace Data page is loaded.
-    const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
     expect(page.url()).toContain(duplicateWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
 
@@ -56,35 +57,7 @@ describe('Duplicate workspace', () => {
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
   });
 
-  test('OWNER can access workspace duplicate page via Workspace action menu', async () => {
-    await findOrCreateWorkspace(page, { workspaceName });
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
-
-    const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.waitForLoad();
-
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    expect(await finishButton.isCursorNotAllowed()).toBe(true);
-
-    // Fill out Workspace Name
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    await workspaceEditPage.fillOutWorkspaceName();
-    // select "Share workspace with same set of collaborators radiobutton
-    await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
-    await workspaceEditPage.requestForReviewRadiobutton(false);
-    await finishButton.waitUntilEnabled();
-    expect(await finishButton.isCursorNotAllowed()).toBe(false);
-
-    // Click CANCEL button.
-    const cancelButton = workspaceEditPage.getCancelButton();
-    await cancelButton.clickAndWait();
-
-    await dataPage.waitForLoad();
-  });
-
-  test('OWNER cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
+  test('Cannot duplicate workspace with older CDR version without consent to restrictions', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
