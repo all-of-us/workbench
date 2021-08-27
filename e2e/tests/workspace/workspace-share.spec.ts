@@ -6,7 +6,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeWorkspaceName } from 'utils/str-utils';
 
-describe('Workspace Share Modal', () => {
+describe('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [
     {
       accessRole: WorkspaceAccessLevel.Writer,
@@ -20,10 +20,9 @@ describe('Workspace Share Modal', () => {
     }
   ];
 
-  // Create new workspace with default CDR version
   const workspace = makeWorkspaceName();
 
-  test.each(assignAccess)('Share workspace %s', async (assign) => {
+  test('Share workspace to READER and WRITER', async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
@@ -34,23 +33,22 @@ describe('Workspace Share Modal', () => {
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    let collaborators = await aboutPage.findUsersInCollaboratorList();
-
-    // Verify No WRITER or READER exists.
-    expect(collaborators.has(assign.accessRole)).toBeFalsy();
-
-    const shareWorkspaceModal = await aboutPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
-    await aboutPage.waitForLoad();
+    for (const assign of assignAccess) {
+      const shareWorkspaceModal = await aboutPage.shareWorkspace();
+      await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
+      await aboutPage.waitForLoad();
+    }
 
     await reloadAboutPage();
-    collaborators = await aboutPage.findUsersInCollaboratorList();
+    const collaborators = await aboutPage.findUsersInCollaboratorList();
     // Verify OWNER (login user) information.
     expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
       true
     );
     // Verify WRITER or READER information.
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+    for (const assign of assignAccess) {
+      expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
+    }
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
@@ -88,26 +86,25 @@ describe('Workspace Share Modal', () => {
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
-  test.each(assignAccess)('Stop share workspace %s', async (assign) => {
+  test('Stop share workspace', async () => {
     await signInWithAccessToken(page);
 
     // Find workspace created by previous test. If not found, test will fail.
     const workspaceCard = await findWorkspaceCard(page, workspace);
     const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
 
-    // Verify WRITER or READER exists in Collaborator list.
-    let collaborators = await aboutPage.findUsersInCollaboratorList();
-    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
-    collaborators.clear();
-
-    await aboutPage.removeCollaborator(assign.userEmail);
-    await aboutPage.waitForLoad();
-
+    // Stop share.
+    for (const assign of assignAccess) {
+      await aboutPage.removeCollaborator(assign.userEmail);
+      await aboutPage.waitForLoad();
+    }
     await reloadAboutPage();
 
-    // Verify WRITER or READER is gone in Collaborator list.
-    collaborators = await aboutPage.findUsersInCollaboratorList();
-    expect(collaborators.has(assign.accessRole)).toBe(false);
+    // Verify WRITER and READER are gone in Collaborator list.
+    const collaborators = await aboutPage.findUsersInCollaboratorList();
+    for (const assign of assignAccess) {
+      expect(collaborators.has(assign.accessRole)).toBe(false);
+    }
   });
 
   // Open Data page then back to About page in order to refresh Collaborators list in page.
