@@ -140,7 +140,7 @@ describe('Workspace UI Test', () => {
 
     const cards = await findAllCards(page);
     if (cards.length === 0) {
-      logger.warning('Do not find a suitable existing workspace (created at least 30 min ago). Test end early.');
+      logger.info('Do not find a suitable existing workspace (created at least 30 min ago). Test end early.');
       return; // End test now, no Workspace card.
     }
 
