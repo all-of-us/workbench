@@ -21,7 +21,6 @@ import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Profile} from 'generated/fetch';
 
-
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
     margin: 'auto',
@@ -158,7 +157,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
               <HtmlViewer
                   ariaLabel='data user code of conduct agreement'
                   containerStyles={{margin: '2rem 0 1rem'}}
-                  filePath={'assets/documents/data-user-code-of-conduct.html'}
+                  filePath={'/data-user-code-of-conduct.html'}
                   onLastPage={() => this.setState({proceedDisabled: false})}
               />
               <FlexRow style={styles.dataUserCodeOfConductFooter}>

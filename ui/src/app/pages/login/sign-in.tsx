@@ -254,7 +254,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         }}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
-          filePath='/assets/documents/aou-tos.html'
+          filePath='/aou-tos.html'
           onComplete={() => {
             AnalyticsTracker.Registration.TOS();
             this.setState({
