@@ -10,8 +10,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
-import CohortBuildPage from 'app/page/cohort-build-page';
+import { MenuOption, ResourceCard } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 
@@ -21,71 +20,6 @@ describe('Create Cohorts from Program Data criteria', () => {
   });
 
   const workspace = makeWorkspaceName();
-
-  test('Discard changes', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.clickAddCohortsButton();
-
-    // Landing in Build Cohort Criteria page.
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-
-    // Copy button is not found.
-    expect(await cohortBuildPage.getCopyButton().exists()).toBeFalsy();
-    // Trash (Delete) button is not found.
-    expect(await cohortBuildPage.getDeleteButton().exists()).toBeFalsy();
-    // Export button is not found.
-    expect(await cohortBuildPage.getExportButton().exists()).toBeFalsy();
-    // Create Cohort button is not found.
-    expect(await cohortBuildPage.getCreateCohortButton().exists()).toBeFalsy();
-
-    // Include Participants Group 1.
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.addCriteria([MenuOption.PhysicalMeasurements]);
-    let addIcon = ClrIconLink.findByName(page, {
-      name: PhysicalMeasurementsCriteria.WheelChairUser,
-      iconShape: 'plus-circle',
-      ancestorLevel: 2
-    });
-    await addIcon.click();
-    const message = await group1.criteriaAddedMessage();
-    expect(message).toEqual('Criteria Added');
-    await group1.finishAndReviewButton();
-
-    const reviewCriteriaSidebar = new ReviewCriteriaSidebar(page);
-    await reviewCriteriaSidebar.waitUntilVisible();
-
-    // Remove Selected Criteria in sidebar.
-    await reviewCriteriaSidebar.removeSelectedCriteria(PhysicalMeasurementsCriteria.WheelChairUser);
-
-    // Add a different criteria.
-    addIcon = ClrIconLink.findByName(page, {
-      name: PhysicalMeasurementsCriteria.PregnantEnrollment,
-      iconShape: 'plus-circle',
-      ancestorLevel: 2
-    });
-    await addIcon.click();
-    expect(Number(await reviewCriteriaSidebar.getCriteriaCount())).toEqual(1);
-
-    // Click Back button to close sidebar.
-    await reviewCriteriaSidebar.clickButton(LinkText.Back);
-    await reviewCriteriaSidebar.waitUntilClose();
-
-    // Click Data tab, Warning (Discard Changes) modal should open. Finish discarding changes.
-    await dataPage.openDataPage({ waitPageChange: false });
-    const warning = await cohortBuildPage.discardChangesConfirmationDialog();
-    const expectedWarningText =
-      'Your cohort has not been saved. If you’d like to save your cohort criteria,' +
-      ' please click CANCEL and save your changes';
-
-    const foundMatch = warning.some((item) => item.indexOf(expectedWarningText) !== -1);
-    expect(foundMatch).toBe(true);
-
-    // Changes are discarded, back to the Data page.
-    await dataPage.waitForLoad();
-  });
 
   // Add new cohort includes 4 categories: BMI; Weight; Height; Blood Pressure Hypotensive.
   // There are more physical measurements categories but they are not tested here.

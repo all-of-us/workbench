@@ -4,14 +4,14 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { findAllCards, signInWithAccessToken } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import ReactSelect from 'app/element/react-select';
-import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
+import { MenuOption } from 'app/text-labels';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { getPropValue } from 'utils/element-utils';
 import { waitForNumericalString } from 'utils/waits-utils';
 import * as fp from 'lodash/fp';
-import ShareModal from 'app/modal/share-modal';
+import { logger } from 'libs/logger';
 
-describe('Workspace UI tests', () => {
+describe('Workspace UI Test', () => {
   const charLimitXpath = '//*[@data-test-id="characterLimit"]';
 
   beforeEach(async () => {
@@ -124,8 +124,12 @@ describe('Workspace UI tests', () => {
       const cards = await findAllCards(page);
       // If any card exists, get its Access Level and compare with filter level.
       for (const card of cards) {
+        // Check one card only. There could be a lot of cards. We don't need to check every one.
         const workspaceAccessLevel = await card.getWorkspaceAccessLevel();
         expect(workspaceAccessLevel).toEqual(accessLevel.toUpperCase());
+        // Verify: Share, Edit, Duplicate and Delete actions.
+        await card.verifyWorkspaceCardMenuOptions(workspaceAccessLevel);
+        break;
       }
     }
   });
@@ -136,6 +140,7 @@ describe('Workspace UI tests', () => {
 
     const cards = await findAllCards(page);
     if (cards.length === 0) {
+      logger.warning('Do not find a suitable existing workspace (created at least 30 min ago). Test end early.');
       return; // End test now, no Workspace card.
     }
 
@@ -172,26 +177,6 @@ describe('Workspace UI tests', () => {
     // Back to Home page.
     await homePage.waitForLoad();
     expect(await homePage.isLoaded()).toBe(true);
-  });
-
-  test('Workspace Card Snowman menu options', async () => {
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
-
-    const cards = await findAllCards(page);
-    if (cards.length === 0) {
-      return; // End test now, no Workspace card.
-    }
-    const selectedCard = fp.shuffle(cards)[0];
-
-    // Verify: Share, Edit, Duplicate and Delete actions are available for click.
-    await selectedCard.verifyWorkspaceCardMenuOptions(WorkspaceAccessLevel.Owner);
-
-    // Verify Share Modal is accessible.
-    await selectedCard.selectSnowmanMenu(MenuOption.Share, { waitForNav: false });
-    const shareModal = new ShareModal(page);
-    await shareModal.waitUntilVisible();
-    await shareModal.clickButton(LinkText.Cancel, { waitForClose: true });
   });
 
   /*
