@@ -232,7 +232,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.props.hideSpinner();
     this.getFederatedWorkspaceInformation();
   }
-  
+
   componentDidUpdate() {
     this.getFederatedWorkspaceInformation();
   }
