@@ -90,9 +90,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const notebookCard = await DataResourceCard.findCard(this.page, notebookName);
     await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: false });
     await waitWhileLoading(this.page);
-    const cloneName = `Duplicate of ${notebookName}`; // name of clone notebook
-    await DataResourceCard.findCard(this.page, cloneName);
-    return cloneName;
+    return `Duplicate of ${notebookName}`; // name of clone notebook
   }
 
   /**
