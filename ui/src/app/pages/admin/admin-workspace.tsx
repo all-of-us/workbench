@@ -233,6 +233,10 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.getFederatedWorkspaceInformation();
   }
 
+  componentDidUpdate() {
+    this.getFederatedWorkspaceInformation();
+  }
+
   async getFederatedWorkspaceInformation() {
     const {urlParams: { workspaceNamespace } } = this.props;
 
