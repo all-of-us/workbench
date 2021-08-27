@@ -23,7 +23,9 @@ import {
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   diskPricePerMonth,
   findGpu,
-  findMachineByName, gpuBases,
+  findMachineByName,
+  getValidGpuTypes,
+  gpuTypeToDisplayName,
   Machine,
   machineRunningCost,
   machineRunningCostBreakdown,
@@ -36,9 +38,11 @@ import {
 import {formatUsd} from 'app/utils/numbers';
 import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {
+  compareGpu,
   diffsToUpdateMessaging,
   getRuntimeConfigDiffs,
   RuntimeConfig,
+  RuntimeDiffState,
   RuntimeStatusRequest,
   useCustomRuntime,
   useRuntimeStatus
@@ -501,22 +505,13 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
   } = gpuConfig || {};
   const [selectedGpuType, setSelectedGpuType] = useState<string>(gpuType);
   const [selectedNumOfGpus, setSelectedNumOfGpus] = useState<number>(numOfGpus);
-  const gpuTypeOptions = fp.flow(
-    fp.filter(({machineName: name}) => name === selectedMachine.name),
-    fp.map('gpuType'),
-    fp.union('gpuType'),
-    fp.sortBy(fp.identity)
-  )(gpuBases);
-  const gpuNumOptions = fp.flow(
-    fp.filter(({machineName: name, gpuType: type}) => name === selectedMachine.name && type === selectedGpuType),
-    fp.map('gpuNum'),
-    fp.union('gpuNum'),
-    fp.sortBy(fp.identity)
-  )(gpuBases);
+  const validGpuOptions = getValidGpuTypes(selectedMachine.cpu, selectedMachine.memory);
+  const validGpuNames = fp.flow(fp.map('name'), fp.uniq, fp.sortBy('price'))(validGpuOptions);
+  const validNumGpusOptions = fp.flow(fp.filter({ type: selectedGpuType }), fp.map('numGpus'))(validGpuOptions);
   const [enableGpu, setEnableGpu] = useState<boolean>(!!gpuConfig);
 
   useEffect(() => {
-    onChange(enableGpu && gpuTypeOptions.length > 0 ? {
+    onChange(enableGpu && validGpuOptions.length > 0 ? {
       gpuType: selectedGpuType,
       numOfGpus: selectedNumOfGpus,
     } : null);
@@ -536,16 +531,17 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
         <label style={styles.label} htmlFor='gpu-type'>GpuType</label>
         <Dropdown id={`gpu-type`}
                   style={{width: '8rem'}}
-                  options={gpuTypeOptions}
+                  options={validGpuNames}
                   onChange={
-                    ({value}) => setSelectedGpuType(value)
+                    ({value}) => {
+                      setSelectedGpuType(fp.find(({ name: gpuName }) => gpuName === value, validGpuOptions).type); }
                   }
                   disabled={disabled}
-                  value={selectedGpuType}/>
+                  value={gpuTypeToDisplayName(selectedGpuType)}/>
         <label style={styles.label} htmlFor='gpu-num'>GPUs</label>
         <Dropdown id={`gpu-num`}
                   style={{width: '3rem'}}
-                  options={gpuNumOptions}
+                  options={validNumGpusOptions}
                   onChange={({value}) => setSelectedNumOfGpus(value)}
                   disabled={disabled}
                   value={selectedNumOfGpus}/>
@@ -849,7 +845,7 @@ const CostEstimator = ({
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
   const workerMachine = findMachineByName(workerMachineType);
-  const gpu = gpuConfig ? findGpu(machine.name, gpuConfig.gpuType, gpuConfig.numOfGpus) : null;
+  const gpu = gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null;
   const costConfig = {
     computeType, masterMachine: machine, gpu, masterDiskSize: runtimeCtx.enablePD && !runtimeCtx.dataprocExists ? pdSize : diskSize,
     numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
@@ -1146,6 +1142,7 @@ const RuntimePanel = fp.flow(
   const enablePD = serverConfigStore.get().config.enablePersistentDisk && (pdExists || !gceExists);
   const unattachedPdExists = enablePD && !gceExists && pdExists;
   const pdSizeReduced = selectedPdSize < pdSize;
+  const gpuConfigDiffType = compareGpu(initialRuntimeConfig, newRuntimeConfig).differenceType;
   // A runtime context can wrap/pass complex runtime context and also make the code cleaner
   const runtimeCtx = {
     runtimeExists: runtimeExists,
@@ -1183,11 +1180,12 @@ const RuntimePanel = fp.flow(
     // Use gceConfig when (PD feature is not enabled) OR (increase PD size or update machineType of an existing runtime with PD attached)
     // OR (update an existing runtime with no PD attached).
     // post launch PD when all existing running Runtime shutdown.
-    if (!runtimeCtx.enablePD || (gceExists && !pdSizeReduced)) {
+    if (!runtimeCtx.enablePD || (gceExists && !pdSizeReduced) && gpuConfigDiffType === RuntimeDiffState.NO_CHANGE) {
       return {
         gceConfig: {
           machineType: runtime.machine.name,
-          diskSize: !runtimeCtx.enablePD ? runtime.diskSize : runtime.pdSize
+          diskSize: !runtimeCtx.enablePD ? runtime.diskSize : runtime.pdSize,
+          gpuConfig: runtime.gpuConfig
         }
       };
     } else {
@@ -1200,7 +1198,8 @@ const RuntimePanel = fp.flow(
             size: runtime.pdSize,
             diskType: DiskType.Standard,
             labels: {}
-          }
+          },
+          gpuConfig: runtime.gpuConfig
         }
       };
     }
@@ -1277,7 +1276,7 @@ const RuntimePanel = fp.flow(
     computeType: selectedCompute,
     masterMachine: selectedMachine,
     masterDiskSize: diskSize,
-    gpu: gpuConfig ? findGpu(selectedMachine.name, gpuConfig.gpuType, gpuConfig.numOfGpus) : null,
+    gpu: gpuConfig ? findGpu(gpuConfig.gpuType, gpuConfig.numOfGpus) : null,
     numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
     numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
     workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
@@ -1460,17 +1459,18 @@ const RuntimePanel = fp.flow(
                         disabled={disableControls}
                         diskSize={diskSize}
                     />}
-                {
-                  enableGpu && selectedCompute === ComputeType.Standard &&
-                  <GpuConfigSelector
-                      disabled={disableControls}
-                      onChange={config => {
-                        setSelectedGpuConfig(config);
-                      }}
-                      selectedMachine={selectedMachine}
-                      gpuConfig={selectedGpuConfig}/>
-                }
              </div>
+              <FlexRow style={{justifyContent: 'space-between'}}>
+                {enableGpu && selectedCompute === ComputeType.Standard &&
+                <GpuConfigSelector
+                    disabled={disableControls}
+                    onChange={config => {
+                      setSelectedGpuConfig(config);
+                    }}
+                    selectedMachine={selectedMachine}
+                    gpuConfig={selectedGpuConfig}/>
+                }
+              </FlexRow>
              <FlexRow style={{marginTop: '1rem', justifyContent: 'space-between'}}>
                <FlexColumn>
                  <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
@@ -1556,16 +1556,16 @@ const RuntimePanel = fp.flow(
               {runtimeExists || (pdExists && pdSizeReduced) ? renderNextButton() : renderCreateButton()}
             </FlexRow>
         }
-         </Fragment>; ],
-        elContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
-                                                           newRuntimeConfig={newRuntimeConfig}
-                                                           onCancel={() => {
-                                                             setPanelContent(PanelContent.Customize);
-                                                           }}
-                                                           updateButton={renderUpdateButton()}
-                                                           runtimeCtx = {runtimeCtx}
-          />],
-      [PanelContent.Disabled, () => <DisabledPanel/>]; ); }
+    </Fragment>],
+      [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
+                                                         newRuntimeConfig={newRuntimeConfig}
+                                                         onCancel={() => {
+                                                           setPanelContent(PanelContent.Customize);
+                                                         }}
+                                                         updateButton={renderUpdateButton()}
+                                                         runtimeCtx={runtimeCtx}
+        />],
+        [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div > ;
 });
 

@@ -129,7 +129,7 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
   };
 };
 
-const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+export const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
   const oldGpuExists = !!oldRuntime.gpuConfig;
   const newGpuExists = !!newRuntime.gpuConfig;
   return {
@@ -138,7 +138,7 @@ const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): Runti
     new: newGpuExists ?  `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
     differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists)
     && (oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
-    oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE
+    oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
