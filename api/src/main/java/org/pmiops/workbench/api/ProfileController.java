@@ -538,8 +538,6 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
-    // Dual write then deprecate the one in userService
-    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -551,8 +549,6 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    // Dual write then deprecate the one in userService
-    accessModuleService.updateBypassTime(userId, request.getModuleName(), request.getIsBypassed());
     userService.updateBypassTime(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }

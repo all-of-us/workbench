@@ -30,6 +30,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -65,15 +66,19 @@ public class InstitutionServiceTest extends SpringTest {
           .organizationTypeEnum(testInst.getOrganizationTypeEnum());
 
   private DbAccessTier registeredTier;
+  private DbAccessTier controlledTier;
 
   private InstitutionTierConfig rtTierConfig;
+  private InstitutionTierConfig ctTierConfig;
 
   @BeforeEach
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
+    ctTierConfig = new InstitutionTierConfig().accessTierShortName(controlledTier.getShortName());
   }
 
   @Test
@@ -954,6 +959,159 @@ public class InstitutionServiceTest extends SpringTest {
 
     assertThat(service.eRaRequiredForTier(existingInst, REGISTERED_TIER_SHORT_NAME))
         .isEqualTo(true);
+  }
+
+  @Test
+  public void testEligibleTiers_institutionNotFound() {
+    final DbUser user = createUser("user@broad.org");
+    assertThat(service.getUserTierEligibilities(user)).isEmpty();
+  }
+
+  @Test
+  public void testEligibleTiers_registeredTier() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true));
+  }
+
+  @Test
+  public void testEligibleTiers_registeredTierAndControlled() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")),
+                        ctTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(true)
+                            .accessTierShortName(controlledTier.getShortName())
+                            .emailAddresses(ImmutableList.of("user@broad.org")))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true),
+            new UserTierEligibility()
+                .accessTierShortName(controlledTier.getShortName())
+                .eraRequired(true)
+                .eligible(true));
+  }
+
+  @Test
+  public void testEligibleTiers_institutionHasRtAndCt_userEligibleForRt() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")),
+                        ctTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(controlledTier.getShortName())
+                            .emailAddresses(ImmutableList.of("user2@broad.org")))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true),
+            new UserTierEligibility()
+                .accessTierShortName(controlledTier.getShortName())
+                .eraRequired(false)
+                .eligible(false));
+  }
+
+  @Test
+  public void testEligibleTiers_institutionHasRtAndCt_institutionNotSignedForCt() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.DOMAINS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailDomains(ImmutableList.of("broad.org", "verily.com")),
+                        ctTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.NO_ACCESS)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName()))));
+    final DbUser user = createUser("user@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(true));
+  }
+
+  @Test
+  public void testEligibleTiers_emailNotMatch() {
+    final Institution inst =
+        service.createInstitution(
+            new Institution()
+                .shortName("Broad")
+                .displayName("The Broad Institute")
+                .organizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION)
+                .tierConfigs(
+                    ImmutableList.of(
+                        rtTierConfig
+                            .membershipRequirement(InstitutionMembershipRequirement.ADDRESSES)
+                            .eraRequired(false)
+                            .accessTierShortName(registeredTier.getShortName())
+                            .emailAddresses(ImmutableList.of("user@broad.org")))));
+    final DbUser user = createUser("user2@broad.org");
+    createAffiliation(user, inst.getShortName());
+    assertThat(service.getUserTierEligibilities(user))
+        .containsExactly(
+            new UserTierEligibility()
+                .accessTierShortName(registeredTier.getShortName())
+                .eraRequired(false)
+                .eligible(false));
   }
 
   private DbUser createUser(String contactEmail) {

@@ -541,18 +541,24 @@ jobs:
           at: .
       - steps: << parameters.optional_steps >>
       - run:
-          name: "Export e2e test users to environment variables"
-          command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
+          name: "Override environment variables for e2e test users"
+          working_directory: ~/workbench/e2e
+          command: cp .env.circleci.<< parameters.env_name >> .env
+      - run:
+          name: "Echo environment variables"
+          command: |
+            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
+            echo "TEST_MODE=${TEST_MODE}"
+      - run:
+          name: "Export user password"
+          command: |
+            echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
+            source $BASH_ENV
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
             - launch-local-ui
-      - run:
-          name: "echo WORKBENCH_ENV & TEST_MODE"
-          command: |
-            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
-            echo "TEST_MODE=${TEST_MODE}"
       - gcloud-auth-login:
           # Needed for yarn test, which invokes generate-impersonated-user-token
           with_application_default_credentials: true
@@ -570,18 +576,22 @@ jobs:
             TESTS_FILE=$(circleci tests split --split-by=timings e2e_tests.txt)
             yarn test:ci $TESTS_FILE
           no_output_timeout: 30m
-      - run:
-          name: Create circleci_parameters.json
-          working_directory: ~/workbench/e2e
-          command: |
-            echo "{ \
-              \"circleBranch\": \"${CIRCLE_BRANCH}\", \
-              \"circleJob\": \"${CIRCLE_JOB}\", \
-              \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
-              \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
-              \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
-              }" > ./logs/circleci_parameters.json
-          when: always
+      - when:
+          condition:
+            equal: [ "test", << parameters.env_name >> ]
+          steps:
+            - run:
+                name: Create circleci_parameters.json
+                working_directory: ~/workbench/e2e
+                command: |
+                  echo "{ \
+                    \"circleBranch\": \"${CIRCLE_BRANCH}\", \
+                    \"circleJob\": \"${CIRCLE_JOB}\", \
+                    \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
+                    \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
+                    \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
+                    }" > ./logs/circleci_parameters.json
+                when: always
       - store_artifacts:
           path: ~/workbench/e2e/logs
           destination: logs

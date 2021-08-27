@@ -93,7 +93,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -103,7 +103,8 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
+    "enablePersistentDisk": false,
+    "enableAccessModuleRewrite" : true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
@@ -125,8 +126,8 @@
     "maxRowsPerInsert": 2500
   },
   "ras": {
-    "host": "",
-    "clientId": ""
+    "host": "https:\/\/sts.nih.gov",
+    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0"
   },
   "accessRenewal": {
     "expiryDays": 365,

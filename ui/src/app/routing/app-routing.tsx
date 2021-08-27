@@ -37,7 +37,7 @@ import {
   urlParamsStore
 } from 'app/utils/navigation';
 import {
-  authStore,
+  authStore, diskStore,
   runtimeStore,
   serverConfigStore,
   stackdriverErrorReporterStore, useStore
@@ -304,6 +304,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
             }
             currentWorkspaceStore.next(workspace);
             runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined, runtimeLoaded: false});
+            diskStore.set({workspaceNamespace: workspace.namespace, persistentDisk: undefined});
             pollAborter.abort();
             const newPollAborter = new AbortController();
             setPollAborter(newPollAborter);

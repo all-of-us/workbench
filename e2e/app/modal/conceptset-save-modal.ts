@@ -53,7 +53,7 @@ export default class ConceptSetSaveModal extends Modal {
 
       // Type in Description
       const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description' }, this);
-      await descriptionTextarea.type(faker.lorem.words());
+      await descriptionTextarea.paste(faker.lorem.words());
     } else {
       let selectedValue: string;
       if (existingConceptSetName) {

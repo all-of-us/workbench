@@ -93,7 +93,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -103,7 +103,8 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
     "enableFireCloudV2Billing" : false,
-    "enableAccessModuleRewrite" : false,
+    "enablePersistentDisk": false,
+    "enableAccessModuleRewrite" : true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
@@ -125,8 +126,8 @@
     "maxRowsPerInsert": 2500
   },
   "ras": {
-    "host": "",
-    "clientId": ""
+    "host": "https:\/\/stsstg.nih.gov",
+    "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
   },
   "accessRenewal": {
     "expiryDays": 3650,
