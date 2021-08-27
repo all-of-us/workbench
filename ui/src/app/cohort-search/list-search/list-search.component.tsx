@@ -500,7 +500,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       this.setState(
         (state) => ({searchSource: !state.searchSource}),
         () => this.getResults(this.state.searchTerms || '')
-        );
+      );
     }
 
     renderRow(row: any, child: boolean, elementId: string) {
