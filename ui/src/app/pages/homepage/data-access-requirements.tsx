@@ -14,7 +14,12 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
-import {buildRasRedirectUrl, getAccessModuleStatusByName, getRegistrationTask} from 'app/utils/access-utils';
+import {
+  buildRasRedirectUrl,
+  getAccessModuleStatusByName,
+  getRegistrationTask,
+  redirectToNiH, redirectToRas
+} from 'app/utils/access-utils';
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
@@ -203,6 +208,18 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   );
 };
 
+
+// a kluge until we have fully migrated from the Registration Dashboard:
+// getRegistrationTask() has onClick() functions for every module, which is generally what we want
+// however, the ERA and RAS modules' functions include routing back to callback locations, which default to
+// the Registration Dashboard.  We want to specify the callbacks which route back here instead.
+const getModuleActionFn = (navigate, module: AccessModule): Function => {
+  return cond(
+      [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
+      [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
+    () => getRegistrationTask(navigate, module).onClick);
+};
+
 const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
@@ -222,7 +239,7 @@ const Module = (props: ModuleProps): JSX.Element => {
   const eligible = true; // TODO
   const status = getAccessModuleStatusByName(profile, module);
   const statusTextMaybe = bypassedOrCompletedText(status);
-  const {onClick} = getRegistrationTask(navigate, module);
+  const moduleAction = getModuleActionFn(navigate, module);
 
   // whether this module needs a profile reload
   const [needsReload, setNeedsReload] = useState(false);
@@ -245,7 +262,7 @@ const Module = (props: ModuleProps): JSX.Element => {
     return active ?
         <Link onClick={() => {
           setNeedsReload(true);
-          onClick();
+          moduleAction();
         }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
         </Link> :
@@ -332,7 +349,7 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
     }
   })(async() => {
     spinnerProps.showSpinner();
-    await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl()});
+    await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl(true)});
     spinnerProps.hideSpinner();
   });
 

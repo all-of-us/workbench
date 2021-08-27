@@ -27,6 +27,12 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {WorkspaceLibrary} from 'app/pages/workspace/workspace-library';
 import {WorkspaceList} from 'app/pages/workspace/workspace-list';
 import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
+import {
+  NIH_CALLBACK_PATH,
+  NIH_CALLBACK_PATH_DAR,
+  RAS_CALLBACK_PATH,
+  RAS_CALLBACK_PATH_DAR
+} from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
@@ -114,11 +120,17 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/profile'>
       <ProfilePage routeData={{title: 'Profile'}}/>
     </AppRoute>
-    <AppRoute exact path='/nih-callback'>
+    <AppRoute exact path={NIH_CALLBACK_PATH}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
-    <AppRoute exact path='/ras-callback'>
+    <AppRoute exact path={NIH_CALLBACK_PATH_DAR}>
+      <DataAccessRequirements routeData={{title: 'Data Access Requirements'}}/>
+    </AppRoute>
+    <AppRoute exact path={RAS_CALLBACK_PATH}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
+    </AppRoute>
+    <AppRoute exact path={RAS_CALLBACK_PATH_DAR}>
+      <DataAccessRequirements routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>
