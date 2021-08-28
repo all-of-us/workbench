@@ -52,7 +52,7 @@ describe('Editing Cohort Test', () => {
     // await new CohortActionsPage(page).deleteCohort();
   });
 
-  test('Discard changes during editing', async () => {
+  test('Discard changes', async () => {
     await loadWorkspaceUrl(page, workspaceName);
 
     // Open previously created Cohort.
@@ -80,7 +80,7 @@ describe('Editing Cohort Test', () => {
     await dataPage.waitForLoad();
   });
 
-  test('Save As another new cohort', async () => {
+  test('Save as cohort', async () => {
     await loadWorkspaceUrl(page, workspaceName);
 
     // Open previously created Cohort.
