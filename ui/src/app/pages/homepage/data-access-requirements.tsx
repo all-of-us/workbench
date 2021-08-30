@@ -255,7 +255,7 @@ const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
 // - returns appropriate text for completed and bypassed modules and null for incomplete modules
 // - because of this, truthy return values indicate that a module is either complete or bypassed
 const bypassedOrCompletedText = (status: AccessModuleStatus) => {
-  const {completionEpochMillis, bypassEpochMillis} = status;
+  const {completionEpochMillis, bypassEpochMillis}: AccessModuleStatus = status || {};
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
 
