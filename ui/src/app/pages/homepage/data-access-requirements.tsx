@@ -208,7 +208,8 @@ const duccModule = [
 ];
 
 // in display order
-const allModules: AccessModule[] = [
+// visible for test
+export const allModules: AccessModule[] = [
   ...rtModules,
   ...ctModules,
   ...duccModule,
@@ -295,16 +296,19 @@ const Module = (props: ModuleProps): JSX.Element => {
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
+  // undefined if the feature flag is false
+  const registrationTask = getRegistrationTask(navigate, module);
+
   // kluges until we have fully migrated from the Registration Dashboard:
   // getRegistrationTask() has onClick() functions for every module, which is generally what we want
   // except: the ERA and RAS modules' functions include routing back to callback locations, which default to
   // the Registration Dashboard.  We want to specify the callbacks which route back here instead.
-  // also: we pop up a modal for Two Factor Auth instead of using the tandard task
+  // also: we pop up a modal for Two Factor Auth instead of using the standard task
   const moduleAction = cond(
       [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
       [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
       [module === AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-    () => getRegistrationTask(navigate, module).onClick);
+    () => registrationTask && registrationTask.onClick);
 
   const Refresh = () => <Button type='primary' onClick={reload} style={styles.refreshButton}>
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -331,7 +335,8 @@ const Module = (props: ModuleProps): JSX.Element => {
         <FlexRow style={styles.moduleBox}>{children}</FlexRow>;
   };
 
-  return <FlexRow>
+  return registrationTask ? // filters out the disabled-by-feature-flag modules
+      <FlexRow data-test-id={`module-${module}`}>
     <FlexRow style={styles.moduleCTA}>
       {active && (needsReload ? <Refresh/> : <Next/>)}
     </FlexRow>
@@ -347,7 +352,7 @@ const Module = (props: ModuleProps): JSX.Element => {
     {showTwoFactorAuthModal && <TwoFactorAuthModal
         onClick={() => setShowTwoFactorAuthModal(false)}
         onCancel={() => setShowTwoFactorAuthModal(false)}/>}
-  </FlexRow>;
+  </FlexRow> : null;
 };
 
 const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
