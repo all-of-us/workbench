@@ -220,7 +220,7 @@ const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
 </FlexColumn>;
 
-const Completed = () => <FlexRow style={styles.completed}>
+const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.completed}>
   <FlexColumn>
     <div style={styles.completedHeader}>Thank you for completing all the necessary steps</div>
     <div style={styles.completedText}>Researcher Workbench data access is complete.</div>
@@ -287,8 +287,7 @@ const Module = (props: ModuleProps): JSX.Element => {
 
   const {module, active} = props;
   const eligible = true; // TODO
-  const status = getAccessModuleStatusByName(profile, module);
-  const statusTextMaybe = bypassedOrCompletedText(status);
+  const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
 
   // whether this module needs a profile reload
   const [needsReload, setNeedsReload] = useState(false);
@@ -317,11 +316,11 @@ const Module = (props: ModuleProps): JSX.Element => {
   const ModuleIcon = () => <div style={styles.moduleIcon}>
     {cond(
       // not eligible to complete module
-      [!eligible, () => <MinusCircle style={{color: colors.disabled}}/>],
+      [!eligible, () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
       // eligible and completed or bypassed
-      [eligible && !!statusTextMaybe, () => <CheckCircle style={{color: colors.success}}/>],
+      [eligible && !!statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
       // eligible and incomplete and unbypassed
-      [eligible && !statusTextMaybe, () => <CheckCircle style={{color: colors.disabled}}/>])}
+      [eligible && !statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
 
   const ModuleBox = ({children}) => {
@@ -337,22 +336,22 @@ const Module = (props: ModuleProps): JSX.Element => {
 
   return registrationTask ? // filters out the disabled-by-feature-flag modules
       <FlexRow data-test-id={`module-${module}`}>
-    <FlexRow style={styles.moduleCTA}>
-      {active && (needsReload ? <Refresh/> : <Next/>)}
-    </FlexRow>
-    <ModuleBox>
-      <ModuleIcon/>
-      <FlexColumn>
-        <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
-          {moduleLabels.get(module)}
-        </div>
-        {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
-      </FlexColumn>
-    </ModuleBox>
-    {showTwoFactorAuthModal && <TwoFactorAuthModal
-        onClick={() => setShowTwoFactorAuthModal(false)}
-        onCancel={() => setShowTwoFactorAuthModal(false)}/>}
-  </FlexRow> : null;
+        <FlexRow style={styles.moduleCTA}>
+          {active && (needsReload ? <Refresh/> : <Next/>)}
+        </FlexRow>
+        <ModuleBox>
+          <ModuleIcon/>
+          <FlexColumn>
+            <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+              {moduleLabels.get(module)}
+            </div>
+            {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+          </FlexColumn>
+        </ModuleBox>
+        {showTwoFactorAuthModal && <TwoFactorAuthModal
+            onClick={() => setShowTwoFactorAuthModal(false)}
+            onCancel={() => setShowTwoFactorAuthModal(false)}/>}
+      </FlexRow> : null;
 };
 
 const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
@@ -455,7 +454,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     fp.flow(
       fp.find(module => {
         const status = getAccessModuleStatusByName(profile, module as AccessModule);
-        return !bypassedOrCompletedText(status);
+        // filter out disabled-by-FF modules by requiring 'status' here
+        return status && !bypassedOrCompletedText(status);
       }),
       setActiveModule
     )

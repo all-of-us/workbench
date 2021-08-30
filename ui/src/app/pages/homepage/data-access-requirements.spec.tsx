@@ -2,7 +2,7 @@ import * as React from "react";
 import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
-import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import {allModules, DataAccessRequirements} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -20,6 +20,11 @@ describe('DataAccessRequirements', () => {
     };
 
     const findModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}"]`);
+    const findIneligibleModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-ineligible"]`);
+    const findCompleteModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-complete"]`);
+    const findIncompleteModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}-incomplete"]`);
+
+    const findCompletionBanner = (wrapper) => wrapper.find('[data-test-id="dar-completed"]');
 
     beforeEach(async() => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
@@ -50,6 +55,39 @@ describe('DataAccessRequirements', () => {
         serverConfigStore.set({config: {...defaultServerConfig, enableComplianceTraining: false}});
         const wrapper = component();
         expect(findModule(wrapper, AccessModule.COMPLIANCETRAINING).exists()).toBeFalsy();
+    });
+
+    it('should render all modules as incomplete', () => {
+        const wrapper = component();
+        allModules.forEach(module => {
+            expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findCompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+        expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
+    });
+
+    it('should render all modules as complete', () => {
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => {return {moduleName: module, bypassEpochMillis: 1}})
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        allModules.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+        expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
     });
 
     it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
