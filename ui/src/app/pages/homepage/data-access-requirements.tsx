@@ -26,6 +26,7 @@ import {
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import {TwoFactorAuthModal} from "./two-factor-auth-modal";
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -268,17 +269,6 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
 };
 
 
-// a kluge until we have fully migrated from the Registration Dashboard:
-// getRegistrationTask() has onClick() functions for every module, which is generally what we want
-// however, the ERA and RAS modules' functions include routing back to callback locations, which default to
-// the Registration Dashboard.  We want to specify the callbacks which route back here instead.
-const getModuleActionFn = (navigate, module: AccessModule): Function => {
-  return cond(
-      [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
-      [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
-    () => getRegistrationTask(navigate, module).onClick);
-};
-
 const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
@@ -298,10 +288,23 @@ const Module = (props: ModuleProps): JSX.Element => {
   const eligible = true; // TODO
   const status = getAccessModuleStatusByName(profile, module);
   const statusTextMaybe = bypassedOrCompletedText(status);
-  const moduleAction = getModuleActionFn(navigate, module);
 
   // whether this module needs a profile reload
   const [needsReload, setNeedsReload] = useState(false);
+
+  // whether to show the Two Factor Auth Modal
+  const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
+
+  // kluges until we have fully migrated from the Registration Dashboard:
+  // getRegistrationTask() has onClick() functions for every module, which is generally what we want
+  // except: the ERA and RAS modules' functions include routing back to callback locations, which default to
+  // the Registration Dashboard.  We want to specify the callbacks which route back here instead.
+  // also: we pop up a modal for Two Factor Auth instead of using the tandard task
+  const moduleAction = cond(
+      [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
+      [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
+      [module === AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
+      () => getRegistrationTask(navigate, module).onClick);
 
   const Refresh = () => <Button type='primary' onClick={reload} style={styles.refreshButton}>
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -341,6 +344,9 @@ const Module = (props: ModuleProps): JSX.Element => {
         {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
       </FlexColumn>
     </ModuleBox>
+    {showTwoFactorAuthModal && <TwoFactorAuthModal
+        onClick={() => setShowTwoFactorAuthModal(false)}
+        onCancel={() => setShowTwoFactorAuthModal(false)}/>}
   </FlexRow>;
 };
 
