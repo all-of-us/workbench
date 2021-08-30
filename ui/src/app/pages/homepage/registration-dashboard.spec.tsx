@@ -7,6 +7,7 @@ import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homep
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {getTwoFactorSetupUrl} from 'app/utils/access-utils';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
