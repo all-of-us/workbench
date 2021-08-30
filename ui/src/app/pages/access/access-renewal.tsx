@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -14,18 +11,13 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
-import {
-  cond,
-  daysFromNow,
-  displayDateWithoutHours,
-  switchCase,
-  useId,
-  withStyle
-} from 'app/utils';
-import {maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
+import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
+import {getAccessModuleBypassTime, getAccessModuleCompletionTime, maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const {useState, useEffect} = React;
 
@@ -210,12 +202,6 @@ export const AccessRenewal = fp.flow(
   useEffect(() => spinnerProps.hideSpinner(), []);
   // State
   const {profile: {
-    complianceTrainingCompletionTime,
-    dataUseAgreementCompletionTime,
-    publicationsLastConfirmedTime,
-    profileLastConfirmedTime,
-    dataUseAgreementBypassTime,
-    complianceTrainingBypassTime,
     accessModules: {modules}},
     profile
   } = useStore(profileStore);
@@ -244,8 +230,8 @@ export const AccessRenewal = fp.flow(
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
   const wasBypassed = moduleName => switchCase(moduleName,
-      [AccessModule.DATAUSERCODEOFCONDUCT, () => !!dataUseAgreementBypassTime],
-      [AccessModule.COMPLIANCETRAINING, () => !!complianceTrainingBypassTime],
+      [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
+      [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
       // these cannot be bypassed
       [AccessModule.PROFILECONFIRMATION, () => false],
       [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
@@ -288,7 +274,7 @@ export const AccessRenewal = fp.flow(
       {/* Profile */}
       <RenewalCard step={1}
         TitleComponent={() => 'Update your profile'}
-        lastCompletionTime={profileLastConfirmedTime}
+        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.PROFILECONFIRMATION)}
         nextReviewTime={getExpirationTimeFor(AccessModule.PROFILECONFIRMATION)}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
@@ -303,7 +289,7 @@ export const AccessRenewal = fp.flow(
       {/* Publications */}
       <RenewalCard step={2}
         TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
-        lastCompletionTime={publicationsLastConfirmedTime}
+        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.PUBLICATIONCONFIRMATION)}
         nextReviewTime={getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -340,13 +326,14 @@ export const AccessRenewal = fp.flow(
       {/* Compliance Training */}
       {enableComplianceTraining && <RenewalCard step={3}
         TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
-        lastCompletionTime={complianceTrainingCompletionTime}
+        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.COMPLIANCETRAINING)}
         nextReviewTime={getExpirationTimeFor(AccessModule.COMPLIANCETRAINING)}
-        bypassTime={complianceTrainingBypassTime}>
+        bypassTime={getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)}>
         <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING)) && !complianceTrainingBypassTime &&
+        {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING))
+        && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING) &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
@@ -359,7 +346,9 @@ export const AccessRenewal = fp.flow(
               redirectToTraining();
             }}
             wasBypassed={wasBypassed(AccessModule.COMPLIANCETRAINING)}/>
-          {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING)) && !complianceTrainingBypassTime && <Button
+          {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING))
+          && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)
+          && <Button
             disabled={refreshButtonDisabled}
             onClick={async() => {
               setLoading(true);
@@ -372,9 +361,9 @@ export const AccessRenewal = fp.flow(
       {/* DUCC */}
       <RenewalCard step={enableComplianceTraining ? 4 : 3}
         TitleComponent={() => 'Sign Data User Code of Conduct'}
-        lastCompletionTime={dataUseAgreementCompletionTime}
+        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)}
         nextReviewTime={getExpirationTimeFor(AccessModule.DATAUSERCODEOFCONDUCT)}
-        bypassTime={dataUseAgreementBypassTime}>
+        bypassTime={getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.DATAUSERCODEOFCONDUCT))}
           actionButtonText='View & Sign'

@@ -1,17 +1,16 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-import * as fp from 'lodash/fp';
+import {AccessRenewal} from 'app/pages/access/access-renewal';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
-import SpyInstance = jest.SpyInstance;
-import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {AccessRenewal} from 'app/pages/access/access-renewal';
-import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {mount} from 'enzyme';
+import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
+import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import SpyInstance = jest.SpyInstance;
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
@@ -35,10 +34,12 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
-  function updateOneModule(updateModuleName, time) {
+  function updateOneModuleExpirationTime(updateModuleName, time) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis}) => ({
+    const newModules = fp.map(({moduleName, expirationEpochMillis, completionEpochMillis, bypassEpochMillis}) => ({
       moduleName,
+      completionEpochMillis: completionEpochMillis,
+      bypassEpochMillis: bypassEpochMillis,
       expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
@@ -47,32 +48,39 @@ describe('Access Renewal Page', () => {
 
   function removeOneModule(toBeRemoved) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis}) =>
+    const newModules = fp.map(({moduleName, expirationEpochMillis, bypassEpochMillis, completionEpochMillis}) =>
         (moduleName === toBeRemoved ? {} : {
-          moduleName,
-          expirationEpochMillis}),
+          moduleName : moduleName,
+          bypassEpochMillis: bypassEpochMillis,
+          completionEpochMillis: completionEpochMillis,
+          expirationEpochMillis: expirationEpochMillis}),
         oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
   function setCompletionTimes(completionFn) {
-    const {profile} = profileStore.get();
-    const newProfile = fp.flow<Profile[], Profile, Profile, Profile, Profile>( // I am sorry.
-      fp.set('complianceTrainingCompletionTime', completionFn()),
-      fp.set('dataUseAgreementCompletionTime', completionFn()),
-      fp.set('publicationsLastConfirmedTime', completionFn()),
-      fp.set('profileLastConfirmedTime', completionFn())
-    )(profile)
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(({moduleName, expirationEpochMillis, bypassEpochMillis}) => ({
+      moduleName,
+      expirationEpochMillis: expirationEpochMillis,
+      bypassEpochMillis: bypassEpochMillis,
+      completionEpochMillis: completionFn()
+    }), oldProfile.accessModules.modules);
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile,  load, reload, updateCache});
   }
 
   function setBypassTimes(completionFn) {
-    const {profile} = profileStore.get();
-    const newProfile = fp.flow<Profile[], Profile, Profile>(
-      fp.set('dataUseAgreementBypassTime', completionFn()),
-      fp.set('complianceTrainingBypassTime', completionFn())
-    )(profile)
+    const oldProfile = profileStore.get().profile;
+    const newModules = fp.map(({moduleName, expirationEpochMillis, completionEpochMillis}) => ({
+      moduleName,
+      expirationEpochMillis: expirationEpochMillis,
+      // profile and publiction is not bypassable.
+      bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION) ? null : completionFn(),
+      completionEpochMillis: completionEpochMillis
+    }), oldProfile.accessModules.modules);
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile,  load, reload, updateCache});
   }
 
@@ -122,7 +130,7 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -139,8 +147,8 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -156,9 +164,9 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
@@ -173,10 +181,10 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
-    updateOneModule(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.COMPLIANCETRAINING, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
     setCompletionTimes(() => Date.now());
 
@@ -197,8 +205,8 @@ describe('Access Renewal Page', () => {
     setCompletionTimes(() => Date.now());
     setBypassTimes(() => Date.now());
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneHourAgo());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneHourAgo());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneHourAgo());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneHourAgo());
 
     await waitOneTickAndUpdate(wrapper);
 
@@ -219,8 +227,8 @@ describe('Access Renewal Page', () => {
 
     const wrapper = component();
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
 
     setBypassTimes(oneYearFromNow);
 
@@ -248,9 +256,9 @@ describe('Access Renewal Page', () => {
 
     setCompletionTimes(() => Date.now());
 
-    updateOneModule(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
-    updateOneModule(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PROFILECONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.PUBLICATIONCONFIRMATION, oneYearFromNow());
+    updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
     // these modules will not be returned in AccessModules because they are disabled
     removeOneModule('complianceTraining');

@@ -8,18 +8,14 @@ import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {redirectToTraining} from 'app/utils/access-utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
-import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
+import {getRegistrationTasks, redirectToTwoFactorSetup} from 'app/utils/access-utils';
 import {NavigationProps} from 'app/utils/navigation';
-import {buildRasRedirectUrl} from 'app/utils/ras';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {AccessModule, Profile} from 'generated/fetch';
+import {AccessModule} from 'generated/fetch';
 
 import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
 
@@ -76,152 +72,6 @@ const styles = reactStyles({
     alignItems: 'center'
   },
 });
-
-export function getTwoFactorSetupUrl(): string {
-  const accountChooserBase = 'https://accounts.google.com/AccountChooser';
-  const url = new URL(accountChooserBase);
-  // If available, set the 'Email' param to give Google a hint that we want to access the
-  // target URL as this specific G Suite user. This helps guide users when multi-login is in use.
-  if (profileStore.get().profile) {
-    url.searchParams.set('Email', profileStore.get().profile.username);
-  }
-  url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
-  return url.toString();
-}
-
-function redirectToTwoFactorSetup(): void {
-  AnalyticsTracker.Registration.TwoFactorAuth();
-  window.open(getTwoFactorSetupUrl(), '_blank');
-}
-
-function redirectToNiH(): void {
-  AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + '/nih-callback?token=<token>');
-  window.open(url, '_blank');
-}
-
-function redirectToRas(): void {
-  AnalyticsTracker.Registration.RasLoginGov();
-  // The scopes are also used in backend for fetching user info.
-  const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
-      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
-      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
-  window.open(url, '_blank');
-}
-
-interface RegistrationTask {
-  key: string;
-  completionPropsKey: string;
-  loadingPropsKey?: string;
-  title: React.ReactNode;
-  description: React.ReactNode;
-  buttonText: string;
-  completedText: string;
-  completionTimestamp: (profile: Profile) => number;
-  onClick: Function;
-  featureFlag?: boolean;
-}
-
-// This needs to be a function, because we want it to evaluate at call time,
-// not at compile time, to ensure that we make use of the server config store.
-// This is important so that we can feature flag off registration tasks.
-//
-// Important: The completion criteria here needs to be kept synchronized with
-// the server-side logic, else users can get stuck on the registration dashboard
-// without a next step:
-// https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-//
-// Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
-// can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate) => serverConfigStore.get().config ? ([
-  {
-    key: 'twoFactorAuth',
-    completionPropsKey: 'twoFactorAuthCompleted',
-    title: 'Turn on Google 2-Step Verification',
-    description: 'Add an extra layer of security to your account by providing your phone number' +
-      'in addition to your password to verify your identity upon login.',
-    buttonText: 'Get Started',
-    completedText: 'Completed',
-    completionTimestamp: (profile: Profile) => {
-      return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
-    },
-    onClick: redirectToTwoFactorSetup
-  }, {
-    key: 'rasLoginGov',
-    completionPropsKey: 'rasLoginGovLinked',
-    loadingPropsKey: 'rasLoginGovLoading',
-    title: 'Connect Your Login.Gov Account',
-    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
-    description: 'Connect your Researcher Workbench account to your login.gov account. ',
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
-    },
-    onClick: redirectToRas
-  },
-  {
-    key: 'eraCommons',
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
-      'There is no exchange of personal data in this step.',
-    featureFlag: serverConfigStore.get().config.enableEraCommons,
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToNiH
-  }, {
-    key: 'complianceTraining',
-    completionPropsKey: 'trainingCompleted',
-    title: <span><AoU/> Responsible Conduct of Research Training</span>,
-    description: <div>Complete ethics training courses to understand the privacy safeguards and the
-      compliance requirements for using the <AoU/> dataset.</div>,
-    buttonText: 'Complete training',
-    featureFlag: serverConfigStore.get().config.enableComplianceTraining,
-    completedText: 'Completed',
-    completionTimestamp: (profile: Profile) => {
-      return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
-    },
-    onClick: redirectToTraining
-  }, {
-    key: 'dataUserCodeOfConduct',
-    completionPropsKey: 'dataUserCodeOfConductCompleted',
-    title: 'Data User Code of Conduct',
-    description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
-    buttonText: 'View & Sign',
-    completedText: 'Signed',
-    completionTimestamp: (profile: Profile) => {
-      if (profile.dataUseAgreementBypassTime) {
-        return profile.dataUseAgreementBypassTime;
-      }
-      // The DUCC completion time field tracks the most recent DUCC completion
-      // timestamp, but doesn't specify whether that DUCC is currently active.
-      const requiredDuccVersion = getLiveDUCCVersion();
-      if (profile.dataUseAgreementSignedVersion === requiredDuccVersion) {
-        return profile.dataUseAgreementCompletionTime;
-      }
-      return null;
-    },
-    onClick: () => {
-      AnalyticsTracker.Registration.EnterDUCC();
-      navigate(['data-code-of-conduct']);
-    }
-  }
-] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
-|| registrationTask.featureFlag) : (() => {
-  throw new Error('Cannot load registration tasks before config loaded');
-})();
-
-export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
-  acc[curr.key] = curr;
-  return acc;
-}, {});
 
 export interface RegistrationDashboardProps {
   eraCommonsError: string;
