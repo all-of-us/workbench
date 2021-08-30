@@ -164,13 +164,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String FULL_USER_NAME = "bob@researchallofus.org";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
   private static final String STREET_ADDRESS = "1 Example Lane";
   private static final String USER_PREFIX = "bob";
   private static final String WRONG_CAPTCHA_TOKEN = "WrongCaptchaToken";
   private static final String ZIP_CODE = "12345";
+  private static final String FULL_USER_NAME = USER_PREFIX + "@" + GSUITE_DOMAIN;
   private static final Timestamp TIMESTAMP = FakeClockConfiguration.NOW;
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
@@ -292,7 +292,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(
-            GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
+            GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
@@ -949,7 +949,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
     verify(mockMailService)
-        .sendInstitutionUserInstructions(CONTACT_EMAIL, instructions.getInstructions());
+        .sendInstitutionUserInstructions(
+            CONTACT_EMAIL, instructions.getInstructions(), FULL_USER_NAME);
   }
 
   @Test
