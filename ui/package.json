@@ -6,7 +6,7 @@
     "start": "PORT=4200 react-scripts start",
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "react-scripts build",
-    "test": "CI=true react-scripts test -- --config=jest.config.js --detectOpenHandles --forceExit --runInBand",
+    "test": "CI=true react-scripts test -- --config=jest.config.js",
     "lint": "yarn eslint src --ext .ts,.tsx",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
