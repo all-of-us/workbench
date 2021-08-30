@@ -866,9 +866,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
       } catch (error) {
         console.log(error);
-        error = await error.json();
-
-        console.log(error);
         this.setState({loading: false});
         if (error.statusCode === 409) {
           this.setState({workspaceCreationConflictError: true});

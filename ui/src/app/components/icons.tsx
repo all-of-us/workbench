@@ -6,8 +6,8 @@ import * as React from 'react';
 
 import {faAlarmExclamation} from '@fortawesome/pro-solid-svg-icons';
 
-import registeredTierBadge from 'assets/icons/registered-tier-badge.svg';
-import controlledTierBadge from 'assets/icons/controlled-tier-badge.svg';
+import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
+import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
 import arrow from 'assets/icons/arrow-left-regular.svg';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
 

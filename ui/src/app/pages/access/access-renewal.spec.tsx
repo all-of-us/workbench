@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
+import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -58,7 +58,7 @@ describe('Access Renewal Page', () => {
 
   function setCompletionTimes(completionFn) {
     const {profile} = profileStore.get();
-    const newProfile = fp.flow(
+    const newProfile = fp.flow<Profile[], Profile, Profile, Profile, Profile>( // I am sorry.
       fp.set('complianceTrainingCompletionTime', completionFn()),
       fp.set('dataUseAgreementCompletionTime', completionFn()),
       fp.set('publicationsLastConfirmedTime', completionFn()),
@@ -69,7 +69,7 @@ describe('Access Renewal Page', () => {
 
   function setBypassTimes(completionFn) {
     const {profile} = profileStore.get();
-    const newProfile = fp.flow(
+    const newProfile = fp.flow<Profile[], Profile, Profile>(
       fp.set('dataUseAgreementBypassTime', completionFn()),
       fp.set('complianceTrainingBypassTime', completionFn())
     )(profile)

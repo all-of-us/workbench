@@ -1,5 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 import {AdminUsers} from './admin-users';
 import {AuthDomainApi, Profile, ProfileApi} from 'generated/fetch';
@@ -9,7 +10,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
-describe('AdminUser', () => {
+describe('AdminUsers', () => {
   let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}};
 
   const component = () => {
@@ -25,7 +26,9 @@ describe('AdminUser', () => {
     }});
     props = {
       ...props,
-      profile: ProfileStubVariables.PROFILE_STUB
+      profile: ProfileStubVariables.PROFILE_STUB,
+      hideSpinner: () => fp.noop,
+      showSpinner: () => fp.noop
     };
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(AuthDomainApi, new AuthDomainApiStub());
