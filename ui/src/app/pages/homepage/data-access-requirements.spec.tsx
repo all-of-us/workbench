@@ -2,7 +2,7 @@ import * as React from "react";
 import {mount} from "enzyme";
 
 import defaultServerConfig from 'testing/default-server-config';
-import {AccessModule, AccessModuleStatus, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
 import {allModules, DataAccessRequirements} from './data-access-requirements';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -57,7 +57,7 @@ describe('DataAccessRequirements', () => {
         expect(findModule(wrapper, AccessModule.COMPLIANCETRAINING).exists()).toBeFalsy();
     });
 
-    it('should render all modules as incomplete', () => {
+    it('should render all modules as incomplete when the profile accessModules are empty', () => {
         const wrapper = component();
         allModules.forEach(module => {
             expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
@@ -68,7 +68,29 @@ describe('DataAccessRequirements', () => {
         expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
     });
 
-    it('should render all modules as complete', () => {
+    it('should render all modules as complete when the profile accessModules are all complete', () => {
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        allModules.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+        expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+    });
+
+    it('should render all modules as complete when the profile accessModules are all bypassed', () => {
         profileStore.set({
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
@@ -93,13 +115,30 @@ describe('DataAccessRequirements', () => {
     it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
         serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: false}});
         const wrapper = component();
-        expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(0);
+        expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeFalsy();
     });
 
     it('should show self-bypass when unsafeSelfBypass is true', () => {
         serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
         const wrapper = component();
-        expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(2);
+        expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeTruthy();
+    });
+
+    it('should not show self-bypass UI when all modules are complete', () => {
+        serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        expect(wrapper.find('[data-test-id="self-bypass"]').exists()).toBeFalsy();
     });
 
 });
