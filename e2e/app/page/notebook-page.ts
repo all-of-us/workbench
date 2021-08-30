@@ -115,6 +115,7 @@ export default class NotebookPage extends NotebookFrame {
     const saveButton = await frame.waitForSelector(CssSelector.saveNotebookButton, { visible: true });
     await saveButton.click();
     await saveButton.dispose();
+    await this.page.waitForTimeout(2000);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
