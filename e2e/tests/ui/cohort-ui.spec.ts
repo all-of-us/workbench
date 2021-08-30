@@ -8,6 +8,9 @@ import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import * as fp from 'lodash/fp';
 import { logger } from 'libs/logger';
 import {Page} from "puppeteer";
+import {waitWhileLoading} from "utils/waits-utils";
+import expect from 'expect';
+import Table from "app/component/table";
 
 describe('Cohort UI Test', () => {
   beforeEach(async () => {
@@ -81,6 +84,48 @@ describe('Cohort UI Test', () => {
     await dataPage.waitForLoad();
   });
 
+  test('Cohort search by code or description', async () => {
+    // Find and open one workspace.
+    await openWorkspace(page);
+
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.clickAddCohortsButton();
+
+    // Landing in Build Cohort Criteria page.
+    const cohortBuildPage = new CohortBuildPage(page);
+    await cohortBuildPage.waitForLoad();
+
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.addCriteria([MenuOption.Procedures]);
+    await waitWhileLoading(page);
+
+    const resultsTable = await group1.getSearchResultsTable();
+    const originalRowNum = (await resultsTable.getRows()).length;
+    console.log(`originalRowNum: ${originalRowNum}`);
+
+    // Search by description.
+    const description = 'Surgical pathology';
+    await group1.searchCriteria(description);
+
+    // Verify each search results contain description.
+    const searchResultsRowNum = (await resultsTable.getRows()).length;
+    console.log(`searchResultsRowNum: ${searchResultsRowNum}`);
+
+    // Rows should be different after search.
+    expect(originalRowNum).not.toEqual(searchResultsRowNum);
+
+    for (let i = 0; i < searchResultsRowNum; i++) {
+      const cellValue = await resultsTable.getCellValue(i + 1, 1);
+      expect(cellValue).toMatch(description);
+    }
+
+    // Search by code.
+    const code = '128927009';
+    await group1.searchCriteria(code);
+    await searchAndVerify(resultsTable, code);
+
+  });
+
   async function openWorkspace(page: Page): Promise<string> {
     // Find all workspaces that are older than 10 min.
     const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 10);
@@ -94,5 +139,16 @@ describe('Cohort UI Test', () => {
     const workspaceName = aWorkspaceCard.getWorkspaceName();
   await aWorkspaceCard.clickWorkspaceName();
   return workspaceName
+  }
+
+  async function verifySearchResults(resultsTable: Table, keyword: string): Promise<void> {
+    // Verify each search results contain description.
+    const searchResultsRowNum = (await resultsTable.getRows()).length;
+    console.log(`searchResultsRowNum: ${searchResultsRowNum}`);
+
+    for (let i = 0; i < searchResultsRowNum; i++) {
+      const cellValue = await resultsTable.getCellValue(i + 1, 1);
+      expect(cellValue).toMatch(keyword);
+    }
   }
 });
