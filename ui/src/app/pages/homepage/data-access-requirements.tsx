@@ -238,7 +238,7 @@ const SelfBypass = (props: {showSpinner: Function, hideSpinner: Function}) => {
   const {showSpinner, hideSpinner} = props;
   const {reload} = useStore(profileStore);
 
-  return <FlexRow style={styles.selfBypass}>
+  return <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
     <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
     <Button style={{marginLeft: '0.5rem'}} onClick={() => bypassAll(showSpinner, hideSpinner, reload)}>Bypass all</Button>
   </FlexRow>;
