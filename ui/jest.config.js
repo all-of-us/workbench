@@ -8,17 +8,17 @@ const config = {
     "json",
     "node"
   ],
-      "moduleDirectories": [
+  "moduleDirectories": [
     "node_modules",
     "src"
   ],
-      "transform": {
+  "transform": {
     "^.+\\.tsx?$": "ts-jest"
   },
-    "testMatch": [
+  "testMatch": [
     "**/*.spec.tsx"
   ],
-      "globals": {
+  "globals": {
     "ts-jest": {
       "tsconfig": "<rootDir>/src/tsconfig.jest.json"
     }
