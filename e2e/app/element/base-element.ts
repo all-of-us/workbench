@@ -116,18 +116,17 @@ export default class BaseElement {
    */
   async isVisible(): Promise<boolean> {
     const computedStyle = async (element) => {
-      return this.page
+      const elementHandle = await this.page
         .evaluateHandle((elem) => {
           const style = window.getComputedStyle(elem);
           return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
         }, element)
-        .then((handle) => {
-          return handle.jsonValue();
-        })
         .catch(() => {
           return null;
         });
+      return elementHandle.jsonValue();
     };
+
     const boxModel = async (element) => {
       return element.boxModel();
     };

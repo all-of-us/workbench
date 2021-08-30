@@ -57,8 +57,8 @@ export default class ShareModal extends Modal {
 
     const typeAndAddUser = async (name: string): Promise<boolean> => {
       const nameWithoutDomain = name.split('@')[0];
-      // Split string into segments of 4 characters. Type 4 chars at a time, much faster than type 1 char and check.
-      const n = 4;
+      // Split string into segments of 3 characters. Type 3 chars at a time, much faster than type 1 char and check.
+      const n = 3;
       for (let i = 0, charsLength = nameWithoutDomain.length; i < charsLength; i += n) {
         const chars = nameWithoutDomain.substring(i, i + n);
         const input = await this.waitForSearchBox().asElementHandle();
