@@ -6,8 +6,17 @@ import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
-import {ArrowRight, CheckCircle, DARIcons, MinusCircle, RegisteredTierBadge, Repeat} from 'app/components/icons';
+import {
+  ArrowRight,
+  CheckCircle,
+  DARIcons,
+  InfoIcon,
+  MinusCircle,
+  RegisteredTierBadge,
+  Repeat
+} from 'app/components/icons';
 import {withErrorModal} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
@@ -245,9 +254,14 @@ const SelfBypass = (props: {showSpinner: Function, hideSpinner: Function}) => {
   </FlexRow>;
 };
 
+const LoginGovTooltip = () => <TooltipTrigger
+    content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
+  <InfoIcon style={{margin: '0 0.3rem'}}/>
+</TooltipTrigger>;
+
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
-  [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov</div>],
+  [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov <LoginGovTooltip/></div>],
   [AccessModule.ERACOMMONS, <div>Connect your eRA Commons account</div>],
   [AccessModule.COMPLIANCETRAINING, <div>Complete <AoU/> research Registered Tier training</div>],
   [AccessModule.DATAUSERCODEOFCONDUCT, <div>Sign Data User Code of Conduct</div>],
