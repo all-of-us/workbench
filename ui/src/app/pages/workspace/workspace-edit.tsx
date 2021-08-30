@@ -842,7 +842,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
-        const navigateToWorkspace = () => this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        const navigateToWorkspace = () => {
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        }
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +

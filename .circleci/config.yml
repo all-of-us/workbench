@@ -445,7 +445,7 @@ jobs:
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
-          command: yarn test --detectOpenHandles --forceExit --runInBand
+          command: CI=true yarn test --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
