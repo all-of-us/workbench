@@ -262,6 +262,25 @@ export const getAccessModuleBypassTime = (accessModules: Array<AccessModuleStatu
   return module ? module.bypassEpochMillis : null;
 };
 
+export const bypassAllModules = async(isBypassed: boolean) => {
+  // TypeScript enum iteration is nonfunctional
+  // so just copy the whole list
+  const modules = [
+    AccessModule.COMPLIANCETRAINING,
+    AccessModule.ERACOMMONS,
+    AccessModule.TWOFACTORAUTH,
+    AccessModule.DATAUSERCODEOFCONDUCT,
+    AccessModule.RASLINKLOGINGOV,
+  ];
+
+  for (const module of modules) {
+    await profileApi().unsafeSelfBypassAccessRequirement({
+      moduleName: module,
+      isBypassed: isBypassed
+    });
+  }
+};
+
 export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
     style={style}
     onClick={() => {

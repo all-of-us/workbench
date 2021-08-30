@@ -16,13 +16,15 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
 import {
   buildRasRedirectUrl,
+  bypassAllModules,
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
-  redirectToNiH, redirectToRas
+  redirectToNiH,
+  redirectToRas
 } from 'app/utils/access-utils';
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
-import {profileStore, useStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -45,6 +47,21 @@ const styles = reactStyles({
   },
   completedText: {
     fontSize: '14px',
+  },
+  selfBypass: {
+    height: '87px',
+    padding: '1em',
+    marginLeft: '3%',
+    marginRight: '3%',
+    borderRadius: '5px',
+    borderColor: colors.primary,
+    justifyContent: 'center',
+  },
+  selfBypassText: {
+    alignSelf: 'center',
+    color: colors.primary,
+    fontSize: '18px',
+    fontWeight: 600,
   },
   headerRW: {
     textTransform: 'uppercase',
@@ -208,6 +225,23 @@ const Completed = () => <FlexRow style={styles.completed}>
   </FlexColumn>
   <GetStartedButton style={{marginLeft: 'auto'}}/>
 </FlexRow>;
+
+const bypassAll = async(showSpinner: Function, hideSpinner: Function, reloadProfile: Function) => {
+  showSpinner();
+  await bypassAllModules(true);
+  hideSpinner();
+  reloadProfile();
+};
+
+const SelfBypass = (props: {showSpinner: Function, hideSpinner: Function}) => {
+  const {showSpinner, hideSpinner} = props;
+  const {reload} = useStore(profileStore);
+
+  return <FlexRow style={styles.selfBypass}>
+    <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
+    <Button style={{marginLeft: '0.5rem'}} onClick={() => bypassAll(showSpinner, hideSpinner, reload)}>Bypass all</Button>
+  </FlexRow>;
+};
 
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
@@ -403,6 +437,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [activeModule, setActiveModule] = useState(null);
 
   const {profile} = useStore(profileStore);
+  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   // whenever the profile changes, find the first incomplete module and setActiveModule
   useEffect(() => {
@@ -419,6 +454,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   return <FlexColumn style={styles.pageWrapper}>
     <DARHeader/>
     {profile && !activeModule && <Completed/>}
+    {unsafeAllowSelfBypass && activeModule &&
+      <SelfBypass showSpinner={spinnerProps.showSpinner} hideSpinner={spinnerProps.hideSpinner} />}
     <FadeBox style={styles.fadeBox}>
       <div style={styles.pleaseComplete}>
         Please complete the necessary steps to gain access to the <AoU/> datasets.

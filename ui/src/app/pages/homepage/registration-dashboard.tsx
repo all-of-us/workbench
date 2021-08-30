@@ -7,14 +7,16 @@ import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {getRegistrationTasks, GetStartedButton} from 'app/utils/access-utils';
+import {
+  bypassAllModules,
+  getRegistrationTasks,
+  GetStartedButton,
+} from 'app/utils/access-utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
-import {AccessModule} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
@@ -138,24 +140,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
 
   async setAllModulesBypassState(isBypassed: boolean) {
     this.setState({bypassInProgress: true});
-
-    // TypeScript enum iteration is nonfunctional
-    // so just copy the whole list
-    const modules = [
-      AccessModule.COMPLIANCETRAINING,
-      AccessModule.ERACOMMONS,
-      AccessModule.TWOFACTORAUTH,
-      AccessModule.DATAUSERCODEOFCONDUCT,
-      AccessModule.RASLINKLOGINGOV,
-    ];
-
-    for (const module of modules) {
-      await profileApi().unsafeSelfBypassAccessRequirement({
-        moduleName: module,
-        isBypassed: isBypassed
-      });
-    }
-
+    await bypassAllModules(isBypassed);
     this.setState({bypassInProgress: false, bypassActionComplete: true});
   }
 
