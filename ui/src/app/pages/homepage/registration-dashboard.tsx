@@ -10,7 +10,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {getRegistrationTasks, redirectToTwoFactorSetup} from 'app/utils/access-utils';
+import {getRegistrationTasks} from 'app/utils/access-utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
