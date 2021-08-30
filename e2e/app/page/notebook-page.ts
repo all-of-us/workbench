@@ -115,6 +115,10 @@ export default class NotebookPage extends NotebookFrame {
     const saveButton = await frame.waitForSelector(CssSelector.saveNotebookButton, { visible: true });
     await saveButton.click();
     await saveButton.dispose();
+    // Puppeteer slowmo is not set and playback is very fast.
+    // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
+    // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
+    await this.page.waitForTimeout(2000);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
