@@ -16,7 +16,7 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
-import {navigateByUrlSpy} from 'testing/navigation-mock';
+import {mockNavigateByUrl} from 'testing/navigation-mock';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -267,14 +267,14 @@ describe('DataSetPage', () => {
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
 
-    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
+    expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/cohorts/build', {
       preventDefaultIfNoKeysPressed: true,
       event: expect.anything()
     });
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navigateByUrlSpy).toHaveBeenCalledWith(pathPrefix + '/concepts', {
+    expect(mockNavigateByUrl).toHaveBeenCalledWith(pathPrefix + '/concepts', {
       preventDefaultIfNoKeysPressed: true,
       event: expect.anything()
     });

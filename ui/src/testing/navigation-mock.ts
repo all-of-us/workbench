@@ -1,9 +1,8 @@
-import * as ReactRouterDom from 'react-router-dom';
-
-export const navigateSpy = jest.fn();
-export const navigateByUrlSpy = jest.fn();
+export const mockNavigate = jest.fn();
+export const mockNavigateByUrl = jest.fn();
 
 jest.mock('app/utils/navigation', () => ({
-  ...jest.requireActual('app/utils/navigation') as typeof ReactRouterDom,
-  useNavigation: () => [navigateSpy, navigateByUrlSpy],
+  ...jest.requireActual('app/utils/navigation') as any,
+  __esModule: true,
+  useNavigation: () => [mockNavigate, mockNavigateByUrl],
 }));

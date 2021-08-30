@@ -10,7 +10,7 @@ import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {navigateSpy} from 'testing/navigation-mock';
+import {mockNavigate} from 'testing/navigation-mock';
 import {WorkspaceList} from './workspace-list';
 import {profileStore, serverConfigStore} from "app/utils/stores";
 
@@ -57,7 +57,7 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');
-    expect(navigateSpy).toHaveBeenCalledWith(
+    expect(mockNavigate).toHaveBeenCalledWith(
       ['workspaces', workspace.namespace, workspace.id, 'data']);
   });
 
