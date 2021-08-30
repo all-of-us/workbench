@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -174,7 +175,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
   private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
   private CreateAccountRequest createAccountRequest;
-  private com.google.api.services.directory.model.User googleUser;
+  private User googleUser;
   private static DbUser dbUser;
   private static List<DbAccessModule> accessModules;
 
@@ -281,7 +282,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
-    googleUser = new com.google.api.services.directory.model.User();
+    googleUser = new User();
     googleUser.setPrimaryEmail(FULL_USER_NAME);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
