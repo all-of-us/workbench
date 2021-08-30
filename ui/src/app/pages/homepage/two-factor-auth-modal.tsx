@@ -29,25 +29,32 @@ const styles = reactStyles({
   },
 });
 
-export const TwoFactorAuthModal = () => <Modal width={500}>
-    <ModalTitle style={styles.twoFactorAuthModalHeader}>Redirecting to turn on Google 2-step Verification</ModalTitle>
-    <ModalBody>
-        <div style={styles.twoFactorAuthModalText}>Clicking ‘Proceed’ will direct you to a Google page where you
-            need to login with your <span style={{fontWeight: 600}}>researchallofus.org</span> account and turn
-            on 2-Step Verification. Once you complete this step, you will see the screen shown below. At that
-            point, you can return to this page and click 'Refresh’.</div>
-        <img style={styles.twoFactorAuthModalImage} src='assets/images/2sv-image.png' />
-    </ModalBody>
-    <ModalFooter>
-        <Button onClick = {() => this.setState({twoFactorAuthModalOpen: false})}
-                type='secondary' style={styles.twoFactorAuthModalCancelButton}>Cancel</Button>
-        <Button onClick = {() => {
-          redirectToTwoFactorSetup();
-          this.setState((state) => ({
-            accessTaskKeyToButtonAsRefresh: state.accessTaskKeyToButtonAsRefresh.set('twoFactorAuth', true),
-            twoFactorAuthModalOpen: false
-          }));
-        }}
-                type='primary'>Proceed</Button>
-    </ModalFooter>
-</Modal>;
+interface Props {
+  onClick: Function;
+  onCancel: Function;
+}
+export const TwoFactorAuthModal = (props: Props) => {
+  const {onClick, onCancel} = props;
+  return <Modal width={500}>
+        <ModalTitle style={styles.twoFactorAuthModalHeader}>Redirecting to turn on Google 2-step Verification</ModalTitle>
+        <ModalBody>
+            <div style={styles.twoFactorAuthModalText}>Clicking ‘Proceed’ will direct you to a Google page where you
+                need to login with your <span style={{fontWeight: 600}}>researchallofus.org</span> account and turn
+                on 2-Step Verification. Once you complete this step, you will see the screen shown below. At that
+                point, you can return to this page and click 'Refresh’.</div>
+            <img style={styles.twoFactorAuthModalImage} src='assets/images/2sv-image.png' />
+        </ModalBody>
+        <ModalFooter>
+            <Button
+                type='secondary'
+                style={styles.twoFactorAuthModalCancelButton}
+                onClick = {onCancel}>Cancel</Button>
+            <Button
+                type='primary'
+                onClick = {() => {
+                  onClick();
+                  redirectToTwoFactorSetup();
+                }}>Proceed</Button>
+        </ModalFooter>
+    </Modal>;
+};

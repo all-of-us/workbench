@@ -268,7 +268,14 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
                   }}>Get Started</Button>
         </div>
       }
-      {this.state.twoFactorAuthModalOpen && <TwoFactorAuthModal/>}
+      {this.state.twoFactorAuthModalOpen && <TwoFactorAuthModal
+        onClick={() => {
+          this.setState((state) => ({
+            accessTaskKeyToButtonAsRefresh: state.accessTaskKeyToButtonAsRefresh.set('twoFactorAuth', true),
+            twoFactorAuthModalOpen: false
+          }));
+        }}
+        onCancel={() => this.setState({twoFactorAuthModalOpen: false})}/>}
     </FlexColumn>;
   }
 });
