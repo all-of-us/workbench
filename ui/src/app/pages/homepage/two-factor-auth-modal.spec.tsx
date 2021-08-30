@@ -5,7 +5,7 @@ import {TwoFactorAuthModal} from "./two-factor-auth-modal";
 
 describe('TwoFactorAuthModal', () => {
 
-  const component = () => mount(<TwoFactorAuthModal/>);
+  const component = () => mount(<TwoFactorAuthModal onCancel={() => {}} onClick={() => {}}/>);
 
   it('should render', () => {
     const wrapper = component();
