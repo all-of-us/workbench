@@ -1,11 +1,11 @@
 import * as React from "react";
 import {mount, ReactWrapper} from 'enzyme';
 
-import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {authStore, profileStore} from 'app/utils/stores';
 import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {Profile} from 'generated/fetch';
+import {authStore, profileStore} from 'app/utils/stores';
+import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 import {
   buildRasRedirectUrl,
   getTwoFactorSetupUrl,
