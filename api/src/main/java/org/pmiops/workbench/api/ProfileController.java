@@ -260,7 +260,7 @@ public class ProfileController implements ProfileApiDelegate {
           userService.createUser(
               profile.getGivenName(),
               profile.getFamilyName(),
-              googleUser.getPrimaryEmail(),
+              gSuiteUsername,
               profile.getContactEmail(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
@@ -299,7 +299,7 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
+      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), gSuiteUsername);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -440,7 +440,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

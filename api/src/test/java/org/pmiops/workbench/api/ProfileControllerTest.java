@@ -163,7 +163,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
   private static final String NONCE = Long.toString(NONCE_LONG);
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String FULL_USER_NAME = "bob@researchallofus.org";
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final String STATE = "EX";
   private static final String STREET_ADDRESS = "1 Example Lane";
@@ -282,14 +282,14 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
     googleUser = new com.google.api.services.directory.model.User();
-    googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser.setPrimaryEmail(FULL_USER_NAME);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
 
     DUCC_VERSION = userService.getCurrentDuccVersion();
 
-    when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(
             GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
         .thenReturn(googleUser);
@@ -402,7 +402,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testCreateAccount_success() {
     createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     assertThat(dbUser).isNotNull();
     assertThat(accessTierService.getAccessTierShortNamesForUser(dbUser)).isEmpty();
   }
@@ -412,7 +412,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountRequest.setTermsOfServiceVersion(1);
     createAccountAndDbUserWithAffiliation();
 
-    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
     assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
@@ -1021,10 +1021,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     profileController.syncEraCommonsStatus();
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
+    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsLinkedNihUsername())
         .isEqualTo(linkedUsername);
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
-    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsLinkExpireTime())
+        .isNotNull();
+    assertThat(userDao.findUserByUsername(FULL_USER_NAME).getEraCommonsCompletionTime())
+        .isNotNull();
   }
 
   @Test
@@ -1106,7 +1108,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile original = createAccountAndDbUserWithAffiliation();
 
     // valid user but no fields updated
-    final AccountPropertyUpdate request = new AccountPropertyUpdate().username(PRIMARY_EMAIL);
+    final AccountPropertyUpdate request = new AccountPropertyUpdate().username(FULL_USER_NAME);
     final Profile retrieved = profileService.updateAccountProperties(request);
 
     // RW-5257 Demo Survey completion time is incorrectly updated
@@ -1144,7 +1146,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getContactEmail()).isEqualTo(newContactEmail);
@@ -1181,7 +1183,7 @@ public class ProfileControllerTest extends BaseControllerTest {
               createAccountAndDbUserWithAffiliation(affiliation, grantAdminAuthority);
           assertThat(original.getContactEmail()).isEqualTo(CONTACT_EMAIL);
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1198,7 +1200,7 @@ public class ProfileControllerTest extends BaseControllerTest {
           createAccountAndDbUserWithAffiliation(grantAdminAuthority);
           final String newContactEmail = "eric.lander@broadinstitute.org";
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).contactEmail(newContactEmail);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).contactEmail(newContactEmail);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1236,7 +1238,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getVerifiedInstitutionalAffiliation()).isEqualTo(newAffiliation);
 
@@ -1269,7 +1271,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionDisplayName(massGeneral.getDisplayName())
                   .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
           final AccountPropertyUpdate request =
-              new AccountPropertyUpdate().username(PRIMARY_EMAIL).affiliation(newAffiliation);
+              new AccountPropertyUpdate().username(FULL_USER_NAME).affiliation(newAffiliation);
           profileService.updateAccountProperties(request);
         });
   }
@@ -1312,7 +1314,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .contactEmail(newContactEmail)
             .affiliation(newAffiliation);
     final Profile retrieved = profileService.updateAccountProperties(request);
@@ -1358,7 +1360,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                   .institutionalRoleEnum(InstitutionalRole.POST_DOCTORAL);
           final AccountPropertyUpdate request =
               new AccountPropertyUpdate()
-                  .username(PRIMARY_EMAIL)
+                  .username(FULL_USER_NAME)
                   .contactEmail(newContactEmail)
                   .affiliation(newAffiliation);
           profileService.updateAccountProperties(request);
@@ -1371,7 +1373,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .accessBypassRequests(Collections.emptyList());
     final Profile retrieved = profileService.updateAccountProperties(request);
 
@@ -1401,7 +1403,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .isBypassed(false));
 
     final AccountPropertyUpdate request1 =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).accessBypassRequests(bypasses1);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).accessBypassRequests(bypasses1);
     final Profile retrieved1 = profileService.updateAccountProperties(request1);
 
     // this is now bypassed
@@ -1474,7 +1476,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Double newQuota = 123.4;
 
     final AccountPropertyUpdate request =
-        new AccountPropertyUpdate().username(PRIMARY_EMAIL).freeCreditsLimit(newQuota);
+        new AccountPropertyUpdate().username(FULL_USER_NAME).freeCreditsLimit(newQuota);
 
     final Profile retrieved = profileService.updateAccountProperties(request);
     assertThat(retrieved.getFreeTierDollarQuota()).isWithin(0.01).of(newQuota);
@@ -1489,7 +1491,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .freeCreditsLimit(original.getFreeTierDollarQuota());
     profileService.updateAccountProperties(request);
 
@@ -1518,7 +1520,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     final AccountPropertyUpdate request =
         new AccountPropertyUpdate()
-            .username(PRIMARY_EMAIL)
+            .username(FULL_USER_NAME)
             .freeCreditsLimit(config.billing.defaultFreeCreditsDollarLimit);
     profileService.updateAccountProperties(request);
     verify(mockUserServiceAuditor, never())
@@ -1559,7 +1561,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     Profile result = profileController.createAccount(createAccountRequest).getBody();
 
     // initialize the global test dbUser
-    dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    dbUser = userDao.findUserByUsername(FULL_USER_NAME);
 
     if (grantAdminAuthority) {
       dbUser.setAuthoritiesEnum(Collections.singleton(Authority.ACCESS_CONTROL_ADMIN));
@@ -1591,13 +1593,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   private void assertProfile(Profile profile) {
     assertThat(profile).isNotNull();
-    assertThat(profile.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    assertThat(profile.getUsername()).isEqualTo(FULL_USER_NAME);
     assertThat(profile.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEmpty();
 
-    DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
+    DbUser user = userDao.findUserByUsername(FULL_USER_NAME);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(user.getFamilyName()).isEqualTo(FAMILY_NAME);

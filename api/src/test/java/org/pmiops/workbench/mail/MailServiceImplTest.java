@@ -10,9 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.api.services.directory.model.User;
-import com.google.api.services.directory.model.UserEmail;
-import com.google.api.services.directory.model.UserName;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
@@ -41,11 +38,9 @@ import org.pmiops.workbench.test.Providers;
 public class MailServiceImplTest extends SpringTest {
 
   private MailServiceImpl service;
-  private static final String GIVEN_NAME = "Bob";
-  private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String PASSWORD = "secretpassword";
-  private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String FULL_USER_NAME = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
 
   private WorkbenchConfig workbenchConfig = createWorkbenchConfig();
@@ -74,33 +69,31 @@ public class MailServiceImplTest extends SpringTest {
   public void testSendWelcomeEmail_throwsMessagingException()
       throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
-    User user = createUser();
     assertThrows(
-        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+        MessagingException.class,
+        () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
     verify(mandrillApi, times(1)).send(any());
   }
 
   @Test
   public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
     doThrow(ApiException.class).when(mandrillApi).send(any());
-    User user = createUser();
     assertThrows(
-        MessagingException.class, () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user));
+        MessagingException.class,
+        () -> service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME));
     verify(mandrillApi, times(3)).send(any());
   }
 
   @Test
   public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
-    User user = createUser();
     assertThrows(
         ServerErrorException.class,
-        () -> service.sendWelcomeEmail("Nota valid email", PASSWORD, user));
+        () -> service.sendWelcomeEmail("Nota valid email", PASSWORD, FULL_USER_NAME));
   }
 
   @Test
   public void testSendWelcomeEmail() throws MessagingException, ApiException {
-    User user = createUser();
-    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
+    service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, FULL_USER_NAME);
     verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
@@ -224,16 +217,6 @@ public class MailServiceImplTest extends SpringTest {
             .phone("123456");
     service.sendBillingSetupEmail(user, request);
     verifyZeroInteractions(mandrillApi);
-  }
-
-  private User createUser() {
-    return new User()
-        .setPrimaryEmail(PRIMARY_EMAIL)
-        .setPassword(PASSWORD)
-        .setName(new UserName().setGivenName(GIVEN_NAME).setFamilyName(FAMILY_NAME))
-        .setEmails(
-            new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
-        .setChangePasswordAtNextLogin(true);
   }
 
   private DbUser createDbUser() {
