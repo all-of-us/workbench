@@ -7,6 +7,7 @@ import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import * as fp from 'lodash/fp';
 import { logger } from 'libs/logger';
+import {Page} from "puppeteer";
 
 describe('Cohort UI Test', () => {
   beforeEach(async () => {
@@ -15,16 +16,8 @@ describe('Cohort UI Test', () => {
 
   // Test reuse workspace that is older than 10 min. Test does not create new workspace.
   test('Cancel Build Cohort', async () => {
-    // Find all workspaces that are older than 10 min.
-    const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 10);
-    if (allWorkspaceCards.length === 0) {
-      logger.info('Cannot find a suitable existing workspace (created at least 10 min ago). Test end early.');
-      return;
-    }
-
-    // Open one workspace.
-    const aWorkspaceCard = fp.shuffle(allWorkspaceCards)[0];
-    await aWorkspaceCard.clickWorkspaceName();
+    // Find and open one workspace.
+    await openWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.clickAddCohortsButton();
@@ -87,4 +80,19 @@ describe('Cohort UI Test', () => {
     // Changes are discarded, back to the Data page.
     await dataPage.waitForLoad();
   });
+
+  async function openWorkspace(page: Page): Promise<string> {
+    // Find all workspaces that are older than 10 min.
+    const allWorkspaceCards = await findAllCards(page, 1000 * 60 * 10);
+    if (allWorkspaceCards.length === 0) {
+    logger.info('Cannot find a suitable existing workspace (created at least 10 min ago). Test end early.');
+    return;
+  }
+
+  // Open one workspace.
+  const aWorkspaceCard = fp.shuffle(allWorkspaceCards)[0];
+    const workspaceName = aWorkspaceCard.getWorkspaceName();
+  await aWorkspaceCard.clickWorkspaceName();
+  return workspaceName
+  }
 });
