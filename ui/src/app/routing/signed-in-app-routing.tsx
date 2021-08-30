@@ -124,13 +124,13 @@ export const SignedInRoutes = () => {
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path={NIH_CALLBACK_PATH_DAR}>
-      <DataAccessRequirements routeData={{title: 'Data Access Requirements'}}/>
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path={RAS_CALLBACK_PATH}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path={RAS_CALLBACK_PATH_DAR}>
-      <DataAccessRequirements routeData={{title: 'Data Access Requirements'}}/>
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>

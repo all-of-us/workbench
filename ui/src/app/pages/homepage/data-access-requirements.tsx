@@ -26,7 +26,7 @@ import {
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
-import {TwoFactorAuthModal} from "./two-factor-auth-modal";
+import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
   headerFlexColumn: {
@@ -304,7 +304,7 @@ const Module = (props: ModuleProps): JSX.Element => {
       [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
       [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
       [module === AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-      () => getRegistrationTask(navigate, module).onClick);
+    () => getRegistrationTask(navigate, module).onClick);
 
   const Refresh = () => <Button type='primary' onClick={reload} style={styles.refreshButton}>
     <Repeat style={styles.refreshIcon}/> Refresh
