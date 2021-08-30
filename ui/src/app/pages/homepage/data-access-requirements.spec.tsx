@@ -1,13 +1,13 @@
 import * as React from "react";
-
 import {mount} from "enzyme";
-import {DataAccessRequirements} from './data-access-requirements';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+
+import defaultServerConfig from 'testing/default-server-config';
 import {AccessModule, InstitutionApi, Profile, ProfileApi} from 'generated/fetch';
+import {DataAccessRequirements} from './data-access-requirements';
+import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
-import defaultServerConfig from "../../../testing/default-server-config";
-import {profileApi, registerApiClient} from "../../services/swagger-fetch-clients";
-import {InstitutionApiStub} from "../../../testing/stubs/institution-api-stub";
 
 const load = jest.fn();
 const reload = jest.fn();
@@ -34,10 +34,10 @@ describe('DataAccessRequirements', () => {
 
         serverConfigStore.set({config: defaultServerConfig});
         profileStore.set({
-            profile: await profileApi().getMe(),
-            load: jest.fn(),
-            reload: jest.fn(),
-            updateCache: jest.fn()
+            profile,
+            load,
+            reload,
+            updateCache,
         });
     });
 
