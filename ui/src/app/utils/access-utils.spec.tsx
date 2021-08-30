@@ -12,7 +12,8 @@ import {
   maybeDaysRemaining,
   MILLIS_PER_DAY,
   NOTIFICATION_THRESHOLD_DAYS,
-  RAS_CALLBACK_PATH, RAS_CALLBACK_PATH_DAR,
+  RAS_CALLBACK_PATH,
+  RAS_CALLBACK_PATH_DAR,
   useIsUserDisabled
 } from "app/utils/access-utils";
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';

@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -260,3 +261,13 @@ export const getAccessModuleBypassTime = (accessModules: Array<AccessModuleStatu
   const module = accessModules.find(a => a.moduleName === moduleName);
   return module ? module.bypassEpochMillis : null;
 };
+
+export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
+    style={style}
+    onClick={() => {
+      // After a registration status change, to be safe, we reload the application. This results in
+      // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+      // have been dependent on the user's registration status, e.g. CDR config information.
+      location.replace('/');
+    }}>Get Started</Button>;
+

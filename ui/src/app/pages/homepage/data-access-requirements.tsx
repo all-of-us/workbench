@@ -18,6 +18,7 @@ import {
   buildRasRedirectUrl,
   getAccessModuleStatusByName,
   getRegistrationTask,
+  GetStartedButton,
   redirectToNiH, redirectToRas
 } from 'app/utils/access-utils';
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
@@ -28,6 +29,22 @@ const styles = reactStyles({
   headerFlexColumn: {
     marginLeft: '3%',
     width: '50%',
+  },
+  completed: {
+    height: '87px',
+    padding: '1em',
+    marginLeft: '3%',
+    marginRight: '3%',
+    borderRadius: '5px',
+    color: colors.primary,
+    backgroundColor: colorWithWhiteness(colors.success, 0.82),
+  },
+  completedHeader: {
+    fontSize: '18px',
+    fontWeight: 600,
+  },
+  completedText: {
+    fontSize: '14px',
   },
   headerRW: {
     textTransform: 'uppercase',
@@ -183,6 +200,14 @@ const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerRW}>Researcher Workbench</Header>
     <Header style={styles.headerDAR}>Data Access Requirements</Header>
 </FlexColumn>;
+
+const Completed = () => <FlexRow style={styles.completed}>
+  <FlexColumn>
+    <div style={styles.completedHeader}>Thank you for completing all the necessary steps</div>
+    <div style={styles.completedText}>Researcher Workbench data access is complete.</div>
+  </FlexColumn>
+  <GetStartedButton style={{marginLeft: 'auto'}}/>
+</FlexRow>;
 
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
@@ -393,6 +418,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   return <FlexColumn style={styles.pageWrapper}>
     <DARHeader/>
+    {profile && !activeModule && <Completed/>}
     <FadeBox style={styles.fadeBox}>
       <div style={styles.pleaseComplete}>
         Please complete the necessary steps to gain access to the <AoU/> datasets.
