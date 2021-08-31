@@ -67,12 +67,6 @@ export default class ConceptSetPage extends AuthenticatedPage {
       const xpath = '//*[@data-test-id="edit-name"]';
       const nameInput = new Textbox(this.page, xpath);
       await nameInput.type(newConceptName);
-      // DON'T DELETE. Value sometimes overridden by old value. To prevent test from failing, verify new value entered successfully.
-      // If new value is not found, re-type once more.
-      const actualValue = await nameInput.getValue();
-      if (actualValue.trim().toLowerCase() !== newConceptName.trim().toLowerCase()) {
-        await nameInput.type(newConceptName);
-      }
     }
 
     // Enter description
@@ -84,6 +78,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
 
     await saveButton.click();
     await this.getEditButton().then((butn) => butn.waitUntilEnabled());
+    await waitWhileLoading(this.page);
   }
 
   /**
