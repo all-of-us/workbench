@@ -38,9 +38,9 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
       if (!fp.isEqual(routeDataStore.get(), routeData)) {
         routeDataStore.set(routeData);
       }
-    }
 
-    document.title = buildPageTitleForEnvironment(routeData.title || params[routeData.pathElementForTitle]);
+      document.title = buildPageTitleForEnvironment(routeData.title || params[routeData.pathElementForTitle]);
+    }
   }, [routeData]);
 
   useEffect(() => {
