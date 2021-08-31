@@ -14,7 +14,7 @@ import {getLiveDUCCVersion} from './code-of-conduct';
 
 const {useState, useEffect} = React;
 
-export interface RegistrationTask {
+interface RegistrationTask {
   key: string;    // legacy accessor text
   module: AccessModule;
   completionPropsKey: string;

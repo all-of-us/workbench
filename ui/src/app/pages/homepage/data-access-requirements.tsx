@@ -332,8 +332,6 @@ const Module = (props: ModuleProps): JSX.Element => {
   </div>;
 
   const ModuleBox = ({children}) => {
-    console.log(`ModuleBox for ${module}, active = ${active}`);
-
     return active ?
         <Link onClick={() => {
           setNeedsReload(true);
@@ -469,7 +467,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   useEffect(() => {
     fp.flow(
       fp.find<AccessModule>(module => {
-        console.log('in fp.find for module ' + module);
         const status = getAccessModuleStatusByName(profile, module);
         return !bypassedOrCompletedText(status);
       }),
