@@ -29,13 +29,12 @@ import {WorkspaceList} from 'app/pages/workspace/workspace-list';
 import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
 import {
   NIH_CALLBACK_PATH,
-  NIH_CALLBACK_PATH_DAR,
   RAS_CALLBACK_PATH,
-  RAS_CALLBACK_PATH_DAR
 } from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
+import {environment} from 'environments/environment';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
@@ -60,7 +59,7 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
 
 export const SignedInRoutes = () => {
   return <Switch>
-    <AppRoute exact path='/' guards={[expiredGuard]}>
+    <AppRoute exact path='/' guards={environment.enableDataAccessRequirements ? [expiredGuard, registrationGuard] : [expiredGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path='/access-renewal'>
@@ -121,16 +120,14 @@ export const SignedInRoutes = () => {
       <ProfilePage routeData={{title: 'Profile'}}/>
     </AppRoute>
     <AppRoute exact path={NIH_CALLBACK_PATH}>
-      <HomepagePage routeData={{title: 'Homepage'}}/>
-    </AppRoute>
-    <AppRoute exact path={NIH_CALLBACK_PATH_DAR}>
-      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
+      {environment.enableDataAccessRequirements ?
+          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+          <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
     <AppRoute exact path={RAS_CALLBACK_PATH}>
-      <HomepagePage routeData={{title: 'Homepage'}}/>
-    </AppRoute>
-    <AppRoute exact path={RAS_CALLBACK_PATH_DAR}>
-      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
+      {environment.enableDataAccessRequirements ?
+          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+          <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>

@@ -51,34 +51,28 @@ export const redirectToTwoFactorSetup = (): void => {
   window.open(getTwoFactorSetupUrl(), '_blank');
 };
 
-// we have two callback paths to enable migration from Homepage+RegistrationFlow to DataAccessRenewal
 export const NIH_CALLBACK_PATH = '/nih-callback';
-export const NIH_CALLBACK_PATH_DAR = '/dar-nih-callback';
 
-export const redirectToNiH = (dar: boolean = false): void => {
+export const redirectToNiH = (): void => {
   AnalyticsTracker.Registration.ERACommons();
-  const callbackPath = dar ? NIH_CALLBACK_PATH_DAR : NIH_CALLBACK_PATH;
   const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
-        window.location.origin.toString() + callbackPath + '?token=<token>');
+        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token=<token>');
   window.open(url, '_blank');
 };
 
-// we have two callback paths to enable migration from Homepage+RegistrationDashboard to DataAccessRequirements
 export const RAS_CALLBACK_PATH = '/ras-callback';
-export const RAS_CALLBACK_PATH_DAR = '/dar-ras-callback';
 
 /** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
-export const buildRasRedirectUrl = (dar: boolean = false): string => {
-  const callbackPath = dar ? RAS_CALLBACK_PATH_DAR : RAS_CALLBACK_PATH;
-  return encodeURIComponentStrict(window.location.origin.toString() + callbackPath);
+export const buildRasRedirectUrl = (): string => {
+  return encodeURIComponentStrict(window.location.origin.toString() + RAS_CALLBACK_PATH);
 };
 
-export const redirectToRas = (dar: boolean = false): void => {
+export const redirectToRas = (): void => {
   AnalyticsTracker.Registration.RasLoginGov();
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
-      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl(dar)
+      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1+federated_identities';
   window.open(url, '_blank');
 };
