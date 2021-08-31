@@ -332,6 +332,8 @@ const Module = (props: ModuleProps): JSX.Element => {
   </div>;
 
   const ModuleBox = ({children}) => {
+    console.log(`ModuleBox for ${module}, active = ${active}`);
+
     return active ?
         <Link onClick={() => {
           setNeedsReload(true);
@@ -437,6 +439,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // clear spinner on mount
   useEffect(() => spinnerProps.hideSpinner(), []);
 
+  const [navigate, ] = useNavigation();
+  const enabledModules = allModules.map(module => {
+    const enabledTaskMaybe = getRegistrationTask(navigate, module);
+    return enabledTaskMaybe && enabledTaskMaybe.module;
+  });
+
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>
   const {token, code} = queryParamsStore.getValue();
@@ -460,14 +468,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // whenever the profile changes, find the first incomplete module and setActiveModule
   useEffect(() => {
     fp.flow(
-      fp.find(module => {
-        const status = getAccessModuleStatusByName(profile, module as AccessModule);
-        // filter out disabled-by-FF modules by requiring 'status' here
-        return status && !bypassedOrCompletedText(status);
+      fp.find<AccessModule>(module => {
+        console.log('in fp.find for module ' + module);
+        const status = getAccessModuleStatusByName(profile, module);
+        return !bypassedOrCompletedText(status);
       }),
       setActiveModule
     )
-    (allModules);
+    (enabledModules);
   }, [profile]);
 
   return <FlexColumn style={styles.pageWrapper}>
