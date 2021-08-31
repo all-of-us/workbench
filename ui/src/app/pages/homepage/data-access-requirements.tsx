@@ -368,23 +368,23 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
-   const {profile, reload} = useStore(profileStore);
+  const {profile, reload} = useStore(profileStore);
 
   const syncExternalModulesAndReloadProfile = async() => {
-
+    const aborter = new AbortController();
     spinnerProps.showSpinner();
-    //await profileApi().syncTwoFactorAuthStatus();
-    //await profileApi().syncComplianceTrainingStatus();
-    reload();
+    await profileApi().syncTwoFactorAuthStatus({signal: aborter.signal});
+    await profileApi().syncComplianceTrainingStatus({signal: aborter.signal});
     spinnerProps.hideSpinner();
+    reload();
+
+    return function cleanup() {
+      aborter.abort();
+    };
   };
 
-  // useEffect(() => {
-  //   syncExternalModulesAndReloadProfile();
-  // }, []);
-
   useEffect(() => {
-    spinnerProps.hideSpinner();
+    syncExternalModulesAndReloadProfile();
   }, []);
 
   // handle the route /nih-callback?token=<token>
