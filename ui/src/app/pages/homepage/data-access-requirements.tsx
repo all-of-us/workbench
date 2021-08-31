@@ -25,7 +25,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
 import {
   buildRasRedirectUrl,
-  bypassAllModules,
+  bypassAll,
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
@@ -239,7 +239,7 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
 
 const bypassAll = async(showSpinner: Function, hideSpinner: Function, reloadProfile: Function) => {
   showSpinner();
-  await bypassAllModules(true);
+  await bypassAll(allModules, true);
   hideSpinner();
   reloadProfile();
 };

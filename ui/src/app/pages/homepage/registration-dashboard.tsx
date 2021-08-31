@@ -7,10 +7,11 @@ import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AccessModule} from 'app/generated/fetch';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {
-  bypassAllModules,
+  bypassAll,
   getRegistrationTasks,
   GetStartedButton,
 } from 'app/utils/access-utils';
@@ -140,7 +141,18 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
 
   async setAllModulesBypassState(isBypassed: boolean) {
     this.setState({bypassInProgress: true});
-    await bypassAllModules(isBypassed);
+
+    // TypeScript enum iteration is nonfunctional
+    // so just copy the whole list
+    const modules = [
+      AccessModule.COMPLIANCETRAINING,
+      AccessModule.ERACOMMONS,
+      AccessModule.TWOFACTORAUTH,
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.RASLINKLOGINGOV,
+    ];
+
+    await bypassAll(modules, isBypassed);
     this.setState({bypassInProgress: false, bypassActionComplete: true});
   }
 
