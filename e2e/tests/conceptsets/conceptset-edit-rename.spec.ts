@@ -82,7 +82,7 @@ describe('Editing and rename Concept Set', () => {
 
     // Edit Concept name and description.
     const newName = makeRandomName();
-    await conceptSetPage.edit(newName, makeString(20));
+    await conceptSetPage.edit(conceptSetName, newName, makeString(20));
     console.log(`Renamed Concept Set: "${conceptSetName}" to "${newName}"`);
 
     // Navigate to workspace Data page, then delete Concept Set

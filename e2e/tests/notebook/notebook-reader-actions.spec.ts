@@ -125,7 +125,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
     // Verify current workspace is collaborator Workspace.
     await newAnalysisPage.waitForLoad();
     const workspaceLink = Link.findByName(page, { name: readerWorkspaceName });
-    const linkDisplayed = await workspaceLink.isDisplayed();
+    const linkDisplayed = await workspaceLink.isVisible();
     expect(linkDisplayed).toBe(true);
 
     // Verify copied notebook exists in collaborator Workspace.
