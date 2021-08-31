@@ -110,9 +110,9 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
-    <AppRoute exact path='/data-access-requirements'>
+    {environment.enableDataAccessRequirements && <AppRoute exact path='/data-access-requirements'>
       <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
-    </AppRoute>
+    </AppRoute>}
     <AppRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
     </AppRoute>
