@@ -7,7 +7,6 @@ import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {AccessModule} from 'app/generated/fetch';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {
@@ -18,6 +17,7 @@ import {
 import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {AccessModule} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
