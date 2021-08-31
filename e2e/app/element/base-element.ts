@@ -176,7 +176,7 @@ export default class BaseElement {
    * @param newValue The text string.
    * @param options The typing options.
    */
-  async type(newValue: string, { delay = 10 } = {}): Promise<this> {
+  async type(newValue: string, { delay = 10, confidence = 2 } = {}): Promise<this> {
     if (newValue === undefined) {
       throw new Error('type() function parameter "newValue" is undefined.');
     }
@@ -184,17 +184,23 @@ export default class BaseElement {
     const clearAndType = async (txt: string): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));
+      await this.pressTab();
       return this.getProperty<string>('value');
     };
 
     let maxRetries = 3;
+    let confidenceCounter = 0;
     const typeAndCheck = async () => {
       console.log(`maxRetries: ${maxRetries}`);
       const actualValue = await clearAndType(newValue);
       if (actualValue === newValue) {
-        await this.pressTab();
-        console.log('success');
-        return; // success
+        confidenceCounter++;
+        console.log(`type successful. confidenceCounter ${confidenceCounter}`);
+        if (confidenceCounter >= confidence) {
+          return; // success
+        }
+      } else {
+        confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       }
       if (maxRetries <= 0) {
         throw new Error(`Failed to type "${newValue}". Actual text: "${actualValue}"`);
