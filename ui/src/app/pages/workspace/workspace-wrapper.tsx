@@ -30,7 +30,7 @@ export const WorkspaceWrapper = fp.flow(
         ...wsResponse.workspace,
         accessLevel: wsResponse.accessLevel
       });
-
+      diskStore.set({workspaceNamespace: workspace.namespace, persistentDisk: undefined});
       runtimeStore.set({workspaceNamespace: wsResponse.workspace.namespace, runtime: undefined, runtimeLoaded: false});
       pollAborter.abort();
       const newPollAborter = new AbortController();
