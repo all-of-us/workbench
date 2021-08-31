@@ -25,7 +25,7 @@ const config = {
     }
   },
   "setupFiles": ["<rootDir>/src/testing/navigation-mock.ts"],
-  "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
+  "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"]
 }
 
 module.exports = config;
