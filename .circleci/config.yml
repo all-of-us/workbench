@@ -729,7 +729,7 @@ workflows:
       - api-bigquery-test
       - puppeteer-env-setup
       - puppeteer-test:
-          parallel_num: 1
+          parallel_num: 2
           env_name: "test"
           test_mode: "nightly-integration"
           optional_steps:
