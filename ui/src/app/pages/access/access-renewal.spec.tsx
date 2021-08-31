@@ -77,7 +77,9 @@ describe('Access Renewal Page', () => {
       moduleName,
       expirationEpochMillis: expirationEpochMillis,
       // profile and publiction is not bypassable.
-      bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION) ? null : completionFn(),
+      bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION)
+          ? null
+          : completionFn(),
       completionEpochMillis: completionEpochMillis
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)

@@ -6,7 +6,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentWorkspace} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {currentWorkspaceStore, nextWorkspaceWarmupStore} from 'app/utils/navigation';
-import {MatchParams, routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
+import {diskStore, MatchParams, routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
