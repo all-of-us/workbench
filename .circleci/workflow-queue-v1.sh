@@ -81,7 +81,7 @@ fetch_older_pipelines() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | .workflows.workflow_id")
 }
 
-poll_active_pipeline() {
+poll_active_pipeline_detail() {
   printf '%s\n' "Fetching workflow_id \"${id}\" on \"${branch}\" branch."
     # TODO local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
     local get_path="project/${project_slug}?filter=running&shallow=true"
@@ -131,18 +131,18 @@ fi
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
 waited_time=0
-wait="10s"
+sleep_time="10s"
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
 
   for id in ${pipeline_workflow_ids}; do
     is_running=false
-    poll_active_pipeline "${id}"
+    poll_active_pipeline_detail "${id}"
     active_workflow=$__
     printf "\n%s\n" "Active workflow id: ${active_workflow}"
     if [[ $active_workflow ]]; then
-      printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${wait} seconds. Please wait..."
+      printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time + waited_time))
       is_running=true
