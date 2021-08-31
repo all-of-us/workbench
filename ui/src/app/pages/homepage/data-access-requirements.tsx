@@ -283,27 +283,18 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
   return handler();
 };
 
-const syncExternalModulesAndReloadProfile = async(reload: Function, spinnerProps: WithSpinnerOverlayProps) => {
-  spinnerProps.showSpinner();
-  await profileApi().syncTwoFactorAuthStatus();
-  await profileApi().syncComplianceTrainingStatus();
-  reload();
-  spinnerProps.hideSpinner();
-};
-
 interface ModuleProps {
   module: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
-  spinnerProps: WithSpinnerOverlayProps;
 
   // TODO
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
 const MaybeModule = (props: ModuleProps): JSX.Element => {
-  const {profile, reload} = useStore(profileStore);
+  const {profile} = useStore(profileStore);
   const [navigate, ] = useNavigation();
 
-  const {module, active, spinnerProps} = props;
+  const {module, active} = props;
   const eligible = true; // TODO
   const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
 
@@ -326,7 +317,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   const Refresh = () => <Button
       type='primary'
       style={styles.refreshButton}
-      onClick={() => syncExternalModulesAndReloadProfile(reload, spinnerProps)} >
+      onClick={() => location.reload()} >
     <Repeat style={styles.refreshIcon}/> Refresh
   </Button>;
 
@@ -377,10 +368,29 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
+  // const [loading, setLoading] = useState(false);
+  // useEffect(() => {
+  //   if (loading) {
+  //     spinnerProps.showSpinner();
+  //   } else {
+  //     spinnerProps.hideSpinner();
+  //   }
+  // }, [loading]);
+
   const {profile, reload} = useStore(profileStore);
 
+  const syncExternalModulesAndReloadProfile = async() => {
+    //if (loading) return;
+
+    spinnerProps.showSpinner();
+    await profileApi().syncTwoFactorAuthStatus();
+    await profileApi().syncComplianceTrainingStatus();
+    reload();
+    spinnerProps.hideSpinner();
+  };
+
   useEffect(() => {
-    syncExternalModulesAndReloadProfile(reload, spinnerProps);
+    syncExternalModulesAndReloadProfile();
   }, []);
 
   // handle the route /nih-callback?token=<token>
@@ -450,7 +460,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
     return <FlexColumn style={styles.modulesContainer}>
       {modules.map(module =>
-          <MaybeModule key={module} module={module} active={module === activeModule} spinnerProps={spinnerProps}/>
+          <MaybeModule key={module} module={module} active={module === activeModule}/>
       )}
     </FlexColumn>;
   };
