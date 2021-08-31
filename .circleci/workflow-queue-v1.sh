@@ -122,8 +122,12 @@ fi
 
 fetch_older_pipelines "${current_pipeline_start_time}"
 pipeline_workflow_ids=$__
-printf "%s\n\n" "Older pipeline workflow id are: ${pipeline_workflow_ids}"
+printf "%s\n\n" "Currently running pipeline workflow id are: ${pipeline_workflow_ids}"
 
+if [[ -z $pipeline_workflow_ids ]]; then
+  printf "%s\n" "No workflows currently running."
+  exit 0
+fi
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
@@ -132,6 +136,7 @@ wait="30s"
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
+
   for id in ${pipeline_workflow_ids}; do
     is_running=false
     poll_active_pipeline "${id}"
