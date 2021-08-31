@@ -310,9 +310,9 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   // kluge until we have fully migrated from the Registration Dashboard:
   // getRegistrationTask() has onClick() functions for every module, which is generally what we want
   // but we pop up a modal for Two Factor Auth instead of using the standard task
-  const moduleAction = module === AccessModule.TWOFACTORAUTH ?
+  const moduleAction = registrationTask && (module === AccessModule.TWOFACTORAUTH ?
       () => setShowTwoFactorAuthModal(true) :
-      () => registrationTask && registrationTask.onClick;
+      registrationTask.onClick);
 
   const Refresh = () => <Button
       type='primary'
@@ -368,29 +368,23 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
-  // const [loading, setLoading] = useState(false);
-  // useEffect(() => {
-  //   if (loading) {
-  //     spinnerProps.showSpinner();
-  //   } else {
-  //     spinnerProps.hideSpinner();
-  //   }
-  // }, [loading]);
-
-  const {profile, reload} = useStore(profileStore);
+   const {profile, reload} = useStore(profileStore);
 
   const syncExternalModulesAndReloadProfile = async() => {
-    //if (loading) return;
 
     spinnerProps.showSpinner();
-    await profileApi().syncTwoFactorAuthStatus();
-    await profileApi().syncComplianceTrainingStatus();
+    //await profileApi().syncTwoFactorAuthStatus();
+    //await profileApi().syncComplianceTrainingStatus();
     reload();
     spinnerProps.hideSpinner();
   };
 
+  // useEffect(() => {
+  //   syncExternalModulesAndReloadProfile();
+  // }, []);
+
   useEffect(() => {
-    syncExternalModulesAndReloadProfile();
+    spinnerProps.hideSpinner();
   }, []);
 
   // handle the route /nih-callback?token=<token>
