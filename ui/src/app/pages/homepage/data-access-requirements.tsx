@@ -299,7 +299,7 @@ interface ModuleProps {
   // TODO
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
-const Module = (props: ModuleProps): JSX.Element => {
+const MaybeModule = (props: ModuleProps): JSX.Element => {
   const {profile, reload} = useStore(profileStore);
   const [navigate, ] = useNavigation();
 
@@ -313,8 +313,8 @@ const Module = (props: ModuleProps): JSX.Element => {
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
-  // undefined if the feature flag is false
   const registrationTask = getRegistrationTask(navigate, module);
+  const moduleEnabled = !!registrationTask;
 
   // kluge until we have fully migrated from the Registration Dashboard:
   // getRegistrationTask() has onClick() functions for every module, which is generally what we want
@@ -355,24 +355,25 @@ const Module = (props: ModuleProps): JSX.Element => {
         <FlexRow style={styles.moduleBox}>{children}</FlexRow>;
   };
 
-  return registrationTask ? // filters out the disabled-by-feature-flag modules
-      <FlexRow data-test-id={`module-${module}`}>
-        <FlexRow style={styles.moduleCTA}>
-          {active && (needsReload ? <Refresh/> : <Next/>)}
-        </FlexRow>
-        <ModuleBox>
-          <ModuleIcon/>
-          <FlexColumn>
-            <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
-              {moduleLabels.get(module)}
-            </div>
-            {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
-          </FlexColumn>
-        </ModuleBox>
-        {showTwoFactorAuthModal && <TwoFactorAuthModal
-            onClick={() => setShowTwoFactorAuthModal(false)}
-            onCancel={() => setShowTwoFactorAuthModal(false)}/>}
-      </FlexRow> : null;
+  const Module = () => <FlexRow data-test-id={`module-${module}`}>
+    <FlexRow style={styles.moduleCTA}>
+      {active && (needsReload ? <Refresh/> : <Next/>)}
+    </FlexRow>
+    <ModuleBox>
+      <ModuleIcon/>
+      <FlexColumn>
+        <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+          {moduleLabels.get(module)}
+        </div>
+        {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+      </FlexColumn>
+    </ModuleBox>
+    {showTwoFactorAuthModal && <TwoFactorAuthModal
+        onClick={() => setShowTwoFactorAuthModal(false)}
+        onCancel={() => setShowTwoFactorAuthModal(false)}/>}
+  </FlexRow>;
+
+  return moduleEnabled ? <Module/> : null;
 };
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
@@ -381,12 +382,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   useEffect(() => {
     syncExternalModulesAndReloadProfile(reload, spinnerProps);
   }, []);
-
-  const [navigate, ] = useNavigation();
-  const enabledModules = allModules.map(module => {
-    const enabledTaskMaybe = getRegistrationTask(navigate, module);
-    return enabledTaskMaybe && enabledTaskMaybe.module;
-  });
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>
@@ -405,7 +400,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
 
-  // whenever the profile changes, find the first incomplete module and setActiveModule
+  const [navigate, ] = useNavigation();
+  const enabledModules = allModules.map(module => {
+    const enabledTaskMaybe = getRegistrationTask(navigate, module);
+    return enabledTaskMaybe && enabledTaskMaybe.module;
+  });
+
+  // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
     fp.flow(
       fp.find<AccessModule>(module => {
@@ -416,8 +417,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     )
     (enabledModules);
   }, [profile]);
-
-  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
     <Header style={styles.headerRW}>Researcher Workbench</Header>
@@ -451,7 +450,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
     return <FlexColumn style={styles.modulesContainer}>
       {modules.map(module =>
-          <Module key={module} module={module} active={module === activeModule} spinnerProps={spinnerProps}/>
+          <MaybeModule key={module} module={module} active={module === activeModule} spinnerProps={spinnerProps}/>
       )}
     </FlexColumn>;
   };
@@ -484,6 +483,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     </FlexColumn>
     <ModulesForCard modules={duccModule}/>
   </FlexRow>;
+
+  const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
     <DARHeader/>
