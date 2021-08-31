@@ -613,7 +613,7 @@ jobs:
       - checkout-code
       - run:
           working_directory: ~/workbench/e2e
-          command: yarn install --non-interactive
+          command: yarn install --frozen-lockfile --non-interactive
       - run:
           name: Build and lint Puppeteer code
           working_directory: ~/workbench/e2e
