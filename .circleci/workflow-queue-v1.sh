@@ -94,7 +94,7 @@ poll_active_pipeline() {
     jq_filter="(.status | test(\"running|pending|queued\")) "
     jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id==\"${1}\""
     jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
-    jq_object+="job_name: .workflows.job_name, build_num, start_time, status }"
+    jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
 
     __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
