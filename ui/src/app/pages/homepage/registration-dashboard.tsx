@@ -17,8 +17,6 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
-import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
-
 const styles = reactStyles({
   mainHeader: {
     color: colors.primary, fontSize: '18px', fontWeight: 600,
