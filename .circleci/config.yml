@@ -312,7 +312,7 @@ commands:
           when: always
 
   halt-puppeteer-check:
-    description: "Stop running Puppeteer end-to-end test if conditions are met"
+    description: "Stop running Puppeteer e2e tests if halt conditions are met"
     steps:
       - run:
           name: "Check commit message and find changed file names that do not match ignore patterns"
