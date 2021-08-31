@@ -3,7 +3,15 @@ import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {compoundRuntimeOpStore, diskStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {
+  compoundRuntimeOpStore,
+  diskStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  serverConfigStore,
+  useStore
+} from 'app/utils/stores';
 
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -71,7 +79,8 @@ export const diffsToUpdateMessaging = (diffs: RuntimeDiff[]): UpdateMessaging =>
     [RuntimeDiffState.NEEDS_DELETE_PD, () => ({
       applyAction: 'APPLY & RECREATE',
       warn: 'Reducing the size of a persistent disk requires it to be deleted and recreated. This will delete all files on the disk.',
-      warnMore: 'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, move them to the workspace bucket. \n' +
+      warnMore: 'If you want to save some files permanently, such as input data, analysis outputs, ' +
+          'or installed packages, move them to the workspace bucket. \n' +
           'Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.'
     })],
     [RuntimeDiffState.NEEDS_DELETE_RUNTIME, () => ({

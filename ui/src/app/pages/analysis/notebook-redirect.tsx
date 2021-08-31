@@ -2,9 +2,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {NavigationProps} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
-import {RuntimeStore} from 'app/utils/stores';
+import {MatchParams, RuntimeStore} from 'app/utils/stores';
 
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
@@ -29,6 +29,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
 export enum Progress {
@@ -221,7 +222,7 @@ interface State {
   progressComplete: Map<Progress, boolean>;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
@@ -237,7 +238,8 @@ export const NotebookRedirect = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withQueryParams(),
-  withNavigation
+  withNavigation,
+  withRouter
 )(
   class extends React.Component<Props, State> {
 
@@ -281,7 +283,7 @@ export const NotebookRedirect = fp.flow(
 
     // get notebook name without file suffix
     private getNotebookName() {
-      const {nbName} = urlParamsStore.getValue();
+      const {nbName} = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }

@@ -90,16 +90,16 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/workspaces'>
       <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/workspaces/:workspaceNamespace'>
+    <AppRoute exact path='/admin/workspaces/:ns'>
       <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>
     </AppRoute>
     <AppRoute exact path='/admin/workspace-audit'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/workspace-audit/:workspaceNamespace'>
+    <AppRoute exact path='/admin/workspace-audit/:ns'>
       <WorkspaceAuditPage routeData={{title: 'Workspace Audit'}}/>
     </AppRoute>
-    <AppRoute exact path='/admin/workspaces/:workspaceNamespace/:nbName'>
+    <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/data-code-of-conduct'>
@@ -123,7 +123,7 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/workspaces/build' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceEditPage routeData={{title: 'Create Workspace'}} workspaceEditMode={WorkspaceEditMode.Create}/>
     </AppRoute>
-    <AppRoute path='/workspaces/:ns/:wsid' exact={false} guards={[expiredGuard, registrationGuard]}>
+    <AppRoute path='/workspaces/:ns/:wsid' exact={false} intermediaryRoute={true} guards={[expiredGuard, registrationGuard]}>
       <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}}/>
     </AppRoute>
     <AppRoute exact path='*'>

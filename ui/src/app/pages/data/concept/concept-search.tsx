@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Prompt} from 'react-router';
+import {Prompt, RouteComponentProps, withRouter} from 'react-router';
 import {Subscription} from 'rxjs/Subscription';
 import * as validate from 'validate.js';
 
@@ -22,8 +22,7 @@ import {
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
-  withCurrentWorkspace,
-  withUrlParams
+  withCurrentWorkspace
 } from 'app/utils';
 import {
   conceptSetUpdating,
@@ -33,6 +32,7 @@ import {
   queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -100,11 +100,10 @@ function sortAndStringify(concepts) {
   return JSON.stringify(concepts.sort((a, b) => a.id - b.id));
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   cohortContext: any;
   concept: Array<Criteria>;
   workspace: WorkspaceData;
-  urlParams: any;
 }
 
 interface State {
@@ -129,8 +128,8 @@ export const ConceptSearch = fp.flow(
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentWorkspace(),
-  withUrlParams(),
-  withNavigation)
+  withNavigation,
+  withRouter)
 (class extends React.Component<Props, State> {
   subscription: Subscription;
   constructor(props: any) {
@@ -201,9 +200,9 @@ export const ConceptSearch = fp.flow(
   }
 
   async getConceptSet() {
-    const {urlParams: {ns, wsid, csid}} = this.props;
+    const {ns, wsid, csid} = this.props.match.params;
     try {
-      const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
+      const resp = await conceptSetsApi().getConceptSet(ns, wsid, +csid);
       if (resp.domain === Domain.SURVEY) {
         resp.criteriums = resp.criteriums.filter((survey) => survey.parentCount !== 0);
       }
@@ -218,17 +217,17 @@ export const ConceptSearch = fp.flow(
   }
 
   async copyConceptSet(copyRequest: CopyRequest) {
-    const {urlParams: {ns, wsid, csid}} = this.props;
+    const {ns, wsid, csid} = this.props.match.params;
     this.setState({copySaving: true});
     return conceptSetsApi().copyConceptSet(ns, wsid, csid, copyRequest);
   }
 
   async submitEdits() {
-    const {urlParams: {ns, wsid, csid}} = this.props;
+    const {ns, wsid, csid} = this.props.match.params;
     const {conceptSet, editName, editDescription} = this.state;
     try {
       this.setState({editSaving: true});
-      await conceptSetsApi().updateConceptSet(ns, wsid, csid, {...conceptSet, name: editName, description: editDescription});
+      await conceptSetsApi().updateConceptSet(ns, wsid, +csid, {...conceptSet, name: editName, description: editDescription});
       await this.getConceptSet();
     } catch (error) {
       console.log(error);
@@ -238,9 +237,9 @@ export const ConceptSearch = fp.flow(
   }
 
   async onDeleteConceptSet() {
-    const {urlParams: {ns, wsid, csid}} = this.props;
+    const {ns, wsid, csid} = this.props.match.params;
     try {
-      await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
+      await conceptSetsApi().deleteConceptSet(ns, wsid, +csid);
       this.props.navigate(['workspaces', ns, wsid, 'data', 'concepts']);
     } catch (error) {
       console.error(error);
@@ -271,7 +270,7 @@ export const ConceptSearch = fp.flow(
   }
 
   get isDetailPage() {
-    return !!this.props.urlParams.csid;
+    return !!this.props.match.params.csid;
   }
 
   get searchContext() {
@@ -283,7 +282,7 @@ export const ConceptSearch = fp.flow(
         return {};
       }
     } else {
-      const {urlParams: {domain}} = this.props;
+      const {domain} = this.props.match.params;
       const selectedSurvey = queryParamsStore.getValue().survey;
       return {domain, selectedSurvey, source: 'concept'};
     }

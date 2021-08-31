@@ -17,7 +17,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
-import {currentWorkspaceStore, NavigationProps, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavigationProps} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -29,6 +30,7 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -119,7 +121,7 @@ const styles = reactStyles({
   }
 });
 
-interface Props extends NavigationProps {
+interface Props extends NavigationProps, RouteComponentProps<MatchParams> {
   cohort: Cohort;
   cohortChanged: boolean;
   searchRequest: any;
@@ -149,7 +151,7 @@ interface State {
   total: number;
 }
 
-export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), withNavigation) (
+export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), withNavigation, withRouter) (
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
     private ageMenu: any;
@@ -279,10 +281,9 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
 
     saveCohort() {
       triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
-      const {cohort, updating} = this.props;
+      const {cohort, updating, match: {params: {ns, wsid}}} = this.props;
       cohort.criteria = this.criteria;
       this.setState({saving: true});
-      const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort)
         .then(() => {
@@ -299,8 +300,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
     createCohort(name, description) {
       triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
       this.setState({saving: true});
-      const {ns, wsid} = urlParamsStore.getValue();
-      const {updating} = this.props;
+      const {updating, match: {params: {ns, wsid}}} = this.props;
       const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
       return cohortsApi().createCohort(ns, wsid, cohort)
         .then((c) => {
@@ -312,8 +312,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
 
     delete = () => {
       triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
-      const {ns, wsid} = urlParamsStore.getValue();
-      const {cohort, updating} = this.props;
+      const {cohort, updating, match: {params: {ns, wsid}}} = this.props;
       cohortsApi().deleteCohort(ns, wsid, cohort.id)
         .then(() => {
           updating();
@@ -327,8 +326,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
     }
 
     navigateTo(action: string) {
-      const {ns, wsid} = urlParamsStore.getValue();
-      const {cohort} = this.props;
+      const {cohort, match: {params: {ns, wsid}}} = this.props;
       let url = `/workspaces/${ns}/${wsid}/`;
       switch (action) {
         case 'notebook':
@@ -354,7 +352,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
     }
 
     async getCohortNames() {
-      const {ns, wsid} = urlParamsStore.getValue();
+      const {match: {params: {ns, wsid}}} = this.props;
       const response = await cohortsApi().getCohortsInWorkspace(ns, wsid);
       return response.items.map(cohort => cohort.name);
     }

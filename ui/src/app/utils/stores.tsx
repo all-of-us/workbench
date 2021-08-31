@@ -154,8 +154,21 @@ export interface ServerConfigStore {
 
 export const serverConfigStore = atom<ServerConfigStore>({});
 
-export interface CanComponentDeactivate {
-  canDeactivate: () => Promise<boolean> | boolean;
+// These fields come from the colon-prefixed params declared on router paths.
+// See app-routing, signed-in-app-routing, and workspace-app-routing for examples.
+// If you want to add a new route param, you will need to define it here as well.
+export interface MatchParams {
+  cid?: string;
+  csid?: string;
+  dataSetId?: string;
+  domain?: string;
+  institutionId?: string;
+  nbName?: string;
+  ns?: string;
+  pid?: string;
+  username?: string;
+  usernameWithoutGsuiteDomain?: string;
+  wsid?: string;
 }
 
 /**
