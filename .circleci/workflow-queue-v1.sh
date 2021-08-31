@@ -78,7 +78,7 @@ fetch_older_pipelines() {
   jq_filter="(.status | test(\"running|pending|queued\")) "
   jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
 
-  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | .workflow_id")
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | .workflows.workflow_id")
 }
 
 poll_active_pipeline() {
