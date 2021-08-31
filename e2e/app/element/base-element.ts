@@ -1,4 +1,4 @@
-import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
+import { ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn } from 'utils/waits-utils';
@@ -176,7 +176,7 @@ export default class BaseElement {
    * @param newValue The text string.
    * @param options The typing options.
    */
-  async type(newValue: string, { delay = 10 } = {}): Promise<this> {
+  async type(newValue: string, { delay = 10, confidence = 2 } = {}): Promise<this> {
     if (newValue === undefined) {
       throw new Error('type() function parameter "newValue" is undefined.');
     }
@@ -184,15 +184,24 @@ export default class BaseElement {
     const clearAndType = async (txt: string): Promise<string> => {
       await this.clear();
       await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));
+      await this.pressTab();
       return this.getProperty<string>('value');
     };
 
-    let maxRetries = 3;
+    let maxRetries = 4;
+    let confidenceCounter = 0;
     const typeAndCheck = async () => {
-      const actualValue = await clearAndType(newValue);
+      let actualValue = await this.getProperty<string>('value');
+      if (actualValue !== newValue) {
+        actualValue = await clearAndType(newValue);
+      }
       if (actualValue === newValue) {
-        await this.pressTab();
-        return; // success
+        confidenceCounter++;
+        if (confidenceCounter >= confidence) {
+          return; // success
+        }
+      } else {
+        confidenceCounter = confidenceCounter > 0 ? confidenceCounter-- : 0;
       }
       if (maxRetries <= 0) {
         throw new Error(`Failed to type "${newValue}". Actual text: "${actualValue}"`);
@@ -354,10 +363,10 @@ export default class BaseElement {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(timeout = 2 * 60 * 1000): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation({
-      timeout
-    });
+  async clickAndWait(
+    navOptions: NavigationOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
+  ): Promise<void> {
+    const navigationPromise = this.page.waitForNavigation(navOptions);
     await this.click({ delay: 10 });
     await navigationPromise.catch((err) => {
       // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.

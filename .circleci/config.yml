@@ -5,7 +5,7 @@ version: 2.1
 # -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.1.1
+  browser-tools: circleci/browser-tools@1.2.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -280,6 +280,7 @@ commands:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
       - restore_cache:
+          name: "Restore UI cache"
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - gcloud-auth-login
       - run:
@@ -290,6 +291,7 @@ commands:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
       - save_cache:
+          name: "Save UI cache"
           paths:
             - ~/.cache/yarn
             - ui/node_modules
@@ -310,7 +312,7 @@ commands:
           when: always
 
   halt-puppeteer-check:
-    description: "Stop running Puppeteer end-to-end test if conditions are met"
+    description: "Stop running Puppeteer e2e tests if halt conditions are met"
     steps:
       - run:
           name: "Check commit message and find changed file names that do not match ignore patterns"
@@ -318,6 +320,14 @@ commands:
       - halt-test-check:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
+
+  puppeteer-access-test-user-setup:
+    steps:
+      - gcloud-auth-login
+      - run:
+          working_directory: ~/workbench/api
+          name: Prep the e2e access test user (in Test env) by setting access module timestamps
+          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
 
 # -------------------------
 #        JOBS
@@ -537,23 +547,22 @@ jobs:
       TEST_MODE: << parameters.test_mode >>
     parallelism: << parameters.parallel_num >>
     steps:
-      - attach_workspace:
-          at: .
+      - checkout-code
       - steps: << parameters.optional_steps >>
+      - restore_cache:
+          name: "Restore e2e cache"
+          keys:
+            - v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - browser-tools/install-browser-tools
       - run:
-          name: "Override environment variables for e2e test users"
+          name: "Set environment variables for e2e test users"
           working_directory: ~/workbench/e2e
-          command: cp .env.circleci.<< parameters.env_name >> .env
-      - run:
-          name: "Echo environment variables"
           command: |
-            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
-            echo "TEST_MODE=${TEST_MODE}"
-      - run:
-          name: "Export user password"
-          command: |
+            cp .env.circleci.<< parameters.env_name >> .env
             echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
             source $BASH_ENV
+            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
+            echo "TEST_MODE=${TEST_MODE}"
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
@@ -602,10 +611,6 @@ jobs:
     executor: puppeteer-executor
     steps:
       - checkout-code
-      - browser-tools/install-browser-tools
-      - restore_cache:
-          keys:
-            - v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           working_directory: ~/workbench/e2e
           command: yarn install --frozen-lockfile --non-interactive
@@ -614,26 +619,12 @@ jobs:
           working_directory: ~/workbench/e2e
           command: yarn build && yarn lint
       - save_cache:
+          name: "Save e2e cache"
           paths:
-            - ~/workbench/e2e/.cache/yarn
+            - ~/.cache/yarn
             - ~/workbench/e2e/node_modules
-          key: v2-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
+          key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
-  puppeteer-access-test-user-setup:
-    executor: workbench-executor
-    steps:
-      - checkout-code
-      - attach_workspace:
-          at: .
-      - gcloud-auth-login
-      - run:
-          working_directory: ~/workbench/api
-          name: Prep the e2e access test user (in Test env) by setting access module timestamps
-          command: ./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}
 
 workflows:
   build-test-deploy:
@@ -737,14 +728,14 @@ workflows:
     jobs:
       - api-bigquery-test
       - puppeteer-env-setup
-      - puppeteer-access-test-user-setup
       - puppeteer-test:
-          parallel_num: 1
+          parallel_num: 2
           env_name: "test"
           test_mode: "nightly-integration"
+          optional_steps:
+            - puppeteer-access-test-user-setup
           requires:
             - puppeteer-env-setup
-            - puppeteer-access-test-user-setup
 
 experimental:
   notify:

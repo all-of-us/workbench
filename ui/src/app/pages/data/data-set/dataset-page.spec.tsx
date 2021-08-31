@@ -6,7 +6,7 @@ import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {
   CdrVersionsApi,
@@ -24,6 +24,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('DataSetPage', () => {
   let datasetApiStub;
@@ -35,17 +36,29 @@ describe('DataSetPage', () => {
     registerApiClient(DataSetApi, datasetApiStub);
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
     serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   const component = () => {
-    return mount(<DatasetPage hideSpinner={() => {}} showSpinner={() => {}} />);
+    return mount(
+        <MemoryRouter
+            initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/data-sets/${stubDataSet().id}`]}
+        >
+          <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
+            <DatasetPage
+                hideSpinner={() => {}}
+                showSpinner={() => {}}
+                match={{params: {
+                    ns: workspaceDataStub.namespace,
+                    wsid: workspaceDataStub.id,
+                    dataSetId: stubDataSet().id
+                  }}}
+            />
+          </Route>
+        </MemoryRouter>
+    );
   };
 
   it('should render', async() => {
@@ -412,7 +425,6 @@ describe('DataSetPage', () => {
       domainValuePairs: [{domain: Domain.PERSON, value: 'person'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.PERSON],
     };
-    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -432,7 +444,6 @@ describe('DataSetPage', () => {
       domainValuePairs: [{domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs'}],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
     };
-    urlParamsStore.next({dataSetId: 1});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 

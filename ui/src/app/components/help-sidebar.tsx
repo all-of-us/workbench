@@ -757,7 +757,7 @@ export const HelpSidebar = fp.flow(
               </div>
             ,
             renderBody: () => this.state.participant ?
-               <SidebarContent/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
+               <SidebarContent participant={this.state.participant}/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
             showFooter: true
           };
         case 'concept':

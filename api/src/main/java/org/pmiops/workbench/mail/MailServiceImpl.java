@@ -1,6 +1,5 @@
 package org.pmiops.workbench.mail;
 
-import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.html.HtmlEscapers;
@@ -80,16 +79,17 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendWelcomeEmail(final String contactEmail, final String password, final User user)
+  public void sendWelcomeEmail(
+      final String contactEmail, final String password, final String username)
       throws MessagingException {
 
     final String htmlMessage =
-        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user));
+        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, username));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
         "Your new All of Us Researcher Workbench Account",
-        String.format("Welcome for %s", user.getName()),
+        String.format("Welcome for %s", username),
         htmlMessage);
   }
 
@@ -232,10 +232,10 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
-      final String password, final User user) {
+      final String password, final String username) {
     final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
-        .put(EmailSubstitutionField.USERNAME, user.getPrimaryEmail())
+        .put(EmailSubstitutionField.USERNAME, username)
         .put(EmailSubstitutionField.PASSWORD, password)
         .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())

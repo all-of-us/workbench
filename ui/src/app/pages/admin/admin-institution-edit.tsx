@@ -15,7 +15,7 @@ import {
 } from 'app/pages/admin/admin-institution-options';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {hasNewValidProps, reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertAPIError} from 'app/utils/errors';
 import {
@@ -33,7 +33,7 @@ import {
   updateRtEmailDomains,
 } from 'app/utils/institutions';
 import {NavigationProps} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
   Institution,
@@ -45,6 +45,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import validate from 'validate.js';
 
 const styles = reactStyles({
@@ -118,9 +119,9 @@ interface InstitutionEditState {
   title: string;
 }
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps, NavigationProps {}
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {}
 
-export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(class extends React.Component<Props, InstitutionEditState> {
+export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -150,8 +151,8 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
   async componentDidMount() {
     this.props.hideSpinner();
     // If institution short Name is passed in the URL get the institution details
-    if (this.props.urlParams.institutionId) {
-      const loadedInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
+    if (this.props.match.params.institutionId) {
+      const loadedInstitution = await institutionApi().getInstitution(this.props.match.params.institutionId);
       this.setState({
         institutionMode: InstitutionMode.EDIT,
         institution: loadedInstitution,
@@ -161,20 +162,6 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
       });
     } else {
       this.setState({institutionMode: InstitutionMode.ADD, title: 'Add new Institution'});
-    }
-  }
-
-  async componentDidUpdate(prevProps: Props) {
-    // If institution short Name is passed in the URL get the institution details
-    if (hasNewValidProps(this.props, prevProps, [p => p.urlParams.institutionId])) {
-      const loadedInstitution = await institutionApi().getInstitution(this.props.urlParams.institutionId);
-      this.setState({
-        institutionMode: InstitutionMode.EDIT,
-        institution: loadedInstitution,
-        institutionToEdit: loadedInstitution,
-        showOtherInstitutionTextBox: loadedInstitution.organizationTypeEnum === OrganizationType.OTHER,
-        title: loadedInstitution.displayName
-      });
     }
   }
 
@@ -410,7 +397,7 @@ export const AdminInstitutionEdit = fp.flow(withUrlParams(), withNavigation)(cla
     }
 
     if (institutionMode === InstitutionMode.EDIT) {
-      await institutionApi().updateInstitution(this.props.urlParams.institutionId, institution)
+      await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
         .then(value => this.backNavigate())
         .catch(reason => this.handleError(reason));
     } else {

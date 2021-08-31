@@ -35,7 +35,7 @@ const ciChromeOptions = fp.concat(chromeOptions, [
 
 export const defaultLaunchOptions = {
   devtools: isDebug,
-  slowMo: 20,
+  slowMo: 10,
   defaultViewport: null,
   ignoreDefaultArgs: true,
   ignoreHTTPSErrors: true,

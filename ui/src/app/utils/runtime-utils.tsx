@@ -3,7 +3,15 @@ import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
 import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {compoundRuntimeOpStore, diskStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {
+  compoundRuntimeOpStore,
+  diskStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  serverConfigStore,
+  useStore
+} from 'app/utils/stores';
 
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
