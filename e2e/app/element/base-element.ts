@@ -189,9 +189,11 @@ export default class BaseElement {
 
     let maxRetries = 3;
     const typeAndCheck = async () => {
+      console.log(`maxRetries: ${maxRetries}`);
       const actualValue = await clearAndType(newValue);
       if (actualValue === newValue) {
         await this.pressTab();
+        console.log('success');
         return; // success
       }
       if (maxRetries <= 0) {

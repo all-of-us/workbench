@@ -71,8 +71,10 @@ export default class ConceptSetPage extends AuthenticatedPage {
       // If new value is not found, re-type once more.
       const actualValue = await nameInput.getValue();
       if (actualValue.trim().toLowerCase() !== newConceptName.trim().toLowerCase()) {
+        console.log(`actualValue: ${actualValue} not equals to ${newConceptName}`);
         await nameInput.type(newConceptName);
       }
+      console.log('Exiting edit function');
     }
 
     // Enter description
