@@ -29,8 +29,6 @@ import {
   getAccessModuleStatusByName,
   getRegistrationTask,
   GetStartedButton,
-  redirectToNiH,
-  redirectToRas
 } from 'app/utils/access-utils';
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
@@ -237,7 +235,7 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
   <GetStartedButton style={{marginLeft: 'auto'}}/>
 </FlexRow>;
 
-const bypassAll = async(showSpinner: Function, hideSpinner: Function, reloadProfile: Function) => {
+const selfBypass = async(showSpinner: Function, hideSpinner: Function, reloadProfile: Function) => {
   showSpinner();
   await bypassAll(allModules, true);
   hideSpinner();
@@ -250,7 +248,7 @@ const SelfBypass = (props: {showSpinner: Function, hideSpinner: Function}) => {
 
   return <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
     <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
-    <Button style={{marginLeft: '0.5rem'}} onClick={() => bypassAll(showSpinner, hideSpinner, reload)}>Bypass all</Button>
+    <Button style={{marginLeft: '0.5rem'}} onClick={() => selfBypass(showSpinner, hideSpinner, reload)}>Bypass all</Button>
   </FlexRow>;
 };
 
@@ -312,16 +310,12 @@ const Module = (props: ModuleProps): JSX.Element => {
   // undefined if the feature flag is false
   const registrationTask = getRegistrationTask(navigate, module);
 
-  // kluges until we have fully migrated from the Registration Dashboard:
+  // kluge until we have fully migrated from the Registration Dashboard:
   // getRegistrationTask() has onClick() functions for every module, which is generally what we want
-  // except: the ERA and RAS modules' functions include routing back to callback locations, which default to
-  // the Registration Dashboard.  We want to specify the callbacks which route back here instead.
-  // also: we pop up a modal for Two Factor Auth instead of using the standard task
-  const moduleAction = cond(
-      [module === AccessModule.ERACOMMONS, () => () => redirectToNiH(true)],
-      [module === AccessModule.RASLINKLOGINGOV, () => () => redirectToRas(true)],
-      [module === AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-    () => registrationTask && registrationTask.onClick);
+  // but we pop up a modal for Two Factor Auth instead of using the standard task
+  const moduleAction = module === AccessModule.TWOFACTORAUTH ?
+      () => setShowTwoFactorAuthModal(true) :
+      () => registrationTask && registrationTask.onClick;
 
   const Refresh = () => <Button type='primary' onClick={reload} style={styles.refreshButton}>
     <Repeat style={styles.refreshIcon}/> Refresh
@@ -432,7 +426,7 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
     }
   })(async() => {
     spinnerProps.showSpinner();
-    await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl(true)});
+    await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
   });
 
