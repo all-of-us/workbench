@@ -14,11 +14,6 @@ branch="master"
 workflow_name="build-test-deploy"
 project_slug="all-of-us/workbench"
 
-# Max check time on a workflow is 45 minutes because e2e tests may take a long time to finish.
-# DISCLAIMER This max time may not be enough.
-max_time=$((45 * 60))
-sleep_time=30
-
 #********************
 # FUNCTIONS
 # *******************
@@ -129,9 +124,13 @@ if [[ -z $pipeline_workflow_ids ]]; then
 fi
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
+# Max check time on a workflow is 45 minutes because e2e tests may take a long time to finish.
+# DISCLAIMER This max time may not be enough.
+max_time=$((45 * 60))
 is_running=true
 waited_time=0
 sleep_time="10s"
+sleep_time_counter=10
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
@@ -144,7 +143,7 @@ while [[ "${is_running}" == "true" ]]; do
     if [[ $active_workflow ]]; then
       printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
-      waited_time=$((sleep_time + waited_time))
+      waited_time=$((sleep_time_counter + waited_time))
       is_running=true
       break
     fi
