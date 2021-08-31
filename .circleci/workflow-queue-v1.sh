@@ -82,18 +82,17 @@ fetch_older_pipelines() {
 }
 
 poll_active_pipeline() {
-  printf '%s\n' "Fetching workflow_id \"${id}\" on \"${branch}\" branch that is either running, pending or queued."
+  printf '%s\n' "Fetching workflow_id \"${id}\" on \"${branch}\" branch."
     # TODO local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
     local get_path="project/${project_slug}?filter=running&shallow=true"
     local curl_result=$(circle_get "${get_path}")
     if [[ ! "${curl_result}" ]]; then
-      printf "Fetching active older pipelines failed."
+      printf "Fetching workflow_id \"${id}\" failed."
       exit 1
     fi
     # TODO jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
     jq_filter="(.status | test(\"running|pending|queued\")) "
     jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id==\"${1}\""
-
     jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
     jq_object+="job_name: .workflows.job_name, build_num, start_time, status }"
 
@@ -132,7 +131,7 @@ fi
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 is_running=true
 waited_time=0
-wait="30s"
+wait="10s"
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
