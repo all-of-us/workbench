@@ -139,7 +139,7 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
     poll_active_pipeline_detail "${id}"
     active_workflow=$__
-    printf "\n%s\n\%s\n" "Active workflow id:", "${active_workflow}"
+    printf "\n%s\n%s\n" "Active workflow id:" "${active_workflow}"
     if [[ $active_workflow ]]; then
       printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
