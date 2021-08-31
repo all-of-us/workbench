@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {MemoryRouter} from 'react-router';
+import {MemoryRouter, Route} from 'react-router';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
@@ -17,7 +17,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
-import {MemoryRouter, Route} from "react-router";
+
 describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
 
