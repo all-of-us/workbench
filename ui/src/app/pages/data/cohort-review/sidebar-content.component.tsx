@@ -93,7 +93,7 @@ interface AnnotationState {
   saving: boolean;
   error: boolean;
   success: boolean;
-  timeout: Timeout;
+  timeout: NodeJS.Timeout;
 }
 
 const AnnotationItem = fp.flow(

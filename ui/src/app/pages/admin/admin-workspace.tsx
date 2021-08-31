@@ -197,7 +197,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
         style={styles.fileDetailsTable}
         scrollable={true}
         paginator={true}
-Link PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+        paginatorTemplate='Link PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
         currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
       <Column field='location' header='Location'/>
       <Column field='nameCell' header='Filename'/>
