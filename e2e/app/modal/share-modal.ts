@@ -57,12 +57,18 @@ export default class ShareModal extends Modal {
 
     const typeAndAddUser = async (name: string): Promise<boolean> => {
       const nameWithoutDomain = name.split('@')[0];
-      for (const char of nameWithoutDomain) {
+      // Split string into segments of 3 characters. Type 3 chars at a time, much faster than type 1 char and check.
+      const n = 3;
+      for (let i = 0, charsLength = nameWithoutDomain.length; i < charsLength; i += n) {
+        const chars = nameWithoutDomain.substring(i, i + n);
         const input = await this.waitForSearchBox().asElementHandle();
-        const waitForResponsePromise = this.page.waitForResponse((response) => {
-          return response.url().includes('/userSearch/registered/') && response.request().method() === 'GET';
-        });
-        await input.type(char);
+        const waitForResponsePromise = this.page.waitForResponse(
+          (response) => {
+            return response.url().includes('/userSearch/registered/') && response.request().method() === 'GET';
+          },
+          { timeout: 60000 }
+        );
+        await input.type(chars, { delay: 0 });
         // Wait for GET /userSearch request to finish. Sometimes it takes several seconds.
         await waitForResponsePromise;
         const foundDropdown = await existsDropDown(timeout);
@@ -92,9 +98,12 @@ export default class ShareModal extends Modal {
   }
 
   async removeUser(username: string): Promise<void> {
-    const rmCollab = await this.page.waitForXPath(`${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`, {
-      visible: true
-    });
+    const rmCollab = await this.page.waitForXPath(
+      `${this.collaboratorRowXPath(username)}//clr-icon[@shape="minus-circle"]`,
+      {
+        visible: true
+      }
+    );
     await rmCollab.hover();
     await rmCollab.click();
     await this.clickButton(LinkText.Save, { waitForClose: true });
@@ -104,8 +113,8 @@ export default class ShareModal extends Modal {
    * Creates an xpath to a share "row" for a given user within the modal. This
    * can be combined with a child selector to pull out a control for a user.
    */
-  private collabRowXPath(username: string): string {
-    // We dip into child contents to find the collab user row element parent.
+  private collaboratorRowXPath(username: string): string {
+    // We dip into child contents to find the collaborator row element parent.
     // .//div filters by a relative path to the parent row.
     return (
       `${this.getXpath()}//*[@data-test-id="collab-user-row" and .//div[` +
@@ -118,7 +127,7 @@ export default class ShareModal extends Modal {
   }
 
   async waitForRoleSelectorForUser(username: string): Promise<Textbox> {
-    const box = new Textbox(this.page, `${this.collabRowXPath(username)}//input[@type="text"]`);
+    const box = new Textbox(this.page, `${this.collaboratorRowXPath(username)}//input[@type="text"]`);
     await box.waitForXPath({ visible: true });
     return box;
   }
