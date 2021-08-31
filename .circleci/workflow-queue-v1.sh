@@ -56,7 +56,7 @@ circle_get() {
 
 # Function returns current pipeline's start_time. It is used for comparison of start_time values.
 fetch_current_pipeline_start_time() {
-  printf '%s\n' "Fetch current pipeline start time."
+  printf '%s\n' "Fetching current pipeline start time."
   # TODO local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
@@ -66,12 +66,12 @@ fetch_current_pipeline_start_time() {
 # Function takes start_time parameter.
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetch pipeline workflow id (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
+  printf '%s\n' "Fetching pipeline workflow id (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
   # TODO local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
   local get_path="project/${project_slug}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
   if [[ ! "${curl_result}" ]]; then
-    printf "Fetch all older pipelines failed."
+    printf "Fetching all older pipelines failed."
     exit 1
   fi
   # TODO jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
@@ -82,17 +82,17 @@ fetch_older_pipelines() {
 }
 
 poll_active_pipeline() {
-  printf '%s\n' "Fetch active older pipelines on \"${branch}\" branch that are running, pending or queued."
+  printf '%s\n' "Fetching active older pipelines on \"${branch}\" branch that are running, pending or queued."
     # TODO local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
     local get_path="project/${project_slug}?filter=running&shallow=true"
     local curl_result=$(circle_get "${get_path}")
     if [[ ! "${curl_result}" ]]; then
-      printf "Fetch active older pipelines failed."
+      printf "Fetching active older pipelines failed."
       exit 1
     fi
     # TODO jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
     jq_filter="(.status | test(\"running|pending|queued\")) "
-    jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${1}\""
+    jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\" and .workflows.workflow_id==\"${1}\""
 
     jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
     jq_object+="job_name: .workflows.job_name, build_num, start_time, status }"
