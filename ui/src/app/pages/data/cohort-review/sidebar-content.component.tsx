@@ -420,7 +420,7 @@ export const SidebarContent = fp.flow(
       </EditAnnotationDefinitionsModal>}
       {creatingDefinition && <AddAnnotationDefinitionModal
           annotationDefinitions={annotationDefinitions}
-          cohordId={cohortReview.cohortId}
+          cohortId={cohortReview.cohortId}
           onCancel={() => this.setState({creatingDefinition: false})}
           onCreate={(ad) => this.definitionCreated(ad)}
           workspace={this.props.workspace}>
