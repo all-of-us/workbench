@@ -32,9 +32,9 @@ import {
   RAS_CALLBACK_PATH,
 } from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
-import {environment} from 'environments/environment';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);

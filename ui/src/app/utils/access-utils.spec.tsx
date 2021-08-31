@@ -13,7 +13,6 @@ import {
   MILLIS_PER_DAY,
   NOTIFICATION_THRESHOLD_DAYS,
   RAS_CALLBACK_PATH,
-  RAS_CALLBACK_PATH_DAR,
   useIsUserDisabled
 } from "app/utils/access-utils";
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -223,9 +222,6 @@ describe('getTwoFactorSetupUrl', () => {
 describe('buildRasRedirectUrl', () => {
   it('should generate expected RAS redirect URL', () => {
     expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH));
-  });
-  it('should generate expected RAS redirect URL for Data Access Renewal', () => {
-    expect(buildRasRedirectUrl(true)).toMatch(encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH_DAR));
   });
 });
 
