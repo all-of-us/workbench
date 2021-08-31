@@ -1,4 +1,4 @@
-import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
+import { ClickOptions, ElementHandle, NavigationOptions, Page, WaitForSelectorOptions } from 'puppeteer';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 import { waitForFn } from 'utils/waits-utils';
@@ -191,7 +191,10 @@ export default class BaseElement {
     let maxRetries = 4;
     let confidenceCounter = 0;
     const typeAndCheck = async () => {
-      const actualValue = await clearAndType(newValue);
+      let actualValue = await this.getProperty<string>('value');
+      if (actualValue !== newValue) {
+        actualValue = await clearAndType(newValue);
+      }
       if (actualValue === newValue) {
         confidenceCounter++;
         if (confidenceCounter >= confidence) {
@@ -360,10 +363,10 @@ export default class BaseElement {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(timeout = 2 * 60 * 1000): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation({
-      timeout
-    });
+  async clickAndWait(
+    navOptions: NavigationOptions = { waitUntil: ['load', 'networkidle0'], timeout: 2 * 60 * 1000 }
+  ): Promise<void> {
+    const navigationPromise = this.page.waitForNavigation(navOptions);
     await this.click({ delay: 10 });
     await navigationPromise.catch((err) => {
       // Log error but DON'T fail the test! Puppeteer waitForNavigation has issues.
