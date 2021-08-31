@@ -22,15 +22,25 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
   });
 
   // All tests use same workspace and Python notebook.
-  const workspace = 'e2eNotebookOwnerActionTest';
-  const notebookName = makeRandomName('Py3');
+  const workspaceName = 'e2eTestNotebookOwnerActions';
+  let notebookName: string;
 
-  test('Notebook name must be unique in same workspace', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  test('Notebook name is unique', async () => {
+    await findOrCreateWorkspace(page, { workspaceName });
 
-    const dataPage = new WorkspaceDataPage(page);
-    const notebookPage = await dataPage.createNotebook(notebookName);
-    const analysisPage = await notebookPage.goAnalysisPage();
+    const analysisPage = new WorkspaceAnalysisPage(page);
+    await analysisPage.openAnalysisPage();
+    await analysisPage.waitForLoad();
+
+    // Find an existing notebook (Okay to use an existing notebook because we're not changing or editing this notebook).
+    // Otherwise create a new notebook if no notebook is found.
+    const aNotebookCard = await analysisPage.findNotebookCard();
+    if (aNotebookCard) {
+      notebookName = await aNotebookCard.getResourceName();
+    } else {
+      notebookName = makeRandomName('e2e');
+      await analysisPage.createNotebook(notebookName).then((notebookPage) => notebookPage.goAnalysisPage());
+    }
 
     // Attempt to create another notebook with same name. It should be blocked.
     await analysisPage.createNewNotebookLink().click();
@@ -43,11 +53,10 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
     const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });
     expect(errorExists.asElement()).not.toBeNull();
 
-    const createButton = modal.createNotebookButton();
-    const disabledButton = await createButton.isCursorNotAllowed();
+    const disabledButton = await modal.createNotebookButton().isCursorNotAllowed();
     expect(disabledButton).toBe(true);
 
-    // Click "Cancel" button.
+    // Click "Cancel" button to close modal.
     await modal.clickButton(LinkText.Cancel, { waitForClose: true });
     const modalExists = await modal.exists();
     expect(modalExists).toBe(false);
@@ -56,8 +65,8 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
     expect(await analysisPage.isLoaded()).toBe(true);
   });
 
-  test('Duplicate notebook', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+  test('Duplicate rename delete notebook', async () => {
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
@@ -65,38 +74,30 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
 
-    // Verify notebook exists.
-    const dataResourceCard = new DataResourceCard(page);
-    const notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
-    expect(notebookCard).toBeTruthy();
-
+    // Duplicate notebook.
     const cloneNotebookName = await analysisPage.duplicateNotebook(notebookName);
-    await analysisPage.deleteResource(cloneNotebookName, ResourceCard.Notebook);
-  });
 
-  test('Rename notebook', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    // Rename notebook.
+    const newNotebookName = makeRandomName('e2e-notebook');
+    const modalTextContents = await analysisPage.renameResource(
+      cloneNotebookName,
+      newNotebookName,
+      ResourceCard.Notebook
+    );
+    expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}`);
 
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
-    await dataPage.openAnalysisPage({ waitPageChange: true });
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.waitForLoad();
-
-    const newNotebookName = makeRandomName('test-notebook');
-    const modalTextContents = await analysisPage.renameResource(notebookName, newNotebookName, ResourceCard.Notebook);
-    expect(modalTextContents).toContain(`Enter new name for ${notebookName}`);
-
-    // Notebook card with new name exists.
+    // Notebook card with new name is found.
     const dataResourceCard = new DataResourceCard(page);
     let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(true);
 
-    // Notebook card with old name exists.
-    cardExists = await dataResourceCard.cardExists(notebookName, ResourceCard.Notebook);
+    // Notebook card with old name is not found.
+    cardExists = await dataResourceCard.cardExists(cloneNotebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(false);
 
+    // Delete newly renamed notebook.
     await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
+    // Verify delete was successful.
     cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(false);
   });

@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
@@ -51,21 +51,37 @@ export default class ConceptSetPage extends AuthenticatedPage {
     return getPropValue<string>(title, 'innerText');
   }
 
-  async edit(newConceptName?: string, newDescription?: string): Promise<void> {
-    await this.getEditButton().then((butn) => butn.click());
-    // edit name
+  async edit(originalConceptName: string, newConceptName?: string, newDescription?: string): Promise<void> {
+    await this.getEditButton().then((button) => button.click());
+
+    // Wait and find the Name input web-element with value.
+    const inputXpath = `//input[@data-test-id="edit-name" and @value="${originalConceptName}"]`;
+    await new Textbox(this.page, inputXpath).waitForXPath({ visible: true });
+    await waitForText(this.page, originalConceptName);
+
+    const saveButton = Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
+    await saveButton.waitUntilEnabled();
+
+    // Enter name
     if (newConceptName !== undefined) {
-      const nameInputXpath = '//*[@data-test-id="edit-name"]';
-      const nameInput = new Textbox(this.page, nameInputXpath);
+      const xpath = '//*[@data-test-id="edit-name"]';
+      const nameInput = new Textbox(this.page, xpath);
       await nameInput.type(newConceptName);
+      // DON'T DELETE. Value sometimes overridden by old value. To prevent test from failing, verify new value entered successfully.
+      // If new value is not found, re-type once more.
+      const actualValue = await nameInput.getValue();
+      if (actualValue.trim().toLowerCase() !== newConceptName.trim().toLowerCase()) {
+        await nameInput.type(newConceptName);
+      }
     }
-    // edit description
+
+    // Enter description
     if (newDescription !== undefined) {
       const descInputXpath = '//*[@id="edit-description"]';
       const descInput = new Textbox(this.page, descInputXpath);
       await descInput.paste(newDescription);
     }
-    const saveButton = Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
+
     await saveButton.click();
     await this.getEditButton().then((butn) => butn.waitUntilEnabled());
   }

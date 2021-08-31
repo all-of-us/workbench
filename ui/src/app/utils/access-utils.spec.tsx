@@ -1,17 +1,20 @@
 import * as React from "react";
 import {mount, ReactWrapper} from 'enzyme';
-import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {authStore, profileStore} from 'app/utils/stores';
-import {AccessModule, ErrorCode} from 'generated/fetch';
-import {Profile, AccessModuleStatus} from 'generated/fetch';
+import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import {
+  buildRasRedirectUrl,
+  getTwoFactorSetupUrl,
   maybeDaysRemaining,
   MILLIS_PER_DAY,
   NOTIFICATION_THRESHOLD_DAYS,
   useIsUserDisabled
 } from "app/utils/access-utils";
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;
@@ -196,3 +199,28 @@ describe('useIsUserDisabled', () => {
     expect(getDisabled(wrapper)).toBe(undefined);
   });
 });
+
+describe('getTwoFactorSetupUrl', () => {
+  beforeEach(async() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    profileStore.set({
+      profile: await profileApi().getMe(),
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn()
+    });
+  });
+
+  it('should generate expected 2FA redirect URL', () => {
+    expect(getTwoFactorSetupUrl()).toMatch(/https:\/\/accounts\.google\.com\/AccountChooser/);
+    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
+    expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
+  });
+});
+
+describe('buildRasRedirectUrl', () => {
+  it('should generate expected RAS redirect URL', () => {
+    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
+  });
+});
+

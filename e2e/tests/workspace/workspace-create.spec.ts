@@ -13,7 +13,7 @@ describe('Creating new workspaces', () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create workspace - NO request for review', async () => {
+  test('Create workspace using minimum required fields', async () => {
     const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -39,7 +39,7 @@ describe('Creating new workspaces', () => {
     await dataPage.deleteWorkspace();
   });
 
-  test('User can create a workspace using all inputs', async () => {
+  test('Create workspace using all fields', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 

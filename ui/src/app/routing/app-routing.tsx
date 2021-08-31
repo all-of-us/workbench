@@ -32,6 +32,8 @@ import {
 } from 'app/utils/cookies';
 import {
   authStore,
+  diskStore,
+  runtimeStore,
   serverConfigStore,
   stackdriverErrorReporterStore,
   useStore

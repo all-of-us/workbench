@@ -22,7 +22,7 @@ export default class CohortSaveAsModal extends Modal {
 
   async typeDescription(description: string): Promise<void> {
     const descriptionTextarea = this.waitForTextarea('DESCRIPTION');
-    await descriptionTextarea.type(description);
+    await descriptionTextarea.paste(description);
   }
 
   async clickSaveButton(): Promise<void> {
