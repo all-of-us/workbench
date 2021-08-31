@@ -73,7 +73,7 @@ fetch_older_pipelines() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | .workflows.workflow_id")
 }
 
-poll_active_pipeline_detail() {
+fetch_pipeline_detail() {
   printf '%s\n' "Fetching workflow_id \"${id}\" on \"${branch}\" branch."
     local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
     local curl_result=$(circle_get "${get_path}")
@@ -111,10 +111,10 @@ fi
 
 fetch_older_pipelines "${current_pipeline_start_time}"
 pipeline_workflow_ids=$__
-printf "%s\n\n" "Currently running pipeline workflow id are: ${pipeline_workflow_ids}"
+printf "%s\n%s\n\n" "Currently running workflow_id are:" "${pipeline_workflow_ids}"
 
 if [[ -z $pipeline_workflow_ids ]]; then
-  printf "%s\n" "No workflows currently running."
+  printf "%s\n" "No workflow currently running."
   exit 0
 fi
 
@@ -132,9 +132,10 @@ while [[ "${is_running}" == "true" ]]; do
 
   for id in ${pipeline_workflow_ids}; do
     is_running=false
-    poll_active_pipeline_detail "${id}"
+    fetch_pipeline_detail "${id}"
     active_workflow=$__
-    printf "\n%s\n%s\n" "Active workflow id:" "${active_workflow}"
+    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow}"
+
     if [[ $active_workflow ]]; then
       printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
