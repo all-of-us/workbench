@@ -136,7 +136,7 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
     fetch_pipeline_jobs "${id}"
     active_workflow=$__
-    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow}"
+    printf "\n%s\n%s\n" "Active workflow and job:" "${active_workflow}"
 
     if [[ $active_workflow ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
