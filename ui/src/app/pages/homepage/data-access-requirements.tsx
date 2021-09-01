@@ -207,7 +207,7 @@ const rtModules = [
   AccessModule.COMPLIANCETRAINING,
 ];
 
-// TODO
+// TODO RW-7059
 const ctModules = [];
 
 const duccModule = [
@@ -215,7 +215,7 @@ const duccModule = [
 ];
 
 // in display order
-// visible for test
+// exported for test
 export const allModules: AccessModule[] = [
   ...rtModules,
   ...ctModules,
@@ -227,6 +227,7 @@ const LoginGovTooltip = () => <TooltipTrigger
   <InfoIcon style={{margin: '0 0.3rem'}}/>
 </TooltipTrigger>;
 
+// TODO merge with RegistrationTasks after we remove RegistrationDashboard
 const moduleLabels: Map<AccessModule, JSX.Element> = new Map([
   [AccessModule.TWOFACTORAUTH, <div>Turn on Google 2-Step Verification</div>],
   [AccessModule.RASLINKLOGINGOV, <div>Verify your identity with Login.gov <LoginGovTooltip/></div>],
@@ -287,7 +288,7 @@ interface ModuleProps {
   module: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
 
-  // TODO
+  // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
 const MaybeModule = (props: ModuleProps): JSX.Element => {
@@ -295,7 +296,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   const [navigate, ] = useNavigation();
 
   const {module, active} = props;
-  const eligible = true; // TODO
+  const eligible = true; // TODO RW-7059
   const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
 
   // whether this module needs a profile reload
@@ -499,7 +500,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         Please complete the necessary steps to gain access to the <AoU/> datasets.
       </div>
       <RegisteredTierCard/>
-      {/* TODO - Step 2 ControlledTierCard */}
+      {/* TODO RW-7059 - Step 2 ControlledTierCard */}
       <DuccCard/>
     </FadeBox>
     </FlexColumn>;
