@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
 import CardBase from './card-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import { waitWhileLoading } from 'utils/waits-utils';
+import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 
 const WorkspaceCardSelector = {
@@ -166,16 +166,19 @@ export default class WorkspaceCard extends CardBase {
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
-    const [element] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const name = await getPropValue<string>(element, 'textContent');
+    const [elementHandle] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    await waitForFn(() => {
+      return elementHandle && elementHandle.boxModel() && elementHandle.boundingBox();
+    });
+    const name = await getPropValue<string>(elementHandle, 'textContent');
     if (waitForDataPage) {
       const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
-      await element.click();
+      await elementHandle.click();
       await navPromise;
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
     } else {
-      await element.click();
+      await elementHandle.click();
       await waitWhileLoading(this.page);
     }
     logger.info(`Click name "${name}" on Workspace card to open workspace.`);
