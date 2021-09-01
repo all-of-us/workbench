@@ -140,13 +140,6 @@ const styles = reactStyles({
     alignSelf: 'center',
     paddingRight: '0.5em',
   },
-  moduleBox: {
-    padding: '0.5em',
-    margin: '0.2em',
-    width: '593px',
-    borderRadius: '0.2rem',
-    backgroundColor: colorWithWhiteness(colors.accent, 0.95),
-  },
   activeModuleBox: {
     padding: '0.5em',
     margin: '0.2em',
@@ -155,6 +148,13 @@ const styles = reactStyles({
     backgroundColor: colors.white,
     border: '1px solid',
     borderColor: colors.accent,
+  },
+  inactiveModuleBox: {
+    padding: '0.5em',
+    margin: '0.2em',
+    width: '593px',
+    borderRadius: '0.2rem',
+    backgroundColor: colorWithWhiteness(colors.accent, 0.95),
   },
   moduleIcon: {
     marginLeft: '0.2em',
@@ -343,7 +343,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
         }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
         </Link> :
-        <FlexRow style={styles.moduleBox}>{children}</FlexRow>;
+        <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
   const Module = () => <FlexRow data-test-id={`module-${module}`}>
