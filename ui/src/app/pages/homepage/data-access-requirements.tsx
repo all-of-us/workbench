@@ -305,7 +305,6 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
   const registrationTask = getRegistrationTask(navigate, module);
-  const moduleEnabled = !!registrationTask;
 
   // kluge until we have fully migrated from the Registration Dashboard:
   // getRegistrationTask() has onClick() functions for every module, which is generally what we want
@@ -365,6 +364,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
         onCancel={() => setShowTwoFactorAuthModal(false)}/>}
   </FlexRow>;
 
+  const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
 };
 
