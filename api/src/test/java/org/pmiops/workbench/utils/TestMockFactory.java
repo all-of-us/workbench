@@ -56,7 +56,7 @@ public class TestMockFactory {
    * <p>TWO_FACTOR_AUTH and ERA_COMMONS: bypassable and not subject to AAR (expirable)
    *
    * <p>DATA_USER_CODE_OF_CONDUCT and RT_COMPLIANCE_TRAINING: bypassable and expirable
-   * 
+   *
    * <p>PROFILE_CONFIRMATION and PUBLICATION_CONFIRMATION: expirable and not bypassable
    *
    * <p>When considering new modules, the simplest option for implementation purposes is to make
