@@ -5,14 +5,14 @@ set -o pipefail
 set -o functrace
 
 #********************
-# VARIABLES
+# GLOBAL VARIABLES
 # *******************
-api_root="https://circleci.com/api/v1/"
+API_ROOT="https://circleci.com/api/v1/"
 # polling branch name. Other branches (PRs) are excluded from consideration.
-branch="master"
+BRANCH="master"
 # Polling workflow name. Other workflow names (nightly-tests and deploy-staging) are excluded from consideration.
-workflow_name="build-test-deploy"
-project_slug="all-of-us/workbench"
+WORKFLOW_NAME="build-test-deploy"
+PROJECT_SLUG="all-of-us/workbench"
 
 #********************
 # FUNCTIONS
@@ -41,7 +41,7 @@ check_circleci_workflow_id() {
 }
 
 circle_get() {
-  local url="${api_root}${1}"
+  local url="${API_ROOT}${1}"
   printf "curl GET ${url}\n" >/dev/tty
   curl -X GET -s -S -f \
     -H "Content-Type: application/json" \
@@ -51,8 +51,8 @@ circle_get() {
 
 # Function returns current pipeline's start_time. It is used for comparison of start_time values.
 fetch_current_pipeline_start_time() {
-  printf '%s\n' "Fetching current pipeline start time."
-  local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
+  printf '%s\n' "Fetching current pipeline start_time."
+  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
   __=$(echo "${curl_result}" | jq -r ".[] | select(.build_num==$CIRCLE_BUILD_NUM) | .start_time")
 }
@@ -60,29 +60,31 @@ fetch_current_pipeline_start_time() {
 # Function takes start_time parameter.
 # Fetch list of builds on master branch that are running, pending or queued.
 fetch_older_pipelines() {
-  printf '%s\n' "Fetching pipeline workflow id (older than ${1}) on \"${branch}\" branch that are running, pending or queued."
-  local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
+  printf '%s\n' "Fetching workflow id (Older than ${1} on \"${BRANCH}\" branch that are running, pending or queued)."
+  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
   if [[ ! "${curl_result}" ]]; then
     printf "Fetching all older pipelines failed."
     exit 1
   fi
-  jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
-  jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
+
+  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
+  jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
 
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | .workflows.workflow_id")
 }
 
-fetch_pipeline_detail() {
-  printf '%s\n' "Fetching workflow_id \"${id}\" on \"${branch}\" branch."
-    local get_path="project/${project_slug}/tree/${branch}?filter=running&shallow=true"
+fetch_pipeline_jobs() {
+  printf '%s\n' "Fetching jobs in workflow_id \"${id}\" on \"${BRANCH}\" branch."
+    local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
     local curl_result=$(circle_get "${get_path}")
     if [[ ! "${curl_result}" ]]; then
-      printf "Fetching workflow_id \"${id}\" failed."
+      printf "Fetching jobs workflow_id \"${id}\" failed."
       exit 1
     fi
-    jq_filter=".branch==\"${branch}\" and (.status | test(\"running|pending|queued\")) "
-    jq_filter+="and .workflows.workflow_name==\"${workflow_name}\" and .workflows.workflow_id==\"${1}\""
+
+    jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
+    jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
     jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
     jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
 
@@ -132,7 +134,7 @@ while [[ "${is_running}" == "true" ]]; do
 
   for id in ${pipeline_workflow_ids}; do
     is_running=false
-    fetch_pipeline_detail "${id}"
+    fetch_pipeline_jobs "${id}"
     active_workflow=$__
     printf "\n%s\n%s\n" "Active workflow:" "${active_workflow}"
 
