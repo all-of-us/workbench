@@ -52,7 +52,7 @@ circle_get() {
 # Function returns current pipeline's start_time. It is used for comparison of start_time values.
 fetch_current_pipeline_start_time() {
   printf '%s\n' "Fetching current pipeline start_time."
-  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
+  local get_path="project/${PROJECT_SLUG}?filter=running&shallow=true"
   local curl_result=$(circle_get "${get_path}")
   __=$(echo "${curl_result}" | jq -r ".[] | select(.build_num==$CIRCLE_BUILD_NUM) | .start_time")
 }
