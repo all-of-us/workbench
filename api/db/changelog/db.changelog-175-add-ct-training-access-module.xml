@@ -19,7 +19,7 @@
         </sql>
         <sql>
             INSERT INTO access_module (name, expirable, bypassable)
-            VALUES('CT_COMPLIANCE_TRAINING', true, true)
+            VALUES('CT_COMPLIANCE_TRAINING', false, true)
         </sql>
     </changeSet>
 </databaseChangeLog>
