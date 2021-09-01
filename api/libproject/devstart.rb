@@ -1897,6 +1897,39 @@ Common.register_command({
   :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
+def reset_default_runtime_autopause(cmd_name, *args)
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.add_option(
+      "--nodry-run",
+      ->(opts, _) { opts.dry_run = false},
+      "Actually update runtimes, defaults to dry run")
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  api_url = get_leo_api_url(gcc.project)
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+       ./gradlew resetDefaultRuntimeAutopause
+      -PappArgs=['#{gcc.project}','#{api_url}',#{op.opts.dry_run}]}
+  end
+end
+
+RESET_DEFAULT_RUNTIME_AUTOPAUSE_CMD = "reset-default-runtime-autopause"
+
+Common.register_command({
+  :invocation => RESET_DEFAULT_RUNTIME_AUTOPAUSE_CMD,
+  :description => "Oneoff reset script for RW-7248",
+  :fn => ->(*args) { reset_default_runtime_autopause(RESET_DEFAULT_RUNTIME_AUTOPAUSE_CMD, *args) }
+})
+
 def delete_runtimes(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
