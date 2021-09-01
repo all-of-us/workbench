@@ -374,8 +374,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const syncExternalModulesAndReloadProfile = async() => {
     const aborter = new AbortController();
     spinnerProps.showSpinner();
-    await profileApi().syncTwoFactorAuthStatus({signal: aborter.signal});
-    await profileApi().syncComplianceTrainingStatus({signal: aborter.signal});
+    await Promise.all([
+      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
+      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
+      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
+    ]);
     spinnerProps.hideSpinner();
     reload();
 
