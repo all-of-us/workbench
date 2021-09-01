@@ -11,6 +11,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessUtils;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditorImpl;
@@ -50,7 +51,8 @@ public class SetAccessModuleTimestamps {
   private static final Options OPTIONS = new Options().addOption(USER_OPT);
 
   // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
-  private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP = Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
+  private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP =
+      Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
 
   void applyTimestampUpdateToUser(
       UserDao userDao,
@@ -66,7 +68,7 @@ public class SetAccessModuleTimestamps {
 
     switch (moduleName) {
       case PROFILE_CONFIRMATION:
-        if(!isBypass) {
+        if (!isBypass) {
           // dual-write to DbUser and AccessModuleService
           // we will remove the module fields in DbUser soon
           // see the Access Module Update epic
@@ -79,6 +81,8 @@ public class SetAccessModuleTimestamps {
         break;
       case RAS_LOGIN_GOV:
         accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
+        accessModuleService.updateBypassTime(
+            dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
         break;
       default:
         throw new IllegalArgumentException("Not implemented!");
@@ -86,8 +90,7 @@ public class SetAccessModuleTimestamps {
     final String field = isBypass ? "bypass" : "completion";
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
     LOG.info(
-        String.format(
-            "Updating %s %s time for user %s to %s", moduleName, field, username, time));
+        String.format("Updating %s %s time for user %s to %s", moduleName, field, username, time));
   }
 
   @Bean
@@ -97,11 +100,14 @@ public class SetAccessModuleTimestamps {
       final String username = opts.getOptionValue(USER_OPT.getLongOpt());
 
       applyTimestampUpdateToUser(
-          userDao, accessModuleService, username, AccessModuleName.PROFILE_CONFIRMATION, PROFILE_CONFIRMATION_TIMESTAMP, false);
+          userDao,
+          accessModuleService,
+          username,
+          AccessModuleName.PROFILE_CONFIRMATION,
+          PROFILE_CONFIRMATION_TIMESTAMP,
+          false);
       applyTimestampUpdateToUser(
           userDao, accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
-      applyTimestampUpdateToUser(
-          userDao, accessModuleService, username, AccessModuleName.ERA_COMMONS, null, false);
     };
   }
 
