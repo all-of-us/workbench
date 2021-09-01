@@ -7,9 +7,10 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 import {mockNavigate} from 'testing/navigation-mock';
+import * as ReactRouterDom from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
+  ...jest.requireActual('react-router-dom') as typeof ReactRouterDom, // use actual for all non-hook parts
   useParams: () => ({
     ns: workspaceDataStub.namespace,
     wsid: workspaceDataStub.id,
