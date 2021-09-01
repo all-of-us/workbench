@@ -296,11 +296,10 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   const [navigate, ] = useNavigation();
 
   const {module, active} = props;
-  const eligible = true; // TODO RW-7059
   const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
 
-  // whether this module needs a profile reload
-  const [needsReload, setNeedsReload] = useState(false);
+  // whether to show the refresh button: this module has been clicked
+  const [showRefresh, setShowRefresh] = useState(false);
 
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
@@ -326,6 +325,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
     <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
   </FlexRow>;
 
+  const eligible = true; // TODO RW-7059
   const ModuleIcon = () => <div style={styles.moduleIcon}>
     {cond(
       // not eligible to complete module
@@ -339,7 +339,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
   const ModuleBox = ({children}) => {
     return active ?
         <Link onClick={() => {
-          setNeedsReload(true);
+          setShowRefresh(true);
           moduleAction();
         }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
@@ -349,7 +349,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
 
   const Module = () => <FlexRow data-test-id={`module-${module}`}>
     <FlexRow style={styles.moduleCTA}>
-      {active && (needsReload ? <Refresh/> : <Next/>)}
+      {active && (showRefresh ? <Refresh/> : <Next/>)}
     </FlexRow>
     <ModuleBox>
       <ModuleIcon/>
