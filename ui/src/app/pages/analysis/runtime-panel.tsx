@@ -155,6 +155,8 @@ const styles = reactStyles({
   }
 });
 
+const MIN_DISK_SIZE_GB = 60;
+
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 100;
@@ -514,7 +516,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
-    workerDiskSize = 50,
+    workerDiskSize = MIN_DISK_SIZE_GB,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
@@ -1156,7 +1158,7 @@ const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
   // persistent disk.
   const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
@@ -1164,14 +1166,14 @@ const RuntimePanel = fp.flow(
         ? 4000
         : 64000;
     const message = {
-      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
-      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
-      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+      standard: `^Disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`
     };
 
     return {
       numericality: {
-        greaterThanOrEqualTo: 50,
+        greaterThanOrEqualTo: MIN_DISK_SIZE_GB,
         lessThanOrEqualTo: maxDiskSize,
         message: message[diskType]
       }
