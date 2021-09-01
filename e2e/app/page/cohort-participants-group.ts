@@ -505,8 +505,15 @@ export default class CohortParticipantsGroup {
 
   async searchCriteria(searchWord: string): Promise<Table> {
     const searchFilterTextbox = Textbox.findByName(this.page, { dataTestId: 'list-search-input' });
+    const waitForResponsePromise = this.page.waitForResponse(
+      (response) => {
+        return response.url().includes('/criteria/') && response.request().method() === 'GET';
+      },
+      { timeout: 60000 }
+    );
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
+    await waitForResponsePromise;
     await waitWhileLoading(this.page);
     return new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
   }
