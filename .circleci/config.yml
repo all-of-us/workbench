@@ -455,7 +455,7 @@ jobs:
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
-          command: yarn test --detectOpenHandles --forceExit --runInBand --maxWorkers=1
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn test --runInBand
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
