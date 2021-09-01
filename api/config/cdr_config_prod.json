@@ -97,7 +97,7 @@
       "cdrVersionId": 7,
       "name": "All of Us Registered Tier Dataset v5",
       "isDefault": true,
-      "bigqueryProject": "fc-aou-cdr-preprod",
+      "bigqueryProject": "fc-aou-cdr-prod",
       "bigqueryDataset": "R2021Q3R2",
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 5,
