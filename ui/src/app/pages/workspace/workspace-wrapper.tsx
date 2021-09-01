@@ -30,15 +30,20 @@ export const WorkspaceWrapper = fp.flow(
         ...wsResponse.workspace,
         accessLevel: wsResponse.accessLevel
       });
-      diskStore.set({workspaceNamespace: wsResponse.workspace.namespace, persistentDisk: undefined});
-      runtimeStore.set({workspaceNamespace: wsResponse.workspace.namespace, runtime: undefined, runtimeLoaded: false});
+
+      updateStores(wsResponse.workspace.namespace);
+    };
+
+    const updateStores = async(namespace) => {
+      diskStore.set({workspaceNamespace: namespace, persistentDisk: undefined});
+      runtimeStore.set({workspaceNamespace: namespace, runtime: undefined, runtimeLoaded: false});
       pollAborter.abort();
       const newPollAborter = new AbortController();
       setPollAborter(newPollAborter);
 
       try {
         await LeoRuntimeInitializer.initialize({
-          workspaceNamespace: wsResponse.workspace.namespace,
+          workspaceNamespace: namespace,
           pollAbortSignal: newPollAborter.signal,
           maxCreateCount: 0,
           maxDeleteCount: 0,
@@ -52,7 +57,7 @@ export const WorkspaceWrapper = fp.flow(
           throw e;
         }
       }
-    };
+    }
 
     if (
         !currentWorkspaceStore.getValue()
@@ -67,7 +72,7 @@ export const WorkspaceWrapper = fp.flow(
       nextWorkspaceWarmupStore.next(undefined);
       if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
         currentWorkspaceStore.next(nextWs);
-        return;
+        updateStores(ns);
       } else {
         getWorkspaceAndUpdateStores(ns, wsid);
       }
