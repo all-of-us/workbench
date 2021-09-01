@@ -357,7 +357,8 @@ def drop_cloud_db(cmd_name, *args)
         "cat db/drop_db.sql | envsubst | " +
         maybe_dockerize_mysql_cmd(
           "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-          interactive=true),
+          true # interactive
+        ),
         pw)
   end
 end
@@ -2101,8 +2102,7 @@ def connect_to_cloud_db(cmd_name, *args)
       maybe_dockerize_mysql_cmd(
         "mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
         "--database=#{env["DB_NAME"]} --password=#{db_password}",
-        interactive=true,
-        tty=true
+        true, true # interactive, tty
       ),
       db_password)
   end
@@ -2132,7 +2132,8 @@ def connect_to_cloud_db_binlog(cmd_name, *args)
       maybe_dockerize_mysql_cmd(
         "mysql --host=127.0.0.1 --port=3307 --user=root " +
         "--database=#{env['DB_NAME']} --password=#{password}",
-        interactive=true),
+        true # interactive
+      ),
       password)
     common.status "*" * 80
 
@@ -2237,7 +2238,8 @@ def create_or_update_workbench_db()
     "cat db/create_db.sql | envsubst | " +
     maybe_dockerize_mysql_cmd(
       "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-      interactive=true),
+      true # interactive
+    ),
     ENV["MYSQL_ROOT_PASSWORD"]
   )
 end
