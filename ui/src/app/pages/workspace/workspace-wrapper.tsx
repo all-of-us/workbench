@@ -23,17 +23,6 @@ export const WorkspaceWrapper = fp.flow(
   const {ns, wsid} = params;
 
   useEffect(() => {
-    const getWorkspaceAndUpdateStores = async(namespace, id) => {
-      // No destructuring because otherwise it shadows the workspace in props
-      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
-      currentWorkspaceStore.next({
-        ...wsResponse.workspace,
-        accessLevel: wsResponse.accessLevel
-      });
-
-      updateStores(wsResponse.workspace.namespace);
-    };
-
     const updateStores = async(namespace) => {
       diskStore.set({workspaceNamespace: namespace, persistentDisk: undefined});
       runtimeStore.set({workspaceNamespace: namespace, runtime: undefined, runtimeLoaded: false});
@@ -57,7 +46,18 @@ export const WorkspaceWrapper = fp.flow(
           throw e;
         }
       }
-    }
+    };
+
+    const getWorkspaceAndUpdateStores = async(namespace, id) => {
+      // No destructuring because otherwise it shadows the workspace in props
+      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
+      currentWorkspaceStore.next({
+        ...wsResponse.workspace,
+        accessLevel: wsResponse.accessLevel
+      });
+
+      updateStores(wsResponse.workspace.namespace);
+    };
 
     if (
         !currentWorkspaceStore.getValue()
