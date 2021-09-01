@@ -77,7 +77,6 @@ public class SetAccessModuleTimestamps {
           accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
         }
         break;
-      case ERA_COMMONS:
       case RAS_LOGIN_GOV:
         accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
         break;
