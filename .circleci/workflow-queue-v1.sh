@@ -71,7 +71,7 @@ fetch_older_pipelines() {
   jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
   jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
 
-  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | unique_by(.workflows.workflow_id)")
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | map(.workflows.workflow_id)  | flatten | unique")
 }
 
 fetch_pipeline_jobs() {
