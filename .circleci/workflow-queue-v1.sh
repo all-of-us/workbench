@@ -121,7 +121,7 @@ if [[ -z $pipeline_workflow_ids ]]; then
 fi
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
-# Max check time on a workflow is 45 minutes because e2e tests may take a long time to finish.
+# Max wait time until workflows have finished is 45 minutes because e2e tests may take a long time to finish.
 # DISCLAIMER This max time may not be enough.
 max_time=$((45 * 60))
 is_running=true
@@ -136,10 +136,10 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
     fetch_pipeline_jobs "${id}"
     active_workflow=$__
-    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow}"
+    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow:=\{\}}"
 
     if [[ $active_workflow ]]; then
-      printf "%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
+      printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
       is_running=true
@@ -149,7 +149,8 @@ while [[ "${is_running}" == "true" ]]; do
 
   printf "%s\n" "Has been waiting for ${waited_time} seconds."
   if [ $waited_time -gt $max_time ]; then
-    printf "\n\n%s\n\n" "***** Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
+    # Do not fail script.
+    printf "\n\n%s\n\n" "***** WARNING: Max wait time (${max_time} seconds) exceeded. Stop waiting for running builds to complete."
     is_running=false
   fi
 done
