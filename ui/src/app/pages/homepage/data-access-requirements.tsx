@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
-import {Button, Link} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
@@ -341,12 +341,12 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
 
   const ModuleBox = ({children}) => {
     return active ?
-        <Link onClick={() => {
+        <Clickable onClick={() => {
           setShowRefresh(true);
           moduleAction();
         }}>
           <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
-        </Link> :
+        </Clickable> :
         <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
