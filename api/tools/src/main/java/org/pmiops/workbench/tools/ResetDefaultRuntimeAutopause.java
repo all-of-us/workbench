@@ -1,13 +1,19 @@
 package org.pmiops.workbench.tools;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -24,16 +30,19 @@ import org.springframework.context.annotation.Bean;
 /** Oneoff script to restore default autopause threshold settings in an environment. */
 public class ResetDefaultRuntimeAutopause {
   private static final Logger log = Logger.getLogger(ResetDefaultRuntimeAutopause.class.getName());
-
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
   private static final String[] LEO_SCOPES =
       new String[] {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
       };
 
-  private static void resetAutopause(String apiUrl, boolean dryRun)
-      throws ApiException, IOException {
+  private static void resetAutopause(String projectId, String apiUrl, boolean dryRun)
+      throws ApiException, IOException, GeneralSecurityException {
     String dryMsg = dryRun ? "[DRY RUN]: would have... " : "";
+
+    IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
+    HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
     AtomicInteger updated = new AtomicInteger();
     RuntimesApi api = newApiClient(apiUrl);
@@ -55,11 +64,20 @@ public class ResetDefaultRuntimeAutopause {
               String rid = runtimeId(r);
               if (!dryRun) {
                 try {
-                  api.updateRuntime(
+                  // The GAE service account lacks sufficient permissions to update a runtime - this
+                  // can only be done by the runtime creator.
+                  RuntimesApi impersonatedClient =
+                      newImpersonatedApiClient(
+                          iamCredentialsClient,
+                          httpTransport,
+                          projectId,
+                          apiUrl,
+                          r.getAuditInfo().getCreator());
+                  impersonatedClient.updateRuntime(
                       r.getGoogleProject(),
                       r.getRuntimeName(),
                       new LeonardoUpdateRuntimeRequest().autopause(true));
-                } catch (ApiException e) {
+                } catch (ApiException | IOException e) {
                   log.log(Level.SEVERE, "failed to update runtime " + rid, e);
                   return;
                 }
@@ -79,6 +97,27 @@ public class ResetDefaultRuntimeAutopause {
     apiClient.setReadTimeout(60 * 1000);
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
+    return api;
+  }
+
+  private static RuntimesApi newImpersonatedApiClient(
+      IamCredentialsClient iamCredentialsClient,
+      HttpTransport httpTransport,
+      String projectId,
+      String apiUrl,
+      String userEmail)
+      throws IOException {
+    final OAuth2Credentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail(ADMIN_SERVICE_ACCOUNT_NAME, projectId),
+            userEmail,
+            Arrays.asList(LEO_SCOPES),
+            iamCredentialsClient,
+            httpTransport);
+    delegatedCreds.refreshIfExpired();
+
+    RuntimesApi api = newApiClient(apiUrl);
+    api.getApiClient().setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return api;
   }
 
@@ -105,8 +144,8 @@ public class ResetDefaultRuntimeAutopause {
   @Bean
   public CommandLineRunner run() {
     return (args) -> {
-      boolean dryRun = Boolean.parseBoolean(args[1]);
-      resetAutopause(args[0], dryRun);
+      boolean dryRun = Boolean.parseBoolean(args[2]);
+      resetAutopause(args[0], args[1], dryRun);
     };
   }
 

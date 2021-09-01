@@ -1915,7 +1915,7 @@ def reset_default_runtime_autopause(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
        ./gradlew resetDefaultRuntimeAutopause
-      -PappArgs=['#{api_url}',#{op.opts.dry_run}]}
+      -PappArgs=['#{gcc.project}','#{api_url}',#{op.opts.dry_run}]}
   end
 end
 
