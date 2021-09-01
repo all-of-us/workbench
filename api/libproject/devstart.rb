@@ -1901,7 +1901,7 @@ def reset_default_runtime_autopause(cmd_name, *args)
   op.add_option(
       "--nodry-run",
       ->(opts, _) { opts.dry_run = false},
-      "Actually delete runtimes, defaults to dry run")
+      "Actually update runtimes, defaults to dry run")
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
