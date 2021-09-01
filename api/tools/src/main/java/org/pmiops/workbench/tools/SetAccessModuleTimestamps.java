@@ -21,10 +21,13 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({
@@ -54,6 +57,8 @@ public class SetAccessModuleTimestamps {
   private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
 
+  private static DbUser dbUser;
+
   void applyTimestampUpdateToUser(
       UserDao userDao,
       AccessModuleService accessModuleService,
@@ -61,11 +66,6 @@ public class SetAccessModuleTimestamps {
       AccessModuleName moduleName,
       @Nullable Timestamp timestamp,
       boolean isBypass) {
-    DbUser dbUser = userDao.findUserByUsername(username);
-    if (dbUser == null) {
-      throw new IllegalArgumentException(String.format("User %s not found!", username));
-    }
-
     switch (moduleName) {
       case PROFILE_CONFIRMATION:
         if (!isBypass) {
@@ -98,6 +98,10 @@ public class SetAccessModuleTimestamps {
     return (args) -> {
       final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
       final String username = opts.getOptionValue(USER_OPT.getLongOpt());
+      dbUser = userDao.findUserByUsername(username);
+      if (dbUser == null) {
+        throw new IllegalArgumentException(String.format("User %s not found!", username));
+      }
 
       applyTimestampUpdateToUser(
           userDao,
@@ -109,6 +113,13 @@ public class SetAccessModuleTimestamps {
       applyTimestampUpdateToUser(
           userDao, accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
     };
+  }
+
+  @Bean
+  @Primary
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  DbUser user() {
+    return dbUser;
   }
 
   public static void main(String[] args) throws Exception {
