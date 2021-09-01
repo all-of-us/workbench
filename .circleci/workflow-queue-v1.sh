@@ -71,7 +71,7 @@ fetch_older_pipelines() {
   jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
   jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
 
-  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | [.workflows.workflow_id] | unique")
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | unique_by(.workflows.workflow_id)")
 }
 
 fetch_pipeline_jobs() {
@@ -136,7 +136,7 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
     fetch_pipeline_jobs "${id}"
     active_workflow=$__
-    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow:=\{\}}"
+    printf "\n%s\n%s\n" "Active workflow:" "${active_workflow}"
 
     if [[ $active_workflow ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
