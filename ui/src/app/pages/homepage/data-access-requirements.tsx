@@ -125,11 +125,13 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 600,
     marginBottom: '0.5em',
+    marginLeft: '0.5em',
   },
   rtDataDetails: {
     fontSize: '14px',
     fontWeight: 100,
     marginBottom: '0.5em',
+    marginLeft: '0.5em',
   },
   modulesContainer: {
     marginLeft: 'auto',
@@ -466,14 +468,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
       <FlexColumn>
         <div style={styles.cardStep}>Step 1</div>
         <div style={styles.cardHeader}>Complete Registration</div>
-        <FlexRow style={styles.rtData}><RegisteredTierBadge/> Registered Tier data</FlexRow>
+        <FlexRow><RegisteredTierBadge/><div style={styles.rtData}>Registered Tier data</div></FlexRow>
         <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.individual/> Individual (not aggregated) data</FlexRow>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.identifying/> Identifying information removed</FlexRow>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.electronic/> Electronic health records</FlexRow>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.survey/> Survey responses</FlexRow>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.physical/> Physical measurements</FlexRow>
-        <FlexRow style={styles.rtDataDetails}><DARIcons.wearable/> Wearable devices</FlexRow>
+        <FlexRow><DARIcons.individual/><div style={styles.rtDataDetails}>Individual (not aggregated) data</div></FlexRow>
+        <FlexRow><DARIcons.identifying/><div style={styles.rtDataDetails}>Identifying information removed</div></FlexRow>
+        <FlexRow><DARIcons.electronic/><div style={styles.rtDataDetails}>Electronic health records</div></FlexRow>
+        <FlexRow><DARIcons.survey/><div style={styles.rtDataDetails}>Survey responses</div></FlexRow>
+        <FlexRow><DARIcons.physical/><div style={styles.rtDataDetails}>Physical measurements</div></FlexRow>
+        <FlexRow><DARIcons.wearable/><div style={styles.rtDataDetails}>Wearable devices</div></FlexRow>
       </FlexColumn>
       <ModulesForCard modules={rtModules}/>
     </FlexRow>;
