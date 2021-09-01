@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {hasNewValidProps, reactStyles} from 'app/utils';
 import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
@@ -235,8 +235,10 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.getFederatedWorkspaceInformation();
   }
 
-  componentDidUpdate() {
-    this.getFederatedWorkspaceInformation();
+  componentDidUpdate(prevProps) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.match.params])) {
+      this.getFederatedWorkspaceInformation();
+    }
   }
 
   async getFederatedWorkspaceInformation() {
