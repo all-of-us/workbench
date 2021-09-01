@@ -329,7 +329,7 @@ const MaybeModule = (props: ModuleProps): JSX.Element => {
     {cond(
       // not eligible to complete module
       [!eligible, () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
-      // eligible and completed or bypassed
+      // eligible and (completed or bypassed)
       [eligible && !!statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
       // eligible and incomplete and unbypassed
       [eligible && !statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
@@ -382,9 +382,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     spinnerProps.hideSpinner();
     reload();
 
-    return function cleanup() {
-      aborter.abort();
-    };
+    // cleanup on unmount
+    return aborter.abort;
   };
 
   useEffect(() => {
