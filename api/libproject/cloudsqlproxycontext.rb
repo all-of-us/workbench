@@ -1,6 +1,7 @@
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
+require_relative "./mysql_docker"
 
 class CloudSqlProxyContext < ServiceAccountContext
 
@@ -11,7 +12,6 @@ class CloudSqlProxyContext < ServiceAccountContext
       ps = nil
       docker_container_id = nil
       instance = "#{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307"
-      mysqladmin_cmd = "mysqladmin "
       if Workbench.in_docker?
         ps = fork do
           exec(*%W{
@@ -21,9 +21,6 @@ class CloudSqlProxyContext < ServiceAccountContext
           })
         end
       else
-        # Containerize mysql usage if we're not inside docker already. This
-        # avoids the requirement for devs to have mysql installed on their workstations.
-        mysqladmin_cmd = "docker run --rm --network host --entrypoint '' mysql:5.7.27 mysqladmin "
         docker_container_id = common.capture_stdout(%W{docker run -d
              -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
@@ -38,7 +35,7 @@ class CloudSqlProxyContext < ServiceAccountContext
 
         common.status "waiting up to #{deadlineSec}s for cloudsql proxy to start..."
         start = Time.now
-        until (common.run mysqladmin_cmd + "ping --host 0.0.0.0 --port 3307 --silent").success?
+        until common.run(maybe_dockerize_mysql_cmd("mysqladmin ping --host 0.0.0.0 --port 3307 --silent")).success?
           if Time.now - start >= deadlineSec
             raise("mysql docker service did not become available after #{deadlineSec}s")
           end
