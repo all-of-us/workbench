@@ -455,7 +455,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   const ModulesForCard = (props: {modules: AccessModule[]}) => {
     const {modules} = props;
-
     return <FlexColumn style={styles.modulesContainer}>
       {modules.map(module =>
           <MaybeModule key={module} module={module} active={module === activeModule}/>
@@ -464,21 +463,19 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   };
 
   const RegisteredTierCard = () => {
-    const LeftColumn = () => <FlexColumn>
-      <div style={styles.cardStep}>Step 1</div>
-      <div style={styles.cardHeader}>Complete Registration</div>
-      <FlexRow style={styles.rtData}><RegisteredTierBadge/> Registered Tier data</FlexRow>
-      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.individual/> Individual (not aggregated) data</FlexRow>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.identifying/> Identifying information removed</FlexRow>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.electronic/> Electronic health records</FlexRow>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.survey/> Survey responses</FlexRow>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.physical/> Physical measurements</FlexRow>
-      <FlexRow style={styles.rtDataDetails}><DARIcons.wearable/> Wearable devices</FlexRow>
-    </FlexColumn>;
-
     return <FlexRow style={styles.card}>
-      <LeftColumn/>
+      <FlexColumn>
+        <div style={styles.cardStep}>Step 1</div>
+        <div style={styles.cardHeader}>Complete Registration</div>
+        <FlexRow style={styles.rtData}><RegisteredTierBadge/> Registered Tier data</FlexRow>
+        <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.individual/> Individual (not aggregated) data</FlexRow>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.identifying/> Identifying information removed</FlexRow>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.electronic/> Electronic health records</FlexRow>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.survey/> Survey responses</FlexRow>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.physical/> Physical measurements</FlexRow>
+        <FlexRow style={styles.rtDataDetails}><DARIcons.wearable/> Wearable devices</FlexRow>
+      </FlexColumn>
       <ModulesForCard modules={rtModules}/>
     </FlexRow>;
   };
