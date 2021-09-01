@@ -4,7 +4,6 @@ import { LinkText, MenuOption, ResourceCard, WorkspaceAccessLevel } from 'app/te
 import { findOrCreateWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
-import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { config } from 'resources/workbench-config';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -15,77 +14,6 @@ jest.setTimeout(10 * 60 * 1000);
 describe('Create Dataset', () => {
   const workspace = makeWorkspaceName();
   let datasetName;
-
-  test('Cannot create dataset when required inputs are blank', async () => {
-    await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    // Click Add Dataset button.
-    const dataPage = new WorkspaceDataPage(page);
-    const datasetPage = await dataPage.clickAddDatasetButton();
-
-    // Select Values (Columns): Select All checkbox is disabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(true);
-
-    // Step 1 Select Cohort: Choose "All Participants"
-    await datasetPage.selectCohorts(['All Participants']);
-
-    // Export button is disabled.
-    const analyzeButton = datasetPage.getAnalyzeButton();
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is disabled.
-    const createDatasetButton = datasetPage.getCreateDatasetButton();
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(true);
-
-    // Select Values (Columns): Select All checkbox is disabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(true);
-
-    // Step 2 Select Concept Sets (Rows): select Demographics.
-    await datasetPage.selectConceptSets([LinkText.Demographics]);
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is enabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
-
-    // Select Values (Columns): Select All checkbox is enabled.
-    expect(await datasetPage.getSelectAllCheckbox().isDisabled()).toBe(false);
-
-    // Select Values (Columns): Select All checkbox is checked.
-    expect(await datasetPage.getSelectAllCheckbox().isChecked()).toBe(true);
-
-    // Step 2 Select Concept Sets (Rows): select all checkboxes.
-    await datasetPage.selectConceptSets([LinkText.AllSurveys]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateSummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitActivitySummary]);
-    await datasetPage.selectConceptSets([LinkText.FitbitHeartRateLevel]);
-    await datasetPage.selectConceptSets([LinkText.FitbitIntraDaySteps]);
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is enabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(false);
-
-    // Step 1 uncheck "All Participants".
-    await datasetPage.unselectCohort('All Participants');
-
-    // Export button is disabled.
-    expect(await analyzeButton.isCursorNotAllowed()).toBe(true);
-
-    // Create Dataset button is disabled.
-    expect(await createDatasetButton.isCursorNotAllowed()).toBe(true);
-
-    // View Preview Table button is disabled.
-    expect(await datasetPage.getPreviewTableButton().isCursorNotAllowed()).toBe(true);
-
-    // Go to Workspaces page. There is no Discard Changes warning.
-    await datasetPage.getBackToWorkspacesLink().clickAndWait();
-
-    await new WorkspacesPage(page).waitForLoad();
-  });
 
   test('Create dataset with all available inputs', async () => {
     await signInWithAccessToken(page);

@@ -4,6 +4,7 @@ import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {reactRouterUrlSearchParams} from 'app/utils/navigation';
+import { MatchParams } from 'app/utils/stores';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router';
@@ -101,12 +102,12 @@ const AdminNotebookViewComponent = (props: Props) => {
 const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
-  const {workspaceNamespace, nbName} = useParams<{workspaceNamespace: string, nbName: string}>();
+  const {ns, nbName} = useParams<MatchParams>();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 
   // react-router does not handling decoding of URL parameters, they must be decoded here.
   return <AdminNotebookViewComponent
-      workspaceNamespace={workspaceNamespace}
+      workspaceNamespace={ns}
       notebookName={decodeURIComponent(nbName)}
       accessReason={accessReason}/>;
 };

@@ -7,8 +7,6 @@ import {useLocation} from 'react-router';
 import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {URLSearchParams} from 'url';
-import {routeDataStore} from './stores';
-import {buildPageTitleForEnvironment} from './title';
 
 // This is an optional warmup store which can be populated to avoid redundant
 // requests on navigation, e.g. from workspace creation/clone -> data page. It
@@ -22,7 +20,6 @@ export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
@@ -57,13 +54,6 @@ export const useNavigation = () => {
   };
 
   return [navigate, navigateByUrl];
-};
-
-export const startTitleSetter = () => {
-  document.title = buildPageTitleForEnvironment();
-  routeDataStore.subscribe(({title, pathElementForTitle}) => {
-    document.title = buildPageTitleForEnvironment(title || urlParamsStore.getValue()[pathElementForTitle]);
-  });
 };
 
 interface NavigateExtras {

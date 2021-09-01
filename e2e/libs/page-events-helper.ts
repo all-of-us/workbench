@@ -73,7 +73,10 @@ export const shouldLogResponse = (request: Request): boolean => {
     '/user-recent-workspaces',
     '/user-recent-resources',
     '/profile',
-    '/data-set/'
+    '/data-set/',
+    '/data-sets/',
+    '/resources',
+    '/concept-sets/'
   ];
   return !filters.some((partialUrl) => request && request.url().includes(partialUrl));
 };

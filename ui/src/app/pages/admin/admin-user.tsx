@@ -14,10 +14,9 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatFreeCreditsUSD, hasNewValidProps,
   isBlank,
-  reactStyles,
-  withUrlParams
+  reactStyles
 } from 'app/utils';
-import {Link as RouterLink} from 'react-router-dom';
+import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
 
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
@@ -29,7 +28,7 @@ import {
   getRoleOptions,
   validateEmail
 } from 'app/utils/institutions';
-import {serverConfigStore} from 'app/utils/stores';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,
@@ -144,12 +143,7 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   </React.Fragment>;
 };
 
-interface Props extends WithSpinnerOverlayProps {
-  // From withUrlParams
-  urlParams: {
-    usernameWithoutGsuiteDomain: string
-  };
-}
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
 interface State {
   emailValidationError: string;
@@ -163,7 +157,7 @@ interface State {
 }
 
 
-export const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
+export const AdminUser = withRouter(class extends React.Component<Props, State> {
 
   private aborter: AbortController;
 
@@ -188,7 +182,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   componentDidUpdate(prevProps: Readonly<Props>) {
-    if (hasNewValidProps(this.props, prevProps, [p => p.urlParams.usernameWithoutGsuiteDomain])) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.match.params.usernameWithoutGsuiteDomain])) {
       this.getUserData();
     }
   }
@@ -249,7 +243,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   async getUser() {
     const {gsuiteDomain} = serverConfigStore.get().config;
     try {
-      const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
+      const profile = await profileApi().getUserByUsername(this.props.match.params.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile, profileLoadingError: ''});
     } catch (error) {
       this.setState({profileLoadingError: 'Could not find user - please check spelling of username and try again'});

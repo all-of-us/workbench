@@ -84,7 +84,7 @@ describe('User registration UI tests:', () => {
 
     // the NEXT button on User Information page should be disabled until all required fields are filled
     const userInforPageButton = createAccountPage.getNextButton();
-    await userInforPageButton.isDisplayed();
+    await userInforPageButton.isVisible();
     const cursor = await userInforPageButton.isCursorNotAllowed();
     expect(cursor).toEqual(true);
   });

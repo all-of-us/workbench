@@ -1,13 +1,12 @@
 package org.pmiops.workbench.mail;
 
-import com.google.api.services.directory.model.User;
 import java.time.Instant;
 import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
-  void sendWelcomeEmail(final String contactEmail, final String password, final User user)
+  void sendWelcomeEmail(final String contactEmail, final String password, final String username)
       throws MessagingException;
 
   void sendInstitutionUserInstructions(final String contactEmail, final String userInstructions)

@@ -1,8 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
-
 import {
   StyledAnchorTag,
 } from 'app/components/buttons';
@@ -16,13 +14,14 @@ import {AoU} from 'app/components/text-wrappers';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
-import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
+import {RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {buildRasRedirectUrl} from 'app/utils/ras';
+import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';

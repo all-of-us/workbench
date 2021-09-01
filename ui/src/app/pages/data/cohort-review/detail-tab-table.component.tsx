@@ -230,9 +230,9 @@ interface Props {
   cohortReview: CohortReview;
   columns: Array<any>;
   domain: Domain;
-  participantId: number;
   workspace: WorkspaceData;
   filterState: any;
+  participantId: number;
   getFilteredData: Function;
   updateState: number;
 }
@@ -291,7 +291,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
     }
 
     componentDidUpdate(prevProps: any) {
-      const {domain, filterState, participantId, updateState} = this.props;
+      const {domain, filterState, updateState, participantId} = this.props;
       const {lazyLoad, loading} = this.state;
       if (prevProps.participantId !== participantId) {
         if (loading) {

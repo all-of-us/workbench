@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -247,7 +248,7 @@ public class ProfileController implements ProfileApiDelegate {
             + "@"
             + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
 
-    com.google.api.services.directory.model.User googleUser =
+    User googleUser =
         directoryService.createUser(
             profile.getGivenName(),
             profile.getFamilyName(),
@@ -260,7 +261,7 @@ public class ProfileController implements ProfileApiDelegate {
           userService.createUser(
               profile.getGivenName(),
               profile.getFamilyName(),
-              googleUser.getPrimaryEmail(),
+              gSuiteUsername,
               profile.getContactEmail(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
@@ -299,7 +300,7 @@ public class ProfileController implements ProfileApiDelegate {
     final MailService mail = mailServiceProvider.get();
 
     try {
-      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), googleUser);
+      mail.sendWelcomeEmail(profile.getContactEmail(), googleUser.getPassword(), gSuiteUsername);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -390,7 +391,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
-    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUser(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
@@ -410,7 +411,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
-    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUser(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
@@ -429,18 +430,16 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private boolean userHasEverLoggedIn(
-      com.google.api.services.directory.model.User googleUser, DbUser user) {
+  private boolean userHasEverLoggedIn(User googleUser, DbUser user) {
     return user.getFirstSignInTime() != null || !googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
-    com.google.api.services.directory.model.User googleUser =
-        directoryService.resetUserPassword(username);
+    User googleUser = directoryService.resetUserPassword(username);
     try {
       mailServiceProvider
           .get()
-          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), user.getUsername());
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
