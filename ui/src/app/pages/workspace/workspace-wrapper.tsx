@@ -23,22 +23,16 @@ export const WorkspaceWrapper = fp.flow(
   const {ns, wsid} = params;
 
   useEffect(() => {
-    const getWorkspaceAndUpdateStores = async(namespace, id) => {
-      // No destructuring because otherwise it shadows the workspace in props
-      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
-      currentWorkspaceStore.next({
-        ...wsResponse.workspace,
-        accessLevel: wsResponse.accessLevel
-      });
-      diskStore.set({workspaceNamespace: wsResponse.workspace.namespace, persistentDisk: undefined});
-      runtimeStore.set({workspaceNamespace: wsResponse.workspace.namespace, runtime: undefined, runtimeLoaded: false});
+    const updateStores = async(namespace) => {
+      diskStore.set({workspaceNamespace: namespace, persistentDisk: undefined});
+      runtimeStore.set({workspaceNamespace: namespace, runtime: undefined, runtimeLoaded: false});
       pollAborter.abort();
       const newPollAborter = new AbortController();
       setPollAborter(newPollAborter);
 
       try {
         await LeoRuntimeInitializer.initialize({
-          workspaceNamespace: wsResponse.workspace.namespace,
+          workspaceNamespace: namespace,
           pollAbortSignal: newPollAborter.signal,
           maxCreateCount: 0,
           maxDeleteCount: 0,
@@ -54,6 +48,17 @@ export const WorkspaceWrapper = fp.flow(
       }
     };
 
+    const getWorkspaceAndUpdateStores = async(namespace, id) => {
+      // No destructuring because otherwise it shadows the workspace in props
+      const wsResponse = await workspacesApi().getWorkspace(namespace, id);
+      currentWorkspaceStore.next({
+        ...wsResponse.workspace,
+        accessLevel: wsResponse.accessLevel
+      });
+
+      updateStores(wsResponse.workspace.namespace);
+    };
+
     if (
         !currentWorkspaceStore.getValue()
         || currentWorkspaceStore.getValue().namespace !== ns
@@ -67,7 +72,7 @@ export const WorkspaceWrapper = fp.flow(
       nextWorkspaceWarmupStore.next(undefined);
       if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
         currentWorkspaceStore.next(nextWs);
-        return;
+        updateStores(ns);
       } else {
         getWorkspaceAndUpdateStores(ns, wsid);
       }
