@@ -3505,7 +3505,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     is_selectable,
     has_attribute,
     has_hierarchy,
-    id as path
+    CAST(id as STRING) as path
     from
     (
     SELECT
