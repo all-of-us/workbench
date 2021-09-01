@@ -12,7 +12,7 @@ import HomePage from 'app/page/home-page';
 // `./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}`.
 // This can also be run locally.
 
-describe('Annual Access Renewal', () => {
+describe('User Access', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ACCESS_TEST_ACCESS_TOKEN_FILE);
   });

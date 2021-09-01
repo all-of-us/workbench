@@ -50,8 +50,7 @@ public class SetAccessModuleTimestamps {
   private static final Options OPTIONS = new Options().addOption(USER_OPT);
 
   // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
-  private final AccessModuleName moduleName = AccessModuleName.PROFILE_CONFIRMATION;
-  private final Timestamp timestamp = Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
+  private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP = Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
 
   void applyTimestampUpdateToUser(
       UserDao userDao,
@@ -65,24 +64,31 @@ public class SetAccessModuleTimestamps {
       throw new IllegalArgumentException(String.format("User %s not found!", username));
     }
 
-    if (moduleName == AccessModuleName.PROFILE_CONFIRMATION && !isBypass) {
-      final String field = isBypass ? "bypass" : "completion";
-      final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
-      LOG.info(
-          String.format(
-              "Updating %s %s time for user %s to %s", moduleName, field, username, time));
+    switch (moduleName) {
+      case PROFILE_CONFIRMATION:
+        if(!isBypass) {
+          // dual-write to DbUser and AccessModuleService
+          // we will remove the module fields in DbUser soon
+          // see the Access Module Update epic
+          // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
 
-      // dual-write to DbUser and AccessModuleService
-      // we will remove the module fields in DbUser soon
-      // see the Access Module Update epic
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-
-      dbUser.setProfileLastConfirmedTime(timestamp);
-      dbUser = userDao.save(dbUser);
-      accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
-    } else {
-      throw new IllegalArgumentException("Not implemented!");
+          dbUser.setProfileLastConfirmedTime(timestamp);
+          dbUser = userDao.save(dbUser);
+          accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
+        }
+        break;
+      case ERA_COMMONS:
+      case RAS_LOGIN_GOV:
+        accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
+        break;
+      default:
+        throw new IllegalArgumentException("Not implemented!");
     }
+    final String field = isBypass ? "bypass" : "completion";
+    final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
+    LOG.info(
+        String.format(
+            "Updating %s %s time for user %s to %s", moduleName, field, username, time));
   }
 
   @Bean
@@ -92,7 +98,11 @@ public class SetAccessModuleTimestamps {
       final String username = opts.getOptionValue(USER_OPT.getLongOpt());
 
       applyTimestampUpdateToUser(
-          userDao, accessModuleService, username, moduleName, timestamp, false);
+          userDao, accessModuleService, username, AccessModuleName.PROFILE_CONFIRMATION, PROFILE_CONFIRMATION_TIMESTAMP, false);
+      applyTimestampUpdateToUser(
+          userDao, accessModuleService, username, AccessModuleName.RAS_LOGIN_GOV, null, false);
+      applyTimestampUpdateToUser(
+          userDao, accessModuleService, username, AccessModuleName.ERA_COMMONS, null, false);
     };
   }
 
