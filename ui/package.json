@@ -6,7 +6,7 @@
     "start": "PORT=4200 react-scripts start",
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "react-scripts build",
-    "test": "react-scripts test -- --env=node",
+    "test": "react-scripts test --watchAll=false",
     "lint": "yarn eslint src --ext .ts,.tsx",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",

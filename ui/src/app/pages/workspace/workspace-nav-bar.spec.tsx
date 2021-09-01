@@ -7,22 +7,19 @@ import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 import {mockNavigate} from 'testing/navigation-mock';
-import * as ReactRouterDom from 'react-router-dom';
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom') as typeof ReactRouterDom, // use actual for all non-hook parts
-  useParams: () => ({
-    ns: workspaceDataStub.namespace,
-    wsid: workspaceDataStub.id,
-  }),
-}));
+import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('WorkspaceNavBar', () => {
 
   let props: {};
 
   const component = () => {
-    return mount(<WorkspaceNavBar {...props}/>, {attachTo: document.getElementById('root')});
+    return mount(<MemoryRouter initialEntries={[`/${workspaceDataStub.namespace}/${workspaceDataStub.id}`]}>
+      <Route path="/:ns/:wsid">
+        <WorkspaceNavBar {...props}/>
+      </Route>
+    </MemoryRouter>,
+    {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {

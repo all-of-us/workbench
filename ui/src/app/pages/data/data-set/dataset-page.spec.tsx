@@ -22,7 +22,7 @@ import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-ver
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
-import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceDataStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import { MemoryRouter, Route } from 'react-router-dom';
 
