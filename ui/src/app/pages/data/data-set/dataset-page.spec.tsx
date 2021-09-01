@@ -16,7 +16,6 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
-import {mockNavigateByUrl} from 'testing/navigation-mock';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -25,6 +24,7 @@ import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigateByUrl } from 'setupTests';
 
 describe('DataSetPage', () => {
   let datasetApiStub;

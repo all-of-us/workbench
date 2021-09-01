@@ -16,11 +16,11 @@ import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {mockNavigate} from 'testing/navigation-mock';
+import {workspaceStubs} from 'testing/stubs/workspaces';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 describe('NotebookRedirect', () => {
   const workspace = {

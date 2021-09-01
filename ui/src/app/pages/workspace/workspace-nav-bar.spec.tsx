@@ -6,8 +6,8 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
-import {mockNavigate} from 'testing/navigation-mock';
 import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceNavBar', () => {
 

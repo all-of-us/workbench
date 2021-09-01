@@ -28,20 +28,16 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {mockNavigate, mockNavigateByUrl} from 'testing/navigation-mock';
 import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 import {Dropdown} from "primereact/dropdown";
 
 import * as Authentication from "app/utils/authentication";
 import SpyInstance = jest.SpyInstance;
+import { mockNavigate } from 'setupTests';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
-jest.mock('app/utils/navigation', () => ({
-  ...jest.requireActual('app/utils/navigation') as any,
-  __esModule: true,
-  useNavigation: () => [mockNavigate, mockNavigateByUrl],
-})).mock('app/utils/workbench-gapi-client', () => ({
+jest.mock('app/utils/workbench-gapi-client', () => ({
   getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
 
