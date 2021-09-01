@@ -72,6 +72,10 @@ public class TestMockFactory {
               .setExpirable(true)
               .setBypassable(true),
           new DbAccessModule()
+              .setName(AccessModuleName.CT_COMPLIANCE_TRAINING)
+              .setExpirable(true)
+              .setBypassable(false),
+          new DbAccessModule()
               .setName(AccessModuleName.PROFILE_CONFIRMATION)
               .setExpirable(true)
               .setBypassable(false),
