@@ -43,13 +43,12 @@ export default class WorkspaceCard extends CardBase {
    * @throws TimeoutError if fails to find Card.
    */
   static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
-    try {
-      await waitWhileLoading(page);
-      await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 1000 });
-    } catch (e) {
-      return [];
-    }
-    const workspaceCards = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
+    await waitWhileLoading(page);
+    await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 10000 }).catch(() => {
+      // Blank
+    });
+
+    const workspaceCards: WorkspaceCard[] = (await page.$x(WorkspaceCardSelector.cardRootXpath)).map((card) =>
       new WorkspaceCard(page).asCard(card)
     );
 
@@ -170,16 +169,16 @@ export default class WorkspaceCard extends CardBase {
     const [element] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     const name = await getPropValue<string>(element, 'textContent');
     if (waitForDataPage) {
-      await Promise.all([
-        this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
-        element.click()
-      ]);
+      const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
+      await element.click();
+      await navPromise;
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
     } else {
       await element.click();
       await waitWhileLoading(this.page);
     }
+    logger.info(`Click name "${name}" on Workspace card to open workspace.`);
     return name;
   }
 

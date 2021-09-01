@@ -13,41 +13,46 @@ import Modal from 'app/modal/modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Workspace READER Jupyter notebook action tests', () => {
   // All tests use same workspace and notebook.
-  const workspace = makeWorkspaceName();
+  const workspaceName = makeWorkspaceName();
   const notebookName = makeRandomName('py3');
   const readerWorkspaceName = 'e2eNotebookReaderActionsTestWorkspace'; // READER workspace for copy-to.
 
-  const pyCode = 'print(1+1)';
-  const pyAnswer = 2;
+  const pyCode = '!jupyter kernelspec list';
+  const pyAnswer = 'python3';
 
   test('Share notebook to workspace READER', async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
 
-    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
-
-    // Run code: 1 + 1.
-    const cellOutput = await notebook.runCodeCell(1, { code: pyCode });
-    expect(Number.parseInt(cellOutput, 10)).toEqual(pyAnswer);
-    await notebook.save();
-
-    await notebook.goAnalysisPage();
+    // Share workspace to a READER before creating new notebook.
     await dataPage.openAboutPage();
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    // Share Workspace to a READER.
     const shareModal = await aboutPage.openShareModal();
     await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
     await waitWhileLoading(page);
+
+    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
+
+    // Run Python code.
+    const codeOutput = await notebook.runCodeCell(1, { code: pyCode });
+    expect(codeOutput).toEqual(expect.stringContaining(pyAnswer));
+
+    await notebook.save();
+
+    const analysisPage = await notebook.goAnalysisPage();
+    const notebookCard = await analysisPage.findNotebookCard(notebookName);
+    expect(notebookCard).toBeTruthy();
   });
 
   test('Workspace READER copy notebook to another workspace', async () => {
@@ -58,7 +63,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspace);
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
     expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
@@ -149,7 +154,7 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
     // Verify shared Workspace Access Level is READER.
     await new WorkspacesPage(page).load();
-    const workspaceCard = await WorkspaceCard.findCard(page, workspace);
+    const workspaceCard = await WorkspaceCard.findCard(page, workspaceName);
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new WorkspaceDataPage(page);
