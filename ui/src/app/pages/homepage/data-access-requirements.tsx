@@ -288,6 +288,31 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
   return handler();
 };
 
+const Refresh = () => <Button
+    type='primary'
+    style={styles.refreshButton}
+    onClick={() => location.reload()} >
+  <Repeat style={styles.refreshIcon}/> Refresh
+</Button>;
+
+const Next = () => <FlexRow style={styles.nextElement}>
+  <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
+</FlexRow>;
+
+const ModuleIcon = (props: {completedOrBypassed: boolean}) => {
+  const eligible = true; // TODO RW-7059
+  const {completedOrBypassed} = props;
+  return <div style={styles.moduleIcon}>
+    {cond(
+        [!eligible,
+          () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
+        [eligible && completedOrBypassed,
+          () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
+        [eligible && !completedOrBypassed,
+          () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
+  </div>;
+};
+
 interface ModuleProps {
   module: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
@@ -317,28 +342,6 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
       () => setShowTwoFactorAuthModal(true) :
       registrationTask.onClick);
 
-  const Refresh = () => <Button
-      type='primary'
-      style={styles.refreshButton}
-      onClick={() => location.reload()} >
-    <Repeat style={styles.refreshIcon}/> Refresh
-  </Button>;
-
-  const Next = () => <FlexRow style={styles.nextElement}>
-    <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
-  </FlexRow>;
-
-  const eligible = true; // TODO RW-7059
-  const ModuleIcon = () => <div style={styles.moduleIcon}>
-    {cond(
-      // not eligible to complete module
-      [!eligible, () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
-      // eligible and (completed or bypassed)
-      [eligible && !!statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
-      // eligible and incomplete and unbypassed
-      [eligible && !statusTextMaybe, () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
-  </div>;
-
   const ModuleBox = ({children}) => {
     return active ?
         <Clickable onClick={() => {
@@ -355,7 +358,7 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
       {active && (showRefresh ? <Refresh/> : <Next/>)}
     </FlexRow>
     <ModuleBox>
-      <ModuleIcon/>
+      <ModuleIcon completedOrBypassed={!!statusTextMaybe}/>
       <FlexColumn>
         <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
           {moduleLabels.get(module)}
@@ -371,6 +374,71 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
   const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
 };
+
+const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
+  <Header style={styles.headerRW}>Researcher Workbench</Header>
+  <Header style={styles.headerDAR}>Data Access Requirements</Header>
+</FlexColumn>;
+
+const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.completed}>
+  <FlexColumn>
+    <div style={styles.completedHeader}>Thank you for completing all the necessary steps</div>
+    <div style={styles.completedText}>Researcher Workbench data access is complete.</div>
+  </FlexColumn>
+  <GetStartedButton style={{marginLeft: 'auto'}}/>
+</FlexRow>;
+
+const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
+  const {modules, activeModule} = props;
+  return <FlexColumn style={styles.modulesContainer}>
+    {modules.map(module =>
+        <MaybeModule key={module} module={module} active={module === activeModule}/>
+    )}
+  </FlexColumn>;
+};
+
+const RegisteredTierCard = (props: {activeModule: AccessModule}) => {
+  const DataDetail = ({icon, text}) => <FlexRow>
+    {switchCase(icon,
+        // I'm sure there's a better way, so I'll keep looking for it
+        ['individual', () => <DARIcons.individual style={styles.rtDetailsIcon}/>],
+        ['identifying', () => <DARIcons.identifying style={styles.rtDetailsIcon}/>],
+        ['electronic', () => <DARIcons.electronic style={styles.rtDetailsIcon}/>],
+        ['survey', () => <DARIcons.survey style={styles.rtDetailsIcon}/>],
+        ['physical', () => <DARIcons.physical style={styles.rtDetailsIcon}/>],
+        ['wearable', () => <DARIcons.wearable style={styles.rtDetailsIcon}/>],
+    )}
+    <div style={styles.rtDataDetails}>{text}</div>
+  </FlexRow>;
+
+  return <FlexRow style={styles.card}>
+    <FlexColumn>
+      <div style={styles.cardStep}>Step 1</div>
+      <div style={styles.cardHeader}>Complete Registration</div>
+      <FlexRow>
+        <RegisteredTierBadge/>
+        <div style={styles.rtData}>Registered Tier data</div>
+      </FlexRow>
+      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+      <DataDetail icon='individual' text='Individual (not aggregated) data'/>
+      <DataDetail icon='identifying' text='Identifying information removed'/>
+      <DataDetail icon='electronic' text='Electronic health records'/>
+      <DataDetail icon='survey' text='Survey responses'/>
+      <DataDetail icon='physical' text='Physical measurements'/>
+      <DataDetail icon='wearable' text='Wearable devices'/>
+    </FlexColumn>
+    <ModulesForCard modules={rtModules} activeModule={props.activeModule}/>
+  </FlexRow>;
+};
+
+const DuccCard = (props: {activeModule: AccessModule}) => <FlexRow style={{...styles.card, height: '125px'}}>
+  <FlexColumn>
+    {/* This will be Step 3 when CT becomes the new Step 2 */}
+    <div style={styles.cardStep}>Step 2</div>
+    <div style={styles.cardHeader}>Sign the code of conduct</div>
+  </FlexColumn>
+  <ModulesForCard modules={[duccModule]} activeModule={props.activeModule}/>
+</FlexRow>;
 
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
@@ -394,7 +462,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   useEffect(() => {
     const aborter = new AbortController();
-
     syncExternalModulesAndReloadProfile(aborter);
 
     // cleanup on unmount
@@ -436,19 +503,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     (enabledModules);
   }, [profile]);
 
-  const DARHeader = () => <FlexColumn style={styles.headerFlexColumn}>
-    <Header style={styles.headerRW}>Researcher Workbench</Header>
-    <Header style={styles.headerDAR}>Data Access Requirements</Header>
-  </FlexColumn>;
-
-  const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.completed}>
-    <FlexColumn>
-      <div style={styles.completedHeader}>Thank you for completing all the necessary steps</div>
-      <div style={styles.completedText}>Researcher Workbench data access is complete.</div>
-    </FlexColumn>
-    <GetStartedButton style={{marginLeft: 'auto'}}/>
-  </FlexRow>;
-
   const SelfBypass = () => {
     const selfBypass = async() => {
       spinnerProps.showSpinner();
@@ -463,57 +517,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     </FlexRow>;
   };
 
-  const ModulesForCard = (props: {modules: AccessModule[]}) => {
-    return <FlexColumn style={styles.modulesContainer}>
-      {props.modules.map(module =>
-          <MaybeModule key={module} module={module} active={module === activeModule}/>
-      )}
-    </FlexColumn>;
-  };
-
-  const RegisteredTierCard = () => {
-    const DataDetail = ({icon, text}) => <FlexRow>
-      {switchCase(icon,
-          // I'm sure there's a better way, so I'll keep looking for it
-          ['individual', () => <DARIcons.individual style={styles.rtDetailsIcon}/>],
-          ['identifying', () => <DARIcons.identifying style={styles.rtDetailsIcon}/>],
-          ['electronic', () => <DARIcons.electronic style={styles.rtDetailsIcon}/>],
-          ['survey', () => <DARIcons.survey style={styles.rtDetailsIcon}/>],
-          ['physical', () => <DARIcons.physical style={styles.rtDetailsIcon}/>],
-          ['wearable', () => <DARIcons.wearable style={styles.rtDetailsIcon}/>],
-      )}
-      <div style={styles.rtDataDetails}>{text}</div>
-    </FlexRow>;
-
-    return <FlexRow style={styles.card}>
-      <FlexColumn>
-        <div style={styles.cardStep}>Step 1</div>
-        <div style={styles.cardHeader}>Complete Registration</div>
-        <FlexRow>
-          <RegisteredTierBadge/>
-          <div style={styles.rtData}>Registered Tier data</div>
-        </FlexRow>
-        <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-        <DataDetail icon='individual' text='Individual (not aggregated) data'/>
-        <DataDetail icon='identifying' text='Identifying information removed'/>
-        <DataDetail icon='electronic' text='Electronic health records'/>
-        <DataDetail icon='survey' text='Survey responses'/>
-        <DataDetail icon='physical' text='Physical measurements'/>
-        <DataDetail icon='wearable' text='Wearable devices'/>
-      </FlexColumn>
-      <ModulesForCard modules={rtModules}/>
-    </FlexRow>;
-  };
-
-  const DuccCard = () => <FlexRow style={{...styles.card, height: '125px'}}>
-    <FlexColumn>
-      {/* This will be Step 3 when CT becomes the new Step 2 */}
-      <div style={styles.cardStep}>Step 2</div>
-      <div style={styles.cardHeader}>Sign the code of conduct</div>
-    </FlexColumn>
-    <ModulesForCard modules={[duccModule]}/>
-  </FlexRow>;
-
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
@@ -524,9 +527,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard/>
+        <RegisteredTierCard activeModule={activeModule}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard/>
+        <DuccCard activeModule={activeModule}/>
       </FadeBox>
     </FlexColumn>;
 });
