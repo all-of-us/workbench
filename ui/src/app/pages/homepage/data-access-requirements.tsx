@@ -417,10 +417,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [activeModule, setActiveModule] = useState(null);
 
   const [navigate, ] = useNavigation();
-  const enabledModules = allModules.map(module => {
+  const enabledModules = fp.flatMap(module => {
     const enabledTaskMaybe = getRegistrationTask(navigate, module);
-    return enabledTaskMaybe && enabledTaskMaybe.module;
-  });
+    return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
+  }, allModules);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
