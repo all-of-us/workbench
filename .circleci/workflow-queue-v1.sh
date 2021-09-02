@@ -105,9 +105,10 @@ fetch_active_jobs() {
 # We need to check all expected jobs are found api response.
 found_all_jobs() {
   printf '%s\n' "Check if all jobs have started."
+  running_jobs=${1}
   for name in ${JOBS}; do
     printf '%s\n' "name: ${name}"
-    if [[ ! " ${1[*]} " =~ " ${name} " ]]; then
+    if [[ ! " ${running_jobs[*]} " =~ " ${name} " ]]; then
       false
     fi
   done
