@@ -107,7 +107,7 @@ found_all_jobs() {
   printf '%s\n' "Check if all jobs have started."
   for name in ${JOBS}; do
     printf '%s\n' "name: ${name}"
-    if [[ ! " ${$1[*]} " =~ " ${name} " ]]; then
+    if [[ ! " ${1[*]} " =~ " ${name} " ]]; then
       false
     fi
   done
