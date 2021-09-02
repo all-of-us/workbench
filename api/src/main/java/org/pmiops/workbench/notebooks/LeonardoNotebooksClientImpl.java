@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
+  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
@@ -111,26 +112,35 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
-    return new LeonardoCreateRuntimeRequest()
-        .labels(runtimeLabels)
-        .defaultClientId(config.server.oauthClientId)
-        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-        .userJupyterExtensionConfig(
-            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-        // Matches Terra UI's scopes, see RW-3531 for rationale.
-        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-        // Note: DockerHub must be used over GCR here, since VPC-SC restricts
-        // pulling external images via GCR (since it counts as GCS traffic).
-        .welderRegistry(WelderRegistryEnum.DOCKERHUB)
-        .customEnvironmentVariables(customEnvironmentVariables)
-        .autopauseThreshold(runtime.getAutopauseThreshold())
-        .autopause(runtime.getAutopauseThreshold() != null)
-        .runtimeConfig(buildRuntimeConfig(runtime));
+    LeonardoCreateRuntimeRequest createRuntimeRequest =
+        new LeonardoCreateRuntimeRequest()
+            .labels(runtimeLabels)
+            .defaultClientId(config.server.oauthClientId)
+            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+            .userJupyterExtensionConfig(
+                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            // Matches Terra UI's scopes, see RW-3531 for rationale.
+            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+            // Note: DockerHub must be used over GCR here, since VPC-SC restricts
+            // pulling external images via GCR (since it counts as GCS traffic).
+            .welderRegistry(WelderRegistryEnum.DOCKERHUB)
+            .customEnvironmentVariables(customEnvironmentVariables)
+            .autopauseThreshold(runtime.getAutopauseThreshold())
+            .runtimeConfig(buildRuntimeConfig(runtime));
+
+    // .autopause is ONLY set if the given .autopauseThreshold value should be respected
+    // setting to .autopause to `false` will turn off autopause completely and create
+    // runtimes that never autopause.
+    if (runtime.getAutopauseThreshold() != null) {
+      createRuntimeRequest.autopause(true);
+    }
+
+    return createRuntimeRequest;
   }
 
   private Object buildRuntimeConfig(Runtime runtime) {
@@ -152,6 +162,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
+    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspaceNamespace);
+
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
