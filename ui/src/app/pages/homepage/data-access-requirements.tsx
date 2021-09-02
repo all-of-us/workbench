@@ -375,8 +375,7 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
 
-  const syncExternalModulesAndReloadProfile = async() => {
-    const aborter = new AbortController();
+  const syncExternalModulesAndReloadProfile = async(aborter: AbortController) => {
     spinnerProps.showSpinner();
 
     try {
@@ -391,13 +390,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
     spinnerProps.hideSpinner();
     reload();
-
-    // cleanup on unmount
-    return aborter.abort;
   };
 
   useEffect(() => {
-    syncExternalModulesAndReloadProfile();
+    const aborter = new AbortController();
+
+    syncExternalModulesAndReloadProfile(aborter);
+
+    // cleanup on unmount
+    return aborter.abort;
   }, []);
 
   // handle the route /nih-callback?token=<token>
