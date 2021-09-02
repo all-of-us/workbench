@@ -13,16 +13,6 @@
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch"
   },
-  "jest": {
-    "clearMocks": true,
-    "testMatch": [
-      "**/*.spec.tsx"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/testing/fileTransformer.js"
-    }
-  },
   "browserslist": [
     "chrome >= 67"
   ],

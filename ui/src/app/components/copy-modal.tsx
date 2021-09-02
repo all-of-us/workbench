@@ -33,7 +33,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');
 
-interface CopyModalProps {
+export interface CopyModalProps {
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
