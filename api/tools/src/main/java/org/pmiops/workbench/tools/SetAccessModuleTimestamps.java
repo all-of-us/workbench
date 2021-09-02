@@ -66,8 +66,7 @@ public class SetAccessModuleTimestamps {
       @Nullable Timestamp timestamp,
       boolean isBypass) {
     accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
-    accessModuleService.updateBypassTime(
-        dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
+
     if (moduleName == AccessModuleName.PROFILE_CONFIRMATION) {
       // dual-write to DbUser and AccessModuleService
       // we will remove the module fields in DbUser soon
@@ -75,6 +74,9 @@ public class SetAccessModuleTimestamps {
       // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
       dbUser.setProfileLastConfirmedTime(timestamp);
       dbUser = userDao.save(dbUser);
+    } else {
+      accessModuleService.updateBypassTime(
+          dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
     }
 
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
