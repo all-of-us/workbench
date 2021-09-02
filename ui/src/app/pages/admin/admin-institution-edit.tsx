@@ -1,3 +1,10 @@
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import {InputSwitch} from 'primereact/inputswitch';
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import * as validate from 'validate.js';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -24,7 +31,8 @@ import {
   getControlledTierEmailDomains,
   getRegisteredTierConfig,
   getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains, getTierConfig,
+  getRegisteredTierEmailDomains,
+  getTierConfig,
   getTierEmailAddresses,
   getTierEmailDomains,
   updateCtEmailAddresses,
@@ -32,7 +40,7 @@ import {
   updateRtEmailAddresses,
   updateRtEmailDomains,
 } from 'app/utils/institutions';
-import {NavigationProps} from 'app/utils/navigation';
+import {NavigationProps, useNavigation} from 'app/utils/navigation';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {
@@ -41,12 +49,6 @@ import {
   InstitutionTierConfig,
   OrganizationType
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import {InputSwitch} from 'primereact/inputswitch';
-import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import validate from 'validate.js';
 
 const styles = reactStyles({
   label: {
@@ -119,8 +121,39 @@ interface InstitutionEditState {
   title: string;
 }
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {}
+const backNavigate = () => {
+  const [navigate, ] = useNavigation();
+  navigate(['admin', 'institution']);
+};
 
+const SaveErrorModal = (props: {onFinish: Function, onContinue: Function}) => {
+  const {onFinish, onContinue} = props;
+  return <Modal>
+    <ModalTitle>Institution not saved</ModalTitle>
+    <ModalFooter>
+      <Button onClick={onFinish}
+              type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
+      <Button onClick={onContinue}
+              type='primary'>Yes Continue</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+const ApiErrorModal = (props: {errorMsg: string, onClose: Function}) => {
+  const {errorMsg, onClose} = props;
+  return <Modal>
+    <ModalTitle>Error While Saving Data</ModalTitle>
+    <ModalBody>
+      <label style={{...styles.label, fontWeight: 100}}>{errorMsg}</label>
+    </ModalBody>
+    <ModalFooter>
+      <Button onClick={onClose}
+              type='secondary'>Close</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {}
 export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class extends React.Component<Props, InstitutionEditState> {
   constructor(props) {
     super(props);
@@ -398,11 +431,11 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
 
     if (institutionMode === InstitutionMode.EDIT) {
       await institutionApi().updateInstitution(this.props.match.params.institutionId, institution)
-        .then(value => this.backNavigate())
+        .then(value => backNavigate())
         .catch(reason => this.handleError(reason));
     } else {
       await institutionApi().createInstitution(institution)
-        .then(value => this.backNavigate())
+        .then(value => backNavigate())
         .catch(reason => this.handleError(reason));
     }
   }
@@ -424,12 +457,8 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     if (!this.fieldsNotEdited()) {
       this.setState({showBackButtonWarning: true});
     } else {
-      this.backNavigate();
+      backNavigate();
     }
-  }
-
-  backNavigate() {
-    this.props.navigate(['admin', 'institution']);
   }
 
   validateEmailAddressPresence(tier: AccessTierShortNames) {
@@ -662,7 +691,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
         </FlexRow>
         <FlexRow style={{justifyContent: 'flex-start', marginRight: '1rem'}}>
           <div>
-            <Button type='secondary' onClick={() => this.backNavigate()} style={{marginRight: '1.5rem'}}>Cancel</Button>
+            <Button type='secondary' onClick={backNavigate} style={{marginRight: '1.5rem'}}>Cancel</Button>
             <TooltipTrigger data-test-id='tooltip' content={
               errors && this.disableSave(errors) && <div>Answer required fields
                 <BulletAlignedUnorderedList>
@@ -682,25 +711,13 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
             </TooltipTrigger>
           </div>
         </FlexRow>
-        {this.state.showBackButtonWarning && <Modal>
-          <ModalTitle>Institution not saved</ModalTitle>
-          <ModalFooter>
-            <Button onClick={() => this.setState({showBackButtonWarning: false})}
-                    type='secondary' style={{marginRight: '2rem'}}>Finish Saving</Button>
-            <Button onClick={() => this.backNavigate()}
-                    type='primary'>Yes Continue</Button>
-          </ModalFooter>
-        </Modal>}
-        {this.state.showApiError && <Modal>
-          <ModalTitle>Error While Saving Data</ModalTitle>
-          <ModalBody>
-            <label style={{...styles.label, fontWeight: 100}}>{this.state.apiErrorMsg}</label>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => this.setState({showApiError: false})}
-                    type='secondary'>Close</Button>
-          </ModalFooter>
-        </Modal>}
+        {this.state.showBackButtonWarning && <SaveErrorModal
+            onFinish={() => this.setState({showBackButtonWarning: false})}
+            onContinue={backNavigate}
+        />}
+        {this.state.showApiError && <ApiErrorModal
+            errorMsg={this.state.apiErrorMsg}
+            onClose={() => this.setState({showApiError: false})}/>}
       </FadeBox>
       </div>;
   }
