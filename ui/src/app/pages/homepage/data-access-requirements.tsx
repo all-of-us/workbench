@@ -9,7 +9,6 @@ import {Header} from 'app/components/headers';
 import {
   ArrowRight,
   CheckCircle,
-  DARIcons,
   InfoIcon,
   MinusCircle,
   RegisteredTierBadge,
@@ -22,7 +21,6 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {switchCase} from 'app/utils';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
 import {
   buildRasRedirectUrl,
@@ -409,15 +407,7 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
 const DataDetail = (props: {icon: string, text: string}) => {
   const {icon, text} = props;
   return <FlexRow>
-    {switchCase(icon,
-        // I'm sure there's a better way, so I'll keep looking for it
-        ['individual', () => <DARIcons.individual style={styles.rtDetailsIcon}/>],
-        ['identifying', () => <DARIcons.identifying style={styles.rtDetailsIcon}/>],
-        ['electronic', () => <DARIcons.electronic style={styles.rtDetailsIcon}/>],
-        ['survey', () => <DARIcons.survey style={styles.rtDetailsIcon}/>],
-        ['physical', () => <DARIcons.physical style={styles.rtDetailsIcon}/>],
-        ['wearable', () => <DARIcons.wearable style={styles.rtDetailsIcon}/>],
-    )}
+    <img style={styles.rtDetailsIcon} src={`/assets/icons/DAR/${icon}.svg`}/>;
     <div style={styles.rtDataDetails}>{text}</div>
   </FlexRow>;
 };

@@ -136,16 +136,3 @@ export const Arrow = svgIcon('/assets/icons/arrow-left-regular.svg');
 export const ControlledTierBadge = svgIcon('/assets/icons/controlled-tier-badge.svg');
 export const GoogleCloudLogoSvg = svgIcon('/assets/icons/google-cloud.svg');
 export const RegisteredTierBadge = svgIcon('/assets/icons/registered-tier-badge.svg');
-
-export const DARIcons = {
-  // Registered Tier
-  individual: svgIcon('/assets/icons/DAR/individual.svg'),
-  identifying: svgIcon('/assets/icons/DAR/identifying.svg'),
-  electronic: svgIcon('/assets/icons/DAR/electronic.svg'),
-  survey: svgIcon('/assets/icons/DAR/survey.svg'),
-  physical: svgIcon('/assets/icons/DAR/physical.svg'),
-  wearable: svgIcon('/assets/icons/DAR/wearable.svg'),
-  // Controlled Tier
-  genomic: svgIcon('/assets/icons/DAR/genomic.svg'),
-  additional: svgIcon('/assets/icons/DAR/additional.svg'),
-};
