@@ -311,12 +311,12 @@ const ModuleIcon = (props: {completedOrBypassed: boolean}) => {
   const {completedOrBypassed} = props;
   return <div style={styles.moduleIcon}>
     {cond(
-        [!eligible,
-          () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
-        [eligible && completedOrBypassed,
-          () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
-        [eligible && !completedOrBypassed,
-          () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
+      [!eligible,
+        () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
+      [eligible && completedOrBypassed,
+        () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
+      [eligible && !completedOrBypassed,
+        () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
 };
 
