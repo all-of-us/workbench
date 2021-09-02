@@ -22,6 +22,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {switchCase} from 'app/utils';
 import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
 import {
   buildRasRedirectUrl,
@@ -470,6 +471,19 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   };
 
   const RegisteredTierCard = () => {
+    const DataDetail = ({icon, text}) => <FlexRow>
+      {switchCase(icon,
+          // I'm sure there's a better way, so I'll keep looking for it
+          ['individual', () => <DARIcons.individual style={styles.rtDetailsIcon}/>],
+          ['identifying', () => <DARIcons.identifying style={styles.rtDetailsIcon}/>],
+          ['electronic', () => <DARIcons.electronic style={styles.rtDetailsIcon}/>],
+          ['survey', () => <DARIcons.survey style={styles.rtDetailsIcon}/>],
+          ['physical', () => <DARIcons.physical style={styles.rtDetailsIcon}/>],
+          ['wearable', () => <DARIcons.wearable style={styles.rtDetailsIcon}/>],
+      )}
+      <div style={styles.rtDataDetails}>{text}</div>
+    </FlexRow>;
+
     return <FlexRow style={styles.card}>
       <FlexColumn>
         <div style={styles.cardStep}>Step 1</div>
@@ -479,30 +493,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
           <div style={styles.rtData}>Registered Tier data</div>
         </FlexRow>
         <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-        <FlexRow>
-          <DARIcons.individual style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Individual (not aggregated) data</div>
-        </FlexRow>
-        <FlexRow>
-          <DARIcons.identifying style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Identifying information removed</div>
-        </FlexRow>
-        <FlexRow>
-          <DARIcons.electronic style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Electronic health records</div>
-        </FlexRow>
-        <FlexRow>
-          <DARIcons.survey style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Survey responses</div>
-        </FlexRow>
-        <FlexRow>
-          <DARIcons.physical style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Physical measurements</div>
-        </FlexRow>
-        <FlexRow>
-          <DARIcons.wearable style={styles.rtDetailsIcon}/>
-          <div style={styles.rtDataDetails}>Wearable devices</div>
-        </FlexRow>
+        <DataDetail icon='individual' text='Individual (not aggregated) data'/>
+        <DataDetail icon='identifying' text='Identifying information removed'/>
+        <DataDetail icon='electronic' text='Electronic health records'/>
+        <DataDetail icon='survey' text='Survey responses'/>
+        <DataDetail icon='physical' text='Physical measurements'/>
+        <DataDetail icon='wearable' text='Wearable devices'/>
       </FlexColumn>
       <ModulesForCard modules={rtModules}/>
     </FlexRow>;
