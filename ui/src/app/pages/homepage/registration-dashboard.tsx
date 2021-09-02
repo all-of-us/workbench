@@ -7,10 +7,13 @@ import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {getRegistrationTasks} from 'app/utils/access-utils';
+import {
+  bypassAll,
+  getRegistrationTasks,
+  GetStartedButton,
+} from 'app/utils/access-utils';
 import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
@@ -149,13 +152,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       AccessModule.RASLINKLOGINGOV,
     ];
 
-    for (const module of modules) {
-      await profileApi().unsafeSelfBypassAccessRequirement({
-        moduleName: module,
-        isBypassed: isBypassed
-      });
-    }
-
+    await bypassAll(modules, isBypassed);
     this.setState({bypassInProgress: false, bypassActionComplete: true});
   }
 
@@ -182,9 +179,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
-            <span>Bypass action is complete.
-              <Button style={{marginLeft: '0.5rem'}}
-                      onClick={() => {location.replace('/'); }}>Get Started</Button>
+            <span>Bypass action is complete. <GetStartedButton/>
             </span>}
           {!bypassActionComplete && <span>
             [Test environment] Self-service bypass is enabled:
@@ -258,14 +253,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       {this.allTasksCompleted() &&
         <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
              data-test-id='success-message'>
-          You successfully completed all the required steps to access the Researcher Workbench.
-          <Button style={{marginLeft: '0.5rem'}}
-                  onClick={() => {
-                    // After a registration status change, to be safe, we reload the application. This results in
-                    // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
-                    // have been dependent on the user's registration status, e.g. CDR config information.
-                    location.replace('/');
-                  }}>Get Started</Button>
+          You successfully completed all the required steps to access the Researcher Workbench. <GetStartedButton/>
         </div>
       }
       {this.state.twoFactorAuthModalOpen && <TwoFactorAuthModal

@@ -1,3 +1,6 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {
   AppRoute,
   withFullHeight,
@@ -16,6 +19,7 @@ import {AdminWorkspace} from 'app/pages/admin/admin-workspace';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
 import {AdminWorkspaceSearch} from 'app/pages/admin/admin-workspace-search';
 import {UserAudit} from 'app/pages/admin/user-audit';
+import {DataAccessRequirements} from 'app/pages/homepage/data-access-requirements';
 import {Homepage} from 'app/pages/homepage/homepage';
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {ProfileComponent} from 'app/pages/profile/profile-component';
@@ -23,9 +27,12 @@ import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-ed
 import {WorkspaceLibrary} from 'app/pages/workspace/workspace-library';
 import {WorkspaceList} from 'app/pages/workspace/workspace-list';
 import {WorkspaceWrapper} from 'app/pages/workspace/workspace-wrapper';
+import {
+  NIH_CALLBACK_PATH,
+  RAS_CALLBACK_PATH,
+} from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {environment} from 'environments/environment';
 import {Redirect, Switch} from 'react-router-dom';
 import {expiredGuard, registrationGuard} from './guards';
 
@@ -33,6 +40,7 @@ const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenew
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminNotebookViewPage = fp.flow(withRouteData, withRoutingSpinner)(AdminNotebookView);
 const AdminReviewWorkspacePage = fp.flow(withRouteData, withRoutingSpinner)(AdminReviewWorkspace);
+const DataAccessRequirementsPage = fp.flow(withRouteData, withRoutingSpinner)(DataAccessRequirements);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight, withRoutingSpinner)(DataUserCodeOfConduct);
 const HomepagePage = fp.flow(withRouteData, withRoutingSpinner)(Homepage);
 const InstitutionAdminPage = fp.flow(withRouteData, withRoutingSpinner)(AdminInstitution);
@@ -51,7 +59,7 @@ const WorkspaceSearchAdminPage = fp.flow(withRouteData, withRoutingSpinner)(Admi
 
 export const SignedInRoutes = () => {
   return <Switch>
-    <AppRoute exact path='/' guards={[expiredGuard]}>
+    <AppRoute exact path='/' guards={environment.enableDataAccessRequirements ? [expiredGuard, registrationGuard] : [expiredGuard]}>
       <HomepagePage routeData={{title: 'Homepage'}}/>
     </AppRoute>
     <AppRoute exact path='/access-renewal'>
@@ -102,17 +110,24 @@ export const SignedInRoutes = () => {
     <AppRoute exact path='/admin/workspaces/:ns/:nbName'>
       <AdminNotebookViewPage routeData={{pathElementForTitle: 'nbName', minimizeChrome: true}}/>
     </AppRoute>
+    {environment.enableDataAccessRequirements && <AppRoute exact path='/data-access-requirements'>
+      <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/>
+    </AppRoute>}
     <AppRoute exact path='/data-code-of-conduct'>
       <DataUserCodeOfConductPage routeData={{title: 'Data User Code of Conduct', minimizeChrome: true}}/>
     </AppRoute>
     <AppRoute exact path='/profile'>
       <ProfilePage routeData={{title: 'Profile'}}/>
     </AppRoute>
-    <AppRoute exact path='/nih-callback'>
-      <HomepagePage routeData={{title: 'Homepage'}}/>
+    <AppRoute exact path={NIH_CALLBACK_PATH}>
+      {environment.enableDataAccessRequirements ?
+          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+          <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
-    <AppRoute exact path='/ras-callback'>
-      <HomepagePage routeData={{title: 'Homepage'}}/>
+    <AppRoute exact path={RAS_CALLBACK_PATH}>
+      {environment.enableDataAccessRequirements ?
+          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+          <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>

@@ -20,5 +20,6 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: false,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableFooter: true
+  enableFooter: true,
+  enableDataAccessRequirements: false,
 };

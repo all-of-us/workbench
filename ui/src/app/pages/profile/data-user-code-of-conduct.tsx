@@ -130,7 +130,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
       const duccVersion = getLiveDUCCVersion();
       profileApi().submitDataUseAgreement(duccVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
-        this.props.navigate(['/']);
+        history.back();
       });
     }
 

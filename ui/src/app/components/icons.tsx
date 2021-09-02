@@ -1,10 +1,18 @@
-import {faCheck, faCheckCircle, faExclamationTriangle, faTimes} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import colors, {addOpacity} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {faAlarmExclamation} from '@fortawesome/pro-solid-svg-icons';
+import {
+  faCheck,
+  faCheckCircle,
+  faExclamationTriangle,
+  faLongArrowAltRight,
+  faMinusCircle,
+  faTimes
+} from '@fortawesome/free-solid-svg-icons';
+import {faAlarmExclamation, faRepeat} from '@fortawesome/pro-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
+import colors, {addOpacity} from 'app/styles/colors';
 
 import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
 import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
@@ -114,17 +122,25 @@ const Icon = ({ shape, size, style, color, ...props }) => {
 
 const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
 
-export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
-export const Check = props => <Icon shape={faCheck} {...props}/>;
-export const Times = props => <Icon shape={faTimes} {...props}/>;
-export const RegisteredTierBadge = svgIcon(registeredTierBadge);
-export const ControlledTierBadge = svgIcon(controlledTierBadge);
-export const Arrow = svgIcon(arrow);
 export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
   return <div style={{...style, ...styles.circleBackground}}>
     <WrappedIcon/>
   </div>;
 };
+
 export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
+export const ArrowRight = props => <Icon shape={faLongArrowAltRight} {...props}/>;
+export const Check = props => <Icon shape={faCheck} {...props}/>;
+export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const ExclamationTriangle = props => <Icon shape={faExclamationTriangle} color={colors.danger} {...props}/>;
+
+export const MinusCircle = props => <Icon shape={faMinusCircle} {...props}/>;
+export const Repeat = props => <Icon shape={faRepeat} {...props}/>;
+export const Times = props => <Icon shape={faTimes} {...props}/>;
+
+const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
+
+export const Arrow = svgIcon(arrow);
+export const ControlledTierBadge = svgIcon(controlledTierBadge);
 export const GoogleCloudLogoSvg = svgIcon(googleCloudLogo);
+export const RegisteredTierBadge = svgIcon(registeredTierBadge);
