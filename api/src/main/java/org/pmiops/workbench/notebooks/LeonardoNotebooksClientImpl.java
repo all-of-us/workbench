@@ -111,25 +111,26 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = new LeonardoCreateRuntimeRequest()
-        .labels(runtimeLabels)
-        .defaultClientId(config.server.oauthClientId)
-        // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
-        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
-        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
-        .userJupyterExtensionConfig(
-            new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
-        // Matches Terra UI's scopes, see RW-3531 for rationale.
-        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
-        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
-        .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
-        // Note: DockerHub must be used over GCR here, since VPC-SC restricts
-        // pulling external images via GCR (since it counts as GCS traffic).
-        .welderRegistry(WelderRegistryEnum.DOCKERHUB)
-        .customEnvironmentVariables(customEnvironmentVariables)
-        .autopauseThreshold(runtime.getAutopauseThreshold())
-        .runtimeConfig(buildRuntimeConfig(runtime));
+    LeonardoCreateRuntimeRequest createRuntimeRequest =
+        new LeonardoCreateRuntimeRequest()
+            .labels(runtimeLabels)
+            .defaultClientId(config.server.oauthClientId)
+            // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
+            .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
+            .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
+            .userJupyterExtensionConfig(
+                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
+            // Matches Terra UI's scopes, see RW-3531 for rationale.
+            .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+            .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+            .toolDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
+            // Note: DockerHub must be used over GCR here, since VPC-SC restricts
+            // pulling external images via GCR (since it counts as GCS traffic).
+            .welderRegistry(WelderRegistryEnum.DOCKERHUB)
+            .customEnvironmentVariables(customEnvironmentVariables)
+            .autopauseThreshold(runtime.getAutopauseThreshold())
+            .runtimeConfig(buildRuntimeConfig(runtime));
 
     if (runtime.getAutopauseThreshold() != null) {
       createRuntimeRequest.autopause(true);
