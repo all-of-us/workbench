@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
+  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String ALL_SAMPLES_WGS_KEY = "ALL_SAMPLES_WGS_BUCKET";
@@ -158,6 +159,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
     Map<String, String> customEnvironmentVariables = new HashMap<>();
+    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspaceNamespace);
+
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
