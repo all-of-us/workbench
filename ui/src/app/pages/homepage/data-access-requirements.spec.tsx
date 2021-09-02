@@ -34,7 +34,7 @@ describe('DataAccessRequirements', () => {
         profileStore.set({profile, load, reload, updateCache});
     });
 
-    it('should render the expected modules', () => {
+    it('should render all modules by default', () => {
         const wrapper = component();
         allModules.forEach(module => expect(findModule(wrapper, module).exists()).toBeTruthy());
     });
@@ -110,6 +110,41 @@ describe('DataAccessRequirements', () => {
             expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
         });
         expect(findCompletionBanner(wrapper).exists()).toBeTruthy();
+    });
+
+    it('should render a mix of complete and incomplete modules, as appropriate', () => {
+        const incompleteModules = [AccessModule.RASLINKLOGINGOV];
+        const completeModules = allModules.filter(module => module !== AccessModule.RASLINKLOGINGOV);
+
+        // sanity check
+        expect(incompleteModules.length).toEqual(1);
+        expect(completeModules.length).toEqual(4);
+
+        profileStore.set({
+            profile: {
+                ...ProfileStubVariables.PROFILE_STUB,
+                accessModules: {
+                    modules: completeModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                }
+            },
+            load,
+            reload,
+            updateCache});
+
+        const wrapper = component();
+        incompleteModules.forEach(module => {
+            expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findCompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+        completeModules.forEach(module => {
+            expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
+
+            expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
+            expect(findIneligibleModule(wrapper, module).exists()).toBeFalsy();
+        });
+        expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
     });
 
     it('should not show self-bypass UI when unsafeSelfBypass is false', () => {

@@ -293,6 +293,7 @@ interface ModuleProps {
   // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
+// Renders a module when it's enabled via feature flags.  Returns null if not.
 const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
   const {profile} = useStore(profileStore);
   const [navigate, ] = useNavigation();
