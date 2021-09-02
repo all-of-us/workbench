@@ -132,6 +132,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .autopauseThreshold(runtime.getAutopauseThreshold())
             .runtimeConfig(buildRuntimeConfig(runtime));
 
+    // .autopause is ONLY set if the given .autopauseThreshold value should be respected
+    // setting to .autopause to `false` will turn off autopause completely and create
+    // runtimes that never autopause.
     if (runtime.getAutopauseThreshold() != null) {
       createRuntimeRequest.autopause(true);
     }
