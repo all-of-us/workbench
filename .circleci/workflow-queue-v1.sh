@@ -105,14 +105,10 @@ fetch_active_jobs() {
 # We need to check all expected jobs are found api response.
 found_all_jobs() {
   printf '%s\n' "Check if all jobs have started."
-  running_jobs=${1}
-  for name in ${JOBS}; do
-    printf '%s\n' "name: ${name}"
-    if [[ ! " ${running_jobs[*]} " =~ " ${name} " ]]; then
-      false
-    fi
-  done
-  return
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
 }
 
 
@@ -173,9 +169,9 @@ while [[ "${is_running}" == "true" ]]; do
     jobs=$(echo $active_jobs | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
 
-    found_all_jobs ${jobs}
-    found_all=$__
-    printf "\n%s\n" "found_all:" "${found_all}"
+    found_all_jobs "${jobs}" "${JOBS[@]}"
+    found_all=$?
+    printf "\n%s\n" "found_all_jobs:" "${found_all}"
 
     if [[ $active_jobs ]] || [[ ! $found_all ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
