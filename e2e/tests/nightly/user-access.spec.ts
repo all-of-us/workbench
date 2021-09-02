@@ -7,8 +7,8 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import HomePage from 'app/page/home-page';
 
 // Important: the access test user must be in a state where they are currently failing access renewal
-// due to an expired "profile last confirmed" date.  CircleCI accomplishes this by running the
-// puppeteer-access-test-user-setup task, which executes
+// due to an expired "profile last confirmed" date and not completing RAS login.gov linking.
+// CircleCI accomplishes this by running the puppeteer-access-test-user-setup task, which executes
 // `./project.rb set-access-module-timestamps --user ${PUPPETEER_ACCESS_TEST}`.
 // This can also be run locally.
 

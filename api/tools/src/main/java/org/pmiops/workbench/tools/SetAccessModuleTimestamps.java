@@ -53,7 +53,6 @@ public class SetAccessModuleTimestamps {
 
   private static final Options OPTIONS = new Options().addOption(USER_OPT);
 
-  // very crude POC implementation - only handles ProfileConfirmation and completion (not bypass)
   private static final Timestamp PROFILE_CONFIRMATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2011-08-01T00:00:00.00Z"));
 
@@ -81,7 +80,7 @@ public class SetAccessModuleTimestamps {
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
     LOG.info(
         String.format(
-            "Updating %s completion time for user %s to %s; bypass time to %s",
+            "Updating %s bypass and/or completion time for user %s to %s; bypass mode is %s",
             moduleName, username, time, isBypass));
   }
 
