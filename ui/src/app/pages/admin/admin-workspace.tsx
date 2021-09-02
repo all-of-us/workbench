@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
+import {hasNewValidProps, reactStyles} from 'app/utils';
 import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
@@ -68,16 +68,16 @@ const styles = reactStyles({
   },
 });
 
-const PurpleLabel = ({style = {}, labelText}) => {
+const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
-    {labelText}
+    {children}
   </label>;
 };
 
-const WorkspaceInfoField = ({labelText, content}) => {
+const WorkspaceInfoField = ({labelText, children}) => {
   return <FlexRow style={styles.infoRow}>
-    <PurpleLabel style={styles.infoLabel} labelText={labelText}/>
-    <div style={styles.infoValue}>{content}</div>
+    <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
+    <div style={styles.infoValue}>{children}</div>
   </FlexRow>;
 };
 
@@ -197,13 +197,13 @@ const FileDetailsTable = (props: FileDetailsProps) => {
         style={styles.fileDetailsTable}
         scrollable={true}
         paginator={true}
-        paginatorTemplate='Link PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
         currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
       <Column field='location' header='Location'/>
       <Column field='nameCell' header='Filename'/>
       <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
     </DataTable>
-    <PurpleLabel labelText="To preview notebooks, enter Access Reason (for auditing purposes)"/>
+    <PurpleLabel>To preview notebooks, enter Access Reason (for auditing purposes)</PurpleLabel>
     <TextArea style={styles.accessReasonText} onChange={v => setTable(initTable(v))}/>
   </FlexColumn>;
 };
@@ -235,8 +235,10 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.getFederatedWorkspaceInformation();
   }
 
-  componentDidUpdate() {
-    this.getFederatedWorkspaceInformation();
+  componentDidUpdate(prevProps) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.match.params])) {
+      this.getFederatedWorkspaceInformation();
+    }
   }
 
   async getFederatedWorkspaceInformation() {
@@ -365,18 +367,15 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
           <h2>Workspace</h2>
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
-            <WorkspaceInfoField labelText='Workspace Name' content={workspace.name}/>
-            <WorkspaceInfoField labelText='Workspace Namespace' content={workspace.namespace}/>
-            <WorkspaceInfoField labelText='Google Project Id' content={workspace.googleProject}/>
-            <WorkspaceInfoField labelText='Billing Status' content={workspace.billingStatus}/>
-            <WorkspaceInfoField labelText='Billing Account Type' content={workspace.billingAccountType}/>
-            <WorkspaceInfoField labelText='Creation Time' content={new Date(workspace.creationTime).toDateString()}/>
-            <WorkspaceInfoField labelText='Last Modified Time' content={new Date(workspace.lastModifiedTime).toDateString()}/>
-            <WorkspaceInfoField labelText='Workspace Published' content={workspace.published ? 'Yes' : 'No'}/>
-            <WorkspaceInfoField
-                labelText='Audit'
-                content={<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}
-            />
+            <WorkspaceInfoField labelText='Workspace Name'>{workspace.name}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Namespace'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Google Project Id'>{workspace.googleProject}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Billing Status'>{workspace.billingStatus}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Billing Account Type'>{workspace.billingAccountType}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Audit'>{<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}</WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
@@ -388,9 +387,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
           </div>
           <h3>Cohort Builder</h3>
           <div className='cohort-builder' style={{marginTop: '1rem'}}>
-            <WorkspaceInfoField labelText='# of Cohorts' content={resources.workspaceObjects.cohortCount}/>
-            <WorkspaceInfoField labelText='# of Concept Sets' content={resources.workspaceObjects.conceptSetCount}/>
-            <WorkspaceInfoField labelText='# of Data Sets' content={resources.workspaceObjects.datasetCount}/>
+            <WorkspaceInfoField labelText='# of Cohorts'>{resources.workspaceObjects.cohortCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Concept Sets'>{resources.workspaceObjects.conceptSetCount}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Data Sets'>{resources.workspaceObjects.datasetCount}</WorkspaceInfoField>
           </div>
           <h3>Cloud Storage Objects</h3>
           <div className='cloud-storage-objects' style={{marginTop: '1rem'}}>
@@ -398,10 +397,18 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
               NOTE: if there are more than ~1000 files in the bucket, these counts and the table below may be
               incomplete because we process only a single page of storage list results.
             </div>
-            <WorkspaceInfoField labelText='GCS bucket path' content={resources.cloudStorage.storageBucketPath}/>
-            <WorkspaceInfoField labelText='# of Workbench-managed notebook files' content={resources.cloudStorage.notebookFileCount}/>
-            <WorkspaceInfoField labelText='# of other files' content={resources.cloudStorage.nonNotebookFileCount}/>
-            <WorkspaceInfoField labelText='Storage used (MB)' content={formatMB(resources.cloudStorage.storageBytesUsed)}/>
+            <WorkspaceInfoField labelText='GCS bucket path'>
+              {resources.cloudStorage.storageBucketPath}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of Workbench-managed notebook files'>
+              {resources.cloudStorage.notebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='# of other files'>
+              {resources.cloudStorage.nonNotebookFileCount}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Storage used (MB)'>
+              {formatMB(resources.cloudStorage.storageBytesUsed)}
+            </WorkspaceInfoField>
           </div>
           {files && <FileDetailsTable
               workspaceNamespace={workspace.namespace}
@@ -409,17 +416,23 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
               bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
           <div className='research-purpose' style={{marginTop: '1rem'}}>
-            <WorkspaceInfoField
-                labelText='Primary purpose of project'
-                content={getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
-                <div key={i}>{researchPurposeItem}</div>)}
-            />
-            <WorkspaceInfoField labelText='Reason for choosing All of Us' content={workspace.researchPurpose.reasonForAllOfUs}/>
-            <WorkspaceInfoField labelText='Area of intended study' content={workspace.researchPurpose.intendedStudy}/>
-            <WorkspaceInfoField labelText='Anticipated findings' content={workspace.researchPurpose.anticipatedFindings}/>
+            <WorkspaceInfoField labelText='Primary purpose of project'>
+              {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
+                  <div key={i}>{researchPurposeItem}</div>)}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Reason for choosing All of Us'>
+              {workspace.researchPurpose.reasonForAllOfUs}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Area of intended study'>
+              {workspace.researchPurpose.intendedStudy}
+            </WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Anticipated findings'>
+              {workspace.researchPurpose.anticipatedFindings}
+            </WorkspaceInfoField>
             {workspace.researchPurpose.populationDetails.length > 0 &&
-              <WorkspaceInfoField labelText='Population area(s) of focus' content={getSelectedPopulations(workspace.researchPurpose)}/>
-            }
+            <WorkspaceInfoField labelText='Population area(s) of focus'>
+              {getSelectedPopulations(workspace.researchPurpose)}
+            </WorkspaceInfoField>}
           </div>
         </div>
 
@@ -442,11 +455,11 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
         <h2>Runtimes</h2>
         <FlexColumn>
           <FlexRow>
-            <PurpleLabel style={styles.narrowWithMargin} labelText="Runtime Name"/>
-            <PurpleLabel style={styles.narrowWithMargin} labelText="Google Project"/>
-            <PurpleLabel style={styles.narrowWithMargin} labelText="Created Time"/>
-            <PurpleLabel style={styles.narrowWithMargin} labelText="Last Accessed Time"/>
-            <PurpleLabel style={styles.narrowWithMargin} labelText="Status"/>
+            <PurpleLabel style={styles.narrowWithMargin}>Runtime Name</PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Google Project</PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Created Time</PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Last Accessed Time</PurpleLabel>
+            <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.runtimes.map((runtime, i) =>
               <FlexRow key={i}>
