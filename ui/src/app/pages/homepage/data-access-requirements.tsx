@@ -30,6 +30,7 @@ import {
   getRegistrationTask,
   GetStartedButton,
 } from 'app/utils/access-utils';
+import {isAbortError} from 'app/utils/errors';
 import {queryParamsStore, useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
@@ -376,11 +377,17 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const syncExternalModulesAndReloadProfile = async() => {
     const aborter = new AbortController();
     spinnerProps.showSpinner();
-    await Promise.all([
-      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
-      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
-      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
-    ]);
+
+    try {
+      await Promise.all([
+        profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
+        profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
+        profileApi().syncEraCommonsStatus({signal: aborter.signal}),
+      ]);
+    } catch (e) {
+      if (!isAbortError(e)) { throw e; }
+    }
+
     spinnerProps.hideSpinner();
     reload();
 
@@ -404,7 +411,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     if (code) {
       handleRasCallback(code, spinnerProps);
     }
-  }, [code] );
+  }, [code]);
 
   // which module are we currently guiding the user to complete?
   const [activeModule, setActiveModule] = useState(null);
