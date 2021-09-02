@@ -520,16 +520,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
-    <DARHeader/>
-    {profile && !activeModule && <Completed/>}
-    {unsafeAllowSelfBypass && activeModule && <SelfBypass/>}
-    <FadeBox style={styles.fadeBox}>
-      <div style={styles.pleaseComplete}>
-        Please complete the necessary steps to gain access to the <AoU/> datasets.
-      </div>
-      <RegisteredTierCard/>
-      {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-      <DuccCard/>
-    </FadeBox>
+      <DARHeader/>
+      {profile && !activeModule && <Completed/>}
+      {unsafeAllowSelfBypass && activeModule && <SelfBypass/>}
+      <FadeBox style={styles.fadeBox}>
+        <div style={styles.pleaseComplete}>
+          Please complete the necessary steps to gain access to the <AoU/> datasets.
+        </div>
+        <RegisteredTierCard/>
+        {/* TODO RW-7059 - Step 2 ControlledTierCard */}
+        <DuccCard/>
+      </FadeBox>
     </FlexColumn>;
 });
