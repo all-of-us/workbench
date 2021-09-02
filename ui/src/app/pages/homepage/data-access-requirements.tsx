@@ -306,29 +306,30 @@ const Next = () => <FlexRow style={styles.nextElement}>
   <span style={styles.nextText}>NEXT</span> <ArrowRight style={styles.nextIcon}/>
 </FlexRow>;
 
-const ModuleIcon = (props: {completedOrBypassed: boolean}) => {
+const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boolean}) => {
   const eligible = true; // TODO RW-7059
-  const {completedOrBypassed} = props;
+  const {moduleName, completedOrBypassed} = props;
+
   return <div style={styles.moduleIcon}>
     {cond(
       [!eligible,
-        () => <MinusCircle data-test-id={`module-${module}-ineligible`} style={{color: colors.disabled}}/>],
+        () => <MinusCircle data-test-id={`module-${moduleName}-ineligible`} style={{color: colors.disabled}}/>],
       [eligible && completedOrBypassed,
-        () => <CheckCircle data-test-id={`module-${module}-complete`} style={{color: colors.success}}/>],
+        () => <CheckCircle data-test-id={`module-${moduleName}-complete`} style={{color: colors.success}}/>],
       [eligible && !completedOrBypassed,
-        () => <CheckCircle data-test-id={`module-${module}-incomplete`} style={{color: colors.disabled}}/>])}
+        () => <CheckCircle data-test-id={`module-${moduleName}-incomplete`} style={{color: colors.disabled}}/>])}
   </div>;
 };
 
 interface ModuleProps {
-  module: AccessModule;
+  moduleName: AccessModule;
   active: boolean;    // is this the currently-active module that the user should complete
 
   // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
 // Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
+const MaybeModule = ({moduleName, active}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -336,13 +337,13 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
   const [navigate, ] = useNavigation();
-  const registrationTask = getRegistrationTask(navigate, module);
+  const registrationTask = getRegistrationTask(navigate, moduleName);
 
   const ModuleBox = ({children}) => {
     // kluge until we have fully migrated from the Registration Dashboard:
     // getRegistrationTask() has onClick() functions for every module, which is generally what we want
     // but we pop up a modal for Two Factor Auth instead of using the standard task
-    const moduleAction = registrationTask && (module === AccessModule.TWOFACTORAUTH ?
+    const moduleAction = registrationTask && (moduleName === AccessModule.TWOFACTORAUTH ?
         () => setShowTwoFactorAuthModal(true) :
         registrationTask.onClick);
 
@@ -358,17 +359,17 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
 
   const Module = () => {
     const {profile} = useStore(profileStore);
-    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
+    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, moduleName));
 
-    return <FlexRow data-test-id={`module-${module}`}>
+    return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
         {active && (showRefresh ? <Refresh/> : <Next/>)}
       </FlexRow>
       <ModuleBox>
-        <ModuleIcon completedOrBypassed={!!statusTextMaybe}/>
+        <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
         <FlexColumn>
           <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
-            {moduleLabels.get(module)}
+            {moduleLabels.get(moduleName)}
           </div>
           {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
         </FlexColumn>
@@ -399,8 +400,8 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
 const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
   const {modules, activeModule} = props;
   return <FlexColumn style={styles.modulesContainer}>
-    {modules.map(module =>
-        <MaybeModule key={module} module={module} active={module === activeModule}/>
+    {modules.map(moduleName =>
+        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule}/>
     )}
   </FlexColumn>;
 };
@@ -495,16 +496,16 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const [activeModule, setActiveModule] = useState(null);
 
   const [navigate, ] = useNavigation();
-  const enabledModules = fp.flatMap(module => {
-    const enabledTaskMaybe = getRegistrationTask(navigate, module);
+  const enabledModules = fp.flatMap(moduleName => {
+    const enabledTaskMaybe = getRegistrationTask(navigate, moduleName);
     return enabledTaskMaybe ? [enabledTaskMaybe.module] : [];
   }, allModules);
 
   // whenever the profile changes, setActiveModule(the first incomplete enabled module)
   useEffect(() => {
     fp.flow(
-      fp.find<AccessModule>(module => {
-        const status = getAccessModuleStatusByName(profile, module);
+      fp.find<AccessModule>(moduleName => {
+        const status = getAccessModuleStatusByName(profile, moduleName);
         return !bypassedOrCompletedText(status);
       }),
       setActiveModule
