@@ -214,16 +214,14 @@ const rtModules = [
 // TODO RW-7059
 const ctModules = [];
 
-const duccModule = [
-  AccessModule.DATAUSERCODEOFCONDUCT,
-];
+const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
 export const allModules: AccessModule[] = [
   ...rtModules,
   ...ctModules,
-  ...duccModule,
+  duccModule,
 ];
 
 const LoginGovTooltip = () => <TooltipTrigger
@@ -510,7 +508,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
       <div style={styles.cardStep}>Step 2</div>
       <div style={styles.cardHeader}>Sign the code of conduct</div>
     </FlexColumn>
-    <ModulesForCard modules={duccModule}/>
+    <ModulesForCard modules={[duccModule]}/>
   </FlexRow>;
 
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
