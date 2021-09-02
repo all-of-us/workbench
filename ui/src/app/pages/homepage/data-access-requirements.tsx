@@ -293,11 +293,10 @@ interface ModuleProps {
   // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
 }
-const MaybeModule = (props: ModuleProps): JSX.Element => {
+const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
   const {profile} = useStore(profileStore);
   const [navigate, ] = useNavigation();
 
-  const {module, active} = props;
   const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
 
   // whether to show the refresh button: this module has been clicked
@@ -455,9 +454,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   };
 
   const ModulesForCard = (props: {modules: AccessModule[]}) => {
-    const {modules} = props;
     return <FlexColumn style={styles.modulesContainer}>
-      {modules.map(module =>
+      {props.modules.map(module =>
           <MaybeModule key={module} module={module} active={module === activeModule}/>
       )}
     </FlexColumn>;
