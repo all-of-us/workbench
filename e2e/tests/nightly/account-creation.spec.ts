@@ -3,13 +3,13 @@ import GoogleLoginPage from 'app/page/google-login';
 import { getPropValue } from 'utils/element-utils';
 import { config } from 'resources/workbench-config';
 
-describe('User registration tests:', () => {
-  test('Can register new user', async () => {
+describe('Account creation tests:', () => {
+  test('Can create a new account', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
 
-    // Click the create account button to start new-user-registration flow.
+    // Click the create account button to start the new user account creation flow.
     await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
