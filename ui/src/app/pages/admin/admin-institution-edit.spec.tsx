@@ -1,16 +1,17 @@
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
+import {InputSwitch} from "primereact/inputswitch";
+import {MemoryRouter, Route} from 'react-router-dom';
+
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore} from 'app/utils/stores';
+import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {simulateSwitchToggle, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
-import {InputSwitch} from "primereact/inputswitch";
-import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('AdminInstitutionEditSpec', () => {
 
