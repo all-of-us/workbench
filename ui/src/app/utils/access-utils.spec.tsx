@@ -1,17 +1,18 @@
 import * as React from "react";
 import {mount, ReactWrapper} from 'enzyme';
 
-import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {authStore, profileStore} from 'app/utils/stores';
 import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {Profile} from 'generated/fetch';
+import {authStore, profileStore} from 'app/utils/stores';
+import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
 import {
   buildRasRedirectUrl,
   getTwoFactorSetupUrl,
   maybeDaysRemaining,
   MILLIS_PER_DAY,
   NOTIFICATION_THRESHOLD_DAYS,
+  RAS_CALLBACK_PATH,
   useIsUserDisabled
 } from "app/utils/access-utils";
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -220,7 +221,7 @@ describe('getTwoFactorSetupUrl', () => {
 
 describe('buildRasRedirectUrl', () => {
   it('should generate expected RAS redirect URL', () => {
-    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
+    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost' + RAS_CALLBACK_PATH));
   });
 });
 

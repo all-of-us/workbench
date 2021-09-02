@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
@@ -11,7 +13,6 @@ import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 const styles = reactStyles({
@@ -198,6 +199,7 @@ export const NavBar = () => {
     </div>
     <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
+    {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
     {
       showStatusAlert && <StatusAlertBanner
           title={statusAlertDetails.title}
@@ -212,7 +214,6 @@ export const NavBar = () => {
           onClose={onStatusAlertBannerUnmount}
       />
     }
-    {<LoginGovIAL2NotificationMaybe/>}
     {
       showSideNav
       && <SideNav

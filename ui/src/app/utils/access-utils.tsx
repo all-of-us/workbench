@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -8,18 +9,14 @@ import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {
-  AccessModule,
-  AccessModuleStatus,
-  Profile
-} from 'generated/fetch';
-import {ErrorCode} from 'generated/fetch';
+import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
 
 const {useState, useEffect} = React;
 
 interface RegistrationTask {
-  key: string;
+  key: string;    // legacy accessor text
+  module: AccessModule;
   completionPropsKey: string;
   loadingPropsKey?: string;
   title: React.ReactNode;
@@ -54,20 +51,24 @@ export const redirectToTwoFactorSetup = (): void => {
   window.open(getTwoFactorSetupUrl(), '_blank');
 };
 
-const redirectToNiH = (): void => {
+export const NIH_CALLBACK_PATH = '/nih-callback';
+
+export const redirectToNiH = (): void => {
   AnalyticsTracker.Registration.ERACommons();
   const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
-        window.location.origin.toString() + '/nih-callback?token=<token>');
+        window.location.origin.toString() + NIH_CALLBACK_PATH + '?token=<token>');
   window.open(url, '_blank');
 };
 
+export const RAS_CALLBACK_PATH = '/ras-callback';
+
 /** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
 export const buildRasRedirectUrl = (): string => {
-  return encodeURIComponentStrict(window.location.origin.toString() + '/ras-callback');
+  return encodeURIComponentStrict(window.location.origin.toString() + RAS_CALLBACK_PATH);
 };
 
-const redirectToRas = (): void => {
+export const redirectToRas = (): void => {
   AnalyticsTracker.Registration.RasLoginGov();
   // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
@@ -87,9 +88,10 @@ const redirectToRas = (): void => {
 //
 // Needing to pass navigate in here is a bit odd but necessary to access the navigate function which
 // can only be accessed through a hook/HOC from a component.
-export const getRegistrationTasks = (navigate) => serverConfigStore.get().config ? ([
+export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
+    module: AccessModule.TWOFACTORAUTH,
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
     description: 'Add an extra layer of security to your account by providing your phone number' +
@@ -102,6 +104,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToTwoFactorSetup
   }, {
     key: 'rasLoginGov',
+    module: AccessModule.RASLINKLOGINGOV,
     completionPropsKey: 'rasLoginGovLinked',
     loadingPropsKey: 'rasLoginGovLoading',
     title: 'Connect Your Login.Gov Account',
@@ -116,6 +119,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
   },
   {
     key: 'eraCommons',
+    module: AccessModule.ERACOMMONS,
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
@@ -130,6 +134,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToNiH
   }, {
     key: 'complianceTraining',
+    module: AccessModule.COMPLIANCETRAINING,
     completionPropsKey: 'trainingCompleted',
     title: <span><AoU/> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
@@ -143,6 +148,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
     onClick: redirectToTraining
   }, {
     key: 'dataUserCodeOfConduct',
+    module: AccessModule.DATAUSERCODEOFCONDUCT,
     completionPropsKey: 'dataUserCodeOfConductCompleted',
     title: 'Data User Code of Conduct',
     description: <span>Sign the Data User Code of Conduct consenting to the <AoU/> data use policy.</span>,
@@ -165,7 +171,7 @@ export const getRegistrationTasks = (navigate) => serverConfigStore.get().config
       navigate(['data-code-of-conduct']);
     }
   }
-] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
+]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
       throw new Error('Cannot load registration tasks before config loaded');
     })();
@@ -174,6 +180,10 @@ export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(naviga
   acc[curr.key] = curr;
   return acc;
 }, {});
+
+export const getRegistrationTask = (navigate, module: AccessModule): RegistrationTask => {
+  return getRegistrationTasks(navigate).find(task => task.module === module);
+};
 
 export const wasReferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -245,3 +255,22 @@ export const getAccessModuleBypassTime = (accessModules: Array<AccessModuleStatu
   const module = accessModules.find(a => a.moduleName === moduleName);
   return module ? module.bypassEpochMillis : null;
 };
+
+export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
+  for (const module of accessModules) {
+    await profileApi().unsafeSelfBypassAccessRequirement({
+      moduleName: module,
+      isBypassed: isBypassed
+    });
+  }
+};
+
+export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
+    style={style}
+    onClick={() => {
+      // After a registration status change, to be safe, we reload the application. This results in
+      // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+      // have been dependent on the user's registration status, e.g. CDR config information.
+      location.replace('/');
+    }}>Get Started</Button>;
+
