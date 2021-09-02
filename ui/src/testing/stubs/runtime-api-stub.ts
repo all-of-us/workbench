@@ -17,7 +17,7 @@ export const defaultGceConfig = (): GceConfig => ({
 export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
   masterDiskSize: 80,
-  workerDiskSize: 50,
+  workerDiskSize: 100,
   workerMachineType: 'n1-standard-4',
   numberOfWorkers: 1,
   numberOfPreemptibleWorkers: 2,

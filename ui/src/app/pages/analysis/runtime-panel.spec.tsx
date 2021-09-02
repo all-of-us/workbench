@@ -857,7 +857,7 @@ describe('RuntimePanel', () => {
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 50
+        workerDiskSize: 60
       }
     };
     runtimeApiStub.runtime = runtime;
@@ -935,7 +935,7 @@ describe('RuntimePanel', () => {
       await pickPdSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickPdSize(wrapper, 50);
+      await pickPdSize(wrapper, 60);
     } else {
       await pickMainDiskSize(wrapper, 49);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
@@ -943,7 +943,7 @@ describe('RuntimePanel', () => {
       await pickMainDiskSize(wrapper, 4900);
       expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-      await pickMainDiskSize(wrapper, 50);
+      await pickMainDiskSize(wrapper, 60);
     }
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
@@ -952,8 +952,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 50);
-    await pickWorkerDiskSize(wrapper, 50);
+    await pickMainDiskSize(wrapper, 60);
+    await pickWorkerDiskSize(wrapper, 60);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
@@ -967,7 +967,7 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 50);
+    await pickMainDiskSize(wrapper, 60);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -975,8 +975,8 @@ describe('RuntimePanel', () => {
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 50);
-    await pickWorkerDiskSize(wrapper, 50);
+    await pickMainDiskSize(wrapper, 60);
+    await pickWorkerDiskSize(wrapper, 60);
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 

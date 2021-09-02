@@ -104,7 +104,8 @@
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
     "enablePersistentDisk": true,
-    "enableAccessModuleRewrite" : true,
+    "enableAccessModuleRewrite": true,
+    "enableUnifiedUserAccessCron": false,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
