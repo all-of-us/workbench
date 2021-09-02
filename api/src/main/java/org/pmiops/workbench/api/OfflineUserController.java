@@ -16,7 +16,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessModule;
@@ -174,8 +173,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> synchronizeUserAccess() {
     if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
-      // TODO(RW-6875): Implement.
-      throw new NotImplementedException();
+      taskQueueService.groupAndPushSynchronizeAccessTasks(userService.getAllUserIds());
     }
 
     userService

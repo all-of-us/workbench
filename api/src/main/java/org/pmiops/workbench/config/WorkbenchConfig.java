@@ -333,5 +333,7 @@ public class WorkbenchConfig {
     // with the task queue configuration to affect the overall concurrency of the offline batch
     // process.
     public Integer usersPerAuditTask;
+    // Number of users to process within a single access synchronization task.
+    public Integer usersPerSynchronizeAccessTask;
   }
 }

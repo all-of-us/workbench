@@ -4,16 +4,23 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import com.google.common.collect.ImmutableList;
+import java.sql.Timestamp;
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
+import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -31,10 +38,12 @@ public class CloudTaskUserControllerTest extends SpringTest {
   private DbUser userB;
 
   @Autowired private CloudTaskUserController controller;
+  @Autowired private UserDao userDao;
+  @Autowired private UserService mockUserService;
 
   @TestConfiguration
   @Import({CloudTaskUserController.class})
-  @MockBean({CloudResourceManagerService.class})
+  @MockBean({CloudResourceManagerService.class, UserService.class})
   static class Configuration {}
 
   @BeforeEach
@@ -49,7 +58,7 @@ public class CloudTaskUserControllerTest extends SpringTest {
     user.setUsername(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
-    return user;
+    return userDao.save(user);
   }
 
   @Test
@@ -67,5 +76,23 @@ public class CloudTaskUserControllerTest extends SpringTest {
             .addUserIdsItem(userA.getUserId())
             .addUserIdsItem(userB.getUserId()));
     verify(mockCloudResourceManagerService, times(2)).getAllProjectsForUser(any());
+  }
+
+  @Test
+  public void testSynchronizeAccess() throws Exception {
+    userA.setTwoFactorAuthCompletionTime(Timestamp.from(Instant.now().minusSeconds(10)));
+    userA.setTwoFactorAuthBypassTime(null);
+    userB.setTwoFactorAuthCompletionTime(null);
+    userB.setTwoFactorAuthBypassTime(null);
+    controller.synchronizeUserAccess(
+        new SynchronizeUserAccessRequest()
+            .addUserIdsItem(userA.getUserId())
+            .addUserIdsItem(userB.getUserId()));
+
+    // Ideally we would use a real implementation of UserService and mock its external deps, but
+    // unfortunately UserService is too sprawling to replicate in a unit test.
+    verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
+    verify(mockUserService, times(2)).updateUserWithRetries(any(), any(), any());
+    verifyNoMoreInteractions(mockUserService);
   }
 }

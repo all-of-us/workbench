@@ -105,7 +105,7 @@
     "enableFireCloudV2Billing" : false,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite": true,
-    "enableUnifiedUserAccessCron": false,
+    "enableUnifiedUserAccessCron": true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
@@ -136,6 +136,7 @@
     "lookbackPeriod": 330
   },
   "offlineBatch": {
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }
