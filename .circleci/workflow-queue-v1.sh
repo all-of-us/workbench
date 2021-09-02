@@ -103,7 +103,7 @@ fetch_active_jobs() {
 
 # V1 "/project/" api response does not show jobs that have not been queued or started.
 # We need to check all expected jobs are found api response.
-found_all_jobs() {
+job_difference_jobs() {
   printf '%s\n' "Check if all jobs have started."
   local e match="$1"
   shift
@@ -168,12 +168,11 @@ while [[ "${is_running}" == "true" ]]; do
     # Is there any job that has not started at all?
     jobs=$(echo $active_jobs | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
+    # Find difference between two arrays.
+    job_difference=$(`echo ${jobs[@]} ${JOBS[@]} | tr ' ' '\n' | sort | uniq -u `)
+    printf "\n%s\n" "job_difference:" "${job_difference}"
 
-    found_all_jobs "${jobs}" "${JOBS[@]}"
-    found_all=$?
-    printf "\n%s\n" "found_all_jobs:" "${found_all}"
-
-    if [[ $active_jobs ]] || [[ ! $found_all ]]; then
+    if [[ $active_jobs ]] || [[ $job_difference ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
