@@ -407,7 +407,7 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
 const DataDetail = (props: {icon: string, text: string}) => {
   const {icon, text} = props;
   return <FlexRow>
-    <img style={styles.rtDetailsIcon} src={`/assets/icons/DAR/${icon}.svg`}/>;
+    <img style={styles.rtDetailsIcon} src={`/assets/icons/DAR/${icon}.svg`}/>
     <div style={styles.rtDataDetails}>{text}</div>
   </FlexRow>;
 };
