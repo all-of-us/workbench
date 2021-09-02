@@ -288,6 +288,13 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
   return handler();
 };
 
+const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reload: Function) => {
+  spinnerProps.showSpinner();
+  await bypassAll(allModules, true);
+  spinnerProps.hideSpinner();
+  reload();
+};
+
 const Refresh = () => <Button
     type='primary'
     style={styles.refreshButton}
@@ -503,26 +510,17 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
     (enabledModules);
   }, [profile]);
 
-  const SelfBypass = () => {
-    const selfBypass = async() => {
-      spinnerProps.showSpinner();
-      await bypassAll(allModules, true);
-      spinnerProps.hideSpinner();
-      reload();
-    };
-
-    return <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
-      <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
-      <Button style={{marginLeft: '0.5rem'}} onClick={() => selfBypass()}>Bypass all</Button>
-    </FlexRow>;
-  };
-
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
       <DARHeader/>
       {profile && !activeModule && <Completed/>}
-      {unsafeAllowSelfBypass && activeModule && <SelfBypass/>}
+      {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+        <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
+        <Button
+            style={{marginLeft: '0.5rem'}}
+            onClick={() => selfBypass(spinnerProps, reload)}>Bypass all</Button>
+      </FlexRow>}
       <FadeBox style={styles.fadeBox}>
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
