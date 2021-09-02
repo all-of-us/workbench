@@ -2,7 +2,13 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
-import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
+import {
+  AutopauseMinuteThresholds,
+  ComputeType,
+  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  findMachineByName,
+  Machine
+} from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
   diskStore,
@@ -263,12 +269,8 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
 };
 
 const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  const oldAutopauseThreshold = oldRuntime.autopauseThreshold;
-  const newAutopauseThreshold = newRuntime.autopauseThreshold;
-
-  if (!oldAutopauseThreshold || !newAutopauseThreshold) {
-    return null;
-  }
+  const oldAutopauseThreshold = oldRuntime.autopauseThreshold == null ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : oldRuntime.autopauseThreshold;
+  const newAutopauseThreshold = newRuntime.autopauseThreshold == null ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : newRuntime.autopauseThreshold;
 
   return {
     desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
