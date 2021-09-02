@@ -8,12 +8,15 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessModule;
@@ -35,17 +38,20 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private final UserService userService;
   private final DirectoryService directoryService;
   private final TaskQueueService taskQueueService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public OfflineUserController(
       AccessTierService accessTierService,
       UserService userService,
       DirectoryService directoryService,
-      TaskQueueService taskQueueService) {
+      TaskQueueService taskQueueService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.accessTierService = accessTierService;
     this.userService = userService;
     this.directoryService = directoryService;
     this.taskQueueService = taskQueueService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -67,6 +73,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      // Functionality now handled by synchronizeUserAccess.
+      return ResponseEntity.noContent().build();
+    }
+
     int errorCount = 0;
     int userCount = 0;
     int completionChangeCount = 0;
@@ -105,6 +116,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncTwoFactorAuthStatus() {
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      // Functionality now handled by synchronizeUserAccess.
+      return ResponseEntity.noContent().build();
+    }
+
     int errorCount = 0;
     int userCount = 0;
     int completionChangeCount = 0;
@@ -157,6 +173,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> synchronizeUserAccess() {
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      // TODO(RW-6875): Implement.
+      throw new NotImplementedException();
+    }
+
     userService
         .getAllUsers()
         .forEach(

@@ -257,6 +257,10 @@ public class WorkbenchConfig {
     public boolean enableFireCloudV2Billing;
     // If true, use the new rewrite version of access module.
     public boolean enableAccessModuleRewrite;
+    // If true, run all offline access controlled checks in synchronizeUserAccess, rather than
+    // across multiple distinct crons. This also switches user access checks to a cloud tasks
+    // implementation, rather than running updates within the cron request directly.
+    public boolean enableUnifiedUserAccessCron;
     // If true, cohort and concept set will show source domains and standard domains options
     public boolean enableStandardSourceDomains;
     // If true, the backend and UI will support persistent disk as the default notebook storage
