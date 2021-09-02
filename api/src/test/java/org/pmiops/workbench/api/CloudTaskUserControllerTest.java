@@ -5,20 +5,23 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import com.google.common.collect.ImmutableList;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +43,11 @@ public class CloudTaskUserControllerTest extends SpringTest {
   @Autowired private CloudTaskUserController controller;
   @Autowired private UserDao userDao;
   @Autowired private UserService mockUserService;
+  @Autowired private AccessModuleService mockAccessModuleService;
 
   @TestConfiguration
   @Import({CloudTaskUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserService.class})
+  @MockBean({CloudResourceManagerService.class, UserService.class, AccessModuleService.class})
   static class Configuration {}
 
   @BeforeEach
@@ -80,10 +84,10 @@ public class CloudTaskUserControllerTest extends SpringTest {
 
   @Test
   public void testSynchronizeAccess() throws Exception {
-    userA.setTwoFactorAuthCompletionTime(Timestamp.from(Instant.now().minusSeconds(10)));
-    userA.setTwoFactorAuthBypassTime(null);
-    userB.setTwoFactorAuthCompletionTime(null);
-    userB.setTwoFactorAuthBypassTime(null);
+    when(mockAccessModuleService.getAccessModuleStatus(userA, AccessModuleName.TWO_FACTOR_AUTH))
+        .thenReturn(Optional.of(new AccessModuleStatus().completionEpochMillis(123L)));
+    when(mockAccessModuleService.getAccessModuleStatus(userB, AccessModuleName.TWO_FACTOR_AUTH))
+        .thenReturn(Optional.of(new AccessModuleStatus()));
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
             .addUserIdsItem(userA.getUserId())

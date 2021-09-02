@@ -10,12 +10,15 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.springframework.http.HttpStatus;
@@ -47,14 +50,17 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserDao userDao;
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
+  private final AccessModuleService accessModuleService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
-      UserService userService) {
+      UserService userService,
+      AccessModuleService accessModuleService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
+    this.accessModuleService = accessModuleService;
   }
 
   @Override
@@ -117,8 +123,12 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // Users who don't have 2FA will go through an active flow to enable it, and are not
         // dependent on this offline check. Disabled users have no access anyways, so don't
         // bother checking them either.
-        if (user.getTwoFactorAuthCompletionTime() != null && !user.getDisabled()) {
-          user = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
+        if (!user.getDisabled()) {
+          Optional<AccessModuleStatus> status =
+              accessModuleService.getAccessModuleStatus(user, AccessModuleName.TWO_FACTOR_AUTH);
+          if (status.isPresent() && status.get().getCompletionEpochMillis() != null) {
+            user = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
+          }
         }
 
         // Always synchronize for consistency. Under normal operation only the passage of time
