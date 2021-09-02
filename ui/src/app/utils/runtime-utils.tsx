@@ -269,8 +269,10 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
 };
 
 const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  const oldAutopauseThreshold = oldRuntime.autopauseThreshold == null ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : oldRuntime.autopauseThreshold;
-  const newAutopauseThreshold = newRuntime.autopauseThreshold == null ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : newRuntime.autopauseThreshold;
+  const oldAutopauseThreshold = oldRuntime.autopauseThreshold === null || oldRuntime.autopauseThreshold === undefined
+    ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : oldRuntime.autopauseThreshold;
+  const newAutopauseThreshold = newRuntime.autopauseThreshold == null || newRuntime.autopauseThreshold === undefined
+    ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : newRuntime.autopauseThreshold;
 
   return {
     desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
