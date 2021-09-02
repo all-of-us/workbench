@@ -101,6 +101,8 @@ fetch_active_jobs() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
 
+# V1 "/project/" api response does not show jobs that have not been queued or started.
+# We need to check all expected jobs are found api response.
 found_all_jobs() {
   printf '%s\n' "Check if all jobs have started."
   for name in ${JOBS}; do
@@ -134,15 +136,16 @@ fi
 
 fetch_older_pipelines "${current_pipeline_start_time}"
 pipeline_workflow_ids=$__
-printf "%s\n%s\n\n" "Currently running workflow_id are:" "${pipeline_workflow_ids}"
 
-unique_workflow_id=$(echo $pipeline_workflow_ids | sort --u)
-printf "%s\n%s\n\n" "Unique workflow_id are:" "${unique_workflow_id}"
-
+# Exit if there are no running workflows on master branch.
 if [[ -z $pipeline_workflow_ids ]]; then
-  printf "%s\n" "No workflow currently running."
+  printf "%s\n" "No workflow currently running on master branch."
   exit 0
 fi
+
+unique_workflow_id=$(echo $pipeline_workflow_ids | sort --u)
+printf "%s\n%s\n\n" "Currently running workflow_id are:" "${unique_workflow_id}"
+
 
 # Wait as long as "pipelines" variable is not empty until max time has reached.
 # Max wait time until workflows have finished is 45 minutes because e2e tests may take a long time to finish.
