@@ -66,31 +66,23 @@ public class SetAccessModuleTimestamps {
       AccessModuleName moduleName,
       @Nullable Timestamp timestamp,
       boolean isBypass) {
-    switch (moduleName) {
-      case PROFILE_CONFIRMATION:
-        if (!isBypass) {
-          // dual-write to DbUser and AccessModuleService
-          // we will remove the module fields in DbUser soon
-          // see the Access Module Update epic
-          // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
-
-          dbUser.setProfileLastConfirmedTime(timestamp);
-          dbUser = userDao.save(dbUser);
-          accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
-        }
-        break;
-      case RAS_LOGIN_GOV:
-        accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
-        accessModuleService.updateBypassTime(
-            dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
-        break;
-      default:
-        throw new IllegalArgumentException("Not implemented!");
+    accessModuleService.updateCompletionTime(dbUser, moduleName, timestamp);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), AccessUtils.storageAccessModuleToClient(moduleName), isBypass);
+    if (moduleName == AccessModuleName.PROFILE_CONFIRMATION) {
+      // dual-write to DbUser and AccessModuleService
+      // we will remove the module fields in DbUser soon
+      // see the Access Module Update epic
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
+      dbUser.setProfileLastConfirmedTime(timestamp);
+      dbUser = userDao.save(dbUser);
     }
-    final String field = isBypass ? "bypass" : "completion";
+
     final String time = Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("NULL");
     LOG.info(
-        String.format("Updating %s %s time for user %s to %s", moduleName, field, username, time));
+        String.format(
+            "Updating %s completion time for user %s to %s; bypass time to %s",
+            moduleName, username, time, isBypass));
   }
 
   @Bean
