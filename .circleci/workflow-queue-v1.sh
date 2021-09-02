@@ -106,6 +106,7 @@ fetch_active_jobs() {
 found_all_jobs() {
   printf '%s\n' "Check if all jobs have started."
   for name in ${JOBS}; do
+    printf '%s\n' "name: ${name}"
     if [[ ! " ${$1[*]} " =~ " ${name} " ]]; then
       false
     fi
@@ -168,7 +169,7 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n%s\n" "Active workflow and jobs:" "${active_jobs}"
 
     # Is there any job that has not started at all?
-    jobs=$(echo $active_jobs | jq .[] | .job_name)
+    jobs=$(echo $active_jobs | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
 
     found_all_jobs ${jobs}
