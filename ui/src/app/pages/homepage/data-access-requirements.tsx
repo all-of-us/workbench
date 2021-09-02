@@ -404,8 +404,9 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
   </FlexColumn>;
 };
 
-const RegisteredTierCard = (props: {activeModule: AccessModule}) => {
-  const DataDetail = ({icon, text}) => <FlexRow>
+const DataDetail = (props: {icon: string, text: string}) => {
+  const {icon, text} = props;
+  return <FlexRow>
     {switchCase(icon,
         // I'm sure there's a better way, so I'll keep looking for it
         ['individual', () => <DARIcons.individual style={styles.rtDetailsIcon}/>],
@@ -417,26 +418,26 @@ const RegisteredTierCard = (props: {activeModule: AccessModule}) => {
     )}
     <div style={styles.rtDataDetails}>{text}</div>
   </FlexRow>;
-
-  return <FlexRow style={styles.card}>
-    <FlexColumn>
-      <div style={styles.cardStep}>Step 1</div>
-      <div style={styles.cardHeader}>Complete Registration</div>
-      <FlexRow>
-        <RegisteredTierBadge/>
-        <div style={styles.rtData}>Registered Tier data</div>
-      </FlexRow>
-      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-      <DataDetail icon='individual' text='Individual (not aggregated) data'/>
-      <DataDetail icon='identifying' text='Identifying information removed'/>
-      <DataDetail icon='electronic' text='Electronic health records'/>
-      <DataDetail icon='survey' text='Survey responses'/>
-      <DataDetail icon='physical' text='Physical measurements'/>
-      <DataDetail icon='wearable' text='Wearable devices'/>
-    </FlexColumn>
-    <ModulesForCard modules={rtModules} activeModule={props.activeModule}/>
-  </FlexRow>;
 };
+
+const RegisteredTierCard = (props: {activeModule: AccessModule}) => <FlexRow style={styles.card}>
+  <FlexColumn>
+    <div style={styles.cardStep}>Step 1</div>
+    <div style={styles.cardHeader}>Complete Registration</div>
+    <FlexRow>
+      <RegisteredTierBadge/>
+      <div style={styles.rtData}>Registered Tier data</div>
+    </FlexRow>
+    <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+    <DataDetail icon='individual' text='Individual (not aggregated) data'/>
+    <DataDetail icon='identifying' text='Identifying information removed'/>
+    <DataDetail icon='electronic' text='Electronic health records'/>
+    <DataDetail icon='survey' text='Survey responses'/>
+    <DataDetail icon='physical' text='Physical measurements'/>
+    <DataDetail icon='wearable' text='Wearable devices'/>
+  </FlexColumn>
+  <ModulesForCard modules={rtModules} activeModule={props.activeModule}/>
+</FlexRow>;
 
 const DuccCard = (props: {activeModule: AccessModule}) => <FlexRow style={{...styles.card, height: '125px'}}>
   <FlexColumn>
