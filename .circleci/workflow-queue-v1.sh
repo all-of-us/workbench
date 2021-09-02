@@ -14,6 +14,11 @@ BRANCH="master"
 WORKFLOW_NAME="build-test-deploy"
 PROJECT_SLUG="all-of-us/workbench"
 
+# List of jobs in build-test-deploy workflow on master branch.
+JOBS=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test" "api-integration-test" "api-local-test")
+JOBS+=("api-unit-test" "wait_until_previous_workflow_done" "ui-unit-test" "puppeteer-env-setup" "api-bigquery-test")
+
+
 #********************
 # FUNCTIONS
 # *******************
@@ -68,28 +73,44 @@ fetch_older_pipelines() {
     exit 1
   fi
 
-  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
-  jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
+  # Explanation:
+  # .why=="github": Exclude jobs manually triggered via ssh by users.
+  # .dont_build!="prs-only": Commits to github branch but a Pull Request has not been created.
+  jq_filter=".branch==\"${BRANCH}\" "
+  jq_filter+=" and .why==\"github\" and .dont_build!=\"prs-only\" "
+  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id!=\"${CIRCLE_WORKFLOW_ID}\""
 
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | [{workflow_id: .workflows.workflow_id}] | unique | .[] | .workflow_id")
 }
 
-fetch_pipeline_jobs() {
-  printf '%s\n' "Fetching jobs in workflow_id \"${id}\" on \"${BRANCH}\" branch."
-    local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?filter=running&shallow=true"
-    local curl_result=$(circle_get "${get_path}")
-    if [[ ! "${curl_result}" ]]; then
-      printf "Fetching jobs workflow_id \"${id}\" failed."
-      exit 1
-    fi
+fetch_active_jobs() {
+  printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
+  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
+  local curl_result=$(circle_get "${get_path}")
+  if [[ ! "${curl_result}" ]]; then
+    printf "Curl request failed. workflow_id \"${1}\"."
+    exit 1
+  fi
 
-    jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|pending|queued\")) "
-    jq_filter+="and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
-    jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
-    jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
+  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
 
-    __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
+  jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
+
+found_all_jobs() {
+  printf '%s\n' "Check if all jobs have started."
+  for name in ${JOBS}; do
+    if [[ ! " ${$1[*]} " =~ " ${name} " ]]; then
+      false
+    fi
+  done
+  return
+}
+
 
 #********************
 # RUNNING
@@ -115,6 +136,9 @@ fetch_older_pipelines "${current_pipeline_start_time}"
 pipeline_workflow_ids=$__
 printf "%s\n%s\n\n" "Currently running workflow_id are:" "${pipeline_workflow_ids}"
 
+unique_workflow_id=$(echo $pipeline_workflow_ids | sort --u)
+printf "%s\n%s\n\n" "Unique workflow_id are:" "${unique_workflow_id}"
+
 if [[ -z $pipeline_workflow_ids ]]; then
   printf "%s\n" "No workflow currently running."
   exit 0
@@ -126,19 +150,29 @@ fi
 max_time=$((45 * 60))
 is_running=true
 waited_time=0
-sleep_time="10s"
-sleep_time_counter=10
+# sleep_time and time_counter must be same.
+sleep_time="20s"
+sleep_time_counter=20
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
 
-  for id in ${pipeline_workflow_ids}; do
+  for id in ${unique_workflow_id}; do
     is_running=false
-    fetch_pipeline_jobs "${id}"
-    active_workflow=$__
-    printf "\n%s\n%s\n" "Active workflow and job:" "${active_workflow}"
+    # Find all running/queued jobs in this workflow_id.
+    fetch_active_jobs "${id}"
+    active_jobs=$__
+    printf "\n%s\n%s\n" "Active workflow and jobs:" "${active_jobs}"
 
-    if [[ $active_workflow ]]; then
+    # Is there any job that has not started at all?
+    jobs=$(echo $active_jobs | jq .[] | .job_name)
+    printf "\n%s\n" "jobs:" "${jobs}"
+
+    found_all_jobs ${jobs}
+    found_all=$__
+    printf "\n%s\n" "found_all:" "${found_all}"
+
+    if [[ $active_jobs ]] || [[ ! $found_all ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
