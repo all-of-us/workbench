@@ -329,27 +329,23 @@ interface ModuleProps {
 }
 // Renders a module when it's enabled via feature flags.  Returns null if not.
 const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
-  const {profile} = useStore(profileStore);
-  const [navigate, ] = useNavigation();
-
-  const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
-
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
   // whether to show the Two Factor Auth Modal
   const [showTwoFactorAuthModal, setShowTwoFactorAuthModal] = useState(false);
 
+  const [navigate, ] = useNavigation();
   const registrationTask = getRegistrationTask(navigate, module);
 
-  // kluge until we have fully migrated from the Registration Dashboard:
-  // getRegistrationTask() has onClick() functions for every module, which is generally what we want
-  // but we pop up a modal for Two Factor Auth instead of using the standard task
-  const moduleAction = registrationTask && (module === AccessModule.TWOFACTORAUTH ?
-      () => setShowTwoFactorAuthModal(true) :
-      registrationTask.onClick);
-
   const ModuleBox = ({children}) => {
+    // kluge until we have fully migrated from the Registration Dashboard:
+    // getRegistrationTask() has onClick() functions for every module, which is generally what we want
+    // but we pop up a modal for Two Factor Auth instead of using the standard task
+    const moduleAction = registrationTask && (module === AccessModule.TWOFACTORAUTH ?
+        () => setShowTwoFactorAuthModal(true) :
+        registrationTask.onClick);
+
     return active ?
         <Clickable onClick={() => {
           setShowRefresh(true);
@@ -360,23 +356,28 @@ const MaybeModule = ({module, active}: ModuleProps): JSX.Element => {
         <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
-  const Module = () => <FlexRow data-test-id={`module-${module}`}>
-    <FlexRow style={styles.moduleCTA}>
-      {active && (showRefresh ? <Refresh/> : <Next/>)}
-    </FlexRow>
-    <ModuleBox>
-      <ModuleIcon completedOrBypassed={!!statusTextMaybe}/>
-      <FlexColumn>
-        <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
-          {moduleLabels.get(module)}
-        </div>
-        {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
-      </FlexColumn>
-    </ModuleBox>
-    {showTwoFactorAuthModal && <TwoFactorAuthModal
-        onClick={() => setShowTwoFactorAuthModal(false)}
-        onCancel={() => setShowTwoFactorAuthModal(false)}/>}
-  </FlexRow>;
+  const Module = () => {
+    const {profile} = useStore(profileStore);
+    const statusTextMaybe = bypassedOrCompletedText(getAccessModuleStatusByName(profile, module));
+
+    return <FlexRow data-test-id={`module-${module}`}>
+      <FlexRow style={styles.moduleCTA}>
+        {active && (showRefresh ? <Refresh/> : <Next/>)}
+      </FlexRow>
+      <ModuleBox>
+        <ModuleIcon completedOrBypassed={!!statusTextMaybe}/>
+        <FlexColumn>
+          <div style={active ? styles.activeModuleText : styles.inactiveModuleText}>
+            {moduleLabels.get(module)}
+          </div>
+          {statusTextMaybe && <div style={styles.moduleDate}>{statusTextMaybe}</div>}
+        </FlexColumn>
+      </ModuleBox>
+      {showTwoFactorAuthModal && <TwoFactorAuthModal
+          onClick={() => setShowTwoFactorAuthModal(false)}
+          onCancel={() => setShowTwoFactorAuthModal(false)}/>}
+    </FlexRow>;
+  };
 
   const moduleEnabled = !!registrationTask;
   return moduleEnabled ? <Module/> : null;
