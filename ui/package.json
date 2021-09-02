@@ -142,7 +142,8 @@
     "tslint": "^5.9.1",
     "tslint-eslint-rules": "^5.4.0",
     "tslint-microsoft-contrib": "^6.0.0",
-    "wd": "^1.12.1"
+    "wd": "^1.12.1",
+    "webpack": "4.44.2"
   },
   "resolutions": {
     "node-fetch": "^2.6.1",

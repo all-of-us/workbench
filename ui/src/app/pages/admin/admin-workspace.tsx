@@ -375,7 +375,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Audit'>{<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Audit'>
+              {<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}
+            </WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
           <div className='collaborators' style={{marginTop: '1rem'}}>
