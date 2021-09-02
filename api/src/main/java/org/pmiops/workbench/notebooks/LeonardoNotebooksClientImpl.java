@@ -111,7 +111,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()))
             .build();
 
-    return new LeonardoCreateRuntimeRequest()
+    LeonardoCreateRuntimeRequest createRuntimeRequest = new LeonardoCreateRuntimeRequest()
         .labels(runtimeLabels)
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in api/src/main/webapp/static.
@@ -129,8 +129,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .welderRegistry(WelderRegistryEnum.DOCKERHUB)
         .customEnvironmentVariables(customEnvironmentVariables)
         .autopauseThreshold(runtime.getAutopauseThreshold())
-        .autopause(runtime.getAutopauseThreshold() != null)
         .runtimeConfig(buildRuntimeConfig(runtime));
+
+    if (runtime.getAutopauseThreshold() != null) {
+      createRuntimeRequest.autopause(true);
+    }
+
+    return createRuntimeRequest;
   }
 
   private Object buildRuntimeConfig(Runtime runtime) {
