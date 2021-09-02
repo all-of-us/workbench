@@ -1437,7 +1437,7 @@ const RuntimePanel = fp.flow(
               }
             </FlexRow>
             </div>
-           {runtimeExists && runtimeChanged &&
+           {runtimeExists && updateMessaging.warn &&
              <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>{updateMessaging.warn}</div>
              </WarningMessage>
