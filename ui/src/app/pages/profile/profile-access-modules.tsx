@@ -49,30 +49,6 @@ const getCompleteOrBypassContent = ({bypassTime, completionTime}: CompletionTime
   }
 };
 
-const getDUCCText = (profile: Profile) => {
-  const [navigate, ] = useNavigation();
-  const universalText = <a onClick={getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].onClick}>
-        View code of conduct
-    </a>;
-  switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-    case RegistrationStepStatus.COMPLETED:
-      return <React.Fragment>
-                <div>Signed On:</div>
-                <div>
-                    {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
-                </div>
-                {universalText}
-            </React.Fragment>;
-    case RegistrationStepStatus.BYPASSED:
-      return <React.Fragment>
-                {bypassedText(profile.dataUseAgreementBypassTime)}
-                {universalText}
-            </React.Fragment>;
-    case RegistrationStepStatus.UNCOMPLETE:
-      return universalText;
-  }
-};
-
 const getEraCommonsCardText = (profile: Profile) => {
   switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
     case RegistrationStepStatus.COMPLETED:
@@ -112,6 +88,30 @@ const getComplianceTrainingText = (profile: Profile) => {
   }
 };
 
+const getDUCCText = (profile: Profile) => {
+  const [navigate, ] = useNavigation();
+  const universalText = <a onClick={getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].onClick}>
+        View code of conduct
+    </a>;
+  switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
+    case RegistrationStepStatus.COMPLETED:
+      return <React.Fragment>
+              <div>Signed On:</div>
+              <div>
+                  {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
+              </div>
+              {universalText}
+          </React.Fragment>;
+    case RegistrationStepStatus.BYPASSED:
+      return <React.Fragment>
+              {bypassedText(profile.dataUseAgreementBypassTime)}
+              {universalText}
+          </React.Fragment>;
+    case RegistrationStepStatus.UNCOMPLETE:
+      return universalText;
+  }
+};
+
 const focusCompletionProps = lensOnProps(['completionTime', 'bypassTime']);
 
 const getTwoFactorContent = fp.flow(
@@ -124,10 +124,7 @@ const getControlledTierContent = fp.flow(
   getCompleteOrBypassContent
 );
 
-interface Props {
-  profile: Profile;
-}
-export const ProfileAccessModules = (props: Props) => {
+export const ProfileAccessModules = (props: {profile: Profile}) => {
   const {profile} = props;
   const [navigate, ] = useNavigation();
   const {config: {enableComplianceTraining, enableEraCommons}} = useStore(serverConfigStore);
