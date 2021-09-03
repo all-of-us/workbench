@@ -101,16 +101,6 @@ fetch_active_jobs() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
 
-# V1 "/project/" api response does not show jobs that have not been queued or started.
-# We need to check all expected jobs are found api response.
-job_difference_jobs() {
-  printf '%s\n' "Check if all jobs have started."
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
-  return 1
-}
-
 
 #********************
 # RUNNING
@@ -165,10 +155,11 @@ while [[ "${is_running}" == "true" ]]; do
     active_jobs=$__
     printf "\n%s\n%s\n" "Active workflow and jobs:" "${active_jobs}"
 
-    # Is there any job that has not started at all?
+    # V1 "/project/" api response does not show jobs that have not been queued or started.
+    # We need to check expected jobs are found in api response.
     jobs=$(echo $active_jobs | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
-    # Find difference between two arrays.
+    # Find any job that has not started at all.
     job_difference=$(`echo ${jobs[@]} ${JOBS[@]} | tr ' ' '\n' | sort | uniq -u `)
     printf "\n%s\n" "job_difference:" "${job_difference}"
 
