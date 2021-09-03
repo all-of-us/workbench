@@ -171,7 +171,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime));
+            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -197,7 +197,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime));
+            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -296,12 +296,13 @@ public class MailServiceImpl implements MailService {
   }
 
   private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
-      Instant expirationTime) {
+      Instant expirationTime, String username) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
+        .put(EmailSubstitutionField.USERNAME, username)
         .put(EmailSubstitutionField.URL, getURLAsHref())
         .build();
   }
