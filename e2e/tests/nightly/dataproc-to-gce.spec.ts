@@ -47,7 +47,6 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickComputeType(ComputeType.Standard);
     await runtimePanel.pickCpus(8);
     await runtimePanel.pickRamGbs(30);
-    await runtimePanel.pickDiskGbs(60);
 
     // Apply changes and wait for new runtime running
     const notebookPreviewPage = await runtimePanel.applyChanges();

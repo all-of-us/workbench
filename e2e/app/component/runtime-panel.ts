@@ -6,6 +6,7 @@ import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
+import RadioButton from "../element/radiobutton";
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -195,7 +196,10 @@ export default class RuntimePanel extends BaseHelpSidebar {
     logger.info('Deleting runtime');
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { name: 'Delete runtime' }).select();
     await this.clickButton(LinkText.Delete);
+
     await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.

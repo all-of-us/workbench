@@ -323,8 +323,7 @@ export default class NotebookPage extends NotebookFrame {
     await runtimePanel.open();
 
     // Click 'delete environment' then Delete buttons.
-    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
-    await runtimePanel.clickButton(LinkText.Delete);
+    await runtimePanel.deleteRuntime();
 
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
     await notebookPreviewPage.waitForLoad();

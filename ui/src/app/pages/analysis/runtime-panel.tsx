@@ -61,6 +61,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
+import {RadioButton} from "../../components/inputs";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -245,8 +246,13 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
 
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={deleting === true} onChange={() => setDeleting(true)}/>
-          Delete persistent disk</label></h3>
+        <div key='Delete persistent disk' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setDeleting(true)}
+                       checked={deleting === true}/>
+          <label>Delete persistent disk</label>
+        </div>
+      </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk.
       </p>
@@ -293,9 +299,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const standardvmDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label><input type='radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
-                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
-          Keep persistent disk, delete application configuration and compute profile</label>
+        <div key='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton name='ageType'
+                       style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+          <label>Keep persistent disk, delete application configuration and compute profile</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s
@@ -313,10 +323,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label><input type='radio'
-                      checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}
-                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}/>
-          Delete everything, including persistent disk</label>
+        <div key='Delete runtime and pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton name='ageType'
+                       style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}/>
+          <label>Delete everything, including persistent disk</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk.
@@ -329,12 +342,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const dataprocDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label >
-          <input type= 'radio'
-                 checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
-                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
-          Delete application configuration and cloud compute profile
-        </label></h3>
+        <div key='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+          <label>Delete application configuration and cloud compute profile</label>
+        </div>
+      </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         You’re about to delete your cloud analysis environment.
       </p>
@@ -344,11 +358,12 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label >
-          <input type= 'radio'
-                 checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}
-                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
-          Delete unattached persistent disk</label>
+        <div key='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>
+          <label>Delete unattached persistent disk</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your unattached persistent disk, which will also delete all files on the disk.
@@ -1324,7 +1339,7 @@ const RuntimePanel = fp.flow(
             </Fragment>
       ],
       [PanelContent.DeleteRuntime, () => {
-        if (runtimeCtx.enablePD) {
+        if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
           return  <ConfirmDeleteRuntimeWithPD
               onConfirm={async(runtimeStatusReq) => {
                 await setRuntimeStatus(runtimeStatusReq);
