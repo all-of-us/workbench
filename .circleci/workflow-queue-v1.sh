@@ -84,7 +84,7 @@ fetch_older_pipelines() {
 }
 
 fetch_jobs() {
-  printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
+  printf '%s\n' "Fetching created jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
   local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
   local curl_result=$(circle_get "${get_path}")
 
@@ -147,12 +147,11 @@ if [[ -z $pipeline_workflow_ids ]]; then
   printf "%s\n" "No workflow currently running on master branch."
   exit 0
 fi
+# Filter out duplicate workflow id.
+workflow_ids=$(echo $pipeline_workflow_ids | sort --u)
+printf "%s\n%s\n\n" "Currently running workflow_ids are:" "${workflow_ids}"
 
-unique_workflow_id=$(echo $pipeline_workflow_ids | sort --u)
-printf "%s\n%s\n\n" "Currently running workflow_id are:" "${unique_workflow_id}"
 
-
-# Wait as long as "pipelines" variable is not empty until max time has reached.
 # Max wait time until workflows have finished is 45 minutes because e2e tests may take a long time to finish.
 # DISCLAIMER This max time may not be enough.
 max_time=$((45 * 60))
@@ -165,26 +164,28 @@ sleep_time_counter=20
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
 
-  for id in ${unique_workflow_id}; do
+  for id in ${workflow_ids}; do
     is_running=false
 
-    # Find jobs that have been initiated/created in CircleCI (included in api response).
+    # Find jobs that have been created in CircleCI (jobs listed in api response).
     created_jobs=fetch_jobs "${id}"
     printf "\n%s\n%s\n" "Created jobs:" "${created_jobs}"
 
     # Find just the running/queued jobs.
     fetch_running_jobs "${id}"
     running_jobs=$__
-    printf "\n%s\n%s\n" "Active workflow and jobs:" "${running_jobs}"
+    printf "\n%s\n%s\n" "Active workflow:" "${running_jobs}"
 
     # V1 "/project/" api response does not show jobs that have not been queued or started.
-    # We need to check expected jobs are found in api response.
+    # We need to check all expected jobs are found in api response.
     jobs=$(echo ${running_jobs} | jq .job_name)
-    printf "\n%s\n" "jobs:" "${jobs}"
+    printf "\n%s\n" "Jobs that have been created:" "${jobs}"
+
     # Find any job that has not started at all.
     not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs[@]} ${created_jobs[@]} | tr ' ' '\n' | sort | uniq -u`)
-    printf "\n%s\n" "not_created_jobs:" "${not_created_jobs}"
+    printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
+    # Wait while there is a job still is running or there is a job that has not been created.
     if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
