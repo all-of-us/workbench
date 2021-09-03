@@ -7,6 +7,7 @@ import CardBase from './card-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { waitForFn, waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
+import BaseElement from 'app/element/base-element';
 
 const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
@@ -167,19 +168,19 @@ export default class WorkspaceCard extends CardBase {
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
     const [elementHandle] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    await elementHandle.hover();
     await waitForFn(() => {
       return elementHandle && elementHandle.boxModel() && elementHandle.boundingBox();
     });
+    const element = BaseElement.asBaseElement(this.page, elementHandle);
     const name = await getPropValue<string>(elementHandle, 'textContent');
     if (waitForDataPage) {
       const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'networkidle0'] });
-      await elementHandle.click();
+      await element.click();
       await navPromise;
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
     } else {
-      await elementHandle.click();
+      await element.click();
       await waitWhileLoading(this.page);
     }
     logger.info(`Click name "${name}" on Workspace card to open workspace.`);
