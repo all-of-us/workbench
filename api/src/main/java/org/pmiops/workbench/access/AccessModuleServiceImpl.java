@@ -105,9 +105,26 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public List<AccessModuleStatus> getAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
-        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
-        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()))
+        .map(this::mapToEnabledAccessModule)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<AccessModuleStatus> getAccessModuleStatus(
+      DbUser user, AccessModuleName accessModuleName) {
+    DbAccessModule dbAccessModule =
+        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
+    DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
+    return mapToEnabledAccessModule(userAccessModule);
+  }
+
+  private Optional<AccessModuleStatus> mapToEnabledAccessModule(
+      DbUserAccessModule dbUserAccessModule) {
+    return Optional.of(dbUserAccessModule)
+        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()));
   }
 
   @Override

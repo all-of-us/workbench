@@ -286,6 +286,11 @@ public class AccessModuleServiceTest extends SpringTest {
             expectedProfileModuleStatus,
             expectedPublicationModuleStatus,
             expectedRtTrainingModuleStatus);
+
+    assertThat(
+            accessModuleService.getAccessModuleStatus(
+                user, AccessModuleName.DATA_USER_CODE_OF_CONDUCT))
+        .isEqualTo(Optional.of(expectedDuccModuleStatus));
   }
 
   @Test
@@ -324,6 +329,13 @@ public class AccessModuleServiceTest extends SpringTest {
         ImmutableList.of(twoFactorAuthUserAccessModule, rtTrainingAccessModule));
     assertThat(accessModuleService.getAccessModuleStatus(user))
         .containsExactly(expected2FAModuleStatus);
+
+    assertThat(accessModuleService.getAccessModuleStatus(user, AccessModuleName.TWO_FACTOR_AUTH))
+        .isEqualTo(Optional.of(expected2FAModuleStatus));
+    assertThat(
+            accessModuleService.getAccessModuleStatus(
+                user, AccessModuleName.RT_COMPLIANCE_TRAINING))
+        .isEqualTo(Optional.empty());
   }
 
   @Test

@@ -2755,6 +2755,26 @@ paths:
       responses:
         200:
           description: 'Audit ran successfully (possibly with audit findings)'
+  "/v1/cloudTask/synchronizeUserAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: "Audits the provided user's access to GCP resources"
+      operationId: synchronizeUserAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Users to synchronize.
+        schema:
+          "$ref": "#/definitions/SynchronizeUserAccessRequest"
+      responses:
+        200:
+          description: 'User synchronization ran successfully'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -8451,6 +8471,16 @@ definitions:
     properties:
       userIds:
         description: 'List of users to audit'
+        type: array
+        items:
+          type: integer
+          format: int64
+
+  SynchronizeUserAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: 'List of users to synchronize'
         type: array
         items:
           type: integer

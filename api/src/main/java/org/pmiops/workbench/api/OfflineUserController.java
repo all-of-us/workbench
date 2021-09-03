@@ -16,7 +16,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessModule;
@@ -174,18 +173,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> synchronizeUserAccess() {
     if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
-      // TODO(RW-6875): Implement.
-      throw new NotImplementedException();
+      taskQueueService.groupAndPushSynchronizeAccessTasks(userService.getAllUserIds());
+    } else {
+      userService
+          .getAllUsers()
+          .forEach(
+              user -> {
+                // This will update the access tiers for a given user, based on compliance rules
+                // If a user is no longer compliant it will remove them from an access tier
+                userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
+              });
     }
-
-    userService
-        .getAllUsers()
-        .forEach(
-            user -> {
-              // This will update the access tiers for a given user, based on compliance rules
-              // If a user is no longer compliant it will remove them from an access tier
-              userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
-            });
     return ResponseEntity.noContent().build();
   }
 
