@@ -30,8 +30,10 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
+import {DataAccessPanel} from './data-access-panel';
 import {ProfileAccessModules} from './profile-access-modules';
 
 
@@ -442,8 +444,9 @@ export const ProfileComponent = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
-            {/* controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/> */}
-            <ProfileAccessModules profile={profile}/>
+            {environment.enableDataAccessRequirements ?
+                <DataAccessPanel tiers={profile.accessTierShortNames}/> :
+                <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>

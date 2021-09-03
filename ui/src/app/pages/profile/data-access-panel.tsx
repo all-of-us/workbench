@@ -1,11 +1,14 @@
-import {StyledAnchorTag} from 'app/components/buttons';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
+import {Link, StyledAnchorTag} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {CheckCircle, ControlledTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import * as Utils from 'app/utils';
-import {AccessTierDisplayNames} from 'app/utils/access-tiers';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
+import {useNavigation} from 'app/utils/navigation';
 
 const needsAgreementText = 'Contains expanded participant data, including genomics. Before you can access controlled tier data, ' +
   'your institution will need to sign an amended agreement with the All of Us Data and Research Center.';
@@ -69,14 +72,18 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
 export const DataAccessPanel = ({
     tiers = [], hasInstitutionalAgreement = false, userRevoked = false
   }) => {
+  const [navigate, ] = useNavigation();
   const sectionId = Utils.useId();
   return <section aria-labelledby={sectionId}>
-    <div id={sectionId} style={styles.title}>Data access</div>
+    <FlexRow id={sectionId}>
+      <div style={styles.title}>Data access</div>
+      <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
+    </FlexRow>
     <hr style={{...styles.verticalLine}}/>
-    <RegisteredTierSection isInRegisteredTier={fp.some(v => v === 'registered', tiers)}/>
+    <RegisteredTierSection isInRegisteredTier={fp.some(v => v === AccessTierShortNames.Registered, tiers)}/>
     <ControlledTierSection
       hasInstitutionalAgreement={hasInstitutionalAgreement}
-      isInControlledTier={fp.some(v => v === 'controlled', tiers)}
+      isInControlledTier={fp.some(v => v === AccessTierShortNames.Controlled, tiers)}
       userRevoked={userRevoked}/>
   </section>;
 };
