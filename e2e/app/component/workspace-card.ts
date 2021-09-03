@@ -167,6 +167,7 @@ export default class WorkspaceCard extends CardBase {
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
     const [elementHandle] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    await elementHandle.hover();
     await waitForFn(() => {
       return elementHandle && elementHandle.boxModel() && elementHandle.boundingBox();
     });
