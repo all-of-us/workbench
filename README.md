@@ -161,14 +161,14 @@ yarn dev-up
 
 You can view your local UI server at http://localhost:4200/.  
 
-By default, this connects to our test API server. Use `--configuration=$ENV` to
+By default, this connects to our test API server. Prepend `REACT_APP_ENVIRONMENT=$ENV` to
 use an alternate `src/environments/environment.$ENV.ts` file and connect to a
 different API server. To connect to your own API server running at
-`localhost:8081`, pass `--configuration=local`.
+`localhost:8081`, pass `REACT_APP_ENVIRONMENT=local`.
 
 To run react UI tests:
 ```Shell
-yarn test-react
+yarn test
 ```
 
 Other useful yarn commands:
