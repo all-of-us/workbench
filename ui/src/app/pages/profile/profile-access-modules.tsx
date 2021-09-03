@@ -8,7 +8,6 @@ import {getRegistrationTasksMap} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {serverConfigStore, useStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
-import {DataAccessPanel} from './data-access-panel';
 import {ProfileRegistrationStepStatus} from './profile-registration-step-status';
 import {styles} from './profile-styles';
 
@@ -134,7 +133,6 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
   const controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null;
 
   return <React.Fragment>
-        {controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/>}
         <div style={styles.title}>
             Requirements for <AoU/> Workbench access
         </div>
