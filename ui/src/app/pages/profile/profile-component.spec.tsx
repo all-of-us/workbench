@@ -113,23 +113,4 @@ describe('ProfilePageComponent', () => {
 
     expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
   });
-
-  it('should not display controlled tier card when there is no controlled tier', async() => {
-    const wrapper = component();
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
-    expect(profileCardCompleteButtons.length).toBe(4);
-  });
-
-  it('should display a controlled tier card when there is a controlled tier', async() => {
-    const wrapper = component({controlledTierEnabled: true});
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
-    expect(profileCardCompleteButtons.length).toBe(5);
-  });
-
-  it('should display a controlled tier card with a complete button when the user has completed training', async() => {
-    const wrapper = component({controlledTierEnabled: true, controlledTierCompletionTime: 1});
-    const profileCardCompleteButtons = wrapper.find('[data-test-id="completed-button"]');
-    expect(profileCardCompleteButtons.length).toBe(1);
-  });
-
 });

@@ -22,4 +22,10 @@ describe('Profile Access Modules', () => {
         const wrapper = component();
         expect(wrapper.exists()).toBeTruthy();
     });
+
+    it('should display all modules as incomplete by default', async() => {
+        const wrapper = component();
+        const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
+        expect(profileCardCompleteButtons.length).toBe(4);
+    });
 });
