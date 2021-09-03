@@ -19,7 +19,6 @@ import {CriteriaSearch, LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/d
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
-  parseQueryParams,
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
@@ -37,6 +36,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {parseQueryParams} from "../../../components/app-router";
 
 const styles = reactStyles({
   conceptSetHeader: {

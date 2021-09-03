@@ -27,6 +27,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
 import * as querystring from 'querystring';
 import {Prompt, RouteComponentProps, withRouter} from 'react-router';
+import {parseQueryParams} from "../../components/app-router";
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 
@@ -136,8 +137,9 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
 
     initCohort() {
       const {workspace: {id, namespace}} = this.props;
-      const searchString = this.props.location.search.replace(/^\?/, '');
-      const query = querystring.parse(searchString);
+      const query = parseQueryParams(this.props.location.search);
+      // Renaming here instead of destructuring because we destructure a bigger thing
+      // later on and it shadows cohortId
       const cid = query.cohortId;
       const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
       const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));

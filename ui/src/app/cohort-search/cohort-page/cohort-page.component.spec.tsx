@@ -23,19 +23,15 @@ describe('CohortPage', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
-
-    props = {
-      setCohortChanged: () => {},
-      setShowWarningModal: () => {},
-      setUpdatingCohort: () => {},
-      hideSpinner: () => {},
-      showSpinner: () => {}
-    };
   });
 
   const component = () => {
     return mount(<Router history={history}>
-      <CohortPage {...props}/>
+      <CohortPage setCohortChanged={() => {}}
+      setShowWarningModal={() => {}}
+      setUpdatingCohort={() => {}}
+      hideSpinner={() => {}}
+      showSpinner={() => {}}/>
     </Router>);
   }
 

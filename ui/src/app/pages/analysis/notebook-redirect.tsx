@@ -18,7 +18,6 @@ import {jupyterApi, proxyApi} from 'app/services/notebooks-swagger-fetch-clients
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  parseQueryParams,
   reactStyles,
   withCurrentWorkspace,
   withUserProfile
@@ -31,6 +30,7 @@ import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {parseQueryParams} from "../../components/app-router";
 
 export enum Progress {
   Unknown,

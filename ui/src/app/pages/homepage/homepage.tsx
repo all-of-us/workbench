@@ -17,7 +17,7 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {parseQueryParams, reactStyles, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -29,6 +29,7 @@ import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
+import {parseQueryParams} from "../../components/app-router";
 
 export const styles = reactStyles({
   bottomBanner: {

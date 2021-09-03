@@ -12,7 +12,6 @@ import {
 } from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import * as querystring from 'querystring';
 import * as React from 'react';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -345,11 +344,6 @@ export function formatDomainString(domainString: string): string {
 
 export function formatDomain(domain: Domain): string {
   return formatDomainString(domain.toString());
-}
-
-export function parseQueryParams(queryParams: string) {
-  const searchString = queryParams.replace(/^\?/, '');
-  return querystring.parse(searchString);
 }
 
 // Given a value and an array, return a new array with the value appended.

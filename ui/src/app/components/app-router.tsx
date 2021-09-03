@@ -5,10 +5,18 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect} from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter, Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
-import {parseQueryParams} from 'app/utils';
+import {
+  BrowserRouter,
+  Link,
+  Redirect,
+  Route,
+  useLocation,
+  useParams,
+  useRouteMatch
+} from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
+import querystring from "querystring";
 
 export interface Guard {
   allowed: () => boolean;
@@ -19,6 +27,11 @@ export const usePath = () => {
   const {path} = useRouteMatch();
   return path;
 };
+
+export function parseQueryParams(queryParams: string) {
+  const searchString = queryParams.replace(/^\?/, '');
+  return querystring.parse(searchString);
+}
 
 export const useQuery = () => {
   return parseQueryParams(useLocation().search);
