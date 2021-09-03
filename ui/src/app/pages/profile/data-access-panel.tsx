@@ -3,55 +3,45 @@ import * as React from 'react';
 
 import {Link} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
-import {CheckCircle, ControlledTierBadge} from 'app/components/icons';
+import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
-import {useId, withCdrVersions} from 'app/utils';
+import {useId} from 'app/utils';
 import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {isTierPresentInEnvironment} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
-import {CdrVersionTiersResponse} from 'generated/fetch';
 
 interface TierProps {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-  accessTierShortNames: string[];
+  userHasAccess: boolean;
 }
-const RegisteredTierSection = fp.flow(withCdrVersions())((props: TierProps) => {
-  const {cdrVersionTiersResponse, accessTierShortNames} = props;
+const RegisteredTierSection = (props: TierProps) => {
+  const {userHasAccess} = props;
 
-  // does this tier exist in this environment? (should always be true for registered)
-  const tierEnabled = isTierPresentInEnvironment(AccessTierShortNames.Registered, cdrVersionTiersResponse);
-
-  // does the user have access to this tier?
-  const userHasAccess = fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames);
-
-  return tierEnabled ? <div style={{
-    marginBottom: '1rem',
+  return isTierPresentInEnvironment(AccessTierShortNames.Registered) ? <div style={{
+    marginBottom: '0.9rem',
     display: 'grid',
-    gridTemplateColumns: 'fit-content(10rem) 1fr',
-    gridTemplateAreas: `"regPrimary regAvailable"
-                          "regSecondary regSecondary"`
+    columnGap: '0.25rem',
+    width: 459,
+    gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
+    gridTemplateAreas: `"rtBadge rtLabel rtAvailable"
+                          ". rtPrimary rtPrimary"
+                          ". rtSecondary rtSecondary"`
   }}>
-    <div style={{...styles.inputLabel, gridArea: 'regPrimary', marginRight: '0.5rem'}}>{AccessTierDisplayNames.Registered}</div>
+    <RegisteredTierBadge style={{gridArea: 'rtBadge'}}/>
+    <div style={{...styles.inputLabel, gridArea: 'rtLabel'}}>{AccessTierDisplayNames.Registered}</div>
     {userHasAccess
-      ? <CheckCircle style={{gridArea: 'regAvailable'}} color={colors.success} size={23}/>
-      : <div style={{ ...styles.dataAccessText, gridArea: 'regSecondary'}}>
+      ? <CheckCircle style={{gridArea: 'rtAvailable'}} color={colors.success} size={23}/>
+      : <div style={{ ...styles.dataAccessText, gridArea: 'rtPrimary'}}>
           Please complete the data access requirements to gain access to registered tier data.
         </div>
     }
   </div> : null;
-});
+};
 
-const ControlledTierSection = fp.flow(withCdrVersions())((props: TierProps) => {
-  const {cdrVersionTiersResponse, accessTierShortNames} = props;
+const ControlledTierSection = (props: TierProps) => {
+  const {userHasAccess} = props;
 
-  // does this tier exist in this environment?
-  const tierEnabled = isTierPresentInEnvironment(AccessTierShortNames.Controlled, cdrVersionTiersResponse);
-
-  // does the user have access to this tier?
-  const userHasAccess = fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames);
-
-  return tierEnabled ? <div style={{
+  return isTierPresentInEnvironment(AccessTierShortNames.Controlled) ? <div style={{
     marginBottom: '0.9rem',
     display: 'grid',
     columnGap: '0.25rem',
@@ -70,7 +60,7 @@ const ControlledTierSection = fp.flow(withCdrVersions())((props: TierProps) => {
         </div>
     }
   </div> : null;
-});
+};
 
 interface PanelProps {
   accessTierShortNames: string[];
@@ -81,13 +71,13 @@ export const DataAccessPanel = (props: PanelProps) => {
   const [navigate, ] = useNavigation();
 
   const sectionId = useId();
-  return <section aria-labelledby={sectionId}>
+  return <section aria-labelledby={sectionId} style={{marginLeft: '1rem'}}>
     <FlexRow id={sectionId}>
       <div style={styles.title}>Data access</div>
       <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
-    <RegisteredTierSection accessTierShortNames={accessTierShortNames}/>
-    <ControlledTierSection accessTierShortNames={accessTierShortNames}/>
+    <RegisteredTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>
+    <ControlledTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>
   </section>;
 };

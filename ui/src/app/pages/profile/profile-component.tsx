@@ -431,21 +431,23 @@ export const ProfileComponent = fp.flow(
             </div>
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
-            <div style={styles.title}>Free credits balance
+            <div style={{marginLeft: '1rem'}}>
+              <div style={styles.title}>Free credits balance
+              </div>
+              <hr style={{...styles.verticalLine}}/>
+              {profile && <FlexRow style={styles.freeCreditsBox}>
+                  <FlexColumn style={{marginLeft: '0.8rem'}}>
+                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                      <div>Remaining <AoU/> free credits:</div>
+                  </FlexColumn>
+                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                  </FlexColumn>
+              </FlexRow>}
             </div>
-            <hr style={{...styles.verticalLine}}/>
-            {profile && <FlexRow style={styles.freeCreditsBox}>
-                <FlexColumn style={{marginLeft: '0.8rem'}}>
-                    <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                    <div>Remaining <AoU/> free credits:</div>
-                </FlexColumn>
-                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                </FlexColumn>
-            </FlexRow>}
             {environment.enableDataAccessRequirements ?
-                <DataAccessPanel tiers={profile.accessTierShortNames}/> :
+                <DataAccessPanel accessTierShortNames={profile.accessTierShortNames}/> :
                 <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
