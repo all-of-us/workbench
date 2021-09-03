@@ -148,7 +148,7 @@ if [[ -z $pipeline_workflow_ids ]]; then
   exit 0
 fi
 # Filter out duplicate workflow id.
-workflow_ids=$(echo $pipeline_workflow_ids | sort --u)
+workflow_ids=$(echo $pipeline_workflow_ids | tr ' ' '\n' | sort --u)
 printf "%s\n%s\n\n" "Currently running workflow_ids are:" "${workflow_ids}"
 
 
@@ -168,7 +168,7 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
 
     # Find jobs that have been created in CircleCI (jobs listed in api response).
-    # Created jobs include jobs with running, queued, failed, success.
+    # Created jobs are jobs with status running, queued, failed, success.
     created_jobs=fetch_jobs "${id}"
     printf "\n%s\n%s\n" "Jobs that have been created:" "${created_jobs}"
 
