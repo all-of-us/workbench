@@ -21,8 +21,9 @@ class CloudSqlProxyContext < ServiceAccountContext
           })
         end
       else
+        common.status Process.euid
         docker_container_id = common.capture_stdout(%W{docker run -d
-             -u #{ENV["UID"]}
+             -u #{Process.euid}
              -v #{@keyfile_path}:/config
              -p 0.0.0.0:3307:3307
              gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy
