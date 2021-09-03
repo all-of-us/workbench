@@ -160,7 +160,8 @@ while [[ "${is_running}" == "true" ]]; do
     jobs=$(echo $active_jobs | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
     # Find any job that has not started at all.
-    job_difference=(`echo ${jobs[@]} ${JOBS[@]} | tr ' ' '\n' | sort | uniq -u `)
+    job_difference=(echo ${JOBS[@]} ${jobs[@]} ${jobs[@]} | tr ' ' '\n' | sort | uniq -u)
+    # job_difference=(`echo ${jobs[@]} ${JOBS[@]} | tr ' ' '\n' | sort | uniq -u `)
     printf "\n%s\n" "job_difference:" "${job_difference}"
 
     if [[ $active_jobs ]] || [[ $job_difference ]]; then
