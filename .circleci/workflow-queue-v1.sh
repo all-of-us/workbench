@@ -111,7 +111,7 @@ fetch_running_jobs() {
   fi
 
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
-  jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+  jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch, build_url }"
   jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
   jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
 
@@ -168,20 +168,25 @@ while [[ "${is_running}" == "true" ]]; do
     is_running=false
 
     # Find jobs that have been created in CircleCI (jobs listed in api response).
+    # Created jobs include jobs with running, queued, failed, success.
     created_jobs=fetch_jobs "${id}"
-    printf "\n%s\n%s\n" "Created jobs:" "${created_jobs}"
+    printf "\n%s\n%s\n" "Jobs that have been created:" "${created_jobs}"
 
     # Find just the running/queued jobs.
-    fetch_running_jobs "${id}"
-    running_jobs=$__
-    printf "\n%s\n%s\n" "Active workflow:" "${running_jobs}"
+    running_jobs=$(echo ${created_jobs} | jq select((.status | test(\"running|queued\"))))
+    printf "\n%s\n%s\n" "Jobs that are running or queued:" "${running_jobs}"
 
-    # V1 "/project/" api response does not show jobs that have not been queued or started.
-    # We need to check all expected jobs are found in api response.
-    jobs=$(echo ${running_jobs} | jq .job_name)
-    printf "\n%s\n" "Jobs that have been created:" "${jobs}"
+    # Find just the running/queued jobs.
+    # fetch_running_jobs "${id}"
+    # running_jobs=$__
+    # printf "\n%s\n%s\n" "Active workflow:" "${running_jobs}"
 
-    # Find any job that has not started at all.
+    # V1 "/project/" api response does not show jobs that have not been created.
+    # We need to compare created job list against expected job list.
+    # jobs=$(echo ${running_jobs} | jq .job_name)
+    # printf "\n%s\n" "Jobs that have been created:" "${jobs}"
+
+    # Find jobs that have not created in CircleCI.
     not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs[@]} ${created_jobs[@]} | tr ' ' '\n' | sort | uniq -u`)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
