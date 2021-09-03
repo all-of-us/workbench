@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {cohortsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {cdrVersionStore} from 'app/utils/stores';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -11,24 +11,32 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
-import {MemoryRouter} from "react-router";
+import {Router} from "react-router";
+import { createMemoryHistory } from 'history';
 
 describe('CohortPage', () => {
+  let props;
+  let history = createMemoryHistory();
+
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
+
+    props = {
+      setCohortChanged: () => {},
+      setShowWarningModal: () => {},
+      setUpdatingCohort: () => {},
+      hideSpinner: () => {},
+      showSpinner: () => {}
+    };
   });
 
   const component = () => {
-    return mount(<MemoryRouter><CohortPage
-        setCohortChanged={() => {}}
-        setShowWarningModal={() => {}}
-        setUpdatingCohort={() => {}}
-        hideSpinner={() => {}}
-        showSpinner={() => {}}
-    /></MemoryRouter>);
+    return mount(<Router history={history}>
+      <CohortPage {...props}/>
+    </Router>);
   }
 
   it('should render', () => {
@@ -46,14 +54,14 @@ describe('CohortPage', () => {
     expect(wrapper.find('[data-test-id="excludes-search-group"]').length).toBe(0);
 
     // Call cohort with 2 includes groups
-    queryParamsStore.next({cohortId: 1});
+    history.push('?cohortId=1');
     await waitOneTickAndUpdate(wrapper);
     expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 1);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(2);
     expect(wrapper.find('[data-test-id="excludes-search-group"]').length).toBe(0);
 
     // Call cohort with 2 includes groups and one excludes group
-    queryParamsStore.next({cohortId: 2});
+    history.push('?cohortId=2');
     await waitOneTickAndUpdate(wrapper);
     expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 2);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(2);

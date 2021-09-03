@@ -1,4 +1,4 @@
-import {queryParamsStore} from 'app/utils/navigation';
+
 import {
   Cohort,
   CohortAnnotationsResponse,
@@ -139,8 +139,7 @@ export class CohortsApiStub extends CohortsApi {
     });
   }
 
-  getCohort(): Promise<Cohort> {
-    const {cohortId} = queryParamsStore.getValue();
+  getCohort(namespace, id, cohortId): Promise<Cohort> {
     const cohort = this.cohorts.find(c => c.id === cohortId) || this.cohorts[0];
     return new Promise<Cohort>(resolve => resolve(cohort));
   }

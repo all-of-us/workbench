@@ -19,6 +19,7 @@ import {CriteriaSearch, LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/d
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
+  parseQueryParams,
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentConcept,
@@ -29,7 +30,6 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
@@ -283,8 +283,8 @@ export const ConceptSearch = fp.flow(
       }
     } else {
       const {domain} = this.props.match.params;
-      const selectedSurvey = queryParamsStore.getValue().survey;
-      return {domain, selectedSurvey, source: 'concept'};
+      const {survey} = parseQueryParams(this.props.location.search);
+      return {domain, selectedSurvey: survey, source: 'concept'};
     }
   }
 

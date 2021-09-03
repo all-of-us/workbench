@@ -1,12 +1,12 @@
-import {queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
+import {routeConfigDataStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
-import * as querystring from 'querystring';
 import * as React from 'react';
 import {useEffect} from 'react';
 import * as ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Redirect, Route, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import {parseQueryParams} from 'app/utils';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
@@ -20,15 +20,13 @@ export const usePath = () => {
   return path;
 };
 
-const useQuery = () => {
-  const searchString = useLocation().search.replace(/^\?/, '');
-  return querystring.parse(searchString);
+export const useQuery = () => {
+  return parseQueryParams(useLocation().search);
 };
 
 // TODO angular2react: This isn't really the right place to be making the store updates but it's the
 // best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
-  const query = useQuery();
   const params = useParams();
 
   useEffect(() => {
@@ -42,12 +40,6 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
       document.title = buildPageTitleForEnvironment(routeData.title || params[routeData.pathElementForTitle]);
     }
   }, [routeData]);
-
-  useEffect(() => {
-    if (!intermediaryRoute) {
-      queryParamsStore.next(query);
-    }
-  }, [query]);
 
   return <WrappedComponent {...props}/>;
 };

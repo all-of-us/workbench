@@ -17,7 +17,6 @@ import {
   currentCohortStore,
   currentCohortReviewStore,
   currentConceptSetStore,
-  queryParamsStore,
   routeConfigDataStore
 } from 'app/utils/navigation';
 import {
@@ -46,7 +45,6 @@ beforeEach(() => {
   currentCohortStore.next(undefined);
   currentConceptSetStore.next(undefined);
   profileStore.set({profile: undefined, load: () => {}, reload :() => {}, updateCache: () => {}});
-  queryParamsStore.next({});
   routeConfigDataStore.next({});
   routeDataStore.set({});
   serverConfigStore.set({});

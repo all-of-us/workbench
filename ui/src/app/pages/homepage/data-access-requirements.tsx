@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
+import { useQuery } from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -30,7 +31,7 @@ import {
   GetStartedButton,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
-import {queryParamsStore, useNavigation} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
@@ -470,7 +471,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>
-  const {token, code} = queryParamsStore.getValue();
+  const query = useQuery();
+  // Query params can be string or string[], so the compiler will
+  // complain if we try to do destructuring
+  const token = query.token as string;
+  const code = query.code as string;
   useEffect(() => {
     if (token) {
       handleTerraShibbolethCallback(token, spinnerProps);

@@ -14,18 +14,19 @@ import {LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
+  hasNewValidProps,
   reactStyles,
   withCurrentCohortSearchContext,
   withCurrentWorkspace
 } from 'app/utils';
 import {
   currentCohortSearchContextStore,
-  currentCohortStore,
-  queryParamsStore
+  currentCohortStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
-import {Prompt} from 'react-router';
+import * as querystring from 'querystring';
+import {Prompt, RouteComponentProps, withRouter} from 'react-router';
 
 const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 
@@ -50,7 +51,7 @@ function colStyle(percentage: string) {
   } as React.CSSProperties;
 }
 
-interface Props extends WithSpinnerOverlayProps {
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps {
   cohortContext: any;
   workspace: WorkspaceData;
 }
@@ -70,7 +71,7 @@ interface State {
   searchContext: any;
 }
 
-export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext()) (
+export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext(), withRouter) (
   class extends React.Component<Props, State> {
     private subscription;
     resolve: Function;
@@ -96,8 +97,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     componentDidMount() {
       const {workspace: {id}, hideSpinner} = this.props;
       hideSpinner();
-      this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
-      this.subscription.add(searchRequestStore.subscribe(searchRequest => {
+      this.initCohort();
+      this.subscription = searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
         const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
         this.setState({
@@ -112,12 +113,15 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
           searchRequest
         };
         localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(localStorageCohort));
-      }));
+      });
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
       if (prevProps.cohortContext && !this.props.cohortContext) {
         this.setState({unsavedSelections: false});
+      }
+      if (hasNewValidProps(this.props, prevProps, [p => p.location.search])) {
+        this.initCohort();
       }
     }
 
@@ -130,14 +134,17 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
     }
 
-    initCohort(cid: number) {
+    initCohort() {
       const {workspace: {id, namespace}} = this.props;
+      const searchString = this.props.location.search.replace(/^\?/, '');
+      const query = querystring.parse(searchString);
+      const cid = query.cohortId;
       const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
       const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
       /* If a cohort id is given in the route, we initialize state with it */
       if (cid) {
         this.setState({loading: true});
-        cohortsApi().getCohort(namespace, id, cid).then(cohort => {
+        cohortsApi().getCohort(namespace, id, +cid).then(cohort => {
           this.setState({cohort, loading: false});
           currentCohortStore.next(cohort);
           if (existingCohort && existingCohort.workspaceId === id && existingCohort.cohortId === +cid) {

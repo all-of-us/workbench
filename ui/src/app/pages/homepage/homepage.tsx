@@ -17,16 +17,17 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {reactStyles, withUserProfile} from 'app/utils';
+import {parseQueryParams, reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
+import {NavigationProps, useNavigation} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
 
 export const styles = reactStyles({
@@ -139,7 +140,7 @@ const GettingStarted = () => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -163,7 +164,7 @@ interface State {
   userWorkspacesResponse: WorkspaceResponseListResponse;
 }
 
-export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends React.Component<Props, State> {
+export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
 
@@ -309,7 +310,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const {workbenchAccessTasks} = queryParamsStore.getValue();
+      const {workbenchAccessTasks} = parseQueryParams(this.props.location.search);
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
