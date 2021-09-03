@@ -16,7 +16,7 @@ import {
 } from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import querystring from "querystring";
+import * as querystring from "querystring";
 
 export interface Guard {
   allowed: () => boolean;
