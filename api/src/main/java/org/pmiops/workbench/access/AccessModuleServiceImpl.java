@@ -102,13 +102,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
   }
 
-  private Optional<AccessModuleStatus> mapToEnabledAccessModule(
-      DbUserAccessModule dbUserAccessModule) {
-    return Optional.of(dbUserAccessModule)
-        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
-        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()));
-  }
-
   @Override
   public List<AccessModuleStatus> getAccessModuleStatus(DbUser user) {
     return userAccessModuleDao.getAllByUser(user).stream()
@@ -125,6 +118,13 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(user, dbAccessModule);
     return mapToEnabledAccessModule(userAccessModule);
+  }
+
+  private Optional<AccessModuleStatus> mapToEnabledAccessModule(
+      DbUserAccessModule dbUserAccessModule) {
+    return Optional.of(dbUserAccessModule)
+        .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
+        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()));
   }
 
   @Override
