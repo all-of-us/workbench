@@ -96,10 +96,6 @@ describe('Create python kernel notebook', () => {
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
 
-    const codeSnippet = '!jupyter kernelspec list';
-    const codeSnippetOutput = await notebook.runCodeCell(7, { code: codeSnippet });
-    expect(codeSnippetOutput).toEqual(expect.stringContaining('python3'));
-
     // Save, exit notebook then come back from Analysis page.
     await notebook.save();
     await notebook.goAnalysisPage();
