@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
