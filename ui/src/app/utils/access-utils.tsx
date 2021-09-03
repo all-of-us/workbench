@@ -9,7 +9,14 @@ import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
+import {
+  AccessModule,
+  AccessModuleStatus,
+  CdrVersionTiersResponse,
+  ErrorCode,
+  Profile
+} from 'generated/fetch';
+import {getCdrVersionTier} from './cdr-versions';
 import {getLiveDUCCVersion} from './code-of-conduct';
 
 const {useState, useEffect} = React;
@@ -274,3 +281,6 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
       location.replace('/');
     }}>Get Started</Button>;
 
+export const isTierPresentInEnvironment = (accessTierShortName: string, cdrTiers: CdrVersionTiersResponse): boolean => {
+  return !!getCdrVersionTier(accessTierShortName, cdrTiers);
+};

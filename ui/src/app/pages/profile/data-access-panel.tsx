@@ -1,20 +1,31 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Link, StyledAnchorTag} from 'app/components/buttons';
+import {Link} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {CheckCircle, ControlledTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
-import * as Utils from 'app/utils';
+import {useId, withCdrVersions} from 'app/utils';
 import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
+import {isTierPresentInEnvironment} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
+import {CdrVersionTiersResponse} from 'generated/fetch';
 
-const needsAgreementText = 'Contains expanded participant data, including genomics. Before you can access controlled tier data, ' +
-  'your institution will need to sign an amended agreement with the All of Us Data and Research Center.';
+interface TierProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
+  accessTierShortNames: string[];
+}
+const RegisteredTierSection = fp.flow(withCdrVersions())((props: TierProps) => {
+  const {cdrVersionTiersResponse, accessTierShortNames} = props;
 
-const RegisteredTierSection = ({isInRegisteredTier = false}) => {
-  return <div style={{
+  // does this tier exist in this environment? (should always be true for registered)
+  const tierEnabled = isTierPresentInEnvironment(AccessTierShortNames.Registered, cdrVersionTiersResponse);
+
+  // does the user have access to this tier?
+  const userHasAccess = fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames);
+
+  return tierEnabled ? <div style={{
     marginBottom: '1rem',
     display: 'grid',
     gridTemplateColumns: 'fit-content(10rem) 1fr',
@@ -22,17 +33,25 @@ const RegisteredTierSection = ({isInRegisteredTier = false}) => {
                           "regSecondary regSecondary"`
   }}>
     <div style={{...styles.inputLabel, gridArea: 'regPrimary', marginRight: '0.5rem'}}>{AccessTierDisplayNames.Registered}</div>
-    {isInRegisteredTier
+    {userHasAccess
       ? <CheckCircle style={{gridArea: 'regAvailable'}} color={colors.success} size={23}/>
       : <div style={{ ...styles.dataAccessText, gridArea: 'regSecondary'}}>
-          Please complete data access requirements below to gain access to registered tier data.
+          Please complete the data access requirements to gain access to registered tier data.
         </div>
     }
-  </div>;
-};
+  </div> : null;
+});
 
-const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControlledTier = false, userRevoked = false}) => {
-  return <div style={{
+const ControlledTierSection = fp.flow(withCdrVersions())((props: TierProps) => {
+  const {cdrVersionTiersResponse, accessTierShortNames} = props;
+
+  // does this tier exist in this environment?
+  const tierEnabled = isTierPresentInEnvironment(AccessTierShortNames.Controlled, cdrVersionTiersResponse);
+
+  // does the user have access to this tier?
+  const userHasAccess = fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames);
+
+  return tierEnabled ? <div style={{
     marginBottom: '0.9rem',
     display: 'grid',
     columnGap: '0.25rem',
@@ -44,46 +63,31 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
   }}>
     <ControlledTierBadge style={{gridArea: 'ctBadge'}}/>
     <div style={{...styles.inputLabel, gridArea: 'ctLabel'}}>{AccessTierDisplayNames.Controlled}</div>
-    {Utils.cond<React.ReactElement>(
-      // TODO: Remove update href and remove _blank target from Anchor tags
-      [hasInstitutionalAgreement && userRevoked, () => <React.Fragment>
-          <div style={{ ...styles.dataAccessText, gridArea: 'ctPrimary'}}>Access to controlled tier data is revoked.</div>
-          <div style={{ ...styles.dataAccessText, gridArea: 'ctSecondary'}}>
-            To gain access <StyledAnchorTag style={{textDecoration: 'underline'}}
-              href='about:blank' target='_blank'>contact admin.</StyledAnchorTag>
-          </div>
-        </React.Fragment>],
-      [hasInstitutionalAgreement && isInControlledTier,
-        () => <CheckCircle style={{gridArea: 'ctAvailable'}}color={colors.success} size={23}/>],
-      [hasInstitutionalAgreement, () => <React.Fragment>
-          <div style={{ ...styles.dataAccessText, gridArea: 'ctPrimary'}}>You must complete the Controlled Tier Data Training.</div>
-          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}}
-            href='about:blank' target='_blank'>Get Started</StyledAnchorTag>
-        </React.Fragment>],
-      () => <React.Fragment>
-          <div style={{gridArea: 'ctPrimary', color: colors.primary}}>{needsAgreementText}</div>
-          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}}
-            href='about:blank' target='_blank'>Learn More</StyledAnchorTag>
-        </React.Fragment>
-    )}
-  </div>;
-};
+    {userHasAccess
+        ? <CheckCircle style={{gridArea: 'ctAvailable'}} color={colors.success} size={23}/>
+        : <div style={{...styles.dataAccessText, gridArea: 'ctPrimary'}}>
+          Please complete the data access requirements to gain access to registered tier data.
+        </div>
+    }
+  </div> : null;
+});
 
-export const DataAccessPanel = ({
-    tiers = [], hasInstitutionalAgreement = false, userRevoked = false
-  }) => {
+interface PanelProps {
+  accessTierShortNames: string[];
+}
+export const DataAccessPanel = (props: PanelProps) => {
+  const {accessTierShortNames} = props;
+
   const [navigate, ] = useNavigation();
-  const sectionId = Utils.useId();
+
+  const sectionId = useId();
   return <section aria-labelledby={sectionId}>
     <FlexRow id={sectionId}>
       <div style={styles.title}>Data access</div>
       <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
-    <RegisteredTierSection isInRegisteredTier={fp.some(v => v === AccessTierShortNames.Registered, tiers)}/>
-    <ControlledTierSection
-      hasInstitutionalAgreement={hasInstitutionalAgreement}
-      isInControlledTier={fp.some(v => v === AccessTierShortNames.Controlled, tiers)}
-      userRevoked={userRevoked}/>
+    <RegisteredTierSection accessTierShortNames={accessTierShortNames}/>
+    <ControlledTierSection accessTierShortNames={accessTierShortNames}/>
   </section>;
 };
