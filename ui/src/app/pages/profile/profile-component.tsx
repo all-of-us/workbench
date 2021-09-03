@@ -432,8 +432,7 @@ export const ProfileComponent = fp.flow(
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
             <div style={{marginLeft: '1rem'}}>
-              <div style={styles.title}>Free credits balance
-              </div>
+              <div style={styles.title}>Free credits balance</div>
               <hr style={{...styles.verticalLine}}/>
               {profile && <FlexRow style={styles.freeCreditsBox}>
                   <FlexColumn style={{marginLeft: '0.8rem'}}>

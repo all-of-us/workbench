@@ -56,7 +56,7 @@ const ControlledTierSection = (props: TierProps) => {
     {userHasAccess
         ? <CheckCircle style={{gridArea: 'ctAvailable'}} color={colors.success} size={23}/>
         : <div style={{...styles.dataAccessText, gridArea: 'ctPrimary'}}>
-          Please complete the data access requirements to gain access to registered tier data.
+          Please complete the data access requirements to gain access to controlled tier data.
         </div>
     }
   </div> : null;
