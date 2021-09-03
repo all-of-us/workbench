@@ -37,16 +37,16 @@ const bypassedText = (bypassTime: number): JSX.Element => {
 
 const getCompleteOrBypassContent = ({bypassTime, completionTime}: CompletionTime): JSX.Element => {
   switch (getRegistrationStatus(completionTime, bypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+    case RegistrationStepStatus.COMPLETED:
+      return <React.Fragment>
                 <div>Completed on:</div>
                 <div>{displayDateWithoutHours(completionTime)}</div>
             </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return bypassedText(bypassTime);
-      default:
-        return;
-    }
+    case RegistrationStepStatus.BYPASSED:
+      return bypassedText(bypassTime);
+    default:
+      return;
+  }
 };
 
 const getDUCCText = (profile: Profile) => {
@@ -55,28 +55,28 @@ const getDUCCText = (profile: Profile) => {
         View code of conduct
     </a>;
   switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+    case RegistrationStepStatus.COMPLETED:
+      return <React.Fragment>
                 <div>Signed On:</div>
                 <div>
                     {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
                 </div>
                 {universalText}
             </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return <React.Fragment>
+    case RegistrationStepStatus.BYPASSED:
+      return <React.Fragment>
                 {bypassedText(profile.dataUseAgreementBypassTime)}
                 {universalText}
             </React.Fragment>;
-      case RegistrationStepStatus.UNCOMPLETE:
-        return universalText;
-    }
+    case RegistrationStepStatus.UNCOMPLETE:
+      return universalText;
+  }
 };
 
 const getEraCommonsCardText = (profile: Profile) => {
   switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <div>
+    case RegistrationStepStatus.COMPLETED:
+      return <div>
                 {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
                     <div> Username:</div>
                     <div> {profile.eraCommonsLinkedNihUsername} </div>
@@ -91,25 +91,25 @@ const getEraCommonsCardText = (profile: Profile) => {
                     </div>
                 </React.Fragment>}
             </div>;
-      case RegistrationStepStatus.BYPASSED:
-        return bypassedText(profile.twoFactorAuthBypassTime);
-      default:
-        return;
-    }
+    case RegistrationStepStatus.BYPASSED:
+      return bypassedText(profile.twoFactorAuthBypassTime);
+    default:
+      return;
+  }
 };
 
 const getComplianceTrainingText = (profile: Profile) => {
   switch (getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+    case RegistrationStepStatus.COMPLETED:
+      return <React.Fragment>
                 <div>Training Completed</div>
                 <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
             </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return bypassedText(profile.complianceTrainingBypassTime);
-      default:
-        return;
-    }
+    case RegistrationStepStatus.BYPASSED:
+      return bypassedText(profile.complianceTrainingBypassTime);
+    default:
+      return;
+  }
 };
 
 const focusCompletionProps = lensOnProps(['completionTime', 'bypassTime']);
