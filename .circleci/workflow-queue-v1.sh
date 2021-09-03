@@ -15,8 +15,8 @@ WORKFLOW_NAME="build-test-deploy"
 PROJECT_SLUG="all-of-us/workbench"
 
 # List of jobs in build-test-deploy workflow on master branch.
-JOBS=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test" "api-integration-test" "api-local-test")
-JOBS+=("api-unit-test" "wait_until_previous_workflow_done" "ui-unit-test" "puppeteer-env-setup" "api-bigquery-test")
+JOB_LIST=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test" "api-integration-test" "api-local-test")
+JOB_LIST+=("api-unit-test" "wait_until_previous_workflow_done" "ui-unit-test" "puppeteer-env-setup" "api-bigquery-test")
 
 
 #********************
@@ -83,20 +83,37 @@ fetch_older_pipelines() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | [{workflow_id: .workflows.workflow_id}] | unique | .[] | .workflow_id")
 }
 
-fetch_active_jobs() {
+fetch_jobs() {
   printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
   local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
   local curl_result=$(circle_get "${get_path}")
+
   if [[ ! "${curl_result}" ]]; then
     printf "Curl request failed. workflow_id \"${1}\"."
     exit 1
   fi
 
-  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
-  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
+  jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+  jq_filter=".branch==\"${BRANCH}\" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
+
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
+}
+
+fetch_running_jobs() {
+  printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
+  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
+  local curl_result=$(circle_get "${get_path}")
+
+  if [[ ! "${curl_result}" ]]; then
+    printf "Curl request failed. workflow_id \"${1}\"."
+    exit 1
+  fi
 
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
   jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
+  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
 
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
@@ -150,21 +167,25 @@ while [[ "${is_running}" == "true" ]]; do
 
   for id in ${unique_workflow_id}; do
     is_running=false
-    # Find all running/queued jobs in this workflow_id.
-    fetch_active_jobs "${id}"
-    active_jobs=$__
-    printf "\n%s\n%s\n" "Active workflow and jobs:" "${active_jobs}"
+
+    # Find jobs that have been initiated/created in CircleCI (included in api response).
+    created_jobs=fetch_jobs "${id}"
+    printf "\n%s\n%s\n" "Created jobs:" "${created_jobs}"
+
+    # Find just the running/queued jobs.
+    fetch_running_jobs "${id}"
+    running_jobs=$__
+    printf "\n%s\n%s\n" "Active workflow and jobs:" "${running_jobs}"
 
     # V1 "/project/" api response does not show jobs that have not been queued or started.
     # We need to check expected jobs are found in api response.
-    jobs=$(echo $active_jobs | jq .job_name)
+    jobs=$(echo ${running_jobs} | jq .job_name)
     printf "\n%s\n" "jobs:" "${jobs}"
     # Find any job that has not started at all.
-    job_difference=(`echo ${JOBS[@]} ${jobs[@]} ${jobs[@]} | tr ' ' '\n' | sort | uniq -u`)
-    # job_difference=(`echo ${jobs[@]} ${JOBS[@]} | tr ' ' '\n' | sort | uniq -u `)
-    printf "\n%s\n" "job_difference:" "${job_difference}"
+    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs[@]} ${created_jobs[@]} | tr ' ' '\n' | sort | uniq -u`)
+    printf "\n%s\n" "not_created_jobs:" "${not_created_jobs}"
 
-    if [[ $active_jobs ]] || [[ $job_difference ]]; then
+    if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
