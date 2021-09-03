@@ -120,8 +120,6 @@ const Icon = ({ shape, size, style, color, ...props }) => {
   return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
 };
 
-const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
-
 export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
   return <div style={{...style, ...styles.circleBackground}}>
     <WrappedIcon/>
