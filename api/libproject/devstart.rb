@@ -3056,3 +3056,49 @@ Common.register_command({
     :description => "Export the workspace_operations table.",
     :fn => ->(*args) {export_workspace_operations(EXPORT_WORKSPACE_OPERATIONS_CMD, *args)}
 })
+
+
+def time_billing(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+  op.opts.dry_run = true
+  op.opts.count = 1
+
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this a dry run?  Default is true."
+  )
+  op.add_option(
+    "--count [count]",
+    ->(opts, v) { opts.count = v},
+    "How many projects to create.  Default is 1."
+  )
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  flags = ([
+    ["--count", op.opts.count],
+    ["--dry-run", op.opts.dry_run]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle timeBilling
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "time-billing",
+  :description => "TODO",
+  :fn => ->(*args) { time_billing("time-billing", *args) }
+})
