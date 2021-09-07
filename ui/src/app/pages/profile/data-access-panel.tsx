@@ -62,10 +62,10 @@ const ControlledTierSection = (props: TierProps) => {
   </div> : null;
 };
 
-interface PanelProps {
+export interface DataAccessPanelProps {
   accessTierShortNames: string[];
 }
-export const DataAccessPanel = (props: PanelProps) => {
+export const DataAccessPanel = (props: DataAccessPanelProps) => {
   const {accessTierShortNames} = props;
 
   const [navigate, ] = useNavigation();
