@@ -254,7 +254,7 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   );
 };
 
-const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps) => {
+const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
   const handler = withErrorModal({
     title: 'Error saving NIH Authentication status.',
     message: 'An error occurred trying to save your NIH Authentication status. Please try again.',
@@ -265,12 +265,13 @@ const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerO
     spinnerProps.showSpinner();
     await profileApi().updateNihToken({jwt: token});
     spinnerProps.hideSpinner();
+    reloadProfile();
   });
 
   return handler();
 };
 
-const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) => {
+const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
   const handler = withErrorModal({
     title: 'Error saving RAS Login.Gov linkage status.',
     message: 'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
@@ -281,16 +282,17 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) 
     spinnerProps.showSpinner();
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
+    reloadProfile();
   });
 
   return handler();
 };
 
-const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reload: Function) => {
+const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
   spinnerProps.showSpinner();
   await bypassAll(allModules, true);
   spinnerProps.hideSpinner();
-  reload();
+  reloadProfile();
 };
 
 const syncExternalModules = async() => {
@@ -478,12 +480,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {token, code} = queryParamsStore.getValue();
   useEffect(() => {
     if (token) {
-      handleTerraShibbolethCallback(token, spinnerProps);
+      handleTerraShibbolethCallback(token, spinnerProps, reload);
     }
   }, [token] );
   useEffect(() => {
     if (code) {
-      handleRasCallback(code, spinnerProps);
+      handleRasCallback(code, spinnerProps, reload);
     }
   }, [code]);
 
