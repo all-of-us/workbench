@@ -459,6 +459,22 @@ public class GenomicExtractionServiceTest {
   }
 
   @Test
+  public void submitExtractionJob_many() throws ApiException {
+    final List<String> largePersonIdList =
+        LongStream.range(1, 3_001).boxed().map(id -> id.toString()).collect(Collectors.toList());
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(largePersonIdList);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> argument =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+
+    verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
+    String actualScatter =
+        argument.getValue().getInputs().get(EXTRACT_WORKFLOW_NAME + ".scatter_count");
+    assertThat(actualScatter).isEqualTo("1500");
+  }
+
+  @Test
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
 
