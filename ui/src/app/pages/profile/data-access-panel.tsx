@@ -7,56 +7,35 @@ import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/compone
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
-import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
-import {isTierPresentInEnvironment} from 'app/utils/access-utils';
+import {AccessTierDisplayNames, AccessTierShortNames, isTierPresentInEnvironment} from 'app/utils/access-tiers';
 import {useNavigation} from 'app/utils/navigation';
 
 interface TierProps {
+  shortName: string;
+  displayName: string;
   userHasAccess: boolean;
 }
-const RegisteredTierSection = (props: TierProps) => {
-  const {userHasAccess} = props;
+const Tier = (props: TierProps) => {
+  const {shortName, displayName, userHasAccess} = props;
 
-  return isTierPresentInEnvironment(AccessTierShortNames.Registered) ? <div style={{
+  return isTierPresentInEnvironment(shortName) ? <div style={{
     marginBottom: '0.9rem',
     display: 'grid',
     columnGap: '0.25rem',
     width: 459,
     gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
-    gridTemplateAreas: `"rtBadge rtLabel rtAvailable"
-                          ". rtPrimary rtPrimary"
+    gridTemplateAreas: `"badge label available"
+                          ". primary primary"
                           ". rtSecondary rtSecondary"`
   }}>
-    <RegisteredTierBadge style={{gridArea: 'rtBadge'}}/>
-    <div style={{...styles.inputLabel, gridArea: 'rtLabel'}}>{AccessTierDisplayNames.Registered}</div>
+    {shortName === AccessTierShortNames.Registered
+        ? <RegisteredTierBadge style={{gridArea: 'badge'}}/>
+            : <ControlledTierBadge style={{gridArea: 'badge'}}/>}
+    <div style={{...styles.inputLabel, gridArea: 'label'}}>{displayName}</div>
     {userHasAccess
-      ? <CheckCircle style={{gridArea: 'rtAvailable'}} color={colors.success} size={23}/>
-      : <div style={{ ...styles.dataAccessText, gridArea: 'rtPrimary'}}>
-          Please complete the data access requirements to gain access to registered tier data.
-        </div>
-    }
-  </div> : null;
-};
-
-const ControlledTierSection = (props: TierProps) => {
-  const {userHasAccess} = props;
-
-  return isTierPresentInEnvironment(AccessTierShortNames.Controlled) ? <div style={{
-    marginBottom: '0.9rem',
-    display: 'grid',
-    columnGap: '0.25rem',
-    width: 459,
-    gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
-    gridTemplateAreas: `"ctBadge ctLabel ctAvailable"
-                          ". ctPrimary ctPrimary"
-                          ". ctSecondary ctSecondary"`
-  }}>
-    <ControlledTierBadge style={{gridArea: 'ctBadge'}}/>
-    <div style={{...styles.inputLabel, gridArea: 'ctLabel'}}>{AccessTierDisplayNames.Controlled}</div>
-    {userHasAccess
-        ? <CheckCircle style={{gridArea: 'ctAvailable'}} color={colors.success} size={23}/>
-        : <div style={{...styles.dataAccessText, gridArea: 'ctPrimary'}}>
-          Please complete the data access requirements to gain access to controlled tier data.
+        ? <CheckCircle style={{gridArea: 'available'}} color={colors.success} size={23}/>
+        : <div style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
+          Please complete the data access requirements to gain access to {shortName} tier data.
         </div>
     }
   </div> : null;
@@ -77,7 +56,15 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
       <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
-    <RegisteredTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>
-    <ControlledTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>
+    {/*<RegisteredTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>*/}
+    {/*<ControlledTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>*/}
+    <Tier
+        shortName={AccessTierShortNames.Registered}
+        displayName={AccessTierDisplayNames.Registered}
+        userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>
+    <Tier
+        shortName={AccessTierShortNames.Controlled}
+        displayName={AccessTierDisplayNames.Controlled}
+        userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>
   </section>;
 };

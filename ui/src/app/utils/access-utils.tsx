@@ -278,7 +278,3 @@ export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
       // have been dependent on the user's registration status, e.g. CDR config information.
       location.replace('/');
     }}>Get Started</Button>;
-
-export const isTierPresentInEnvironment = (accessTierShortName: string): boolean => {
-  return !!useStore(cdrVersionStore).tiers.find(tier => tier.accessTierShortName === accessTierShortName);
-};
