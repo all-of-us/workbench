@@ -7,7 +7,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
 import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
-import {authStore, cdrVersionStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {
   AccessModule,

@@ -23,6 +23,7 @@
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
 import {environment} from 'environments/environment';
 import {
+  AccessTierApi,
   AuthDomainApi,
   BaseAPI,  // internal
   CdrVersionsApi,
@@ -86,6 +87,7 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
+export const accessTierApi = bindCtor(AccessTierApi);
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);

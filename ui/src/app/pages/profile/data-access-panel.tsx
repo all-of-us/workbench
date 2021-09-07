@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Link} from 'app/components/buttons';
@@ -7,18 +6,20 @@ import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/compone
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
-import {AccessTierDisplayNames, AccessTierShortNames, isTierPresentInEnvironment} from 'app/utils/access-tiers';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {useNavigation} from 'app/utils/navigation';
+
 
 interface TierProps {
   shortName: string;
   displayName: string;
+  presentInEnvironment: boolean;
   userHasAccess: boolean;
 }
 const Tier = (props: TierProps) => {
-  const {shortName, displayName, userHasAccess} = props;
+  const {shortName, displayName, presentInEnvironment, userHasAccess} = props;
 
-  return isTierPresentInEnvironment(shortName) ? <div style={{
+  return presentInEnvironment ? <div style={{
     marginBottom: '0.9rem',
     display: 'grid',
     columnGap: '0.25rem',
@@ -33,8 +34,8 @@ const Tier = (props: TierProps) => {
             : <ControlledTierBadge style={{gridArea: 'badge'}}/>}
     <div style={{...styles.inputLabel, gridArea: 'label'}}>{displayName}</div>
     {userHasAccess
-        ? <CheckCircle style={{gridArea: 'available'}} color={colors.success} size={23}/>
-        : <div style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
+        ? <CheckCircle data-test-id={`${shortName}-tier-access-granted`} style={{gridArea: 'available'}} color={colors.success} size={23}/>
+        : <div data-test-id={`${shortName}-tier-access-denied`} style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
           Please complete the data access requirements to gain access to {shortName} tier data.
         </div>
     }
@@ -42,10 +43,11 @@ const Tier = (props: TierProps) => {
 };
 
 export interface DataAccessPanelProps {
-  accessTierShortNames: string[];
+  accessTiersInEnvironment: string[];
+  userAccessTiers: string[];
 }
 export const DataAccessPanel = (props: DataAccessPanelProps) => {
-  const {accessTierShortNames} = props;
+  const {accessTiersInEnvironment, userAccessTiers} = props;
 
   const [navigate, ] = useNavigation();
 
@@ -61,10 +63,12 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
     <Tier
         shortName={AccessTierShortNames.Registered}
         displayName={AccessTierDisplayNames.Registered}
-        userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>
+        presentInEnvironment={accessTiersInEnvironment.includes(AccessTierShortNames.Registered)}
+        userHasAccess={userAccessTiers.includes(AccessTierShortNames.Registered)}/>
     <Tier
         shortName={AccessTierShortNames.Controlled}
         displayName={AccessTierDisplayNames.Controlled}
-        userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>
+        presentInEnvironment={accessTiersInEnvironment.includes(AccessTierShortNames.Controlled)}
+        userHasAccess={userAccessTiers.includes(AccessTierShortNames.Controlled)}/>
   </section>;
 };
