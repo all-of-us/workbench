@@ -311,9 +311,9 @@ const syncExternalModules = async() => {
 const Refresh = (props: {showSpinner: Function}) => <Button
     type='primary'
     style={styles.refreshButton}
-    onClick={() => {
+    onClick={async() => {
       props.showSpinner();
-      syncExternalModules();
+      await syncExternalModules();
       location.reload();  // will also hide spinner
     }} >
   <Repeat style={styles.refreshIcon}/> Refresh
@@ -517,7 +517,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
-            onClick={() => selfBypass(spinnerProps, reload)}>Bypass all</Button>
+            onClick={async() => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
       </FlexRow>}
       <FadeBox style={styles.fadeBox}>
         <div style={styles.pleaseComplete}>
