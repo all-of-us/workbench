@@ -254,49 +254,68 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   );
 };
 
-const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerOverlayProps) => {
+const handleTerraShibbolethCallback = (token: string, spinner: WithSpinnerOverlayProps) => {
   const handler = withErrorModal({
     title: 'Error saving NIH Authentication status.',
     message: 'An error occurred trying to save your NIH Authentication status. Please try again.',
     onDismiss: () => {
-      spinnerProps.hideSpinner();
+      spinner.hideSpinner();
     }
   })(async() => {
-    spinnerProps.showSpinner();
+    spinner.showSpinner();
     await profileApi().updateNihToken({jwt: token});
-    spinnerProps.hideSpinner();
+    spinner.hideSpinner();
   });
 
   return handler();
 };
 
-const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps) => {
+const handleRasCallback = (code: string, spinner: WithSpinnerOverlayProps) => {
   const handler = withErrorModal({
     title: 'Error saving RAS Login.Gov linkage status.',
     message: 'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
     onDismiss: () => {
-      spinnerProps.hideSpinner();
+      spinner.hideSpinner();
     }
   })(async() => {
-    spinnerProps.showSpinner();
+    spinner.showSpinner();
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
-    spinnerProps.hideSpinner();
+    spinner.hideSpinner();
   });
 
   return handler();
 };
 
-const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reload: Function) => {
-  spinnerProps.showSpinner();
+const selfBypass = async(spinner: WithSpinnerOverlayProps, reload: Function) => {
+  spinner.showSpinner();
   await bypassAll(allModules, true);
-  spinnerProps.hideSpinner();
+  spinner.hideSpinner();
   reload();
 };
 
-const Refresh = () => <Button
+const syncExternalModules = async() => {
+  const aborter = new AbortController();
+  try {
+    await Promise.all([
+      profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
+      profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
+      profileApi().syncEraCommonsStatus({signal: aborter.signal}),
+    ]);
+  } catch (e) {
+    if (!isAbortError(e)) { throw e; }
+  } finally {
+    aborter.abort();
+  }
+};
+
+const Refresh = (props: {showSpinner: Function}) => <Button
     type='primary'
     style={styles.refreshButton}
-    onClick={() => location.reload()} >
+    onClick={() => {
+      props.showSpinner();
+      syncExternalModules();
+      location.reload();  // will also hide spinner
+    }} >
   <Repeat style={styles.refreshIcon}/> Refresh
 </Button>;
 
@@ -325,9 +344,10 @@ interface ModuleProps {
 
   // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)
+  spinner: WithSpinnerOverlayProps;
 }
 // Renders a module when it's enabled via feature flags.  Returns null if not.
-const MaybeModule = ({moduleName, active}: ModuleProps): JSX.Element => {
+const MaybeModule = ({moduleName, active, spinner}: ModuleProps): JSX.Element => {
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
 
@@ -361,7 +381,7 @@ const MaybeModule = ({moduleName, active}: ModuleProps): JSX.Element => {
 
     return <FlexRow data-test-id={`module-${moduleName}`}>
       <FlexRow style={styles.moduleCTA}>
-        {active && (showRefresh ? <Refresh/> : <Next/>)}
+        {active && (showRefresh ? <Refresh showSpinner={spinner.showSpinner}/> : <Next/>)}
       </FlexRow>
       <ModuleBox>
         <ModuleIcon moduleName={moduleName} completedOrBypassed={!!statusTextMaybe}/>
@@ -395,11 +415,11 @@ const Completed = () => <FlexRow data-test-id='dar-completed' style={styles.comp
   <GetStartedButton style={{marginLeft: 'auto'}}/>
 </FlexRow>;
 
-const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule}) => {
-  const {modules, activeModule} = props;
+const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessModule, spinner: WithSpinnerOverlayProps}) => {
+  const {modules, activeModule, spinner} = props;
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName =>
-        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule}/>
+        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule} spinner={spinner}/>
     )}
   </FlexColumn>;
 };
@@ -412,60 +432,45 @@ const DataDetail = (props: {icon: string, text: string}) => {
   </FlexRow>;
 };
 
-const RegisteredTierCard = (props: {activeModule: AccessModule}) => <FlexRow style={styles.card}>
-  <FlexColumn>
-    <div style={styles.cardStep}>Step 1</div>
-    <div style={styles.cardHeader}>Complete Registration</div>
-    <FlexRow>
-      <RegisteredTierBadge/>
-      <div style={styles.rtData}>Registered Tier data</div>
-    </FlexRow>
-    <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
-    <DataDetail icon='individual' text='Individual (not aggregated) data'/>
-    <DataDetail icon='identifying' text='Identifying information removed'/>
-    <DataDetail icon='electronic' text='Electronic health records'/>
-    <DataDetail icon='survey' text='Survey responses'/>
-    <DataDetail icon='physical' text='Physical measurements'/>
-    <DataDetail icon='wearable' text='Wearable devices'/>
-  </FlexColumn>
-  <ModulesForCard modules={rtModules} activeModule={props.activeModule}/>
-</FlexRow>;
+const RegisteredTierCard = (props: {activeModule: AccessModule, spinner: WithSpinnerOverlayProps}) => {
+  const {activeModule, spinner} = props;
+  return <FlexRow style={styles.card}>
+    <FlexColumn>
+      <div style={styles.cardStep}>Step 1</div>
+      <div style={styles.cardHeader}>Complete Registration</div>
+      <FlexRow>
+        <RegisteredTierBadge/>
+        <div style={styles.rtData}>Registered Tier data</div>
+      </FlexRow>
+      <div style={styles.rtDataDetails}>Once registered, you’ll have access to:</div>
+      <DataDetail icon='individual' text='Individual (not aggregated) data'/>
+      <DataDetail icon='identifying' text='Identifying information removed'/>
+      <DataDetail icon='electronic' text='Electronic health records'/>
+      <DataDetail icon='survey' text='Survey responses'/>
+      <DataDetail icon='physical' text='Physical measurements'/>
+      <DataDetail icon='wearable' text='Wearable devices'/>
+    </FlexColumn>
+    <ModulesForCard modules={rtModules} activeModule={activeModule} spinner={spinner}/>
+  </FlexRow>;
+};
 
-const DuccCard = (props: {activeModule: AccessModule}) => <FlexRow style={{...styles.card, height: '125px'}}>
-  <FlexColumn>
-    {/* This will be Step 3 when CT becomes the new Step 2 */}
-    <div style={styles.cardStep}>Step 2</div>
-    <div style={styles.cardHeader}>Sign the code of conduct</div>
-  </FlexColumn>
-  <ModulesForCard modules={[duccModule]} activeModule={props.activeModule}/>
-</FlexRow>;
+const DuccCard = (props: {activeModule: AccessModule, spinner: WithSpinnerOverlayProps}) => {
+  const {activeModule, spinner} = props;
+  return <FlexRow style={{...styles.card, height: '125px'}}>
+    <FlexColumn>
+      {/* This will be Step 3 when CT becomes the new Step 2 */}
+      <div style={styles.cardStep}>Step 2</div>
+      <div style={styles.cardHeader}>Sign the code of conduct</div>
+    </FlexColumn>
+    <ModulesForCard modules={[duccModule]} activeModule={activeModule} spinner={spinner}/>
+  </FlexRow>;
+};
 
-export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerProps: WithSpinnerOverlayProps) => {
+export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinner: WithSpinnerOverlayProps) => {
   const {profile, reload} = useStore(profileStore);
 
-  const syncExternalModulesAndReloadProfile = async(aborter: AbortController) => {
-    spinnerProps.showSpinner();
-
-    try {
-      await Promise.all([
-        profileApi().syncTwoFactorAuthStatus({signal: aborter.signal}),
-        profileApi().syncComplianceTrainingStatus({signal: aborter.signal}),
-        profileApi().syncEraCommonsStatus({signal: aborter.signal}),
-      ]);
-    } catch (e) {
-      if (!isAbortError(e)) { throw e; }
-    }
-
-    spinnerProps.hideSpinner();
-    reload();
-  };
-
   useEffect(() => {
-    const aborter = new AbortController();
-    syncExternalModulesAndReloadProfile(aborter);
-
-    // cleanup on unmount
-    return aborter.abort;
+    spinner.hideSpinner();
   }, []);
 
   // handle the route /nih-callback?token=<token>
@@ -473,12 +478,12 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {token, code} = queryParamsStore.getValue();
   useEffect(() => {
     if (token) {
-      handleTerraShibbolethCallback(token, spinnerProps);
+      handleTerraShibbolethCallback(token, spinner);
     }
   }, [token] );
   useEffect(() => {
     if (code) {
-      handleRasCallback(code, spinnerProps);
+      handleRasCallback(code, spinner);
     }
   }, [code]);
 
@@ -512,15 +517,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
-            onClick={() => selfBypass(spinnerProps, reload)}>Bypass all</Button>
+            onClick={() => selfBypass(spinner, reload)}>Bypass all</Button>
       </FlexRow>}
       <FadeBox style={styles.fadeBox}>
         <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
         </div>
-        <RegisteredTierCard activeModule={activeModule}/>
+        <RegisteredTierCard activeModule={activeModule} spinner={spinner}/>
         {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard activeModule={activeModule}/>
+        <DuccCard activeModule={activeModule} spinner={spinner}/>
       </FadeBox>
     </FlexColumn>;
 });
