@@ -243,6 +243,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
                shape='exclamation-triangle' size='20'/>
       <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
     </div>
+
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
         <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
@@ -511,7 +512,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   return <div>
     <h3 style={{...styles.sectionHeader, ...styles.bold}} >Persistent Disk (GB)</h3>
     <div> Persistent disks store analysis data.
-      <a href='https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
+      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
     <InputNumber id={`persistent-disk`}
