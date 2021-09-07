@@ -6,7 +6,7 @@ import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
-import RadioButton from "../element/radiobutton";
+import RadioButton from 'app/element/radiobutton';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';

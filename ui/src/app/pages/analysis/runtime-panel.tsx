@@ -246,7 +246,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
 
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div key='Delete persistent disk' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setDeleting(true)}
                        checked={deleting === true}/>
