@@ -44,6 +44,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {diskStore, runtimeStore, serverConfigStore, useStore, withStore} from 'app/utils/stores';
 
+import {RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {supportUrls} from 'app/utils/zendesk';
@@ -61,7 +62,6 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {RadioButton} from "../../components/inputs";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -299,7 +299,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const standardvmDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div key='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
@@ -323,7 +323,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div key='Delete runtime and pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='Delete runtime and pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
@@ -342,7 +342,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const dataprocDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div key='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
@@ -358,7 +358,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div key='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>

@@ -335,6 +335,21 @@ export default class NotebookPage extends NotebookFrame {
     await runtimePanel.close();
   }
 
+  /**
+   * Delete unattached persistent disk
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    // Open runtime panel
+    const runtimePanel = new RuntimePanel(this.page);
+    await runtimePanel.open();
+
+    // Click 'delete persistent disk' then Delete buttons.
+    await runtimePanel.deleteUnattachedPd();
+
+    const notebookPreviewPage = new NotebookPreviewPage(this.page);
+    await notebookPreviewPage.waitForLoad();
+  }
+
   private async findRunButton(timeout?: number): Promise<ElementHandle> {
     const frame = await this.getIFrame();
     return frame.waitForSelector(CssSelector.runCellButton, { visible: true, timeout });
