@@ -197,7 +197,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
     // Select "Delete gce runtime and pd" radiobutton.
-    await RadioButton.findByName(this.page, { dataTestId: 'Delete runtime' }).select();
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
     await this.clickButton(LinkText.Delete);
     await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
@@ -246,10 +246,10 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.open();
     await this.clickButton(LinkText.DeletePd);
     // Select "Delete gce runtime and pd" radiobutton.
-    await RadioButton.findByName(this.page, { dataTestId: 'Delete unattached pd' }).select();
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-unattached-pd' }).select();
     await this.clickButton(LinkText.Delete);
     await this.waitUntilClose();
-    logger.info('Runtime is deleted');
+    logger.info('Unattached persistent disk is deleted');
   }
 
   async applyChanges(): Promise<NotebookPreviewPage> {

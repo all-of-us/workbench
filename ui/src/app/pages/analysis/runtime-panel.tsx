@@ -246,7 +246,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
 
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div data-test-id='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setDeleting(true)}
                        checked={deleting === true}/>
@@ -299,7 +299,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const standardvmDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div data-test-id='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
@@ -323,7 +323,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div data-test-id='Delete runtime and pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='delete-runtime-and-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton name='ageType'
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
@@ -342,7 +342,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const dataprocDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div data-test-id='Delete runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
@@ -358,7 +358,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <div data-test-id='Delete unattached pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+        <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
           <RadioButton style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>
@@ -770,7 +770,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
             <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
-          </Clickable>
+          </Clickable>Delete Environment
         </FlexRow>
       </TooltipTrigger>
     }

@@ -72,12 +72,12 @@ describe('Updating runtime compute type', () => {
 
     // Delete environment
     await notebook.deleteRuntime();
+    await notebook.deleteUnattachedPd();
 
     // Verify GCE custom settings are still shown
     await runtimePanel.open();
     expect(await runtimePanel.getCpus()).toBe('8');
     expect(await runtimePanel.getRamGbs()).toBe('30');
-    expect(await runtimePanel.getDiskGbs()).toBe(60);
 
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();

@@ -23,7 +23,7 @@
     "test-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false yarn _test --maxWorkers=1",
     "test:ci": "yarn _test --ci --maxWorkers=3 --forceExit",
     "test-nightly": "cross-env WORKBENCH_ENV=test TEST_MODE=nightly-integration yarn _test --maxWorkers=3",
-    "test-nightly:debug": "cross-env PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false WORKBENCH_ENV=test TEST_MODE=nightly-integration yarn _test --detectOpenHandles",
+    "test-nightly:debug": "cross-env PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false WORKBENCH_ENV=local TEST_MODE=nightly-integration yarn _test --detectOpenHandles",
     "test-nightly-local-devup": "cross-env WORKBENCH_ENV=local TEST_MODE=nightly-integration yarn jest --maxWorkers=1",
     "test-nightly-local-devup:debug": "cross-env WORKBENCH_ENV=local TEST_MODE=nightly-integration PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false DEBUG=true yarn jest --maxWorkers=1",
     "test-nightly-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false TEST_MODE=nightly-integration yarn _test --maxWorkers=1",
