@@ -102,7 +102,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": false,
-    "enableFireCloudV2Billing" : true,
+    "enableFireCloudV2Billing" : false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
     "enableUnifiedUserAccessCron": false,
