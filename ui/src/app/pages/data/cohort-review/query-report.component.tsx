@@ -248,8 +248,8 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
     }
 
     groupChartData(data: any) {
-      const groups = ['gender', 'ageRange', 'race'];
-      const init = {gender: {}, ageRange: {}, race: {}};
+      const groups = ['name', 'ageRange', 'race'];
+      const init = {name: {}, ageRange: {}, race: {}};
       const groupedData = data.reduce((acc, i) => {
         groups.forEach(group => {
           const key = i[group];
@@ -272,6 +272,17 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
           return 'Male';
         default:
           return name;
+      }
+    }
+
+    getStatisticsHeader(group: string) {
+      switch (group) {
+        case 'ageRange':
+          return 'Age';
+        case 'name':
+          return 'Gender';
+        case 'race':
+          return 'Race';
       }
     }
 
@@ -357,7 +368,7 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
                   <div style={styles.container}>
                     <div style={{...styles.container, ...styles.groupHeader}}>
                       <div style={{...columns.col7, ...styles.groupText}}>
-                        {group === 'ageRange' ? 'Age' : group}
+                        {this.getStatisticsHeader(group)}
                       </div>
                       {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
                         Total
