@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
-import {LinkText, ResourceCard} from 'app/text-labels';
+import { LinkText, ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/component/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
@@ -12,7 +12,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
-import RadioButton from "../element/radiobutton";
+import RadioButton from 'app/element/radiobutton';
 
 // CSS selectors
 const CssSelector = {
