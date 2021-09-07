@@ -1467,7 +1467,7 @@ const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {runtimeCtx.unattachedPdExists ?
+        {runtimeCtx.unattachedPdExists && !runtimeExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(
