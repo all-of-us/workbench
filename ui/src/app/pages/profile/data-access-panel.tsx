@@ -26,8 +26,7 @@ const Tier = (props: TierProps) => {
     width: 459,
     gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
     gridTemplateAreas: `"badge label available"
-                          ". primary primary"
-                          ". rtSecondary rtSecondary"`
+                          ". primary primary"`
   }}>
     {shortName === AccessTierShortNames.Registered
         ? <RegisteredTierBadge style={{gridArea: 'badge'}}/>
@@ -36,7 +35,7 @@ const Tier = (props: TierProps) => {
     {userHasAccess
         ? <CheckCircle data-test-id={`${shortName}-tier-access-granted`} style={{gridArea: 'available'}} color={colors.success} size={23}/>
         : <div data-test-id={`${shortName}-tier-access-denied`} style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
-          Please complete the data access requirements to gain access to {shortName} tier data.
+          Please complete the data access requirements to gain access.
         </div>
     }
   </div> : null;

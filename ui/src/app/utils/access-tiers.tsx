@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import {switchCase} from "./index";
+import {switchCase} from './index';
 
 export enum AccessTierShortNames {
     Registered = 'registered',
