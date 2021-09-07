@@ -169,11 +169,11 @@ while [[ "${is_running}" == "true" ]]; do
 
     # Find jobs that have been created in CircleCI (jobs listed in api response).
     # Created jobs are jobs with status running, queued, failed, success.
-    created_jobs=(fetch_jobs "${id}")
+    created_jobs=$(fetch_jobs "${id}")
     printf "\n%s\n%s\n" "Jobs that have been created:" "${created_jobs}"
 
     # Find just the running/queued jobs.
-    running_jobs=(echo ${created_jobs} | jq select((.status | test(\"running|queued\"))))
+    running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
     printf "\n%s\n%s\n" "Jobs that are running or queued:" "${running_jobs}"
 
     # Find just the running/queued jobs.
