@@ -1,4 +1,4 @@
-import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
+import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
