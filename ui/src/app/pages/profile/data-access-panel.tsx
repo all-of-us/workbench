@@ -6,18 +6,18 @@ import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/compone
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
-import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {useNavigation} from 'app/utils/navigation';
 
 
 interface TierProps {
   shortName: string;
-  displayName: string;
   presentInEnvironment: boolean;
   userHasAccess: boolean;
 }
 const Tier = (props: TierProps) => {
-  const {shortName, displayName, presentInEnvironment, userHasAccess} = props;
+  const {shortName, presentInEnvironment, userHasAccess} = props;
+  const displayName = displayNameForTier(shortName);
 
   return presentInEnvironment ? <div style={{
     marginBottom: '0.9rem',
@@ -51,6 +51,11 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
 
   const [navigate, ] = useNavigation();
 
+  const orderedTiers = [
+    AccessTierShortNames.Registered,
+    AccessTierShortNames.Controlled
+  ];
+
   const sectionId = useId();
   return <section aria-labelledby={sectionId} style={{marginLeft: '1rem'}}>
     <FlexRow id={sectionId}>
@@ -58,17 +63,11 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
       <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
-    {/*<RegisteredTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Registered, accessTierShortNames)}/>*/}
-    {/*<ControlledTierSection userHasAccess={fp.some(v => v === AccessTierShortNames.Controlled, accessTierShortNames)}/>*/}
-    <Tier
-        shortName={AccessTierShortNames.Registered}
-        displayName={AccessTierDisplayNames.Registered}
-        presentInEnvironment={accessTiersInEnvironment.includes(AccessTierShortNames.Registered)}
-        userHasAccess={userAccessTiers.includes(AccessTierShortNames.Registered)}/>
-    <Tier
-        shortName={AccessTierShortNames.Controlled}
-        displayName={AccessTierDisplayNames.Controlled}
-        presentInEnvironment={accessTiersInEnvironment.includes(AccessTierShortNames.Controlled)}
-        userHasAccess={userAccessTiers.includes(AccessTierShortNames.Controlled)}/>
+    {orderedTiers.map(tier =>
+        <Tier
+            key={tier}
+            shortName={tier}
+            presentInEnvironment={accessTiersInEnvironment.includes(tier)}
+            userHasAccess={userAccessTiers.includes(tier)}/>)}
   </section>;
 };
