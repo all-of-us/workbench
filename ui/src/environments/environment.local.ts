@@ -1,5 +1,4 @@
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {Environment, ZendeskEnv} from 'environments/environment-type';
+import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
 // This file is used for a local UI server pointed at a local API server
@@ -25,5 +24,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDataAccessRequirements: true,
-  accessTiersVisibleToUsers: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
 };

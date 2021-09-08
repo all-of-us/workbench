@@ -1,5 +1,4 @@
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {Environment, ZendeskEnv} from 'environments/environment-type';
+import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Staging',
@@ -23,5 +22,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDataAccessRequirements: false,
-  accessTiersVisibleToUsers: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled],
+  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
 };

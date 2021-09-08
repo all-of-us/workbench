@@ -6,6 +6,13 @@ export enum ZendeskEnv {
   Sandbox = 'sandbox'
 }
 
+// A copy of utils/access-tiers.tsx AccessTierShortNames, so there's no circular dependency.
+// TODO: remove this after accessTiersVisibleToUsers is removed
+export enum EnvAccessTierShortNames {
+  Registered = 'registered',
+  Controlled = 'controlled',
+}
+
 export interface EnvironmentBase {
   // Permanent environment variables.
   //
