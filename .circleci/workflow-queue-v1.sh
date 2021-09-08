@@ -125,7 +125,7 @@ compare_arrays() {
   arg2=$2[@]
   array2=("${!arg2}")
 
-  if [[ "${array1[@]}" == "${array2[@]}" ]] ; then
+  if [[ ${array1[*]} == ${array2[*]} ]] ; then
       return
   fi;
   false
@@ -204,7 +204,7 @@ while [[ "${is_running}" == "true" ]]; do
     created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
     printf "\n%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
-    printf "\n%s\n%s\n" "JOB_LIST:" "${JOB_LIST[@]}"
+
     compare_arrays JOB_LIST created_job_names
     not_created_jobs=$__
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
