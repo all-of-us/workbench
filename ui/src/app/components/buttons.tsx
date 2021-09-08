@@ -8,7 +8,7 @@ import {reactStyles} from 'app/utils/index';
 import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as Interactive from 'react-interactive';
+import Interactive from 'react-interactive';
 
 
 export const styles = reactStyles({

@@ -16,7 +16,7 @@ import {
   AdminTableUser,
   Profile,
 } from 'generated/fetch';
-import * as moment from 'moment';
+import moment from 'moment'
 
 const styles = reactStyles({
   colStyle: {

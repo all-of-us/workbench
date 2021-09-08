@@ -6,22 +6,20 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
-import {navigateSpy} from 'testing/navigation-mock';
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
-  useParams: () => ({
-    ns: workspaceDataStub.namespace,
-    wsid: workspaceDataStub.id,
-  }),
-}));
+import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceNavBar', () => {
 
   let props: {};
 
   const component = () => {
-    return mount(<WorkspaceNavBar {...props}/>, {attachTo: document.getElementById('root')});
+    return mount(<MemoryRouter initialEntries={[`/${workspaceDataStub.namespace}/${workspaceDataStub.id}`]}>
+      <Route path="/:ns/:wsid">
+        <WorkspaceNavBar {...props}/>
+      </Route>
+    </MemoryRouter>,
+    {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {
@@ -50,7 +48,7 @@ describe('WorkspaceNavBar', () => {
     const wrapper = component();
 
     wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
-    expect(navigateSpy).toHaveBeenCalledWith(
+    expect(mockNavigate).toHaveBeenCalledWith(
       ['workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 

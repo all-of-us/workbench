@@ -6,6 +6,8 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {redirectToTwoFactorSetup} from 'app/utils/access-utils';
 
+import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
+
 const styles = reactStyles({
   twoFactorAuthModalCancelButton: {
     marginRight: '1rem',
@@ -42,7 +44,7 @@ export const TwoFactorAuthModal = (props: Props) => {
                 need to login with your <span style={{fontWeight: 600}}>researchallofus.org</span> account and turn
                 on 2-Step Verification. Once you complete this step, you will see the screen shown below. At that
                 point, you can return to this page and click 'Refresh’.</div>
-            <img style={styles.twoFactorAuthModalImage} src='assets/images/2sv-image.png' />
+            <img style={styles.twoFactorAuthModalImage} src={twoFactorAuthModalImage} />
         </ModalBody>
         <ModalFooter>
             <Button

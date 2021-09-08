@@ -8,6 +8,16 @@ import {AoU} from 'app/components/text-wrappers';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 
+import homepage from 'assets/images/quick-tour/homepage.png';
+import workspaces from 'assets/images/quick-tour/workspaces.png';
+import cohorts from 'assets/images/quick-tour/cohorts.png';
+import conceptSets from 'assets/images/quick-tour/concept-sets.png';
+import datasets from 'assets/images/quick-tour/datasets.png';
+import notebooks from 'assets/images/quick-tour/notebooks.png';
+import checkImg from 'assets/images/check.svg';
+import expandIcon from 'assets/icons/expand.svg';
+import shrinkIcon from 'assets/icons/shrink.svg';
+
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';
 const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
@@ -24,7 +34,7 @@ export const panels = [
       allows you to select data types for analysis. The cohorts and concept sets
       you make can then be accessed from “Notebooks,” the analysis environment. <br/><br/>
       For illustration, let's consider research on 'Type 2 diabetes' for this quick tour.</div>,
-    image: '/assets/images/quick-tour/homepage.png'
+    image: homepage
   },
   {
     title: 'Workspaces',
@@ -46,7 +56,7 @@ export const panels = [
       2 Diabetes, for research purpose you could enter: “I will use this Workspace to
       investigate the impact of Geography on use of different medications to treat
       Type 2Diabetes.”</div>,
-    image: '/assets/images/quick-tour/workspaces.png'
+    image: workspaces
   },
   {
     title: 'Cohorts',
@@ -61,7 +71,7 @@ export const panels = [
       you can go through and manually review the records for each participant and decide if
       you want to include or exclude them from your Cohort and make specific
       annotations/notes to each record.</div>,
-    image: '/assets/images/quick-tour/cohorts.png'
+    image: cohorts
   },
   {
     title: 'Concepts',
@@ -76,7 +86,7 @@ export const panels = [
       (concepts) from your “diabetes cases” Cohort, you can search for the 3 concepts
       from the “Labs and Measurements” domain and call it “biometrics” Concept Set. You can then
       use Notebooks to extract that information from your cohort.</div>,
-    image: '/assets/images/quick-tour/concept-sets.png'
+    image: conceptSets
   },
   {
     title: 'Datasets',
@@ -88,7 +98,7 @@ export const panels = [
       For example, select your cohort called “diabetes cases” and your concept set called
       “biometrics” and then the values from the concept set you want to see. Before exporting
       the dataset, you can preview the resulting data frame that will be sent to the notebook.</div>,
-    image: '/assets/images/quick-tour/datasets.png'
+    image: datasets
   },
   {
     title: 'Notebooks',
@@ -102,7 +112,7 @@ export const panels = [
       to import your “diabetes cases” Cohort and then select your “biometrics” Concept Set, to
       get biometrics data for the participants in your Cohort. You can then analyze the data to
       study correlation between hypertension and diabetes.</div>,
-    image: '/assets/images/quick-tour/notebooks.png'
+    image: notebooks
   }];
 
 const styles = reactStyles({
@@ -274,10 +284,6 @@ export interface QuickTourReactProps {
 }
 
 export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
-  checkImg = '/assets/images/check.svg';
-  expandIcon = '/assets/icons/expand.svg';
-  shrinkIcon = '/assets/icons/shrink.svg';
-
   constructor(props: QuickTourReactProps) {
     super(props);
     this.state = {selected: 0, fullImage: false};
@@ -326,7 +332,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                data-test-id='shrink-icon'
                style={{position: 'absolute', right: '5%', bottom: '5%',
                  cursor: 'pointer', width: '28px'}}>
-            <img src={this.shrinkIcon}/>
+            <img src={shrinkIcon}/>
           </div>
         </div>
       </div> :
@@ -345,7 +351,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                        data-test-id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
                     {(i < selected) && <div style={styles.check}>
-                        <img src={this.checkImg}/>
+                        <img src={checkImg}/>
                     </div>}
                     {(i === selected) && <div style={styles.current}/>}
                   </div>
@@ -388,7 +394,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                   <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
                        data-test-id='expand-icon'
                        onClick={() => this.toggleImage()}>
-                      <img src={this.expandIcon}/>
+                      <img src={expandIcon}/>
                   </div>
               </div>}
             </div>

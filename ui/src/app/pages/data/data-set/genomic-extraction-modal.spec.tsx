@@ -7,8 +7,8 @@ import {DataSetApi, TerraJobStatus} from "generated/fetch";
 import {mount} from "enzyme";
 import {workspaceDataStub} from "testing/stubs/workspaces";
 import {genomicExtractionStore} from "app/utils/stores";
-import moment = require("moment");
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import moment from "moment";
 
 describe('GenomicExtractionModal', () => {
   let dataset;

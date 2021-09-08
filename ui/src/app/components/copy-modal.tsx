@@ -33,7 +33,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');
 
-export interface Props {
+export interface CopyModalProps {
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
@@ -45,7 +45,7 @@ export interface Props {
   saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
-interface HocProps extends Props, NavigationProps {
+interface HocProps extends CopyModalProps, NavigationProps {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
@@ -54,7 +54,7 @@ interface WorkspaceOptions {
   options: Array<{label: string, value: Workspace}>;
 }
 
-interface State {
+interface CopyModalState {
   workspaceOptions: Array<WorkspaceOptions>;
   destination: Workspace;
   newName: string;
@@ -130,7 +130,7 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
 </div>;
 
 const CopyModal = fp.flow(withNavigation, withCdrVersions())
-(class extends React.Component<HocProps, State> {
+(class extends React.Component<HocProps, CopyModalState> {
   constructor(props: HocProps) {
     super(props);
     this.state = {
@@ -390,7 +390,5 @@ const CopyModal = fp.flow(withNavigation, withCdrVersions())
 });
 
 export {
-  CopyModal,
-  Props as CopyModalProps,
-  State as CopyModalState,
+  CopyModal
 };
