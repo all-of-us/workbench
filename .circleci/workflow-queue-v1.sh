@@ -119,8 +119,8 @@ fetch_running_jobs() {
 }
 
 compare_arrays() {
-  A=${1[@]};
-  B=${2[@]};
+  A=${1}[@];
+  B=${2}[@];
   if [ "$A" == "$B" ] ; then
       return
   fi;
