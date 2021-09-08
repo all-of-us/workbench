@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
@@ -21,7 +21,6 @@ import {
   ParticipantCohortStatus,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import Timeout = NodeJS.Timeout;
 
 const styles = {
   header: {
@@ -94,7 +93,7 @@ interface AnnotationState {
   saving: boolean;
   error: boolean;
   success: boolean;
-  timeout: Timeout;
+  timeout: NodeJS.Timeout;
 }
 
 const AnnotationItem = fp.flow(
@@ -166,7 +165,7 @@ const AnnotationItem = fp.flow(
       console.error(error);
       this.setState({saving: false, error: true});
     } finally {
-      const timeout: Timeout = global.setTimeout(() => this.setState({error: false, success: false}), 5000);
+      const timeout: NodeJS.Timeout = global.setTimeout(() => this.setState({error: false, success: false}), 5000);
       this.setState({savingValue: undefined, timeout});
     }
   }

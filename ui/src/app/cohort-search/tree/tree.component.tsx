@@ -21,6 +21,8 @@ import {
   Domain
 } from 'generated/fetch';
 
+import arrow from 'assets/icons/arrow-left-regular.svg';
+
 const styles = reactStyles({
   error: {
     background: colors.warning,
@@ -363,7 +365,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
           <button style={styles.returnLink} onClick={() => back()}>
-            <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon} alt='Go back' />
+            <img src={arrow} style={styles.arrowIcon} alt='Go back' />
             RETURN TO LIST</button>
         </div>}
         {error && <div style={styles.error}>

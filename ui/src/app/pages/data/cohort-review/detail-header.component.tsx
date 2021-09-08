@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import * as moment from 'moment';
+import moment from 'moment'
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
