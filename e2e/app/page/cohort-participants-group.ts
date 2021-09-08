@@ -189,9 +189,7 @@ export default class CohortParticipantsGroup {
   async deleteCriteria(criteriaName: string): Promise<void> {
     await this.clickCriteriaSnowmanIcon(criteriaName);
     await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
-    const xpath = `${this.rootXpath}//*[normalize-space()="UNDO" and @role="button"]`;
-    const undoButton = new Button(this.page, xpath);
-    await undoButton.waitForXPath(); // Find the UNDO button but do not click.
+    await waitWhileLoading(this.page);
   }
 
   /**
@@ -505,8 +503,15 @@ export default class CohortParticipantsGroup {
 
   async searchCriteria(searchWord: string): Promise<Table> {
     const searchFilterTextbox = Textbox.findByName(this.page, { dataTestId: 'list-search-input' });
+    const waitForResponsePromise = this.page.waitForResponse(
+      (response) => {
+        return response.url().includes('/criteria/') && response.request().method() === 'GET';
+      },
+      { timeout: 60000 }
+    );
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
+    await waitForResponsePromise;
     await waitWhileLoading(this.page);
     return new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
   }
