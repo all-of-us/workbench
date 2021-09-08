@@ -7,8 +7,6 @@ import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
 import * as React from 'react';
 
-import cookies from 'assets/images/cookies.png';
-
 const styles = reactStyles({
   cookiePolicyMessage: {
     position: 'fixed',
@@ -64,7 +62,7 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
   render() {
     return this.cookieBannerVisible() && <div style={styles.cookiePolicyMessage}>
             <FlexRow style={{alignItems: 'center'}}>
-                <img src={cookies}/>
+                <img src='assets/images/cookies.png'/>
                 <div style={{paddingLeft: '1rem', color: colors.primary}}>
                     We use cookies to help provide you with the best experience we can. By continuing to use our site, you consent
                     to our <StyledAnchorTag href='/cookie-policy' target='_blank'>Cookie Policy</StyledAnchorTag>.

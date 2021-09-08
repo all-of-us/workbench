@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
-import validate from 'validate.js';
+import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';

@@ -1,13 +1,19 @@
 # All of Us Workbench UI
 
-The UI is a React app in TypeScript. 
-A tutorial in React can be found [here](https://reactjs.org/tutorial/tutorial.html).
-
-This app uses [CRA](https://create-react-app.dev/docs/getting-started/) / [react-app-rewired](https://www.npmjs.com/package/react-app-rewired) as a server and [react-router-dom](https://reactrouter.com/web/guides/quick-start) for routing.
+The UI is an Angular 2.0 app in TypeScript. For an intro to Angular 2, see
+[the tutorial](https://angular.io/docs/ts/latest/tutorial/).
 
 All the interesting code is under `src/app/`.
 
-A UI style guide can be found [here](https://github.com/all-of-us/workbench/wiki/UI-Style-Guide).
+`*.component.tsx` are UI components, controlling various widgets; they have
+associated `*.component.html` and/or `*.component.css` for their templated DOM
+and style. Angular scopes CSS to its associated component.
+
+`*.service.ts` provide data. Typically, these wrap REST APIs.
+
+`*.module.ts` set up glue to stick the app together: routing of URLs to
+different views, installation of the various components/services for use in
+other places.
 
 To debug Project Clarity, the widget framework, go here for examples:
 https://github.com/vmware/clarity/tree/master/src/app

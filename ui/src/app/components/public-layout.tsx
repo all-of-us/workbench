@@ -2,8 +2,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
 
-import headerImage from 'assets/images/all-of-us-logo.svg'
-
 const styles = reactStyles({
   content: {
     color: colors.primary,
@@ -11,7 +9,7 @@ const styles = reactStyles({
   }
 });
 
-export const PUBLIC_HEADER_IMAGE = headerImage;
+export const PUBLIC_HEADER_IMAGE = '/assets/images/all-of-us-logo.svg';
 
 /**
  * A layout component suitable for display public-facing content, such as static

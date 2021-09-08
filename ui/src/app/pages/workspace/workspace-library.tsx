@@ -16,10 +16,6 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
 import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
 
-import phenotypeLibrary from 'assets/icons/phenotype-library.svg';
-import tutorialWorkspaces from 'assets/icons/tutorial-workspaces.svg';
-import demonstration from 'assets/icons/demonstration.svg';
-
 const styles = reactStyles({
   navPanel: {
     display: 'flex', flexDirection: 'column',  padding: '1rem',
@@ -57,7 +53,7 @@ const libraryTabs = {
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
     // TODO: Find the right icon when we intend to release this.
-    icon: phenotypeLibrary,
+    icon: '/assets/icons/phenotype-library.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id && workspace.workspace.namespace === featuredWorkspace.namespace));
@@ -68,7 +64,7 @@ const libraryTabs = {
     description: <div>These workspaces demonstrate how computable electronic phenotypes can be implemented within
       the <AoU/> dataset using examples of previously published phenotype algorithms. You can open the
       workspaces to view them or “duplicate” the workspaces to edit and execute the algorithms.</div>,
-    icon: phenotypeLibrary,
+    icon: '/assets/icons/phenotype-library.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id &&
@@ -81,7 +77,7 @@ const libraryTabs = {
     description: <div>These workspaces provide instructions for key Researcher Workbench components and representations
       of the <AoU/> dataset. You can open the workspaces to view them or “duplicate” the workspaces to edit
       and execute them.</div>,
-    icon: tutorialWorkspaces,
+    icon: '/assets/icons/tutorial-workspaces.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id &&
@@ -96,7 +92,7 @@ const libraryTabs = {
       Projects. They are aimed at demonstrating the quality, utility, and diversity of <AoU/> data by replicating
       previously published studies. You can open the workspaces to view them or “duplicate” the workspaces to edit
       and execute them.</div>,
-    icon: demonstration,
+    icon: '/assets/icons/demonstration.svg',
     filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
         workspace.workspace.id === featuredWorkspace.id &&

@@ -19,7 +19,7 @@ import {genomicExtractionStore, updateGenomicExtractionStore, withStore} from 'a
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';

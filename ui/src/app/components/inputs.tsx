@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';

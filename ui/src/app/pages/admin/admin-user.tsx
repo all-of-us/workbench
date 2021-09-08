@@ -38,7 +38,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import validate from 'validate.js';
+import * as validate from 'validate.js';
 
 const styles = reactStyles({
   semiBold: {

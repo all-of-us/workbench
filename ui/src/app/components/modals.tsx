@@ -1,6 +1,6 @@
-import Color from 'color';
+import * as Color from 'color';
 import * as React from 'react';
-import ReactModal from 'react-modal';
+import * as ReactModal from 'react-modal';
 
 import {Button} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';

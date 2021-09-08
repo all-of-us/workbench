@@ -1,4 +1,4 @@
-import {Button, Clickable, Link} from 'app/components/buttons';
+import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
@@ -238,10 +238,10 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
   const [deleting, setDeleting] = useState(false);
 
   return <Fragment>
-    <div style={{display: 'flex',  marginRight: '0.5rem'}}>
-      <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
+    <div style={{display: 'flex'}}>
+      <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
                shape='exclamation-triangle' size='20'/>
-      <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
+      <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
     </div>
 
     <div style={styles.confirmWarning}>
@@ -261,8 +261,9 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
         you will need to create a new cloud environment to access it. </p>
     </div>
       <div>
-        <div>To backup and share files, such as input data, analysis outputs,
-          or installed packages, <a href={supportUrls.workspaceBucket}>move them to the workspace bucket.</a>
+        <div>If you want to save some files permanently, such as input data, analysis outputs,
+          or installed packages,
+          <StyledAnchorTag href={supportUrls.workspaceBucket} target='_blank'> &nbsp;move them to the workspace bucket.</StyledAnchorTag>
         </div>
         <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
     </div>
@@ -303,7 +304,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
-          <label>Keep persistent disk, delete environment</label>
+          <label>Keep persistent disk, delete application configuration and compute profile</label>
         </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
@@ -311,14 +312,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         stored on your disk.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-        Deletes your analysis environment, but detaches your
+        Deletes your application configuration and cloud compute profile, but detaches your
         persistent disk and saves it for later.
         The disk will be automatically reattached the next time you create a cloud environment using
-        the standard VM compute type within this workspace.
+        the standard VM compute type.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at <b>{formatUsd(diskPricePerMonth * pdSize)}</b> per month.
-        You can delete your disk at any time via the runtime panel.
+        You will continue to incur persistent disk cost at {formatUsd(diskPricePerMonth * pdSize)} per month.
       </p>
     </div>
     <div style={styles.confirmWarning}>
@@ -328,11 +328,14 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
                        style={{marginRight: '0.25rem'}}
                        onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
                        checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}/>
-          <label>Delete persistent disk and environment</label>
+          <label>Delete everything, including persistent disk</label>
         </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-        Deletes your persistent disk, which will also delete all files on the disk. Also deletes your analysis environment.
+        Deletes your persistent disk, which will also delete all files on the disk.
+      </p>
+      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
+        Also deletes your application configuration and cloud compute profile
       </p>
     </div>
   </div>;
@@ -369,20 +372,21 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at <b>{formatUsd(diskPricePerMonth * pdSize)}</b> per month.
+        You will continue to incur persistent disk cost at {formatUsd(diskPricePerMonth * pdSize)} per month.
       </p>
     </div>
   </div>;
   return <Fragment>
-    <div style={{display: 'flex',  marginRight: '0.5rem'}}>
-        <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
+      <div style={{display: 'flex'}}>
+        <ClrIcon style={{color: colors.warning, gridColumn: 1, gridRow: 1}} className='is-solid'
                  shape='exclamation-triangle' size='20'/>
-        <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
-    </div>
+        <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 2, gridRow: 1}}>Delete environment options</h3>
+      </div>
       {computeType === ComputeType.Standard ? standardvmDeleteOption : dataprocDeleteOption}
       <div>
-        <div>To backup and share files, such as input data, analysis outputs, or installed packages,
-          <a href={supportUrls.workspaceBucket}>move them to the workspace bucket.</a></div>
+        <div>If you want to save some files permanently, such as input data, analysis outputs, or installed packages,
+          <StyledAnchorTag href={supportUrls.workspaceBucket} target='_blank'> &nbsp;move them to the workspace bucket.
+          </StyledAnchorTag></div>
         <div>Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.</div>
       </div>
       <FlexRow style={{justifyContent: 'flex-end'}}>
@@ -509,7 +513,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   return <div>
     <h3 style={{...styles.sectionHeader, ...styles.bold}} >Persistent Disk (GB)</h3>
     <div> Persistent disks store analysis data.
-      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'>Learn more about persistent disks and where your disk is mounted.
+      <a href= 'https://support.terra.bio/hc/en-us/articles/360047318551'> Learn more about persistent disks and where your disk is mounted.
       </a>
     </div>
     <InputNumber id={`persistent-disk`}
@@ -650,23 +654,16 @@ const PresetSelector = ({
     }} />;
 };
 
-import computeStarting from 'assets/icons/compute-starting.svg';
-import computeRunning from 'assets/icons/compute-running.svg';
-import computeStopping from 'assets/icons/compute-stopping.svg';
-import computeError from 'assets/icons/compute-error.svg';
-import computeStopped from 'assets/icons/compute-stopped.svg';
-import computeNone from 'assets/icons/compute-none.svg';
-
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {altText, iconSrc = null, styleOverrides = {}, onClick = null } = switchCase(status,
+  const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
     [
       RuntimeStatus.Creating,
       () => ({
         altText: 'Runtime creation in progress',
-        iconSrc: computeStarting,
+        iconShape: 'compute-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -674,7 +671,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Running,
       () => ({
         altText: 'Runtime running, click to pause',
-        iconSrc: computeRunning,
+        iconShape: 'compute-running',
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
@@ -682,7 +679,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Updating,
       () => ({
         altText: 'Runtime update in progress',
-        iconSrc: computeStarting,
+        iconShape: 'compute-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -690,14 +687,14 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Error,
       () => ({
         altText: 'Runtime in error state',
-        iconSrc: computeError
+        iconShape: 'compute-error'
       })
     ],
     [
       RuntimeStatus.Stopping,
       () => ({
         altText: 'Runtime pause in progress',
-        iconSrc: computeStopping,
+        iconShape: 'compute-stopping',
         styleOverrides: rotateStyle
       })
     ],
@@ -705,7 +702,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Stopped,
       () => ({
         altText: 'Runtime paused, click to resume',
-        iconSrc: computeStopped,
+        iconShape: 'compute-stopped',
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
@@ -713,7 +710,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Starting,
       () => ({
         altText: 'Runtime resume in progress',
-        iconSrc: computeStarting,
+        iconShape: 'compute-starting',
         styleOverrides: rotateStyle
       })
     ],
@@ -721,7 +718,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Deleting,
       () => ({
         altText: 'Runtime deletion in progress',
-        iconSrc: computeStopping,
+        iconShape: 'compute-stopping',
         styleOverrides: rotateStyle,
       })
     ],
@@ -729,24 +726,26 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Deleted,
       () => ({
         altText: 'Runtime has been deleted',
-        iconSrc: computeNone
+        iconShape: 'compute-none'
       })
     ],
     [
       RuntimeStatus.Unknown,
       () => ({
         altText: 'Runtime status unknown',
-        iconSrc: computeNone
+        iconShape: 'compute-none'
       })
     ],
     [
       DEFAULT,
       () => ({
         altText: 'No runtime found',
-        iconSrc: computeNone
+        iconShape: 'compute-none'
       })
     ]
   );
+
+  const iconSrc = `/assets/icons/${iconShape}.svg`;
 
   {/* height/width of the icon wrapper are set so that the img element can rotate inside it */}
   {/* without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal */}
@@ -770,24 +769,14 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
-            <img
-                alt={altText}
-                src={iconSrc}
-                style={styleOverrides}
-                data-test-id={`runtime-status-icon-${status}`}
-            />
-          </Clickable>
+            <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+          </Clickable>Delete Environment
         </FlexRow>
       </TooltipTrigger>
     }
     {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
-          <img
-              alt={altText}
-              src={iconSrc}
-              style={styleOverrides}
-              data-test-id={`runtime-status-icon-${status}`}
-          />
+          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
         </FlexRow>
       </TooltipTrigger>
     }
@@ -821,7 +810,7 @@ const CostEstimator = ({
   const runningCostBreakdown = machineRunningCostBreakdown(costConfig);
   const storageCost = machineStorageCost(costConfig);
   const storageCostBreakdown = machineStorageCostBreakdown(costConfig);
-  const costPriceFontSize = runtimeCtx.enablePD ? '12px' : '20px';
+  const costPriceFontSize = runtimeCtx.enablePD ? '15px' : '20px';
   return <FlexRow>
       <FlexColumn style={{marginRight: '1rem'}}>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when running</div>
@@ -839,7 +828,7 @@ const CostEstimator = ({
           </div>
         </TooltipTrigger>
       </FlexColumn>
-      <FlexColumn style={{marginRight: '1rem'}}>
+      <FlexColumn>
         <div style={{fontSize: '10px', fontWeight: 600}}>Cost when paused</div>
         <TooltipTrigger content={
           <div>
@@ -858,7 +847,7 @@ const CostEstimator = ({
     {runtimeCtx.enablePD && computeType === ComputeType.Standard && <FlexColumn>
       <div style={{fontSize: '10px', fontWeight: 600}}>Persistent disk cost</div>
         <div
-            style={{fontSize: costPriceFontSize, color: costTextColor}}
+            style={{fontSize: '15px', color: costTextColor}}
             data-test-id='pd-cost'
         >
           {formatUsd(pdSize * diskPricePerMonth)}/month
@@ -1447,9 +1436,11 @@ const RuntimePanel = fp.flow(
                    onChange={config => setSelectedDataprocConfig(config)}
                    dataprocConfig={selectedDataprocConfig} />
              }
+           </div>
+            <div>
               <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                {runtimeCtx.enablePD && selectedCompute === ComputeType.Standard &&
-                <div>
+              {runtimeCtx.enablePD && selectedCompute === ComputeType.Standard &&
+                  <div>
                   <PersistentDiskSizeSelector
                       selectedDiskSize={selectedPdSize}
                       onChange={(value) => {
@@ -1458,9 +1449,9 @@ const RuntimePanel = fp.flow(
                       disabled={disableControls}
                       diskSize={pdSize}
                   /> </div>
-                }
-              </FlexRow>
-           </div>
+              }
+            </FlexRow>
+            </div>
            {runtimeExists && updateMessaging.warn &&
              <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>{updateMessaging.warn}</div>

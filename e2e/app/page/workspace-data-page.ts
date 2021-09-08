@@ -33,8 +33,8 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
   async imgDiagramLoaded(): Promise<ElementHandle[]> {
     return Promise.all<ElementHandle, ElementHandle>([
-      this.page.waitForXPath('//img[@data-test-id="dataset-diagram"]', { visible: true }),
-      this.page.waitForXPath('//img[@data-test-id="cohort-diagram"]', { visible: true })
+      this.page.waitForXPath('//img[@src="/assets/images/dataset-diagram.svg"]', { visible: true }),
+      this.page.waitForXPath('//img[@src="/assets/images/cohort-diagram.svg"]', { visible: true })
     ]);
   }
 

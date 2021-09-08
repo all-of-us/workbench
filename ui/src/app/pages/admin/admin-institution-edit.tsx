@@ -46,7 +46,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import validate from 'validate.js';
+import * as validate from 'validate.js';
 
 const styles = reactStyles({
   label: {

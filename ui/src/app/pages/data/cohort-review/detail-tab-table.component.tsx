@@ -12,12 +12,13 @@ import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   container: {
@@ -829,7 +830,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
                 tabFilterState[column] = v;
                 this.setState({tabFilterState});
               }}
-              onKeyUp={e => e.key === 'Enter' && this.filterText()}
+              onKeyUp={e => e.key === Key.Enter && this.filterText()}
               placeholder={'Search'} />
             <i className='pi pi-times-circle' style={{margin: '0 5px'}} onClick={() => {
               tabFilterState[column] = '';

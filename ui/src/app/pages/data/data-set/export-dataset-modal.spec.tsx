@@ -17,6 +17,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 describe('ExportDatasetModal', () => {
   let dataset;
@@ -184,7 +185,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
     const wrapper = mount(component(testProps));
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(tool => {
+    Object.keys(GenomicsAnalysisToolEnum).forEach(tool => {
       expect(wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()).toBeTruthy();
     });
   });
@@ -196,7 +197,7 @@ describe('ExportDatasetModal', () => {
     wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(tool => {
+    Object.keys(GenomicsAnalysisToolEnum).forEach(tool => {
       expect(wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()).toBeFalsy();
     });
   });
@@ -220,7 +221,7 @@ describe('ExportDatasetModal', () => {
       notebookName: expectedNotebookName,
       kernelType: KernelTypeEnum.Python,
       generateGenomicsAnalysisCode: true,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.HAIL
     });
   });
 
@@ -241,7 +242,7 @@ describe('ExportDatasetModal', () => {
     expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
       dataSetRequest: expectedDatasetRequest,
       kernelType: KernelTypeEnum.Python,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.HAIL
     }));
 
     wrapper.find('[data-test-id="genomics-tool-PLINK"]').first().simulate('click');
@@ -249,7 +250,7 @@ describe('ExportDatasetModal', () => {
     expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
       dataSetRequest: expectedDatasetRequest,
       kernelType: KernelTypeEnum.Python,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.PLINK
     }));
 
     wrapper.find('[data-test-id="genomics-tool-NONE"]').first().simulate('click');
@@ -257,7 +258,7 @@ describe('ExportDatasetModal', () => {
     expect(previewSpy).toHaveBeenCalledWith(workspace.namespace, workspace.id, expect.objectContaining({
       dataSetRequest: expectedDatasetRequest,
       kernelType: KernelTypeEnum.Python,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.NONE
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE
     }));
   });
 

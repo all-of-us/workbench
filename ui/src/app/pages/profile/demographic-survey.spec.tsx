@@ -89,5 +89,5 @@ it('should handle error when submitting the survey', async() => {
   // We need to await one tick to allow async processing of the error response to resolve.
   await waitOneTickAndUpdate(wrapper);
 
-  expect(wrapper.find('Modal[role="alertdialog"]').exists).toBeTruthy();
+  expect(wrapper.find('Modal[role="alertdialog"]').length).toEqual(1);
 });

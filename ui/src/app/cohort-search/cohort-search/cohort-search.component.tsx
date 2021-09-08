@@ -25,8 +25,6 @@ import { MatchParams } from 'app/utils/stores';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 
-import arrowIcon from 'assets/icons/arrow-left-regular.svg';
-
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
@@ -80,6 +78,8 @@ const styles = reactStyles({
     margin: '0 0 0 0.75rem'
   }
 });
+
+const arrowIcon = '/assets/icons/arrow-left-regular.svg';
 
 function initGroup(role: string, item: any) {
   return {
