@@ -63,8 +63,6 @@ export const styles = reactStyles({
   },
 });
 
-const parseQueryString = (location) => querystring.parse(location.search.replace(/^\?/, ''));
-
 const WelcomeHeader = () => {
   return <FlexColumn style={{marginLeft: '3%', width: '50%'}}>
     <FlexRow>
@@ -258,6 +256,10 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
     return getRegistrationTasksMap(this.props.navigate);
   }
 
+  parseQueryString() {
+    return querystring.parse(this.props.location.search.replace(/^\?/, ''));
+  }
+
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
@@ -311,7 +313,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const {workbenchAccessTasks} = parseQueryString(this.props.location);
+      const {workbenchAccessTasks} = parseQueryString();
 
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
