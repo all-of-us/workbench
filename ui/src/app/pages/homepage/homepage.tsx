@@ -21,13 +21,19 @@ import {reactStyles, withUserProfile} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {buildRasRedirectUrl, getRegistrationTasksMap} from 'app/utils/access-utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {NavigationProps, queryParamsStore, useNavigation} from 'app/utils/navigation';
+import {NavigationProps, useNavigation} from 'app/utils/navigation';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
+import {parseQueryParams} from "app/components/app-router";
+
+import workspaceIcon from 'assets/images/workspace-icon.svg';
+import cohortIcon from 'assets/images/cohort-icon.svg';
+import analysisIcon from 'assets/images/analysis-icon.svg';
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -71,9 +77,9 @@ const WelcomeHeader = () => {
           Researcher Workbench</Header>
       </FlexColumn>
       <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
-        <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
+        <img style={styles.welcomeMessageIcon} src={workspaceIcon}/>
+        <img style={styles.welcomeMessageIcon} src={cohortIcon}/>
+        <img style={styles.welcomeMessageIcon} src={analysisIcon}/>
       </FlexRow>
     </FlexRow>
     <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
@@ -139,7 +145,7 @@ const GettingStarted = () => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function
@@ -163,7 +169,7 @@ interface State {
   userWorkspacesResponse: WorkspaceResponseListResponse;
 }
 
-export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends React.Component<Props, State> {
+export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
 
@@ -309,7 +315,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation)(class extends
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const {workbenchAccessTasks} = queryParamsStore.getValue();
+      const workbenchAccessTasks = parseQueryParams(this.props.location.search).get('workbenchAccessTasks');
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();

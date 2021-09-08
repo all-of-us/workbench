@@ -1,4 +1,4 @@
-import {Environment, ZendeskEnv} from 'environments/environment-type';
+import {EnvAccessTierShortNames, Environment, ZendeskEnv} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: 'Perf',
@@ -23,4 +23,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDataAccessRequirements: false,
+  accessTiersVisibleToUsers: [EnvAccessTierShortNames.Registered, EnvAccessTierShortNames.Controlled],
 };

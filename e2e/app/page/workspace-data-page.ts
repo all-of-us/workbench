@@ -3,7 +3,7 @@ import Link from 'app/element/link';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { Language, MenuOption, ResourceCard } from 'app/text-labels';
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
@@ -27,15 +27,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
   async isLoaded(): Promise<boolean> {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
-    await this.imgDiagramLoaded();
     return true;
-  }
-
-  async imgDiagramLoaded(): Promise<ElementHandle[]> {
-    return Promise.all<ElementHandle, ElementHandle>([
-      this.page.waitForXPath('//img[@src="/assets/images/dataset-diagram.svg"]', { visible: true }),
-      this.page.waitForXPath('//img[@src="/assets/images/cohort-diagram.svg"]', { visible: true })
-    ]);
   }
 
   getAddDatasetButton(): ClrIconLink {

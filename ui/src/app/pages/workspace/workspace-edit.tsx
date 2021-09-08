@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
 
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -853,7 +853,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
-        const navigateToWorkspace = () => this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        const navigateToWorkspace = () => {
+          this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        }
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
@@ -876,9 +878,6 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         navigateToWorkspace();
 
       } catch (error) {
-        console.log(error);
-        error = await error.json();
-
         console.log(error);
         this.setState({loading: false});
         if (error.statusCode === 409) {

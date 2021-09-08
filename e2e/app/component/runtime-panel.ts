@@ -6,6 +6,7 @@ import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
+import RadioButton from 'app/element/radiobutton';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -125,8 +126,8 @@ export default class RuntimePanel extends BaseHelpSidebar {
     return await runtimePresetMenu.select(runtimePreset);
   }
 
-  buildStatusIconSrc = (startStopIconState: StartStopIconState): string => {
-    return `/assets/icons/compute-${startStopIconState}.svg`;
+  buildStatusIconDataTestId = (startStopIconState: StartStopIconState): string => {
+    return `runtime-status-icon-${startStopIconState}`;
   };
 
   /**
@@ -139,18 +140,24 @@ export default class RuntimePanel extends BaseHelpSidebar {
     startStopIconState: StartStopIconState,
     timeout: number = 20 * 60 * 1000
   ): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(startStopIconState)}"]`;
+    const xpath =
+      `${this.getXpath()}${statusIconXpath}` +
+      `[@data-test-id="${this.buildStatusIconDataTestId(startStopIconState)}"]`;
     await this.page.waitForXPath(xpath, { visible: true, timeout });
   }
 
   async clickPauseRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Running)}"]`;
+    const xpath =
+      `${this.getXpath()}${statusIconXpath}` +
+      `[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Running)}"]`;
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
 
   async clickResumeRuntimeIcon(): Promise<void> {
-    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Stopped)}"]`;
+    const xpath =
+      `${this.getXpath()}${statusIconXpath}` +
+      `[@data-test-id="${this.buildStatusIconDataTestId(StartStopIconState.Stopped)}"]`;
     const icon = new Button(this.page, xpath);
     await icon.click();
   }
@@ -195,6 +202,8 @@ export default class RuntimePanel extends BaseHelpSidebar {
     logger.info('Deleting runtime');
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
     await this.clickButton(LinkText.Delete);
     await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
@@ -233,6 +242,20 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
     logger.info('Runtime is resumed');
+  }
+
+  /**
+   * Delete unattached persistent disk.
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    logger.info('Deleting unattached persistent disk');
+    await this.open();
+    await this.clickButton(LinkText.DeletePd);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-unattached-pd' }).select();
+    await this.clickButton(LinkText.Delete);
+    await this.waitUntilClose();
+    logger.info('Unattached persistent disk is deleted');
   }
 
   async applyChanges(): Promise<NotebookPreviewPage> {

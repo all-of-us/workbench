@@ -1,4 +1,4 @@
-import { Page, Response } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 import { waitWhileLoading } from 'utils/waits-utils';
 
@@ -16,8 +16,13 @@ export default abstract class BasePage {
   /**
    * Reload current page.
    */
-  async reloadPage(): Promise<Response> {
-    return this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
+  async reloadPage(): Promise<void> {
+    const response = await this.page.reload({ waitUntil: ['networkidle0', 'load', 'domcontentloaded'] });
+    if (response && !response.ok()) {
+      // Log response if status is not OK
+      logger.info(`Reload page: Response status: ${response.status()}\n${await response.text()}`);
+    }
+    await waitWhileLoading(this.page);
   }
 
   /**

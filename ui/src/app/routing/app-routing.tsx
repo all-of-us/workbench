@@ -39,6 +39,9 @@ import {
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
+import { WorkspaceData } from 'app/utils/workspace-data';
+
+import logo from 'assets/images/all-of-us-logo.svg'
 
 declare const gapi: any;
 
@@ -142,8 +145,8 @@ const loadErrorReporter = () => {
 const exposeAccessTokenSetter = () => {
   // Set this as early as possible in the application boot-strapping process,
   // so it's available for Puppeteer to call. If we need this even earlier in
-  // the page, it could go into something like main.ts, but ideally we'd keep
-  // this logic in one place, and keep main.ts minimal.
+  // the page, it could go into something like index.ts, but ideally we'd keep
+  // this logic in one place, and keep index.ts minimal.
   if (environment.allowTestAccessTokenOverride) {
     window.setTestAccessTokenOverride = (token: string) => {
       // Disclaimer: console.log statements here are unlikely to captured by
@@ -314,7 +317,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = () => 
       <div>
         <div style={{maxWidth: '500px', margin: '1rem', fontFamily: 'Montserrat'}}>
           <div>
-              <img alt='logo' src='/assets/images/all-of-us-logo.svg' width='155px'/>
+              <img alt='logo' src={logo} width='155px'/>
           </div>
           <div style={{fontSize: '20pt', color: '#2F2E7E', padding: '1rem 0 1rem 0'}}>Cookies are Disabled</div>
           <div style={{fontSize: '14pt', color: '#000000'}}>

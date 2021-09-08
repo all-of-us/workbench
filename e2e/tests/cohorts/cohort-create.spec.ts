@@ -1,11 +1,4 @@
-import {
-  Ethnicity,
-  FilterSign,
-  PhysicalMeasurementsCriteria,
-  Race,
-  Sex,
-  Visits
-} from 'app/page/cohort-participants-group';
+import { Ethnicity, FilterSign, PhysicalMeasurementsCriteria, Race, Sex } from 'app/page/cohort-participants-group';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
@@ -13,18 +6,20 @@ import CohortActionsPage from 'app/page/cohort-actions-page';
 import { MenuOption, ResourceCard } from 'app/text-labels';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
+import { Page } from 'puppeteer';
 
-describe('Create Cohorts from Program Data criteria', () => {
+describe('Create Cohorts Test', () => {
+  const workspaceName = makeWorkspaceName();
+  let workspaceUrl: string;
+
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = makeWorkspaceName();
-
   // Add new cohort includes 4 categories: BMI; Weight; Height; Blood Pressure Hypotensive.
   // There are more physical measurements categories but they are not tested here.
   test('Create cohort from physical measurement criteria', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await loadWorkspaceUrl(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -101,7 +96,7 @@ describe('Create Cohorts from Program Data criteria', () => {
   });
 
   test('Create cohort from demographics criteria', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await loadWorkspaceUrl(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -170,7 +165,7 @@ describe('Create Cohorts from Program Data criteria', () => {
   });
 
   test('Create cohort from whole genome variant', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await loadWorkspaceUrl(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -189,42 +184,8 @@ describe('Create Cohorts from Program Data criteria', () => {
     await new CohortActionsPage(page).deleteCohort();
   });
 
-  // Include all visit types in a single Include Group.
-  test('Create cohort from visits', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-
-    const dataPage = new WorkspaceDataPage(page);
-    const cohortBuildPage = await dataPage.clickAddCohortsButton();
-
-    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.includeVisits([
-      Visits.AmbulanceVisit,
-      Visits.AmbulatoryClinicCenter,
-      Visits.AmbulatoryRehabilitationVisit,
-      Visits.EmergencyRoomVisit,
-      Visits.EmergencyRoomAndInpatientVisit,
-      Visits.HomeVisit,
-      Visits.InpatientVisit,
-      Visits.LaboratoryVisit,
-      Visits.NonhospitalInstitutionVisit,
-      Visits.OfficeVisit,
-      Visits.OutpatientVisit,
-      Visits.PharmacyVisit
-    ]);
-    const group1Count = await group1.getGroupCount();
-    const totalCount = await cohortBuildPage.getTotalCount();
-    expect(group1Count).toEqual(totalCount);
-    expect(Number.isNaN(group1Count)).toBe(false);
-
-    // Save new cohort.
-    await cohortBuildPage.createCohort();
-
-    // Delete cohort in Cohort Build page.
-    await new CohortActionsPage(page).deleteCohort();
-  });
-
   test('Create cohort from EKG conditions with modifiers', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await loadWorkspaceUrl(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
@@ -275,4 +236,15 @@ describe('Create Cohorts from Program Data criteria', () => {
     // Delete cohort in Cohort Build page.
     await new CohortActionsPage(page).deleteCohort();
   });
+
+  // Helper functions
+  async function loadWorkspaceUrl(page: Page, workspaceName: string): Promise<void> {
+    if (workspaceUrl) {
+      // Faster: Load previously saved URL instead clicks thru links to open workspace data page.
+      await page.goto(workspaceUrl, { waitUntil: ['load', 'networkidle0'] });
+      return;
+    }
+    await findOrCreateWorkspace(page, { workspaceName });
+    workspaceUrl = page.url(); // Save URL for load workspace directly without search.
+  }
 });

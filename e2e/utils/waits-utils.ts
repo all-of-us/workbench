@@ -1,5 +1,6 @@
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
+import { takeScreenshot } from './save-file-utils';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -380,24 +381,32 @@ export async function waitWhileLoading(
   const { waitForRuntime = false } = opts;
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
-    waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon"])'
+    waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon-container"])'
   }`;
+
+  // Prevent checking on Login page.
+  await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
+    return;
+  });
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
   // Wait for spinners stop and gone.
-  await Promise.all([
-    page.waitForFunction(
-      (css) => {
-        return !document.querySelectorAll(css).length;
-      },
-      { polling: 'mutation', timeout },
-      spinElementsSelector
-    ),
-    page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
-  ]).catch((err: Error) => {
-    logger.error(`Failed wait for spinner stop: xpath="${spinElementsSelector}"`);
+  try {
+    await Promise.all([
+      page.waitForFunction(
+        (css) => {
+          return !document.querySelectorAll(css).length;
+        },
+        { polling: 'mutation', timeout },
+        spinElementsSelector
+      ),
+      page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
+    ]);
+    await page.waitForTimeout(500);
+  } catch (err) {
+    logger.error(`FAILED to wait for spinner stop: xpath="${spinElementsSelector}"`);
     if (err.message.includes('Target closed')) {
       // Leave blank. Ignore error and continue test.
       // Puppeteer can throw following exception when polling for mutation status if this object disappeared in DOM
@@ -405,11 +414,10 @@ export async function waitWhileLoading(
       // Error: Protocol error (Runtime.callFunctionOn): Target closed.
     } else {
       logger.error(err.stack);
-      throw err;
+      await takeScreenshot(page, 'Spinner_TimeoutError.jpg');
+      throw new Error(err.message);
     }
-  });
-
-  await page.waitForTimeout(500);
+  }
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
