@@ -9,6 +9,8 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import { environment } from 'environments/environment';
 import * as React from 'react';
 
+import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
+import nihFooterLogo from 'assets/images/nih-logo-footer.png';
 
 const styles = reactStyles({
   footerAnchor: {
@@ -82,8 +84,8 @@ const FooterTemplate = ({style = {}, ...props}) => {
   return <div style={{...styles.footerTemplate, ...style}} {...props}>
     <FlexRow>
       <FlexColumn style={{height: '4rem', justifyContent: 'space-between'}}>
-        <img style={styles.footerImage} src='assets/images/all-of-us-logo-footer.svg'/>
-        <img style={{...styles.footerImage, height: '1rem'}} src='assets/images/nih-logo-footer.png'/>
+        <img style={styles.footerImage} src={aouFooterLogo}/>
+        <img style={{...styles.footerImage, height: '1rem'}} src={nihFooterLogo}/>
       </FlexColumn>
       <div style={{marginLeft: '1.5rem', width: '100%'}}>
         {props.children}

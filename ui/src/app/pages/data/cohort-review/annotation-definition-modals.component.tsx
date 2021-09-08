@@ -14,7 +14,6 @@ import {reactStyles, summarizeErrors} from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
-import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   editRow: {
@@ -248,7 +247,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
                     onChange={v => this.setState({editValue: v})}
                     onBlur={() => this.rename()}
                     onKeyPress={e => {
-                      if (e.key === Key.Enter) {
+                      if (e.key === 'Enter') {
                         this.rename();
                       }
                     }}

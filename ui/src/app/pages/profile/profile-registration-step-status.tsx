@@ -90,6 +90,5 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
   };
 
 export {
-  ProfileRegistrationStepStatus,
-  Props as ProfileRegistrationStepStatusProps
+  ProfileRegistrationStepStatus
 };

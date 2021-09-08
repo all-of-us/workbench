@@ -1,5 +1,3 @@
-// The root project TypeScript compiler config. This defines common compiler options
-// used across Angular, Jest, and default builds.
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -16,9 +14,21 @@
       "es2018.promise",
       "dom"
     ],
-    "module": "es2015",
+    "module": "esnext",
     "baseUrl": "./src",
-    "jsx": "react",
-    "resolveJsonModule": true
-  }
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "strict": false,
+    "isolatedModules": true
+  },
+  "include": [
+    "src"
+  ]
 }

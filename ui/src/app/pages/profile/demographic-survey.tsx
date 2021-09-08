@@ -21,7 +21,7 @@ import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/f
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
