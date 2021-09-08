@@ -15,14 +15,14 @@ import {Router} from "react-router";
 import { createMemoryHistory } from 'history';
 
 describe('CohortPage', () => {
-  let props;
-  let history = createMemoryHistory();
+  let history;
 
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
+    history = createMemoryHistory();
   });
 
   const component = () => {

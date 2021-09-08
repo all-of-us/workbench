@@ -11,7 +11,7 @@ import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/st
 import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
-import {parseQueryParams} from "../components/app-router";
+import {parseQueryParams} from "app/components/app-router";
 
 const {useState, useEffect} = React;
 
