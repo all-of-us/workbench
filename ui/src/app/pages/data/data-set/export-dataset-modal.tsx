@@ -29,7 +29,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {validate} from 'validate.js';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   closeFunction: Function;
@@ -55,7 +54,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
   ({workspace, dataset, closeFunction}: HocProps) => {
     const [existingNotebooks, setExistingNotebooks] = useState(undefined);
     const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
-    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(GenomicsAnalysisToolEnum.HAIL);
+    const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL);
     const [isExporting, setIsExporting] = useState(false);
     const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
     const [notebookName, setNotebookName] = useState('');
@@ -157,7 +156,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       }
     }
 
-    function genomicsToolRadioButton(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
+    function genomicsToolRadioButton(displayName: string, genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum) {
       return <label key={'genomics-tool-' + genomicsTool} style={styles.radioButtonLabel}>
         <RadioButton
           style={{marginRight: '0.25rem'}}
@@ -252,9 +251,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
                 </div>
-              {genomicsToolRadioButton('Hail', GenomicsAnalysisToolEnum.HAIL)}
-              {genomicsToolRadioButton('PLINK', GenomicsAnalysisToolEnum.PLINK)}
-              {genomicsToolRadioButton('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
+              {genomicsToolRadioButton('Hail', DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL)}
+              {genomicsToolRadioButton('PLINK', DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK)}
+              {genomicsToolRadioButton('Other VCF-compatible tool', DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)}
             </React.Fragment>}
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>

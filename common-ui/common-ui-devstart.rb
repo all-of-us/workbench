@@ -55,10 +55,8 @@ def build(cmd_name, ui_name, args)
     optimize = "--prod"
   end
 
-  # Angular version 5 requires --environment instead of --configuration as an option
-  angular_opts = "--configuration=#{options.env}"
-  common.run_inline %W{yarn run build
-      #{optimize} #{angular_opts} --no-watch --no-progress}
+  react_opts = "REACT_APP_ENVIRONMENT=#{options.env}"
+  common.run_inline "#{react_opts} yarn run build #{optimize} --no-watch --no-progress"
 end
 
 class CommonUiDevStart

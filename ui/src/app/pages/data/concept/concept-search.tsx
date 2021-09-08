@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Prompt, RouteComponentProps, withRouter} from 'react-router';
 import {Subscription} from 'rxjs/Subscription';
-import * as validate from 'validate.js';
+import validate from 'validate.js';
 
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';

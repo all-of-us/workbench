@@ -12,6 +12,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
+import RadioButton from 'app/element/radiobutton';
 
 // CSS selectors
 const CssSelector = {
@@ -324,6 +325,8 @@ export default class NotebookPage extends NotebookFrame {
 
     // Click 'delete environment' then Delete buttons.
     await runtimePanel.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
     await runtimePanel.clickButton(LinkText.Delete);
 
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
@@ -334,6 +337,18 @@ export default class NotebookPage extends NotebookFrame {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
     await runtimePanel.close();
+  }
+
+  /**
+   * Delete unattached persistent disk
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    // Open runtime panel
+    const runtimePanel = new RuntimePanel(this.page);
+    await runtimePanel.open();
+
+    // Click 'delete persistent disk' then Delete buttons.
+    await runtimePanel.deleteUnattachedPd();
   }
 
   private async findRunButton(timeout?: number): Promise<ElementHandle> {

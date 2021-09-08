@@ -16,8 +16,7 @@ import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
-import {navigateSpy} from 'testing/navigation-mock';
-
+import {mockNavigate} from 'setupTests';
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -32,7 +31,7 @@ describe('NotebookRedirect', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
-  let runtimeStub: RuntimeApiStub;
+  let runtimeStub;
 
   const initialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl'
   let history = createMemoryHistory({initialEntries: [initialUrl]});
@@ -221,7 +220,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
     act(() => {
@@ -234,7 +233,7 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(navigateSpy).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalled();
   });
 
 
@@ -255,7 +254,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
     act(() => {
@@ -268,6 +267,6 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
