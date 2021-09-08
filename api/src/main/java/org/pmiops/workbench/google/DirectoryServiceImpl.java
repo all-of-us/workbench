@@ -159,8 +159,6 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
                       .setProjection("full")
                       .execute()));
     } catch (GoogleJsonResponseException e) {
-      // Handle the special case where we're looking for a not found user by returning
-      // null.
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return Optional.empty();
       }
