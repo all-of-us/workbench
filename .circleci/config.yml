@@ -26,7 +26,7 @@ parameters:
 # -------------------------
 anchors:
   env-default: &env-default
-    JAVA_TOOL_OPTIONS: -Xmx2g
+    JAVA_TOOL_OPTIONS: -Xmx4g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
@@ -229,7 +229,7 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                command: REACT_APP_ENVIRONMENT=local yarn dev-up
+                command: yarn dev-up --configuration=local
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
