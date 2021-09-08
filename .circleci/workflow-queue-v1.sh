@@ -201,9 +201,11 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
     printf "\n%s\n%s\n" "JOB_LIST:" "${JOB_LIST[@]}"
-    compare_arrays "${JOB_LIST}" "${created_job_names}"
-    not_created_jobs=$__
+    # compare_arrays "${JOB_LIST}" "${created_job_names}"
+    # not_created_jobs=$__
     # not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
+
+    not_created_jobs=(`printf '%s\n' "${JOB_LIST[@]}" "${created_job_names[@]}" | sort | uniq -u`)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
