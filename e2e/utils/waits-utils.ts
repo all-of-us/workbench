@@ -383,6 +383,13 @@ export async function waitWhileLoading(
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon"])'
   }`;
 
+  // Prevent checking on Login page.
+  await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
+    // Ignore error because this is not a signed-in page.
+    console.log('Unauthenticated');
+    return;
+  });
+
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
