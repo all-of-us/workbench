@@ -118,6 +118,14 @@ fetch_running_jobs() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
 
+compare_arrays() {
+  A=${1[@]};
+  B=${2[@]};
+  if [ "$A" == "$B" ] ; then
+      return
+  fi;
+  false
+}
 
 #********************
 # RUNNING
@@ -192,9 +200,11 @@ while [[ "${is_running}" == "true" ]]; do
     created_jobs_list=$(echo ${created_jobs} | jq ".job_name")
     printf "%s\n%s\n" "created_jobs_list:" "${created_jobs_list}"
 
-    printf "%s\n%s\n" "JOB_LIST:" "${JOB_LIST}"
+    printf "%s\n%s\n" "JOB_LIST:" "${JOB_LIST[@]}"
 
-    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
+    compare_arrays "${$JOB_LIST}" "${$created_jobs_list}"
+    not_created_jobs=$__
+    # not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
