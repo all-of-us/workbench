@@ -126,11 +126,12 @@ compare_arrays() {
   array2=("${!arg2}")
   # ${#array1[*]} returns the number of elements in array
   if [ ${#array1[*]} != ${#array2[*]} ]; then
+    printf "%s\n" "arrays size are not equals"
     retval=false
     return 1
   fi
+  printf "%s\n" "arrays size are equals"
 
-  printf "%s\n" "arrays size equals"
   # ${!array1[*]} which returns a list of indexes.
   for ii in ${!array1[*]}; do
     if [ "${array1[$ii]}" != "${array2[$ii]}" ]; then
@@ -139,7 +140,7 @@ compare_arrays() {
       return 1
     fi
   done
-  
+
   printf "%s\n" "arrays are equals"
   retval=true
   return 0
