@@ -229,7 +229,7 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                command: yarn dev-up --configuration=local
+                command: REACT_APP_ENVIRONMENT=local yarn dev-up
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
