@@ -37,6 +37,7 @@ import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -146,22 +147,32 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
    * @return
    */
   @Override
-  public User getUser(String username) {
+  public Optional<User> getUser(String username) {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
-      return retryHandler.runAndThrowChecked(
-          (context) ->
-              getGoogleDirectoryService().users().get(username).setProjection("full").execute());
+      return Optional.of(
+          retryHandler.runAndThrowChecked(
+              (context) ->
+                  getGoogleDirectoryService()
+                      .users()
+                      .get(username)
+                      .setProjection("full")
+                      .execute()));
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
-        return null;
+        return Optional.empty();
       }
       throw ExceptionUtils.convertGoogleIOException(e);
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
+  }
+
+  @Override
+  public User getUserOrThrow(String username) {
+    return getUser(username).orElseThrow(() -> new NotFoundException("user not found"));
   }
 
   @Override
@@ -195,12 +206,12 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   @Override
   public boolean isUsernameTaken(String userPrefix) {
-    return getUser(userPrefix + "@" + gSuiteDomain()) != null;
+    return getUser(userPrefix + "@" + gSuiteDomain()).isPresent();
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
   public Optional<String> getContactEmail(String username) {
-    return Optional.ofNullable(getUser(username))
+    return getUser(username)
         .map(
             user ->
                 (String)
@@ -258,7 +269,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   @Override
   public User resetUserPassword(String username) {
-    User user = getUser(username);
+    User user = getUserOrThrow(username);
     String password = randomString();
     user.setPassword(password);
     retryHandler.run(

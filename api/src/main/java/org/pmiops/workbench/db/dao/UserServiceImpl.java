@@ -827,7 +827,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
     return syncTwoFactorAuthStatus(
-        targetUser, agent, directoryService.getUser(targetUser.getUsername()).getIsEnrolledIn2Sv());
+        targetUser,
+        agent,
+        directoryService.getUserOrThrow(targetUser.getUsername()).getIsEnrolledIn2Sv());
   }
 
   @Override

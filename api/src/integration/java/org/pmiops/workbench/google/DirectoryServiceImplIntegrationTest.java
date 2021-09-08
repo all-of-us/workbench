@@ -47,7 +47,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
             .execute(
                 c -> {
                   Map<String, Map<String, Object>> schemas =
-                      service.getUser(username).getCustomSchemas();
+                      service.getUserOrThrow(username).get().getCustomSchemas();
                   if (schemas == null) {
                     throw new RuntimeException("custom schemas is still null");
                   }
