@@ -1,3 +1,4 @@
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {Environment, ZendeskEnv} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
@@ -24,4 +25,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDataAccessRequirements: true,
+  accessTiersVisibleToUsers: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled],
 };

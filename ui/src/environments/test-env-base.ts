@@ -1,3 +1,4 @@
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {EnvironmentBase, ZendeskEnv} from 'environments/environment-type';
 
 // The values are shared across the deployed test env as well as the local dev
@@ -26,4 +27,5 @@ export const testEnvironmentBase: EnvironmentBase = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDataAccessRequirements: true,
+  accessTiersVisibleToUsers: [AccessTierShortNames.Registered, AccessTierShortNames.Controlled],
 };
