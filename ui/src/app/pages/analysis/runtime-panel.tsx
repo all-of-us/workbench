@@ -49,6 +49,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {diskStore, runtimeStore, serverConfigStore, useStore, withStore} from 'app/utils/stores';
 
+import {CheckBox} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {supportUrls} from 'app/utils/zendesk';
@@ -517,20 +518,21 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
     } : null);
   }, [enableGpu, selectedGpuType, selectedNumOfGpus]);
 
-  return <fieldset style={{marginTop: '0.75rem'}}>
-    <div>
-      <div>
-        <input name='enable-gpu'
-               type='checkbox' checked={enableGpu}
-               onChange={() => {
-                 setEnableGpu(!enableGpu);
-               }}/>Enable GPUs
-      </div>
-      {enableGpu &&
-      <FlexRow style={styles.labelAndInput}>
-        <label style={styles.label} htmlFor='gpu-type'>GpuType</label>
+  return <FlexColumn style={{marginTop: '1rem', justifyContent: 'space-between'}}>
+    <FlexRow >
+      <CheckBox label='Enable GPUs'
+                checked={enableGpu}
+                onChange={() => {
+                  setEnableGpu(!enableGpu);
+                }}/>
+      <a href= 'https://support.terra.bio/hc/en-us/articles/4403006001947'>Learn more about GPU cost and restrictions.</a>
+    </FlexRow>
+    { enableGpu &&
+    <FlexRow style={styles.formGrid}>
+        <FlexRow style={styles.labelAndInput}>
+        <label style={{...styles.label, minWidth: '3.0rem'}} htmlFor='gpu-type'>Gpu Type</label>
         <Dropdown id={`gpu-type`}
-                  style={{width: '8rem'}}
+                  style={{width: '7rem'}}
                   options={validGpuNames}
                   onChange={
                     ({value}) => {
@@ -538,17 +540,17 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
                   }
                   disabled={disabled}
                   value={gpuTypeToDisplayName(selectedGpuType)}/>
-        <label style={styles.label} htmlFor='gpu-num'>GPUs</label>
+        </FlexRow>
+        <FlexRow style={styles.labelAndInput}>
+        <label style={{...styles.label, minWidth: '2.0rem'}} htmlFor='gpu-num'>GPUs</label>
         <Dropdown id={`gpu-num`}
-                  style={{width: '3rem'}}
                   options={validNumGpusOptions}
                   onChange={({value}) => setSelectedNumOfGpus(value)}
                   disabled={disabled}
                   value={selectedNumOfGpus}/>
-      </FlexRow>
-      }
-    </div>
-  </fieldset>;
+        </FlexRow>
+    </FlexRow>}
+  </FlexColumn>;
 };
 
 const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize}) => {
@@ -1071,7 +1073,7 @@ const RuntimePanel = fp.flow(
   const pdExists = !!persistentDisk;
   const pdSize = pdExists ? persistentDisk.size : defaultDiskSize;
   const initialAutopauseThreshold = existingRuntime.autopauseThreshold || DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES;
-  const gpuConfig = !!gceConfig && !!gceConfig.gpuConfig ? gceConfig.gpuConfig : null;
+  const gpuConfig = gceConfig && gceConfig.gpuConfig ? gceConfig.gpuConfig : null;
   const enableGpu = serverConfigStore.get().config.enableGpu;
 
   const initialPanelContent = fp.cond([
@@ -1119,10 +1121,10 @@ const RuntimePanel = fp.flow(
   const initialRuntimeConfig = {
     computeType: initialCompute,
     machine: initialMasterMachine,
-    diskSize: diskSize,
-    dataprocConfig: dataprocConfig,
-    gpuConfig: gpuConfig,
-    pdSize: pdSize,
+    diskSize,
+    dataprocConfig,
+    gpuConfig,
+    pdSize,
     autopauseThreshold: initialAutopauseThreshold
   };
 

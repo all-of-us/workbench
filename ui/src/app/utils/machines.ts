@@ -222,7 +222,7 @@ export const machineRunningCostBreakdown = ({
   computeType,
   masterDiskSize,
   masterMachine,
-    gpu,
+  gpu,
   numberOfWorkers = 0,
   numberOfPreemptibleWorkers = 0,
   workerDiskSize,
@@ -251,7 +251,7 @@ export const machineRunningCostBreakdown = ({
     costs.push(`${formatUsd(dataprocSurchargeAmount)}/hr Dataproc Per-CPU Surcharge`);
   } else {
     costs.push(`${formatUsd(masterMachine.price)}/hr VM`);
-    if (!!gpu) {
+    if (gpu) {
       costs.push(`${formatUsd(gpu.price)}/hr GPU`);
     }
   }
