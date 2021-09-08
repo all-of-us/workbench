@@ -15,6 +15,8 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useRef, useState} from 'react';
 
+import logo from 'assets/images/all-of-us-logo.svg'
+
 const styles = reactStyles({
   headerContainer: {
     display: 'flex',
@@ -186,7 +188,7 @@ export const NavBar = () => {
     <div>
       <a href={'/'}>
         <img
-            src='/assets/images/all-of-us-logo.svg'
+            src={logo}
             style={styles.headerImage}
         />
       </a>

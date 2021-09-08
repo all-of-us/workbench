@@ -14,6 +14,11 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import colors, {addOpacity} from 'app/styles/colors';
 
+import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
+import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
+import arrow from 'assets/icons/arrow-left-regular.svg';
+import googleCloudLogo from 'assets/icons/google-cloud.svg';
+
 export const styles = {
   infoIcon: {
     color: colors.accent,
@@ -111,14 +116,14 @@ export const ValidationIcon = props => {
   }
 };
 
+const Icon = ({ shape, size, style, color, ...props }) => {
+  return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
+};
+
 export const withCircleBackground = WrappedIcon => ({style = styles.defaultCircle}) => {
   return <div style={{...style, ...styles.circleBackground}}>
     <WrappedIcon/>
   </div>;
-};
-
-const Icon = ({ shape, size, style, color, ...props }) => {
-  return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
 };
 
 export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
@@ -126,13 +131,14 @@ export const ArrowRight = props => <Icon shape={faLongArrowAltRight} {...props}/
 export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
 export const ExclamationTriangle = props => <Icon shape={faExclamationTriangle} color={colors.danger} {...props}/>;
+
 export const MinusCircle = props => <Icon shape={faMinusCircle} {...props}/>;
 export const Repeat = props => <Icon shape={faRepeat} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
 
 const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
 
-export const Arrow = svgIcon('/assets/icons/arrow-left-regular.svg');
-export const ControlledTierBadge = svgIcon('/assets/icons/controlled-tier-badge.svg');
-export const GoogleCloudLogoSvg = svgIcon('/assets/icons/google-cloud.svg');
-export const RegisteredTierBadge = svgIcon('/assets/icons/registered-tier-badge.svg');
+export const Arrow = svgIcon(arrow);
+export const ControlledTierBadge = svgIcon(controlledTierBadge);
+export const GoogleCloudLogoSvg = svgIcon(googleCloudLogo);
+export const RegisteredTierBadge = svgIcon(registeredTierBadge);

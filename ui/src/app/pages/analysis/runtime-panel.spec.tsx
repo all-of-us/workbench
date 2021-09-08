@@ -936,14 +936,14 @@ describe('RuntimePanel', () => {
   it('should display the Running runtime status icon in state Running', async() => {
     const wrapper = await component();
 
-    expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-running.svg`);
+    expect(wrapper.find('[data-test-id="runtime-status-icon-Running"]')).toBeTruthy();
   });
 
   it('should display a compute-none when there is no runtime', async() => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
-    expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
+    expect(wrapper.find('[data-test-id="runtime-status-icon-None"]')).toBeTruthy();
   });
 
   it('should prevent runtime creation when disk size is invalid', async() => {
