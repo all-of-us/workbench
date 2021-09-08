@@ -136,6 +136,7 @@
     "lookbackPeriod": 330
   },
   "offlineBatch": {
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }

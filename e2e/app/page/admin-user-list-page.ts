@@ -61,7 +61,7 @@ export default class UserAdminPage extends AuthenticatedPage {
     const bodyTable = dataTable.getFrozenBody();
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
     await cell.click();
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
     const newPage = await newTarget.page();
     return new UserProfileInfo(newPage).waitForLoad();
   }
@@ -110,7 +110,7 @@ export default class UserAdminPage extends AuthenticatedPage {
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
     await getPropValue<string>(cell, 'textContent');
     await cell.click();
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
     const newPage = await newTarget.page();
     await waitWhileLoading(this.page);
     return new UserAuditPage(newPage).waitForLoad();

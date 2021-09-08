@@ -1,11 +1,12 @@
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ControlledTierBadge, ExclamationTriangle} from 'app/components/icons';
+import {ExclamationTriangle} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
@@ -16,26 +17,22 @@ import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
-import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
-import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {styles} from 'app/pages/profile/profile-styles';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
-  lensOnProps, withUserProfile
+  withUserProfile
 } from 'app/utils';
-import {getRegistrationTasksMap} from 'app/utils/access-utils';
 import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
-import {Dropdown} from 'primereact/dropdown';
+import {ProfileAccessModules} from './profile-access-modules';
 
 
 // validators for validate.js
@@ -59,74 +56,18 @@ const validators = {
   country: {...required, ...notTooLong(95)}
 };
 
-enum RegistrationStepStatus {
-  COMPLETED,
-  BYPASSED,
-  UNCOMPLETE
-}
-
 interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   profileState: {
     profile: Profile;
     reload: () => {};
   };
-  controlledTierProfile: {
-    controlledTierCompletionTime?: number
-    controlledTierBypassTime?: number
-    controlledTierEnabled?: boolean
-  };
 }
-
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
   showDemographicSurveyModal: boolean;
   updating: boolean;
 }
-
-interface CompletionTime {
-  completionTime: number;
-  bypassTime: number;
-}
-
-const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
-  return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
-  bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
-};
-
-const bypassedText = (bypassTime: number): JSX.Element => {
-  return <React.Fragment>
-  <div>Bypassed on:</div>
-  <div>{displayDateWithoutHours(bypassTime)}</div>
-</React.Fragment>;
-};
-
-const getCompleteOrBypassContent = ({bypassTime, completionTime}: CompletionTime): JSX.Element => {
-  switch (getRegistrationStatus(completionTime, bypassTime)) {
-    case RegistrationStepStatus.COMPLETED:
-      return <React.Fragment>
-      <div>Completed on:</div>
-      <div>{displayDateWithoutHours(completionTime)}</div>
-    </React.Fragment>;
-    case RegistrationStepStatus.BYPASSED:
-      return bypassedText(bypassTime);
-    default:
-      return;
-  }
-};
-
-const focusCompletionProps = lensOnProps(['completionTime', 'bypassTime']);
-
-const getTwoFactorContent = fp.flow(
-  focusCompletionProps(['twoFactorAuthCompletionTime', 'twoFactorAuthBypassTime']),
-  getCompleteOrBypassContent
-);
-
-const getControlledTierContent = fp.flow(
-  focusCompletionProps(['controlledTierCompletionTime', 'controlledTierBypassTime']),
-  getCompleteOrBypassContent
-);
-
 export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal,
@@ -259,85 +200,13 @@ export const ProfileComponent = fp.flow(
       }
     }
 
-    private getEraCommonsCardText(profile) {
-      switch (getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <div>
-          {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
-              <div> Username:</div>
-              <div> {profile.eraCommonsLinkedNihUsername} </div>
-          </React.Fragment>}
-          {profile.eraCommonsLinkExpireTime != null &&
-          //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
-          profile.eraCommonsLinkExpireTime !== 0
-          && <React.Fragment>
-              <div> Completed on:</div>
-              <div>
-                {displayDateWithoutHours(profile.eraCommonsCompletionTime)}
-              </div>
-          </React.Fragment>}
-        </div>;
-        case RegistrationStepStatus.BYPASSED:
-          return bypassedText(profile.twoFactorAuthBypassTime);
-        default:
-          return;
-      }
-    }
-
-    private getComplianceTrainingText(profile) {
-      switch (getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <React.Fragment>
-          <div>Training Completed</div>
-          <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
-        </React.Fragment>;
-        case RegistrationStepStatus.BYPASSED:
-          return bypassedText(profile.complianceTrainingBypassTime);
-        default:
-          return;
-      }
-    }
-
-    getRegistrationTasksMap() {
-      return getRegistrationTasksMap(this.props.navigate);
-    }
-
-    private getDUCCText(profile) {
-      const universalText = <a onClick={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
-      View code of conduct
-    </a>;
-      switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <React.Fragment>
-          <div>Signed On:</div>
-          <div>
-            {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
-          </div>
-          {universalText}
-        </React.Fragment>;
-        case RegistrationStepStatus.BYPASSED:
-          return <React.Fragment>
-          {bypassedText(profile.dataUseAgreementBypassTime)}
-          {universalText}
-        </React.Fragment>;
-        case RegistrationStepStatus.UNCOMPLETE:
-          return universalText;
-      }
-    }
-
     render() {
       const {
         profileState: {
           profile
         },
-        // TODO: when the controlled tier data is available fetch it from the profile
-        controlledTierProfile: {
-          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null
-        } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
-      const {enableComplianceTraining, enableEraCommons} =
-      serverConfigStore.get().config;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
@@ -573,71 +442,9 @@ export const ProfileComponent = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
-            {controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/>}
-            <div style={styles.title}>
-              Requirements for <AoU/> Workbench access
-            </div>
-            <hr style={{...styles.verticalLine}}/>
-            <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
-              {controlledTierEnabled && <ProfileRegistrationStepStatus
-                title={<span><AoU/> Controlled Tier Data Training</span>}
-                wasBypassed={!!controlledTierBypassTime}
-                incompleteButtonText={'Get Started'}
-                completedButtonText={'Completed'}
-                isComplete={!!(controlledTierCompletionTime || controlledTierBypassTime)}
-                // TODO: link to the training modules once they are available
-                completeStep={() => null}
-                content={getControlledTierContent({controlledTierCompletionTime, controlledTierBypassTime})}
-                >
-                <div>
-                  {!(controlledTierCompletionTime || controlledTierBypassTime) && <div>To be completed</div>}
-                  <ControlledTierBadge/>
-                </div>
-              </ProfileRegistrationStepStatus>}
-              <ProfileRegistrationStepStatus
-                title='Turn on Google 2-Step Verification'
-                wasBypassed={!!profile.twoFactorAuthBypassTime}
-                incompleteButtonText='Set Up'
-                completedButtonText={this.getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                isComplete={!!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={this.getRegistrationTasksMap()['twoFactorAuth'].onClick}
-                content={getTwoFactorContent(profile)}
-                >
-              </ProfileRegistrationStepStatus>
-              {enableEraCommons && <ProfileRegistrationStepStatus
-                  title='Connect Your eRA Commons Account'
-                  wasBypassed={!!profile.eraCommonsBypassTime}
-                  incompleteButtonText='Link'
-                  completedButtonText={this.getRegistrationTasksMap()['eraCommons'].completedText}
-                  isComplete={!!(this.getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={this.getRegistrationTasksMap()['eraCommons'].onClick}
-                  content={this.getEraCommonsCardText(profile)}
-                >
-              </ProfileRegistrationStepStatus>}
-              {enableComplianceTraining && <ProfileRegistrationStepStatus
-                  title={<span><AoU/> Responsible Conduct of Research Training</span>}
-                  wasBypassed={!!profile.complianceTrainingBypassTime}
-                  incompleteButtonText='Access Training'
-                  completedButtonText={this.getRegistrationTasksMap()['complianceTraining'].completedText}
-                  isComplete={!!(this.getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={this.getRegistrationTasksMap()['complianceTraining'].onClick}
-                  content={this.getComplianceTrainingText(profile)}
-                >
-              </ProfileRegistrationStepStatus>}
-              <ProfileRegistrationStepStatus
-                  title='Sign Data User Code Of Conduct'
-                  wasBypassed={!!profile.dataUseAgreementBypassTime}
-                  incompleteButtonText='Sign'
-                  completedButtonText={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  isComplete={!!(this.getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-                  completeStep={this.getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: 0}}
-                  content={this.getDUCCText(profile)}
-                >
-              </ProfileRegistrationStepStatus>
-            </div>
+            {/* controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/> */}
+            <ProfileAccessModules profile={profile}/>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
-
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>
               <div style={{color: colors.primary, fontSize: '14px'}}>

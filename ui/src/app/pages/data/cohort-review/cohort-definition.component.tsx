@@ -172,9 +172,9 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
   getFormattedString(acc, d) {
     if (d.domain === Domain.DRUG) {
       if (d.group === false) {
-        return acc === '' ? `RXNORM | ${d.value}` : `${acc}, ${d.value}`;
+        return acc === '' ? `RXNORM | ${d.name}` : `${acc}, ${d.name}`;
       } else {
-        return acc === '' ? `ATC | ${d.value}` : `${acc}, ${d.value}`;
+        return acc === '' ? `ATC | ${d.name}` : `${acc}, ${d.name}`;
       }
     } else if (d.domain === Domain.PHYSICALMEASUREMENT || d.domain === Domain.VISIT) {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
@@ -191,9 +191,9 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
       }
     } else {
       if (d.group === false) {
-        return acc === '' ? d.value : `${acc}, ${d.value}`;
+        return acc === '' ? d.name : `${acc}, ${d.name}`;
       } else {
-        return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`;
+        return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`;
       }
     }
   }

@@ -5,6 +5,8 @@ require_relative "./mysql_docker"
 
 class CloudSqlProxyContext < ServiceAccountContext
 
+  DOCKER_PROXY_NAME = 'rw_cloud_sql_proxy'
+
   def run()
     common = Common.new
     # TODO(dmohs): An error here does not cause the main thread to die.
@@ -21,10 +23,15 @@ class CloudSqlProxyContext < ServiceAccountContext
           })
         end
       else
+        if common.run(%W{docker kill #{DOCKER_PROXY_NAME}}).success?
+          common.warning "found and killed existing cloud sql proxy docker service"
+        end
         docker_container_id = common.capture_stdout(%W{docker run -d
              -u #{ENV["UID"]}
              -v #{@keyfile_path}:/config
              -p 0.0.0.0:3307:3307
+             --rm
+             --name #{DOCKER_PROXY_NAME}
              gcr.io/cloudsql-docker/gce-proxy:1.19.1 /cloud_sql_proxy
              -instances=#{instance}
              -credential_file=/config

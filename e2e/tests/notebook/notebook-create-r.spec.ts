@@ -2,6 +2,7 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language } from 'app/text-labels';
+import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -37,7 +38,7 @@ describe('Create R kernel notebook', () => {
       codeFile: 'resources/r-code/sys-print.R',
       markdownWorkaround: true
     });
-    expect(code2Output).toContain('success');
+    expect(code2Output).toMatch(/success$/);
 
     // Import R libs in Code cell [3].
     cellIndex = 3;
@@ -46,7 +47,7 @@ describe('Create R kernel notebook', () => {
       markdownWorkaround: true,
       timeOut: 5 * 60 * 1000
     });
-    expect(cell3Output).toContain('success');
+    expect(cell3Output).toMatch(/success$/);
 
     // Delete R notebook
     await notebook.deleteNotebook(rNotebookName);

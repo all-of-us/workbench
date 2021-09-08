@@ -105,8 +105,8 @@
     "enableFireCloudV2Billing" : false,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": false,
-    "enableStandardSourceDomains": false
+    "enableUnifiedUserAccessCron": true,
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -137,6 +137,7 @@
   },
   "offlineBatch": {
     "unsafeCloudTasksForwardingHost": "http:\/\/localhost:8081",
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }
