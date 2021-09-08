@@ -13,7 +13,7 @@ import {
   AuditTargetPropertyChange
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import * as React from 'react';
 import {useState} from 'react';
 

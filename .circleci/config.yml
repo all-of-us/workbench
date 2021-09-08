@@ -229,7 +229,7 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                command: REACT_APP_ENVIRONMENT=local yarn dev-up
+                command: yarn dev-up --configuration=local
                 background: true
       - unless:
           condition: << parameters.connect_local_api >>
@@ -455,7 +455,7 @@ jobs:
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
-          command: NODE_OPTIONS=--max_old_space_size=4096 yarn test --runInBand
+          command: yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui

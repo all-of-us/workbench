@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
 import {CSSProperties} from 'react';
+import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
 import {AlertDanger} from 'app/components/alert';
@@ -309,7 +310,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
-      if (key === 'Enter') {
+      if (key === Key.Enter) {
         if (value.trim().length < searchTrigger) {
           this.setState({inputErrors: ['Minimum criteria search length is two characters']});
         } else {

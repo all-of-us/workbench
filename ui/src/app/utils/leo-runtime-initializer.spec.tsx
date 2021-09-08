@@ -182,12 +182,12 @@ describe('RuntimeInitializer', () => {
     });
     await new Promise(setImmediate);
 
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
       gceConfig: {
         diskSize: 777,
         machineType: 'n1-standard-16'
       }
-    }), expect.any(Object));
+    }), jasmine.any(Object));
   });
 
   it('should use preset values during lazy runtime creation if a preset was selected', async() => {
@@ -208,12 +208,12 @@ describe('RuntimeInitializer', () => {
     });
     await new Promise(setImmediate);
 
-    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
       gceConfig: {
         diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
         machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
       }
-    }), expect.any(Object));
+    }), jasmine.any(Object));
   });
 
   it('should delete runtime if in an error state', async() => {

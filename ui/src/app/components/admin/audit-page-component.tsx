@@ -8,7 +8,7 @@ import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
 import {AuditAction, AuditLogEntry} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import * as React from 'react';
 
 const {useEffect, useState} = React;

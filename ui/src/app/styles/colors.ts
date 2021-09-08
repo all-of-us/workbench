@@ -1,4 +1,4 @@
-import Color from 'color';
+import * as Color from 'color';
 
 export default {
   // Style guide found here:

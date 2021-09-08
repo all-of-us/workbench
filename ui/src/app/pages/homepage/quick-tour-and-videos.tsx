@@ -12,13 +12,6 @@ import {useEffect, useRef, useState} from 'react';
 
 import {QuickTourReact} from './quick-tour-modal';
 
-import thumbnail from 'assets/images/QT-thumbnail.svg';
-import intro from 'assets/images/intro-workbench.png';
-import cohortBuilder from 'assets/images/cohort-builder.png';
-import datasetBuilder from 'assets/images/dataset-builder.png';
-import snippets from 'assets/images/notebook-code-snippets.png';
-import support from 'assets/images/user-support.png';
-
 export const styles = reactStyles({
   quickTourCardsRow: {
     justifyContent: 'flex-start',
@@ -63,22 +56,22 @@ export const QuickTourAndVideos = (props: Props) => {
   // The videoId parameters below are the YouTube ids that get inserted into the src url of the iframe
   const quickTourResources = [
     {
-      src: thumbnail,
+      src: '/assets/images/QT-thumbnail.svg',
       onClick: () => setShowQuickTour(true)
     }, {
-      src: intro,
+      src: '/assets/images/intro-workbench.png',
       onClick: () => openVideo('NTLJtwLcavo')
     }, {
-      src: cohortBuilder,
+      src: '/assets/images/cohort-builder.png',
       onClick: () => openVideo('G6_GG2CJ9mA')
     }, {
-      src: datasetBuilder,
+      src: '/assets/images/dataset-builder.png',
       onClick: () => openVideo('cUuDKUxjQoo')
     }, {
-      src: snippets,
+      src: '/assets/images/notebook-code-snippets.png',
       onClick: () => openVideo('NvMWBlVyyUU')
     }, {
-      src: support,
+      src: '/assets/images/user-support.png',
       onClick: () => openVideo('Ni4PEJVbmSk')
     }
   ];

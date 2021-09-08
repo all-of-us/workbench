@@ -47,7 +47,7 @@ export const InvalidBillingBanner = fp.flow(
         </Button>
         {enableBillingUpgrade && <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}
                                     onClick={() => {
-                                      props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
+                                      this.props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
                                     }}>
             Provide billing account
         </a>}

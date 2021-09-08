@@ -13,6 +13,7 @@ import {highlightSearchTerm, reactStyles, validateInputForMySQL} from 'app/utils
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, Domain} from 'generated/fetch';
+import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   searchContainer: {
@@ -249,15 +250,15 @@ export class SearchBar extends React.Component<Props, State> {
     }
   }
 
-  onKeyDown(key) {
+  onKeyDown(key: Key) {
     switch (key) {
-      case 'ArrowDown':
+      case Key.ArrowDown:
         this.moveDown();
         break;
-      case 'ArrowUp':
+      case Key.ArrowUp:
         this.moveUp();
         break;
-      case 'Enter':
+      case Key.Enter:
         this.enterSelect();
     }
   }

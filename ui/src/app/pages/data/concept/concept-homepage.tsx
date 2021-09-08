@@ -26,7 +26,9 @@ import {
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, Domain, DomainCard as ConceptDomainCard, DomainInfo, SurveyModule} from 'generated/fetch';
+import {Concept, Domain, DomainCard, DomainInfo, SurveyModule} from 'generated/fetch';
+import {Key} from 'ts-key-enum';
+
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
@@ -75,7 +77,7 @@ const styles = reactStyles({
 });
 
 const DomainCard: React.FunctionComponent<{
-  conceptDomainCard: ConceptDomainCard, conceptDomainInfo: DomainInfo, browseInDomain: Function, updating: boolean
+  conceptDomainCard: DomainCard, conceptDomainInfo: DomainInfo, browseInDomain: Function, updating: boolean
 }> = ({conceptDomainCard, conceptDomainInfo, browseInDomain, updating}) => {
   const {enableStandardSourceDomains} = serverConfigStore.get().config;
   // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
@@ -115,7 +117,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
     </DomainCardBase>;
   };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurementCard: ConceptDomainCard, physicalMeasurementInfo: DomainInfo,
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurementCard: DomainCard, physicalMeasurementInfo: DomainInfo,
   browsePhysicalMeasurements: Function, updating: boolean}> =
     ({physicalMeasurementCard, physicalMeasurementInfo, browsePhysicalMeasurements, updating}) => {
       const {enableStandardSourceDomains} = serverConfigStore.get().config;
@@ -147,7 +149,7 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps {
 
 interface State {
   // Array of domains and their metadata
-  conceptDomainCards: Array<ConceptDomainCard>;
+  conceptDomainCards: Array<DomainCard>;
   // Array of domains and their metadata
   conceptDomainList: Array<DomainInfo>;
   // Array of surveys
@@ -299,7 +301,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     handleSearchKeyPress(e) {
       const {currentInputString} = this.state;
       // search on enter key if no forbidden characters are present
-      if (e.key === 'Enter') {
+      if (e.key === Key.Enter) {
         if (currentInputString.trim().length < 3) {
           this.setState({inputErrors: [], showSearchError: true});
         } else {

@@ -10,7 +10,7 @@ import {
 } from 'generated/fetch';
 
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {AdminUserListResponse, EmptyResponse} from 'generated/fetch/api';
+import {EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ProfileStubVariables {
@@ -147,10 +147,4 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
-  public getAllUsers(): Promise<AdminUserListResponse> {
-    return Promise.resolve({users: [{
-      userId: 1,
-      username: ProfileStubVariables.PROFILE_STUB.username,
-    }]});
-  }
 }

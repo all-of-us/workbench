@@ -16,11 +16,11 @@ import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {workspaceStubs} from 'testing/stubs/workspaces';
+import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {navigateSpy} from 'testing/navigation-mock';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { mockNavigate } from 'setupTests';
 
 describe('NotebookRedirect', () => {
   const workspace = {
@@ -230,7 +230,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     // Simulate transition to deleting - should navigate away.
     act(() => {
@@ -243,7 +243,7 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(mockNavigate).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalled();
   });
 
 
@@ -267,7 +267,7 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
 
     // Simulate transition to updating.
     act(() => {
@@ -280,6 +280,6 @@ describe('NotebookRedirect', () => {
     });
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });

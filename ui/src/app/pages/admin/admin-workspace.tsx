@@ -1,7 +1,7 @@
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import * as moment from 'moment';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
@@ -29,7 +29,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   infoRow: {
@@ -70,14 +70,14 @@ const styles = reactStyles({
 
 const PurpleLabel = ({style = {}, children}) => {
   return <label style={{color: colors.primary, ...style}}>
-    {children}
+    {...children}
   </label>;
 };
 
 const WorkspaceInfoField = ({labelText, children}) => {
   return <FlexRow style={styles.infoRow}>
     <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
-    <div style={styles.infoValue}>{children}</div>
+    <div style={styles.infoValue}>{...children}</div>
   </FlexRow>;
 };
 
@@ -376,7 +376,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             <WorkspaceInfoField labelText='Last Modified Time'>{new Date(workspace.lastModifiedTime).toDateString()}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Workspace Published'>{workspace.published ? 'Yes' : 'No'}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Audit'>
-              {<Link to={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</Link>}
+              <a href={`/admin/workspace-audit/${workspace.namespace}`}>Audit History</a>
             </WorkspaceInfoField>
           </div>
           <h3>Collaborators</h3>
@@ -432,9 +432,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
               {workspace.researchPurpose.anticipatedFindings}
             </WorkspaceInfoField>
             {workspace.researchPurpose.populationDetails.length > 0 &&
-            <WorkspaceInfoField labelText='Population area(s) of focus'>
-              {getSelectedPopulations(workspace.researchPurpose)}
-            </WorkspaceInfoField>}
+              <WorkspaceInfoField labelText='Population area(s) of focus'>
+                {getSelectedPopulations(workspace.researchPurpose)}
+              </WorkspaceInfoField>}
           </div>
         </div>
 

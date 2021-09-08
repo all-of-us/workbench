@@ -21,8 +21,6 @@ import {
 import {environment} from 'environments/environment';
 import {useEffect, useState} from 'react';
 
-import backgroundImage from 'assets/images/BG-Pattern.png';
-
 const styles = reactStyles({
   appContainer: {
     width: '100%',
@@ -33,7 +31,7 @@ const styles = reactStyles({
     position: 'relative'
   },
   backgroundImage: {
-    backgroundImage: `url(${backgroundImage})`,
+    backgroundImage: 'url(\'/assets/images/BG-Pattern.png\')',
     backgroundSize: '80px', /* half the size of the image */
     width: '100%',
     height: '100%',

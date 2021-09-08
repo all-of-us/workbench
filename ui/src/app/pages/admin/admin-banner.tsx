@@ -6,7 +6,7 @@ import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
-import validate from 'validate.js';
+import * as validate from 'validate.js';
 
 const styles = {
   smallHeaderStyles: {
