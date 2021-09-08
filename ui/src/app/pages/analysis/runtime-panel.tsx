@@ -549,7 +549,7 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
                   options={validGpuNames}
                   onChange={
                     ({value}) => {
-                      setSelectedGpuType(fp.find(({ name: gpuName }) => gpuName === value, validGpuOptions).type); }
+                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type); }
                   }
                   disabled={disabled}
                   value={gpuTypeToDisplayName(selectedGpuType)}/>
