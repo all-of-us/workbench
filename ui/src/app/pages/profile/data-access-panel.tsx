@@ -21,17 +21,21 @@ const Tier = (props: TierProps) => {
 
   return environment.accessTiersVisibleToUsers.includes(shortName)
       ? <div style={styles.dataAccessTier}>
-    {shortName === AccessTierShortNames.Registered
-        ? <RegisteredTierBadge style={{gridArea: 'badge'}}/>
+        {shortName === AccessTierShortNames.Registered
+            ? <RegisteredTierBadge style={{gridArea: 'badge'}}/>
             : <ControlledTierBadge style={{gridArea: 'badge'}}/>}
-    <div style={{...styles.inputLabel, gridArea: 'label'}}>{displayName}</div>
-    {userHasAccess
-        ? <CheckCircle data-test-id={`${shortName}-tier-access-granted`} style={{gridArea: 'available'}} color={colors.success} size={23}/>
-        : <div data-test-id={`${shortName}-tier-access-denied`} style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
-          Please complete the data access requirements to gain access.
+        <div style={{...styles.inputLabel, gridArea: 'label'}}>{displayName}</div>
+        {userHasAccess
+            ? <CheckCircle
+                data-test-id={`${shortName}-tier-access-granted`}
+                style={{gridArea: 'available'}}
+                color={colors.success}
+                size={23}/>
+            : <div data-test-id={`${shortName}-tier-access-denied`} style={{ ...styles.dataAccessText, gridArea: 'primary'}}>
+              Please complete the data access requirements to gain access.
+        </div>}
         </div>
-    }
-  </div> : null;
+      : null;
 };
 
 export interface DataAccessPanelProps {
