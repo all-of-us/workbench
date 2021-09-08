@@ -125,10 +125,18 @@ compare_arrays() {
   arg2=$2[@]
   array2=("${!arg2}")
 
-  if [[ ${array1[*]} == ${array2[*]} ]] ; then
-      return
-  fi;
-  false
+  if [ ${#array1[*]} != ${#array2[*]} ]; then
+    false
+  fi
+  printf "%s\n" "arrays size equals"
+  for ii in ${!array1[*]}; do
+    if [ "${array1[$ii]}" != "${array2[$ii]}" ]; then
+      printf "%s\n" "arrays are not equals"
+      false
+    fi
+  done
+  printf "%s\n" "arrays are equals"
+  return
 }
 
 #********************
