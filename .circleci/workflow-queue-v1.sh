@@ -125,7 +125,7 @@ compare_arrays() {
   arg2=$2[@]
   array2=("${!arg2}")
 
-  if [ "${array1[@]}" == "${array2[@]}" ] ; then
+  if [[ "${array1[@]}" == "${array2[@]}" ]] ; then
       return
   fi;
   false
