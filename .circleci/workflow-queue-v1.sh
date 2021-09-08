@@ -182,9 +182,9 @@ printf "%s\n%s\n\n" "Currently running workflow_ids:" "${workflow_ids}"
 max_time=$((45 * 60))
 is_running=true
 waited_time=0
-# sleep_time and time_counter must be same.
-sleep_time="20s"
-sleep_time_counter=20
+# 25 seconds. The sleep_time and time_counter must be same.
+sleep_time="25s"
+sleep_time_counter=25
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
@@ -221,7 +221,7 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
-    if [[ $running_jobs ]] && [[ $not_created_jobs ]]; then
+    if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
