@@ -32,7 +32,8 @@ export const styles = reactStyles({
   },
   dataAccessText: {
     fontWeight: 500,
-    color: colors.primary
+    color: colors.primary,
+    lineHeight: '22px',
   },
   longInputContainerStyle: {
     width: 420,
