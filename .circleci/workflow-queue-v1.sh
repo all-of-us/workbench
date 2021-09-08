@@ -127,8 +127,7 @@ compare_arrays() {
   # ${#array1[*]} returns the number of elements in array
   if [ ${#array1[*]} != ${#array2[*]} ]; then
     printf "%s\n" "arrays size are not equals"
-    retval=false
-    return 1
+    false
   fi
   printf "%s\n" "arrays size are equals"
 
@@ -136,14 +135,12 @@ compare_arrays() {
   for ii in ${!array1[*]}; do
     if [ "${array1[$ii]}" != "${array2[$ii]}" ]; then
       printf "%s\n" "arrays are not equals"
-      retval=false
-      return 1
+      false
     fi
   done
 
   printf "%s\n" "arrays are equals"
-  retval=true
-  return 0
+  return
 }
 
 #********************
