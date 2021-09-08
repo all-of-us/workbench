@@ -217,13 +217,11 @@ while [[ "${is_running}" == "true" ]]; do
     created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
     printf "\n%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
-
-    is_running_all_jobs=(`compare_arrays JOB_LIST created_job_names`)
-    # not_created_jobs=$__
-    printf "\n%s\n" "Jobs that have not been created:" "${is_running_all_jobs}"
+    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_job_names[@]} | tr ' ' '\n' | sort | uniq -u `)
+    printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
-    if [[ $running_jobs ]] && [[ ! $is_running_all_jobs ]]; then
+    if [[ $running_jobs ]] && [[ $not_created_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
