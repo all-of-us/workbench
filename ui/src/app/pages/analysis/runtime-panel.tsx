@@ -317,8 +317,8 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         the standard VM compute type within this workspace.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at {formatUsd(diskPricePerMonth * pdSize)} per month.
-        You can delete your disk at any time  via the runtime panel.
+        You will continue to incur persistent disk cost at <b>{formatUsd(diskPricePerMonth * pdSize)}</b> per month.
+        You can delete your disk at any time via the runtime panel.
       </p>
     </div>
     <div style={styles.confirmWarning}>
@@ -372,7 +372,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         Since the persistent disk is not attached, the application configuration and cloud compute profile will remain.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 4}}>
-        You will continue to incur persistent disk cost at {formatUsd(diskPricePerMonth * pdSize)} per month.
+        You will continue to incur persistent disk cost at <b>{formatUsd(diskPricePerMonth * pdSize)}</b> per month.
       </p>
     </div>
   </div>;
