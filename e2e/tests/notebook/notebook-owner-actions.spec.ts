@@ -74,10 +74,19 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
     const analysisPage = new WorkspaceAnalysisPage(page);
     await analysisPage.waitForLoad();
 
-    // Duplicate notebook.
-    const cloneNotebookName = await analysisPage.duplicateNotebook(notebookName);
+    // Before clone notebook, check to see if a notebook with cloneNotebookName is found. If yes, delete it now.
+    const cloneNotebookName = `Duplicate of ${notebookName}`;
 
-    // Rename notebook.
+    const dataResourceCard = new DataResourceCard(page);
+    let cardExists = await dataResourceCard.cardExists(cloneNotebookName, ResourceCard.Notebook);
+    if (cardExists) {
+      await analysisPage.deleteResource(cloneNotebookName, ResourceCard.Notebook);
+    }
+
+    // Start clone notebook.
+    await analysisPage.duplicateNotebook(notebookName);
+
+    // Rename notebook clone.
     const newNotebookName = makeRandomName('e2e-notebook');
     const modalTextContents = await analysisPage.renameResource(
       cloneNotebookName,
@@ -87,8 +96,7 @@ describe('Workspace OWNER notebook snowman menu actions', () => {
     expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}`);
 
     // Notebook card with new name is found.
-    const dataResourceCard = new DataResourceCard(page);
-    let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
+    cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
     expect(cardExists).toBe(true);
 
     // Notebook card with old name is not found.
