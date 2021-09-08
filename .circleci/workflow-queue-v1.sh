@@ -206,21 +206,12 @@ while [[ "${is_running}" == "true" ]]; do
     running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
     printf "\n%s\n%s\n\n" "Jobs that are running or queued:" "${running_jobs}"
 
-
-    # Find just the running/queued jobs.
-    # fetch_running_jobs "${id}"
-    # running_jobs=$__
-    # printf "\n%s\n%s\n" "Active workflow:" "${running_jobs}"
-
-    # V1 "/project/" api response does not show jobs that have not been created.
-    # We need to compare created job list against expected job list.
-    # jobs=$(echo ${running_jobs} | jq .job_name)
-    # printf "\n%s\n" "Jobs that have been created:" "${jobs}"
-
     # Find jobs that have not created in CircleCI.
     created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
     printf "\n%s\n%s\n" "created_job_names:" "${created_job_names}"
 
+    # V1 "/project/" api response does not show jobs that have not been created.
+    # We need to compare created job list against expected job list.
     not_created_jobs=(`echo ${JOB_LIST[@]} ${created_job_names[@]} | tr ' ' '\n' | sort | uniq -u `)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
