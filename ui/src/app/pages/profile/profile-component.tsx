@@ -115,13 +115,11 @@ export const ProfileComponent = fp.flow(
     async componentDidMount() {
       this.props.hideSpinner();
       try {
-        const details = await institutionApi().getPublicInstitutionDetails();
+        const publicInstitutionDetails = institutionApi().getPublicInstitutionDetails();
+        const systemAccessTiers = accessTierApi().getAccessTierShortNames();
         this.setState({
-          institutions: details.institutions
-        });
-        const systemAccessTiers = await accessTierApi().getAccessTierShortNames();
-        this.setState({
-          systemAccessTiers
+          institutions: (await publicInstitutionDetails).institutions,
+          systemAccessTiers: await systemAccessTiers,
         });
       } catch (e) {
         reportError(e);
