@@ -82,8 +82,8 @@
     },
     {
       "cdrVersionId": 6,
-      "isDefault": true,
       "name": "All of Us Registered Tier Dataset v4",
+      "isDefault": true,
       "accessTier": "registered",
       "bigqueryProject": "fc-aou-cdr-prod",
       "bigqueryDataset": "R2020Q4R3",

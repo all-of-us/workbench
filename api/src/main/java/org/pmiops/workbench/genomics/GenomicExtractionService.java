@@ -249,7 +249,7 @@ public class GenomicExtractionService {
                                     + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".query_project",
-                                "\"" + workspace.getWorkspaceNamespace() + "\"")
+                                "\"" + workspace.getGoogleProject() + "\"")
                             .put(
                                 EXTRACT_WORKFLOW_NAME + ".extraction_uuid",
                                 "\"" + extractionUuid + "\"")

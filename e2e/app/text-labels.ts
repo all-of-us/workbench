@@ -64,6 +64,7 @@ export enum LinkText {
   AllSurveys = 'All Surveys',
   ApplyModifiers = 'APPLY MODIFIERS',
   ApplyRecreate = 'APPLY & RECREATE',
+  Audit = 'AUDIT',
   Back = 'Back',
   BackToCohort = 'Back to cohort',
   BackToReviewSet = 'Back to review set',
@@ -90,10 +91,12 @@ export enum LinkText {
   DeleteConceptSet = 'Delete Concept Set',
   DeleteDataset = 'Delete Dataset',
   DeleteEnvironment = 'Delete Environment',
+  DeletePd = 'Delete Persistent Disk',
   DeleteNotebook = 'Delete Notebook',
   DeleteWorkspace = 'Delete Workspace',
   Demographics = 'Demographics',
   DiscardChanges = 'Discard Changes',
+  DownloadSql = 'DOWNLOAD SQL',
   DuplicateWorkspace = 'Duplicate Workspace',
   Edit = 'Edit',
   Export = 'Export',
@@ -153,3 +156,13 @@ export enum SideBarLink {
   WorkspaceMenu,
   EditAnnotations
 }
+
+export const InstitutionSelectValue = {
+  Vanderbilt: 'Vanderbilt University Medical Center',
+  Broad: 'Broad Institute',
+  Verily: 'Verily LLC',
+  NationalInstituteHealth: 'National Institute of Health',
+  Wondros: 'Wondros',
+  AdminTesting: 'Admin Testing',
+  DummyMaster: 'Dummy Master'
+};

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ElementHandle, Page } from 'puppeteer';
+import { ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import { LinkText, ResourceCard } from 'app/text-labels';
@@ -12,6 +12,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
+import RadioButton from 'app/element/radiobutton';
 
 // CSS selectors
 const CssSelector = {
@@ -56,7 +57,7 @@ export default class NotebookPage extends NotebookFrame {
     }
     // When open notebook for the first time, notebook websocket can close unexpectedly that causes kernel disconnect unexpectedly.
     // Thus, a longer sleep interval is required.
-    await this.waitForKernelIdle(10 * 60 * 1000, 20000); // 10 minutes
+    await this.waitForKernelIdle(10 * 60 * 1000, 10000); // 10 minutes
     return true;
   }
 
@@ -115,12 +116,45 @@ export default class NotebookPage extends NotebookFrame {
     const saveButton = await frame.waitForSelector(CssSelector.saveNotebookButton, { visible: true });
     await saveButton.click();
     await saveButton.dispose();
+    // Puppeteer slowmo is not set and playback is very fast.
+    // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
+    // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
+    await this.page.waitForTimeout(2000);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
+    const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickFileMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.downloadMenuDropdown, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click File menu -> Download.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
     const frame = await this.getIFrame();
-    await frame.waitForXPath(Xpath.fileMenuDropdown, { visible: true }).then((element) => element.click());
-    await frame.waitForXPath(Xpath.downloadMenuDropdown, { visible: true }).then((element) => element.hover());
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
     const menuOption = await frame.waitForXPath(formatXpath, { visible: true });
     await menuOption.hover();
     await menuOption.click();
@@ -152,7 +186,7 @@ export default class NotebookPage extends NotebookFrame {
   /**
    * Wait for notebook kernel becomes ready (idle).
    */
-  async waitForKernelIdle(timeOut = 300000, sleepInterval = 10000): Promise<boolean> {
+  async waitForKernelIdle(timeOut = 300000, sleepInterval = 5000): Promise<boolean> {
     // Check kernel status twice with a pause between two checks because kernel status can suddenly become not ready.
     let ready = false;
     const startTime = Date.now();
@@ -228,7 +262,7 @@ export default class NotebookPage extends NotebookFrame {
     if (code !== undefined && codeFile !== undefined) {
       throw new Error('Code and codeFile parameters are both defined. Only one is required in runCodeCell method.');
     }
-    let notebookCode;
+    let notebookCode: string;
     if (code !== undefined) {
       notebookCode = code;
     } else if (codeFile !== undefined) {
@@ -291,6 +325,8 @@ export default class NotebookPage extends NotebookFrame {
 
     // Click 'delete environment' then Delete buttons.
     await runtimePanel.clickButton(LinkText.DeleteEnvironment);
+    // Select "Delete gce runtime and pd" radiobutton.
+    await RadioButton.findByName(this.page, { dataTestId: 'delete-runtime' }).select();
     await runtimePanel.clickButton(LinkText.Delete);
 
     const notebookPreviewPage = new NotebookPreviewPage(this.page);
@@ -301,6 +337,18 @@ export default class NotebookPage extends NotebookFrame {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
     await runtimePanel.close();
+  }
+
+  /**
+   * Delete unattached persistent disk
+   */
+  async deleteUnattachedPd(): Promise<void> {
+    // Open runtime panel
+    const runtimePanel = new RuntimePanel(this.page);
+    await runtimePanel.open();
+
+    // Click 'delete persistent disk' then Delete buttons.
+    await runtimePanel.deleteUnattachedPd();
   }
 
   private async findRunButton(timeout?: number): Promise<ElementHandle> {

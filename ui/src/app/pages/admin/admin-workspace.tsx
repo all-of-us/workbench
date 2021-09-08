@@ -13,12 +13,13 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
+import {hasNewValidProps, reactStyles} from 'app/utils';
 import {useNavigation} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems
 } from 'app/utils/research-purpose';
+import { MatchParams } from 'app/utils/stores';
 import {
   CloudStorageTraffic,
   FileDetail,
@@ -28,6 +29,7 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ReactFragment, useState} from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const styles = reactStyles({
   infoRow: {
@@ -206,7 +208,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   </FlexColumn>;
 };
 
-interface Props extends UrlParamsProps, WithSpinnerOverlayProps {}
+interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
 interface State {
   workspaceDetails?: WorkspaceAdminView;
@@ -233,8 +235,14 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
     this.getFederatedWorkspaceInformation();
   }
 
+  componentDidUpdate(prevProps) {
+    if (hasNewValidProps(this.props, prevProps, [p => p.match.params])) {
+      this.getFederatedWorkspaceInformation();
+    }
+  }
+
   async getFederatedWorkspaceInformation() {
-    const {urlParams: { workspaceNamespace } } = this.props;
+    const {ns} = this.props.match.params;
 
     this.setState({
       loadingData: true,
@@ -242,9 +250,9 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
 
     try {
       // Fire off all requests in parallel
-      const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(workspaceNamespace);
-      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(workspaceNamespace);
-      const filesPromise = workspaceAdminApi().listFiles(workspaceNamespace);
+      const workspaceDetailsPromise = workspaceAdminApi().getWorkspaceAdminView(ns);
+      const cloudStorageTrafficPromise = workspaceAdminApi().getCloudStorageTraffic(ns);
+      const filesPromise = workspaceAdminApi().listFiles(ns);
       // Wait for all promises to complete before updating state.
       const [workspaceDetails, cloudStorageTraffic, files] =
           await Promise.all([workspaceDetailsPromise, cloudStorageTrafficPromise, filesPromise]);
@@ -322,7 +330,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   private async deleteRuntime() {
     await workspaceAdminApi().deleteRuntimesInWorkspace(
-      this.props.urlParams.workspaceNamespace,
+      this.props.match.params.ns,
       {runtimesToDelete: [this.state.runtimeToDelete.runtimeName]});
     this.setState({runtimeToDelete: null});
     await this.getFederatedWorkspaceInformation();
@@ -494,4 +502,4 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 }
 
-export const AdminWorkspace = withUrlParams()(AdminWorkspaceImpl);
+export const AdminWorkspace = withRouter(AdminWorkspaceImpl);

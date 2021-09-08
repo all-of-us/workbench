@@ -61,12 +61,16 @@ export interface EnvironmentBase {
   captchaSiteKey: string;
   // Enable workbench footer on the signed in pages
   enableFooter: boolean;
+
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
+
+  // use the new Data Access Requirements page in place of the Registration Dashboard
+  enableDataAccessRequirements: boolean;
 }
 
 export interface Environment extends EnvironmentBase {

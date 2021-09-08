@@ -10,6 +10,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.PublicInstitutionDetails;
+import org.pmiops.workbench.model.UserTierEligibility;
 
 public interface InstitutionService {
   List<Institution> getInstitutions();
@@ -114,4 +115,11 @@ public interface InstitutionService {
 
   /** Returns {@code true} if eRA commons is required for given tier. */
   boolean eRaRequiredForTier(Institution institution, String accessTierShortName);
+
+  /**
+   * Returns the access tiers that the user's institution allow the user to join.
+   *
+   * @return
+   */
+  List<UserTierEligibility> getUserTierEligibilities(DbUser user);
 }

@@ -106,6 +106,7 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
+    "enableUnifiedUserAccessCron": false,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
@@ -122,8 +123,8 @@
     "maxRowsPerInsert": 2500
   },
   "ras": {
-    "host": "",
-    "clientId": ""
+    "host": "https:\/\/sts.nih.gov",
+    "clientId": "d139ec98-5c24-4076-a103-e020a558bea0"
   },
   "accessRenewal": {
     "expiryDays": 3650,
@@ -131,6 +132,7 @@
     "lookbackPeriod": 330
   },
   "offlineBatch": {
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }

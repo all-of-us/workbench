@@ -2755,6 +2755,26 @@ paths:
       responses:
         200:
           description: 'Audit ran successfully (possibly with audit findings)'
+  "/v1/cloudTask/synchronizeUserAccess":
+    post:
+      tags:
+      - cloudTaskUser
+      - cloudTask
+      security: []
+      description: "Audits the provided user's access to GCP resources"
+      operationId: synchronizeUserAccess
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: Users to synchronize.
+        schema:
+          "$ref": "#/definitions/SynchronizeUserAccessRequest"
+      responses:
+        200:
+          description: 'User synchronization ran successfully'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -5706,6 +5726,11 @@ definitions:
         type: array
         items:
           type: string
+      tierEligibilities:
+        type: array
+        description: User eligibility of each acces tier based on their institution's tier requirements.
+        items:
+          "$ref": "#/definitions/UserTierEligibility"
       degrees:
         type: array
         items:
@@ -8455,6 +8480,16 @@ definitions:
           type: integer
           format: int64
 
+  SynchronizeUserAccessRequest:
+    type: object
+    properties:
+      userIds:
+        description: 'List of users to synchronize'
+        type: array
+        items:
+          type: integer
+          format: int64
+
   WorkspaceAuditLogQueryResponse:
     type: object
     description: >
@@ -9426,3 +9461,18 @@ definitions:
     enum:
       - DISABLED
       - ENABLED
+  UserTierEligibility:
+    type: object
+    properties:
+      accessTierShortName:
+        description: Short name of access tier.
+        type: string
+      eligible:
+         type: boolean
+         description: |-
+          User eligibility for tiers is based on their contact emails and their institution's tier
+          requirements. This does not mean the user has access to these tiers; to gain
+          access, the user must still complete all the necessary access requirement steps for each tier.
+      eraRequired:
+         type: boolean
+         description: If eRA Commons linking is required for this access tier.

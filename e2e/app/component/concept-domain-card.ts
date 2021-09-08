@@ -2,7 +2,7 @@ import { Page } from 'puppeteer';
 import Button from 'app/element/button';
 import Container from 'app/container';
 import { getPropValue } from 'utils/element-utils';
-import CriteriaSearchPage from '../page/criteria-search-page';
+import CriteriaSearchPage from 'app/page/criteria-search-page';
 
 export enum Domain {
   Conditions = 'Conditions',

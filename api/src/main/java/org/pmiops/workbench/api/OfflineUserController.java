@@ -8,9 +8,11 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -35,17 +37,20 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private final UserService userService;
   private final DirectoryService directoryService;
   private final TaskQueueService taskQueueService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public OfflineUserController(
       AccessTierService accessTierService,
       UserService userService,
       DirectoryService directoryService,
-      TaskQueueService taskQueueService) {
+      TaskQueueService taskQueueService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.accessTierService = accessTierService;
     this.userService = userService;
     this.directoryService = directoryService;
     this.taskQueueService = taskQueueService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -67,6 +72,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      // Functionality now handled by synchronizeUserAccess.
+      return ResponseEntity.noContent().build();
+    }
+
     int errorCount = 0;
     int userCount = 0;
     int completionChangeCount = 0;
@@ -105,6 +115,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncTwoFactorAuthStatus() {
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      // Functionality now handled by synchronizeUserAccess.
+      return ResponseEntity.noContent().build();
+    }
+
     int errorCount = 0;
     int userCount = 0;
     int completionChangeCount = 0;
@@ -157,14 +172,18 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> synchronizeUserAccess() {
-    userService
-        .getAllUsers()
-        .forEach(
-            user -> {
-              // This will update the access tiers for a given user, based on compliance rules
-              // If a user is no longer compliant it will remove them from an access tier
-              userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
-            });
+    if (workbenchConfigProvider.get().featureFlags.enableUnifiedUserAccessCron) {
+      taskQueueService.groupAndPushSynchronizeAccessTasks(userService.getAllUserIds());
+    } else {
+      userService
+          .getAllUsers()
+          .forEach(
+              user -> {
+                // This will update the access tiers for a given user, based on compliance rules
+                // If a user is no longer compliant it will remove them from an access tier
+                userService.updateUserWithRetries(Function.identity(), user, Agent.asSystem());
+              });
+    }
     return ResponseEntity.noContent().build();
   }
 

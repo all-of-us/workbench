@@ -15,10 +15,15 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  protected async isSignedIn(): Promise<boolean> {
+  protected async isSignedIn(timeout = 60 * 1000): Promise<boolean> {
     return this.page
-      .waitForSelector(signedInIndicator, { timeout: 3 * 60 * 1000 })
-      .then((elemt) => elemt.asElement() !== null);
+      .waitForSelector(signedInIndicator, { timeout })
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   }
 
   /**
@@ -31,7 +36,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isSignedIn();
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) {
+      throw new Error(`Failed to find signed-in web-element. xpath="${signedInIndicator}"`);
+    }
     await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
     const pageTitle = await this.page.title();
@@ -44,6 +52,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async loadPageUrl(url: string): Promise<void> {
     await this.gotoUrl(url);
+    const signedIn = await this.isSignedIn(5000);
+    if (!signedIn) {
+      await this.page.reload();
+    }
     await this.waitForLoad();
   }
 

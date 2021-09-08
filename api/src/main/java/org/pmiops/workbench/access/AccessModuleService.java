@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessModule.AccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.AccessModule;
@@ -16,6 +17,14 @@ public interface AccessModuleService {
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */
   List<AccessModuleStatus> getAccessModuleStatus(DbUser user);
+
+  /**
+   * Retrieves a specific {@link AccessModuleStatus} for a user.
+   *
+   * @return
+   */
+  Optional<AccessModuleStatus> getAccessModuleStatus(
+      DbUser user, AccessModuleName accessModuleName);
 
   /**
    * Returns true is the access module compliant.

@@ -92,7 +92,7 @@ export const WorkspaceRoutes = () => {
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks/:nbName`}>
       <NotebookRedirectPage routeData={{
-        pathElementForTitle: 'nbName', // use the (urldecoded) captured value nbName
+        pathElementForTitle: 'nbName',
         breadcrumb: BreadcrumbType.Notebook,
         // The iframe we use to display the Jupyter notebook does something strange
         // to the height calculation of the container, which is normally set to auto.

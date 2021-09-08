@@ -49,6 +49,22 @@ public class TestMockFactory {
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
+  /**
+   * Populate the list of expected Access Modules with appropriate properties. See
+   * http://broad.io/aou-access-modules-2021.
+   *
+   * <p>TWO_FACTOR_AUTH and ERA_COMMONS: bypassable and not subject to AAR (expirable)
+   *
+   * <p>DATA_USER_CODE_OF_CONDUCT and RT_COMPLIANCE_TRAINING: bypassable and expirable
+   *
+   * <p>PROFILE_CONFIRMATION and PUBLICATION_CONFIRMATION: expirable and not bypassable
+   *
+   * <p>When considering new modules, the simplest option for implementation purposes is to make
+   * them bypassable and non-expirable. So we should default to this, unless required for product
+   * reasons.
+   *
+   * <p>RAS_LOGIN_GOV and CT_COMPLIANCE_TRAINING are bypassable and non-expirable for this reason.
+   */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
           new DbAccessModule()
@@ -70,6 +86,10 @@ public class TestMockFactory {
           new DbAccessModule()
               .setName(AccessModuleName.RT_COMPLIANCE_TRAINING)
               .setExpirable(true)
+              .setBypassable(true),
+          new DbAccessModule()
+              .setName(AccessModuleName.CT_COMPLIANCE_TRAINING)
+              .setExpirable(false)
               .setBypassable(true),
           new DbAccessModule()
               .setName(AccessModuleName.PROFILE_CONFIRMATION)

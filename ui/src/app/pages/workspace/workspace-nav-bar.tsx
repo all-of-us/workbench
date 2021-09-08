@@ -9,8 +9,7 @@ import colors from 'app/styles/colors';
 import {
   reactStyles,
   withCdrVersions,
-  withCurrentWorkspace,
-  withUrlParams
+  withCurrentWorkspace
 } from 'app/utils';
 import {
   getCdrVersion,
@@ -20,6 +19,7 @@ import {
 import {useNavigation} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
+import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({
@@ -138,12 +138,12 @@ function restrictTab(workspace, tab) {
 
 export const WorkspaceNavBar = fp.flow(
   withCurrentWorkspace(),
-  withUrlParams(),
   withCdrVersions()
 )(props => {
-  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
+  const {tabPath, workspace, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
   const [navigate, ] = useNavigation();
+  const {ns, wsid} = useParams();
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;
@@ -156,7 +156,7 @@ export const WorkspaceNavBar = fp.flow(
         disabled={disabled}
         style={{...styles.tab, ...(selected ? styles.active : {}), ...(disabled ? styles.disabled : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => navigate(['workspaces', namespace, id, link])}
+        onClick={() => navigate(['workspaces', ns, wsid, link])}
       >
         {name}
       </Clickable>

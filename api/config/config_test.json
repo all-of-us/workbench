@@ -105,8 +105,9 @@
     "enableFireCloudV2Billing" : false,
     "enableGpu": true,
     "enablePersistentDisk": true,
-    "enableAccessModuleRewrite" : true,
-    "enableStandardSourceDomains": false
+    "enableAccessModuleRewrite": true,
+    "enableUnifiedUserAccessCron": true,
+    "enableStandardSourceDomains": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -136,6 +137,7 @@
     "lookbackPeriod": 330
   },
   "offlineBatch": {
-    "usersPerAuditTask": 20
+    "usersPerAuditTask": 20,
+    "usersPerSynchronizeAccessTask": 50
   }
 }

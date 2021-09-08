@@ -1,6 +1,7 @@
 import {Guard} from 'app/components/app-router';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {authStore, profileStore} from 'app/utils/stores';
+import {environment} from 'environments/environment';
 
 export const signInGuard: Guard = {
   allowed: (): boolean => {
@@ -16,7 +17,7 @@ export const disabledGuard = (userDisabled: boolean): Guard => ({
 
 export const registrationGuard: Guard = {
   allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
-  redirectPath: '/'
+  redirectPath: environment.enableDataAccessRequirements ? '/data-access-requirements' : '/'
 };
 
 export const expiredGuard: Guard = {

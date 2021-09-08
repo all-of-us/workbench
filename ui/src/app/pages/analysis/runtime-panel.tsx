@@ -49,7 +49,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {diskStore, runtimeStore, serverConfigStore, useStore, withStore} from 'app/utils/stores';
 
-import {CheckBox} from 'app/components/inputs';
+import {CheckBox, RadioButton} from 'app/components/inputs';
 import {AoU} from 'app/components/text-wrappers';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import {supportUrls} from 'app/utils/zendesk';
@@ -162,6 +162,8 @@ const styles = reactStyles({
   }
 });
 
+const MIN_DISK_SIZE_GB = 60;
+
 const defaultMachineName = 'n1-standard-4';
 const defaultMachineType: Machine = findMachineByName(defaultMachineName);
 const defaultDiskSize = 100;
@@ -250,8 +252,13 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
 
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label ><input type= 'radio' checked={deleting === true} onChange={() => setDeleting(true)}/>
-          Delete persistent disk</label></h3>
+        <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setDeleting(true)}
+                       checked={deleting === true}/>
+          <label>Delete persistent disk</label>
+        </div>
+      </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk.
       </p>
@@ -298,9 +305,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const standardvmDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label><input type='radio' checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
-                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
-          Keep persistent disk, delete application configuration and compute profile</label>
+        <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton name='ageType'
+                       style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+          <label>Keep persistent disk, delete application configuration and compute profile</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Please save your analysis data in the directory /home/jupyter/notebooks to ensure it’s
@@ -318,10 +329,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label><input type='radio'
-                      checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}
-                      onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}/>
-          Delete everything, including persistent disk</label>
+        <div data-test-id='delete-runtime-and-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton name='ageType'
+                       style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD}/>
+          <label>Delete everything, including persistent disk</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk.
@@ -334,12 +348,13 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
   const dataprocDeleteOption = <div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label >
-          <input type= 'radio'
-                 checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
-                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}/>
-          Delete application configuration and cloud compute profile
-        </label></h3>
+        <div data-test-id='delete-runtime' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}/>
+          <label>Delete application configuration and cloud compute profile</label>
+        </div>
+      </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         You’re about to delete your cloud analysis environment.
       </p>
@@ -349,11 +364,12 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
     <div style={styles.confirmWarning}>
       <h3 style={{...styles.baseHeader, ...styles.bold, gridColumn: 1, gridRow: 1}}>
-        <label >
-          <input type= 'radio'
-                 checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}
-                 onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}/>
-          Delete unattached persistent disk</label>
+        <div data-test-id='delete-unattached-pd' style={{display: 'inline-block', marginRight: '0.5rem'}}>
+          <RadioButton style={{marginRight: '0.25rem'}}
+                       onChange={() => setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)}
+                       checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}/>
+          <label>Delete unattached persistent disk</label>
+        </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your unattached persistent disk, which will also delete all files on the disk.
@@ -575,7 +591,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   const {
     workerMachineType = defaultMachineName,
-    workerDiskSize = 50,
+    workerDiskSize = MIN_DISK_SIZE_GB,
     numberOfWorkers = 2,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
@@ -814,7 +830,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
             <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
-          </Clickable>
+          </Clickable>Delete Environment
         </FlexRow>
       </TooltipTrigger>
     }
@@ -1228,7 +1244,7 @@ const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
   // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
   // persistent disk.
   const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
@@ -1236,14 +1252,14 @@ const RuntimePanel = fp.flow(
         ? 4000
         : 64000;
     const message = {
-      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
-      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
-      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+      standard: `^Disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between ${MIN_DISK_SIZE_GB} and ${maxDiskSize} GB`
     };
 
     return {
       numericality: {
-        greaterThanOrEqualTo: 50,
+        greaterThanOrEqualTo: MIN_DISK_SIZE_GB,
         lessThanOrEqualTo: maxDiskSize,
         message: message[diskType]
       }
@@ -1395,7 +1411,7 @@ const RuntimePanel = fp.flow(
             </Fragment>
       ],
       [PanelContent.DeleteRuntime, () => {
-        if (runtimeCtx.enablePD) {
+        if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
           return  <ConfirmDeleteRuntimeWithPD
               onConfirm={async(runtimeStatusReq) => {
                 await setRuntimeStatus(runtimeStatusReq);
@@ -1519,7 +1535,7 @@ const RuntimePanel = fp.flow(
               }
             </FlexRow>
             </div>
-        {runtimeExists && runtimeChanged &&
+           {runtimeExists && updateMessaging.warn &&
              <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>{updateMessaging.warn}</div>
              </WarningMessage>
@@ -1534,7 +1550,7 @@ const RuntimePanel = fp.flow(
               {getWarningMessageContent()}
             </WarningMessage>
            }
-        {runtimeCtx.unattachedPdExists ?
+        {runtimeCtx.unattachedPdExists && !runtimeExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
                 <Link
                     style={{...styles.deleteLink, ...(

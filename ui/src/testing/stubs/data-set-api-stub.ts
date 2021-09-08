@@ -23,7 +23,8 @@ export const stubDataSet = (): DataSet => ({
   lastModifiedTime: 10000,
   conceptSets: [],
   cohorts: [],
-  domainValuePairs: []
+  domainValuePairs: [],
+  prePackagedConceptSet: [],
 });
 
 export class DataSetApiStub extends DataSetApi {

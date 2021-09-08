@@ -12,7 +12,7 @@ import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {reactStyles, withCdrVersions, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -94,7 +94,7 @@ const WorkspaceInfoTooltipText = () => {
   </div>;
 };
 
-export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
+export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
 (class extends React.Component<WorkspaceProps, WorkspaceState> {
 
   constructor(props) {

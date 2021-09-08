@@ -9,8 +9,7 @@ import {
   currentWorkspaceStore,
   globalErrorStore,
   queryParamsStore,
-  routeConfigDataStore,
-  urlParamsStore
+  routeConfigDataStore
 } from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -298,14 +297,6 @@ export const withUserProfile = () => {
   return withStore(profileStore, 'profileState');
 };
 
-// HOC that provides a 'urlParams' prop with the current url params object
-export const withUrlParams = () => {
-  return connectBehaviorSubject(urlParamsStore, 'urlParams');
-};
-export interface UrlParamsProps {
-  urlParams: { [key: string]: any; };
-}
-
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
@@ -395,7 +386,7 @@ export function hasNewValidProps(currProps, prevProps, fieldsToCompare) {
 export function debouncer(action, sensitivityMs) {
   let t = Date.now();
 
-  const timer = setInterval(() => {
+  const timer = global.setInterval(() => {
     if (Date.now() - t < sensitivityMs) {
       action();
     }

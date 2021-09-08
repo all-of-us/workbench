@@ -2,8 +2,22 @@ import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {disksApi, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {DEFAULT, switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
-import {AutopauseMinuteThresholds, ComputeType, findMachineByName, Machine} from 'app/utils/machines';
-import {compoundRuntimeOpStore, diskStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, serverConfigStore, useStore} from 'app/utils/stores';
+import {
+  AutopauseMinuteThresholds,
+  ComputeType,
+  DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
+  findMachineByName,
+  Machine
+} from 'app/utils/machines';
+import {
+  compoundRuntimeOpStore,
+  diskStore,
+  markCompoundRuntimeOperationCompleted,
+  registerCompoundRuntimeOperation,
+  runtimeStore,
+  serverConfigStore,
+  useStore
+} from 'app/utils/stores';
 
 import {DataprocConfig, GpuConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -72,7 +86,8 @@ export const diffsToUpdateMessaging = (diffs: RuntimeDiff[]): UpdateMessaging =>
     [RuntimeDiffState.NEEDS_DELETE_PD, () => ({
       applyAction: 'APPLY & RECREATE',
       warn: 'Reducing the size of a persistent disk requires it to be deleted and recreated. This will delete all files on the disk.',
-      warnMore: 'If you want to save some files permanently, such as input data, analysis outputs, or installed packages, move them to the workspace bucket. \n' +
+      warnMore: 'If you want to save some files permanently, such as input data, analysis outputs, ' +
+          'or installed packages, move them to the workspace bucket. \n' +
           'Note: Jupyter notebooks are autosaved to the workspace bucket, and deleting your disk will not delete your notebooks.'
     })],
     [RuntimeDiffState.NEEDS_DELETE_RUNTIME, () => ({
@@ -269,12 +284,10 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
 };
 
 const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  const oldAutopauseThreshold = oldRuntime.autopauseThreshold;
-  const newAutopauseThreshold = newRuntime.autopauseThreshold;
-
-  if (!oldAutopauseThreshold || !newAutopauseThreshold) {
-    return null;
-  }
+  const oldAutopauseThreshold = oldRuntime.autopauseThreshold === null || oldRuntime.autopauseThreshold === undefined
+    ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : oldRuntime.autopauseThreshold;
+  const newAutopauseThreshold = newRuntime.autopauseThreshold == null || newRuntime.autopauseThreshold === undefined
+    ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : newRuntime.autopauseThreshold;
 
   return {
     desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',

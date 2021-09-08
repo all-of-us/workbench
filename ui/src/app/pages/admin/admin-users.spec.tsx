@@ -9,7 +9,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
 
 
-describe('AdminUser', () => {
+describe('AdminUsers', () => {
   let props: {profile: Profile, hideSpinner: () => {}, showSpinner: () => {}};
 
   const component = () => {

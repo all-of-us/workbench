@@ -10,8 +10,10 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils';
+import {reactStyles, summarizeErrors} from 'app/utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
+import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
@@ -32,15 +34,22 @@ const styles = reactStyles({
   }
 });
 
-export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.Component<
-  {
-    annotationDefinitions: CohortAnnotationDefinition[],
-    onCancel: Function,
-    onCreate: Function,
-    urlParams: any
-  },
-  {name: string, annotationType: AnnotationType, enumValues: string[], saving: boolean}
-> {
+interface ModalProps extends RouteComponentProps {
+  annotationDefinitions: CohortAnnotationDefinition[];
+  cohortId: number;
+  onCancel: Function;
+  onCreate: Function;
+  workspace: WorkspaceData;
+}
+
+interface ModalState {
+  name: string;
+  annotationType: AnnotationType;
+  enumValues: string[];
+  saving: boolean;
+}
+
+export const AddAnnotationDefinitionModal = withRouter(class extends React.Component<ModalProps, ModalState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -53,12 +62,12 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
 
   async create() {
     try {
-      const {onCreate, urlParams: {ns, wsid, cid}} = this.props;
+      const {onCreate, cohortId, workspace: {namespace, id}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
       const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
-        ns, wsid, cid, {
-          cohortId: cid,
+        namespace, id, cohortId, {
+          cohortId: cohortId,
           columnName: name,
           annotationType,
           enumValues: annotationType === AnnotationType.ENUM ? enumValues : undefined
@@ -149,12 +158,11 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
   }
 });
 
-export const EditAnnotationDefinitionsModal = withUrlParams()(class extends React.Component<
+export const EditAnnotationDefinitionsModal = withRouter(class extends React.Component<
   {
     onClose: Function,
     annotationDefinitions: CohortAnnotationDefinition[],
-    setAnnotationDefinitions: Function,
-    urlParams: any
+    setAnnotationDefinitions: Function
   },
   {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
     renameError: boolean}
@@ -167,10 +175,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
 
   async delete(id) {
     try {
-      const {
-        annotationDefinitions, onClose, setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
-      } = this.props;
+      const {annotationDefinitions, onClose, setAnnotationDefinitions} = this.props;
+      const {params: {ns, wsid, cid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review'});
       this.setState({busy: true});
       await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(ns, wsid, cid, id);
       setAnnotationDefinitions(
@@ -188,11 +194,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
 
   async rename() {
     try {
-      const {
-        annotationDefinitions,
-        setAnnotationDefinitions,
-        urlParams: {ns, wsid, cid}
-      } = this.props;
+      const {annotationDefinitions, setAnnotationDefinitions} = this.props;
+      const {params: {ns, wsid, cid}} = matchPath(location.pathname, {path: '/workspaces/:ns/:wsid/data/cohorts/:cid/review'});
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
         this.setState({busy: true});

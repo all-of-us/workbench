@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
+import com.google.api.services.directory.model.User;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -373,8 +374,7 @@ public class UserServiceTest extends SpringTest {
 
   @Test
   public void testSyncTwoFactorAuthStatus() {
-    com.google.api.services.directory.model.User googleUser =
-        new com.google.api.services.directory.model.User();
+    User googleUser = new User();
     googleUser.setPrimaryEmail(USERNAME);
     googleUser.setIsEnrolledIn2Sv(true);
 

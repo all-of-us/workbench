@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileAccessModules;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -127,6 +128,8 @@ public class ProfileService {
 
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
+    final List<UserTierEligibility> userTierEligibilities =
+        institutionService.getUserTierEligibilities(user);
 
     final List<AccessModuleStatus> accessModuleStatuses =
         accessModuleService.getAccessModuleStatus(userLite);
@@ -147,6 +150,7 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
+        userTierEligibilities,
         accessModules);
   }
 

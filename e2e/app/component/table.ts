@@ -23,6 +23,11 @@ export default class Table extends Container {
     return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
+  async getCellLink(rowIndex: number, columnIndex: number): Promise<ElementHandle> {
+    const cellXpath = this.getCellXpath(rowIndex, columnIndex) + '/a';
+    return this.page.waitForXPath(cellXpath, { visible: true });
+  }
+
   async getCellValue(rowIndex: number, columnIndex: number): Promise<string> {
     const handle = await this.getCell(rowIndex, columnIndex);
     return getPropValue<string>(handle, 'innerText');

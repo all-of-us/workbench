@@ -4,12 +4,12 @@ import GoogleLoginPage from 'app/page/google-login';
 import { config } from 'resources/workbench-config';
 import { waitForText } from 'utils/waits-utils';
 
-describe('User registration UI tests:', () => {
-  test('Loading registration workflow', async () => {
+describe('Account creation UI tests:', () => {
+  test('Can navigate the new user account creation workflow', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
 
-    // Click the create account button to start new-user-registration flow.
+    // Click the create account button to start the new user account creation flow.
     await loginPage.clickCreateAccountButton();
 
     const createAccountPage = new CreateAccountPage(page);
@@ -84,7 +84,7 @@ describe('User registration UI tests:', () => {
 
     // the NEXT button on User Information page should be disabled until all required fields are filled
     const userInforPageButton = createAccountPage.getNextButton();
-    await userInforPageButton.isDisplayed();
+    await userInforPageButton.isVisible();
     const cursor = await userInforPageButton.isCursorNotAllowed();
     expect(cursor).toEqual(true);
   });
