@@ -157,7 +157,7 @@ if [[ -z $pipeline_workflow_ids ]]; then
 fi
 # Filter out duplicate workflow id.
 workflow_ids=$(echo $pipeline_workflow_ids | tr ' ' '\n' | sort --u)
-printf "%s\n%s\n\n" "Currently running workflow_ids are:" "${workflow_ids}"
+printf "%s\n%s\n\n" "Currently running workflow_ids:" "${workflow_ids}"
 
 
 # Max wait time until workflows have finished is 45 minutes because e2e tests may take a long time to finish.
@@ -181,9 +181,9 @@ while [[ "${is_running}" == "true" ]]; do
     created_jobs=$__
     printf "\n%s\n%s\n" "Jobs that have been created:" "${created_jobs}"
 
-    # Find just the running/queued jobs.
-    running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
-    printf "\n%s\n%s\n" "Jobs that are running or queued:" "${running_jobs}"
+    # Find running/queued jobs only.
+    # running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
+    # printf "\n%s\n%s\n" "Jobs that are running or queued:" "${running_jobs}"
 
 
     # Find just the running/queued jobs.
@@ -197,12 +197,11 @@ while [[ "${is_running}" == "true" ]]; do
     # printf "\n%s\n" "Jobs that have been created:" "${jobs}"
 
     # Find jobs that have not created in CircleCI.
-    created_jobs_list=$(echo ${created_jobs} | jq -r ".job_name")
-    printf "%s\n%s\n" "created_jobs_list:" "${created_jobs_list}"
+    created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
+    printf "%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
     printf "%s\n%s\n" "JOB_LIST:" "${JOB_LIST[@]}"
-
-    compare_arrays "${JOB_LIST}" "${created_jobs_list}"
+    compare_arrays "${JOB_LIST}" "${created_job_names}"
     not_created_jobs=$__
     # not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
