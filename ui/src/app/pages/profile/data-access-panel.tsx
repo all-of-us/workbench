@@ -8,26 +8,19 @@ import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
 import {useNavigation} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 
 
 interface TierProps {
   shortName: string;
-  presentInEnvironment: boolean;
   userHasAccess: boolean;
 }
 const Tier = (props: TierProps) => {
-  const {shortName, presentInEnvironment, userHasAccess} = props;
+  const {shortName, userHasAccess} = props;
   const displayName = displayNameForTier(shortName);
 
-  return presentInEnvironment ? <div style={{
-    marginBottom: '0.9rem',
-    display: 'grid',
-    columnGap: '0.25rem',
-    width: 459,
-    gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
-    gridTemplateAreas: `"badge label available"
-                          ". primary primary"`
-  }}>
+  return environment.accessTiersVisibleToUsers.includes(shortName)
+      ? <div style={styles.dataAccessTier}>
     {shortName === AccessTierShortNames.Registered
         ? <RegisteredTierBadge style={{gridArea: 'badge'}}/>
             : <ControlledTierBadge style={{gridArea: 'badge'}}/>}
@@ -42,11 +35,10 @@ const Tier = (props: TierProps) => {
 };
 
 export interface DataAccessPanelProps {
-  accessTiersInEnvironment: string[];
   userAccessTiers: string[];
 }
 export const DataAccessPanel = (props: DataAccessPanelProps) => {
-  const {accessTiersInEnvironment, userAccessTiers} = props;
+  const {userAccessTiers} = props;
 
   const [navigate, ] = useNavigation();
 
@@ -66,7 +58,6 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
         <Tier
             key={tier}
             shortName={tier}
-            presentInEnvironment={accessTiersInEnvironment.includes(tier)}
             userHasAccess={userAccessTiers.includes(tier)}/>)}
   </section>;
 };

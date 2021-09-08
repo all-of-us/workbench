@@ -21,6 +21,15 @@ export const styles = reactStyles({
     fontSize: 14,
     marginRight: 20
   },
+  dataAccessTier: {
+    marginBottom: '0.9rem',
+    display: 'grid',
+    columnGap: '0.25rem',
+    width: 459,
+    gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
+    gridTemplateAreas: `"badge label available"
+                        ". primary primary"`
+  },
   dataAccessText: {
     fontWeight: 500,
     color: colors.primary

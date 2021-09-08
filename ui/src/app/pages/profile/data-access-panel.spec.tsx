@@ -4,6 +4,8 @@ import * as React from 'react';
 import {DataAccessPanel, DataAccessPanelProps} from 'app/pages/profile/data-access-panel';
 import {cdrVersionStore} from 'app/utils/stores';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {environment} from 'environments/environment';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const findRTGranted = (wrapper) => wrapper.find(`[data-test-id="registered-tier-access-granted"]`);
 const findRTDenied = (wrapper) => wrapper.find(`[data-test-id="registered-tier-access-denied"]`);
@@ -33,35 +35,41 @@ describe('Data Access Panel', () => {
 
   beforeEach(() => {
     cdrVersionStore.set(cdrVersionTiersResponse);
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
   });
 
   it('Should show success status for registered tier when the user has access', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered', 'controlled'], userAccessTiers: ['registered']});
+
+    const wrapper = component({userAccessTiers: ['registered']});
     expectAccessStatus(wrapper, true, false);
   });
 
   it('Should show success status for controlled tier when the user has access', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered', 'controlled'], userAccessTiers: ['controlled']});
+    const wrapper = component({userAccessTiers: ['controlled']});
     expectAccessStatus(wrapper, false, true);
   });
 
   it('Should show success status when the user is in the registered tier and controlled tier', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered', 'controlled'], userAccessTiers: ['registered', 'controlled']});
+    const wrapper = component({userAccessTiers: ['registered', 'controlled']});
     expectAccessStatus(wrapper, true, true);
   });
 
   it('Should not show success status when the user is not in the registered tier or controlled tier', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered', 'controlled'], userAccessTiers: []});
+    const wrapper = component({userAccessTiers: []});
     expectAccessStatus(wrapper, false, false);
   });
 
   it('Should only show the registered tier in environments without a controlled tier (user has access)', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered'], userAccessTiers: ['registered']});
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+
+    const wrapper = component({userAccessTiers: ['registered']});
     expectAccessStatusRtOnly(wrapper, true);
   });
   
   it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async() => {
-    const wrapper = component({accessTiersInEnvironment: ['registered'], userAccessTiers: []});
+    environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
+
+    const wrapper = component({userAccessTiers: []});
     expectAccessStatusRtOnly(wrapper, false);
   });
 });

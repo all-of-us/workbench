@@ -19,7 +19,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {styles} from 'app/pages/profile/profile-styles';
-import {accessTierApi, institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
+import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
@@ -69,7 +69,6 @@ interface ProfilePageState {
   institutions: Array<PublicInstitutionDetails>;
   showDemographicSurveyModal: boolean;
   updating: boolean;
-  systemAccessTiers: string[];
 }
 export const ProfileComponent = fp.flow(
   withUserProfile(),
@@ -88,7 +87,6 @@ export const ProfileComponent = fp.flow(
         institutions: [],
         showDemographicSurveyModal: false,
         updating: false,
-        systemAccessTiers: [],
       };
     }
     static displayName = 'ProfilePage';
@@ -115,12 +113,8 @@ export const ProfileComponent = fp.flow(
     async componentDidMount() {
       this.props.hideSpinner();
       try {
-        const publicInstitutionDetails = institutionApi().getPublicInstitutionDetails();
-        const systemAccessTiers = accessTierApi().getAccessTierShortNames();
-        this.setState({
-          institutions: (await publicInstitutionDetails).institutions,
-          systemAccessTiers: await systemAccessTiers,
-        });
+        const {institutions} = await institutionApi().getPublicInstitutionDetails();
+        this.setState({institutions});
       } catch (e) {
         reportError(e);
       }
@@ -212,7 +206,7 @@ export const ProfileComponent = fp.flow(
           profile
         },
       } = this.props;
-      const {currentProfile, updating, showDemographicSurveyModal, systemAccessTiers} = this.state;
+      const {currentProfile, updating, showDemographicSurveyModal} = this.state;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
@@ -450,7 +444,7 @@ export const ProfileComponent = fp.flow(
               </FlexRow>}
             </div>
             {environment.enableDataAccessRequirements ?
-                <DataAccessPanel accessTiersInEnvironment={systemAccessTiers} userAccessTiers={profile.accessTierShortNames}/> :
+                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
                 <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
