@@ -119,9 +119,13 @@ fetch_running_jobs() {
 }
 
 compare_arrays() {
-  A=${1}[@];
-  B=${2}[@];
-  if [ "$A" == "$B" ] ; then
+  local -n arg1=$1[@]
+  local -n array1=("${!arg1}")
+
+  local -n arg2=$1[@]
+  local -n array2=("${!arg2}")
+
+  if [ "${array1[@]}" == "${array2[@]}" ] ; then
       return
   fi;
   false
@@ -201,11 +205,8 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
     printf "\n%s\n%s\n" "JOB_LIST:" "${JOB_LIST[@]}"
-    # compare_arrays "${JOB_LIST}" "${created_job_names}"
-    # not_created_jobs=$__
-    # not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
-
-    not_created_jobs=(`printf '%s\n' "${JOB_LIST[@]}" "${created_job_names[@]}" | sort | uniq -u`)
+    compare_arrays JOB_LIST created_job_names
+    not_created_jobs=$__
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
