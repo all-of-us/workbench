@@ -23,11 +23,6 @@ import {AccountCreationInstitution} from 'app/pages/login/account-creation/accou
 import {environment} from 'environments/environment';
 import * as React from 'react';
 
-import landingBackgroundImage from 'assets/images/login-group.png';
-import landingSmallerBackgroundImage from 'assets/images/login-standing.png';
-import successBackgroundImage from 'assets/images/congrats-female.png';
-import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
-
 // A template function which returns the appropriate style config based on window size and
 // background images.
 export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImageConfig) => {
@@ -102,12 +97,12 @@ interface BackgroundImageConfig {
 
 export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map([
   [SignInStep.LANDING, {
-    backgroundImgSrc: landingBackgroundImage,
-    smallerBackgroundImgSrc: landingSmallerBackgroundImage
+    backgroundImgSrc: '/assets/images/login-group.png',
+    smallerBackgroundImgSrc: '/assets/images/login-standing.png'
   }],
   [SignInStep.SUCCESS_PAGE, {
-    backgroundImgSrc: successBackgroundImage,
-    smallerBackgroundImgSrc: successSmallerBackgroundImage
+    backgroundImgSrc: '/assets/images/congrats-female.png',
+    smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
   }]]
 );
 
@@ -254,7 +249,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         }}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
-          filePath='/aou-tos.html'
+          filePath='/assets/documents/aou-tos.html'
           onComplete={() => {
             AnalyticsTracker.Registration.TOS();
             this.setState({

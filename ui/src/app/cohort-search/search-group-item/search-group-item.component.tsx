@@ -15,6 +15,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, Domain, Modifier, ModifierType, ResourceType, SearchGroupItem as Item, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
   menu: {
@@ -140,7 +141,7 @@ interface State {
   loading: boolean;
   paramListOpen: boolean;
   renaming: boolean;
-  timeout: NodeJS.Timeout;
+  timeout: Timeout;
 }
 
 export const SearchGroupItem = withCurrentWorkspace()(
@@ -215,7 +216,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
       this.updateSearchRequest('status', 'pending', true);
-      const timeout: NodeJS.Timeout = global.setTimeout(() => {
+      const timeout: Timeout = global.setTimeout(() => {
         this.updateSearchRequest(null, null, false, true);
       }, 10000);
       this.setState({timeout});

@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CSSProperties} from 'react';
+import {CSSProperties, PropsWithChildren} from 'react';
 import {Link as RouterLink} from 'react-router-dom';
 
 import {Clickable} from 'app/components/buttons';
@@ -94,11 +94,10 @@ function canDelete(resource: WorkspaceResource): boolean {
   return resource.permission === 'OWNER' || resource.permission === 'WRITER';
 }
 
-interface NavProps {
+interface NavProps extends PropsWithChildren<any> {
   resource: WorkspaceResource;
   linkTestId?: string;
   style?: CSSProperties;
-  children: string | React.ReactNode;
 }
 
 const ResourceNavigation = (props: NavProps) => {
@@ -118,7 +117,7 @@ const ResourceNavigation = (props: NavProps) => {
 
   return <Clickable disabled={!canNavigate()}>
     <RouterLink to={url} style={style} data-test-id={linkTestId} onClick={() => onNavigate()}>
-      {children}
+      {...children}
     </RouterLink>
   </Clickable>;
 };

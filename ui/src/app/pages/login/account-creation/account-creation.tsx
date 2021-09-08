@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
-import validate from 'validate.js';
+import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';

@@ -17,7 +17,7 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {useNavigation} from 'app/utils/navigation';
-import {MatchParams, serverConfigStore} from 'app/utils/stores';
+import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {useParams} from 'react-router-dom';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
@@ -143,7 +143,7 @@ export const WorkspaceNavBar = fp.flow(
   const {tabPath, workspace, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
   const [navigate, ] = useNavigation();
-  const {ns, wsid} = useParams<MatchParams>();
+  const {ns, wsid} = useParams();
 
   const navTab = (currentTab, disabled) => {
     const {name, link} = currentTab;

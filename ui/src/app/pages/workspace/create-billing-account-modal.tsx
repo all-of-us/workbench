@@ -116,7 +116,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
     username
   }} = useStore(profileStore);
   const [currentStep, setCurrentStep] = useState(0);
-  const [phoneNumber, setPhoneNumber] = useState<string>();
+  const [phoneNumber, setPhoneNumber] = useState();
   const [invalidPhoneNumberInput, setInvalidPhoneNumberInput] = useState<boolean>(null);
   const [useCreditCard, setUseCreditCard] = useState<boolean>(null);
   const [nihFunded, setNihFunded] = useState<boolean>(null);

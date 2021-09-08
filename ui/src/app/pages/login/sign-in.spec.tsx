@@ -39,7 +39,7 @@ describe('SignInReact', () => {
     const wrapper = component();
     const templateImage = wrapper.find('[data-test-id="sign-in-page"]').hostNodes();
     const backgroundImage = templateImage.prop('style').backgroundImage;
-    expect(backgroundImage).toBe('url(\'' + 'login-group.png' + '\')');
+    expect(backgroundImage).toBe('url(\'' + '/assets/images/login-group.png' + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe('SignInReact', () => {
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
-      .toBe('url(\'' + 'login-standing.png' + '\')');
+      .toBe('url(\'' + '/assets/images/login-standing.png' + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 

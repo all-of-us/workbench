@@ -16,9 +16,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
 import {useEffect, useState} from 'react';
 
-import cohortImg from 'assets/images/cohort-diagram.svg';
-import dataSetImg from 'assets/images/dataset-diagram.svg';
-
 const styles = {
   cardButtonArea: {
     display: 'flex',
@@ -75,6 +72,10 @@ const descriptions = {
   be exported for analysis. `,
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
+
+const cohortImg = '/assets/images/cohort-diagram.svg';
+
+const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 const resourceTypesToFetch = [ResourceType.COHORT, ResourceType.COHORTREVIEW, ResourceType.CONCEPTSET, ResourceType.DATASET];
 
@@ -176,7 +177,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
-              <img data-test-id={"cohort-diagram"} src={cohortImg}/>
+              <img src={cohortImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>
@@ -199,7 +200,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             {/*Because the container can stretch based on window size, but the height
                can't we set a max width to cap the height based on aspect ratio*/}
             <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
-              <img data-test-id={"dataset-diagram"} src={dataSetImg}/>
+              <img src={dataSetImg}/>
             </div>
           </CardButton>
         </TooltipTrigger>
