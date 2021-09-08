@@ -106,7 +106,7 @@ describe('Cohort UI Test', () => {
 
     const resultsTable = await group1.getSearchResultsTable();
     const originalRowNum = (await resultsTable.getRows()).length;
-    console.log(`originalRowNum: ${originalRowNum}`);
+    expect(originalRowNum).toBeGreaterThanOrEqual(1);
 
     // Search by description.
     const description = 'surgical pathology';

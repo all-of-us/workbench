@@ -385,8 +385,6 @@ export async function waitWhileLoading(
 
   // Prevent checking on Login page.
   await page.waitForSelector('[data-test-id="sign-in-page"]', { timeout: 1000 }).catch(() => {
-    // Ignore error because this is not a signed-in page.
-    console.log('Unauthenticated');
     return;
   });
 
