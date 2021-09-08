@@ -378,7 +378,7 @@ public class UserServiceTest extends SpringTest {
     googleUser.setPrimaryEmail(USERNAME);
     googleUser.setIsEnrolledIn2Sv(true);
 
-    when(mockDirectoryService.getUser(USERNAME)).thenReturn(googleUser);
+    when(mockDirectoryService.getUserOrThrow(USERNAME)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
