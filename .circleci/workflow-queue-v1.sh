@@ -177,6 +177,7 @@ while [[ "${is_running}" == "true" ]]; do
     running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
     printf "\n%s\n%s\n" "Jobs that are running or queued:" "${running_jobs}"
 
+
     # Find just the running/queued jobs.
     # fetch_running_jobs "${id}"
     # running_jobs=$__
@@ -188,7 +189,10 @@ while [[ "${is_running}" == "true" ]]; do
     # printf "\n%s\n" "Jobs that have been created:" "${jobs}"
 
     # Find jobs that have not created in CircleCI.
-    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs[@]} ${created_jobs[@]} | tr ' ' '\n' | sort | uniq -u`)
+    created_jobs_list=$(echo ${created_jobs} | jq ".job_name")
+    printf "%s\n%s\n" "created_jobs_list:" "${created_jobs_list}"
+
+    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_jobs_list[@]} ${created_jobs_list[@]} | tr ' ' '\n' | sort | uniq -u`)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
