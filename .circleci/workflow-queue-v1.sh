@@ -127,7 +127,8 @@ compare_arrays() {
   # ${#array1[*]} returns the number of elements in array
   if [ ${#array1[*]} != ${#array2[*]} ]; then
     printf "%s\n" "arrays size are not equals"
-    return false
+    false
+    return
   fi
   printf "%s\n" "arrays size are equals"
 
@@ -135,12 +136,14 @@ compare_arrays() {
   for ii in ${!array1[*]}; do
     if [ "${array1[$ii]}" != "${array2[$ii]}" ]; then
       printf "%s\n" "arrays are not equals"
-      return false
+      false
+      return
     fi
   done
 
   printf "%s\n" "arrays are equals"
-  return true
+  true
+  return
 }
 
 #********************
@@ -217,12 +220,12 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n%s\n" "created_jobs_list:" "${created_job_names}"
 
 
-    not_created_jobs=$(compare_arrays JOB_LIST created_job_names)
+    is_running_all_jobs=$(compare_arrays JOB_LIST created_job_names)
     # not_created_jobs=$__
-    printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs[@]}"
+    printf "\n%s\n" "Jobs that have not been created:" "${is_running_all_jobs}"
 
     # Wait while there is a job still is running or there is a job that has not been created.
-    if [[ $running_jobs ]] && [[ $not_created_jobs ]]; then
+    if [[ $running_jobs ]] && [[ ! $is_running_all_jobs ]]; then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
