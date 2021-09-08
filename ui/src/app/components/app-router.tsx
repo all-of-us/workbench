@@ -20,6 +20,10 @@ export const usePath = () => {
   return path;
 };
 
+export const parseQueryParams = (search: string) => {
+  return new URLSearchParams(search);
+}
+
 const useQuery = () => {
   const searchString = useLocation().search.replace(/^\?/, '');
   return querystring.parse(searchString);
