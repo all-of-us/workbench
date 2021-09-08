@@ -19,9 +19,12 @@ import {
 import {Attribute, Criteria, Domain, Modifier} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
+import arrowLeft from 'assets/icons/arrow-left-regular.svg';
+import times from 'assets/icons/times-light.svg';
+
 const proIcons = {
-  arrowLeft: '/assets/icons/arrow-left-regular.svg',
-  times: '/assets/icons/times-light.svg'
+  arrowLeft: arrowLeft,
+  times: times
 };
 
 const styles = reactStyles({

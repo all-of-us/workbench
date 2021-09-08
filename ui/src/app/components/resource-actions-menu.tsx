@@ -3,7 +3,7 @@ import * as React from 'react';
 import {MenuItem, SnowmanButton} from './buttons';
 import {PopupTrigger, TooltipTrigger} from './popups';
 
-interface Action {
+export interface Action {
   icon?: string;
   faIcon?: IconDefinition;
   displayName: string;
@@ -12,7 +12,7 @@ interface Action {
   hoverText?: string;
 }
 
-const ResourceActionsMenu = (props: { actions: Action[] }) => {
+export const ResourceActionsMenu = (props: { actions: Action[] }) => {
   const {actions} = props;
   return <PopupTrigger
         data-test-id='resource-card-menu'
@@ -37,8 +37,4 @@ const ResourceActionsMenu = (props: { actions: Action[] }) => {
     >
         <SnowmanButton data-test-id='resource-menu'/>
     </PopupTrigger>;
-};
-export {
-    Action,
-    ResourceActionsMenu,
 };

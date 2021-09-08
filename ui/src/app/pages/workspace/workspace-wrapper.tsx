@@ -4,7 +4,11 @@ import {WorkspaceNavBar} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceRoutes} from 'app/routing/workspace-app-routing';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {withCurrentWorkspace} from 'app/utils';
-import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
+import {
+  ExceededActionCountError,
+  LeoRuntimeInitializationAbortedError,
+  LeoRuntimeInitializer
+} from 'app/utils/leo-runtime-initializer';
 import {currentWorkspaceStore, nextWorkspaceWarmupStore} from 'app/utils/navigation';
 import {diskStore, MatchParams, routeDataStore, runtimeStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
@@ -42,7 +46,9 @@ export const WorkspaceWrapper = fp.flow(
         // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
         // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
         // initialization here.
-        if (!(e instanceof ExceededActionCountError)) {
+        // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
+        // away from a page during a poll.
+        if (!(e instanceof ExceededActionCountError || e instanceof LeoRuntimeInitializationAbortedError)) {
           throw e;
         }
       }
