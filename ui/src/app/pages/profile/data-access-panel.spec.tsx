@@ -65,7 +65,7 @@ describe('Data Access Panel', () => {
     const wrapper = component({userAccessTiers: ['registered']});
     expectAccessStatusRtOnly(wrapper, true);
   });
-  
+
   it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async() => {
     environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
