@@ -327,18 +327,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     async initialBillingAccountLoad() {
+      const freeTierBillingAccount: BillingAccount = {
+        name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
+        isFreeTier: true,
+        isOpen: true,
+        displayName: 'Use All of Us initial credits',
+      };
       // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
       // or fetch user's available billing accounts.
       // When creating/duplicating workspace, show free tier billing account.
       // When editing existing workspace, show free tier if that is currently being used or 'User Provided Billing Account'
       // if it is user's billing account.
-      if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
-        const freeTierBillingAccount: BillingAccount = {
-          name: 'billingAccounts/' + serverConfigStore.get().config.freeTierBillingAccountId,
-          isFreeTier: true,
-          isOpen: true,
-          displayName: 'Use All of Us initial credits',
-        };
+      if (!serverConfigStore.get().config.enableBillingUpgrade) {
+        this.setState({billingAccounts: [freeTierBillingAccount]});
+      } else if (serverConfigStore.get().config.enableBillingUpgrade && !hasBillingScope()) {
+        console.log('!!!!!1111111');
         if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState(prevState => fp.set(
               ['workspace', 'billingAccountName'],
@@ -362,12 +365,16 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           }
         }
       } else {
+        console.log('!!!!!111111122222');
         await this.fetchBillingAccounts();
       }
     }
 
     async fetchBillingAccounts() {
+      console.log('!!!!!1111111222224444444');
+      console.log(this.props.workspaceEditMode);
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+      console.log(billingAccounts);
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
         const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
         if (maybeFreeTierAccount) {
@@ -377,8 +384,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             prevState));
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        console.log('!!!!!111111122222444444455555566666666');
+        console.log(this.props.workspace.billingAccountName);
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.googleProject);
-
+        console.log('!!!!!1111111222224444444555555');
+        console.log(fetchedBillingInfo);
         if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
           // If the user has owner access on the workspace but does not have access to the billing account
           // that it is attached to, keep the server's current value for billingAccountName and add a shim
@@ -416,6 +426,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         }
       }
       this.setState({billingAccounts});
+      console.log(billingAccounts);
     }
 
     async requestBillingScopeThenFetchBillingAccount() {
