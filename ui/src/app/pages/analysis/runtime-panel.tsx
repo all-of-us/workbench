@@ -254,7 +254,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
         </div>
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
-        Deletes your persistent disk, which will also delete all files on the disk. Also deletes your analysis environment.
+        Deletes your persistent disk, which will also delete all files on the disk.
       </p>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
         If you want to permanently save some files from the disk before deleting it,
@@ -333,9 +333,6 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
       </h3>
       <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 2}}>
         Deletes your persistent disk, which will also delete all files on the disk. Also deletes your analysis environment.
-      </p>
-      <p style={{...styles.confirmWarningText, gridColumn: 1, gridRow: 3}}>
-        Also deletes your application configuration and cloud compute profile
       </p>
     </div>
   </div>;
