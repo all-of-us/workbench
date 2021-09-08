@@ -536,7 +536,8 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
 
   return <FlexColumn style={{marginTop: '1rem', justifyContent: 'space-between'}}>
     <FlexRow >
-      <CheckBox label='Enable GPUs'
+      <CheckBox id={`enable-gpu`}
+                label='Enable GPUs'
                 checked={enableGpu}
                 onChange={() => {
                   setEnableGpu(!enableGpu);
