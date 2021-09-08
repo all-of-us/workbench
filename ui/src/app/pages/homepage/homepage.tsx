@@ -313,7 +313,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const {workbenchAccessTasks} = parseQueryString();
+      const {workbenchAccessTasks} = this.parseQueryString();
 
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
