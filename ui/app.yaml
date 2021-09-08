@@ -5,8 +5,8 @@ default_expiration: "2m"
 
 handlers:
 - url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|mp4|pdf|png|svg|ttf|woff|woff2))
-  static_files: dist/\1
-  upload: dist/(.*)
+  static_files: build/\1
+  upload: build/(.*)
   secure: always
   http_headers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
@@ -14,8 +14,8 @@ handlers:
     X-Content-Type-Options: "nosniff"
     Content-Security-Policy: "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'self'; report-uri /content-security-report"
 - url: /.*
-  static_files: dist/index.html
-  upload: dist/index.html
+  static_files: build/index.html
+  upload: build/index.html
   secure: always
   http_headers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
@@ -78,6 +78,6 @@ handlers:
       report-uri /content-security-index-report"
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
-# Skip everything not starting with "dist".
+# Skip everything not starting with "build".
 skip_files:
-- ^(?!dist).*$
+- ^(?!build).*$

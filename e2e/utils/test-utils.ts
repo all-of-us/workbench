@@ -14,10 +14,9 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
-import { waitWhileLoading } from './waits-utils';
 
 export async function signOut(page: Page): Promise<void> {
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     return 'window.setTestAccessTokenOverride(null)';
   });
 
@@ -25,18 +24,25 @@ export async function signOut(page: Page): Promise<void> {
   await page.waitForTimeout(1000);
 }
 
+// Resolve typescript error: TS2339: Property 'setTestAccessTokenOverride' does not exist on type 'Window & typeof globalThis'.
+declare const window: Window &
+  typeof globalThis & {
+    setTestAccessTokenOverride: any;
+  };
+
 export async function signInWithAccessToken(page: Page, tokenFilename = config.USER_ACCESS_TOKEN_FILE): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home);
-  await page.waitForTimeout(1000);
 
   // Once ready, initialize the token on the page (this is stored in local storage).
   // See sign-in.service.ts for details.
+
   await page.waitForFunction('!!window["setTestAccessTokenOverride"]');
-  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
-  await page.waitForTimeout(1000);
+  await page.evaluate((token) => {
+    window.setTestAccessTokenOverride(token);
+  }, token);
 
   // Force a page reload; auth will be re-initialized with the token now that
   // localstorage has been updated.
@@ -45,10 +51,8 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.U
   // Puppeteer. Any console.log() within the above global function, for example,
   // is unlikely to be captured.
   await homePage.reloadPage();
-  await homePage.waitForLoad().catch(() => {
-    homePage.gotoUrl(PageUrl.Home);
-  });
-  await waitWhileLoading(page);
+  await homePage.gotoUrl(PageUrl.Home);
+  await homePage.waitForLoad();
 }
 
 /**
@@ -127,7 +131,7 @@ export async function createWorkspace(
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
-  console.log(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
+  logger.info(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
   return workspaceName;
 }
 
