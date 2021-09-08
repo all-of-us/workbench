@@ -119,11 +119,11 @@ fetch_running_jobs() {
 }
 
 compare_arrays() {
-  local -n arg1=$1[@]
-  local -n array1=("${!arg1}")
+  arg1=$1[@]
+  array1=("${!arg1}")
 
-  local -n arg2=$1[@]
-  local -n array2=("${!arg2}")
+  arg2=$2[@]
+  array2=("${!arg2}")
 
   if [ "${array1[@]}" == "${array2[@]}" ] ; then
       return
