@@ -7,6 +7,7 @@ import {profileStore} from 'app/utils/stores';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();
@@ -14,8 +15,12 @@ describe('DataUserCodeOfConduct', () => {
   const updateCache = jest.fn();
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
 
-  const component = () => mount(<DataUserCodeOfConduct hideSpinner={() => {}}
-                                                       showSpinner={() => {}}/>);
+  const component = () => mount(<MemoryRouter>
+    <DataUserCodeOfConduct hideSpinner={() => {}}
+                           showSpinner={() => {}}/>
+  </MemoryRouter>);
+
+  const duccComponent = (wrapper) => wrapper.childAt(0).childAt(0).childAt(0).childAt(0).childAt(0);
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
@@ -35,7 +40,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should not allow DataUserCodeOfConduct without identical initials', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
+    duccComponent(wrapper).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -52,7 +57,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should not allow DataUserCodeOfConduct with only one field populated', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
+    duccComponent(wrapper).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -70,7 +75,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should populate username and name from the profile automatically', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
+    duccComponent(wrapper).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="ducc-next-button"]').simulate('click');
@@ -85,7 +90,7 @@ describe('DataUserCodeOfConduct', () => {
   it('should submit DataUserCodeOfConduct acceptance with version number', async() => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
-    wrapper.childAt(0).childAt(0).setState({proceedDisabled: false});
+    duccComponent(wrapper).setState({proceedDisabled: false});
     await waitOneTickAndUpdate(wrapper);
 
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
