@@ -4,6 +4,8 @@ import {reactStyles} from 'app/utils';
 import {signIn} from 'app/utils/authentication';
 import * as React from 'react';
 
+import googleIcon from 'assets/icons/google-icon.png'
+
 export const styles = reactStyles({
   button: {
     marginTop: '0.5rem',
@@ -22,7 +24,7 @@ export const styles = reactStyles({
 
 export const GoogleSignInButton: React.FunctionComponent = () =>
   <Button type='primary' style={styles.button} onClick={() => signIn()}>
-    <img src='/assets/icons/google-icon.png'
+    <img src={googleIcon}
          style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
     <div>
       Sign In

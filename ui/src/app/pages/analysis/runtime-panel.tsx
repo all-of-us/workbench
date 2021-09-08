@@ -650,16 +650,23 @@ const PresetSelector = ({
     }} />;
 };
 
+import computeStarting from 'assets/icons/compute-starting.svg';
+import computeRunning from 'assets/icons/compute-running.svg';
+import computeStopping from 'assets/icons/compute-stopping.svg';
+import computeError from 'assets/icons/compute-error.svg';
+import computeStopped from 'assets/icons/compute-stopped.svg';
+import computeNone from 'assets/icons/compute-none.svg';
+
 const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
+  const {altText, iconSrc = null, styleOverrides = {}, onClick = null } = switchCase(status,
     [
       RuntimeStatus.Creating,
       () => ({
         altText: 'Runtime creation in progress',
-        iconShape: 'compute-starting',
+        iconSrc: computeStarting,
         styleOverrides: rotateStyle
       })
     ],
@@ -667,7 +674,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Running,
       () => ({
         altText: 'Runtime running, click to pause',
-        iconShape: 'compute-running',
+        iconSrc: computeRunning,
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
@@ -675,7 +682,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Updating,
       () => ({
         altText: 'Runtime update in progress',
-        iconShape: 'compute-starting',
+        iconSrc: computeStarting,
         styleOverrides: rotateStyle
       })
     ],
@@ -683,14 +690,14 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Error,
       () => ({
         altText: 'Runtime in error state',
-        iconShape: 'compute-error'
+        iconSrc: computeError
       })
     ],
     [
       RuntimeStatus.Stopping,
       () => ({
         altText: 'Runtime pause in progress',
-        iconShape: 'compute-stopping',
+        iconSrc: computeStopping,
         styleOverrides: rotateStyle
       })
     ],
@@ -698,7 +705,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Stopped,
       () => ({
         altText: 'Runtime paused, click to resume',
-        iconShape: 'compute-stopped',
+        iconSrc: computeStopped,
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
@@ -706,7 +713,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Starting,
       () => ({
         altText: 'Runtime resume in progress',
-        iconShape: 'compute-starting',
+        iconSrc: computeStarting,
         styleOverrides: rotateStyle
       })
     ],
@@ -714,7 +721,7 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Deleting,
       () => ({
         altText: 'Runtime deletion in progress',
-        iconShape: 'compute-stopping',
+        iconSrc: computeStopping,
         styleOverrides: rotateStyle,
       })
     ],
@@ -722,26 +729,24 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       RuntimeStatus.Deleted,
       () => ({
         altText: 'Runtime has been deleted',
-        iconShape: 'compute-none'
+        iconSrc: computeNone
       })
     ],
     [
       RuntimeStatus.Unknown,
       () => ({
         altText: 'Runtime status unknown',
-        iconShape: 'compute-none'
+        iconSrc: computeNone
       })
     ],
     [
       DEFAULT,
       () => ({
         altText: 'No runtime found',
-        iconShape: 'compute-none'
+        iconSrc: computeNone
       })
     ]
   );
-
-  const iconSrc = `/assets/icons/${iconShape}.svg`;
 
   {/* height/width of the icon wrapper are set so that the img element can rotate inside it */}
   {/* without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal */}
@@ -765,14 +770,24 @@ const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
       onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
           <Clickable onClick={() => onClick()}>
-            <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+            <img
+                alt={altText}
+                src={iconSrc}
+                style={styleOverrides}
+                data-test-id={`runtime-status-icon-${status}`}
+            />
           </Clickable>
         </FlexRow>
       </TooltipTrigger>
     }
     {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <FlexRow style={iconWrapperStyle}>
-          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+          <img
+              alt={altText}
+              src={iconSrc}
+              style={styleOverrides}
+              data-test-id={`runtime-status-icon-${status}`}
+          />
         </FlexRow>
       </TooltipTrigger>
     }

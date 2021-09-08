@@ -28,12 +28,12 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {navigateSpy} from 'testing/navigation-mock';
 import {ProfileApiStub} from "testing/stubs/profile-api-stub";
 import {Dropdown} from "primereact/dropdown";
 
 import * as Authentication from "app/utils/authentication";
 import SpyInstance = jest.SpyInstance;
+import { mockNavigate } from 'setupTests';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -250,7 +250,7 @@ describe('WorkspaceEdit', () => {
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
@@ -392,7 +392,7 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(workspacesApi.workspaces.length).toEqual(numBefore + 1);
-    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
   it('supports waiting on access delays', async () => {
@@ -411,18 +411,18 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(15e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({workspace, accessLevel: WorkspaceAccessLevel.OWNER});
     };
     jest.advanceTimersByTime(10e3);
     await waitOneTickAndUpdate(wrapper);
-    expect(navigateSpy).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalled();
 
     jest.useRealTimers();
   });
@@ -455,11 +455,11 @@ describe('WorkspaceEdit', () => {
     if (!aclDelayBtn.exists()) {
       fail('failed to find a rendered acl delay modal button after many timer increments');
     }
-    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     aclDelayBtn.simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(navigateSpy).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalled();
 
     jest.useRealTimers();
   });
