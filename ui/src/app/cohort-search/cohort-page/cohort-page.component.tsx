@@ -136,10 +136,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
 
     initCohort() {
       const {workspace: {id, namespace}} = this.props;
-      const query = parseQueryParams(this.props.location.search);
-      // Renaming here instead of destructuring because we destructure a bigger thing
-      // later on and it shadows cohortId
-      const cid = query.cohortId;
+      const cid = parseQueryParams(this.props.location.search).get('cohortId');
       const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
       const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
       /* If a cohort id is given in the route, we initialize state with it */

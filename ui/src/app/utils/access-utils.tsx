@@ -187,7 +187,7 @@ export const getRegistrationTask = (navigate, module: AccessModule): Registratio
 };
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
-  const {renewal} = parseQueryParams(queryParams);
+  const renewal = parseQueryParams(queryParams).get('renewal');
   return renewal === '1';
 };
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;

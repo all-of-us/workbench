@@ -16,7 +16,6 @@ import {
 } from 'react-router-dom';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import * as querystring from "querystring";
 
 export interface Guard {
   allowed: () => boolean;
@@ -28,12 +27,18 @@ export const usePath = () => {
   return path;
 };
 
-export function parseQueryParams(queryParams: string) {
-  const searchString = queryParams.replace(/^\?/, '');
-  return querystring.parse(searchString);
+export const parseQueryParams = (search: string) => {
+  return new URLSearchParams(search);
 }
 
-export const useQuery = () => {
+/**
+ * Retrieve query parameters from the React Router.
+ *
+ * Example:
+ *  my/query/page?user=alice123
+ *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
+ */
+export const useQuery = (): URLSearchParams => {
   return parseQueryParams(useLocation().search);
 };
 

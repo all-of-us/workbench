@@ -3,7 +3,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useLocation} from 'react-router';
 import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
@@ -88,17 +87,6 @@ export interface UrlObj {
 
 export const stringifyUrl = (url: UrlObj) => {
   return url.url + (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '');
-};
-
-/**
- * Retrieve query parameters from the React Router.
- *
- * Example:
- *  my/query/page?user=alice123
- *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
- */
-export const reactRouterUrlSearchParams = (): URLSearchParams => {
-  return new URLSearchParams(useLocation().search);
 };
 
 export enum BreadcrumbType {

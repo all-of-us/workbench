@@ -283,7 +283,7 @@ export const ConceptSearch = fp.flow(
       }
     } else {
       const {domain} = this.props.match.params;
-      const {survey} = parseQueryParams(this.props.location.search);
+      const survey = parseQueryParams(this.props.location.search).get('survey');
       return {domain, selectedSurvey: survey, source: 'concept'};
     }
   }

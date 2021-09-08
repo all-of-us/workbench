@@ -3,7 +3,7 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {reactRouterUrlSearchParams} from 'app/utils/navigation';
+import {useQuery} from 'app/components/app-router';
 import { MatchParams } from 'app/utils/stores';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
@@ -103,7 +103,7 @@ const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
   const {ns, nbName} = useParams<MatchParams>();
-  const accessReason = reactRouterUrlSearchParams().get('accessReason');
+  const accessReason = useQuery().get('accessReason');
 
   // react-router does not handling decoding of URL parameters, they must be decoded here.
   return <AdminNotebookViewComponent

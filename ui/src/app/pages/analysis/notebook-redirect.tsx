@@ -261,12 +261,12 @@ export const NotebookRedirect = fp.flow(
     }
 
     private isCreatingNewNotebook() {
-      const {creating} = parseQueryParams(this.props.location.search);
+      const creating = parseQueryParams(this.props.location.search).get('creating');
       return !!creating;
     }
 
     private isPlaygroundMode() {
-      const {playgroundMode} = parseQueryParams(this.props.location.search);
+      const playgroundMode = parseQueryParams(this.props.location.search).get('playgroundMode');
       return playgroundMode === 'true';
     }
 
@@ -389,7 +389,7 @@ export const NotebookRedirect = fp.flow(
 
     private async createNotebookAndLocalize(runtime: Runtime) {
       const fileContent = commonNotebookFormat;
-      const {kernelType} = parseQueryParams(this.props.location.search);
+      const kernelType = parseQueryParams(this.props.location.search).get('kernelType');
       if (kernelType === Kernels.R.toString()) {
         fileContent.metadata = rNotebookMetadata;
       } else {

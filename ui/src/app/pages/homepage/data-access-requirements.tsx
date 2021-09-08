@@ -479,10 +479,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>
   const query = useQuery();
-  // Query params can be string or string[], so the compiler will
-  // complain if we try to do destructuring
-  const token = query.token as string;
-  const code = query.code as string;
+  const token = query.get('token');
+  const code = query.get('code');
   useEffect(() => {
     if (token) {
       handleTerraShibbolethCallback(token, spinnerProps, reload);

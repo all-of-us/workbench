@@ -315,7 +315,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
 
-      const {workbenchAccessTasks} = parseQueryParams(this.props.location.search);
+      const workbenchAccessTasks = parseQueryParams(this.props.location.search).get('workbenchAccessTasks');
       const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
