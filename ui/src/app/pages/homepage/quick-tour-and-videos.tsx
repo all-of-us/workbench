@@ -10,7 +10,7 @@ import cohortBuilder from 'assets/images/cohort-builder.png';
 import datasetBuilder from 'assets/images/dataset-builder.png';
 import intro from 'assets/images/intro-workbench.png';
 import snippets from 'assets/images/notebook-code-snippets.png';
-import thumbnail from 'assets/images/QT-thumbnail.svg';
+import qtThumbnail from 'assets/images/QT-thumbnail.svg';
 import support from 'assets/images/user-support.png';
 import * as React from 'react';
 import {useEffect, useRef, useState} from 'react';
@@ -61,7 +61,7 @@ export const QuickTourAndVideos = (props: Props) => {
   // The videoId parameters below are the YouTube ids that get inserted into the src url of the iframe
   const quickTourResources = [
     {
-      src: thumbnail,
+      src: qtThumbnail,
       onClick: () => setShowQuickTour(true)
     }, {
       src: intro,

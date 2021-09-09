@@ -6,7 +6,7 @@ import LoginReactComponent from './login';
 describe('LoginComponent', () => {
   let props: {signIn: Function, onCreateAccount: Function};
 
-  const component = (props) => mount(<LoginReactComponent {...props}/>);
+  const component = () => mount(<LoginReactComponent {...props}/>);
 
   beforeEach(() => {
     props = {
@@ -16,7 +16,7 @@ describe('LoginComponent', () => {
   });
 
   it('should render', () => {
-    const wrapper = component(props);
+    const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 });

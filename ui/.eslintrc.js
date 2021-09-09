@@ -71,7 +71,7 @@ module.exports = {
     'no-eval': 'warn',
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
-    // 'no-shadow': 'warn',
+    '@typescript-eslint/no-shadow': 'error',
     // 'dot-notation': 'warn',
     'no-throw-literal': 'warn', 
     'no-fallthrough': 'warn', // For switch statements

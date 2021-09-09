@@ -58,7 +58,7 @@ describe('RuntimeInitializer', () => {
         return {...baseRuntime, ...override};
       });
     for (const runtime of runtimes) {
-      mockGetRuntime.mockImplementationOnce((workspaceNamespace) => {
+      mockGetRuntime.mockImplementationOnce(() => {
         return runtime;
       });
     }
@@ -151,7 +151,7 @@ describe('RuntimeInitializer', () => {
 
   it('should create runtime if it is initially nonexistent', async () => {
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
-    mockCreateRuntime.mockImplementationOnce(async (workspaceNamespace) => {
+    mockCreateRuntime.mockImplementationOnce(async () => {
       return {status: RuntimeStatus.Creating};
     });
     mockGetRuntimeCalls([
@@ -226,7 +226,7 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Creating},
       {status: RuntimeStatus.Error},
     ]);
-    mockDeleteRuntime.mockImplementationOnce(async (workspaceNamespace) => {
+    mockDeleteRuntime.mockImplementationOnce(async () => {
       return {};
     });
     mockGetRuntimeCalls([
@@ -236,7 +236,7 @@ describe('RuntimeInitializer', () => {
     // After some period of "deleting" status, we expect the runtime to become nonexistent...
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
     // which should trigger a creation request...
-    mockCreateRuntime.mockImplementationOnce(async (workspaceNamespace) => {
+    mockCreateRuntime.mockImplementationOnce(async () => {
       return {status: RuntimeStatus.Creating};
     });
     // and eventually give us a good runtime.
@@ -287,7 +287,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should timeout after max delay', async () => {
-    mockGetRuntime.mockImplementation(async (workspaceNamespace) => {
+    mockGetRuntime.mockImplementation(async () => {
       return {status: RuntimeStatus.Starting};
     });
 
@@ -304,7 +304,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should reject promise after abort signal', async () => {
-    mockGetRuntime.mockImplementation(async (workspaceNamespace) => {
+    mockGetRuntime.mockImplementation(async () => {
       return {status: RuntimeStatus.Starting};
     });
     const aborter = new AbortController();
@@ -333,10 +333,10 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Creating},
       {status: RuntimeStatus.Error},
     ]);
-    mockDeleteRuntime.mockImplementation(async (workspaceNamespace) => {
+    mockDeleteRuntime.mockImplementation(async () => {
       return {};
     });
-    mockCreateRuntime.mockImplementation(async (workspaceNamespace) => {
+    mockCreateRuntime.mockImplementation(async () => {
       return {status: RuntimeStatus.Creating};
     });
 

@@ -1,6 +1,13 @@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
+// Renaming some things to avoid shadowing the enum keys
+import {
+  Cohort as FetchCohort,
+  CohortReview as FetchCohortReview,
+  ConceptSet as FetchConceptSet,
+  Criteria,
+  ErrorResponse
+} from 'generated/fetch';
 import * as querystring from 'querystring';
 import * as React from 'react';
 import {useHistory} from 'react-router-dom';
@@ -14,9 +21,9 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(undefined);
 
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
-export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
-export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
-export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
+export const currentCohortStore = new BehaviorSubject<FetchCohort>(undefined);
+export const currentCohortReviewStore = new BehaviorSubject<FetchCohortReview>(undefined);
+export const currentConceptSetStore = new BehaviorSubject<FetchConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
