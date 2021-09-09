@@ -19,7 +19,7 @@ import {
   useStore
 } from 'app/utils/stores';
 
-import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
+import {DataprocConfig, GpuConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -54,6 +54,7 @@ export interface RuntimeConfig {
   machine: Machine;
   diskSize: number;
   dataprocConfig: DataprocConfig;
+  gpuConfig: GpuConfig;
   pdSize: number;
   autopauseThreshold: number;
 }
@@ -140,6 +141,20 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
+  };
+};
+
+export const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
+  const oldGpuExists = !!oldRuntime.gpuConfig;
+  const newGpuExists = !!newRuntime.gpuConfig;
+  return {
+    desc: 'Change GPU config',
+    previous: oldGpuExists ? `${oldRuntime.gpuConfig.numOfGpus} ${oldRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
+    new: newGpuExists ?  `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
+    differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists &&
+        oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
+        oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ?
+        RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
   };
 };
 
@@ -291,6 +306,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       diskSize: diskStore.get().persistentDisk == null ? runtime.gceConfig.diskSize : null,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
+      gpuConfig: runtime.gceConfig.gpuConfig,
       pdSize: runtime.diskConfig != null ? runtime.diskConfig.size : runtime.gceConfig.diskSize
     };
   } else if (runtime.gceWithPdConfig) {
@@ -300,6 +316,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       diskSize: null,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: null,
+      gpuConfig: runtime.gceWithPdConfig.gpuConfig,
       pdSize: runtime.gceWithPdConfig.persistentDisk.size
     };
   } else if (runtime.dataprocConfig) {
@@ -309,6 +326,7 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
       diskSize: runtime.dataprocConfig.masterDiskSize,
       autopauseThreshold: runtime.autopauseThreshold,
       dataprocConfig: runtime.dataprocConfig,
+      gpuConfig: null,
       pdSize: diskStore.get().persistentDisk != null ? diskStore.get().persistentDisk.size : null
     };
   }
@@ -319,7 +337,8 @@ export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: Run
   const comparePD = runtimeCtx.enablePD && newRuntime.computeType === ComputeType.Standard;
   return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
     compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
-    compareComputeTypes, compareMachineCpu, compareMachineMemory, comparePD ? comparePdSize : compareDiskSize, compareAutopauseThreshold]
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, comparePD ? comparePdSize : compareDiskSize,
+    compareAutopauseThreshold, compareGpu]
     .map(compareFn => compareFn(oldRuntime, newRuntime))
     .filter(diff => diff !== null)
     .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);

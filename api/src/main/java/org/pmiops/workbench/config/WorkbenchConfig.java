@@ -263,6 +263,8 @@ public class WorkbenchConfig {
     public boolean enableUnifiedUserAccessCron;
     // If true, cohort and concept set will show source domains and standard domains options
     public boolean enableStandardSourceDomains;
+    // If true, the backend and UI will support gpu for standard vm
+    public boolean enableGpu;
     // If true, the backend and UI will support persistent disk as the default notebook storage
     public boolean enablePersistentDisk;
   }

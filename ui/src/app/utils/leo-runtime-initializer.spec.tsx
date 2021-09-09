@@ -198,7 +198,8 @@ describe('RuntimeInitializer', () => {
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
         gceConfig: {
           diskSize: 777,
-          machineType: 'n1-standard-16'
+          machineType: 'n1-standard-16',
+          gpuConfig: null,
         },
         status: RuntimeStatus.Deleted
       }; });
@@ -211,7 +212,8 @@ describe('RuntimeInitializer', () => {
     expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, expect.objectContaining({
       gceConfig: {
         diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
-        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType,
+        gpuConfig: null,
       }
     }), expect.any(Object));
   });
