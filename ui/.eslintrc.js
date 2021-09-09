@@ -77,8 +77,7 @@ module.exports = {
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'error',
-    // 'no-unused-vars': 'off', // Needed for TS 
-    // '@typescript-eslint/no-unused-vars': 'warn', 
+    'no-unused-expressions': ['error', {'allowShortCircuit': true, 'allowTernary': true}],
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'no-var': 'warn',

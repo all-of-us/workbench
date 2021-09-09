@@ -869,7 +869,8 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         pre => {
           switch (pre) {
             case PrePackagedConceptSetEnum.BOTH: {
-              re.add(PrepackagedConceptSet.PERSON), re.add(PrepackagedConceptSet.SURVEYS);
+              re.add(PrepackagedConceptSet.PERSON);
+              re.add(PrepackagedConceptSet.SURVEYS);
               break;
             }
             case PrePackagedConceptSetEnum.PERSON: {
