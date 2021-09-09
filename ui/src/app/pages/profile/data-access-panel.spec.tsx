@@ -1,5 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
+import {MemoryRouter} from "react-router-dom";
 
 import {DataAccessPanel, DataAccessPanelProps} from 'app/pages/profile/data-access-panel';
 import {cdrVersionStore} from 'app/utils/stores';
@@ -30,7 +31,7 @@ const expectAccessStatusRtOnly = (wrapper, rtStatus: boolean) => {
 
 describe('Data Access Panel', () => {
   const component = (props: DataAccessPanelProps) => {
-    return mount(<DataAccessPanel {...props}/>);
+    return mount(<MemoryRouter><DataAccessPanel {...props}/></MemoryRouter>);
   };
 
   beforeEach(() => {
