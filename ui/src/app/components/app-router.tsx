@@ -29,7 +29,7 @@ export const usePath = () => {
 
 export const parseQueryParams = (search: string) => {
   return new URLSearchParams(search);
-}
+};
 
 /**
  * Retrieve query parameters from the React Router.

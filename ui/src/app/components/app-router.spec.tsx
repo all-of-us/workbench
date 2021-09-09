@@ -12,7 +12,7 @@ jest.mock('react-router-dom', () => {
     __esModule: true,
     ...originalModule,
     BrowserRouter: ({ children }) => <div>{children}</div>,
-  }
+  };
 });
 
 describe('AppRouter', () => {
@@ -20,7 +20,7 @@ describe('AppRouter', () => {
     return mount(<MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
       {makeAppRouter()}
     </MemoryRouter>);
-  }
+  };
 
   it('allows anyone into unprotected route', () => {
     const wrapper = component(['/unprotected-route'], 0);
@@ -66,17 +66,17 @@ describe('AppRouter', () => {
 const alwaysFalseGuard: Guard = {
   allowed: (): boolean => false,
   redirectPath: '/punting'
-}
+};
 
 const alwaysTrueGuard: Guard = {
   allowed: (): boolean => true,
   redirectPath: '/punting'
-}
+};
 
 const otherAlwaysTrueGuard: Guard = {
   allowed: (): boolean => true,
   redirectPath: '/punting'
-}
+};
 
 const makeAppRouter = () => {
   return <AppRouter>
@@ -95,11 +95,11 @@ const makeAppRouter = () => {
       <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
       <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
     </Switch>
-  </AppRouter>
-}
+  </AppRouter>;
+};
 
 class TestComponent extends React.Component<{text: String}> {
   render() {
-    return <span>{this.props.text}</span>
+    return <span>{this.props.text}</span>;
   }
 }

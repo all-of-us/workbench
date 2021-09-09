@@ -1,7 +1,7 @@
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import moment from 'moment';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';

@@ -13,7 +13,7 @@ import {
   CriteriaWithAttributesStubVariables,
   RootSurveyStubVariables,
   SurveyQuestionStubVariables
-} from 'testing/stubs/cohort-builder-service-stub'
+} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {AttributesPage, Props} from './attributes-page.component';
 

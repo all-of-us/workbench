@@ -51,7 +51,7 @@ describe('RuntimePanel', () => {
   const iconsDir = '/assets/icons';
 
   const component = async(propOverrides?: object) => {
-    const allProps = {...props, ...propOverrides}
+    const allProps = {...props, ...propOverrides};
     const c = mount(<RuntimePanelWrapper {...allProps}/>);
     await waitOneTickAndUpdate(c);
     return c;
@@ -207,7 +207,7 @@ describe('RuntimePanel', () => {
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
     // defaults to generalAnalysis preset, which is a n1-standard-4 machine with a 100GB disk
-    expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk')
+    expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk');
   });
 
   it('should allow creation when no runtime exists with defaults', async() => {

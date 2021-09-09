@@ -10,20 +10,20 @@ describe('Quick Tour and Videos', () => {
     };
 
     const getResource = (wrapper: ReactWrapper, index: number): ReactWrapper => {
-        return wrapper.find(`[data-test-id="quick-tour-resource-${index}"]`)
-    }
+        return wrapper.find(`[data-test-id="quick-tour-resource-${index}"]`);
+    };
 
     const assertResourcesVisible = (wrapper: ReactWrapper, ...indices: number[]) => {
         indices.forEach(index => {
             expect(getResource(wrapper, index).exists()).toBeTruthy();
         });
-    }
+    };
 
     const assertResourcesInvisible = (wrapper: ReactWrapper, ...indices: number[]) => {
         indices.forEach(index => {
              expect(getResource(wrapper, index).exists()).toBeFalsy();
         });
-    }
+    };
 
     it('should auto-display quick tour when requested', () => {
         const wrapper = component(true);

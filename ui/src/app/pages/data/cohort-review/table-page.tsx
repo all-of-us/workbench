@@ -394,7 +394,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         return acc;
       }, []);
       return filterArr.includes(null) ? null : filterArr;
-    }
+    };
 
     mapData = (participant: ParticipantCohortStatus) => {
       const {participantId, status, sexAtBirth, gender, race, ethnicity, birthDate, deceased} = participant;
@@ -408,7 +408,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         birthDate,
         deceased: deceased ? 'Yes' : null
       };
-    }
+    };
 
     formatStatusForText(status: CohortStatus): string {
       return {
@@ -438,7 +438,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         'participants',
         event.data.participantId
       ]);
-    }
+    };
 
     showCohortDescription() {
       triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
@@ -461,11 +461,11 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         this.setState({loading: true, error: false, page: event.page});
         setTimeout(() => this.getTableData());
       }
-    }
+    };
 
     onSort = (event: any) => {
       this.columnSort(event.sortField);
-    }
+    };
 
     columnSort = (sortField: string) => {
       if (sortField === 'participantId') {
@@ -478,7 +478,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
         this.setState({loading: true, error: false, sortField, sortOrder: 1});
       }
       setTimeout(() => this.getTableData());
-    }
+    };
 
     filterTemplate(column: string) {
       const {data, demoFilters, filters, loading} = this.state;
@@ -553,14 +553,14 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       }
       this.setState({loading: true, error: false, filters});
       setTimeout(() => this.getTableData());
-    }
+    };
 
     onInputChange = (value: any) => {
       const {filters} = this.state;
       filters.PARTICIPANTID = value;
       this.setState({filters});
       this.filterInput(value);
-    }
+    };
 
     errorMessage = () => {
       const {data, error, loading} = this.state;
@@ -579,7 +579,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
           shape='exclamation-triangle' size='22'/>
           {message}
       </div>;
-    }
+    };
 
     render() {
       const {cohortReview} = this.props;

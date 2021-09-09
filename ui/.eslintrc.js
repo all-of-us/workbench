@@ -54,7 +54,7 @@ module.exports = {
     // 'brace-style': ['warn', '1tbs'],
     // 'simple-import-sort/sort': 'warn',
     'quotes': ['error', 'single', {"allowTemplateLiterals": true}],
-    // '@typescript-eslint/semi': 'warn',
+    '@typescript-eslint/semi': 'error',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
     /* Functionality */

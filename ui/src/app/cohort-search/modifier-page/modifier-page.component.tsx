@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
@@ -339,13 +339,13 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       }
       formState[index].operator = sel;
       this.setState({count: null, formState}, () => this.validateValues());
-    }
+    };
 
     inputChange = (index: string, field: string, value: any) => {
       const {formState} = this.state;
       formState[index].values[field] = value;
       this.setState({count: null, formState}, () => this.validateValues());
-    }
+    };
 
     getModifiersFromForm() {
       return this.state.formState.reduce((acc, mod) => {
@@ -403,7 +403,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         console.error(error);
         this.setState({calculating: false, calculateError: true});
       }
-    }
+    };
 
     trackEvent = (label: string) => {
       const {cohortContext: {domain}} = this.props;
@@ -412,7 +412,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         'Click',
         `Modifiers - ${label} - ${domainToTitle(domain)} - Cohort Builder Search`
       );
-    }
+    };
 
     validateValues() {
       const {formState} = this.state;
@@ -451,7 +451,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
         {opt.label}
         &nbsp;<span style={styles.count}>{visitCounts[opt.value].toLocaleString()}</span>
       </div>;
-    }
+    };
 
     renderInput(index: string, field: string, type) {
       const {values} = this.state.formState[index];

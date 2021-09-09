@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {jest} from '@jest/globals'
+import {jest} from '@jest/globals';
 
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 
@@ -8,7 +8,7 @@ const functionStub = {
     return Promise.resolve();
   },
   failedFunction() {
-    return Promise.resolve({status: 504}).then(response => {throw response});
+    return Promise.resolve({status: 504}).then(response => {throw response;});
   }
 };
 

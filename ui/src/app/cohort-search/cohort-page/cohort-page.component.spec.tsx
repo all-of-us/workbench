@@ -33,7 +33,7 @@ describe('CohortPage', () => {
       hideSpinner={() => {}}
       showSpinner={() => {}}/>
     </Router>);
-  }
+  };
 
   it('should render', () => {
     const wrapper = component();

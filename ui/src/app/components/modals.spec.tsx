@@ -20,7 +20,7 @@ describe('NotificationModal', () => {
 
   it('should appear and disappear based on store changes', async () => {
     const wrapper = component();
-    const meta = {title: 'Hello', message: 'World'}
+    const meta = {title: 'Hello', message: 'World'};
     // Notification modal should not render
     expect(wrapper.find(NotificationModal)).toEqual({});
     notificationStore.set(meta);

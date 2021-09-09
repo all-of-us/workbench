@@ -71,7 +71,7 @@ describe('cdr-versions', () => {
     });
 
     it('should detect when a Workspace does not have the default CDR Version', async () => {
-        const altWorkspace = {...testWorkspace, cdrVersionId: altCdrVersion.cdrVersionId}
+        const altWorkspace = {...testWorkspace, cdrVersionId: altCdrVersion.cdrVersionId};
         expect(hasDefaultCdrVersion(altWorkspace, cdrVersionTiersResponse)).toBeFalsy();
     });
 

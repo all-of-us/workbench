@@ -102,7 +102,7 @@ export const withWindowSize = () => WrappedComponent => {
       if (!fp.isEqual(windowSize, newSize)) {
         this.setState({windowSize: newSize});
       }
-    }
+    };
 
     componentDidMount() {
       window.addEventListener('resizeAnimation', this.resize);

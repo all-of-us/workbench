@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import moment from 'moment';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {validate, validators} from 'validate.js';
@@ -252,7 +252,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === participantCohortStatuses.length,
         priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId']
       });
-    }
+    };
 
     backToTable() {
       const {ns, wsid, cid} = this.props.match.params;
@@ -261,11 +261,11 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
 
     previous = () => {
       this.navigate(true);
-    }
+    };
 
     next = () => {
       this.navigate(false);
-    }
+    };
 
     navigate = (left: boolean) => {
       const {afterId, isFirstParticipant, isLastParticipant, priorId} = this.state;
@@ -294,12 +294,12 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
           this.navigateById(status.participantId);
         });
       }
-    }
+    };
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = this.props.match.params;
       this.props.navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
-    }
+    };
 
     getRequestFilters = () => {
       const filters = filterStateStore.getValue().participants;
@@ -320,7 +320,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
         }
         return acc;
       }, []);
-    }
+    };
 
     vocabChange = (event: any) => {
       const {value} = event;
@@ -333,18 +333,18 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       filterState.vocab = value;
       filterStateStore.next(filterState);
       this.setState({filterState: filterState});
-    }
+    };
     setFilterTab = (filterTab: string) => {
       triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${filterTab} - Review Individual`);
       this.setState({filterTab});
-    }
+    };
 
     setFilter = (value: any, type: string) => {
       const {filterState} = this.state;
       filterState.global[type] = value;
       filterStateStore.next(filterState);
       this.setState({filterState: filterState});
-    }
+    };
 
     clearFilters = () => {
       triggerEvent(EVENT_CATEGORY, 'Click', 'Filter - Reset - Review Individual');
@@ -358,7 +358,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       };
       filterStateStore.next(filterState);
       this.setState({filterState: filterState});
-    }
+    };
 
     render() {
       const {cohortReview: {cohortName, description}, participant} = this.props;

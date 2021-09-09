@@ -20,7 +20,7 @@ describe('SidebarContent', () => {
 
   it('should render', () => {
     const {namespace, id} = workspaceDataStub;
-    const {cohortId, participantCohortStatuses} = cohortReviewStubs[0]
+    const {cohortId, participantCohortStatuses} = cohortReviewStubs[0];
     const wrapper = mount(
         <MemoryRouter>
           <SidebarContent

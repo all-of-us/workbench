@@ -76,7 +76,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1};})
                 }
             },
             load,
@@ -98,7 +98,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, bypassEpochMillis: 1}})
+                    modules: allModules.map(module => {return {moduleName: module, bypassEpochMillis: 1};})
                 }
             },
             load,
@@ -127,7 +127,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: completeModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                    modules: completeModules.map(module => {return {moduleName: module, completionEpochMillis: 1};})
                 }
             },
             load,
@@ -168,7 +168,7 @@ describe('DataAccessRequirements', () => {
             profile: {
                 ...ProfileStubVariables.PROFILE_STUB,
                 accessModules: {
-                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1}})
+                    modules: allModules.map(module => {return {moduleName: module, completionEpochMillis: 1};})
                 }
             },
             load,

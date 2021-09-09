@@ -23,12 +23,12 @@ const SHORT_TIME_BUFFER = 10 * 60 * 1000;
 // return a time (in epoch millis) which is today + `days` days, plus a short buffer
 const todayPlusDays = (days: number): number => {
   return Date.now() + (MILLIS_PER_DAY * days) + SHORT_TIME_BUFFER ;
-}
+};
 
 const noModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
   accessModules: {}
-}
+};
 
 const noExpirableModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -38,7 +38,7 @@ const noExpirableModules: Profile = {
       expirationEpochMillis: undefined,
     }]
   }
-}
+};
 
 const noExpModules: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -48,7 +48,7 @@ const noExpModules: Profile = {
       expirationEpochMillis: undefined,
     }]
   }
-}
+};
 
 const laterExpiration: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -58,7 +58,7 @@ const laterExpiration: Profile = {
       expirationEpochMillis: todayPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1),
     }]
   }
-}
+};
 
 const expirationsInWindow: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -71,7 +71,7 @@ const expirationsInWindow: Profile = {
       expirationEpochMillis: todayPlusDays(10),
     }]
   }
-}
+};
 
 const thirtyDaysPlusExpiration: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -84,7 +84,7 @@ const thirtyDaysPlusExpiration: Profile = {
       expirationEpochMillis: todayPlusDays(31),
     }]
   }
-}
+};
 
 describe('maybeDaysRemaining', () => {
   it('returns undefined when the profile has no accessModules', () => {

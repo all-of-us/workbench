@@ -4,7 +4,7 @@ import {reactStyles} from 'app/utils';
 import {signIn} from 'app/utils/authentication';
 import * as React from 'react';
 
-import googleIcon from 'assets/icons/google-icon.png'
+import googleIcon from 'assets/icons/google-icon.png';
 
 export const styles = reactStyles({
   button: {

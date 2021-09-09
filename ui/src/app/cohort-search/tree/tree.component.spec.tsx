@@ -17,7 +17,7 @@ describe('CriteriaTree', () => {
     });
   });
   it('should create', () => {
-    const wrapper = shallow(<CriteriaTree/>)
+    const wrapper = shallow(<CriteriaTree/>);
     expect(wrapper).toBeTruthy();
   });
 

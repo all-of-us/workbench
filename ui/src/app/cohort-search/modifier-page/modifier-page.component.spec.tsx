@@ -1,7 +1,7 @@
 import {mount, shallow} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/stores'
+import {serverConfigStore} from 'app/utils/stores';
 import {currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';

@@ -319,11 +319,11 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions(), w
           this.props.navigate(['workspaces', ns, wsid, 'data']);
         })
         .catch(error => console.error(error));
-    }
+    };
 
     cancelDelete = () => {
       this.setState({deleting: false});
-    }
+    };
 
     navigateTo(action: string) {
       const {cohort, match: {params: {ns, wsid}}} = this.props;

@@ -5,10 +5,10 @@ import {Authority} from 'generated/fetch';
 
 const noAuth = ProfileStubVariables.PROFILE_STUB;
 
-const instAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.INSTITUTIONADMIN]}
-const accessAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.ACCESSCONTROLADMIN]}
-const devAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]}
-const featuredWsAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]}
+const instAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.INSTITUTIONADMIN]};
+const accessAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.ACCESSCONTROLADMIN]};
+const devAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
+const featuredWsAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
 
 describe('authorities', () => {
     it('should correctly authorize INSTITUTION_ADMIN', async () => {

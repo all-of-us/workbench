@@ -375,5 +375,5 @@ describe('RuntimeInitializer', () => {
     mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
     await runInitializerAndTimers({resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Stopped});
     expect(mockStartRuntime).not.toHaveBeenCalled();
-  })
+  });
 });

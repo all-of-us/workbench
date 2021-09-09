@@ -139,7 +139,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     checkWidth = (i: number) => {
       const el = this.nameRefs[i].current;
       return el ? el.offsetWidth >= el.scrollWidth : true;
-    }
+    };
 
     render() {
       const {domain} = this.props;

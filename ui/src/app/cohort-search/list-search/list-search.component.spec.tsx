@@ -19,4 +19,4 @@ describe('ListSearchComponent', () => {
     />);
     expect(wrapper.exists()).toBeTruthy();
   });
-})
+});

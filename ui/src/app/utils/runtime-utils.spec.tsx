@@ -12,17 +12,17 @@ import defaultServerConfig from 'testing/default-server-config';
 const WORKSPACE_NS = 'test';
 
 const Runtime = ({id}) => {
-  const [{currentRuntime}, ] = useCustomRuntime(WORKSPACE_NS, diskStore.get().persistentDisk)
+  const [{currentRuntime}, ] = useCustomRuntime(WORKSPACE_NS, diskStore.get().persistentDisk);
   const {runtimeName = ''} = currentRuntime || {};
-  return <div id={id}>{runtimeName}</div>
-}
+  return <div id={id}>{runtimeName}</div>;
+};
 
 const TestComponent = () => {
   return <div>
     <Runtime id='1'/>
     <Runtime id='2'/>
   </div>;
-}
+};
 
 describe('runtime-utils', () => {
   let runtimeApiStub: RuntimeApiStub;
@@ -51,7 +51,7 @@ describe('runtime-utils', () => {
 
   it('should initialize with a value', async () => {
     const wrapper = mount(<TestComponent/>);
-    await waitOneTickAndUpdate(wrapper)
+    await waitOneTickAndUpdate(wrapper);
 
     // Runtime initialization is in progress at this point.
     const runtime = (id) => wrapper.find({id}).first();
@@ -65,7 +65,7 @@ describe('runtime-utils', () => {
 
   it('should update when runtime store updates', async () => {
     const wrapper = mount(<TestComponent/>);
-    await waitOneTickAndUpdate(wrapper)
+    await waitOneTickAndUpdate(wrapper);
 
     const runtime = (id) => wrapper.find({id}).first();
 

@@ -89,7 +89,7 @@ describe('HelpSidebar', () => {
     const icon = wrapper.find({'data-test-id': 'extraction-status-icon-container'}).find('svg');
     expect(icon.exists()).toEqual(exists);
     return icon;
-  }
+  };
 
   const setRuntimeStatus = (status) => {
     const runtime = {...defaultRuntime(), status};
@@ -242,7 +242,7 @@ describe('HelpSidebar', () => {
 
   it('should display "starting" UX during compound runtime op with no runtime', async() => {
     setRuntimeStatus(RuntimeStatus.Deleting);
-    registerCompoundRuntimeOperation(workspaceDataStub.namespace, {aborter: new AbortController()})
+    registerCompoundRuntimeOperation(workspaceDataStub.namespace, {aborter: new AbortController()});
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 

@@ -100,11 +100,11 @@ export const CohortReview = fp.flow(
 
     reviewCreated = () => {
       this.setState({reviewPresent: true});
-    }
+    };
 
     goBack = () => {
       history.back();
-    }
+    };
 
     render() {
       const {cohort, reviewPresent} = this.state;

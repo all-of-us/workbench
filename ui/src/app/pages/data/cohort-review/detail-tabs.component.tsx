@@ -388,13 +388,13 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
       const tab = e.index === 0 ? 'Summary' : tabs[e.index - 1].name;
       triggerEvent(EVENT_CATEGORY, 'Click', `${tab} - Review Individual`);
       this.setState({activeTab: e.index});
-    }
+    };
 
     chartHover = (data: any) => {
       if (data.conditionTitle) {
         triggerEvent(EVENT_CATEGORY, 'hover', `${data.conditionTitle} Chart - Review Individual`);
       }
-    }
+    };
 
     render() {
       const {activeTab, chartData, filterState, updateState} = this.state;

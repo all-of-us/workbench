@@ -108,7 +108,7 @@ describe('CopyModal', () => {
         dropNotebookFileSuffix(fromResourceName),
         copyRequest
     );
-  }
+  };
 
   type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -300,7 +300,7 @@ describe('CopyModal', () => {
           props.fromResourceName,
           copyRequest
       );
-    }
+    };
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -339,7 +339,7 @@ describe('CopyModal', () => {
           props.fromResourceName,
           copyRequest
       );
-    }
+    };
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -376,7 +376,7 @@ describe('CopyModal', () => {
           props.fromResourceName,
           copyRequest
       );
-    }
+    };
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

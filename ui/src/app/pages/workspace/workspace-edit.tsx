@@ -845,7 +845,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
         const navigateToWorkspace = () => {
           this.props.navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-        }
+        };
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
             `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +

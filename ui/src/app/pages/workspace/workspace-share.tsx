@@ -314,7 +314,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(class extends React.Com
       }
       this.closeDropdown();
     }
-  }
+  };
 
   cleanClassNameForSelect(value: string): string {
     return (value + '-user-role').replace(/[@\.]/g, '');

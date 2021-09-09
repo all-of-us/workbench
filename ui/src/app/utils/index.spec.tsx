@@ -17,11 +17,11 @@ describe('Helper functions', () => {
     const r1 = Utils.maybe(setFirstName, null);
     expect(r1).toEqual(Utils.nothing);
 
-    const r2 = Utils.maybe(setFirstName, {})
-    expect(r2).toEqual({firstName: 'first'})
+    const r2 = Utils.maybe(setFirstName, {});
+    expect(r2).toEqual({firstName: 'first'});
 
-    const r3 = fp.flow(Utils.maybe(setFirstName), Utils.maybe(setLastName))({})
-    expect(r3).toEqual({firstName: 'first', lastName: 'last'})
+    const r3 = fp.flow(Utils.maybe(setFirstName), Utils.maybe(setLastName))({});
+    expect(r3).toEqual({firstName: 'first', lastName: 'last'});
   });
 });
 

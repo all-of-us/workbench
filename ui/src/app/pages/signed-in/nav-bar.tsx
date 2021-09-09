@@ -15,7 +15,7 @@ import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useRef, useState} from 'react';
 
-import logo from 'assets/images/all-of-us-logo.svg'
+import logo from 'assets/images/all-of-us-logo.svg';
 
 const styles = reactStyles({
   headerContainer: {

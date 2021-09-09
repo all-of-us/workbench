@@ -179,7 +179,7 @@ describe('resources.tsx', () => {
         const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/review`;
         const EXPECTED_CONCEPT_SET_URL = `${WORKSPACE_URL_PREFIX}/data/concepts/sets/${CONCEPT_SET_ID}`;
         const EXPECTED_DATA_SET_URL = `${WORKSPACE_URL_PREFIX}/data/data-sets/${DATA_SET_ID}`;
-        const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/notebooks/preview/${NOTEBOOK_NAME}`
+        const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/notebooks/preview/${NOTEBOOK_NAME}`;
 
         expect(stringifyUrl(getResourceUrl(testCohort))).toBe(EXPECTED_COHORT_URL);
         expect(stringifyUrl(getResourceUrl(testCohortReview))).toBe(EXPECTED_COHORT_REVIEW_URL);

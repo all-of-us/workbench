@@ -12,8 +12,8 @@ import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import SpyInstance = jest.SpyInstance;
 
-const EXPIRY_DAYS = 365
-const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS
+const EXPIRY_DAYS = 365;
+const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS;
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
 describe('Access Renewal Page', () => {
@@ -30,7 +30,7 @@ describe('Access Renewal Page', () => {
       {moduleName: AccessModule.COMPLIANCETRAINING, expirationEpochMillis: expiredTime},
       {moduleName: AccessModule.PROFILECONFIRMATION, expirationEpochMillis: expiredTime},
       {moduleName: AccessModule.PUBLICATIONCONFIRMATION, expirationEpochMillis: expiredTime}
-    ]}, profile)
+    ]}, profile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -42,7 +42,7 @@ describe('Access Renewal Page', () => {
       bypassEpochMillis: bypassEpochMillis,
       expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
     }), oldProfile.accessModules.modules);
-    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -55,7 +55,7 @@ describe('Access Renewal Page', () => {
           completionEpochMillis: completionEpochMillis,
           expirationEpochMillis: expirationEpochMillis}),
         oldProfile.accessModules.modules);
-    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -67,7 +67,7 @@ describe('Access Renewal Page', () => {
       bypassEpochMillis: bypassEpochMillis,
       completionEpochMillis: completionFn()
     }), oldProfile.accessModules.modules);
-    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -82,7 +82,7 @@ describe('Access Renewal Page', () => {
           : completionFn(),
       completionEpochMillis: completionEpochMillis
     }), oldProfile.accessModules.modules);
-    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
+    const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
@@ -114,21 +114,21 @@ describe('Access Renewal Page', () => {
 
 
   it('should render when the user is expired', async () => {
-    expireAllModules()
+    expireAllModules();
     const wrapper = component();
 
     setCompletionTimes(() => Date.now() - 1000 * 60 * 60 * 24 * EXPIRY_DAYS);
     await waitOneTickAndUpdate(wrapper);
 
     expect(findNodesContainingText(wrapper, 'access has expired').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1)
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
 
   it('should show the correct state when profile is complete', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 
@@ -136,16 +136,16 @@ describe('Access Renewal Page', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // Complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(1);
 
     // Incomplete
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
 
   it('should show the correct state when profile and publication are complete', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 
@@ -157,12 +157,12 @@ describe('Access Renewal Page', () => {
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
 
     // Incomplete
-    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
   });
 
   it('should show the correct state when all items except DUCC are complete', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 
@@ -179,7 +179,7 @@ describe('Access Renewal Page', () => {
   });
 
   it('should show the correct state when all items are complete', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 
@@ -200,7 +200,7 @@ describe('Access Renewal Page', () => {
   });
 
   it('should show the correct state when items are bypassed', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 
@@ -213,7 +213,7 @@ describe('Access Renewal Page', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // Incomplete
-    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1)
+    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
 
     // Bypassed
@@ -225,7 +225,7 @@ describe('Access Renewal Page', () => {
   });
 
   it('should show the correct state when all items are complete or bypassed', async () => {
-    expireAllModules()
+    expireAllModules();
 
     const wrapper = component();
 

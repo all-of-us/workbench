@@ -1208,7 +1208,7 @@ const RuntimePanel = fp.flow(
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
     // The logic here is tricky to be compatible
     // post launch PD when all existing running Runtime shutdown.
-    const runtimeDiffTypes = runtimeDiffs.map(diff => diff.differenceType)
+    const runtimeDiffTypes = runtimeDiffs.map(diff => diff.differenceType);
     const runtimeNeedsDelete = runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME) ||
         runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD);
     if (runtimeCtx.enablePD && (!runtimeCtx.gceExists || runtimeNeedsDelete)) {

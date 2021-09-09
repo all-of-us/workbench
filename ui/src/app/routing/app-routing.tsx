@@ -41,7 +41,7 @@ import {Configuration} from 'generated/fetch';
 import 'rxjs/Rx';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import logo from 'assets/images/all-of-us-logo.svg'
+import logo from 'assets/images/all-of-us-logo.svg';
 
 declare const gapi: any;
 

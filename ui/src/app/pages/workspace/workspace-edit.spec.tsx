@@ -164,7 +164,7 @@ describe('WorkspaceEdit', () => {
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
-    workspaceEditMode = WorkspaceEditMode.Edit
+    workspaceEditMode = WorkspaceEditMode.Edit;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -224,7 +224,7 @@ describe('WorkspaceEdit', () => {
 
   it('supports disable save button if Research Outcome is not answered', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
-    workspace.researchPurpose.researchOutcomeList = []
+    workspace.researchPurpose.researchOutcomeList = [];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -278,7 +278,7 @@ describe('WorkspaceEdit', () => {
 
   it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async() => {
     // the standard test workspace already has the latest CDR Version but let's make it explicit with a new const
-    const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID}
+    const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID};
     currentWorkspaceStore.next(defaultCdrWorkspace);
 
     workspaceEditMode = WorkspaceEditMode.Duplicate;
@@ -527,7 +527,7 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
 
-    wrapper.find('[data-test-id="researchPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } })
+    wrapper.find('[data-test-id="researchPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } });
     wrapper.find('[data-test-id="diseaseFocusedResearch-checkbox"]').at(1).simulate('change', { target: { checked: true } });
 
     expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();

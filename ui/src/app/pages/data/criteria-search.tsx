@@ -233,7 +233,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
       loadingSubtree: true,
       treeSearchTerms: criterion.name
     });
-  }
+  };
 
   closeSidebar() {
     attributesSelectionStore.next(undefined);
@@ -276,7 +276,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
     // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
     this.growlTimer = global.setTimeout(() => this.setState({growlVisible: false}), 2500);
     this.setState({growlVisible: true});
-  }
+  };
 
   getListSearchSelectedIds() {
     const {cohortContext: {source}} = this.props;
@@ -293,7 +293,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
       node.scrollIntoView({behavior: 'smooth', block: 'start'});
     }
     this.setState({loadingSubtree: false});
-  }
+  };
 
   back = () => {
     if (this.state.mode === 'tree') {
@@ -302,16 +302,16 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
       attributesSelectionStore.next(undefined);
       this.setState({mode: this.state.backMode});
     }
-  }
+  };
 
 
   setTreeSearchTerms = (input: string) => {
     this.setState({treeSearchTerms: input});
-  }
+  };
 
   setAutocompleteSelection = (selection: any) => {
     this.setState({loadingSubtree: true, autocompleteSelection: selection});
-  }
+  };
 
   get showDataBrowserLink() {
     return [Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG].includes(this.props.cohortContext.domain);

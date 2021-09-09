@@ -118,8 +118,8 @@ describe('WorkspaceAbout', () => {
   it('should not display Publish/Unpublish buttons without appropriate Authority', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeFalsy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeFalsy();
   });
 
   it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
@@ -128,8 +128,8 @@ describe('WorkspaceAbout', () => {
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
   });
 
   it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
@@ -138,8 +138,8 @@ describe('WorkspaceAbout', () => {
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy()
-    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy()
+    expect(wrapper.exists('[data-test-id="publish-button"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="unpublish-button"]')).toBeTruthy();
   });
 
 });

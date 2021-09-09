@@ -49,7 +49,7 @@ describe('renderResourceCard', () => {
       menuOnly: false,
     });
     expect(card).toBeFalsy();
-  })
+  });
 
   it('renders a Cohort menu without other card elements', () => {
     const testCohort = {
@@ -112,4 +112,4 @@ describe('renderResourceCard', () => {
     expect(wrapper.text()).toContain('Export to Notebook');
     expect(wrapper.text()).toContain('Extract VCF Files');
   });
-})
+});

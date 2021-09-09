@@ -39,7 +39,7 @@ export class ConfirmDeleteModal
     event.toLowerCase().match('delete') ?
       this.setState({deleteDisabled: false}) :
       this.setState({deleteDisabled: true});
-  }
+  };
 
   render() {
     const {resourceType} = this.props;

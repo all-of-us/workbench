@@ -24,7 +24,7 @@ const mountModal = () => {
         dataSets=''
         onCancel={onCancelFn}
         deleteResource={deleteResourceFn}/>);
-}
+};
 
 describe('DataSetReferenceModal', () => {
     it('should render', async () => {

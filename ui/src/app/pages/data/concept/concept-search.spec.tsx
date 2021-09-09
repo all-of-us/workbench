@@ -45,7 +45,7 @@ describe('ConceptSearch', () => {
         />
       </Route>
     </MemoryRouter>);
-  }
+  };
 
   it('should render', () => {
     const wrapper = component();

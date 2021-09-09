@@ -241,7 +241,7 @@ export const useIsUserDisabled = () => {
         }
       })();
     }
-    return () => {mounted = false;}
+    return () => {mounted = false;};
   }, [authLoaded, isSignedIn]);
   return disabled;
 };

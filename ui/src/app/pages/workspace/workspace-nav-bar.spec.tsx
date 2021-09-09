@@ -70,7 +70,7 @@ describe('WorkspaceNavBar', () => {
 
     expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeFalsy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
-  })
+  });
 
   it('should display an alternative CDR Version with a new version flag', () => {
     const altWorkspace = workspaceDataStub;
@@ -84,7 +84,7 @@ describe('WorkspaceNavBar', () => {
 
     expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeTruthy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
-  })
+  });
 
   it('clicks the new version flag which should pop up the version upgrade modal', () => {
     const altWorkspace = workspaceDataStub;
@@ -99,5 +99,5 @@ describe('WorkspaceNavBar', () => {
     flag.simulate('click');
 
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeTruthy();
-  })
+  });
 });

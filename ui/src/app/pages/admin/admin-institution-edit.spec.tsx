@@ -25,7 +25,7 @@ describe('AdminInstitutionEditSpec', () => {
         />
       </Route>
     </MemoryRouter>);
-  }
+  };
 
   beforeEach(() => {
     serverConfigStore.set({config: defaultServerConfig});

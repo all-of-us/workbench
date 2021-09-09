@@ -48,7 +48,7 @@ describe('LoginGovIAL2Notification', () => {
       }});
     const newProfile = fp.set('accessModules', {modules: [
         {moduleName: AccessModule.RASLINKLOGINGOV, completionEpochMillis: Date.now()},
-      ]}, profile)
+      ]}, profile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();
@@ -62,7 +62,7 @@ describe('LoginGovIAL2Notification', () => {
       }});
     const newProfile = fp.set('accessModules', {modules: [
         {moduleName: AccessModule.RASLINKLOGINGOV, bypassEpochMillis: Date.now()},
-      ]}, profile)
+      ]}, profile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
 
     const wrapper = component();

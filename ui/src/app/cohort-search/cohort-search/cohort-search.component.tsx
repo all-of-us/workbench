@@ -257,7 +257,7 @@ export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter
     // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
     this.growlTimer = global.setTimeout(() => this.setState({growlVisible: false}), 2500);
     this.setState({growlVisible: true});
-  }
+  };
 
   selectDeceased() {
     const param = {

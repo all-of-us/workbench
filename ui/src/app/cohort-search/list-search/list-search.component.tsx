@@ -327,7 +327,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           }
         }
       }
-    }
+    };
 
     // Temp function to get the correct results based on enableStandardSourceDomains config flag
     getResults(value: string) {
@@ -363,7 +363,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       } finally {
         this.setState({loading: false, sourceMatch});
       }
-    }
+    };
 
     // Searches either source or standard based on value of searchSource in state
     getResultsBySourceOrStandard = async(value: string) => {
@@ -383,7 +383,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       } finally {
         this.setState({loading: false});
       }
-    }
+    };
 
     showStandardResults() {
       this.trackEvent('Standard Vocab Hyperlink');
@@ -405,7 +405,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         param = {...param, surveyName: this.props.searchContext.selectedSurvey};
       }
       this.props.select(param);
-    }
+    };
 
     setAttributes(node: any) {
       attributesSelectionStore.next(node);
@@ -415,7 +415,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     showHierarchy = (row: any) => {
       this.trackEvent('More Info');
       this.props.hierarchy(row);
-    }
+    };
 
     showIngredients = (row: any) => {
       const {ingredients} = this.state;
@@ -443,13 +443,13 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           this.setState({ingredients});
         }
       }
-    }
+    };
 
     isSelected = (row: any) => {
       const {selectedIds} = this.props;
       const paramId = this.getParamId(row);
       return selectedIds.includes(paramId);
-    }
+    };
 
     getParamId(row: any) {
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}${row.isStandard}`;
@@ -458,7 +458,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     trackEvent = (label: string) => {
       const {searchContext: {domain}} = this.props;
       triggerEvent('Cohort Builder Search', 'Click', `${label} - ${domainToTitle(domain)} - Cohort Builder Search`);
-    }
+    };
 
     onNameHover(el: HTMLDivElement, id: string) {
       if (el.offsetWidth < el.scrollWidth) {

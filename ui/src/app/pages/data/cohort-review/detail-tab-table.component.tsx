@@ -12,7 +12,7 @@ import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, Domain, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-import moment from 'moment'
+import moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
@@ -519,7 +519,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
         const range = [start, start + lazyLoadSize - 1];
         this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
-    }
+    };
 
     columnSort = (sortField: string) => {
       if (this.state.sortField === sortField) {
@@ -535,7 +535,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
         console.log(range);
         this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
-    }
+    };
 
     onPage = (event: any) => {
       const {lazyLoad, page, range, totalCount} = this.state;
@@ -552,7 +552,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       } else {
         this.setState({page: event.page, range, start: event.first});
       }
-    }
+    };
 
     overlayTemplate = (rowData: any, column: any) => {
       let vl: any;
@@ -577,7 +577,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           </OverlayPanel>
         </div>
       </React.Fragment>;
-    }
+    };
 
     updateData = (event, colName, namesArray) => {
       const {checked, name} = event.target;
@@ -605,7 +605,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       }
       filterState.tabs[domain][colName] = checkedItems;
       getFilteredData(filterState);
-    }
+    };
 
     filterData() {
       let {data, start} = this.state;
@@ -699,7 +699,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
         shape='exclamation-triangle' size='22'/>
         {message}
       </div>;
-    }
+    };
 
     filterCodes = (input: string) => {
       if (!input) {
@@ -716,14 +716,14 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
         }, new Set());
         this.setState({codeResults});
       }
-    }
+    };
 
     filterText = () => {
       const {domain, filterState, getFilteredData} = this.props;
       const {tabFilterState} = this.state;
       filterState.tabs[domain] = tabFilterState;
       getFilteredData(filterState);
-    }
+    };
 
     filterEvent(column: string) {
       const {columns, domain} = this.props;
@@ -866,14 +866,14 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           })}
         </TabView>
       </React.Fragment>;
-    }
+    };
 
     hideGraphIcon = (rowData: any) => {
       const {filterState: {vocab}} = this.props;
       const noConcept = rowData[`${vocab}Name`]
         && rowData[`${vocab}Name`] === 'No matching concept';
       return {'graphExpander' : noConcept};
-    }
+    };
 
     render() {
       const {expandedRows, loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;

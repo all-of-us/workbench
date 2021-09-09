@@ -12,7 +12,7 @@ import {MemoryRouter} from 'react-router';
 // And fails with:
 //   ReferenceError: Zone is not defined
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
-  const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve))
+  const waitImmediate = () => new Promise<void>(resolve => setImmediate(resolve));
   await act(waitImmediate);
   wrapper.update();
 }

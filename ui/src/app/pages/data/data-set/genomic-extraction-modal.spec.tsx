@@ -18,7 +18,7 @@ describe('GenomicExtractionModal', () => {
 
   const component = () => {
     return <GenomicExtractionModal {...testProps}/>;
-  }
+  };
 
   beforeEach(() => {
     datasetApiStub = new DataSetApiStub();
@@ -33,7 +33,7 @@ describe('GenomicExtractionModal', () => {
       workspaceFirecloudName: workspace.id,
       closeFunction: () => {},
       title: 'Top 10 Egregious Hacks Your Tech Lead Doesn\'t Want You To Know'
-    }
+    };
   });
 
   afterEach(() => {

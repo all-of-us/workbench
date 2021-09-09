@@ -1,4 +1,4 @@
-import {getTrail} from 'app/components/breadcrumb'
+import {getTrail} from 'app/components/breadcrumb';
 import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
