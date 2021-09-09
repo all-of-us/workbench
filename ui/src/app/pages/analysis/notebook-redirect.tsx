@@ -20,7 +20,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   withCurrentWorkspace,
-  withQueryParams,
   withUserProfile
 } from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
@@ -31,6 +30,7 @@ import {environment} from 'environments/environment';
 import {Profile, Runtime, RuntimeStatus} from 'generated/fetch';
 import {RouteComponentProps, withRouter} from 'react-router-dom';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+import {parseQueryParams} from "app/components/app-router";
 
 export enum Progress {
   Unknown,
@@ -224,7 +224,6 @@ interface State {
 
 interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
-  queryParams: any;
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   runtimeStore: RuntimeStore;
 }
@@ -237,7 +236,6 @@ export const NotebookRedirect = fp.flow(
   withUserProfile(),
   withCurrentWorkspace(),
   withRuntimeStore(),
-  withQueryParams(),
   withNavigation,
   withRouter
 )(
@@ -263,11 +261,13 @@ export const NotebookRedirect = fp.flow(
     }
 
     private isCreatingNewNotebook() {
-      return !!this.props.queryParams.creating;
+      const creating = parseQueryParams(this.props.location.search).get('creating');
+      return !!creating;
     }
 
     private isPlaygroundMode() {
-      return this.props.queryParams.playgroundMode === 'true';
+      const playgroundMode = parseQueryParams(this.props.location.search).get('playgroundMode');
+      return playgroundMode === 'true';
     }
 
     private async runtimeRetry<T>(f: () => Promise<T>): Promise<T> {
@@ -389,7 +389,7 @@ export const NotebookRedirect = fp.flow(
 
     private async createNotebookAndLocalize(runtime: Runtime) {
       const fileContent = commonNotebookFormat;
-      const {kernelType} = this.props.queryParams;
+      const kernelType = parseQueryParams(this.props.location.search).get('kernelType');
       if (kernelType === Kernels.R.toString()) {
         fileContent.metadata = rNotebookMetadata;
       } else {

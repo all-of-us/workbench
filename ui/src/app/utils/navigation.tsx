@@ -3,7 +3,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, CohortReview, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as querystring from 'querystring';
 import * as React from 'react';
-import {useLocation} from 'react-router';
 import {useHistory} from 'react-router-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
@@ -19,7 +18,6 @@ export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefined);
@@ -89,17 +87,6 @@ export interface UrlObj {
 
 export const stringifyUrl = (url: UrlObj) => {
   return url.url + (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '');
-};
-
-/**
- * Retrieve query parameters from the React Router.
- *
- * Example:
- *  my/query/page?user=alice123
- *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
- */
-export const reactRouterUrlSearchParams = (): URLSearchParams => {
-  return new URLSearchParams(useLocation().search);
 };
 
 export enum BreadcrumbType {

@@ -11,6 +11,7 @@ import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import { MemoryRouter } from 'react-router-dom';
 
 
 describe('ProfilePageComponent', () => {
@@ -29,7 +30,7 @@ describe('ProfilePageComponent', () => {
   let mockUpdateProfile: SpyInstance;
 
   const component = (controlledTierProfile = {}) => {
-    return mount(<ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/>);
+    return mount(<MemoryRouter><ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/></MemoryRouter>);
   };
 
   const load = jest.fn();

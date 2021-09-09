@@ -8,6 +8,7 @@ import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
+import { MemoryRouter } from 'react-router-dom';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
@@ -16,7 +17,9 @@ const updateCache = jest.fn();
 
 describe('DataAccessRequirements', () => {
     const component = () => {
-        return mount(<DataAccessRequirements hideSpinner={() => {}}/>);
+        return mount(<MemoryRouter>
+            <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}}/>
+        </MemoryRouter>);
     };
 
     const findModule = (wrapper, module: AccessModule) => wrapper.find(`[data-test-id="module-${module}"]`);

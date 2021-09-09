@@ -60,7 +60,7 @@ module.exports = {
     /* Functionality */
     'curly': 'warn',
     'guard-for-in': 'warn',
-    'no-restricted-imports': ['error', {paths: ['rxjs'] }],
+    'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
     'no-caller': 'warn',
     'no-bitwise': 'warn',
     // 'no-console': 'warn', 

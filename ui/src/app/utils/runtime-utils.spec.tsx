@@ -7,7 +7,7 @@ import {RuntimeApi} from 'generated/fetch/api';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
 import * as React from 'react';
-import defaultServerConfig from "../../testing/default-server-config";
+import defaultServerConfig from "testing/default-server-config";
 
 const WORKSPACE_NS = 'test';
 

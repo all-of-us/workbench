@@ -33,6 +33,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {ProfileAccessModules} from './profile-access-modules';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 // validators for validate.js
@@ -56,7 +57,7 @@ const validators = {
   country: {...required, ...notTooLong(95)}
 };
 
-interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -71,7 +72,8 @@ interface ProfilePageState {
 export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal,
-  withNavigation
+  withNavigation,
+  withRouter
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -296,7 +298,7 @@ export const ProfileComponent = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(hasExpired || wasReferredFromRenewal()) &&
+            {(hasExpired || wasReferredFromRenewal(this.props.location.search)) &&
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
@@ -480,7 +482,7 @@ export const ProfileComponent = fp.flow(
                 data-test-id='save_profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => wasReferredFromRenewal()
+                onClick={() => wasReferredFromRenewal(this.props.location.search)
                   ? this.saveProfileWithRenewal(currentProfile)
                   : this.saveProfile(currentProfile)
                 }
