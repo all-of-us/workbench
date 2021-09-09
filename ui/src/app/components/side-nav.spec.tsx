@@ -11,8 +11,8 @@ describe('SideNav', () => {
     onToggleSideNav: () => {},
   };
 
-  const spy = jest.spyOn(ProfilePicture, "getProfilePictureSrc");
-  spy.mockReturnValue("lol.png");
+  const spy = jest.spyOn(ProfilePicture, 'getProfilePictureSrc');
+  spy.mockReturnValue('lol.png');
 
   const component = () => mount(<SideNav {...props}/>);
 

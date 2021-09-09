@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ProfileAccessModules} from "./profile-access-modules";
+import {ProfileAccessModules} from './profile-access-modules';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {Profile} from 'generated/fetch';
 import {serverConfigStore} from 'app/utils/stores';

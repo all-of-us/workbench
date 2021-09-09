@@ -1,12 +1,12 @@
 import {getTrail} from 'app/components/breadcrumb'
 import {BreadcrumbType, currentWorkspaceStore} from 'app/utils/navigation';
-import {registerApiClient} from "app/services/swagger-fetch-clients";
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
-import {WorkspacesApi} from "generated/fetch";
+import {WorkspacesApi} from 'generated/fetch';
 
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
-import {exampleCohortStubs} from "testing/stubs/cohorts-api-stub";
-import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
+import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
@@ -22,7 +22,7 @@ describe('getTrail', () => {
       exampleCohortStubs[0],
       cohortReviewStubs[0],
       ConceptSetsApiStub.stubConceptSets()[0],
-      {ns: 'testns', wsid: 'testwsid', cid: "88", pid: "77"}
+      {ns: 'testns', wsid: 'testwsid', cid: '88', pid: '77'}
     );
     expect(trail.map(item => item.label))
       .toEqual(['Workspaces', 'defaultWorkspace', 'Cohort Name', 'Participant 77']);

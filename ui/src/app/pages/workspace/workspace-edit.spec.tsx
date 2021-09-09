@@ -28,10 +28,10 @@ import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub} from "testing/stubs/profile-api-stub";
-import {Dropdown} from "primereact/dropdown";
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {Dropdown} from 'primereact/dropdown';
 
-import * as Authentication from "app/utils/authentication";
+import * as Authentication from 'app/utils/authentication';
 import SpyInstance = jest.SpyInstance;
 import { mockNavigate } from 'setupTests';
 
@@ -593,7 +593,7 @@ describe('WorkspaceEdit', () => {
     let billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props.value).toEqual("billingAccounts/freetier");
+    expect(billingDropDown.props.value).toEqual('billingAccounts/freetier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['billingAccounts/freetier', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -611,7 +611,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -626,7 +626,7 @@ describe('WorkspaceEdit', () => {
 
     const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -642,7 +642,7 @@ describe('WorkspaceEdit', () => {
     const billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
-    expect(billingDropDown.props.value).toEqual("free-tier");
+    expect(billingDropDown.props.value).toEqual('free-tier');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -661,7 +661,7 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 4 options: Free tier, user's billing account, workspace billing account, CREATE_BILLING_ACCOUNT_OPTION
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -678,7 +678,7 @@ describe('WorkspaceEdit', () => {
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     // 'billing-account' is workspace's current billing account.
     // There would be 4 options: Free tier, user's billing account, workspace billing account, CREATE_BILLING_ACCOUNT_OPTION
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['billing-account', 'SELECT_OR_CREATE_BILLING_ACCOUNT_OPTION_VALUE']);
     expect(billingDropDown.props.options.map(o => o.label))
@@ -697,7 +697,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
-    expect(billingDropDown.props.value).toEqual("billing-account");
+    expect(billingDropDown.props.value).toEqual('billing-account');
     expect(billingDropDown.props.options.map(o => o.value))
       .toEqual(['free-tier', 'user-billing', 'billing-account', 'CREATE_BILLING_ACCOUNT_OPTION']);
     expect(billingDropDown.props.options.map(o => o.label))

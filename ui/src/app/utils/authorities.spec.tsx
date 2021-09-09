@@ -1,5 +1,5 @@
-import * as React from "react";
-import {AuthorityGuardedAction, hasAuthorityForAction} from "./authorities";
+import * as React from 'react';
+import {AuthorityGuardedAction, hasAuthorityForAction} from './authorities';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {Authority} from 'generated/fetch';
 

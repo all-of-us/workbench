@@ -29,7 +29,7 @@ import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {QuickTourAndVideos} from './quick-tour-and-videos';
-import {parseQueryParams} from "app/components/app-router";
+import {parseQueryParams} from 'app/components/app-router';
 
 import workspaceIcon from 'assets/images/workspace-icon.svg';
 import cohortIcon from 'assets/images/cohort-icon.svg';

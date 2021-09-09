@@ -12,7 +12,7 @@ import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from 'generated/fetch';
-import {serverConfigStore} from "app/utils/stores";
+import {serverConfigStore} from 'app/utils/stores';
 import {runtimePresets} from './runtime-presets';
 
 let mockGetRuntime: SpyInstance;

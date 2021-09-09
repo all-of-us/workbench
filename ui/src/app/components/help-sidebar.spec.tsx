@@ -38,8 +38,8 @@ import {
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
-import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
-import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 

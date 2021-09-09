@@ -53,7 +53,7 @@ module.exports = {
     'no-undef-init': 'warn',
     // 'brace-style': ['warn', '1tbs'],
     // 'simple-import-sort/sort': 'warn',
-    // 'quotes': ['warn', 'single'], 
+    'quotes': ['warn', 'single', {"allowTemplateLiterals": true}],
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 

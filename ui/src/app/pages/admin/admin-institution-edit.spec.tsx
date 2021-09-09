@@ -9,7 +9,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import {simulateSwitchToggle, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {AdminInstitutionEdit} from './admin-institution-edit';
-import {InputSwitch} from "primereact/inputswitch";
+import {InputSwitch} from 'primereact/inputswitch';
 import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('AdminInstitutionEditSpec', () => {

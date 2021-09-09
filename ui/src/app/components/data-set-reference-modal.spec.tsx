@@ -1,9 +1,9 @@
-import {mount} from "enzyme";
-import * as React from "react";
-import {DataSetReferenceModal} from "./data-set-reference-modal";
+import {mount} from 'enzyme';
+import * as React from 'react';
+import {DataSetReferenceModal} from './data-set-reference-modal';
 import {WorkspaceResource} from 'generated/fetch';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {Button} from "./buttons";
+import {Button} from './buttons';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApi} from 'generated/fetch';

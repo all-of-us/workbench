@@ -1,6 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
-import {MemoryRouter} from "react-router-dom";
+import {MemoryRouter} from 'react-router-dom';
 
 import {DataAccessPanel, DataAccessPanelProps} from 'app/pages/profile/data-access-panel';
 import {cdrVersionStore} from 'app/utils/stores';
