@@ -21,7 +21,11 @@ import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {
+  defaultGceConfig,
+  defaultDataprocConfig,
+  RuntimeApiStub
+} from 'testing/stubs/runtime-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
@@ -42,6 +46,7 @@ describe('RuntimePanel', () => {
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
   let enablePd: boolean;
+  let enableGpu: boolean;
 
   const iconsDir = '/assets/icons';
 
@@ -58,6 +63,7 @@ describe('RuntimePanel', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {...defaultServerConfig}});
     enablePd = serverConfigStore.get().config.enablePersistentDisk;
+    enableGpu = serverConfigStore.get().config.enableGpu;
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -120,6 +126,15 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
+  function getCheckbox(wrapper, id) {
+    return wrapper.find(id).first().prop('checked');
+  }
+
+  function clickCheckbox(wrapper, id) {
+    const currentChecked = getCheckbox(wrapper, id);
+    wrapper.find(id).first().simulate('change', {target: {checked: !currentChecked}});
+  }
+
   const getMainCpu = (wrapper) => getInputValue(wrapper, '#runtime-cpu');
   const pickMainCpu = (wrapper, cpu) => pickDropdownOption(wrapper, '#runtime-cpu', cpu);
 
@@ -131,6 +146,15 @@ describe('RuntimePanel', () => {
 
   const getPdSize = (wrapper) => getInputValue(wrapper, '#persistent-disk');
   const pickPdSize = (wrapper, pdSize) => enterNumberInput(wrapper, '#persistent-disk', pdSize);
+
+  const getGpuType = (wrapper) => getInputValue(wrapper, '#gpu-type');
+  const pickGpuType = (wrapper, gpuType) => pickDropdownOption(wrapper, '#gpu-type', gpuType);
+
+  const getGpuNum = (wrapper) => getInputValue(wrapper, '#gpu-num');
+  const pickGpuNum = (wrapper, gpuNum) => pickDropdownOption(wrapper, '#gpu-num', gpuNum);
+
+  const getEnableGpu = (wrapper) => getCheckbox(wrapper, '#enable-gpu');
+  const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
 
   const pickComputeType = (wrapper, computeType) => pickDropdownOption(wrapper, '#runtime-compute', computeType);
 
@@ -328,7 +352,8 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
     expect(runtimeApiStub.runtime.gceConfig).toEqual({
       machineType: 'n1-highmem-8',
-      diskSize: 75
+      diskSize: 75,
+      gpuConfig: null
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
@@ -1042,4 +1067,58 @@ describe('RuntimePanel', () => {
     const createPanel = wrapper.find({'data-test-id': 'runtime-create-panel'});
     expect(createPanel.exists()).toBeFalsy();
   });
+
+  it('should allow creating gce with GPU', async() => {
+    if (!enableGpu) {
+      return;
+    }
+    runtimeApiStub.runtime = null;
+    runtimeStoreStub.runtime = null;
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    await pickComputeType(wrapper, ComputeType.Standard);
+    await clickEnableGpu(wrapper);
+    await pickGpuType(wrapper, 'nvidia-tesla-t4');
+    await pickGpuNum(wrapper, 2);
+    if (enablePd) {
+      await pickMainCpu(wrapper, 8);
+      await pickPdSize(wrapper, 75);
+      await mustClickButton(wrapper, 'Create');
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.gpuType).toEqual('nvidia-tesla-t4');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(2);
+    } else {
+      await pickMainCpu(wrapper, 8);
+      await pickMainDiskSize(wrapper, 75);
+      await mustClickButton(wrapper, 'Create');
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual('nvidia-tesla-t4');
+      expect(runtimeApiStub.runtime.gceConfig.gpuConfig.numOfGpus).toEqual(2);
+    }
+  });
+
+  it('should allow creating gce without GPU', async() => {
+    if (!enableGpu) {
+      return;
+    }
+    runtimeApiStub.runtime = null;
+    runtimeStoreStub.runtime = null;
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    await pickComputeType(wrapper, ComputeType.Standard);
+    if (enablePd) {
+      await pickMainCpu(wrapper, 8);
+      await pickPdSize(wrapper, 75);
+      await mustClickButton(wrapper, 'Create');
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
+    } else {
+      await pickMainCpu(wrapper, 8);
+      await pickMainDiskSize(wrapper, 75);
+      await mustClickButton(wrapper, 'Create');
+      expect(runtimeApiStub.runtime.status).toEqual('Creating');
+      expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
+    }
+  });
+
 });

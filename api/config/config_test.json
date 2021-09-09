@@ -103,6 +103,7 @@
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
     "enableFireCloudV2Billing" : false,
+    "enableGpu": true,
     "enablePersistentDisk": true,
     "enableAccessModuleRewrite": true,
     "enableUnifiedUserAccessCron": true,

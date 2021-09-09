@@ -13,7 +13,8 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        diskSize: 100
+        diskSize: 100,
+        gpuConfig: null,
       },
     }
   },
