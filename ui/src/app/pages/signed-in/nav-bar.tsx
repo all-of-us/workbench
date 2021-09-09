@@ -11,7 +11,7 @@ import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import {profileStore, ProfileStore, RouteData, useStore} from 'app/utils/stores';
+import {profileStore, ProfileStore, RouteDataStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useRef, useState} from 'react';
 
@@ -100,7 +100,7 @@ const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
   }
 };
 
-export const NavBar = (routeData: RouteData) => {
+export const NavBar = (routeData: RouteDataStore) => {
   const [showSideNav, setShowSideNav] = useState(false);
   const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [statusAlertDetails, setStatusAlertDetails] = useState({

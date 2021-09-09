@@ -13,7 +13,7 @@ import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 const {useEffect, useState} = React;
 
-export interface RouteData {
+export interface RouteDataStore {
   title?: string;
   minimizeChrome?: boolean;
   pageKey?: string;
@@ -23,7 +23,7 @@ export interface RouteData {
   workspaceNavBarTab?: string;
 }
 
-export const routeDataStore = atom<RouteData>({});
+export const routeDataStore = atom<RouteDataStore>({});
 
 interface AuthStore {
   authLoaded: boolean;

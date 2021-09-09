@@ -14,7 +14,7 @@ import {
 import {
   BreadcrumbType
 } from 'app/utils/navigation';
-import {MatchParams, routeDataStore, RouteData, withStore} from 'app/utils/stores';
+import {MatchParams, routeDataStore, RouteDataStore, withStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, CohortReview, ConceptSet} from 'generated/fetch';
 
@@ -147,7 +147,7 @@ interface Props {
   cohort: Cohort;
   cohortReview: CohortReview;
   conceptSet: ConceptSet;
-  routeData: RouteData;
+  routeData: RouteDataStore;
 }
 
 interface State {
