@@ -32,7 +32,7 @@ export async function convertAPIError(e): Promise<ErrorResponse> {
       message = null,
       statusCode = null} = await e.json();
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
-  }  catch {
+  } catch {
     return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
   }
 }

@@ -411,7 +411,7 @@ export const AdminInstitutionEdit = fp.flow(withNavigation, withRouter)(class ex
     let errorMsg = 'Error while saving Institution. Please try again later';
     const error = await convertAPIError(rejectReason);
     if (rejectReason.status === 409) {
-      errorMsg  = error.message;
+      errorMsg = error.message;
     }
     this.setState({apiErrorMsg: errorMsg, showApiError: true});
   }

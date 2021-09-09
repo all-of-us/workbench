@@ -142,7 +142,7 @@ interface State {
   loadingSubtree: boolean;
 }
 
-export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class extends React.Component<Props, State>  {
+export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class extends React.Component<Props, State> {
   growl: any;
   growlTimer: NodeJS.Timer;
   subscription: Subscription;
@@ -240,7 +240,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
     setSidebarActiveIconStore.next(null);
   }
 
-  addSelection = (selectCriteria)  => {
+  addSelection = (selectCriteria) => {
     const {cohortContext, cohortContext: {source}, match: {params}} = this.props;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
@@ -267,7 +267,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
       localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }
     this.setState({selectedCriteriaList: criteriaList});
-    this.isConcept ?  currentConceptStore.next(criteriaList) : currentCohortCriteriaStore.next(criteriaList);
+    this.isConcept ? currentConceptStore.next(criteriaList) : currentCohortCriteriaStore.next(criteriaList);
     const growlMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
     this.growl.show({severity: 'success', detail: growlMessage, closable: false, life: 2000});
     if (!!this.growlTimer) {

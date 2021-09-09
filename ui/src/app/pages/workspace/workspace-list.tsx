@@ -81,10 +81,10 @@ export class WorkspaceList extends React.Component<WithSpinnerOverlayProps, Stat
 
     // Maps each "Filter by" dropdown element to a set of access levels to display.
     const filters = [
-      { label: 'Owner',  value: ['OWNER'] },
+      { label: 'Owner', value: ['OWNER'] },
       { label: 'Writer', value: ['WRITER'] },
       { label: 'Reader', value: ['READER'] },
-      { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
+      { label: 'All', value: ['OWNER', 'READER', 'WRITER'] },
     ];
     const defaultFilter = filters.find(f => f.label === 'All');
 

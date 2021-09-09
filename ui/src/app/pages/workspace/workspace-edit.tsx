@@ -1112,7 +1112,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       let freeTierBalancePanel: OverlayPanel;
 
       const errors = this.validate();
-      return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
           {!hasDefaultCdrVersion(this.state.workspace, cdrVersionTiersResponse) && showCdrVersionModal &&
@@ -1273,7 +1273,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                                 indent={true}>
           <FlexRow>
             <FlexColumn>
-              <FlexColumn  style={styles.researchPurposeRow}>
+              <FlexColumn style={styles.researchPurposeRow}>
                 <FlexRow>
                 <CheckBox
                   data-test-id='researchPurpose-checkbox'

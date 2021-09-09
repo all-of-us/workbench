@@ -44,7 +44,7 @@ export const styles = reactStyles({
 export const LoginReactComponent: React.FunctionComponent<{
   onCreateAccount: Function }> = ({onCreateAccount}) => {
     return <React.Fragment>
-      <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem',  paddingLeft: '3rem'}}>
+      <div data-test-id='login' style={{marginBottom: '.5rem', marginTop: '5.5rem', paddingLeft: '3rem'}}>
         <div>
           <Header style={{width: '14rem', lineHeight: '30px'}}>
             Already have a

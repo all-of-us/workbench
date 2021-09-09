@@ -16,7 +16,7 @@ import {parseQueryParams} from "app/components/app-router";
 const {useState, useEffect} = React;
 
 interface RegistrationTask {
-  key: string;    // legacy accessor text
+  key: string; // legacy accessor text
   module: AccessModule;
   completionPropsKey: string;
   loadingPropsKey?: string;

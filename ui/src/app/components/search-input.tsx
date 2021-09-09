@@ -122,10 +122,10 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
     this._searchTermChangedEvent = fp.debounce(300, this._search);
 
     // State machine states
-    this._START = 0;   // Input box lacks focus, drop-down invisible
-    this._ACTIVE = 1;  // Input box focused, drop-down invisible
+    this._START = 0; // Input box lacks focus, drop-down invisible
+    this._ACTIVE = 1; // Input box focused, drop-down invisible
     this._SUGGEST = 2; // Input box focused, search results visible
-    this._HOVER = 3;   // Input box focused, search results visible, item activated
+    this._HOVER = 3; // Input box focused, search results visible, item activated
   }
 
   _toggleHover(j) {
@@ -155,7 +155,7 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
 
   _onBlur() {
     const state = this.state.state;
-    if (state === this._ACTIVE  ||
+    if (state === this._ACTIVE ||
         state === this._SUGGEST ||
         state === this._HOVER) {
       this.setState({state: this._START});

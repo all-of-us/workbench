@@ -73,7 +73,7 @@ export const WorkspaceEditSection = (props: Props) => {
       </div>
       }
       {props.tooltip && <TooltipTrigger content={props.tooltip}>
-        <InfoIcon style={{...styles.infoIcon,  marginTop: '0.2rem'}}/>
+        <InfoIcon style={{...styles.infoIcon, marginTop: '0.2rem'}}/>
       </TooltipTrigger>
       }
     </FlexRow>

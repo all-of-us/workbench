@@ -100,7 +100,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     return renderResourceCard({
       resource,
       menuOnly: true,
-      existingNameList: [],   // TODO existing bug RW-5847: does not populate names for rename modal
+      existingNameList: [], // TODO existing bug RW-5847: does not populate names for rename modal
       onUpdate: loadResources});
   };
 

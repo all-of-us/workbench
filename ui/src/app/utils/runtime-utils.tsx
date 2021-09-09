@@ -125,7 +125,7 @@ const compareMachineCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig)
   const newCpu = newRuntime.machine.cpu;
 
   return {
-    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
+    desc: (newCpu < oldCpu ? 'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
     differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
@@ -137,7 +137,7 @@ const compareMachineMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConf
   const newMemory = newRuntime.machine.memory;
 
   return {
-    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
+    desc: (newMemory < oldMemory ? 'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.CAN_UPDATE_WITH_REBOOT
@@ -150,7 +150,7 @@ export const compareGpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig)
   return {
     desc: 'Change GPU config',
     previous: oldGpuExists ? `${oldRuntime.gpuConfig.numOfGpus} ${oldRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
-    new: newGpuExists ?  `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
+    new: newGpuExists ? `${newRuntime.gpuConfig.numOfGpus} ${newRuntime.gpuConfig.gpuType} GPU` : 'No GPUs',
     differenceType: (!oldGpuExists && !newGpuExists) || (oldGpuExists && newGpuExists &&
         oldRuntime.gpuConfig.gpuType === newRuntime.gpuConfig.gpuType &&
         oldRuntime.gpuConfig.numOfGpus === newRuntime.gpuConfig.numOfGpus) ?
@@ -209,7 +209,7 @@ const compareWorkerCpu = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig):
   const newCpu = findMachineByName(newRuntime.dataprocConfig.workerMachineType).cpu;
 
   return {
-    desc: (newCpu < oldCpu ?  'Decrease' : 'Increase') + ' number of CPUs',
+    desc: (newCpu < oldCpu ? 'Decrease' : 'Increase') + ' number of CPUs',
     previous: oldCpu.toString(),
     new: newCpu.toString(),
     differenceType: oldCpu === newCpu ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
@@ -225,7 +225,7 @@ const compareWorkerMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfi
   const newMemory = findMachineByName(newRuntime.dataprocConfig.workerMachineType).memory;
 
   return {
-    desc: (newMemory < oldMemory ?  'Decrease' : 'Increase') + ' memory',
+    desc: (newMemory < oldMemory ? 'Decrease' : 'Increase') + ' memory',
     previous: oldMemory.toString() + ' GB',
     new: newMemory.toString() + ' GB',
     differenceType: oldMemory === newMemory ? RuntimeDiffState.NO_CHANGE : RuntimeDiffState.NEEDS_DELETE_RUNTIME
@@ -241,7 +241,7 @@ const compareDataprocWorkerDiskSize = (oldRuntime: RuntimeConfig, newRuntime: Ru
   const newDiskSize = newRuntime.dataprocConfig.workerDiskSize || 0;
 
   return {
-    desc: (newDiskSize < oldDiskSize ?  'Decrease' : 'Increase') + ' worker disk size',
+    desc: (newDiskSize < oldDiskSize ? 'Decrease' : 'Increase') + ' worker disk size',
     previous: oldDiskSize.toString() + ' GB',
     new: newDiskSize.toString() + ' GB',
     differenceType: oldDiskSize === newDiskSize ?
@@ -258,7 +258,7 @@ const compareDataprocNumberOfPreemptibleWorkers = (oldRuntime: RuntimeConfig, ne
   const newNumWorkers = newRuntime.dataprocConfig.numberOfPreemptibleWorkers || 0;
 
   return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' number of preemptible workers',
+    desc: (newNumWorkers < oldNumWorkers ? 'Decrease' : 'Increase') + ' number of preemptible workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
@@ -275,7 +275,7 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
   const newNumWorkers = newRuntime.dataprocConfig.numberOfWorkers || 0;
 
   return {
-    desc: (newNumWorkers < oldNumWorkers ?  'Decrease' : 'Increase') + ' number of workers',
+    desc: (newNumWorkers < oldNumWorkers ? 'Decrease' : 'Increase') + ' number of workers',
     previous: oldNumWorkers.toString(),
     new: newNumWorkers.toString(),
     differenceType: oldNumWorkers === newNumWorkers ?
@@ -290,7 +290,7 @@ const compareAutopauseThreshold = (oldRuntime: RuntimeConfig, newRuntime: Runtim
     ? DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES : newRuntime.autopauseThreshold;
 
   return {
-    desc: (newAutopauseThreshold < oldAutopauseThreshold ?  'Decrease' : 'Increase') + ' autopause threshold',
+    desc: (newAutopauseThreshold < oldAutopauseThreshold ? 'Decrease' : 'Increase') + ' autopause threshold',
     previous: AutopauseMinuteThresholds.get(oldAutopauseThreshold),
     new: AutopauseMinuteThresholds.get(newAutopauseThreshold),
     differenceType: oldAutopauseThreshold === newAutopauseThreshold ?
@@ -432,7 +432,7 @@ export const useDisk = (currentWorkspaceNamespace) => {
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
 export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
-  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
+  RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>] => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
   // Ensure that a runtime gets initialized, if it hasn't already been.
@@ -496,7 +496,7 @@ export const getRuntimeCtx = (runtime: Runtime, pendingRuntime: Runtime) => {
   const runtimeExists = (runtime.status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(runtime.status)) || !!pendingRuntime;
   const {dataprocConfig = null} = pendingRuntime || runtime || {} as Partial<Runtime>;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const gceExists = runtimeExists &&  initialCompute === ComputeType.Standard;
+  const gceExists = runtimeExists && initialCompute === ComputeType.Standard;
   const persistentDisk = diskStore.get().persistentDisk;
   return {
     runtimeExists: runtimeExists,

@@ -444,7 +444,7 @@ interface ToggleProps {
   width?: number;
 }
 
-export class Toggle extends React.Component<ToggleProps>  {
+export class Toggle extends React.Component<ToggleProps> {
   constructor(props) {
     super(props);
   }

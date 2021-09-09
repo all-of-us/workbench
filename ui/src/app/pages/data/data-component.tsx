@@ -133,7 +133,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         .map(resource => resource.cohort.name);
     } else if (resourceType.cohortReview) {
       return resourceList
-        .filter(resource => resource.cohortReview !== null  && resource.cohortReview !== undefined)
+        .filter(resource => resource.cohortReview !== null && resource.cohortReview !== undefined)
         .map(resource => resource.cohortReview.cohortName);
     } else {
       return [];

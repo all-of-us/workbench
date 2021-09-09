@@ -270,7 +270,7 @@ export const InteractiveNotebook = fp.flow(
 
     private get notebookInUse() {
       const {lastLockedBy, lockExpirationTime} = this.state;
-      return lastLockedBy !== null && new Date().getTime()  < lockExpirationTime
+      return lastLockedBy !== null && new Date().getTime() < lockExpirationTime
         && lastLockedBy !== profileStore.get().profile.username;
     }
 

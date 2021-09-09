@@ -89,7 +89,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
         .then((markedWorkspace) => {
           workspace.researchPurpose.needsReviewPrompt = false;
           navigate(
-            ['workspaces',  markedWorkspace.namespace, markedWorkspace.id, 'about']);
+            ['workspaces', markedWorkspace.namespace, markedWorkspace.id, 'about']);
         });
     };
 
@@ -104,7 +104,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
                    style={{display: 'flex', alignItems: 'center', marginLeft: '.5rem'}}
                    data-test-id='edit-workspace'
                    onClick={() => navigate(
-                     ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
+                     ['workspaces', workspace.namespace, workspace.id, 'edit'])}>
           <EditComponentReact enableHoverEffect={true}
                               disabled={!isOwner}
                               style={styles.editIcon}/>

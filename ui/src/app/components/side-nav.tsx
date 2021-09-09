@@ -99,39 +99,39 @@ const getSideNavItemStyles = (active, hovering, disabled) => {
 
 // TODO RW-7006: Ideally, we would use useLocation to get the path and pass it in to these functions.
 // However, this component is currently rendered outside of the React router, so useLocation won't work.
-const bannerAdminActive = () =>  {
+const bannerAdminActive = () => {
   return window.location.pathname === '/admin/banner';
 };
 
-const userAdminActive = () =>  {
+const userAdminActive = () => {
   return window.location.pathname.startsWith('/admin/user');
 };
 
-const userAuditActive = () =>  {
+const userAuditActive = () => {
   return window.location.pathname.startsWith('/admin/user-audit');
 };
 
-const workspaceAdminActive = () =>  {
+const workspaceAdminActive = () => {
   return window.location.pathname.startsWith('/admin/workspaces');
 };
 
-const workspaceAuditActive = () =>  {
+const workspaceAuditActive = () => {
   return window.location.pathname.startsWith('/admin/workspace-audit');
 };
 
-const homeActive = () =>  {
+const homeActive = () => {
   return window.location.pathname === '/';
 };
 
-const libraryActive = () =>  {
+const libraryActive = () => {
   return window.location.pathname === '/library';
 };
 
-const workspacesActive = () =>  {
+const workspacesActive = () => {
   return window.location.pathname === '/workspaces';
 };
 
-const profileActive = () =>  {
+const profileActive = () => {
   return window.location.pathname === '/profile';
 };
 

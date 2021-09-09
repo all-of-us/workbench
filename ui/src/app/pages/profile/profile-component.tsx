@@ -282,9 +282,9 @@ export const ProfileComponent = fp.flow(
             tooLongWarningCharacters={inputProps.tooLongWarningCharacters}
             {...inputProps}
             textBoxStyleOverrides={{...styles.longInputContainerStyle, ...inputProps.style}}
-          />  :
+          /> :
             <TooltipTrigger content='This field cannot be edited' disabled={!props.disabled}>
-          <TextInput  data-test-id={props.id || valueKey}
+          <TextInput data-test-id={props.id || valueKey}
             {...inputProps}
             style={{...styles.inputStyle, ...inputProps.style}}
           /></TooltipTrigger>}

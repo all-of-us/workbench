@@ -112,7 +112,7 @@ export interface ParticipantsChartsState {
 }
 
 export const ParticipantsCharts = withCurrentWorkspace()(
-  class extends React.Component<ParticipantsChartsProps, ParticipantsChartsState>  {
+  class extends React.Component<ParticipantsChartsProps, ParticipantsChartsState> {
     nameRefs: Array<any> = [];
     constructor(props: ParticipantsChartsProps) {
       super(props);

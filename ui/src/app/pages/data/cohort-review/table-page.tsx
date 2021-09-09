@@ -370,7 +370,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
 
     mapFilters = () => {
       const {filters} = this.state;
-      const filterArr =  Object.keys(filters).reduce((acc, _type) => {
+      const filterArr = Object.keys(filters).reduce((acc, _type) => {
         const values = filters[_type];
         if (_type === Columns[Columns.PARTICIPANTID]) {
           if (values) {
@@ -518,7 +518,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
               borderTop: opt.name === 'Select All' && options.length > 1 ? '1px solid #ccc' : 0,
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
             }}>
-              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+              <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={filters[colType].includes(opt.value)} value={opt.value}
                      onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
               <label style={{paddingLeft: '0.4rem'}}> {opt.name} </label>

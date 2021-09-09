@@ -74,7 +74,7 @@ const stylesFunction = {
       borderRadius: '50%',
       height: '37px',
       width: '37px',
-      opacity: currentStep === buttonStep ? '1.0' :  '0.2',
+      opacity: currentStep === buttonStep ? '1.0' : '0.2',
       backgroundColor: currentStep === buttonStep ? colors.primary : '#333F52',
       fontFamily: 'Montserrat',
       textAlign: 'center',

@@ -22,7 +22,7 @@ import demonstration from 'assets/icons/demonstration.svg';
 
 const styles = reactStyles({
   navPanel: {
-    display: 'flex', flexDirection: 'column',  padding: '1rem',
+    display: 'flex', flexDirection: 'column', padding: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.85),
     minWidth: '300px', maxWidth: '300px', marginLeft: '-0.6rem'
   },

@@ -92,9 +92,9 @@ const formatMB = (fileSize: number): string => {
 
 const parseLocation = (file: FileDetail, bucket: string): string => {
   const prefixLength = bucket.length;
-  const start = prefixLength + 1;  // slash after bucket name
+  const start = prefixLength + 1; // slash after bucket name
   const suffixPos = file.path.lastIndexOf(file.name);
-  const end = suffixPos - 1;  // slash before filename
+  const end = suffixPos - 1; // slash before filename
 
   return file.path.substring(start, end);
 };

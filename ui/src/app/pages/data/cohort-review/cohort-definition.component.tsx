@@ -93,7 +93,7 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
 
   getModifierFormattedData(groupedData, params, mod, domain) {
     let typeMatched;
-    const modArray =  params.map(eachParam => {
+    const modArray = params.map(eachParam => {
       if (eachParam.domain === Domain.DRUG) {
         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
@@ -180,7 +180,7 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
     } else if (d.domain === Domain.SURVEY) {
       if (!d.group) {
-        return  acc === '' ? `${d.name}` :
+        return acc === '' ? `${d.name}` :
           `${acc}, ${d.name}`;
       } else if (d.group && !d.conceptId) {
         return acc === '' ? `Survey - ${d.name}` :

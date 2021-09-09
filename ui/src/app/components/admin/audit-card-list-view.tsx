@@ -180,7 +180,7 @@ const EventBundleView = (props: {eventBundle: AuditEventBundle}) => {
 
 const AuditActionCard = (props: { action: AuditAction }) => {
   const {action} = props;
-  const timeString  = fp.flow(
+  const timeString = fp.flow(
     fp.get('actionTime'),
     moment,
     m => m.format('YYYY-MM-DD hh:mm:ss')
@@ -261,7 +261,7 @@ const ActionTypeFilter = (props: {
     </React.Fragment>);
 };
 
-export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
+export const AuditActionCardListView = (props: { actions: AuditAction[]}) => {
   const {actions} = props;
   const [activeActionTypes, setActiveActionTypes] = useState({});
 
@@ -311,7 +311,7 @@ export const AuditActionCardListView = (props: { actions:  AuditAction[]}) => {
                           updateFilter={updateFilterCallback}
         />
         <div style={{margin: '1rem', width: '30rem'}}>
-          {filteredActions.length ? filteredActions : <div  style={infoMessageStyle}>All cards filtered out.</div>}
+          {filteredActions.length ? filteredActions : <div style={infoMessageStyle}>All cards filtered out.</div>}
         </div>
       </React.Fragment>
   );

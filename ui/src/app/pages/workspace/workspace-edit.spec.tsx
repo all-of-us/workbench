@@ -467,7 +467,7 @@ describe('WorkspaceEdit', () => {
   it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {
     const wrapper = component();
     // Intended Study Text
-    const text  = 'intended Study text';
+    const text = 'intended Study text';
     // since its a new page the characters box for Intended study should say 1000 characters remaining
     let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     expect(intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props.children)

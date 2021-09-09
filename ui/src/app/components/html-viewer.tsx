@@ -17,7 +17,7 @@ interface State {
   loading: boolean;
 }
 
-export const HtmlViewer = withWindowSize()( class extends React.Component<Props,  State> {
+export const HtmlViewer = withWindowSize()( class extends React.Component<Props, State> {
   iframeRef: React.RefObject<any>;
 
   constructor(props) {

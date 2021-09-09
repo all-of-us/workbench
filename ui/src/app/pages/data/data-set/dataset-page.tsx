@@ -396,8 +396,8 @@ const StepNumber = ({step, style = {}}) => {
                          style={{fill: colorWithWhiteness(colors.primary, 0.5), ...style}}/>;
 };
 
-const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...props}) => {
-  return  <div style={styles.selectBoxHeader}>
+const BoxHeader = ({step = '', header = '', subHeader = '', style = {}, ...props}) => {
+  return <div style={styles.selectBoxHeader}>
     <div style={{display: 'flex', marginLeft: '0.2rem'}}>
       <StepNumber step={step} style={{marginTop: '0.5rem'}}/>
       <label style={{marginLeft: '0.5rem', color: colors.primary, display: 'flex', ...style}}>
@@ -551,7 +551,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
     updatePrepackagedDomains() {
       if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
-        PREPACKAGED_DOMAINS =   {
+        PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS
         };
@@ -699,7 +699,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
     private getDomainsFromConceptSets(
       conceptSets: ConceptSet[], prepackagedConceptSets: Set<PrepackagedConceptSet>): Set<Domain> {
       const domains =
-        conceptSets.map(cs => cs.domain === Domain.PHYSICALMEASUREMENT ?  Domain.MEASUREMENT : cs.domain).concat(
+        conceptSets.map(cs => cs.domain === Domain.PHYSICALMEASUREMENT ? Domain.MEASUREMENT : cs.domain).concat(
           Array.from(prepackagedConceptSets).map(p => PREPACKAGED_DOMAINS[p]));
       return new Set(domains);
     }
@@ -1237,7 +1237,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                     {this.getPrePackagedList()
                         .map((prepackaged: PrepackagedConceptSet) => {
                           const p = PrepackagedConceptSet[prepackaged];
-                          return <ImmutableListItem name={p}  data-test-id='prePackage-concept-set-item'
+                          return <ImmutableListItem name={p} data-test-id='prePackage-concept-set-item'
                                                 key={prepackaged}
                                                 checked={selectedPrepackagedConceptSets.has(p)}
                                                 onChange={() => this.selectPrePackagedConceptSet(

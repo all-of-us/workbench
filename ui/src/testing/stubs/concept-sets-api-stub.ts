@@ -82,7 +82,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
-    this.surveyConceptSets  =  ConceptSetsApiStub.stubConceptSets().filter((concepts) => {
+    this.surveyConceptSets = ConceptSetsApiStub.stubConceptSets().filter((concepts) => {
       return concepts.domain === Domain.OBSERVATION;
     });
   }
@@ -97,13 +97,13 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         lastModifiedTime: new Date().getTime() - 8000,
         participantCount: ConceptStubVariables.STUB_CONCEPTS.length,
         criteriums: ConceptStubVariables.STUB_CONCEPTS
-      },  {
+      }, {
         id: 346,
         name: 'Mock Concept Set Measurement',
         description: 'Mocked for tests',
         domain: Domain.MEASUREMENT,
         lastModifiedTime: new Date().getTime()
-      },  {
+      }, {
         id: 347,
         name: 'Mock Concept Set for condition',
         description: 'Mocked for tests',

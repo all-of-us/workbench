@@ -33,7 +33,7 @@ module.exports = {
     // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
 
     /* Best Practices */
-    // 'no-multi-spaces': 'warn',
+    'no-multi-spaces': 'error',
 
     /* Typescript specific */
     '@typescript-eslint/explicit-member-accessibility': 'off',

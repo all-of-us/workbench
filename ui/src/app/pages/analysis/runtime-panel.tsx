@@ -244,7 +244,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
   const [deleting, setDeleting] = useState(false);
 
   return <Fragment>
-    <div style={{display: 'flex',  marginRight: '0.5rem'}}>
+    <div style={{display: 'flex', marginRight: '0.5rem'}}>
       <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
                shape='exclamation-triangle' size='20'/>
       <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
@@ -380,7 +380,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
     </div>
   </div>;
   return <Fragment>
-    <div style={{display: 'flex',  marginRight: '0.5rem'}}>
+    <div style={{display: 'flex', marginRight: '0.5rem'}}>
         <ClrIcon style={{color: colors.warning, marginRight: '0.25rem'}} className='is-solid'
                  shape='exclamation-triangle' size='20'/>
         <h3 style={{...styles.baseHeader, ...styles.bold}}>Delete environment options</h3>
@@ -497,7 +497,7 @@ const DisabledPanel = () => {
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
-  return <FlexRow  style={styles.labelAndInput}>
+  return <FlexRow style={styles.labelAndInput}>
       <label style={styles.label} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
       <InputNumber id={`${idPrefix}-disk`}
                    showButtons
@@ -511,7 +511,7 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
     </FlexRow>;
 };
 
-const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  => {
+const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig}) => {
   const {
     gpuType = 'nvidia-tesla-t4',
     numOfGpus = 1,
@@ -585,7 +585,7 @@ const PersistentDiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskS
   </div>;
 };
 
-const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
+const DataProcConfigSelector = ({onChange, disabled, dataprocConfig}) => {
   const {
     workerMachineType = defaultMachineName,
     workerDiskSize = MIN_DISK_SIZE_GB,
@@ -1242,7 +1242,7 @@ const RuntimePanel = fp.flow(
         masterMachineType: runtime.machine.name,
         masterDiskSize: runtime.diskSize
       }
-    } : runtime.computeType === ComputeType.Standard ? createStandardComputeRuntimeRequest(runtime) :  null;
+    } : runtime.computeType === ComputeType.Standard ? createStandardComputeRuntimeRequest(runtime) : null;
 
     // If the selected runtime matches a preset, plumb through the appropriate configuration type.
     runtimeRequest.configurationType = fp.get(
@@ -1425,7 +1425,7 @@ const RuntimePanel = fp.flow(
       ],
       [PanelContent.DeleteRuntime, () => {
         if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
-          return  <ConfirmDeleteRuntimeWithPD
+          return <ConfirmDeleteRuntimeWithPD
               onConfirm={async(runtimeStatusReq) => {
                 await setRuntimeStatus(runtimeStatusReq);
                 onClose();

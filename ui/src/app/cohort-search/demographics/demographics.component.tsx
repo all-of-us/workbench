@@ -406,7 +406,7 @@ export class Demographics extends React.Component<Props, State> {
               {nodes.map((opt, o) => <div key={o} style={styles.option}>
                 {selectedIds.includes(opt.parameterId)
                   ? <ClrIcon shape='check-circle' size='20' style={{...styles.selectIcon, ...styles.selected}}/>
-                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon} onClick={() => this.selectOption(opt)}/>
+                  : <ClrIcon shape='plus-circle' size='20' style={styles.selectIcon} onClick={() => this.selectOption(opt)}/>
                 }
                 {opt.name}
                 {!!opt.count && <span style={styles.count}>

@@ -568,7 +568,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
               onClick={(e) => vl.toggle(e)}/>}
           <OverlayPanel className='labOverlay' ref={(el) => vl = el}
                         showCloseIcon={true} dismissable={true}>
-            {(rowData.refRange &&  column.field === 'value') &&
+            {(rowData.refRange && column.field === 'value') &&
             <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
             {(rowData.unit && column.field === 'value') &&
             <div>Units: {rowData.unit}</div>}
@@ -787,7 +787,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
             {checkboxes}
           </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
-            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
+            <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
             <label> Select All </label>

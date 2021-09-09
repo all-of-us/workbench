@@ -138,7 +138,7 @@ export const DemographicSurvey = withProfileErrorModal(
     validateDemographicSurvey(demographicSurvey) {
       validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected';
       const validationCheck = {
-        race: { presence: { allowEmpty: false},  },
+        race: { presence: { allowEmpty: false}, },
         ethnicity: { presence: { allowEmpty: false } },
         genderIdentityList: { presence: { allowEmpty: false } },
         identifiesAsLgbtq: { nullBoolean: {} },

@@ -317,7 +317,7 @@ const Refresh = (props: {showSpinner: Function}) => <Button
     onClick={async() => {
       props.showSpinner();
       await syncExternalModules();
-      location.reload();  // will also hide spinner
+      location.reload(); // will also hide spinner
     }} >
   <Repeat style={styles.refreshIcon}/> Refresh
 </Button>;
@@ -343,7 +343,7 @@ const ModuleIcon = (props: {moduleName: AccessModule, completedOrBypassed: boole
 
 interface ModuleProps {
   moduleName: AccessModule;
-  active: boolean;    // is this the currently-active module that the user should complete
+  active: boolean; // is this the currently-active module that the user should complete
 
   // TODO RW-7059
   // eligible: boolean;  // is the user eligible to complete this module (does the inst. allow it)

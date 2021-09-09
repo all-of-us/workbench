@@ -68,7 +68,7 @@ describe('Access Renewal Page', () => {
       completionEpochMillis: completionFn()
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
-    profileStore.set({profile: newProfile,  load, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
   function setBypassTimes(completionFn) {
@@ -83,7 +83,7 @@ describe('Access Renewal Page', () => {
       completionEpochMillis: completionEpochMillis
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
-    profileStore.set({profile: newProfile,  load, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
   const profile = ProfileStubVariables.PROFILE_STUB;

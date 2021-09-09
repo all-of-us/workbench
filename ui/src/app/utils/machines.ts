@@ -233,7 +233,7 @@ export const machineRunningCostBreakdown = ({
     if (workerMachine) {
       costs.push(`${formatUsd(masterMachine.price)}/hr Master VM`);
       if (numberOfWorkers > 0) {
-        costs.push(`${formatUsd(workerMachine.price  * numberOfWorkers)}/hr Worker VM(s) (${numberOfWorkers})`);
+        costs.push(`${formatUsd(workerMachine.price * numberOfWorkers)}/hr Worker VM(s) (${numberOfWorkers})`);
       }
       if (numberOfPreemptibleWorkers > 0) {
         costs.push(

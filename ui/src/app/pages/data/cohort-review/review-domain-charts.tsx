@@ -13,7 +13,7 @@ export class ReviewDomainChartsComponent extends React.Component<
 
   getOptions() {
     const values = this.props.unitData.map(val => {
-      return  val.values;
+      return val.values;
     });
     const date = this.props.unitData.map(val => {
       return val.date;

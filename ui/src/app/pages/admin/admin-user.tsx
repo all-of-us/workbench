@@ -353,7 +353,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       freeCreditsLimit: this.updatedProfileValue('freeTierDollarQuota'),
       contactEmail: this.updatedProfileValue('contactEmail'),
       affiliation: this.updatedProfileValue('verifiedInstitutionalAffiliation'),
-      accessBypassRequests: [],  // coming soon: RW-4958
+      accessBypassRequests: [], // coming soon: RW-4958
     };
 
     this.setState({loading: true});

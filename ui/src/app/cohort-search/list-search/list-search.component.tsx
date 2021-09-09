@@ -177,7 +177,7 @@ const styles = reactStyles({
   }
 });
 
-const columnBodyStyle =  {
+const columnBodyStyle = {
   ...styles.columnBodyName,
   width: '9%'
 };
