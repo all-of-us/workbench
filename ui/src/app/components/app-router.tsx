@@ -39,7 +39,7 @@ export const parseQueryParams = (search: string) => {
  *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
  */
 export const useQuery = (): URLSearchParams => {
-  const location = useLocation()
+  const location = useLocation();
   return parseQueryParams(location.search);
 };
 
