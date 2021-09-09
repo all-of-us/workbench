@@ -137,6 +137,7 @@
   },
   "resolutions": {
     "node-fetch": "^2.6.1",
-    "node-gyp": "^4"
+    "node-gyp": "^4",
+    "immer": "^9.0.6"
   }
 }
