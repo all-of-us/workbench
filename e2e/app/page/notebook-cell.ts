@@ -63,7 +63,8 @@ export default class NotebookCell extends NotebookFrame {
     const clickAndCheck = async (): Promise<ElementHandle> => {
       maxAttempts--;
       const cell = await this.findCell();
-      await cell.click({ delay: 30 });
+      await cell.click({ delay: 20 });
+      await cell.hover();
       // Click in a notebook cell editor area enables cell Edit mode.
       // When a cell is in Edit mode, user can enter code to run.
       const iframe = await this.getIFrame();

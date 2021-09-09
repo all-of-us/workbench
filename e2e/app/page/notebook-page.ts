@@ -269,7 +269,8 @@ export default class NotebookPage extends NotebookFrame {
       notebookCode = fs.readFileSync(codeFile, 'ascii');
     }
 
-    await this.waitForKernelIdle(60000, 5000);
+    // Check kernel idle again before typing code.
+    await this.waitForKernelIdle(60000, 1000);
     const codeCell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
     const cellInputTextbox = await codeCell.focus();
 
@@ -290,7 +291,7 @@ export default class NotebookPage extends NotebookFrame {
     }
 
     await this.run();
-    const codeOutput = await this.waitForKernelIdle(300000, 3000).then(() => codeCell.waitForOutput(timeOut));
+    const codeOutput = await this.waitForKernelIdle(timeOut, 1000).then(() => codeCell.waitForOutput(timeOut));
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
   }
