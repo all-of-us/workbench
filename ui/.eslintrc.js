@@ -51,16 +51,20 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'warn',
 
     /* Style */
-    '@typescript-eslint/prefer-function-type': 'warn',
-    'spaced-comment': ['warn', 'always', {'block': {'balanced': true}}],
+    'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
+    '@typescript-eslint/naming-convention': ['error',
+      {'selector': 'class', 'format': ["PascalCase"]},
+      {'selector': 'interface', 'format': ["PascalCase"]}
+    ],
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
-    'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
-    'simple-import-sort/sort': 'error',
+    '@typescript-eslint/prefer-function-type': 'error',
     'quotes': ['error', 'single', {'allowTemplateLiterals': true}],
     '@typescript-eslint/semi': 'error',
+    'simple-import-sort/sort': 'error',
     'space-before-function-paren': ['error', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    'spaced-comment': ['warn', 'always', {'block': {'balanced': true}}],
 
     /* Functionality */
     'curly': 'warn',
