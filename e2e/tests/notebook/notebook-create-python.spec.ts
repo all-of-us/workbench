@@ -1,20 +1,18 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { LinkText, ResourceCard } from 'app/text-labels';
+import { ResourceCard } from 'app/text-labels';
 import { waitForFn } from 'utils/waits-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import expect from 'expect';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import NewNotebookModal from 'app/modal/new-notebook-modal';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Create python kernel notebook', () => {
+describe('Python Kernel Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -78,22 +76,15 @@ describe('Create python kernel notebook', () => {
 
     expect(
       await notebook.runCodeCell(4, {
-        codeFile: 'resources/python-code/nbstripoutput-filter.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
-    expect(
-      await notebook.runCodeCell(5, {
         codeFile: 'resources/python-code/gsutil.py',
         markdownWorkaround: true
       })
     ).toMatch(/success$/);
 
-    await notebook.runCodeCell(6, { codeFile: 'resources/python-code/simple-pyplot.py' });
+    await notebook.runCodeCell(5, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
     // Verify plot is the output.
-    const cell = notebook.findCell(6);
+    const cell = notebook.findCell(5);
     const cellOutputElement = await cell.findOutputElementHandle();
     const [imgElement] = await cellOutputElement.$x('./img[@src]');
     expect(imgElement).toBeTruthy(); // plot format is a img.
@@ -127,38 +118,5 @@ describe('Create python kernel notebook', () => {
 
     // Ideally we would validate the download URLs or download content here.
     // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
-  });
-
-  test('Notebook name is unique', async () => {
-    await findOrCreateWorkspace(page, { workspaceName });
-
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.openAnalysisPage();
-    await analysisPage.waitForLoad();
-
-    // Attempt to create another notebook with same name. It should be blocked.
-    await analysisPage.createNewNotebookLink().click();
-
-    const modal = new NewNotebookModal(page);
-    await modal.waitForLoad();
-    await modal.name().type(pyNotebookName);
-
-    const errorTextXpath = `${modal.getXpath()}//*[text()="Name already exists"]`;
-    const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });
-    expect(errorExists.asElement()).not.toBeNull();
-
-    const disabledButton = await modal.createNotebookButton().isCursorNotAllowed();
-    expect(disabledButton).toBe(true);
-
-    // Click "Cancel" button to close modal.
-    await modal.clickButton(LinkText.Cancel, { waitForClose: true });
-    const modalExists = await modal.exists();
-    expect(modalExists).toBe(false);
-
-    // Page remain unchanged, still should be in Analysis page.
-    expect(await analysisPage.isLoaded()).toBe(true);
-
-    await analysisPage.deleteResource(pyNotebookName, ResourceCard.Notebook);
-    await analysisPage.waitForLoad();
   });
 });

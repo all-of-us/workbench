@@ -79,7 +79,7 @@ export default class WorkspaceCard extends CardBase {
       `${WorkspaceCardSelector.cardRootXpath}[.//*[${WorkspaceCardSelector.cardNameXpath}` +
       ` and normalize-space(text())="${workspaceName}"]]`;
     return page
-      .waitForXPath(selector, { timeout })
+      .waitForXPath(selector, { timeout, visible: true })
       .then((element) => {
         logger.info(`Found workspace card: "${workspaceName}"`);
         return new WorkspaceCard(page).asCard(element);

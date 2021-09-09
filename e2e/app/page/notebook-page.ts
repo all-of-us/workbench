@@ -29,7 +29,8 @@ const Xpath = {
   fileMenuDropdown: './/a[text()="File"]',
   downloadMenuDropdown: './/a[text()="Download as"]',
   downloadIpynbButton: './/*[@id="download_script"]/a',
-  downloadMarkdownButton: './/*[@id="download_markdown"]/a'
+  downloadMarkdownButton: './/*[@id="download_markdown"]/a',
+  open: './/*[@id="open_notebook"]/a'
 };
 
 export enum Mode {
@@ -97,15 +98,16 @@ export default class NotebookPage extends NotebookFrame {
   /**
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
-  async run(): Promise<void> {
+  async run(timeout = 60000): Promise<void> {
     logger.info('Click notebook Run button.');
-    await this.waitForKernelIdle(60000, 1000);
+    await this.waitForKernelIdle(timeout, 1000);
     const runButton = await this.findRunButton();
     await runButton.click();
     // Click Run button turns notebook page into Command_mode from Edit mode.
     // Short sleep to avoid check output too soon.
     await this.page.waitForTimeout(500);
     await runButton.dispose();
+    await this.waitForKernelIdle(timeout, 1000);
   }
 
   /**
@@ -120,6 +122,42 @@ export default class NotebookPage extends NotebookFrame {
     // Need a short pause here after click SAVE button to allow click to finish. Otherwise, it can cause tests to fail.
     // See https://precisionmedicineinitiative.atlassian.net/browse/RW-7228 for more details.
     await this.page.waitForTimeout(2000);
+  }
+
+  async selectFileOpenMenu(): Promise<void> {
+    const clickFileMenuIcon = async (iframe: Frame): Promise<void> => {
+      await iframe.waitForXPath(Xpath.fileMenuDropdown, { visible: true, timeout: 2000 }).then((element) => {
+        element.hover();
+        element.click();
+      });
+    };
+
+    let maxRetries = 3;
+    const clickAndCheck = async (iframe: Frame) => {
+      await clickFileMenuIcon(iframe);
+      const succeeded = await iframe
+        .waitForXPath(Xpath.open, { visible: true, timeout: 2000 })
+        .then((menuitem) => {
+          menuitem.hover();
+          menuitem.click();
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (succeeded) {
+        return;
+      }
+      if (maxRetries <= 0) {
+        throw new Error('Failed to click File menu -> Download.');
+      }
+      maxRetries--;
+      await this.page.waitForTimeout(1000).then(() => clickAndCheck(iframe)); // 1 second pause and retry.
+    };
+
+    const frame = await this.getIFrame();
+    await clickAndCheck(frame);
+    await this.page.waitForTimeout(500);
   }
 
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
@@ -290,8 +328,8 @@ export default class NotebookPage extends NotebookFrame {
       logger.info(`Type notebook code:\n--------${notebookCode}\n--------`);
     }
 
-    await this.run();
-    const codeOutput = await this.waitForKernelIdle(timeOut, 1000).then(() => codeCell.waitForOutput(timeOut));
+    await this.run(timeOut);
+    const codeOutput = await codeCell.waitForOutput(timeOut);
     logger.info(`Notebook code output:\n${codeOutput}`);
     return codeOutput;
   }
