@@ -138,6 +138,7 @@
   "resolutions": {
     "node-fetch": "^2.6.1",
     "node-gyp": "^4",
-    "immer": "^9.0.6"
+    "immer": "^9.0.6",
+    "browserslist": "^4.16.5"
   }
 }
