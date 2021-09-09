@@ -15,7 +15,7 @@ export class AccountCreationResendModal extends React.Component<AccountCreationR
   send() {
     const {username, creationNonce, onClose} = this.props;
     profileApi().resendWelcomeEmail({username, creationNonce})
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
     onClose();
   }
 
@@ -59,7 +59,7 @@ export class AccountCreationUpdateModal extends React.Component<
     const {username, creationNonce, onDone} = this.props;
     const {contactEmail} = this.state;
     profileApi().updateContactEmail({username, contactEmail, creationNonce})
-      .catch(error => console.log(error));
+      .catch(error => console.error(error));
     onDone(contactEmail);
   }
 

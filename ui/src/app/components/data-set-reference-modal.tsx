@@ -40,7 +40,7 @@ class DataSetReferenceModal extends React.Component<Props, {}> {
         });
       await deleteResource();
     } catch (ex) {
-      console.log(ex);
+      console.error(ex);
     }
   }
 

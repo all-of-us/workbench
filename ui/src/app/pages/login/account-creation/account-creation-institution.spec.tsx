@@ -89,8 +89,6 @@ it('should load institutions list', async () => {
   // Drop down list should be sorted in ASC order
   expect(options[0].label).not.toEqual(defaultInstitutions[0].displayName);
   expect(options[0].label).toEqual('Broad Institute');
-  console.log(options[0]);
-  console.log(defaultInstitutions[0]);
 });
 
 it('should show user-facing error message on data load error', async () => {

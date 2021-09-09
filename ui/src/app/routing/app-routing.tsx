@@ -207,10 +207,13 @@ const useOverriddenApiUrl = () => {
           }
           window.location.reload();
         };
+        /* eslint-disable */
+        // This should should only be visible in lower environments.
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+        /* eslint-enable */
       } catch (err) {
-        console.log('Error setting urls: ' + err);
+        console.error('Error setting urls: ' + err);
       }
     }
   }, []);

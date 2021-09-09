@@ -103,7 +103,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
     if (prevProps.user.userId !== this.props.user.userId) {
       this.resetState();
     } else if (!fp.isEqual(getBypassedModules(prevProps.user), getBypassedModules(this.props.user))) {
-      console.log('User modules changed');
+      console.warn('User modules changed');
       this.resetState();
     }
   }

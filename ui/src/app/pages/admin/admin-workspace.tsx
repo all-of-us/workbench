@@ -257,7 +257,7 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
       this.setState({workspaceDetails, cloudStorageTraffic, files});
     } catch (error) {
       if (error instanceof Response) {
-        console.log('error', error, await error.json());
+        console.error('error', error, await error.json());
         this.setState({dataLoadError: error});
       }
     } finally {

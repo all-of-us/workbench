@@ -234,7 +234,7 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       // The participant is not on the current page... for now, just log it and ignore it
       // We get here by URL (when a direct link to a detail page is shared, for example)
       if (index < 0) {
-        console.log('Participant not on page');
+        console.warn('Participant not on page');
         // For now, disable next / prev entirely
         this.setState({
           isFirstParticipant: true,

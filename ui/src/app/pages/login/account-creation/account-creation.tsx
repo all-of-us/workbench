@@ -157,7 +157,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
           })
           .catch((error) => {
-            console.log(error);
+            console.error(error);
             this.setState({usernameCheckInProgress: false});
           });
     }, 300);

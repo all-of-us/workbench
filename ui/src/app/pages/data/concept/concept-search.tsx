@@ -209,7 +209,7 @@ export const ConceptSearch = fp.flow(
       currentConceptSetStore.next(JSON.parse(JSON.stringify(resp)));
       currentConceptStore.next(resp.criteriums);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // TODO: what do we do with resources not found?  Currently we just have an endless spinner
       // Maybe want to think about designing an AoU not found page for better UX
     }
@@ -229,7 +229,7 @@ export const ConceptSearch = fp.flow(
       await conceptSetsApi().updateConceptSet(ns, wsid, +csid, {...conceptSet, name: editName, description: editDescription});
       await this.getConceptSet();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       this.setState({editing: false, editSaving: false});
     }

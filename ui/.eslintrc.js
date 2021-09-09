@@ -63,7 +63,7 @@ module.exports = {
     'no-restricted-imports': ['error', {paths: ['rxjs'], patterns: ['../']}],
     'no-caller': 'warn',
     'no-bitwise': 'warn',
-    // 'no-console': 'warn', 
+    'no-console': ['warn', {'allow': ['warn', 'error', 'assert']}],
     'no-new-wrappers': 'warn',
     'no-debugger': 'warn',
     'constructor-super': 'warn',

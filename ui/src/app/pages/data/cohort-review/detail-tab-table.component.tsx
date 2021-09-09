@@ -532,7 +532,6 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
       if (lazyLoad) {
         const rangeStart = Math.floor(start / lazyLoadSize) * lazyLoadSize;
         const range = [rangeStart, rangeStart + lazyLoadSize - 1];
-        console.log(range);
         this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
     };

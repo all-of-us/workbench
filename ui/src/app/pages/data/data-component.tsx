@@ -109,7 +109,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         )
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
