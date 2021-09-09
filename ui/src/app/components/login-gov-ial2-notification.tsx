@@ -75,8 +75,7 @@ const LoginGovIAL2Notification = () => {
     <Button
         type='primary'
         style={styles.button}
-        onClick={() => environment.enableDataAccessRequirements ?
-            navigate(['data-access-requirements']) :
+        onClick={() =>
             location.replace('/?workbenchAccessTasks=true')}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
