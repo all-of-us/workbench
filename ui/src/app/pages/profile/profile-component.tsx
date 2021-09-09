@@ -30,8 +30,10 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
+import {DataAccessPanel} from './data-access-panel';
 import {ProfileAccessModules} from './profile-access-modules';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -86,7 +88,7 @@ export const ProfileComponent = fp.flow(
         currentProfile: this.initializeProfile(),
         institutions: [],
         showDemographicSurveyModal: false,
-        updating: false
+        updating: false,
       };
     }
     static displayName = 'ProfilePage';
@@ -113,10 +115,8 @@ export const ProfileComponent = fp.flow(
     async componentDidMount() {
       this.props.hideSpinner();
       try {
-        const details = await institutionApi().getPublicInstitutionDetails();
-        this.setState({
-          institutions: details.institutions
-        });
+        const {institutions} = await institutionApi().getPublicInstitutionDetails();
+        this.setState({institutions});
       } catch (e) {
         reportError(e);
       }
@@ -431,21 +431,23 @@ export const ProfileComponent = fp.flow(
             </div>
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
-            <div style={styles.title}>Free credits balance
+            <div style={{marginLeft: '1rem'}}>
+              <div style={styles.title}>Free credits balance</div>
+              <hr style={{...styles.verticalLine}}/>
+              {profile && <FlexRow style={styles.freeCreditsBox}>
+                  <FlexColumn style={{marginLeft: '0.8rem'}}>
+                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                      <div>Remaining <AoU/> free credits:</div>
+                  </FlexColumn>
+                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                  </FlexColumn>
+              </FlexRow>}
             </div>
-            <hr style={{...styles.verticalLine}}/>
-            {profile && <FlexRow style={styles.freeCreditsBox}>
-                <FlexColumn style={{marginLeft: '0.8rem'}}>
-                    <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                    <div>Remaining <AoU/> free credits:</div>
-                </FlexColumn>
-                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                </FlexColumn>
-            </FlexRow>}
-            {/* controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/> */}
-            <ProfileAccessModules profile={profile}/>
+            {environment.enableDataAccessRequirements ?
+                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
+                <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>
