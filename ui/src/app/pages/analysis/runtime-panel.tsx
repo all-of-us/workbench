@@ -518,10 +518,10 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig})  =>
   } = gpuConfig || {};
   const [selectedGpuType, setSelectedGpuType] = useState<string>(gpuType);
   const [selectedNumOfGpus, setSelectedNumOfGpus] = useState<number>(numOfGpus);
+  const [enableGpu, setEnableGpu] = useState<boolean>(!!gpuConfig);
   const validGpuOptions = getValidGpuTypes(selectedMachine.cpu, selectedMachine.memory);
   const validGpuNames = fp.flow(fp.map('name'), fp.uniq, fp.sortBy('price'))(validGpuOptions);
   const validNumGpusOptions = fp.flow(fp.filter({ type: selectedGpuType }), fp.map('numGpus'))(validGpuOptions);
-  const [enableGpu, setEnableGpu] = useState<boolean>(!!gpuConfig);
 
   useEffect(() => {
     onChange(enableGpu && validGpuOptions.length > 0 ? {
