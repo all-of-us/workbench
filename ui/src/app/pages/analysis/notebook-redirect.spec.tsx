@@ -34,7 +34,7 @@ describe('NotebookRedirect', () => {
   let runtimeStub;
 
   const initialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl';
-  let history = createMemoryHistory({initialEntries: [initialUrl]});
+  const history = createMemoryHistory({initialEntries: [initialUrl]});
 
   const component = async () => {
     const c = mount(<Router history={history}>

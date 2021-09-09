@@ -99,8 +99,7 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
       } else {
         typeMatched = groupedData.find( matched => matched.group === eachParam.domain);
       }
-      let name;
-      name = mod.reduce((acc, m) => {
+      const name = mod.reduce((acc, m) => {
         const concatOperand = m.operands.reduce((final, o) => {
           return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
         } , '');

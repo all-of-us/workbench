@@ -206,14 +206,13 @@ export const Breadcrumb = fp.flow(
       });
       const {pid = ''} = participantMatch ? participantMatch.params : {};
 
-      let nbName;
       const notebookMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/notebooks/:nbName'
       });
       const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName'
       });
-      nbName = notebookMatch
+      const nbName = notebookMatch
           ? notebookMatch.params.nbName
           : notebookPreviewMatch
               ? notebookPreviewMatch.params.nbName

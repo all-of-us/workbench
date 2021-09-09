@@ -233,11 +233,10 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
       (domain === Domain.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
       triggerEvent(category, 'Click', `${category} - ${label}`);
-      let context: any;
       const itemId = generateId('items');
       const groupId = null;
       const item = initItem(itemId, domain);
-      context = {item, domain, type, standard, role, groupId};
+      const context = {item, domain, type, standard, role, groupId};
       this.props.setSearchContext(context);
     }
 

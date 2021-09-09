@@ -87,6 +87,6 @@ module.exports = {
     /* Maintainability */
     'eol-last': 'warn',
     'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
-    // 'prefer-const': ['warn', {'destructuring': 'all'}], 
+    'prefer-const': ['error', {'destructuring': 'all'}],
   }
 };
