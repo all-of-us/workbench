@@ -238,8 +238,6 @@ describe('NotebookRedirect', () => {
 
 
   it('should not navigate after runtime transitions to updating', async () => {
-    const navSpy = jest.fn();
-
     history.push(initialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 

@@ -1,13 +1,11 @@
-import {mount, ReactWrapper} from 'enzyme';
-import * as React from 'react';
-import {MemoryRouter} from 'react-router-dom';
-import SpyInstance = jest.SpyInstance;
-
 import {TextInput} from 'app/components/inputs';
 import {ProfileComponent} from 'app/pages/profile/profile-component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {mount, ReactWrapper} from 'enzyme';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
+import * as React from 'react';
+import {MemoryRouter} from 'react-router-dom';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -27,8 +25,6 @@ describe('ProfilePageComponent', () => {
 
   const profile = ProfileStubVariables.PROFILE_STUB;
 
-  let mockUpdateProfile: SpyInstance;
-
   const component = (controlledTierProfile = {}) => {
     return mount(<MemoryRouter><ProfileComponent controlledTierProfile={controlledTierProfile} hideSpinner={() => {}}/></MemoryRouter>);
   };
@@ -41,7 +37,7 @@ describe('ProfilePageComponent', () => {
     const profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
-    mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
+    jest.spyOn(profileApi, 'updateProfile');
 
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {

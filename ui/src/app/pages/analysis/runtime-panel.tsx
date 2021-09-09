@@ -40,7 +40,6 @@ import {
 import {formatUsd} from 'app/utils/numbers';
 import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {
-  compareGpu,
   diffsToUpdateMessaging,
   getRuntimeConfigDiffs,
   RuntimeConfig,
@@ -1169,7 +1168,6 @@ const RuntimePanel = fp.flow(
   const enablePD = serverConfigStore.get().config.enablePersistentDisk && (pdExists || !gceExists);
   const unattachedPdExists = enablePD && !gceExists && pdExists;
   const pdSizeReduced = selectedPdSize < pdSize;
-  const gpuConfigDiffType = compareGpu(initialRuntimeConfig, newRuntimeConfig).differenceType;
   // A runtime context can wrap/pass complex runtime context and also make the code cleaner
   const runtimeCtx = {
     runtimeExists: runtimeExists,

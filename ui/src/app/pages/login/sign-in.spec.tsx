@@ -13,17 +13,11 @@ import {createEmptyProfile, SignIn,SignInProps} from './sign-in';
 describe('SignInReact', () => {
   let props: SignInProps;
 
-  const signIn = jest.fn();
-
   const component = () => mount(<SignIn {...props}/>);
 
   // To correctly shallow-render this component wrapped by a HOC, we need to add an extra
   // .shallow() call at the end.
   const shallowComponent = () => shallow(<SignIn {...props}/>).shallow();
-
-  const defaultConfig = {
-    gsuiteDomain: 'researchallofus.org',
-  };
 
   beforeEach(() => {
     window.scrollTo = () => {};
@@ -59,7 +53,6 @@ describe('SignInReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
   });
 
   it('should handle sign-up flow', async () => {

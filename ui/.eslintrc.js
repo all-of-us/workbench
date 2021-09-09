@@ -54,8 +54,8 @@ module.exports = {
     'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
     '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
     '@typescript-eslint/naming-convention': ['error',
-      {'selector': 'class', 'format': ["PascalCase"]},
-      {'selector': 'interface', 'format': ["PascalCase"]}
+      {'selector': 'class', 'format': ['PascalCase']},
+      {'selector': 'interface', 'format': ['PascalCase']}
     ],
     'no-trailing-spaces': 'error',
     'no-undef-init': 'error',
@@ -87,6 +87,8 @@ module.exports = {
     'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'error',
     'no-unused-expressions': ['error', {'allowShortCircuit': true, 'allowTernary': true}],
+    'no-unused-vars': 'off', // Needed for TS
+    '@typescript-eslint/no-unused-vars': ['error', {'varsIgnorePattern': '^_$', 'args': 'none'}],
     'react/jsx-curly-spacing': ['error', {'when': 'never'}],
     'react/jsx-uses-vars': 'error',
     'no-var': 'error',

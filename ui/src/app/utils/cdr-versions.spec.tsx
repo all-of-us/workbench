@@ -1,7 +1,6 @@
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {getCdrVersion, getDefaultCdrVersionForTier,hasDefaultCdrVersion} from 'app/utils/cdr-versions';
 import {Workspace} from 'generated/fetch';
-import * as React from 'react';
 import {
     altCdrVersion,
     cdrVersionTiersResponse,

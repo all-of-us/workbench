@@ -10,8 +10,6 @@ import {ErrorHandler} from './error-handler';
 
 
 describe('ErrorHandler', () => {
-  const description = 'test';
-
   const component = () => {
     return mount(<ErrorHandler/>);
   };

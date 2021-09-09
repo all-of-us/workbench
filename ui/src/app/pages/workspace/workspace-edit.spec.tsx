@@ -491,14 +491,11 @@ describe('WorkspaceEdit', () => {
     // Intended Study Text
     const testInput = fp.repeat(1000, 'a');
     // since its a new page the characters box for Intended study should say 1000 characters remaining
-    let intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
+    const intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
     expect(intendedStudySection.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toBe('1000 characters remaining');
 
     intendedStudySection.find('textarea#intendedStudyText').simulate('change', {target: {value: testInput}});
-
-    intendedStudySection = wrapper.find('[data-test-id="intendedStudyText"]');
-    const charsRemaining = 1000 - testInput.length;
 
     expect(wrapper.find('[data-test-id="characterLimit"]').get(0).props.children)
       .toContain('0 characters remaining');

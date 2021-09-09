@@ -8,7 +8,7 @@ import {
   DataSetPreviewResponse,
   DataSetRequest,
   DomainValuesResponse,
-  EmptyResponse, GenomicExtractionJobListResponse,
+  EmptyResponse,
   KernelTypeEnum,
   MarkDataSetRequest, ReadOnlyNotebookResponse
 } from 'generated/fetch';

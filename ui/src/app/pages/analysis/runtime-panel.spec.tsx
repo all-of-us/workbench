@@ -46,8 +46,6 @@ describe('RuntimePanel', () => {
   let enablePd: boolean;
   let enableGpu: boolean;
 
-  const iconsDir = '/assets/icons';
-
   const component = async (propOverrides?: object) => {
     const allProps = {...props, ...propOverrides};
     const c = mount(<RuntimePanelWrapper {...allProps}/>);
@@ -142,16 +140,12 @@ describe('RuntimePanel', () => {
   const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
   const pickMainDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#runtime-disk', diskSize);
 
-  const getPdSize = (wrapper) => getInputValue(wrapper, '#persistent-disk');
   const pickPdSize = (wrapper, pdSize) => enterNumberInput(wrapper, '#persistent-disk', pdSize);
 
-  const getGpuType = (wrapper) => getInputValue(wrapper, '#gpu-type');
   const pickGpuType = (wrapper, gpuType) => pickDropdownOption(wrapper, '#gpu-type', gpuType);
 
-  const getGpuNum = (wrapper) => getInputValue(wrapper, '#gpu-num');
   const pickGpuNum = (wrapper, gpuNum) => pickDropdownOption(wrapper, '#gpu-num', gpuNum);
 
-  const getEnableGpu = (wrapper) => getCheckbox(wrapper, '#enable-gpu');
   const clickEnableGpu = (wrapper) => clickCheckbox(wrapper, '#enable-gpu');
 
   const pickComputeType = (wrapper, computeType) => pickDropdownOption(wrapper, '#runtime-compute', computeType);

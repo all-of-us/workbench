@@ -1,11 +1,10 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import {ConfigApi, InstitutionApi} from 'generated/fetch';
+import {InstitutionApi} from 'generated/fetch';
 import * as React from 'react';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 
 import {AdminInstitution} from './admin-institution';

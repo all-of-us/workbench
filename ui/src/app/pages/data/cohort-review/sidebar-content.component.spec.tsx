@@ -3,7 +3,7 @@ import {currentCohortReviewStore, currentWorkspaceStore} from 'app/utils/navigat
 import {mount} from 'enzyme';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import * as React from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
@@ -19,8 +19,6 @@ describe('SidebarContent', () => {
   });
 
   it('should render', () => {
-    const {namespace, id} = workspaceDataStub;
-    const {cohortId, participantCohortStatuses} = cohortReviewStubs[0];
     const wrapper = mount(
         <MemoryRouter>
           <SidebarContent

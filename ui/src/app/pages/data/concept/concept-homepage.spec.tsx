@@ -16,17 +16,6 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-function searchTable(searchTerm: string, wrapper) {
-  wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('change', {target: {value: searchTerm}});
-  wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keypress', {key: 'Enter'});
-}
-
-const defaultSearchTerm = 'test';
-
-
-
 describe('ConceptHomepage', () => {
 
   const component = () => {

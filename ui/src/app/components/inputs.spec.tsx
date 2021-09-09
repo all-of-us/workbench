@@ -1,5 +1,4 @@
 import {
-  EnzymeAdapter,
   mount,
   ReactWrapper,
   shallow,

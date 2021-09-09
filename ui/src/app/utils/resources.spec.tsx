@@ -7,7 +7,6 @@ import {
     ResourceType,
     WorkspaceResource,
 } from 'generated/fetch';
-import * as React from 'react';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {stubResource} from 'testing/stubs/resources-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';

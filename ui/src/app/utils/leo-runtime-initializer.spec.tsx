@@ -4,7 +4,6 @@ import {LeoRuntimeInitializer, LeoRuntimeInitializerOptions} from 'app/utils/leo
 import {Runtime} from 'generated/fetch';
 import {RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
-import * as React from 'react';
 import SpyInstance = jest.SpyInstance;
 import {expect} from '@jest/globals';
 import {serverConfigStore} from 'app/utils/stores';

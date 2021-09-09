@@ -1,9 +1,7 @@
-import {mount, ReactWrapper} from 'enzyme';
+import {ReactWrapper} from 'enzyme';
 import * as fp from 'lodash/fp';
 import {InputSwitch} from 'primereact/inputswitch';
-import * as React from 'react';
 import {act} from 'react-dom/test-utils';
-import {MemoryRouter} from 'react-router';
 
 // This file is necessary because angular imports complain if there
 // is no zone, regardless of whether the imports are used.

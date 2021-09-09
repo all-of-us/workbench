@@ -337,7 +337,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   }
   render() {
     const {
-      checked, disabled, label, labelStyle, onChange, manageOwnState, style, wrapperStyle,
+      checked, disabled, label, labelStyle, manageOwnState, style, wrapperStyle,
       ...otherProps
     } = this.props;
     const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
@@ -349,7 +349,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
       disabled={disabled}
       onChange={e => this.handleChange(e)}
       style={{...styles.checkbox, ...style, ...maybeDisabledOverrides}}
-      {...otherProps}
+      {...fp.omit(['onChange'], otherProps)}
     />;
     if (label) {
       return <span style={wrapperStyle}>{input}

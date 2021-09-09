@@ -31,7 +31,6 @@ import {
   stackdriverErrorReporterStore,
   useStore
 } from 'app/utils/stores';
-import { WorkspaceData } from 'app/utils/workspace-data';
 import logo from 'assets/images/all-of-us-logo.svg';
 import {environment} from 'environments/environment';
 import {Configuration} from 'generated/fetch';
@@ -207,11 +206,11 @@ const useOverriddenApiUrl = () => {
           }
           window.location.reload();
         };
-        /* eslint-disable */
+        /* eslint-disable no-console */
         // This should should only be visible in lower environments.
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
-        /* eslint-enable */
+        /* eslint-enable no-console */
       } catch (err) {
         console.error('Error setting urls: ' + err);
       }

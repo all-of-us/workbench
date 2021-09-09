@@ -9,7 +9,6 @@ import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import SpyInstance = jest.SpyInstance;
 
 const EXPIRY_DAYS = 365;
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS;
@@ -87,8 +86,6 @@ describe('Access Renewal Page', () => {
 
   const profile = ProfileStubVariables.PROFILE_STUB;
 
-  let mockUpdateProfile: SpyInstance;
-
   const component = () => {
     return mount(<AccessRenewal hideSpinner={() => {}}/>);
   };
@@ -97,7 +94,7 @@ describe('Access Renewal Page', () => {
     const profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
-    mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
+    jest.spyOn(profileApi, 'updateProfile');
 
     reload.mockImplementation(async () => {
       profileStore.set({profile: profileStore.get().profile, load, reload, updateCache});

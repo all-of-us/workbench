@@ -1,5 +1,5 @@
 import {AccountCreationTos, AccountCreationTosProps} from 'app/pages/login/account-creation/account-creation-tos';
-import {mount, ReactWrapper, shallow, ShallowWrapper} from 'enzyme';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
