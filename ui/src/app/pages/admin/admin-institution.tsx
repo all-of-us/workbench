@@ -87,16 +87,16 @@ export const AdminInstitution = fp.flow(withNavigation)(
     }
 
     renderInstitutionName(row, col) {
-      const link = 'admin/institution/edit/' + row['shortName'];
-      return <a href={link}> {row['displayName']}</a>;
+      const link = 'admin/institution/edit/' + row.shortName;
+      return <a href={link}> {row.displayName}</a>;
     }
 
     renderOrganizationType(row, col) {
       // This should fail if the organization value is not in list
       const organizationLabel = OrganizationTypeOptions
-        .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
-      if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-        return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+        .filter(organization => organization.value === row.organizationTypeEnum)[0].label;
+      if (row.organizationTypeEnum === OrganizationType.OTHER) {
+        return organizationLabel + ' - ' + row.organizationTypeOtherText;
       }
       return organizationLabel;
     }

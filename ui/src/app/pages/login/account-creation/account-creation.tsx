@@ -273,7 +273,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     validationData.usernameWithEmail = validationData.username + '@' + gsuiteDomain;
 
     if (!isBlank(validationData.username)) {
-      validationCheck['usernameWithEmail'] = {
+      validationCheck.usernameWithEmail = {
         email: {
           message: '^Username contains invalid characters'
         }

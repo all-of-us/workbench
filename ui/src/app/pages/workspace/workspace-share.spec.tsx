@@ -124,7 +124,7 @@ describe('WorkspaceShare', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find('[data-test-id="harry.potter@hogwarts.edu-user-role"]').first()
-      .props()['isDisabled']).toBe(true);
+      .props().isDisabled).toBe(true);
   });
 
   it('saves acl correctly after changes made', async () => {

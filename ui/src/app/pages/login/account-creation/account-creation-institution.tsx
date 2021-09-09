@@ -292,7 +292,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     };
     if (!isBlank(this.state.profile.verifiedInstitutionalAffiliation.institutionShortName) &&
         !isBlank(this.state.profile.contactEmail)) {
-      validationCheck['checkEmailResponse'] = {
+      validationCheck.checkEmailResponse = {
         checkEmailResponse: {}
       };
     }
