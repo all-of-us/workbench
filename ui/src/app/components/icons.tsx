@@ -14,10 +14,13 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import colors, {addOpacity} from 'app/styles/colors';
 
-import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
-import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
 import arrow from 'assets/icons/arrow-left-regular.svg';
 import googleCloudLogo from 'assets/icons/google-cloud.svg';
+
+import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
+import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
+export const ControlledTierBadge = controlledTierBadge;
+export const RegisteredTierBadge = registeredTierBadge;
 
 export const styles = {
   infoIcon: {
@@ -139,6 +142,4 @@ export const Times = props => <Icon shape={faTimes} {...props}/>;
 const svgIcon = src => ({size = 25, ...props}) => <img style={{height: size, width: size}} src={src} {...props}/>;
 
 export const Arrow = svgIcon(arrow);
-export const ControlledTierBadge = svgIcon(controlledTierBadge);
 export const GoogleCloudLogoSvg = svgIcon(googleCloudLogo);
-export const RegisteredTierBadge = svgIcon(registeredTierBadge);
