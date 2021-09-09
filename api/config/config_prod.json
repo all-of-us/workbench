@@ -47,7 +47,7 @@
     "extractionPetServiceAccount": "pet-114668949591113561197@aouwgscohortextraction-prod.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-prod",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 1,
+    "extractionMethodConfigurationVersion": 2,
     "extractionCohortsDataset": "fc-aou-cdr-prod-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-prod-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-prod-ct.wgs_extraction_temp_tables"
