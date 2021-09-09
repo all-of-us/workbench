@@ -246,10 +246,10 @@ export const DetailHeader = fp.flow(withCurrentCohortReview(), withCurrentWorksp
       const totalPages = Math.ceil(pagination.queryResultSize / pagination.pageSize);
 
       this.setState({
-        afterId: participantCohortStatuses[index + 1] && participantCohortStatuses[index + 1].participantId,
+        afterId: participantCohortStatuses[index + 1] && participantCohortStatuses[index + 1]['participantId'],
         isFirstParticipant: pagination.page === 0 && index === 0,
         isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === participantCohortStatuses.length,
-        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1].participantId
+        priorId: participantCohortStatuses[index - 1] && participantCohortStatuses[index - 1]['participantId']
       });
     };
 

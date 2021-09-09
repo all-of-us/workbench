@@ -264,7 +264,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
-        trainingCompleted: !!(this.getRegistrationTasksMap().complianceTraining
+        trainingCompleted: !!(this.getRegistrationTasksMap()['complianceTraining']
           .completionTimestamp(result))
       });
     }).catch(err => {
@@ -273,7 +273,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
-        twoFactorAuthCompleted: !!(this.getRegistrationTasksMap().twoFactorAuth.completionTimestamp(result))
+        twoFactorAuthCompleted: !!(this.getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
@@ -303,13 +303,13 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       }
       this.setState({
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
-            (() => !!(this.getRegistrationTasksMap().eraCommons
+            (() => !!(this.getRegistrationTasksMap()['eraCommons']
               .completionTimestamp(profile)))() : true),
         rasLoginGovLinked: (serverConfigStore.get().config.enableRasLoginGovLinking ?
-            (() => !!(this.getRegistrationTasksMap().rasLoginGov
+            (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
               .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
-          (() => !!(this.getRegistrationTasksMap().dataUserCodeOfConduct
+          (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons

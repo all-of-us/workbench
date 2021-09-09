@@ -19,7 +19,7 @@ declare let gtag: Function;
  */
 export function triggerEvent(
   category: string, action: string, label?: string, value?: number) {
-  if (window.gtag) {
+  if (window['gtag']) {
     gtag('event', action, {
       'event_category': category,
       'event_label': label,

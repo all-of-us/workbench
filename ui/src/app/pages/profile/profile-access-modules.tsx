@@ -89,7 +89,7 @@ const getComplianceTrainingText = (profile: Profile) => {
 
 const getDUCCText = (profile: Profile) => {
   const [navigate, ] = useNavigation();
-  const universalText = <a onClick={getRegistrationTasksMap(navigate).dataUserCodeOfConduct.onClick}>
+  const universalText = <a onClick={getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].onClick}>
         View code of conduct
     </a>;
   switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
@@ -157,9 +157,9 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
                 title='Turn on Google 2-Step Verification'
                 wasBypassed={!!profile.twoFactorAuthBypassTime}
                 incompleteButtonText='Set Up'
-                completedButtonText={getRegistrationTasksMap(navigate).twoFactorAuth.completedText}
-                isComplete={!!(getRegistrationTasksMap(navigate).twoFactorAuth.completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap(navigate).twoFactorAuth.onClick}
+                completedButtonText={getRegistrationTasksMap(navigate)['twoFactorAuth'].completedText}
+                isComplete={!!(getRegistrationTasksMap(navigate)['twoFactorAuth'].completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap(navigate)['twoFactorAuth'].onClick}
                 content={getTwoFactorContent(profile)}
             >
             </ProfileRegistrationStepStatus>
@@ -167,9 +167,9 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
                 title='Connect Your eRA Commons Account'
                 wasBypassed={!!profile.eraCommonsBypassTime}
                 incompleteButtonText='Link'
-                completedButtonText={getRegistrationTasksMap(navigate).eraCommons.completedText}
-                isComplete={!!(getRegistrationTasksMap(navigate).eraCommons.completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap(navigate).eraCommons.onClick}
+                completedButtonText={getRegistrationTasksMap(navigate)['eraCommons'].completedText}
+                isComplete={!!(getRegistrationTasksMap(navigate)['eraCommons'].completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap(navigate)['eraCommons'].onClick}
                 content={getEraCommonsCardText(profile)}
             >
             </ProfileRegistrationStepStatus>}
@@ -177,9 +177,9 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
                 title={<span><AoU/> Responsible Conduct of Research Training</span>}
                 wasBypassed={!!profile.complianceTrainingBypassTime}
                 incompleteButtonText='Access Training'
-                completedButtonText={getRegistrationTasksMap(navigate).complianceTraining.completedText}
-                isComplete={!!(getRegistrationTasksMap(navigate).complianceTraining.completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap(navigate).complianceTraining.onClick}
+                completedButtonText={getRegistrationTasksMap(navigate)['complianceTraining'].completedText}
+                isComplete={!!(getRegistrationTasksMap(navigate)['complianceTraining'].completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap(navigate)['complianceTraining'].onClick}
                 content={getComplianceTrainingText(profile)}
             >
             </ProfileRegistrationStepStatus>}
@@ -187,9 +187,9 @@ export const ProfileAccessModules = (props: {profile: Profile}) => {
                 title='Sign Data User Code Of Conduct'
                 wasBypassed={!!profile.dataUseAgreementBypassTime}
                 incompleteButtonText='Sign'
-                completedButtonText={getRegistrationTasksMap(navigate).dataUserCodeOfConduct.completedText}
-                isComplete={!!(getRegistrationTasksMap(navigate).dataUserCodeOfConduct.completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap(navigate).dataUserCodeOfConduct.onClick}
+                completedButtonText={getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].completedText}
+                isComplete={!!(getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap(navigate)['dataUserCodeOfConduct'].onClick}
                 childrenStyle={{marginLeft: 0}}
                 content={getDUCCText(profile)}
             >

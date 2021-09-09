@@ -99,7 +99,7 @@ export function openZendeskWidget(
   // this property is dynamically loaded by the Zendesk web widget snippet,
   // and can't properly be typed. If for some reason the support widget is
   // unavailable, we'll show a notice to the user.
-  if (window.zE == null) {
+  if (window['zE'] == null) {
     // Show an error message to the user, asking them to reload or contact
     // support via email.
     console.error('Error loading Zendesk widget');
@@ -114,12 +114,12 @@ export function openZendeskWidget(
   // in the created ticket, which means that for AoU these tickets won't be
   // correctly associated with the researcher's AoU Google Account. See
   // the Zendesk integration doc for more discussion.
-  window.zE('webWidget', 'identify', {
+  window['zE']('webWidget', 'identify', {
     name: `${givenName} ${familyName}`,
     email: aouEmailAddress,
   });
 
-  window.zE('webWidget', 'prefill', {
+  window['zE']('webWidget', 'prefill', {
     name: {
       value: `${givenName} ${familyName}`,
       readOnly: true,
@@ -134,5 +134,5 @@ export function openZendeskWidget(
 
   // Trigger the widget to open the full contact form (instead of the
   // help icon, which is the starting state).
-  window.zE('webWidget', 'open');
+  window['zE']('webWidget', 'open');
 }

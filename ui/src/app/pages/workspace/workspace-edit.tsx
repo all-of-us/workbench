@@ -242,7 +242,7 @@ function getDiseaseNames(keyword) {
     return response.json();
   }).then((matches) => {
     const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
-    const diseases = fp.map((elt) => elt.label)(labeledMatches);
+    const diseases = fp.map((elt) => elt['label'])(labeledMatches);
     return diseases;
   });
 }
@@ -1007,7 +1007,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       if (otherPurpose) {
         const {tooShort, tooLong} = lengthMessages('Other primary purpose');
         values = {...values, otherPurposeDetails};
-        constraints.otherPurposeDetails = {
+        constraints['otherPurposeDetails'] = {
           presence: {
             allowEmpty: false,
             message: tooShort
@@ -1020,7 +1020,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       }
       if (populationChecked) {
         values = {...values, populationDetails};
-        constraints.populationDetails = {
+        constraints['populationDetails'] = {
           presence: true
         };
       }
@@ -1028,7 +1028,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           populationDetails.includes(SpecificPopulationEnum.OTHER)) {
         const {tooShort, tooLong} = lengthMessages('Other Specific Population');
         values = {...values, otherPopulationDetails};
-        constraints.otherPopulationDetails = {
+        constraints['otherPopulationDetails'] = {
           presence: {
             allowEmpty: false,
             message: tooShort
@@ -1042,7 +1042,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       if (diseaseFocusedResearch) {
         const {tooShort, tooLong} = lengthMessages('Disease of Focus');
         values = {...values, diseaseOfFocus};
-        constraints.diseaseOfFocus = {
+        constraints['diseaseOfFocus'] = {
           presence: {
             allowEmpty: false,
             message: tooShort
@@ -1057,7 +1057,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
         const {tooShort, tooLong} = lengthMessages('Other methods of disseminating research findings');
         values = {...values, otherDisseminateResearchFindings};
-        constraints.otherDisseminateResearchFindings = {
+        constraints['otherDisseminateResearchFindings'] = {
           presence: {
             allowEmpty: false,
             message: tooShort
