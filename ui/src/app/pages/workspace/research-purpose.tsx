@@ -143,24 +143,24 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
       </div>
       <div style={styles.sectionHeader}>Summary of research purpose</div>
       <div style={styles.sectionContentContainer}>
-        {/*Intended study section*/}
+        {/* Intended study section */}
         <div style={styles.sectionSubHeader}>{researchPurposeQuestions[2].header}</div>
         <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
           {workspace.researchPurpose.intendedStudy}</div>
 
-        {/*Scientific approach section*/}
+        {/* Scientific approach section */}
         <div style={styles.sectionSubHeader}>{researchPurposeQuestions[3].header}</div>
         <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
           {workspace.researchPurpose.scientificApproach}</div>
 
-        {/*Anticipated findings section*/}
+        {/* Anticipated findings section */}
         <div style={styles.sectionSubHeader}>{researchPurposeQuestions[4].header}</div>
         <div style={{...styles.sectionItemWithBackground, padding: '15px'}}>
           {workspace.researchPurpose.anticipatedFindings}
         </div>
       </div>
 
-      {/*Findings section*/}
+      {/* Findings section */}
       <div style={styles.sectionHeader}>Findings will be disseminated via:</div>
       <div style={styles.sectionContentContainer}>
         {workspace.researchPurpose.disseminateResearchFindingList.map((disseminateFinding, i) =>
@@ -169,7 +169,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
         )}
       </div>
 
-      {/*Outcomes section*/}
+      {/* Outcomes section */}
       <div style={styles.sectionHeader}>Outcomes anticipated from the research:</div>
       <div style={styles.sectionContentContainer}>
         {workspace.researchPurpose.researchOutcomeList.map((workspaceOutcome, i) =>
@@ -178,7 +178,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withNavigation)(
         )}
       </div>
 
-      {/*Underserved populations section*/}
+      {/* Underserved populations section */}
       {workspace.researchPurpose.populationDetails.length > 0 && <React.Fragment>
         <div style={styles.sectionHeader}>Population of interest</div>
         <div style={styles.sectionContentContainer}>

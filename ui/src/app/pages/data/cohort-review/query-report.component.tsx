@@ -352,15 +352,15 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentCohortReview(),
                     <div style={{...columns.col10, ...styles.queryTitle}}>
                       Descriptive Statistics
                     </div>
-                    {/*TODO uncomment print icon when we know how we want to display the data download policy*/}
-                    {/*<ClrIcon*/}
-                    {/*  className='is-solid'*/}
-                    {/*  style={{...columns.col2,*/}
-                    {/*    ...(groupedData ? styles.print : styles.printDisabled)}}*/}
-                    {/*  onClick={() => groupedData && window.print()}*/}
-                    {/*  disabled={!groupedData}*/}
-                    {/*  shape='printer'*/}
-                    {/*  size={32} />*/}
+                    {/* TODO uncomment print icon when we know how we want to display the data download policy */}
+                    {/* <ClrIcon */}
+                    {/*  className='is-solid' */}
+                    {/*  style={{...columns.col2, */}
+                    {/*    ...(groupedData ? styles.print : styles.printDisabled)}} */}
+                    {/*  onClick={() => groupedData && window.print()} */}
+                    {/*  disabled={!groupedData} */}
+                    {/*  shape='printer' */}
+                    {/*  size={32} /> */}
                 </div>
               </div>
               {groupedData && Object.keys(groupedData).map((group, g) => (

@@ -46,19 +46,19 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base 
+    // 'prefer-arrow/prefer-arrow-functions': ['warn'], // Lots of 'newable' functions in the code base
     '@typescript-eslint/type-annotation-spacing': 'warn',
     '@typescript-eslint/unified-signatures': 'warn',
 
     /* Style */
     '@typescript-eslint/prefer-function-type': 'warn',
-    // 'spaced-comment': 'warn',
+    'spaced-comment': ['warn', 'always', {'block': {'balanced': true}}],
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
-    'brace-style': ['warn', '1tbs', { "allowSingleLine": true }],
+    'brace-style': ['warn', '1tbs', { 'allowSingleLine': true }],
     'simple-import-sort/sort': 'error',
-    'quotes': ['error', 'single', {"allowTemplateLiterals": true}],
+    'quotes': ['error', 'single', {'allowTemplateLiterals': true}],
     '@typescript-eslint/semi': 'error',
     'space-before-function-paren': ['error', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
@@ -83,7 +83,7 @@ module.exports = {
     'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'error',
     'no-unused-expressions': ['error', {'allowShortCircuit': true, 'allowTernary': true}],
-    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    'react/jsx-curly-spacing': ['warn', {'when': 'never'}],
     'react/jsx-uses-vars': 'warn',
     'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt

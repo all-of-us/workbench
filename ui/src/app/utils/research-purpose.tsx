@@ -59,10 +59,10 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
     .filter(subCategoryItem => researchPurpose.populationDetails.includes(subCategoryItem.shortName)));
   return categories.map((selectedPopulationOfInterest, index) => {
     return <React.Fragment>
-      {/*Generate a header for each section of underserved populations*/}
+      {/* Generate a header for each section of underserved populations */}
       <div key={index} style={{...styles.researchPurposeItemHeader, marginTop: index === 0 ? 0 : '0.5rem'}}>
         {selectedPopulationOfInterest.label}</div>
-      {/*Iterate through the subcategories of underserved populations and list each of them*/}
+      {/* Iterate through the subcategories of underserved populations and list each of them */}
       {selectedPopulationOfInterest.subCategory.map((subCategory, subCategoryIndex) => <div style={{
         ...styles.sectionItemWithBackground, marginTop: '0.5rem'}} key={subCategoryIndex}>
         {subCategory.label}

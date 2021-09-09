@@ -9,7 +9,7 @@ export const delay = ms => {
  * @description A container allowing components and functions to subscribe to changes in the container's contents
  * @function subscribe Add a subscription by passing a function
  * @function next Send the new value to all subscribers
- **/
+ * */
 export interface Subscribable<T> {
   subscribe: (fn: (newValue?: T, oldValue?: T) => void) => { unsubscribe: () => void};
   next: (newValue: T, oldValue: T) => void;

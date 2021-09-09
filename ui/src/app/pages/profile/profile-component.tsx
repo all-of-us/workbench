@@ -453,7 +453,7 @@ export const ProfileComponent = fp.flow(
               <hr style={{...styles.verticalLine}}/>
               <div style={{color: colors.primary, fontSize: '14px'}}>
                 <div>Survey Completed</div>
-                {/*If a user has created an account, they have, by definition, completed the demographic survey*/}
+                {/* If a user has created an account, they have, by definition, completed the demographic survey */}
                 <div>{displayDateWithoutHours(profile.demographicSurveyCompletionTime !== null ?
                   profile.demographicSurveyCompletionTime : profile.firstSignInTime)}</div>
                 <Button

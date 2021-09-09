@@ -438,7 +438,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
-              {/*TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137*/}
+              {/* TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137 */}
               {enableStandardSourceDomains && !!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements

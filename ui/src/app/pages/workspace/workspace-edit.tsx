@@ -1267,7 +1267,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               </div></div>
             }/>
 
-        {/*Primary purpose */}
+        {/* Primary purpose */}
           <WorkspaceEditSection header={researchPurposeQuestions[0].header} publiclyDisplayed={true}
                                 description={researchPurposeQuestions[0].description} index='1.'
                                 indent={true}>
@@ -1309,7 +1309,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           header={researchPurposeQuestions[1].header} indent={true} publiclyDisplayed={true}
           description={researchPurposeQuestions[1].description} style={{width: '48rem'}} index='2.'>
           <FlexColumn>
-            {/* TextBox: scientific question(s) researcher intend to study Section*/}
+            {/* TextBox: scientific question(s) researcher intend to study Section */}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[2]}
                 researchValue={intendedStudy}
@@ -1318,7 +1318,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 id='intendedStudyText'
             />
 
-            {/* TextBox: scientific approaches section*/}
+            {/* TextBox: scientific approaches section */}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[3]}
                 researchValue={scientificApproach}
@@ -1326,7 +1326,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 index='2.2'
                 id='scientificApproachText'
             />
-            {/*TextBox: anticipated findings from the study section*/}
+            {/* TextBox: anticipated findings from the study section */}
             <WorkspaceResearchSummary
                 researchPurpose={researchPurposeQuestions[4]}
                 researchValue={anticipatedFindings}
@@ -1337,7 +1337,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           </FlexColumn>
         </WorkspaceEditSection>
 
-          {/*disseminate  research Section */}
+          {/* disseminate  research Section */}
         <WorkspaceEditSection header={researchPurposeQuestions[5].header}
                               description={researchPurposeQuestions[5].description} style={{width: '48rem'}} index='3.'>
           <FlexRow>
@@ -1352,7 +1352,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           </FlexRow>
         </WorkspaceEditSection>
 
-          {/*Research outcome section*/}
+          {/* Research outcome section */}
           <WorkspaceEditSection header={researchPurposeQuestions[6].header} index='4.'
                                 description={researchPurposeQuestions[6].description}
                                 style={{width: '48rem'}}>
@@ -1364,7 +1364,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             </FlexRow>
           </WorkspaceEditSection>
 
-          {/*Underrespresented population section*/}
+          {/* Underrespresented population section */}
         <WorkspaceEditSection header={researchPurposeQuestions[7].header} index='5.' indent={true}
                               description={researchPurposeQuestions[7].description}
                               style={{width: '48rem'}} publiclyDisplayed={true}>
@@ -1428,7 +1428,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           </FlexRow>
         </WorkspaceEditSection>
 
-          {/* Request for review section*/}
+          {/* Request for review section */}
         <WorkspaceEditSection header={researchPurposeQuestions[8].header} index='6.' indent={true}>
           <FlexRow style={styles.text}><div>
             Any research that focuses on certain population characteristics or&nbsp;

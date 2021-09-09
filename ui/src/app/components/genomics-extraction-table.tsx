@@ -115,7 +115,7 @@ const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) =
           [DEFAULT, () => Number.MAX_SAFE_INTEGER]
       ),
     statusDisplay: <TooltipTrigger content={iconConfig.iconTooltip}>
-      <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
+      <div> {/* This div wrapper is needed so the tooltip doesn't move around with the spinning icon */}
         <FontAwesomeIcon
           icon={iconConfig.icon}
           style={{

@@ -1149,7 +1149,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         {filteredPreviewData.isLoading ?
           <div>Generating preview for {domainDisplayed}</div> : <div>
             {filteredPreviewData.errorText && <div>{filteredPreviewData.errorText}</div>}
-            {/* If there is no error that means no data was return*/}
+            {/* If there is no error that means no data was return */}
             {!filteredPreviewData.errorText && <div>No Results found for {domainDisplayed}</div>}
             </div>
         }

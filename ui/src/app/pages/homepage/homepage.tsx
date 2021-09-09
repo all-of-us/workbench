@@ -355,7 +355,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
         <WelcomeHeader/>
         <FadeBox style={styles.fadeBox}>
           {/* The elements inside this fadeBox will be changed as part of ongoing
-          homepage redesign work*/}
+          homepage redesign work */}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
               {accessTasksLoaded ?
                 (accessTasksRemaining ?

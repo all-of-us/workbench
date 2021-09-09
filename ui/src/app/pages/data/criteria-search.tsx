@@ -385,7 +385,7 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
             selectedIds={this.getListSearchSelectedIds()}
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
-         {/*List View (using duplicated version of ListSearch) */}
+         {/* List View (using duplicated version of ListSearch) */}
         {!this.initTree && cohortContext.domain && <div style={this.searchContentStyle('list')}>
           <ListSearch hierarchy={this.showHierarchy}
                       searchContext={cohortContext}
