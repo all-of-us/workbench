@@ -104,7 +104,10 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               ...result,
               // TODO (RW-4682): Fix this nonsense
               modifiedTime: result.modifiedTime ? new Date(Number(result.modifiedTime)).toDateString() : null
-            }; }));
+            };
+          }
+        )
+      );
     } catch (error) {
       console.log(error);
     } finally {

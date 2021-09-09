@@ -175,7 +175,8 @@ describe('RuntimeInitializer', () => {
           machineType: 'n1-standard-16'
         },
         status: RuntimeStatus.Deleted
-      }; });
+      };
+    });
 
     LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,
@@ -202,7 +203,8 @@ describe('RuntimeInitializer', () => {
           gpuConfig: null,
         },
         status: RuntimeStatus.Deleted
-      }; });
+      };
+});
 
     LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,

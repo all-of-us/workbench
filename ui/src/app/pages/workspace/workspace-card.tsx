@@ -94,8 +94,8 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
           <MenuItem icon='pencil'
                     onClick={() => {
                       AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                      navigate([wsPathPrefix, 'edit']); }
-                    }
+                      navigate([wsPathPrefix, 'edit']);
+                    }}
                     disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Edit
           </MenuItem>

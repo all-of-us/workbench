@@ -174,8 +174,8 @@ const WorkbenchFooter = withUserProfile()(
                     this.props.profileState.profile.familyName,
                     this.props.profileState.profile.username,
                     this.props.profileState.profile.contactEmail,
-                  ); }
-                } href='#'>
+                  );
+                }} href='#'>
                   Contact Us
                 </Link>
               </FlexColumn>

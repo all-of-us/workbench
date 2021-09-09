@@ -169,22 +169,21 @@ const FileDetailsTable = (props: FileDetailsProps) => {
   }
 
   const initTable = (accessReason: string): Array<TableEntry> => {
-    return data
-      .map(file => {
-        return {
-          location: parseLocation(file, bucket),
-          rawName: file.name,
-          nameCell: <NameCell
-              file={file}
-              bucket={bucket}
-              workspaceNamespace={workspaceNamespace}
-              accessReason={accessReason}/>,
-          size: formatMB(file.sizeInBytes),
-        }; })
-      .sort((a, b) => {
-        const locationComparison = a.location.localeCompare(b.location);
-        return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;
-      });
+    return data.map(file => {
+      return {
+        location: parseLocation(file, bucket),
+        rawName: file.name,
+        nameCell: <NameCell
+            file={file}
+            bucket={bucket}
+            workspaceNamespace={workspaceNamespace}
+            accessReason={accessReason}/>,
+        size: formatMB(file.sizeInBytes),
+      };
+    }).sort((a, b) => {
+      const locationComparison = a.location.localeCompare(b.location);
+      return locationComparison === 0 ? a.rawName.localeCompare(b.rawName) : locationComparison;
+    });
   };
 
   const [tableData, setTable] = useState<Array<TableEntry>>(initTable(''));

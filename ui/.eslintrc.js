@@ -51,7 +51,7 @@ module.exports = {
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
-    // 'brace-style': ['warn', '1tbs'],
+    'brace-style': ['warn', '1tbs', { "allowSingleLine": true }],
     'simple-import-sort/sort': 'error',
     'quotes': ['error', 'single', {"allowTemplateLiterals": true}],
     '@typescript-eslint/semi': 'error',

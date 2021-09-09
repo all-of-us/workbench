@@ -180,9 +180,12 @@ export const ConceptAddModal = withCurrentWorkspace()
                             checked={addingToExistingSet}
                             disabled={conceptSets.length === 0}
                             data-test-id='toggle-existing-set'
-                            onChange={() => {this.setState({
+                            onChange={() => {
+                              this.setState({
                               addingToExistingSet: true,
-                              nameTouched: false}); }}/>
+                              nameTouched: false});
+                            }}
+                />
                 <label style={styles.label}>Choose existing set</label>
               </div>
             </TooltipTrigger>

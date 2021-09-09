@@ -123,32 +123,42 @@ export class AdminUserBypass extends React.Component<Props, State> {
           {enableComplianceTraining && <Toggle name='Compliance Training'
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
+                  onToggle={() => {
+                    this.setState({selectedModules:
+                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])});
+                  }}
           />}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
                   checked={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); }}
+                  onToggle={() => {
+                    this.setState({selectedModules:
+                      fp.xor(selectedModules, [AccessModule.ERACOMMONS])});
+                  }}
           />}
           <Toggle name='Two Factor Auth'
                   checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
                   data-test-id='two-factor-auth-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}
+                  onToggle={() => {
+                    this.setState({selectedModules:
+                      fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])});
+                  }}
           />
           <Toggle name='Data User Code of Conduct'
                   checked={selectedModules.includes(AccessModule.DATAUSERCODEOFCONDUCT)}
                   data-test-id='ducc-toggle'
-                  onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])}); }}
+                  onToggle={() => {
+                    this.setState({selectedModules:
+                      fp.xor(selectedModules, [AccessModule.DATAUSERCODEOFCONDUCT])});
+                  }}
           />
           {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
                                        checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
                                        data-test-id='ras-link-login-gov-toggle'
-                                       onToggle={() => {this.setState({selectedModules:
-                                             fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
+                                       onToggle={() => {
+                                          this.setState({selectedModules:
+                                            fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])});
+                                       }}
           />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon={Times}

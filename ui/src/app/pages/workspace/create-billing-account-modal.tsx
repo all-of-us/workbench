@@ -137,14 +137,13 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       title: 'Failed To Send Email',
       message: 'An error occurred trying to send email. Please try again.',
     })
-  )(async() => {await profileApi().sendBillingSetupEmail(
-    {
+  )(async() => {
+    await profileApi().sendBillingSetupEmail({
       phone: phoneNumber,
       paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,
       isNihFunded: nihFunded,
       institution: verifiedInstitutionalAffiliation.institutionDisplayName
-    }
-  );
+    });
     setCurrentStep(4);
   });
 

@@ -545,10 +545,9 @@ const GpuConfigSelector = ({disabled, onChange, selectedMachine, gpuConfig}) => 
         <Dropdown id={`gpu-type`}
                   style={{width: '7rem'}}
                   options={validGpuNames}
-                  onChange={
-                    ({value}) => {
-                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type); }
-                  }
+                  onChange={({value}) => {
+                      setSelectedGpuType(fp.find({name: value}, validGpuOptions).type);
+                  }}
                   disabled={disabled}
                   value={gpuTypeToDisplayName(selectedGpuType)}/>
         </FlexRow>
@@ -1440,7 +1439,8 @@ const RuntimePanel = fp.flow(
               }}
               onCancel={() => setPanelContent(PanelContent.Customize)}
           />;
-        }}],
+        }
+}],
       [PanelContent.DeleteUnattachedPd, () => <ConfirmDeleteUnattachedPD
           onConfirm={async() => {
             await disksApi().deleteDisk(namespace, persistentDisk.name);
