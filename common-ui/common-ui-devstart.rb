@@ -12,13 +12,6 @@ DRY_RUN_CMD = %W{echo [DRY_RUN]}
 class Options < OpenStruct
 end
 
-# Ensure the docker is running what you want by calling the command to run it
-def ensure_docker(cmd_name, args)
-  unless Workbench.in_docker?
-    exec(*(%W{docker-compose run --rm #{@ui_name} ./project.rb #{cmd_name}} + args))
-  end
-end
-
 # Creates a default command-line argument parser.
 # command_name: For help text.
 def create_parser(command_name)
@@ -29,7 +22,6 @@ def create_parser(command_name)
 end
 
 def swagger_regen(cmd_name)
-  ensure_docker cmd_name, []
 
   common = Common.new
   Workbench::Swagger.download_swagger_codegen_cli
@@ -37,7 +29,6 @@ def swagger_regen(cmd_name)
 end
 
 def build(cmd_name, ui_name, args)
-  ensure_docker cmd_name, args
   options = BuildOptions.new.parse(cmd_name, args)
 
   common = Common.new
@@ -71,7 +62,6 @@ class CommonUiDevStart
   end
 
   def deploy_ui(cmd_name, args)
-    ensure_docker cmd_name, args
     DeployUI.new(cmd_name, @ui_name, args).run
   end
 
