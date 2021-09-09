@@ -8,7 +8,6 @@ import {
   currentConceptStore,
   currentWorkspaceStore,
   globalErrorStore,
-  queryParamsStore,
   routeConfigDataStore
 } from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
@@ -305,11 +304,6 @@ export const withRouteConfigData = () => {
 // HOC that provides a 'cdrVersionTiersResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
   return withStore(cdrVersionStore, 'cdrVersionTiersResponse');
-};
-
-// HOC that provides a 'queryParams' prop with current query params
-export const withQueryParams = () => {
-  return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
 export function displayDateWithoutHours(time: number): string {

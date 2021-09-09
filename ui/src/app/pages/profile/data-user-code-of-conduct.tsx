@@ -20,6 +20,7 @@ import {getLiveDUCCVersion} from 'app/utils/code-of-conduct';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {Profile} from 'generated/fetch';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 const styles = reactStyles({
   dataUserCodeOfConductPage: {
@@ -82,7 +83,7 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-interface Props extends WithSpinnerOverlayProps, NavigationProps {
+interface Props extends WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile,
     reload: Function,
@@ -99,7 +100,7 @@ interface State {
   proceedDisabled: boolean;
 }
 
-export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
+export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, withRouter)(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -264,7 +265,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation)(
                         // This may record extra GA events if the user views & accepts the DUCC from their profile. If the additional events
                         // are an issue, we may need further changes, possibly disable the Accept button after initial submit.
                         AnalyticsTracker.Registration.AcceptDUCC();
-                        wasReferredFromRenewal()
+                        wasReferredFromRenewal(this.props.location.search)
                           ? this.submitCodeOfConductWithRenewal(initialMonitoring)
                           : this.submitDataUserCodeOfConduct(initialMonitoring);
                         this.setState({submitting: false});

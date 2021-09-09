@@ -30,9 +30,12 @@ import {wasReferredFromRenewal} from 'app/utils/access-utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {NavigationProps} from 'app/utils/navigation';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
+import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
+import {DataAccessPanel} from './data-access-panel';
 import {ProfileAccessModules} from './profile-access-modules';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 // validators for validate.js
@@ -56,7 +59,7 @@ const validators = {
   country: {...required, ...notTooLong(95)}
 };
 
-interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
+interface ProfilePageProps extends WithProfileErrorModalProps, WithSpinnerOverlayProps, NavigationProps, RouteComponentProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -71,7 +74,8 @@ interface ProfilePageState {
 export const ProfileComponent = fp.flow(
   withUserProfile(),
   withProfileErrorModal,
-  withNavigation
+  withNavigation,
+  withRouter
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -84,7 +88,7 @@ export const ProfileComponent = fp.flow(
         currentProfile: this.initializeProfile(),
         institutions: [],
         showDemographicSurveyModal: false,
-        updating: false
+        updating: false,
       };
     }
     static displayName = 'ProfilePage';
@@ -111,10 +115,8 @@ export const ProfileComponent = fp.flow(
     async componentDidMount() {
       this.props.hideSpinner();
       try {
-        const details = await institutionApi().getPublicInstitutionDetails();
-        this.setState({
-          institutions: details.institutions
-        });
+        const {institutions} = await institutionApi().getPublicInstitutionDetails();
+        this.setState({institutions});
       } catch (e) {
         reportError(e);
       }
@@ -296,7 +298,7 @@ export const ProfileComponent = fp.flow(
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
-            {(hasExpired || wasReferredFromRenewal()) &&
+            {(hasExpired || wasReferredFromRenewal(this.props.location.search)) &&
               <div style={styles.renewalBox}>
                 <ExclamationTriangle size={25} color={colors.warning} style={{margin: '0.5rem'}}/>
                 <div style={{color: colors.primary, fontWeight: 600}}>Please update or verify your profile.</div>
@@ -429,21 +431,23 @@ export const ProfileComponent = fp.flow(
             </div>
           </div>
           <div style={{width: '20rem', marginRight: '4rem'}}>
-            <div style={styles.title}>Free credits balance
+            <div style={{marginLeft: '1rem'}}>
+              <div style={styles.title}>Free credits balance</div>
+              <hr style={{...styles.verticalLine}}/>
+              {profile && <FlexRow style={styles.freeCreditsBox}>
+                  <FlexColumn style={{marginLeft: '0.8rem'}}>
+                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                      <div>Remaining <AoU/> free credits:</div>
+                  </FlexColumn>
+                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                  </FlexColumn>
+              </FlexRow>}
             </div>
-            <hr style={{...styles.verticalLine}}/>
-            {profile && <FlexRow style={styles.freeCreditsBox}>
-                <FlexColumn style={{marginLeft: '0.8rem'}}>
-                    <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                    <div>Remaining <AoU/> free credits:</div>
-                </FlexColumn>
-                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                </FlexColumn>
-            </FlexRow>}
-            {/* controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/> */}
-            <ProfileAccessModules profile={profile}/>
+            {environment.enableDataAccessRequirements ?
+                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
+                <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>
@@ -480,7 +484,7 @@ export const ProfileComponent = fp.flow(
                 data-test-id='save_profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
-                onClick={() => wasReferredFromRenewal()
+                onClick={() => wasReferredFromRenewal(this.props.location.search)
                   ? this.saveProfileWithRenewal(currentProfile)
                   : this.saveProfile(currentProfile)
                 }

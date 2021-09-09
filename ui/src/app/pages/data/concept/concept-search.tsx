@@ -29,7 +29,6 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   NavigationProps,
-  queryParamsStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
@@ -37,6 +36,7 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {parseQueryParams} from "app/components/app-router";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -283,8 +283,8 @@ export const ConceptSearch = fp.flow(
       }
     } else {
       const {domain} = this.props.match.params;
-      const selectedSurvey = queryParamsStore.getValue().survey;
-      return {domain, selectedSurvey, source: 'concept'};
+      const survey = parseQueryParams(this.props.location.search).get('survey');
+      return {domain, selectedSurvey: survey, source: 'concept'};
     }
   }
 

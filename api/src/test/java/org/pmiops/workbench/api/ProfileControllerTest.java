@@ -290,7 +290,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     DUCC_VERSION = userService.getCurrentDuccVersion();
 
-    when(mockDirectoryService.getUser(FULL_USER_NAME)).thenReturn(googleUser);
+    when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
     when(mockDirectoryService.createUser(
             GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
         .thenReturn(googleUser);

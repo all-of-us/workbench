@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
+import { useQuery } from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -21,7 +22,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
+import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils';
 import {
   buildRasRedirectUrl,
   bypassAll,
@@ -30,7 +31,7 @@ import {
   GetStartedButton,
 } from 'app/utils/access-utils';
 import {isAbortError} from 'app/utils/errors';
-import {queryParamsStore, useNavigation} from 'app/utils/navigation';
+import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
@@ -426,10 +427,35 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
   </FlexColumn>;
 };
 
+// TODO is there a better way?
+
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+
+const Individual = individual;
+const Identifying = identifying;
+const Electronic = electronic;
+const Survey = survey;
+const Physical = physical;
+const Wearable = wearable;
+
+const renderIcon = (iconName: string) => switchCase(iconName,
+    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
+    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
+    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
+    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
+);
+
 const DataDetail = (props: {icon: string, text: string}) => {
   const {icon, text} = props;
   return <FlexRow>
-    <img style={styles.rtDetailsIcon} src={`/assets/icons/DAR/${icon}.svg`}/>
+    {renderIcon(icon)}
     <div style={styles.rtDataDetails}>{text}</div>
   </FlexRow>;
 };
@@ -477,7 +503,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
 
   // handle the route /nih-callback?token=<token>
   // handle the route /ras-callback?code=<code>
-  const {token, code} = queryParamsStore.getValue();
+  const query = useQuery();
+  const token = query.get('token');
+  const code = query.get('code');
   useEffect(() => {
     if (token) {
       handleTerraShibbolethCallback(token, spinnerProps, reload);

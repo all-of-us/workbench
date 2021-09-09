@@ -6,11 +6,12 @@ import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError} from 'app/utils/errors';
-import {encodeURIComponentStrict, queryParamsStore} from 'app/utils/navigation';
+import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
 import {getLiveDUCCVersion} from './code-of-conduct';
+import {parseQueryParams} from "app/components/app-router";
 
 const {useState, useEffect} = React;
 
@@ -185,7 +186,10 @@ export const getRegistrationTask = (navigate, module: AccessModule): Registratio
   return getRegistrationTasks(navigate).find(task => task.module === module);
 };
 
-export const wasReferredFromRenewal = (): boolean => queryParamsStore.getValue().renewal === '1';
+export const wasReferredFromRenewal = (queryParams): boolean => {
+  const renewal = parseQueryParams(queryParams).get('renewal');
+  return renewal === '1';
+};
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 

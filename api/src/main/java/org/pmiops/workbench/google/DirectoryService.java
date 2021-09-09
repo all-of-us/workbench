@@ -21,8 +21,14 @@ public interface DirectoryService {
   /** Returns whether the given user prefix corresponds to an existing GSuite user account. */
   boolean isUsernameTaken(String userPrefix);
 
-  /** Returns a user via username lookup. Returns null if no user was found. */
-  User getUser(String username);
+  /** Returns a user via username lookup, if found. */
+  Optional<User> getUser(String username);
+
+  /**
+   * Returns a user via username lookup, or throws a {@link
+   * org.pmiops.workbench.exceptions.NotFoundException} if not found.
+   */
+  User getUserOrThrow(String username);
 
   /**
    * Returns a mapping of researcher username (e.g. foo@researchallofus.org) to that user's 2FA

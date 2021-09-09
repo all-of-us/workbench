@@ -11,7 +11,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {cdrVersionStore} from '../utils/stores';
+import {cdrVersionStore} from 'app/utils/stores';
 
 import {CopyModal, CopyModalProps} from './copy-modal';
 import {AccessTierShortNames} from 'app/utils/access-tiers';

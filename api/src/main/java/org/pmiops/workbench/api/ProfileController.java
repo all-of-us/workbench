@@ -391,7 +391,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
-    User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUserOrThrow(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
@@ -411,7 +411,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
-    User googleUser = directoryService.getUser(username);
+    User googleUser = directoryService.getUserOrThrow(username);
     DbUser user = userService.getByUsernameOrThrow(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {

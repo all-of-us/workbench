@@ -33,7 +33,7 @@ import {
   runtimeStore,
   profileStore
 } from 'app/utils/stores';
-import {currentWorkspaceStore} from '../../utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 
 describe('RuntimePanel', () => {
