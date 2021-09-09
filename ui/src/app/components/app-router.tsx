@@ -39,7 +39,8 @@ export const parseQueryParams = (search: string) => {
  *  reactRouterUrlSearchParams.get('user') -> value is 'alice123'
  */
 export const useQuery = (): URLSearchParams => {
-  return parseQueryParams(useLocation().search);
+  const location = useLocation();
+  return parseQueryParams(location.search);
 };
 
 // TODO angular2react: This isn't really the right place to be making the store updates but it's the
