@@ -1,20 +1,18 @@
+import {TextInput} from 'app/components/inputs';
+import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {conceptSetsApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {cdrVersionStore} from 'app/utils/stores';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
+import {ConceptSetsApi, ResourceType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import Select from 'react-select';
-
-import {TextInput} from 'app/components/inputs';
-import {conceptSetsApi, registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {ConceptSetsApi, ResourceType, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
-
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {CdrVersionsStubVariables,cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {cdrVersionStore} from 'app/utils/stores';
 
 import {CopyModal, CopyModalProps} from './copy-modal';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 function simulateSelect(wrapper: ReactWrapper, reactSelect: Select, selection: string) {
   // Open Select options. Simulating a click doesn't work for some reason

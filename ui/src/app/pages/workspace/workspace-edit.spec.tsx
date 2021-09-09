@@ -1,10 +1,12 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
-
+import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
+import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
+import * as Authentication from 'app/utils/authentication';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {
   DisseminateResearchEnum, ProfileApi,
   ResearchOutcomeEnum,
@@ -13,6 +15,9 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
 import {simulateSelection, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {
   altCdrVersion,
@@ -20,18 +25,11 @@ import {
   controlledCdrVersion,
   defaultCdrVersion,
 } from 'testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
-import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
-import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
-import {AccessTierShortNames} from 'app/utils/access-tiers';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {Dropdown} from 'primereact/dropdown';
-
-import * as Authentication from 'app/utils/authentication';
 import SpyInstance = jest.SpyInstance;
 import { mockNavigate } from 'setupTests';
 

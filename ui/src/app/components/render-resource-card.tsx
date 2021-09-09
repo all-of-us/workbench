@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortReviewResourceCard} from 'app/pages/data/cohort-review/cohort-review-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
@@ -8,6 +5,8 @@ import {ConceptSetResourceCard} from 'app/pages/data/concept/concept-set-resourc
 import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card';
 import {isCohort, isCohortReview, isConceptSet, isDataSet, isNotebook} from 'app/utils/resources';
 import {BillingStatus, WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface RenderResourceCardProps {
   resource: WorkspaceResource;

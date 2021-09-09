@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
@@ -12,6 +9,8 @@ import {currentCohortReviewStore} from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortReview, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {

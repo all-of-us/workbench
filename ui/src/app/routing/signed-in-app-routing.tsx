@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {
   AppRoute,
   withFullHeight,
@@ -33,7 +30,10 @@ import {
 } from 'app/utils/access-utils';
 import {BreadcrumbType} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import {Redirect, Switch} from 'react-router-dom';
+
 import {expiredGuard, registrationGuard} from './guards';
 
 const AccessRenewalPage = fp.flow(withRouteData, withRoutingSpinner)(AccessRenewal);

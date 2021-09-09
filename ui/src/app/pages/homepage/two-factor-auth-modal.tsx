@@ -1,12 +1,10 @@
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {redirectToTwoFactorSetup} from 'app/utils/access-utils';
-
 import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
+import * as React from 'react';
 
 const styles = reactStyles({
   twoFactorAuthModalCancelButton: {

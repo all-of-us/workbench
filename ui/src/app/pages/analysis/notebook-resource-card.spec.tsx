@@ -1,8 +1,7 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
+import {mount} from 'enzyme';
 import {WorkspaceAccessLevel} from 'generated/fetch';
+import * as React from 'react';
 import {MemoryRouter} from 'react-router';
 
 

@@ -1,25 +1,25 @@
-import {mount, ReactWrapper} from 'enzyme';
-import * as React from 'react';
-import Iframe from 'react-iframe';
-import {act} from 'react-dom/test-utils';
-
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
+import {mount, ReactWrapper} from 'enzyme';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {RuntimesApi as LeoRuntimesApi, JupyterApi, ProxyApi} from 'notebooks-generated/fetch';
-import {waitOneTickAndUpdate, waitForFakeTimersAndUpdate} from 'testing/react-test-helpers';
-import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import { createMemoryHistory } from 'history';
+import {JupyterApi, ProxyApi,RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
+import * as React from 'react';
+import {act} from 'react-dom/test-utils';
+import Iframe from 'react-iframe';
+import { Route, Router } from 'react-router-dom';
+import {mockNavigate} from 'setupTests';
+import {waitForFakeTimersAndUpdate,waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
-import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
+import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
-import {mockNavigate} from 'setupTests';
+
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
-import { Route, Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 
 describe('NotebookRedirect', () => {
   const workspace = {

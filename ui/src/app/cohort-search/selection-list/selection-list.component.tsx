@@ -1,6 +1,3 @@
-import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
-
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {getItemFromSearchRequest, saveCriteria} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
@@ -16,11 +13,12 @@ import {
   currentCohortCriteriaStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
-import {Attribute, Criteria, Domain, Modifier} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-
 import arrowLeft from 'assets/icons/arrow-left-regular.svg';
 import times from 'assets/icons/times-light.svg';
+import {Attribute, Criteria, Domain, Modifier} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 const proIcons = {
   arrowLeft: arrowLeft,

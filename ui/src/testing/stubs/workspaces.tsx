@@ -6,6 +6,7 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {

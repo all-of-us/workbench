@@ -1,7 +1,3 @@
-import * as React from 'react';
-
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
@@ -15,6 +11,8 @@ import {globalErrorStore} from 'app/utils/navigation';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 const styles = reactStyles({
   errorCodeContainer: {

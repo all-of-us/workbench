@@ -1,6 +1,3 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {Button, Clickable} from 'app/components/buttons';
 import {COMPARE_DOMAINS_FOR_DISPLAY, DatasetPage} from 'app/pages/data/data-set/dataset-page';
 import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
@@ -8,6 +5,7 @@ import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {
   CdrVersionsApi,
   CohortsApi,
@@ -16,6 +14,9 @@ import {
   Domain, PrePackagedConceptSetEnum,
   WorkspaceAccessLevel, WorkspacesApi
 } from 'generated/fetch';
+import * as React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { mockNavigateByUrl } from 'setupTests';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CdrVersionsApiStub, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -23,8 +24,6 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub, stubDataSet} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { mockNavigateByUrl } from 'setupTests';
 
 describe('DataSetPage', () => {
   let datasetApiStub;

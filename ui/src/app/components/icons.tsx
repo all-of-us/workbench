@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {
   faCheck,
   faCheckCircle,
@@ -11,14 +8,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {faAlarmExclamation, faRepeat} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-
 import colors, {addOpacity} from 'app/styles/colors';
-
 import arrow from 'assets/icons/arrow-left-regular.svg';
-import googleCloudLogo from 'assets/icons/google-cloud.svg';
-
-import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
 import {ReactComponent as controlledTierBadge} from 'assets/icons/controlled-tier-badge.svg';
+import googleCloudLogo from 'assets/icons/google-cloud.svg';
+import {ReactComponent as registeredTierBadge} from 'assets/icons/registered-tier-badge.svg';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 export const ControlledTierBadge = controlledTierBadge;
 export const RegisteredTierBadge = registeredTierBadge;
 

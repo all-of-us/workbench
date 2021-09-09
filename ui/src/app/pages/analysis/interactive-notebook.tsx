@@ -1,7 +1,3 @@
-import * as Cookies from 'js-cookie';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PlaygroundIcon} from 'app/components/icons';
@@ -24,6 +20,9 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, RuntimeStatus} from 'generated/fetch';
+import * as Cookies from 'js-cookie';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 

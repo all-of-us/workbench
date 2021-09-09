@@ -1,9 +1,9 @@
+import * as ProfilePicture from 'app/utils/profile-picture';
 import {mount} from 'enzyme';
 import * as React from 'react';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 import {SideNav, SideNavItem, SideNavProps} from './side-nav';
-import * as ProfilePicture from 'app/utils/profile-picture';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('SideNav', () => {
   const props: SideNavProps = {

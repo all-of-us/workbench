@@ -1,9 +1,4 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {Prompt, RouteComponentProps, withRouter} from 'react-router';
-import {Subscription} from 'rxjs/Subscription';
-import validate from 'validate.js';
-
+import {parseQueryParams} from 'app/components/app-router';
 import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
@@ -36,7 +31,11 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {parseQueryParams} from 'app/components/app-router';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {Prompt, RouteComponentProps, withRouter} from 'react-router';
+import {Subscription} from 'rxjs/Subscription';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   conceptSetHeader: {

@@ -1,18 +1,18 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {
   registerApiClient
 } from 'app/services/swagger-fetch-clients';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
+import * as React from 'react';
+import { mockNavigate } from 'setupTests';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+
 import {WorkspaceList} from './workspace-list';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import { mockNavigate } from 'setupTests';
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;

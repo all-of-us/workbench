@@ -1,24 +1,21 @@
-import * as React from 'react';
-
 import {CardButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
+import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
-import {WorkspaceData} from 'app/utils/workspace-data';
-
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertToResource} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType} from 'generated/fetch';
+import * as React from 'react';
 
 const styles = {
   heading: {

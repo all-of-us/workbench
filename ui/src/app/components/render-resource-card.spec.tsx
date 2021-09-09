@@ -1,13 +1,13 @@
-import * as React from 'react';
-
+import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
+import * as React from 'react';
 import {MemoryRouter} from 'react-router';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {stubDataSet} from 'testing/stubs/data-set-api-stub';
-import {renderResourceCard} from './render-resource-card';
-import {mount} from 'enzyme';
 import {stubResource} from 'testing/stubs/resources-stub';
-import {serverConfigStore} from 'app/utils/stores';
+
+import {renderResourceCard} from './render-resource-card';
 
 describe('renderResourceCard', () => {
 

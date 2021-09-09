@@ -1,11 +1,4 @@
-import * as React from 'react';
-import {mount, ReactWrapper} from 'enzyme';
-
-import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {Profile} from 'generated/fetch';
-import {authStore, profileStore} from 'app/utils/stores';
-import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
   buildRasRedirectUrl,
   getTwoFactorSetupUrl,
@@ -15,7 +8,13 @@ import {
   RAS_CALLBACK_PATH,
   useIsUserDisabled
 } from 'app/utils/access-utils';
-import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {authStore, profileStore} from 'app/utils/stores';
+import {mount, ReactWrapper} from 'enzyme';
+import {AccessModule, ErrorCode, ProfileApi} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
+import * as React from 'react';
+import {waitOnTimersAndUpdate} from 'testing/react-test-helpers';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 // 10 minutes, in millis
 const SHORT_TIME_BUFFER = 10 * 60 * 1000;

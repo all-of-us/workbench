@@ -1,5 +1,4 @@
 import {User, UserApi, UserResponse, UserRole, WorkbenchListBillingAccountsResponse} from 'generated/fetch';
-
 import * as fp from 'lodash/fp';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 

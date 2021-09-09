@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {useEffect, useState} from 'react';
-
 import { useQuery } from 'app/components/app-router';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -34,6 +30,10 @@ import {isAbortError} from 'app/utils/errors';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({
@@ -429,11 +429,11 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
 
 // TODO is there a better way?
 
-import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
-import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
 import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
-import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
 import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
 import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
 
 const Individual = individual;

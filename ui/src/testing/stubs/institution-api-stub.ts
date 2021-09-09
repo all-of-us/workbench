@@ -1,4 +1,9 @@
 import {
+  getRegisteredTierConfig,
+  getRegisteredTierEmailAddresses,
+  getRegisteredTierEmailDomains,
+} from 'app/utils/institutions';
+import {
   CheckEmailRequest,
   CheckEmailResponse,
   GetInstitutionsResponse,
@@ -9,11 +14,6 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {
-  getRegisteredTierConfig,
-  getRegisteredTierEmailAddresses,
-  getRegisteredTierEmailDomains,
-} from 'app/utils/institutions';
 
 export const defaultInstitutions: Array<Institution> = [{
   shortName: 'VUMC',

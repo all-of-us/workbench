@@ -1,13 +1,17 @@
-import * as React from 'react';
 import {
-    FileDetail,
     Cohort,
     CohortReview,
-    ResourceType,
     ConceptSet,
     DataSet,
+    FileDetail,
+    ResourceType,
     WorkspaceResource,
 } from 'generated/fetch';
+import * as React from 'react';
+import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
+import {stubResource} from 'testing/stubs/resources-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
+
 import {stringifyUrl} from './navigation';
 import {
     getDescription,
@@ -23,9 +27,6 @@ import {
     isNotebook,
     toDisplay,
 } from './resources';
-import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {stubResource} from 'testing/stubs/resources-stub';
 
 const COHORT_NAME = exampleCohortStubs[0].name;
 const COHORT_DESCRIPTION = exampleCohortStubs[0].description;

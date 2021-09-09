@@ -1,15 +1,15 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {CohortBuilderApi, CriteriaType, Domain} from 'generated/fetch';
+import * as React from 'react';
 import {MemoryRouter, Router} from 'react-router';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
+
 import {CohortSearch} from './cohort-search.component';
 
 const searchContextStubs = [

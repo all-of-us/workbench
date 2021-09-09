@@ -1,11 +1,11 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {registerApiClient, statusApi} from 'app/services/swagger-fetch-clients';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {mount} from 'enzyme';
 import {StatusApi} from 'generated/fetch';
+import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {StatusApiStub} from 'testing/stubs/status-api-stub';
+
 import {ErrorHandler} from './error-handler';
 
 

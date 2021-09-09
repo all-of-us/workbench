@@ -6,11 +6,10 @@ import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
-import { environment } from 'environments/environment';
-import * as React from 'react';
-
 import aouFooterLogo from 'assets/images/all-of-us-logo-footer.svg';
 import nihFooterLogo from 'assets/images/nih-logo-footer.png';
+import { environment } from 'environments/environment';
+import * as React from 'react';
 
 const styles = reactStyles({
   footerAnchor: {

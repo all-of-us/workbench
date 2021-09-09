@@ -5,9 +5,8 @@ import {FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import * as React from 'react';
-
 import cookies from 'assets/images/cookies.png';
+import * as React from 'react';
 
 const styles = reactStyles({
   cookiePolicyMessage: {

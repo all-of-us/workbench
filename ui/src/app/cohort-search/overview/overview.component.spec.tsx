@@ -1,6 +1,6 @@
 import {shallow} from 'enzyme';
-
 import * as React from 'react';
+
 import {ListOverview} from './overview.component';
 
 describe('ListOverview', () => {

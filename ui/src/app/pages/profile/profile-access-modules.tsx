@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {ControlledTierBadge} from 'app/components/icons';
 import {AoU} from 'app/components/text-wrappers';
 import {displayDateWithoutHours, lensOnProps} from 'app/utils';
@@ -8,6 +5,9 @@ import {getRegistrationTasksMap} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {serverConfigStore, useStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {ProfileRegistrationStepStatus} from './profile-registration-step-status';
 import {styles} from './profile-styles';
 

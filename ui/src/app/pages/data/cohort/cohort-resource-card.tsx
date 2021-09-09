@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
@@ -13,6 +10,8 @@ import {NavigationProps} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getId, getResourceUrl, getType} from 'app/utils/resources';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {DataSet, WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {
   resource: WorkspaceResource;

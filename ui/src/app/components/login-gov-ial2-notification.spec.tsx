@@ -1,12 +1,12 @@
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import * as React from 'react';
+import {AccessModule} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import defaultServerConfig from 'testing/default-server-config';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 import {LoginGovIAL2NotificationMaybe} from './login-gov-ial2-notification';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import defaultServerConfig from 'testing/default-server-config';
-import {AccessModule} from 'generated/fetch';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('LoginGovIAL2Notification', () => {
   const load = jest.fn();

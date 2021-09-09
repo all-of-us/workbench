@@ -1,10 +1,10 @@
-import * as React from 'react';
-
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {maybeDaysRemaining} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, useStore} from 'app/utils/stores';
+import * as React from 'react';
+
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';

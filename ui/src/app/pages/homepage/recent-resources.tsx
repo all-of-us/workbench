@@ -1,11 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {Link as RouterLink} from 'react-router-dom';
-
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import {CSSProperties, useEffect, useState} from 'react';
-
 import {Clickable} from 'app/components/buttons';
 import {SmallHeader} from 'app/components/headers';
 import {renderResourceCard} from 'app/components/render-resource-card';
@@ -22,6 +14,12 @@ import {
   WorkspaceResourceResponse,
   WorkspaceResponse
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
+import {CSSProperties, useEffect, useState} from 'react';
+import {Link as RouterLink} from 'react-router-dom';
 
 const styles = reactStyles({
   column: {

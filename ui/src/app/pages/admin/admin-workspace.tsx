@@ -1,9 +1,3 @@
-import * as HighCharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
-import * as fp from 'lodash/fp';
-import moment from 'moment';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
@@ -26,8 +20,13 @@ import {
   ListRuntimeResponse,
   WorkspaceAdminView,
 } from 'generated/fetch';
+import * as HighCharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
+import moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
 import {ReactFragment, useState} from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 

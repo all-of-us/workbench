@@ -1,5 +1,6 @@
 import {UserMetricsApi} from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+
 import {stubResource} from './resources-stub';
 
 export class UserMetricsApiStub extends UserMetricsApi {

@@ -1,10 +1,9 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 const styles = reactStyles({
   alertBanner: {

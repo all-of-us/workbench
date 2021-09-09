@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {TieredMenu} from 'primereact/tieredmenu';
-import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
-
 import {SearchGroup} from 'app/cohort-search/search-group/search-group.component';
 import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
@@ -14,6 +9,10 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CdrVersionTiersResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {TieredMenu} from 'primereact/tieredmenu';
+import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 function initItem(id: string, type: string) {
   return {

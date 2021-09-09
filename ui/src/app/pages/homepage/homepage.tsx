@@ -1,6 +1,4 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
+import {parseQueryParams} from 'app/components/app-router';
 import {
   StyledAnchorTag,
 } from 'app/components/buttons';
@@ -26,14 +24,15 @@ import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {supportUrls} from 'app/utils/zendesk';
-import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import {QuickTourAndVideos} from './quick-tour-and-videos';
-import {parseQueryParams} from 'app/components/app-router';
-
-import workspaceIcon from 'assets/images/workspace-icon.svg';
-import cohortIcon from 'assets/images/cohort-icon.svg';
 import analysisIcon from 'assets/images/analysis-icon.svg';
+import cohortIcon from 'assets/images/cohort-icon.svg';
+import workspaceIcon from 'assets/images/workspace-icon.svg';
+import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+
+import {QuickTourAndVideos} from './quick-tour-and-videos';
 
 export const styles = reactStyles({
   bottomBanner: {

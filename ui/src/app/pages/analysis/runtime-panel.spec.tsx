@@ -1,15 +1,18 @@
-import {mount} from 'enzyme';
-import {act} from 'react-dom/test-utils';
-import * as React from 'react';
-import * as fp from 'lodash/fp';
-
 import {Button, Link} from 'app/components/buttons';
-import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
+import {Spinner} from 'app/components/spinners';
 import {ConfirmDelete, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
 import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
-import {findMachineByName, ComputeType} from 'app/utils/machines';
+import {ComputeType,findMachineByName} from 'app/utils/machines';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
+import {
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  profileStore,
+  runtimeStore,
+  serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {
   ProfileApi,
   RuntimeConfigurationType,
@@ -17,27 +20,22 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
+import {BillingAccountType, BillingStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {act} from 'react-dom/test-utils';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables,cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {
-  defaultGceConfig,
   defaultDataprocConfig,
+  defaultGceConfig,
   RuntimeApiStub
 } from 'testing/stubs/runtime-api-stub';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {BillingAccountType, BillingStatus} from 'generated/fetch';
-import {
-  cdrVersionStore,
-  clearCompoundRuntimeOperations,
-  serverConfigStore,
-  runtimeStore,
-  profileStore
-} from 'app/utils/stores';
-import {currentWorkspaceStore} from 'app/utils/navigation';
 
 
 describe('RuntimePanel', () => {

@@ -1,6 +1,5 @@
-import {environment} from 'environments/environment';
-
 import {BASE_TITLE} from 'app/utils/strings';
+import {environment} from 'environments/environment';
 
 export function buildPageTitleForEnvironment(pageTitle?: string) {
   let title = BASE_TITLE;

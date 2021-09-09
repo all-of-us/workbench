@@ -1,4 +1,5 @@
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
+
 import {stackdriverErrorReporterStore} from './stores';
 
 /**

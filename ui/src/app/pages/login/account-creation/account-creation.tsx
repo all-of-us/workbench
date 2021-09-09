@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {MultiSelect} from 'primereact/multiselect';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
@@ -31,6 +26,10 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 import {Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {MultiSelect} from 'primereact/multiselect';
+import * as React from 'react';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   ...commonStyles,

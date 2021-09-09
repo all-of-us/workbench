@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -33,9 +28,14 @@ import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {environment} from 'environments/environment';
 import {AccessModule, InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+import { RouteComponentProps,withRouter } from 'react-router-dom';
+import validate from 'validate.js';
+
 import {DataAccessPanel} from './data-access-panel';
 import {ProfileAccessModules} from './profile-access-modules';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 
 // validators for validate.js

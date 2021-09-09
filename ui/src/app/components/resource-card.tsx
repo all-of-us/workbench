@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {CSSProperties} from 'react';
-import {Link as RouterLink} from 'react-router-dom';
-
 import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -22,6 +17,11 @@ import {
   isNotebook,
 } from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {CSSProperties} from 'react';
+import {Link as RouterLink} from 'react-router-dom';
+
 import {Action, ResourceActionsMenu} from './resource-actions-menu';
 
 const styles = reactStyles({

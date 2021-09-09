@@ -1,7 +1,3 @@
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-
 import {BugReportModal} from 'app/components/bug-report';
 import {Button} from 'app/components/buttons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -9,6 +5,9 @@ import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {Profile, Workspace} from 'generated/fetch';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
 
 const styles = reactStyles({
   tableStyle: {

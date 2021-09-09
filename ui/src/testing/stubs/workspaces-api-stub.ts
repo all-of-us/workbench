@@ -1,5 +1,3 @@
-import * as fp from 'lodash/fp';
-
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -26,7 +24,9 @@ import {
   WorkspacesApi,
   WorkspaceUserRolesResponse
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 import {cohortReviewStubs} from './cohort-review-service-stub';
 import {exampleCohortStubs} from './cohorts-api-stub';

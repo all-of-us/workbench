@@ -1,13 +1,11 @@
-import * as React from 'react';
-
-import {withUserProfile} from 'app/utils';
-
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {withUserProfile} from 'app/utils';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   Profile
 } from 'generated/fetch';
+import * as React from 'react';
 
 
 export const BugReportModal = withUserProfile()

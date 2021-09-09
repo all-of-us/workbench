@@ -52,7 +52,7 @@ module.exports = {
     'no-trailing-spaces': 'warn',
     'no-undef-init': 'warn',
     // 'brace-style': ['warn', '1tbs'],
-    // 'simple-import-sort/sort': 'warn',
+    'simple-import-sort/sort': 'error',
     'quotes': ['error', 'single', {"allowTemplateLiterals": true}],
     '@typescript-eslint/semi': 'error',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],

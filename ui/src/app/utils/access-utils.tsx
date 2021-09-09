@@ -1,6 +1,4 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
+import {parseQueryParams} from 'app/components/app-router';
 import {Button} from 'app/components/buttons';
 import {AoU} from 'app/components/text-wrappers';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -10,8 +8,10 @@ import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {authStore, profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, AccessModuleStatus, ErrorCode, Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {getLiveDUCCVersion} from './code-of-conduct';
-import {parseQueryParams} from 'app/components/app-router';
 
 const {useState, useEffect} = React;
 

@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import {validate} from 'validate.js';
-
 import {Button, Clickable} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -13,7 +9,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import { matchPath, RouteComponentProps, withRouter } from 'react-router-dom';
+import {validate} from 'validate.js';
 
 const styles = reactStyles({
   editRow: {

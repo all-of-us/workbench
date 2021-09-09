@@ -1,11 +1,10 @@
-import * as React from 'react';
-
 import { Button } from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import {useId} from 'app/utils';
+import * as React from 'react';
 
 
 const styles = reactStyles({

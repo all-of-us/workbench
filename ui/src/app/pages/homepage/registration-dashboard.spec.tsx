@@ -1,12 +1,11 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
-import {ProfileApi} from 'generated/fetch';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
+import {ProfileApi} from 'generated/fetch';
+import * as React from 'react';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;

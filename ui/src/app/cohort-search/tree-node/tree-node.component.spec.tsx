@@ -1,11 +1,11 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentConceptStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {mount} from 'enzyme';
 import {CohortBuilderApi, Domain} from 'generated/fetch';
+import * as React from 'react';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
+
 import {NodeProp, TreeNode} from './tree-node.component';
 
 const treeNodeStub = {

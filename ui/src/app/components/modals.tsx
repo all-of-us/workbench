@@ -1,15 +1,15 @@
-import Color from 'color';
-import * as React from 'react';
-import ReactModal from 'react-modal';
-
 import {Button} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {reactStyles, withStyle} from 'app/utils/index';
-import {notificationStore, NotificationStore, profileStore, useStore} from 'app/utils/stores';
+import {NotificationStore, notificationStore, profileStore, useStore} from 'app/utils/stores';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import Color from 'color';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
+import ReactModal from 'react-modal';
 import {animated, useSpring} from 'react-spring';
+
 import {TextColumn} from './text-column';
 
 const { useEffect} = React;

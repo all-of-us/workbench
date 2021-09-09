@@ -1,12 +1,11 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {DemographicSurvey, Props} from 'app/pages/profile/demographic-survey';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {Disability, Ethnicity, GenderIdentity, ProfileApi, Race, SexAtBirth} from 'generated/fetch';
+import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 

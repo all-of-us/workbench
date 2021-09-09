@@ -1,7 +1,6 @@
-import * as React from 'react';
 import {jest} from '@jest/globals';
-
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
+import * as React from 'react';
 
 const functionStub = {
   successfulFunction() {

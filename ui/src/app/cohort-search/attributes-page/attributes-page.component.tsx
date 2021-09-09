@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {ppiQuestions, ppiSurveys} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
@@ -24,6 +20,9 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AttrName, CriteriaSubType, Domain, Operator} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
 
 const styles = reactStyles({
   countPreview: {

@@ -1,14 +1,13 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
-
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInputWithLabel, Toggle} from 'app/components/inputs';
+import {BulletAlignedUnorderedList} from 'app/components/lists';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {institutionApi, profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -16,11 +15,6 @@ import {
   isBlank,
   reactStyles
 } from 'app/utils';
-import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
-
-import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {TooltipTrigger} from 'app/components/popups';
-import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {
   EmailAddressMismatchErrorMessage,
   EmailDomainMismatchErrorMessage,
@@ -37,7 +31,10 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+import {Link as RouterLink, RouteComponentProps, withRouter} from 'react-router-dom';
 import validate from 'validate.js';
 
 const styles = reactStyles({

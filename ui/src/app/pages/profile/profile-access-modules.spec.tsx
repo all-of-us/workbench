@@ -1,11 +1,11 @@
+import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
+import {Profile} from 'generated/fetch';
 import * as React from 'react';
+import defaultServerConfig from 'testing/default-server-config';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 import {ProfileAccessModules} from './profile-access-modules';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {Profile} from 'generated/fetch';
-import {serverConfigStore} from 'app/utils/stores';
-import defaultServerConfig from 'testing/default-server-config';
 
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 

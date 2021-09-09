@@ -1,18 +1,7 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import {
-  CdrVersionTiersResponse,
-  ConceptSet,
-  FileDetail,
-  ResourceType,
-  Workspace
-} from 'generated/fetch';
-
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -22,6 +11,16 @@ import {NavigationProps} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {
+  CdrVersionTiersResponse,
+  ConceptSet,
+  FileDetail,
+  ResourceType,
+  Workspace
+} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
 

@@ -1,5 +1,4 @@
 import {AccessRenewal} from 'app/pages/access/access-renewal';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';

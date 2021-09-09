@@ -1,7 +1,7 @@
 import {shallow} from 'enzyme';
+import {Domain} from 'generated/fetch';
 import * as React from 'react';
 
-import {Domain} from 'generated/fetch';
 import {SearchGroupItem} from './search-group-item.component';
 
 const itemStub = {id: 'item_id', searchParameters: [], status: 'active', type: Domain.CONDITION};

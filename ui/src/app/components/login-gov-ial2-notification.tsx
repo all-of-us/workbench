@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {getAccessModuleStatusByName} from 'app/utils/access-utils';
@@ -7,6 +5,8 @@ import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule} from 'generated/fetch';
+import * as React from 'react';
+
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';

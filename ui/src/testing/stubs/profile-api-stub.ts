@@ -1,3 +1,4 @@
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
   AccessBypassRequest,
   AccessModule,
@@ -8,8 +9,6 @@ import {
   Profile,
   ProfileApi,
 } from 'generated/fetch';
-
-import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AdminUserListResponse, EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 

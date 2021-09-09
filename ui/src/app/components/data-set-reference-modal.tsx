@@ -1,9 +1,9 @@
-import * as React from 'react';
-
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {getDisplayName, getId, getType, getTypeString} from 'app/utils/resources';
 import {WorkspaceResource} from 'generated/fetch';
+import * as React from 'react';
+
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalTitle} from './modals';
 

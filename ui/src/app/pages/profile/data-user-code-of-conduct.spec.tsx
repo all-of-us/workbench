@@ -1,13 +1,12 @@
-import {mount} from 'enzyme';
-import * as React from 'react';
-
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {profileStore} from 'app/utils/stores';
+import {mount} from 'enzyme';
 import {Profile, ProfileApi} from 'generated/fetch';
-import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('DataUserCodeOfConduct', () => {
   const load = jest.fn();

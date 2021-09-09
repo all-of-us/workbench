@@ -1,13 +1,12 @@
 
-import * as React from 'react';
-import {useState} from 'react';
-
 import {Button, StyledAnchorTag} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import * as React from 'react';
+import {useState} from 'react';
 
 export const styles = reactStyles({
   checkbox: {

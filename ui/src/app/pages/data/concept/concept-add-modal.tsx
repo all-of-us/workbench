@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
@@ -14,6 +11,8 @@ import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {conceptSetUpdating} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, CreateConceptSetRequest, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({

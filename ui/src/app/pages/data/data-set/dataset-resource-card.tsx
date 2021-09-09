@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
@@ -17,6 +14,9 @@ import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {ExportDatasetModal} from './export-dataset-modal';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, NavigationProps {

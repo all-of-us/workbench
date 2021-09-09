@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Dropdown} from 'primereact/dropdown';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {FormSection} from 'app/components/forms';
@@ -35,6 +30,10 @@ import {
   Profile,
   PublicInstitutionDetails,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
+import * as React from 'react';
+import validate from 'validate.js';
 
 const styles = reactStyles({
   ...commonStyles,

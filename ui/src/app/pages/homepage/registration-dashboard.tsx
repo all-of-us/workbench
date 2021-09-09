@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
@@ -18,6 +15,9 @@ import {NavigationProps} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/stores';
 import {withNavigation} from 'app/utils/with-navigation-hoc';
 import {AccessModule} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+
 import {TwoFactorAuthModal} from './two-factor-auth-modal';
 
 const styles = reactStyles({

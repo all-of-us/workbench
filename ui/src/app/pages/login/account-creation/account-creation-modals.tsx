@@ -3,7 +3,6 @@ import {styles as headerStyles} from 'app/components/headers';
 import {TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-
 import * as React from 'react';
 
 interface AccountCreationResendModalProps {

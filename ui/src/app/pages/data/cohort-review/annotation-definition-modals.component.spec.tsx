@@ -1,10 +1,9 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
-
+import { MemoryRouter } from 'react-router-dom';
 import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from './annotation-definition-modals.component';
-import { MemoryRouter } from 'react-router-dom';
 
 describe('AddAnnotationDefinitionModal', () => {
   it('should render', () => {

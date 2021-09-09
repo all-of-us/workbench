@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
@@ -13,11 +11,11 @@ import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {useNavigation} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
-import {useEffect, useState} from 'react';
-
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
+import {ResourceType, WorkspaceAccessLevel, WorkspaceResource} from 'generated/fetch';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
 
 const styles = {
   cardButtonArea: {

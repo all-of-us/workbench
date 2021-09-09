@@ -1,6 +1,6 @@
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
-import {atom, Atom} from 'app/utils/subscribable';
+import {Atom,atom} from 'app/utils/subscribable';
 import {
   CdrVersionTier,
   ConfigResponse, Disk,

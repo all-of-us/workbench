@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -13,12 +11,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {environment} from 'environments/environment';
-import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
-
+import demonstration from 'assets/icons/demonstration.svg';
 import phenotypeLibrary from 'assets/icons/phenotype-library.svg';
 import tutorialWorkspaces from 'assets/icons/tutorial-workspaces.svg';
-import demonstration from 'assets/icons/demonstration.svg';
+import {environment} from 'environments/environment';
+import {FeaturedWorkspace, FeaturedWorkspaceCategory} from 'generated/fetch';
+import * as React from 'react';
 
 const styles = reactStyles({
   navPanel: {

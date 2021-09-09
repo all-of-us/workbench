@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
@@ -25,6 +22,8 @@ import {
   UserRole,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface WorkspaceProps extends WithSpinnerOverlayProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};

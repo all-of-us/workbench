@@ -1,7 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import validate from 'validate.js';
-
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -77,8 +73,12 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import * as React from 'react';
+import validate from 'validate.js';
+
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({

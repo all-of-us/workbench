@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+
 import {DEFAULT, switchCase} from './index';
 import {formatUsd} from './numbers';
 

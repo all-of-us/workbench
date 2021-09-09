@@ -4,13 +4,14 @@ import {mount} from 'enzyme';
 import {InstitutionApi, InstitutionMembershipRequirement} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {InputSwitch} from 'primereact/inputswitch';
 import * as React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
 import defaultServerConfig from 'testing/default-server-config';
 import {simulateSwitchToggle, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+
 import {AdminInstitutionEdit} from './admin-institution-edit';
-import {InputSwitch} from 'primereact/inputswitch';
-import { MemoryRouter, Route } from 'react-router-dom';
 
 describe('AdminInstitutionEditSpec', () => {
 

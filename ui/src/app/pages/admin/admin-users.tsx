@@ -1,8 +1,3 @@
-import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -16,7 +11,11 @@ import {
   AdminTableUser,
   Profile,
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import moment from 'moment';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import * as React from 'react';
 
 const styles = reactStyles({
   colStyle: {

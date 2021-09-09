@@ -1,6 +1,3 @@
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
 import {CopyModal} from 'app/components/copy-modal';
 import {DataSetReferenceModal} from 'app/components/data-set-reference-modal';
 import {RenameModal} from 'app/components/rename-modal';
@@ -12,6 +9,8 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {getDescription, getDisplayName, getId, getType} from 'app/utils/resources';
 import {CopyRequest, DataSet, WorkspaceResource} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
