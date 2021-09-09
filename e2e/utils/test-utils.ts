@@ -14,6 +14,7 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
+import { authenticator } from 'otplib';
 
 export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => {
@@ -280,3 +281,10 @@ export function isValidDate(date: string) {
 
 const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
+
+/**
+ * Generates a two factor auth code by given secret.
+ */
+export async function generate2FACode(secret: string) {
+  return authenticator.generate(secret);
+}
