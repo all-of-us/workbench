@@ -7,8 +7,7 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   currentWorkspaceStore,
-  globalErrorStore,
-  routeConfigDataStore
+  globalErrorStore
 } from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -294,11 +293,6 @@ export const withGlobalError = () => {
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
   return withStore(profileStore, 'profileState');
-};
-
-// HOC that provides a 'routeConfigData' prop with current route's data object
-export const withRouteConfigData = () => {
-  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
 // HOC that provides a 'cdrVersionTiersResponse' prop with the CDR version information.

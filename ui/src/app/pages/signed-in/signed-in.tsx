@@ -11,7 +11,6 @@ import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {routeConfigDataStore} from 'app/utils/navigation';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -68,26 +67,12 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
   }, []);
 
   useEffect(() => {
-    const subscriptions = [];
-    // This handles detection of Angular-based routing data.
-    subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
+    const subscription = routeDataStore.subscribe(({minimizeChrome}) => {
       setHideFooter(minimizeChrome);
-    }));
-    // This handles detection of React-based routing data. During migrations,
-    // we assume React routing data will be set deeper/later in the component
-    // hierarchy, therefore it will generally take precedence over React.
-    subscriptions.push(routeDataStore.subscribe(({minimizeChrome}) => {
-      setHideFooter(minimizeChrome);
-    }));
+    });
 
     return () => {
-      /*
-       * TODO RW-1920: we will only need one subscription after routeConfigDataStore and
-       *  routeDataStore are collapsed, and then we won't have to duck-type this
-       */
-      for (const s of subscriptions) {
-        s.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
   }, []);
 

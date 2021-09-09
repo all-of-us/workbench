@@ -18,9 +18,8 @@ import { useParams } from 'react-router-dom';
 
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace()
-)(({workspace, routeConfigData, hideSpinner}) => {
+)(({workspace, routeData, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
-  const routeData = useStore(routeDataStore);
 
   const [pollAborter, setPollAborter] = useState(new AbortController());
   const params = useParams<MatchParams>();
