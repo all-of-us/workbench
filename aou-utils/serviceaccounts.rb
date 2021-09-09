@@ -2,6 +2,7 @@ require "json"
 require "set"
 require_relative "workbench"
 require_relative "utils/common"
+require "tmpdir"
 
 # Entering a service account context ensures that a keyfile exists at the given
 # path for the given service account, and that GOOGLE_APPLICATION_CREDENTIALS is
