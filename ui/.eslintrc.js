@@ -37,7 +37,12 @@ module.exports = {
 
     /* Typescript specific */
     '@typescript-eslint/explicit-member-accessibility': 'off',
-    // '@typescript-eslint/member-ordering': ['warn', { 'classExpressions': ['method', 'field'] }],
+    '@typescript-eslint/member-ordering': ['error', {'default': [
+      'static-field',
+      'instance-field',
+      'static-method',
+      'instance-method'
+    ]}],
     '@typescript-eslint/no-empty-interface': 'warn',
     '@typescript-eslint/no-inferrable-types': ['warn', {ignoreParameters: true}],
     '@typescript-eslint/no-non-null-assertion': 'warn',
