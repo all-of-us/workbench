@@ -182,6 +182,12 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
+
+  const expectEqualFields = (a, b, fieldNames) => {
+    const pick = fp.flow(fp.pick(fieldNames));
+    expect(pick(a)).toEqual(pick(b));
+  };
+
   it('should show loading spinner while loading', async () => {
     const wrapper = await component();
 
@@ -298,11 +304,6 @@ describe('RuntimePanel', () => {
       ['masterMachineType', 'masterDiskSize', 'workerDiskSize', 'numberOfWorkers']
     );
   });
-
-  const expectEqualFields = (a, b, fieldNames) => {
-    const pick = fp.flow(fp.pick(fieldNames));
-    expect(pick(a)).toEqual(pick(b));
-  };
 
   it('should allow creation when runtime has error status', async () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;

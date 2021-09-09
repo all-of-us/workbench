@@ -41,6 +41,22 @@ enum AnalyticsCategory {
   WORKSPACE_UPDATE_PROMPT = 'Workspace update prompt'
 }
 
+function getCurrentPageLabel(suffix = '') {
+  let prefix;
+
+  if (window.location.pathname === '/') {
+    prefix = 'From Home Page';
+  } else if (window.location.pathname === '/workspaces') {
+    prefix = 'From Workspace List Page';
+  } else if (window.location.pathname.match(/\/workspaces\/.*/) !== null) {
+    prefix = 'From Workspace Page';
+  } else {
+    prefix = 'Unknown Label: ' + window.location.pathname;
+  }
+
+  return suffix ? `${prefix} (${suffix})` : prefix;
+}
+
 export const AnalyticsTracker = {
   Workspaces: {
     OpenCreatePage: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Create Page', getCurrentPageLabel()),
@@ -132,25 +148,16 @@ export const AnalyticsTracker = {
   }
 };
 
-function getCurrentPageLabel(suffix = '') {
-  let prefix;
-
-  if (window.location.pathname === '/') {
-    prefix = 'From Home Page';
-  } else if (window.location.pathname === '/workspaces') {
-    prefix = 'From Workspace List Page';
-  } else if (window.location.pathname.match(/\/workspaces\/.*/) !== null) {
-    prefix = 'From Workspace Page';
-  } else {
-    prefix = 'Unknown Label: ' + window.location.pathname;
-  }
-
-  return suffix ? `${prefix} (${suffix})` : prefix;
-}
-
 enum UserAuthState {
   LOGGED_IN = 'Logged in',
   LOGGED_OUT = 'Logged out'
+}
+
+// invokes the 'set' command in gtag.js which mutates global state.
+// All gtag event triggers after this call will be affected.
+// see https://developers.google.com/gtagjs/reference/api
+function gtagSet(setParam: object) {
+  gtag('set', setParam);
 }
 
 /**
@@ -208,11 +215,4 @@ export function initializeAnalytics() {
     [environment.gaUserInstitutionCategoryDimension]: InstitutionCategoryState.UNKNOWN,
   });
   gtag('config', environment.gaId);
-}
-
-// invokes the 'set' command in gtag.js which mutates global state.
-// All gtag event triggers after this call will be affected.
-// see https://developers.google.com/gtagjs/reference/api
-function gtagSet(setParam: object) {
-  gtag('set', setParam);
 }

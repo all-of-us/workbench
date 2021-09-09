@@ -49,6 +49,11 @@ export const leoRuntimesApi = bindCtor(RuntimesApi);
 export const proxyApi = bindCtor(ProxyApi);
 export const jupyterApi = bindCtor(JupyterApi);
 
+export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
+  checkFrozen();
+  registry.set(ctor, impl);
+}
+
 export function bindApiClients(conf: FetchConfiguration) {
   for (const ctor of apiCtors) {
     // We use an anonymous subclass here because Swagger's typescript-fetch
@@ -65,11 +70,6 @@ export function bindApiClients(conf: FetchConfiguration) {
     }());
   }
   frozen = true;
-}
-
-export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
-  checkFrozen();
-  registry.set(ctor, impl);
 }
 
 export function clearApiClients() {

@@ -20,6 +20,14 @@ export function typeDisplay(parameter): string {
   }
 }
 
+export function stripHtml(string: string) {
+  return string.replace(/<(.|\n)*?>/g, '');
+}
+
+export function toTitleCase(str: string): string {
+  return fp.startCase(fp.toLower(str));
+}
+
 export function nameDisplay(parameter): string {
   if (parameter.type === CriteriaType.DECEASED) {
     return '';
@@ -30,10 +38,6 @@ export function nameDisplay(parameter): string {
     }
     return name;
   }
-}
-
-export function toTitleCase(str: string): string {
-  return fp.startCase(fp.toLower(str));
 }
 
 export function attributeDisplay(parameter): string {
@@ -211,10 +215,6 @@ export function highlightMatches(
   return name;
 }
 
-export function stripHtml(string: string) {
-  return string.replace(/<(.|\n)*?>/g, '');
-}
-
 export function getChartObj(chartObj: any) {
   if (chartObj && typeof ResizeObserver === 'function') {
     // Unbind window.onresize handler so we don't do double redraws
@@ -235,6 +235,10 @@ export function getChartObj(chartObj: any) {
   }
 }
 
+function genSuffix(): string {
+  return Math.random().toString(36).substr(2, 9);
+}
+
 export function generateId(prefix?: string): string {
   prefix = prefix || 'id';
   let newId = `${prefix}_${genSuffix()}`;
@@ -245,10 +249,6 @@ export function generateId(prefix?: string): string {
   ids.add(newId);
   idsInUse.next(ids);
   return newId;
-}
-
-function genSuffix(): string {
-  return Math.random().toString(36).substr(2, 9);
 }
 
 export function parseCohortDefinition(json: string) {
@@ -292,51 +292,6 @@ export function parseCohortDefinition(json: string) {
   return sr;
 }
 
-export function mapRequest(sr: any) {
-  const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
-    if (grp.status === 'active' && hasActiveItems(grp)) {
-      acc.push(mapGroup(grp));
-    }
-    return acc;
-  }, []);
-  return <SearchRequest>{
-    includes: grpFilter('includes'),
-    excludes: grpFilter('excludes'),
-    dataFilters: sr.dataFilters
-  };
-}
-
-export function mapGroup(group: any) {
-  const {id, temporal, mention, name, time, timeValue} = group;
-  const items = group.items.reduce((acc, it) => {
-    if (it.status === 'active') {
-      acc.push(mapGroupItem(it, temporal));
-    }
-    return acc;
-  }, []);
-  let searchGroup = <SearchGroup>{id, items, temporal};
-  if (name) {
-    searchGroup.name = name;
-  }
-  if (temporal) {
-    searchGroup = {...searchGroup, mention, time, timeValue: parseInt(timeValue, 10)};
-  }
-  return searchGroup;
-}
-
-export function mapGroupItem(item: any, temporal: boolean) {
-  const {id, type, modifiers, name, temporalGroup} = item;
-  const searchParameters = item.searchParameters.map(mapParameter);
-  const searchGroupItem = <SearchGroupItem>{id, type, searchParameters, modifiers};
-  if (name) {
-    searchGroupItem.name = name;
-  }
-  if (temporal) {
-    searchGroupItem.temporalGroup = temporalGroup;
-  }
-  return searchGroupItem;
-}
-
 export function mapParameter(sp: any) {
   const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
     hasAncestorData, isStandard} = sp;
@@ -359,8 +314,53 @@ export function mapParameter(sp: any) {
   return param;
 }
 
+export function mapGroupItem(item: any, temporal: boolean) {
+  const {id, type, modifiers, name, temporalGroup} = item;
+  const searchParameters = item.searchParameters.map(mapParameter);
+  const searchGroupItem = <SearchGroupItem>{id, type, searchParameters, modifiers};
+  if (name) {
+    searchGroupItem.name = name;
+  }
+  if (temporal) {
+    searchGroupItem.temporalGroup = temporalGroup;
+  }
+  return searchGroupItem;
+}
+
+export function mapGroup(group: any) {
+  const {id, temporal, mention, name, time, timeValue} = group;
+  const items = group.items.reduce((acc, it) => {
+    if (it.status === 'active') {
+      acc.push(mapGroupItem(it, temporal));
+    }
+    return acc;
+  }, []);
+  let searchGroup = <SearchGroup>{id, items, temporal};
+  if (name) {
+    searchGroup.name = name;
+  }
+  if (temporal) {
+    searchGroup = {...searchGroup, mention, time, timeValue: parseInt(timeValue, 10)};
+  }
+  return searchGroup;
+}
+
 export function hasActiveItems(group: any) {
   return group.items.some(it => it.status === 'active');
+}
+
+export function mapRequest(sr: any) {
+  const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
+    if (grp.status === 'active' && hasActiveItems(grp)) {
+      acc.push(mapGroup(grp));
+    }
+    return acc;
+  }, []);
+  return <SearchRequest>{
+    includes: grpFilter('includes'),
+    excludes: grpFilter('excludes'),
+    dataFilters: sr.dataFilters
+  };
 }
 
 export function getTypeAndStandard(searchParameters: Array<any>, type: Domain) {

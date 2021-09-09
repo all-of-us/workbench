@@ -56,6 +56,18 @@ describe('WorkspaceEdit', () => {
     return mount(<WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/>);
   };
 
+  async function expectNoTierChangesAllowed() {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    const selectionProps = accessTierSelection.find('select').props();
+    expect(selectionProps.disabled).toBeTruthy();
+    expect(selectionProps.value).toBe(workspace.accessTierShortName);
+  }
+
   beforeEach(async () => {
     workspace = {
       // accessLevel is a required WorkspaceData property (WorkspaceData extends
@@ -354,18 +366,6 @@ describe('WorkspaceEdit', () => {
     workspace.accessTierShortName = AccessTierShortNames.Controlled;
     await expectNoTierChangesAllowed();
   });
-
-  async function expectNoTierChangesAllowed() {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-
-    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
-    expect(accessTierSelection.exists()).toBeTruthy();
-
-    const selectionProps = accessTierSelection.find('select').props();
-    expect(selectionProps.disabled).toBeTruthy();
-    expect(selectionProps.value).toBe(workspace.accessTierShortName);
-  }
 
   // regression test for RW-5132
   it('prevents multiple Workspace creations via the same confirmation dialog', async () => {

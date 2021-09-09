@@ -32,16 +32,6 @@ export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImag
   const bgWidthMinPx = 900;
   const bgWidthSmallLimitPx = 1600;
 
-  return {
-    backgroundImage: calculateImage(),
-    backgroundColor: colors.light,
-    backgroundRepeat: 'no-repeat',
-    flex: 1,
-    width: '100%',
-    backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
-    backgroundPosition: calculateBackgroundPosition()
-  };
-
   function calculateImage() {
     if (!imageConfig) {
       return null;
@@ -60,6 +50,16 @@ export const backgroundStyleTemplate = (windowSize, imageConfig?: BackgroundImag
     }
     return position;
   }
+
+  return {
+    backgroundImage: calculateImage(),
+    backgroundColor: colors.light,
+    backgroundRepeat: 'no-repeat',
+    flex: 1,
+    width: '100%',
+    backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
+    backgroundPosition: calculateBackgroundPosition()
+  };
 };
 
 const styles = reactStyles({

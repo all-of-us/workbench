@@ -91,6 +91,14 @@ export function getControlledTierConfig(institution: Institution): InstitutionTi
   return getTierConfig(institution, AccessTierShortNames.Controlled);
 }
 
+export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
+  const tierConfig = getTierConfig(institution, accessTier);
+  if (tierConfig.emailAddresses) {
+    return tierConfig.emailAddresses;
+  }
+  return [];
+}
+
 export function getRegisteredTierEmailAddresses(institution: Institution): Array<string> {
   return getTierEmailAddresses(institution, AccessTierShortNames.Registered);
 }
@@ -99,10 +107,10 @@ export function getControlledTierEmailAddresses(institution: Institution): Array
   return getTierEmailAddresses(institution, AccessTierShortNames.Controlled);
 }
 
-export function getTierEmailAddresses(institution: Institution, accessTier: string): Array<string> {
+export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
   const tierConfig = getTierConfig(institution, accessTier);
-  if (tierConfig.emailAddresses) {
-    return tierConfig.emailAddresses;
+  if (tierConfig.emailDomains) {
+    return tierConfig.emailDomains;
   }
   return [];
 }
@@ -113,14 +121,6 @@ export function getRegisteredTierEmailDomains(institution: Institution): Array<s
 
 export function getControlledTierEmailDomains(institution: Institution): Array<string> {
   return getTierEmailDomains(institution, AccessTierShortNames.Controlled);
-}
-
-export function getTierEmailDomains(institution: Institution, accessTier: string): Array<string> {
-  const tierConfig = getTierConfig(institution, accessTier);
-  if (tierConfig.emailDomains) {
-    return tierConfig.emailDomains;
-  }
-  return [];
 }
 
 // Update User register tier email addresses and return the new tier configs.

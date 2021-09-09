@@ -34,6 +34,16 @@ function toDisplay(resourceType: ResourceType): string {
   ])(resourceType);
 }
 
+function getType(resource: WorkspaceResource): ResourceType {
+  return fp.cond([
+    [isCohort, () => ResourceType.COHORT],
+    [isCohortReview, () => ResourceType.COHORTREVIEW],
+    [isConceptSet, () => ResourceType.CONCEPTSET],
+    [isDataSet, () => ResourceType.DATASET],
+    [isNotebook, () => ResourceType.NOTEBOOK],
+  ])(resource);
+}
+
 const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType(resource));
 
 function getDescription(resource: WorkspaceResource): string {
@@ -76,16 +86,6 @@ function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [isConceptSet, r => ({url: `${workspacePrefix}/data/concepts/sets/${r.conceptSet.id}`})],
     [isDataSet, r => ({url: `${workspacePrefix}/data/data-sets/${r.dataSet.id}`})],
     [isNotebook, r => ({url: `${workspacePrefix}/notebooks/preview/${encodeURIComponentStrict(r.notebook.name)}`})],
-  ])(resource);
-}
-
-function getType(resource: WorkspaceResource): ResourceType {
-  return fp.cond([
-      [isCohort, () => ResourceType.COHORT],
-      [isCohortReview, () => ResourceType.COHORTREVIEW],
-      [isConceptSet, () => ResourceType.CONCEPTSET],
-      [isDataSet, () => ResourceType.DATASET],
-      [isNotebook, () => ResourceType.NOTEBOOK],
   ])(resource);
 }
 

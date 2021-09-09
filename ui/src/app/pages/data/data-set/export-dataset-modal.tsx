@@ -61,6 +61,38 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
     const [errorMsg, setErrorMsg] = useState(null);
     const [, navigateByUrl] = useNavigation();
 
+
+    function hasWgs() {
+      return fp.includes(PrePackagedConceptSetEnum.WHOLEGENOME, dataset.prePackagedConceptSet);
+    }
+
+    function createDataSetRequest(): DataSetRequest {
+      return {
+        name: dataset ? dataset.name : 'dataset',
+        ...(dataset.id
+            ? { dataSetId: dataset.id }
+            : {
+              dataSetId: dataset.id,
+              includesAllParticipants: dataset.includesAllParticipants,
+              conceptSetIds: dataset.conceptSets.map(cs => cs.id),
+              cohortIds: dataset.cohorts.map(c => c.id),
+              domainValuePairs: dataset.domainValuePairs,
+              prePackagedConceptSet: dataset.prePackagedConceptSet
+            })
+      };
+    }
+
+    function createExportDatasetRequest(): DataSetExportRequest {
+      return {
+        dataSetRequest: createDataSetRequest(),
+        kernelType,
+        genomicsAnalysisTool,
+        generateGenomicsAnalysisCode: hasWgs(),
+        notebookName,
+        newNotebook: creatingNewNotebook
+      };
+    }
+
     async function exportDataset() {
       AnalyticsTracker.DatasetBuilder.Export(kernelType);
 
@@ -77,33 +109,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
         setIsExporting(false);
         setErrorMsg('The request cannot be completed. Please try again or contact Support in the left hand navigation');
       }
-    }
-
-    function createExportDatasetRequest(): DataSetExportRequest {
-      return {
-        dataSetRequest: createDataSetRequest(),
-        kernelType,
-        genomicsAnalysisTool,
-        generateGenomicsAnalysisCode: hasWgs(),
-        notebookName,
-        newNotebook: creatingNewNotebook
-      };
-    }
-
-    function createDataSetRequest(): DataSetRequest {
-      return {
-        name: dataset ? dataset.name : 'dataset',
-        ...(dataset.id
-          ? { dataSetId: dataset.id }
-          : {
-            dataSetId: dataset.id,
-            includesAllParticipants: dataset.includesAllParticipants,
-            conceptSetIds: dataset.conceptSets.map(cs => cs.id),
-            cohortIds: dataset.cohorts.map(c => c.id),
-            domainValuePairs: dataset.domainValuePairs,
-            prePackagedConceptSet: dataset.prePackagedConceptSet
-          })
-      };
     }
 
     function loadHtmlStringIntoIFrame(html) {
@@ -164,10 +169,6 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           onChange={() => setGenomicsAnalysisTool(genomicsTool)}/>
         {displayName}
       </label>;
-    }
-
-    function hasWgs() {
-      return fp.includes(PrePackagedConceptSetEnum.WHOLEGENOME, dataset.prePackagedConceptSet);
     }
 
     useEffect(() => {

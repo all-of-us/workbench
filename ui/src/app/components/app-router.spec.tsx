@@ -16,6 +16,48 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('AppRouter', () => {
+
+  class TestComponent extends React.Component<{text: String}> {
+    render() {
+      return <span>{this.props.text}</span>;
+    }
+  }
+
+  const alwaysFalseGuard: Guard = {
+    allowed: (): boolean => false,
+    redirectPath: '/punting'
+  };
+
+  const alwaysTrueGuard: Guard = {
+    allowed: (): boolean => true,
+    redirectPath: '/punting'
+  };
+
+  const otherAlwaysTrueGuard: Guard = {
+    allowed: (): boolean => true,
+    redirectPath: '/punting'
+  };
+
+  const makeAppRouter = () => {
+    return <AppRouter>
+      <Switch>
+        <AppRoute exact path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
+        <AppRoute exact path='/punting'><TestComponent text={'Punting'}/></AppRoute>
+        <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
+        <AppRoute exact path='/protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Protected Route'}/></AppRoute>
+        <AppRoute exact path='/other-protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Other Protected Route'}/></AppRoute>
+        <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}>
+          <TestComponent text={'Nested Protected Route'}/>
+        </AppRoute>
+        <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}>
+          <TestComponent text={'Unreachable Path'}/>
+        </AppRoute>
+        <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
+        <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
+      </Switch>
+    </AppRouter>;
+  };
+
   const component = (initialEntries: string[], initialIndex: number) => {
     return mount(<MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
       {makeAppRouter()}
@@ -63,43 +105,3 @@ describe('AppRouter', () => {
   });
 });
 
-const alwaysFalseGuard: Guard = {
-  allowed: (): boolean => false,
-  redirectPath: '/punting'
-};
-
-const alwaysTrueGuard: Guard = {
-  allowed: (): boolean => true,
-  redirectPath: '/punting'
-};
-
-const otherAlwaysTrueGuard: Guard = {
-  allowed: (): boolean => true,
-  redirectPath: '/punting'
-};
-
-const makeAppRouter = () => {
-  return <AppRouter>
-    <Switch>
-      <AppRoute exact path='/unprotected-route'><TestComponent text={'Unprotected Route'}/></AppRoute>
-      <AppRoute exact path='/punting'><TestComponent text={'Punting'}/></AppRoute>
-      <AppRoute exact path='/unreachable-path' guards={[alwaysFalseGuard]}><TestComponent text={'Unreachable Path'}/></AppRoute>
-      <AppRoute exact path='/protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Protected Route'}/></AppRoute>
-      <AppRoute exact path='/other-protected-route' guards={[alwaysTrueGuard]}><TestComponent text={'Other Protected Route'}/></AppRoute>
-      <AppRoute exact path='/nested-protected-route' guards={[alwaysTrueGuard, otherAlwaysTrueGuard]}>
-        <TestComponent text={'Nested Protected Route'}/>
-      </AppRoute>
-      <AppRoute exact path='/nested-unreachable-path' guards={[alwaysTrueGuard, alwaysFalseGuard]}>
-        <TestComponent text={'Unreachable Path'}/>
-      </AppRoute>
-      <AppRoute exact path='/not-found'><TestComponent text={'Not Found'}/></AppRoute>
-      <AppRoute exact path='*'><Redirect to='/not-found'/></AppRoute>
-    </Switch>
-  </AppRouter>;
-};
-
-class TestComponent extends React.Component<{text: String}> {
-  render() {
-    return <span>{this.props.text}</span>;
-  }
-}
