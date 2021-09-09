@@ -283,10 +283,8 @@ const asyncFilter = async (arr, predicate) =>
   arr.reduce(async (items, item) => ((await predicate(item)) ? [...(await items), item] : items), []);
 
 /**
- * Is there a element located by CSS selector?
- * @param page Puppeteer.Page
- * @param selector CSS selector
+ * Generates a two factor auth code by given secret.
  */
-export async function generateRas2FACode(rasTotsCode: string) {
-  return authenticator.generate(rasTotsCode);
+export async function generate2FACode(secret: string) {
+  return authenticator.generate(secret);
 }
