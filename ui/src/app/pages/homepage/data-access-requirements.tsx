@@ -21,7 +21,7 @@ import {withProfileErrorModal} from 'app/components/with-error-modal';
 import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cond, displayDateWithoutHours, reactStyles} from 'app/utils';
+import {cond, displayDateWithoutHours, reactStyles, switchCase} from 'app/utils';
 import {
   buildRasRedirectUrl,
   bypassAll,
@@ -426,10 +426,35 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
   </FlexColumn>;
 };
 
+// TODO is there a better way?
+
+import {ReactComponent as individual} from 'assets/icons/DAR/individual.svg';
+import {ReactComponent as identifying} from 'assets/icons/DAR/identifying.svg';
+import {ReactComponent as electronic} from 'assets/icons/DAR/electronic.svg';
+import {ReactComponent as survey} from 'assets/icons/DAR/survey.svg';
+import {ReactComponent as physical} from 'assets/icons/DAR/physical.svg';
+import {ReactComponent as wearable} from 'assets/icons/DAR/wearable.svg';
+
+const Individual = individual;
+const Identifying = identifying;
+const Electronic = electronic;
+const Survey = survey;
+const Physical = physical;
+const Wearable = wearable;
+
+const renderIcon = (iconName: string) => switchCase(iconName,
+    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
+    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+    ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
+    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+    ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
+    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
+);
+
 const DataDetail = (props: {icon: string, text: string}) => {
   const {icon, text} = props;
   return <FlexRow>
-    <img style={styles.rtDetailsIcon} src={`/assets/icons/DAR/${icon}.svg`}/>
+    {renderIcon(icon)}
     <div style={styles.rtDataDetails}>{text}</div>
   </FlexRow>;
 };
