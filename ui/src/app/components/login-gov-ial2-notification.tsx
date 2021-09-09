@@ -70,7 +70,7 @@ const LoginGovIAL2Notification = () => {
   const [navigate, ] = useNavigation();
   return <FlexRow data-test-id='ial2-notification' style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
-    <div style={styles.text}>Please verify your identity by 10/06/2021.
+    <div style={styles.text}>Please verify your identity by 10/27/2021.
     </div>
     <Button
         type='primary'
