@@ -12,7 +12,6 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import { MemoryRouter } from 'react-router-dom';
 
 
 describe('ProfilePageComponent', () => {
