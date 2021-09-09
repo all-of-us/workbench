@@ -1,13 +1,12 @@
 import * as React from 'react';
+import {Link} from 'react-router-dom';
 
-import {Link} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {CheckCircle, ControlledTierBadge, RegisteredTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import {useId} from 'app/utils';
 import {AccessTierShortNames, displayNameForTier} from 'app/utils/access-tiers';
-import {useNavigation} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 
@@ -44,8 +43,6 @@ export interface DataAccessPanelProps {
 export const DataAccessPanel = (props: DataAccessPanelProps) => {
   const {userAccessTiers} = props;
 
-  const [navigate, ] = useNavigation();
-
   const orderedTiers = [
     AccessTierShortNames.Registered,
     AccessTierShortNames.Controlled
@@ -55,7 +52,7 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
   return <section aria-labelledby={sectionId} style={{marginLeft: '1rem'}}>
     <FlexRow id={sectionId}>
       <div style={styles.title}>Data access</div>
-      <Link style={{marginLeft: 'auto'}} onClick={() => navigate(['data-access-requirements'])}>Manage data access</Link>
+      <Link style={{marginLeft: 'auto'}} to='/data-access-requirements'>Manage data access</Link>
     </FlexRow>
     <hr style={{...styles.verticalLine}}/>
     {orderedTiers.map(tier =>
