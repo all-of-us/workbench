@@ -1207,20 +1207,11 @@ const RuntimePanel = fp.flow(
   }, []);
   const createStandardComputeRuntimeRequest = (runtime: RuntimeConfig) => {
     // The logic here is tricky to be compatible
-    // Use gceConfig when (PD feature is not enabled) OR (increase PD size or update machineType of an existing runtime with PD attached)
-    // OR (update an existing runtime with no PD attached).
-    // Note: PATCH endpoint isn't supported today for updating GPU configs in Leo. To change/remove GPU configs we need to delete and recreate the runtime.
-    // Thus, we need to jump to the branch providing gceWithPdConfig.
     // post launch PD when all existing running Runtime shutdown.
-    if (!runtimeCtx.enablePD || (gceExists && !pdSizeReduced) && gpuConfigDiffType === RuntimeDiffState.NO_CHANGE) {
-      return {
-        gceConfig: {
-          machineType: runtime.machine.name,
-          diskSize: !runtimeCtx.enablePD ? runtime.diskSize : runtime.pdSize,
-          gpuConfig: runtime.gpuConfig
-        }
-      };
-    } else {
+    const runtimeDiffTypes = runtimeDiffs.map(diff => diff.differenceType)
+    const runtimeNeedsDelete = runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_RUNTIME) ||
+        runtimeDiffTypes.includes(RuntimeDiffState.NEEDS_DELETE_PD);
+    if (runtimeCtx.enablePD && (!runtimeCtx.gceExists || runtimeNeedsDelete)) {
       return {
         gceWithPdConfig: {
           machineType: runtime.machine.name,
@@ -1231,6 +1222,14 @@ const RuntimePanel = fp.flow(
             diskType: DiskType.Standard,
             labels: {}
           },
+          gpuConfig: runtime.gpuConfig
+        }
+      };
+    } else {
+      return {
+        gceConfig: {
+          machineType: runtime.machine.name,
+          diskSize: !runtimeCtx.enablePD ? runtime.diskSize : runtime.pdSize,
           gpuConfig: runtime.gpuConfig
         }
       };
