@@ -19,7 +19,6 @@ import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle
 import {
   getAccessModuleBypassTime,
   getAccessModuleCompletionTime,
-  getExpirationTimeFor,
   maybeDaysRemaining,
   redirectToTraining
 } from 'app/utils/access-utils';
@@ -99,9 +98,15 @@ const syncAndReload = fp.flow(
   await profileApi().syncComplianceTrainingStatus();
 });
 
-
 // Helper Functions
+
 const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= serverConfigStore.get().config.accessRenewalLookback;
+
+const getExpirationTimeFor = (modules: Array<AccessModuleStatus>, moduleName: AccessModule): number => fp.flow(
+    fp.find({moduleName: moduleName}),
+    fp.get('expirationEpochMillis'))
+(modules);
+
 const isModuleExpiring = (modules: Array<AccessModuleStatus>, moduleName: AccessModule): boolean =>
     isExpiring(getExpirationTimeFor(modules, moduleName));
 
