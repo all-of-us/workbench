@@ -23,7 +23,7 @@ describe('DataUserCodeOfConduct', () => {
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       const newProfile = await profileApi().getMe();
       profileStore.set({profile: newProfile, load, reload, updateCache});
     });
@@ -36,7 +36,7 @@ describe('DataUserCodeOfConduct', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should not allow DataUserCodeOfConduct without identical initials', async() => {
+  it('should not allow DataUserCodeOfConduct without identical initials', async () => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
     duccComponent(wrapper).setState({proceedDisabled: false});
@@ -53,7 +53,7 @@ describe('DataUserCodeOfConduct', () => {
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
   });
 
-  it('should not allow DataUserCodeOfConduct with only one field populated', async() => {
+  it('should not allow DataUserCodeOfConduct with only one field populated', async () => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
     duccComponent(wrapper).setState({proceedDisabled: false});
@@ -71,7 +71,7 @@ describe('DataUserCodeOfConduct', () => {
     expect(wrapper.find('[data-test-id="submit-ducc-button"]').prop('disabled')).toBeTruthy();
   });
 
-  it('should populate username and name from the profile automatically', async() => {
+  it('should populate username and name from the profile automatically', async () => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
     duccComponent(wrapper).setState({proceedDisabled: false});
@@ -86,7 +86,7 @@ describe('DataUserCodeOfConduct', () => {
       .toBe(ProfileStubVariables.PROFILE_STUB.username);
   });
 
-  it('should submit DataUserCodeOfConduct acceptance with version number', async() => {
+  it('should submit DataUserCodeOfConduct acceptance with version number', async () => {
     const wrapper = component();
     // Need to step past the HOC before setting state.
     duccComponent(wrapper).setState({proceedDisabled: false});

@@ -379,7 +379,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       return ![Domain.PHYSICALMEASUREMENT, Domain.SURVEY, Domain.VISIT].includes(domain);
     }
 
-    calculate = async() => {
+    calculate = async () => {
       const {selections, cohortContext: {domain, role}, workspace: {id , namespace}} = this.props;
       this.trackEvent('Calculate');
       try {

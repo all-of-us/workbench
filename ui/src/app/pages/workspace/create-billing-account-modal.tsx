@@ -137,7 +137,7 @@ export const CreateBillingAccountModal = ({onClose}: Props) => {
       title: 'Failed To Send Email',
       message: 'An error occurred trying to send email. Please try again.',
     })
-  )(async() => {
+  )(async () => {
     await profileApi().sendBillingSetupEmail({
       phone: phoneNumber,
       paymentMethod: useCreditCard ? BillingPaymentMethod.CREDITCARD : BillingPaymentMethod.PURCHASEORDER,

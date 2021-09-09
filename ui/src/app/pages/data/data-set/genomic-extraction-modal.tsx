@@ -107,7 +107,7 @@ export const GenomicExtractionModal = ({
       <Button data-test-id='extract-button'
               disabled={loading || isClientError}
               style={{marginLeft: '0.5rem'}}
-              onClick={async() => {
+              onClick={async () => {
                 setLoading(true);
                 try {
                   const job = await dataSetApi().extractGenomicData(

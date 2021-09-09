@@ -144,7 +144,7 @@ describe('GenomicExtractionModal', () => {
     expect(wrapper.find('[data-test-id="extract-warning"]').exists()).toBeFalsy();
   });
 
-  it('should show error text on known failed extract', async() => {
+  it('should show error text on known failed extract', async () => {
     genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
 
     const message = 'invalid dataset';
@@ -166,7 +166,7 @@ describe('GenomicExtractionModal', () => {
     expect(extractButton().prop('disabled')).toBe(true);
   });
 
-  it('should show error text on unknown error', async() => {
+  it('should show error text on unknown error', async () => {
     genomicExtractionStore.set({[workspaceDataStub.namespace]: []});
 
     jest.spyOn(datasetApiStub, 'extractGenomicData').mockRejectedValueOnce(

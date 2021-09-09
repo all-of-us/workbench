@@ -76,7 +76,7 @@ const confirmPublications = fp.flow(
     title: 'Failed To Confirm Publications',
     message: 'An error occurred trying to confirm your publications. Please try again.',
   })
-)(async() => await profileApi().confirmPublications());
+)(async () => await profileApi().confirmPublications());
 
 
 const syncAndReload = fp.flow(
@@ -89,7 +89,7 @@ const syncAndReload = fp.flow(
     title: 'Failed To Refresh',
     message: 'An error occurred trying to refresh your compliance training status. Please try again.',
   })
-)(async() => {
+)(async () => {
   await profileApi().syncComplianceTrainingStatus();
 });
 
@@ -216,7 +216,7 @@ export const AccessRenewal = fp.flow(
 
   // onMount - as we move between pages, let's make sure we have the latest profile
   useEffect(() => {
-    const getProfile = async() => {
+    const getProfile = async () => {
       setLoading(true);
       await reloadProfile();
       setLoading(false);
@@ -302,7 +302,7 @@ export const AccessRenewal = fp.flow(
           <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
-            onClick={async() => {
+            onClick={async () => {
               setLoading(true);
               await confirmPublications();
               setLoading(false);
@@ -350,7 +350,7 @@ export const AccessRenewal = fp.flow(
           && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)
           && <Button
             disabled={refreshButtonDisabled}
-            onClick={async() => {
+            onClick={async () => {
               setLoading(true);
               await syncAndReload();
               setLoading(false);

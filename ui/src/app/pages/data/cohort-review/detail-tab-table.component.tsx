@@ -347,7 +347,7 @@ export const DetailTabTable = fp.flow(withCurrentCohortReview(), withCurrentWork
           } as PageFilterRequest;
           if (getCount) {
             // call api for count with no filters to get total count
-            await this.callCountApi(pageFilterRequest).then(async(count) => {
+            await this.callCountApi(pageFilterRequest).then(async (count) => {
               totalCount = count;
               if (lazyLoad) {
                 if (start > totalCount) {

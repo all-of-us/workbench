@@ -123,13 +123,13 @@ describe('useIsUserDisabled', () => {
     return <div data-disabled={isUserDisabled}></div>;
   };
 
-  const component = async() => {
+  const component = async () => {
     const wrapper = mount(<HookConsumer/>);
     await waitOnTimersAndUpdate(wrapper);
     return wrapper;
   };
 
-  const simulateSignIn = async(wrapper: ReactWrapper, isSignedIn: boolean) => {
+  const simulateSignIn = async (wrapper: ReactWrapper, isSignedIn: boolean) => {
     authStore.set({authLoaded: true, isSignedIn});
     await waitOnTimersAndUpdate(wrapper);
   };
@@ -143,20 +143,20 @@ describe('useIsUserDisabled', () => {
     profileStore.set({load, reload, updateCache});
   });
 
-  it('is undefined while loading', async() => {
+  it('is undefined while loading', async () => {
     const wrapper = await component();
 
     expect(getDisabled(wrapper)).toBe(undefined);
   });
 
-  it('is not disabled for unauthenticated user', async() => {
+  it('is not disabled for unauthenticated user', async () => {
     const wrapper = await component();
 
     await simulateSignIn(wrapper, false);
     expect(getDisabled(wrapper)).toBe(false);
   });
 
-  it('is undefined during profile load', async() => {
+  it('is undefined during profile load', async () => {
     // profile load blocks forever
     load.mockImplementation(() => new Promise(() => {}));
 
@@ -167,7 +167,7 @@ describe('useIsUserDisabled', () => {
     expect(load).toHaveBeenCalled();
   });
 
-  it('is not disabled on profile load', async() => {
+  it('is not disabled on profile load', async () => {
     // profile load finishes immediately
     load.mockImplementation(() => Promise.resolve({}));
 
@@ -177,7 +177,7 @@ describe('useIsUserDisabled', () => {
     expect(getDisabled(wrapper)).toBe(false);
   });
 
-  it('is disabled on profile disabled error', async() => {
+  it('is disabled on profile disabled error', async () => {
     // profile load fails
     load.mockImplementation(() => Promise.reject(new Response(JSON.stringify({
       errorCode: ErrorCode.USERDISABLED
@@ -189,7 +189,7 @@ describe('useIsUserDisabled', () => {
     expect(getDisabled(wrapper)).toBe(true);
   });
 
-  it('is undefined on other profile errors', async() => {
+  it('is undefined on other profile errors', async () => {
     // profile load fails with an unknown error
     load.mockImplementation(() => Promise.reject({}));
 
@@ -201,7 +201,7 @@ describe('useIsUserDisabled', () => {
 });
 
 describe('getTwoFactorSetupUrl', () => {
-  beforeEach(async() => {
+  beforeEach(async () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
       profile: await profileApi().getMe(),

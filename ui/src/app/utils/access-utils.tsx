@@ -227,7 +227,7 @@ export const useIsUserDisabled = () => {
     if (!isSignedIn) {
       setDisabled(false);
     } else {
-      (async() => {
+      (async () => {
         try {
           await profileStore.get().load();
           if (mounted) {
@@ -260,7 +260,7 @@ export const getAccessModuleBypassTime = (accessModules: Array<AccessModuleStatu
   return module ? module.bypassEpochMillis : null;
 };
 
-export const bypassAll = async(accessModules: AccessModule[], isBypassed: boolean) => {
+export const bypassAll = async (accessModules: AccessModule[], isBypassed: boolean) => {
   for (const module of accessModules) {
     await profileApi().unsafeSelfBypassAccessRequirement({
       moduleName: module,

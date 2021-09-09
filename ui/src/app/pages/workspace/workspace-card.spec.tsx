@@ -29,7 +29,7 @@ describe('WorkspaceCard', () => {
     serverConfigStore.set({config: {gsuiteDomain: 'abc'}});
   });
 
-  it('disables sharing for non-owners', async() => {
+  it('disables sharing for non-owners', async () => {
     const wrapper = component(WorkspaceAccessLevel.WRITER);
     await waitOneTickAndUpdate(wrapper);
 

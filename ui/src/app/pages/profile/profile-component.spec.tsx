@@ -44,7 +44,7 @@ describe('ProfilePageComponent', () => {
     mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
 
     // mocking because we don't have access to the angular service
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
       profileStore.set({profile: newProfile, load, reload, updateCache});
     });
@@ -68,7 +68,7 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('value')).toMatch(profile.givenName);
   });
 
-  it('should save correctly', async() => {
+  it('should save correctly', async () => {
     const wrapper = component();
     expect(profileStore.get().profile.givenName).toEqual(profile.givenName);
 
@@ -84,7 +84,7 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
-  it('should display/update address', async() => {
+  it('should display/update address', async () => {
 
     const wrapper = component();
 
@@ -103,7 +103,7 @@ describe('ProfilePageComponent', () => {
 
   });
 
-  it('should throw error if street Address 1 is empty', async() => {
+  it('should throw error if street Address 1 is empty', async () => {
 
     const wrapper = component();
 

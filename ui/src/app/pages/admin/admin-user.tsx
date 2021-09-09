@@ -554,7 +554,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             <DropdownWithLabel
                 label={'Free credit limit'}
                 options={this.getFreeCreditLimitOptions()}
-                onChange={async(event) => this.setFreeTierCreditDollarLimit(event.value)}
+                onChange={async (event) => this.setFreeTierCreditDollarLimit(event.value)}
                 initialValue={updatedProfile.freeTierDollarQuota}
                 dropdownStyle={{width: '4.5rem'}}
                 dataTestId={'freeTierDollarQuota'}
@@ -562,7 +562,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
             {verifiedInstitutionOptions && <DropdownWithLabel
                 label={'Verified institution'}
                 options={this.getInstitutionDropdownOptions()}
-                onChange={async(event) => this.setVerifiedInstitutionOnProfile(event.value)}
+                onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
                 initialValue={
                   updatedProfile.verifiedInstitutionalAffiliation
                       ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName

@@ -55,7 +55,7 @@ describe('SearchGroup', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('Should render each item in items prop', async() => {
+  it('Should render each item in items prop', async () => {
     const wrapper = mount(<SearchGroup role='includes' group={groupStub} index={0} updateRequest={() => {}}/>);
     expect(wrapper.find('[data-test-id="item-list"]').length).toBe(itemsStub.length);
     wrapper.setProps({group: {...groupStub, temporal: true}});

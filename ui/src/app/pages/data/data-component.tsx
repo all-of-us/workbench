@@ -94,7 +94,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
     return;
   }
 
-  const loadResources = async() => {
+  const loadResources = async () => {
     try {
       setIsLoading(true);
       setResourceList(

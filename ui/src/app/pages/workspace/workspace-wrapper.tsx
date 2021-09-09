@@ -27,7 +27,7 @@ export const WorkspaceWrapper = fp.flow(
   const {ns, wsid} = params;
 
   useEffect(() => {
-    const updateStores = async(namespace) => {
+    const updateStores = async (namespace) => {
       diskStore.set({workspaceNamespace: namespace, persistentDisk: undefined});
       runtimeStore.set({workspaceNamespace: namespace, runtime: undefined, runtimeLoaded: false});
       pollAborter.abort();
@@ -54,7 +54,7 @@ export const WorkspaceWrapper = fp.flow(
       }
     };
 
-    const getWorkspaceAndUpdateStores = async(namespace, id) => {
+    const getWorkspaceAndUpdateStores = async (namespace, id) => {
       // No destructuring because otherwise it shadows the workspace in props
       const wsResponse = await workspacesApi().getWorkspace(namespace, id);
       currentWorkspaceStore.next({

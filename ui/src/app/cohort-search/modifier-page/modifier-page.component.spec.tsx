@@ -32,7 +32,7 @@ describe('ModifierPage', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should display Only Age Event modifier for SURVEY', async() => {
+  it('should display Only Age Event modifier for SURVEY', async () => {
     currentCohortSearchContextStore.next({domain: Domain.SURVEY, item: {modifiers: []}});
     const wrapper = mount(<ModifierPage closeModifiers={() => {}} selections={[]}/>);
     await waitOneTickAndUpdate(wrapper);

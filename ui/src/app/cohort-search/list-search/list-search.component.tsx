@@ -338,7 +338,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     // Old function that searches both source and standard
-    getAllResults = async(value: string) => {
+    getAllResults = async (value: string) => {
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
@@ -365,7 +365,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     };
 
     // Searches either source or standard based on value of searchSource in state
-    getResultsBySourceOrStandard = async(value: string) => {
+    getResultsBySourceOrStandard = async (value: string) => {
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {id, namespace}} = this.props;

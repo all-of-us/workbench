@@ -35,7 +35,7 @@ describe('WorkspaceList', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
 
     // mocking because we don't have access to the angular service
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
       profileStore.set({profile: newProfile, load, reload, updateCache});
     });
@@ -44,7 +44,7 @@ describe('WorkspaceList', () => {
     serverConfigStore.set({config: {gsuiteDomain: 'abc', enableResearchReviewPrompt: true}});
   });
 
-  it('displays the correct number of workspaces', async() => {
+  it('displays the correct number of workspaces', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
@@ -52,7 +52,7 @@ describe('WorkspaceList', () => {
     expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
   });
 
-  it('navigates when clicking on the workspace name', async() => {
+  it('navigates when clicking on the workspace name', async () => {
     const workspace = workspaceStubs[0];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -61,7 +61,7 @@ describe('WorkspaceList', () => {
       ['workspaces', workspace.namespace, workspace.id, 'data']);
   });
 
-  it('has the correct permissions classes', async() => {
+  it('has the correct permissions classes', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspace-card"]').first()
@@ -69,7 +69,7 @@ describe('WorkspaceList', () => {
       .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
   });
 
-  it('should show Research Purpose Review Modal if workspace require review', async() => {
+  it('should show Research Purpose Review Modal if workspace require review', async () => {
     const workspace = workspaceStubs[0];
     workspace.researchPurpose.needsReviewPrompt = true;
     const wrapper = component();

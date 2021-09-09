@@ -55,7 +55,7 @@ module.exports = {
     'simple-import-sort/sort': 'error',
     'quotes': ['error', 'single', {"allowTemplateLiterals": true}],
     '@typescript-eslint/semi': 'error',
-    // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
+    'space-before-function-paren': ['error', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
     /* Functionality */
     'curly': 'warn',

@@ -38,7 +38,7 @@ describe('atom', () => {
     expect(testAtom.get()).toEqual({value: 5});
   });
 
-  it('should call a single subscribed function', async() => {
+  it('should call a single subscribed function', async () => {
     const testAtom = atom({value: 1});
     const [complete, subscribeFn] = makeSubscribeFn([
       newValue => expect(newValue).toEqual({value: 10}),
@@ -52,7 +52,7 @@ describe('atom', () => {
     await complete();
   });
 
-  it('should call a multiple subscribed functions with new and old values', async() => {
+  it('should call a multiple subscribed functions with new and old values', async () => {
     const testAtom = atom({value: 1});
     const assertions = [
       newValue => expect(newValue).toEqual({value: 10}),
@@ -74,7 +74,7 @@ describe('atom', () => {
     await complete3();
   });
 
-  it('should not call an unsubscribed function', async() => {
+  it('should not call an unsubscribed function', async () => {
     const testAtom = atom({value: 1});
     let numberOfCalledSubscriptions = 0;
     const subscriber = [() => numberOfCalledSubscriptions += 1];
@@ -99,7 +99,7 @@ describe('atom', () => {
     expect(numberOfCalledSubscriptions).toBe(2);
   });
 
-  it('should not call any functions when all have unsubscribed', async() => {
+  it('should not call any functions when all have unsubscribed', async () => {
     const testAtom = atom({value: 1});
     let numberOfCalledSubscriptions = 0;
     const subscriber = [() => numberOfCalledSubscriptions += 1];
@@ -124,7 +124,7 @@ describe('atom', () => {
     expect(numberOfCalledSubscriptions).toBe(0);
   });
 
-  it('should call remaining subscribers when one throws', async() => {
+  it('should call remaining subscribers when one throws', async () => {
     const testAtom = atom({value: 1});
     let numberOfCalledSubscriptions = 0;
     const subscriber = [() => numberOfCalledSubscriptions += 1];

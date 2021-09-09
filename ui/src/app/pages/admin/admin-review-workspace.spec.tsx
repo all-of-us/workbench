@@ -33,21 +33,21 @@ describe('AdminReviewWorkspace', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
   });
 
-  it('should render and display a table', async() => {
+  it('should render and display a table', async () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="reviewWorkspacesTable"]').length).toBeGreaterThan(0);
   });
 
-  it('should display workspaces for review', async() => {
+  it('should display workspaces for review', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspaceName"]').first().text())
       .toBe(workspaceStubs[0].name);
   });
 
-  it('should no longer display the workspace once it has been approved or rejected', async() => {
+  it('should no longer display the workspace once it has been approved or rejected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const numWorkspaces = wrapper.find('[data-test-id="workspaceName"]').length;

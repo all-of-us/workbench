@@ -73,12 +73,12 @@ beforeEach(() => {
   mockGetPublicInstitutionDetails = jest.spyOn(institutionApi(), 'getPublicInstitutionDetails');
 });
 
-it('should render', async() => {
+it('should render', async () => {
   const wrapper = component();
   expect(wrapper.exists()).toBeTruthy();
 });
 
-it('should load institutions list', async() => {
+it('should load institutions list', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -93,7 +93,7 @@ it('should load institutions list', async() => {
   console.log(defaultInstitutions[0]);
 });
 
-it('should show user-facing error message on data load error', async() => {
+it('should show user-facing error message on data load error', async () => {
   mockGetPublicInstitutionDetails.mockRejectedValueOnce(new Response(null, {status: 500}));
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
@@ -101,7 +101,7 @@ it('should show user-facing error message on data load error', async() => {
   expect(wrapper.find('[data-test-id="data-load-error"]').exists).toBeTruthy();
 });
 
-it('should reset role value & options when institution is selected', async() => {
+it('should reset role value & options when institution is selected', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -134,7 +134,7 @@ it('should reset role value & options when institution is selected', async() => 
 });
 
 
-it('should show validation errors in an empty form', async() => {
+it('should show validation errors in an empty form', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -144,7 +144,7 @@ it('should show validation errors in an empty form', async() => {
   expect(errors['profile.contactEmail'].length).toBeGreaterThan(0);
 });
 
-it('should validate email affiliation when inst and email address are specified', async() => {
+it('should validate email affiliation when inst and email address are specified', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -172,7 +172,7 @@ it('should validate email affiliation when inst and email address are specified'
   );
 });
 
-it('should validate email affiliation when inst and email domain are specified', async() => {
+it('should validate email affiliation when inst and email domain are specified', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -200,7 +200,7 @@ it('should validate email affiliation when inst and email domain are specified',
 
 });
 
-it('should display validation icon only after email verification', async() => {
+it('should display validation icon only after email verification', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -224,7 +224,7 @@ it('should display validation icon only after email verification', async() => {
   expect(wrapper.find('[data-test-id="email-validation-icon"]').children().length).toBe(1);
 });
 
-it('should clear email validation when institution is changed', async() => {
+it('should clear email validation when institution is changed', async () => {
   const wrapper = component();
   await waitOneTickAndUpdate(wrapper);
 
@@ -256,7 +256,7 @@ it('should clear email validation when institution is changed', async() => {
   expect(getInstance(wrapper).validate()['checkEmailResponse']).toBeTruthy();
 });
 
-it('should trigger email check when email is filled in before choosing institution', async() => {
+it('should trigger email check when email is filled in before choosing institution', async () => {
   // This test ensures that a user can fill in their email address first, then choose an
   // institution, and still be able to complete the form. This ensures that the institution change
   // can trigger a checkEmail request.
@@ -281,7 +281,7 @@ it('should trigger email check when email is filled in before choosing instituti
 });
 
 
-it('should call callback with correct form data', async() => {
+it('should call callback with correct form data', async () => {
   let profile: Profile = null;
   props.onComplete = (formProfile: Profile) => {
     profile = formProfile;

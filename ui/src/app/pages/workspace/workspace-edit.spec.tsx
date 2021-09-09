@@ -233,7 +233,7 @@ describe('WorkspaceEdit', () => {
     await waitOneTickAndUpdate(wrapper);
   });
 
-  it('supports successful duplication', async() => {
+  it('supports successful duplication', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -251,7 +251,7 @@ describe('WorkspaceEdit', () => {
     expect(mockNavigate).toHaveBeenCalledTimes(1);
   });
 
-  it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
+  it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async () => {
     // init the workspace to a non-default CDR version value
     const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID};
     currentWorkspaceStore.next(altCdrWorkspace);
@@ -274,7 +274,7 @@ describe('WorkspaceEdit', () => {
     expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
   });
 
-  it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async() => {
+  it('does not display the CDR Version upgrade message when duplicating a workspace with the latest CDR Version', async () => {
     // the standard test workspace already has the latest CDR Version but let's make it explicit with a new const
     const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID};
     currentWorkspaceStore.next(defaultCdrWorkspace);
@@ -291,7 +291,7 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()).toBeFalsy();
   });
 
-  it('does not display the access tier dropdown when multiple tiers are not available', async() => {
+  it('does not display the access tier dropdown when multiple tiers are not available', async () => {
     cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
 
     const wrapper = component();
@@ -300,7 +300,7 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
   });
 
-  it('enables access tier selection on creation when multiple tiers are available', async() => {
+  it('enables access tier selection on creation when multiple tiers are available', async () => {
     workspaceEditMode = WorkspaceEditMode.Create;
 
     const wrapper = component();
@@ -331,25 +331,25 @@ describe('WorkspaceEdit', () => {
     expect(cdrVersionSelectOptions()).toEqual([controlledCdrVersion.cdrVersionId]);
   });
 
-  it('retains the tier on edit and does not permit changes - Registered', async() => {
+  it('retains the tier on edit and does not permit changes - Registered', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
     workspace.accessTierShortName = AccessTierShortNames.Registered;
     await expectNoTierChangesAllowed();
   });
 
-  it('retains the tier on edit and does not permit changes - Controlled', async() => {
+  it('retains the tier on edit and does not permit changes - Controlled', async () => {
     workspaceEditMode = WorkspaceEditMode.Edit;
     workspace.accessTierShortName = AccessTierShortNames.Controlled;
     await expectNoTierChangesAllowed();
   });
 
-  it('retains the tier on duplication and does not permit changes - Registered', async() => {
+  it('retains the tier on duplication and does not permit changes - Registered', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     workspace.accessTierShortName = AccessTierShortNames.Registered;
     await expectNoTierChangesAllowed();
   });
 
-  it('retains the tier on duplication and does not permit changes - Controlled', async() => {
+  it('retains the tier on duplication and does not permit changes - Controlled', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     workspace.accessTierShortName = AccessTierShortNames.Controlled;
     await expectNoTierChangesAllowed();
@@ -368,7 +368,7 @@ describe('WorkspaceEdit', () => {
   }
 
   // regression test for RW-5132
-  it('prevents multiple Workspace creations via the same confirmation dialog', async() => {
+  it('prevents multiple Workspace creations via the same confirmation dialog', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -425,7 +425,7 @@ describe('WorkspaceEdit', () => {
     jest.useRealTimers();
   });
 
-  it('shows confirmation on extended access delays', async() => {
+  it('shows confirmation on extended access delays', async () => {
     workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -462,7 +462,7 @@ describe('WorkspaceEdit', () => {
     jest.useRealTimers();
   });
 
-  it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async() => {
+  it ('should show warning message if research purpose summary Intended study have answer less than 50 characters', async () => {
     const wrapper = component();
     // Intended Study Text
     const text = 'intended Study text';
@@ -486,7 +486,7 @@ describe('WorkspaceEdit', () => {
       .toContain('The description you entered seems too short.');
   });
 
-  it ('should show error message if research purpose summary has reached 1000 characters', async() => {
+  it ('should show error message if research purpose summary has reached 1000 characters', async () => {
     const wrapper = component();
     // Intended Study Text
     const testInput = fp.repeat(1000, 'a');
@@ -504,7 +504,7 @@ describe('WorkspaceEdit', () => {
       .toContain('0 characters remaining');
   });
 
-  it ('should show error message if Other primary purpose is more than 500 characters', async() => {
+  it ('should show error message if Other primary purpose is more than 500 characters', async () => {
     const wrapper = component();
     expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeUndefined();
     wrapper.find('[data-test-id="otherPurpose-checkbox"]').at(1).simulate('change', { target: { checked: true } });
@@ -521,7 +521,7 @@ describe('WorkspaceEdit', () => {
     expect(getSaveButtonDisableMsg(wrapper, 'otherPurposeDetails')).toBeDefined();
   });
 
-  it ('should show error message if Disease of focus is more than 80 characters', async() => {
+  it ('should show error message if Disease of focus is more than 80 characters', async () => {
     const wrapper = component();
     expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeUndefined();
 
@@ -540,7 +540,7 @@ describe('WorkspaceEdit', () => {
     expect(getSaveButtonDisableMsg(wrapper, 'diseaseOfFocus')).toBeDefined();
   });
 
-  it ('should show error message if Other text for disseminate research is more than 100 characters', async() => {
+  it ('should show error message if Other text for disseminate research is more than 100 characters', async () => {
     const wrapper = component();
     wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
     const validInput = fp.repeat(8, 'a');
@@ -552,7 +552,7 @@ describe('WorkspaceEdit', () => {
     expect(getSaveButtonDisableMsg(wrapper, 'otherDisseminateResearchFindings')).toBeDefined();
   });
 
-  it ('should show error message if Other text for Special Population is more than 100 characters', async() => {
+  it ('should show error message if Other text for Special Population is more than 100 characters', async () => {
     const wrapper = component();
     expect(wrapper.find(`[data-test-id="specific-population-yes"]`)
       .first().prop('checked')).toEqual(true);
@@ -570,7 +570,7 @@ describe('WorkspaceEdit', () => {
     expect(getSaveButtonDisableMsg(wrapper, 'otherPopulationDetails')).toBeDefined();
   });
 
-  it ('should show error message when other disseminate checked but empty', async() => {
+  it ('should show error message when other disseminate checked but empty', async () => {
     const wrapper = component();
     wrapper.find('[data-test-id="OTHER-checkbox"]').at(1).simulate('change', { target: { checked: true } });
     const validInput = fp.repeat(8, 'a');

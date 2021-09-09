@@ -54,7 +54,7 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}: 
     nameConflict ? nameConflictMsg : '';
   const disableSaveButton = nameConflict || invalidNameInput || !name || saving;
 
-  const onSave = async() => {
+  const onSave = async () => {
     setSaving(true);
     setSaveErrorMsg('');
     save(name, description)

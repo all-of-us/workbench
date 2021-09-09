@@ -106,7 +106,7 @@ export const ProfileComponent = fp.flow(
         onDismiss: () => this.props.navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
-    )(async() => {
+    )(async () => {
       this.setState({updating: true});
       await profileApi().confirmProfile();
       this.setState({updating: false});

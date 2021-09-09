@@ -120,7 +120,7 @@ export const DataUserCodeOfConduct = fp.flow(withUserProfile(), withNavigation, 
         onDismiss: () => this.props.navigate(['access-renewal'])
       }),
       withErrorModal({ title: 'Your agreement failed to update', message: 'Please try submitting the agreement again.' })
-    )(async(initials) => {
+    )(async (initials) => {
       const duccVersion = getLiveDUCCVersion();
       const profile = await profileApi().submitDataUseAgreement(duccVersion, initials);
       this.props.profileState.updateCache(profile);

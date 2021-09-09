@@ -113,7 +113,7 @@ export const NavBar = () => {
   const {profile} = useStore(profileStore);
 
   useEffect(() => {
-    const getAlert = async() => {
+    const getAlert = async () => {
       const statusAlert = await statusAlertApi().getStatusAlert();
       if (!!statusAlert) {
         setShowStatusAlert(shouldShowStatusAlert(statusAlert.statusAlertId, statusAlert.message));

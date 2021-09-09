@@ -29,7 +29,7 @@ describe('DataAccessRequirements', () => {
 
     const findCompletionBanner = (wrapper) => wrapper.find('[data-test-id="dar-completed"]');
 
-    beforeEach(async() => {
+    beforeEach(async () => {
         registerApiClient(InstitutionApi, new InstitutionApiStub());
         registerApiClient(ProfileApi, new ProfileApiStub());
 

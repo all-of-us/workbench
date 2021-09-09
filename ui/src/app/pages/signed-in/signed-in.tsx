@@ -96,7 +96,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
      *  We should holistically figure out a Reacty way to do this.
      *  See discussion on https://github.com/all-of-us/workbench/pull/4713
      */
-    const checkStoresLoaded = async() => {
+    const checkStoresLoaded = async () => {
       // AppComponent should be loading the server config.
       if (config) {
         if (!profileState.profile) {

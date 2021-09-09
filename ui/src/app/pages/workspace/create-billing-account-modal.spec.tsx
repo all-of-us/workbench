@@ -19,7 +19,7 @@ describe('CreateBillingAccountModal', () => {
     profileStore.set({profile, load, reload, updateCache});
   });
 
-  it('simulate creating billing account with all steps correctly', async() => {
+  it('simulate creating billing account with all steps correctly', async () => {
     const wrapper = component();
     // Show step 0 at start.
     expect(wrapper.find('[data-test-id="step-0-modal"]').exists()).toBeTruthy();

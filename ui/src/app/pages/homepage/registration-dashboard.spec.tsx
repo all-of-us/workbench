@@ -14,7 +14,7 @@ describe('RegistrationDashboard', () => {
     return mount(<RegistrationDashboard {...props}/>);
   };
 
-  beforeEach(async() => {
+  beforeEach(async () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
       profile: await profileApi().getMe(),

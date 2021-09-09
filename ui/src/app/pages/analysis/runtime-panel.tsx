@@ -223,7 +223,7 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
       <Button
         aria-label={'Delete'}
         disabled={deleting}
-        onClick={async() => {
+        onClick={async () => {
           setDeleting(true);
           try {
             await onConfirm();
@@ -281,7 +281,7 @@ export const ConfirmDeleteUnattachedPD = ({onConfirm, onCancel}) => {
       <Button
           aria-label={'Delete'}
           disabled={!deleting}
-          onClick={async() => {
+          onClick={async () => {
             setDeleting(true);
             try {
               await onConfirm();
@@ -401,7 +401,7 @@ export const ConfirmDeleteRuntimeWithPD = ({onCancel, onConfirm, computeType, pd
         <Button
             aria-label={'Delete'}
             disabled={deleting}
-            onClick={async() => {
+            onClick={async () => {
               setDeleting(true);
               try {
                 await onConfirm(runtimeStatusReq);
@@ -1191,7 +1191,7 @@ const RuntimePanel = fp.flow(
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
   useEffect(() => {
     const aborter = new AbortController();
-    const fetchFreeCredits = async() => {
+    const fetchFreeCredits = async () => {
       const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id, {signal: aborter.signal});
       setCreatorFreeCreditsRemaining(freeCreditsRemaining);
     };
@@ -1423,7 +1423,7 @@ const RuntimePanel = fp.flow(
       [PanelContent.DeleteRuntime, () => {
         if (runtimeCtx.enablePD && runtimeCtx.pdExists) {
           return <ConfirmDeleteRuntimeWithPD
-              onConfirm={async(runtimeStatusReq) => {
+              onConfirm={async (runtimeStatusReq) => {
                 await setRuntimeStatus(runtimeStatusReq);
                 onClose();
               }}
@@ -1433,7 +1433,7 @@ const RuntimePanel = fp.flow(
           />;
         } else {
           return <ConfirmDelete
-              onConfirm={async() => {
+              onConfirm={async () => {
                 await setRuntimeStatus(RuntimeStatusRequest.DeleteRuntime);
                 onClose();
               }}
@@ -1442,7 +1442,7 @@ const RuntimePanel = fp.flow(
         }
 }],
       [PanelContent.DeleteUnattachedPd, () => <ConfirmDeleteUnattachedPD
-          onConfirm={async() => {
+          onConfirm={async () => {
             await disksApi().deleteDisk(namespace, persistentDisk.name);
             onClose();
           }}

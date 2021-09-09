@@ -73,7 +73,7 @@ describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
   let props: {};
 
-  const component = async() => {
+  const component = async () => {
     const c = mount(<HelpSidebar {...props} />, {attachTo: document.getElementById('root')});
     await waitOneTickAndUpdate(c);
     return c;
@@ -102,7 +102,7 @@ describe('HelpSidebar', () => {
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: null, runtimeLoaded: false});
   };
 
-  const setActiveIcon = async(wrapper, activeIconKey) => {
+  const setActiveIcon = async (wrapper, activeIconKey) => {
     setSidebarActiveIconStore.next(activeIconKey);
     await waitOneTickAndUpdate(wrapper);
   };
@@ -132,12 +132,12 @@ describe('HelpSidebar', () => {
     jest.useRealTimers();
   });
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = await component();
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should update content when pageKey prop changes', async() => {
+  it('should update content when pageKey prop changes', async () => {
     props = {pageKey: 'data'};
     const wrapper = await component();
     await setActiveIcon(wrapper, 'help');
@@ -146,7 +146,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
-  it('should show a different icon and title when pageKey is notebookStorage', async() => {
+  it('should show a different icon and title when pageKey is notebookStorage', async () => {
     props = {pageKey: 'notebookStorage'};
     const wrapper = await component();
     await setActiveIcon(wrapper, 'notebooksHelp');
@@ -154,7 +154,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
-  it('should update marginRight style when sidebarOpen prop changes', async() => {
+  it('should update marginRight style when sidebarOpen prop changes', async () => {
     const wrapper = await component();
     await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe('calc(14rem + 70px)');
@@ -163,7 +163,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
-  it('should show delete workspace modal on clicking delete workspace', async() => {
+  it('should show delete workspace modal on clicking delete workspace', async () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
@@ -171,7 +171,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
   });
 
-  it('should show workspace share modal on clicking share workspace', async() => {
+  it('should show workspace share modal on clicking share workspace', async () => {
     const wrapper = await component();
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
     wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
@@ -179,7 +179,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find(MockWorkspaceShare).exists()).toBeTruthy();
   });
 
-  it('should hide workspace icon if on criteria search page', async() => {
+  it('should hide workspace icon if on criteria search page', async () => {
     props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([]);
@@ -192,7 +192,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(1);
   });
 
-  it('should update count if criteria is added', async() => {
+  it('should update count if criteria is added', async () => {
     props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
@@ -200,7 +200,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find({'data-test-id': 'criteria-count'}).first().props().children).toBe(2);
   });
 
-  it('should not display runtime control icon for read-only workspaces', async() => {
+  it('should not display runtime control icon for read-only workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.READER
@@ -209,7 +209,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find({'data-test-id': 'help-sidebar-icon-runtime'}).length).toBe(0);
   });
 
-  it('should display runtime control icon for writable workspaces', async() => {
+  it('should display runtime control icon for writable workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER
@@ -218,7 +218,7 @@ describe('HelpSidebar', () => {
     expect(wrapper.find({'data-test-id': 'help-sidebar-icon-runtime'}).length).toBe(1);
   });
 
-  it('should display dynamic runtime status icon', async() => {
+  it('should display dynamic runtime status icon', async () => {
     setRuntimeStatus(RuntimeStatus.Running);
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -240,7 +240,7 @@ describe('HelpSidebar', () => {
 
   });
 
-  it('should display "starting" UX during compound runtime op with no runtime', async() => {
+  it('should display "starting" UX during compound runtime op with no runtime', async () => {
     setRuntimeStatus(RuntimeStatus.Deleting);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {aborter: new AbortController()});
     const wrapper = await component();
@@ -253,7 +253,7 @@ describe('HelpSidebar', () => {
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
   });
 
-  it('should display "running" icon when extract currently running', async() => {
+  it('should display "running" icon when extract currently running', async () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
@@ -278,7 +278,7 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.starting);
   });
 
-  it('should display "aborting" icon when extract currently aborting and nothing running', async() => {
+  it('should display "aborting" icon when extract currently aborting and nothing running', async () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
@@ -300,7 +300,7 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.stopping);
   });
 
-  it('should display "FAILED" icon with recent failed jobs', async() => {
+  it('should display "FAILED" icon with recent failed jobs', async () => {
     genomicExtractionStore.set({
       [workspaceDataStub.namespace]: [
         {
@@ -315,7 +315,7 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.error);
   });
 
-  it('should display icon corresponding to most recent completed job within 24h', async() => {
+  it('should display icon corresponding to most recent completed job within 24h', async () => {
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
     const twoHoursAgo = new Date();
@@ -338,7 +338,7 @@ describe('HelpSidebar', () => {
     expect(extractionStatusIcon(wrapper).prop('style').color).toEqual(colors.asyncOperationStatus.succeeded);
   });
 
-  it('should display no extract icons with old failed/succeeded jobs', async() => {
+  it('should display no extract icons with old failed/succeeded jobs', async () => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
     genomicExtractionStore.set({

@@ -99,7 +99,7 @@ describe('Access Renewal Page', () => {
     registerApiClient(ProfileApi, profileApi);
     mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
 
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       profileStore.set({profile: profileStore.get().profile, load, reload, updateCache});
     });
 

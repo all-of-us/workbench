@@ -109,7 +109,7 @@ export const NotificationModal = () => {
   </Modal>;
 };
 
-export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
+export const withErrorModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
   try {
     return await wrappedFn(...args);
   } catch (e) {
@@ -117,7 +117,7 @@ export const withErrorModal = fp.curry((notificationState: NotificationStore, wr
   }
 });
 
-export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async(...args) => {
+export const withSuccessModal = fp.curry((notificationState: NotificationStore, wrappedFn) => async (...args) => {
   const response = await wrappedFn(...args);
   notificationStore.set(notificationState);
   return response;

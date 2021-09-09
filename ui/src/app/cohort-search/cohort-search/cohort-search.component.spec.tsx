@@ -64,7 +64,7 @@ describe('CohortSearch', () => {
     expect(wrapper.find('[data-test-id="demographics"]').length).toBe(1);
   });
 
-  it('should show warning modal for unsaved demographics selections', async() => {
+  it('should show warning modal for unsaved demographics selections', async () => {
     currentCohortSearchContextStore.next(searchContextStubs[1]);
     const wrapper = component();
     expect(wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length).toBe(0);

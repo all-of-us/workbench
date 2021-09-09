@@ -159,7 +159,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
   const {actions, sourceId, query} = queryResult;
 
   useEffect(() => {
-    const getLogEntries = async() => {
+    const getLogEntries = async () => {
       setLoading(true);
       setQueryResult(EMPTY_AUDIT_RESULT);
       try {

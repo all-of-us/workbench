@@ -1412,7 +1412,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           switchCase(this.state.modalState,
             [ModalState.Create, () =>
               <CreateModal entityName='Dataset'
-                           getExistingNames={async() => {
+                           getExistingNames={async () => {
                              const resources = await workspacesApi()
                                .getWorkspaceResources(namespace, id, {typesToFetch: [ResourceType.DATASET]});
                              return resources.map(resource => resource.dataSet.name);

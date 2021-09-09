@@ -288,7 +288,7 @@ export const HelpSidebar = fp.flow(
       onDismiss: () => {
         this.setState({currentModal: CurrentModal.None});
       }
-    }, async() => {
+    }, async () => {
       AnalyticsTracker.Workspaces.Delete();
       await workspacesApi().deleteWorkspace(this.props.workspace.namespace, this.props.workspace.id);
       this.props.navigate(['workspaces']);

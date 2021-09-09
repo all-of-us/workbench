@@ -71,7 +71,7 @@ describe('RuntimeInitializer', () => {
    * This is helpful for testing the initializer, since it has a Promise-based API but relies on
    * a polling strategy using setTimeout calls in order to wait for the runtime to become ready.
    */
-  const runTimersUntilSettled = async(p: Promise<any>, maxLoops: number = 20) => {
+  const runTimersUntilSettled = async (p: Promise<any>, maxLoops: number = 20) => {
     let isSettled = false;
     p.then(() => isSettled = true).catch((e) => {
       isSettled = true;
@@ -88,7 +88,7 @@ describe('RuntimeInitializer', () => {
     }
   };
 
-  const runInitializerAndTimers = async(options?: Partial<LeoRuntimeInitializerOptions>, maxLoops?: number): Promise<Runtime> => {
+  const runInitializerAndTimers = async (options?: Partial<LeoRuntimeInitializerOptions>, maxLoops?: number): Promise<Runtime> => {
     const runtimePromise = LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,
       ...options
@@ -97,14 +97,14 @@ describe('RuntimeInitializer', () => {
     return await runtimePromise;
   };
 
-  it('should resolve promise if runtime is in ready state', async() => {
+  it('should resolve promise if runtime is in ready state', async () => {
     // This tests the simplest case of the initializer. No polling necessary.
     mockGetRuntimeCalls([baseRuntime]);
     const runtime = await runInitializerAndTimers();
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should resume runtime if it is initially stopping / stopped', async() => {
+  it('should resume runtime if it is initially stopping / stopped', async () => {
     // This test case also includes some repeated statuses, since that is a more realistic
     // reflection of how we poll Leo & get occasional new statuses.
     mockGetRuntimeCalls([
@@ -124,7 +124,7 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should call callback with runtime status', async() => {
+  it('should call callback with runtime status', async () => {
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Stopped},
     ]);
@@ -149,9 +149,9 @@ describe('RuntimeInitializer', () => {
     );
   });
 
-  it('should create runtime if it is initially nonexistent', async() => {
+  it('should create runtime if it is initially nonexistent', async () => {
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
-    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+    mockCreateRuntime.mockImplementationOnce(async (workspaceNamespace) => {
       return {status: RuntimeStatus.Creating};
     });
     mockGetRuntimeCalls([
@@ -164,7 +164,7 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should lazily create user\'s most runtime if a valid one exists', async() => {
+  it('should lazily create user\'s most runtime if a valid one exists', async () => {
     serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
@@ -191,7 +191,7 @@ describe('RuntimeInitializer', () => {
     }), expect.any(Object));
   });
 
-  it('should use preset values during lazy runtime creation if a preset was selected', async() => {
+  it('should use preset values during lazy runtime creation if a preset was selected', async () => {
     serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
@@ -220,13 +220,13 @@ describe('RuntimeInitializer', () => {
     }), expect.any(Object));
   });
 
-  it('should delete runtime if in an error state', async() => {
+  it('should delete runtime if in an error state', async () => {
     // A runtime in an error state should trigger a deletion request.
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Creating},
       {status: RuntimeStatus.Error},
     ]);
-    mockDeleteRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+    mockDeleteRuntime.mockImplementationOnce(async (workspaceNamespace) => {
       return {};
     });
     mockGetRuntimeCalls([
@@ -236,7 +236,7 @@ describe('RuntimeInitializer', () => {
     // After some period of "deleting" status, we expect the runtime to become nonexistent...
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
     // which should trigger a creation request...
-    mockCreateRuntime.mockImplementationOnce(async(workspaceNamespace) => {
+    mockCreateRuntime.mockImplementationOnce(async (workspaceNamespace) => {
       return {status: RuntimeStatus.Creating};
     });
     // and eventually give us a good runtime.
@@ -252,7 +252,7 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should recover from intermittent 500s', async() => {
+  it('should recover from intermittent 500s', async () => {
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Creating},
       {status: RuntimeStatus.Creating},
@@ -268,7 +268,7 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.Running);
   });
 
-  it('should give up after too many server errors', async() => {
+  it('should give up after too many server errors', async () => {
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Creating},
     ]);
@@ -286,8 +286,8 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should timeout after max delay', async() => {
-    mockGetRuntime.mockImplementation(async(workspaceNamespace) => {
+  it('should timeout after max delay', async () => {
+    mockGetRuntime.mockImplementation(async (workspaceNamespace) => {
       return {status: RuntimeStatus.Starting};
     });
 
@@ -303,8 +303,8 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should reject promise after abort signal', async() => {
-    mockGetRuntime.mockImplementation(async(workspaceNamespace) => {
+  it('should reject promise after abort signal', async () => {
+    mockGetRuntime.mockImplementation(async (workspaceNamespace) => {
       return {status: RuntimeStatus.Starting};
     });
     const aborter = new AbortController();
@@ -323,7 +323,7 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should respect the maxDeleteCount option', async() => {
+  it('should respect the maxDeleteCount option', async () => {
     // Mock out getRuntime API responses which simulate a runtime in an error state, which is then
     // reset, but ends up in an error state again. This scenario should warrant two deleteRuntime
     // calls, but the initializer is configured to max out at 1 and should return an error.
@@ -333,10 +333,10 @@ describe('RuntimeInitializer', () => {
       {status: RuntimeStatus.Creating},
       {status: RuntimeStatus.Error},
     ]);
-    mockDeleteRuntime.mockImplementation(async(workspaceNamespace) => {
+    mockDeleteRuntime.mockImplementation(async (workspaceNamespace) => {
       return {};
     });
-    mockCreateRuntime.mockImplementation(async(workspaceNamespace) => {
+    mockCreateRuntime.mockImplementation(async (workspaceNamespace) => {
       return {status: RuntimeStatus.Creating};
     });
 
@@ -349,7 +349,7 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should respect the maxCreateCount option', async() => {
+  it('should respect the maxCreateCount option', async () => {
     // Ensure that the initializer won't take action on a NOT_FOUND runtime if the maxCreateCount
     // is set to disallow create requests.
     mockGetRuntime.mockRejectedValueOnce(new Response(null, {status: 404}));
@@ -361,7 +361,7 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should respect the maxResumeCount option', async() => {
+  it('should respect the maxResumeCount option', async () => {
     mockGetRuntimeCalls([
       {status: RuntimeStatus.Stopped},
     ]);
@@ -373,7 +373,7 @@ describe('RuntimeInitializer', () => {
     }
   });
 
-  it('should respect custom resolutionCondition', async() => {
+  it('should respect custom resolutionCondition', async () => {
     mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
     await runInitializerAndTimers({resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Stopped});
     expect(mockStartRuntime).not.toHaveBeenCalled();

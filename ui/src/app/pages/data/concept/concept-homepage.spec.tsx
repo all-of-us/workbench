@@ -50,14 +50,14 @@ describe('ConceptHomepage', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should have one card per domain.', async() => {
+  it('should have one card per domain.', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
   });
 
-  it('should have one card per survey.', async() => {
+  it('should have one card per survey.', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="survey-box-name"]').length)

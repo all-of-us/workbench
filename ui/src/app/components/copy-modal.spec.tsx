@@ -147,12 +147,12 @@ describe('CopyModal', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
-  it('should populate select options with writeable Workspaces from getWorkspaces()', async() => {
+  it('should populate select options with writeable Workspaces from getWorkspaces()', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -170,7 +170,7 @@ describe('CopyModal', () => {
     expect(options).toEqual([currentWsOption, writerWsOption, writerAltCdrWsOption, writerControlledCdrWsOption]);
   });
 
-  it('should list workspaces with the same CDR version first', async() => {
+  it('should list workspaces with the same CDR version first', async () => {
     // choose a workspace with an alternative CDR version instead of the default
     props.fromWorkspaceNamespace = altCdrWorkspace.namespace;
     props.fromWorkspaceFirecloudName = altCdrWorkspace.id;
@@ -193,7 +193,7 @@ describe('CopyModal', () => {
     expect(options).toEqual([currentWsOption, controlledCdrWriterWsOption, otherCdrOwnerWsOption, otherCdrWriterWsOption]);
   });
 
-  it('should call correct copyNotebook() call after selecting an option and entering a name', async() => {
+  it('should call correct copyNotebook() call after selecting an option and entering a name', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -218,7 +218,7 @@ describe('CopyModal', () => {
     );
   });
 
-  it('should call correct copyNotebook() call when a mismatched CDR is selected', async() => {
+  it('should call correct copyNotebook() call when a mismatched CDR is selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -249,7 +249,7 @@ describe('CopyModal', () => {
     );
   });
 
-  it('should disable notebook copy button when a mismatched access tier is selected', async() => {
+  it('should disable notebook copy button when a mismatched access tier is selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -271,7 +271,7 @@ describe('CopyModal', () => {
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
-  it('should disable copy notebook button if option is not selected', async() => {
+  it('should disable copy notebook button if option is not selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -285,7 +285,7 @@ describe('CopyModal', () => {
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
-  it('should call correct copyConceptSet() call after selecting an option with a matching CDR and entering a name', async() => {
+  it('should call correct copyConceptSet() call after selecting an option with a matching CDR and entering a name', async () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 
@@ -324,7 +324,7 @@ describe('CopyModal', () => {
     );
   });
 
-  it('should disable concept set copy button when a mismatched CDR is selected', async() => {
+  it('should disable concept set copy button when a mismatched CDR is selected', async () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 
@@ -361,7 +361,7 @@ describe('CopyModal', () => {
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
-  it('should disable concept set copy button when a mismatched access tier is selected', async() => {
+  it('should disable concept set copy button when a mismatched access tier is selected', async () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 

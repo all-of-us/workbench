@@ -60,13 +60,13 @@ export interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({
   profile: null,
-  load: async() => {
+  load: async () => {
     if (!profileStore.get().profile) {
       await profileStore.get().reload();
     }
     return profileStore.get().profile;
   },
-  reload: async() => {
+  reload: async () => {
     const newProfile = await profileApi().getMe();
     profileStore.get().updateCache(newProfile);
     return profileStore.get().profile;

@@ -34,14 +34,14 @@ describe('DataPage', () => {
     </MemoryRouter>);
   };
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should show all datasets, cohorts, and concept sets', async() => {
+  it('should show all datasets, cohorts, and concept sets', async () => {
     const wrapper = component();
     const resourceCardsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
@@ -53,7 +53,7 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only cohorts when selected', async() => {
+  it('should show only cohorts when selected', async () => {
     const wrapper = component();
     const resourceCardsExpected = exampleCohortStubs.length;
     await waitOneTickAndUpdate(wrapper);
@@ -63,7 +63,7 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only cohort reviews when selected', async() => {
+  it('should show only cohort reviews when selected', async () => {
     const wrapper = component();
     const resourceCardsExpected = cohortReviewStubs.length;
     await waitOneTickAndUpdate(wrapper);
@@ -73,7 +73,7 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only conceptSets when selected', async() => {
+  it('should show only conceptSets when selected', async () => {
     const wrapper = component();
     const resourceCardsExpected = ConceptSetsApiStub.stubConceptSets().length;
     await waitOneTickAndUpdate(wrapper);
@@ -83,7 +83,7 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only dataSets when selected', async() => {
+  it('should show only dataSets when selected', async () => {
     const wrapper = component();
     const resourceCardsExpected = DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);

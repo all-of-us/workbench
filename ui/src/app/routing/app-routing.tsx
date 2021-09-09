@@ -175,7 +175,7 @@ const useServerConfig = () => {
   const {config} = useStore(serverConfigStore);
 
   useEffect(() => {
-    const load = async() => {
+    const load = async () => {
       const serverConfig = await configApi().getConfig();
       serverConfigStore.set({config: serverConfig});
     };

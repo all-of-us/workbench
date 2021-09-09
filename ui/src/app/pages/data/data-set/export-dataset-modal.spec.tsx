@@ -62,7 +62,7 @@ describe('ExportDatasetModal', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should export to a new notebook', async() => {
+  it('should export to a new notebook', async () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const expectedNotebookName = 'Notebook Name';
@@ -83,7 +83,7 @@ describe('ExportDatasetModal', () => {
     }));
   });
 
-  it('should disable export if no name is provided', async() => {
+  it('should disable export if no name is provided', async () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
 
@@ -97,7 +97,7 @@ describe('ExportDatasetModal', () => {
     expect(wrapper.find(Tooltip).text()).toBe('Notebook name can\'t be blank');
   });
 
-  it('should disable export if a conflicting name is provided', async() => {
+  it('should disable export if a conflicting name is provided', async () => {
     workspacesApiStub.notebookList = [
       {
         'name': 'existing notebook.ipynb'
@@ -116,7 +116,7 @@ describe('ExportDatasetModal', () => {
     expect(exportSpy).not.toHaveBeenCalled();
   });
 
-  it('should export to an existing notebook with the correct kernel type', async() => {
+  it('should export to an existing notebook with the correct kernel type', async () => {
     const expectedNotebookName = 'existing notebook';
     dataset.name = expectedNotebookName;
     workspacesApiStub.notebookList = [
@@ -147,7 +147,7 @@ describe('ExportDatasetModal', () => {
     }));
   });
 
-  it('should show code preview, auto reload on kernel switch, and hide code preview', async() => {
+  it('should show code preview, auto reload on kernel switch, and hide code preview', async () => {
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
       name: dataset.name
@@ -179,7 +179,7 @@ describe('ExportDatasetModal', () => {
     expect(wrapper.find('iframe').exists()).toBeFalsy();
   });
 
-  it('Show genomics analysis tools if WGS is in the dataset', async() => {
+  it('Show genomics analysis tools if WGS is in the dataset', async () => {
     testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
     const wrapper = mount(component(testProps));
 
@@ -188,7 +188,7 @@ describe('ExportDatasetModal', () => {
     });
   });
 
-  it('Remove genomics analysis tools if R is selected', async() => {
+  it('Remove genomics analysis tools if R is selected', async () => {
     testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
     const wrapper = mount(component(testProps));
 
@@ -200,7 +200,7 @@ describe('ExportDatasetModal', () => {
     });
   });
 
-  it('Should export code with genomics analysis tool', async() => {
+  it('Should export code with genomics analysis tool', async () => {
     testProps.dataset.prePackagedConceptSet = [PrePackagedConceptSetEnum.WHOLEGENOME];
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -223,7 +223,7 @@ describe('ExportDatasetModal', () => {
     });
   });
 
-  it('Auto reload code preview if genomics analysis tool is changed', async() => {
+  it('Auto reload code preview if genomics analysis tool is changed', async () => {
     const expectedDatasetRequest = {
       dataSetId: dataset.id,
       name: dataset.name

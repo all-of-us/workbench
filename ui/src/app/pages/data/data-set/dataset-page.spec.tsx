@@ -60,28 +60,28 @@ describe('DataSetPage', () => {
     );
   };
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it ('should display all concepts sets in workspace', async() => {
+  it ('should display all concepts sets in workspace', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
 
-  it('should display all cohorts in workspace', async() => {
+  it('should display all cohorts in workspace', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="cohort-list-item"]').length)
       .toBe(exampleCohortStubs.length);
   });
 
-  it('should display values based on Domain of Concept selected in workspace', async() => {
+  it('should display values based on Domain of Concept selected in workspace', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -111,7 +111,7 @@ describe('DataSetPage', () => {
   });
 
   it('should select all values by default on selection on concept set only if the new domain is unique',
-    async() => {
+    async () => {
       const wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
@@ -160,7 +160,7 @@ describe('DataSetPage', () => {
       expect(checkedValuesList.length).toBe(4);
     });
 
-  it('should display correct values on rapid selection of multiple domains', async() => {
+  it('should display correct values on rapid selection of multiple domains', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -179,7 +179,7 @@ describe('DataSetPage', () => {
   });
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',
-    async() => {
+    async () => {
       const wrapper = component();
       await waitOneTickAndUpdate(wrapper);
 
@@ -213,7 +213,7 @@ describe('DataSetPage', () => {
         .prop('disabled')).toBeFalsy();
     });
 
-  it('should display preview data table once preview button is clicked', async() => {
+  it('should display preview data table once preview button is clicked', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -243,7 +243,7 @@ describe('DataSetPage', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('should display preview data for current domains only', async() => {
+  it('should display preview data for current domains only', async () => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -272,7 +272,7 @@ describe('DataSetPage', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
+  it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async () => {
     const wrapper = component();
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
@@ -292,7 +292,7 @@ describe('DataSetPage', () => {
     });
   });
 
-  it('dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
+  it('dataSet should show tooltip and disable SAVE button if user has READER access', async () => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = component();
@@ -304,7 +304,7 @@ describe('DataSetPage', () => {
     expect(isSaveButtonDisable).toBeTruthy();
   });
 
-  it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
+  it('dataSet should disable cohort/concept PLUS ICON if user has READER access', async () => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
     const wrapper = component();
@@ -316,7 +316,7 @@ describe('DataSetPage', () => {
     expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
   });
 
-  it('should call load data dictionary when caret is expanded', async() => {
+  it('should call load data dictionary when caret is expanded', async () => {
     const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -342,7 +342,7 @@ describe('DataSetPage', () => {
     expect(domains).toEqual([Domain.PERSON, Domain.CONDITION, Domain.MEASUREMENT, Domain.SURVEY]);
   });
 
-  it('should unselect any workspace Cohort if PrePackaged is selected', async() => {
+  it('should unselect any workspace Cohort if PrePackaged is selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     // Select one cohort
@@ -359,7 +359,7 @@ describe('DataSetPage', () => {
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeTruthy();
   });
 
-  it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async() => {
+  it('should unselect PrePackaged cohort is selected if Workspace Cohort is selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -377,7 +377,7 @@ describe('DataSetPage', () => {
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
   });
 
-  it('should display Pre packaged concept set as per CDR data', async() => {
+  it('should display Pre packaged concept set as per CDR data', async () => {
     let wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
@@ -402,7 +402,7 @@ describe('DataSetPage', () => {
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
   });
 
-  it('should display Pre packaged concept set per genomics extraction flag', async() => {
+  it('should display Pre packaged concept set per genomics extraction flag', async () => {
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = true;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
 
@@ -416,7 +416,7 @@ describe('DataSetPage', () => {
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
   });
 
-  it('should open Export modal if Analyze is clicked and WGS concept is not selected', async() => {
+  it('should open Export modal if Analyze is clicked and WGS concept is not selected', async () => {
     datasetApiStub.getDatasetMock = {
       ...stubDataSet(),
       conceptSets: [{id: 345, domain: Domain.PERSON}],
@@ -432,7 +432,7 @@ describe('DataSetPage', () => {
     wrapper.find(ExportDatasetModal).find('[data-test-id="export-dataset-modal-cancel-button"]').simulate('click');
   });
 
-  it('should open Extract modal if Analyze is clicked and WGS concept is selected', async() => {
+  it('should open Extract modal if Analyze is clicked and WGS concept is selected', async () => {
     datasetApiStub.getDatasetMock = {
       ...stubDataSet(),
       conceptSets: [{

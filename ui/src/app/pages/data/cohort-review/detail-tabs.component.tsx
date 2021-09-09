@@ -345,7 +345,7 @@ export const DetailTabs = fp.flow(withCurrentCohortReview(), withCurrentWorkspac
 
     loadParticipantChartData() {
       const {ns, wsid, pid} = this.props.match.params;
-      fp.map(async(domainName: string) => {
+      fp.map(async (domainName: string) => {
         this.setState((prevState) => ({
           chartData: {
             ...prevState.chartData,

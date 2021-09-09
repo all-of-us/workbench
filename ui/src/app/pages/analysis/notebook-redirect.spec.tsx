@@ -36,7 +36,7 @@ describe('NotebookRedirect', () => {
   const initialUrl = '/workspaces/namespace/id/notebooks/wharrgarbl';
   let history = createMemoryHistory({initialEntries: [initialUrl]});
 
-  const component = async() => {
+  const component = async () => {
     const c = mount(<Router history={history}>
       <Route path='/workspaces/:ns/:wsid/notebooks/:nbName'>
         <NotebookRedirect hideSpinner={() => {}}
@@ -78,17 +78,17 @@ describe('NotebookRedirect', () => {
     jest.clearAllMocks();
   });
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = await component();
     expect(wrapper).toBeTruthy();
   });
 
-  it('should show redirect display before showing notebook', async() => {
+  it('should show redirect display before showing notebook', async () => {
     const wrapper = await component();
     expect(wrapper.exists('[data-test-id="notebook-redirect"]')).toBeTruthy();
   });
 
-  it('should be "Initializing" until a Creating runtime for an existing notebook is running', async() => {
+  it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await component();
@@ -110,7 +110,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Initializing" until a Creating runtime for a new notebook is running', async() => {
+  it('should be "Initializing" until a Creating runtime for a new notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     const wrapper = await component();
@@ -132,7 +132,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async() => {
+  it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
     history.push(initialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
@@ -155,7 +155,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Resuming" until a Stopped runtime for a new notebook is running', async() => {
+  it('should be "Resuming" until a Stopped runtime for a new notebook is running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
 
     const wrapper = await component();
@@ -177,7 +177,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async() => {
+  it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async () => {
     history.push(initialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
@@ -192,7 +192,7 @@ describe('NotebookRedirect', () => {
   });
 
 
-  it('should be "Redirecting" when the runtime is initially Running for a new notebook', async() => {
+  it('should be "Redirecting" when the runtime is initially Running for a new notebook', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
     const wrapper = await component();
@@ -205,7 +205,7 @@ describe('NotebookRedirect', () => {
       .toContain(progressStrings.get(Progress.Redirecting));
   });
 
-  it('should navigate away after runtime transitions to deleting', async() => {
+  it('should navigate away after runtime transitions to deleting', async () => {
     history.push(initialUrl + '?kernelType=R?creating=false');
     runtimeStub.runtime.status = RuntimeStatus.Running;
 
@@ -237,7 +237,7 @@ describe('NotebookRedirect', () => {
   });
 
 
-  it('should not navigate after runtime transitions to updating', async() => {
+  it('should not navigate after runtime transitions to updating', async () => {
     const navSpy = jest.fn();
 
     history.push(initialUrl + '?kernelType=R?creating=false');

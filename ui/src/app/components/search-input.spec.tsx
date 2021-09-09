@@ -24,7 +24,7 @@ test('component has sane defaults', () => {
   expect(p.onSearch).toBeTruthy();
 });
 
-test('no dropdown is displayed on user input by default', async() => {
+test('no dropdown is displayed on user input by default', async () => {
   const input = mount(<SearchInput/>);
   input.find('[data-test-id="search-input"]')
     .first().simulate('change', {target: {value: 'foo'}});
@@ -32,7 +32,7 @@ test('no dropdown is displayed on user input by default', async() => {
   expect(input.find('[data-test-id="search-input-drop-down"]').exists()).toBeFalsy();
 });
 
-test('dropdown is displayed when results are available', async() => {
+test('dropdown is displayed when results are available', async () => {
   function onSearch(keyword: string) {
     return new Promise<Array<string>>((accept, reject) => {
       accept(['bar']);
@@ -52,7 +52,7 @@ test('dropdown is displayed when results are available', async() => {
   });
 });
 
-test('selecting a result from the dropdown closes the dropdown', async() => {
+test('selecting a result from the dropdown closes the dropdown', async () => {
   function onSearch(keyword: string) {
     return new Promise<Array<string>>((accept, reject) => {
       accept(['bar']);
@@ -67,7 +67,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
       input.update();
       accept(undefined);
     }, DROPDOWN_DELAY_MS);
-  }).then(async() => {
+  }).then(async () => {
     const match = input.find('[data-test-id="search-input-drop-down-element-0"]');
     expect(match.exists()).toBeTruthy();
     match.simulate('mousedown');
@@ -78,7 +78,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
   });
 });
 
-test('onChange handler is called when the contents changes', async() => {
+test('onChange handler is called when the contents changes', async () => {
   let changed = false;
   const input = mount(<SearchInput onChange={() => { changed = true; }}/>);
   input.find('[data-test-id="search-input"]')

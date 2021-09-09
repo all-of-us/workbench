@@ -38,35 +38,35 @@ describe('Data Access Panel', () => {
     environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered, AccessTierShortNames.Controlled];
   });
 
-  it('Should show success status for registered tier when the user has access', async() => {
+  it('Should show success status for registered tier when the user has access', async () => {
 
     const wrapper = component({userAccessTiers: ['registered']});
     expectAccessStatus(wrapper, true, false);
   });
 
-  it('Should show success status for controlled tier when the user has access', async() => {
+  it('Should show success status for controlled tier when the user has access', async () => {
     const wrapper = component({userAccessTiers: ['controlled']});
     expectAccessStatus(wrapper, false, true);
   });
 
-  it('Should show success status when the user is in the registered tier and controlled tier', async() => {
+  it('Should show success status when the user is in the registered tier and controlled tier', async () => {
     const wrapper = component({userAccessTiers: ['registered', 'controlled']});
     expectAccessStatus(wrapper, true, true);
   });
 
-  it('Should not show success status when the user is not in the registered tier or controlled tier', async() => {
+  it('Should not show success status when the user is not in the registered tier or controlled tier', async () => {
     const wrapper = component({userAccessTiers: []});
     expectAccessStatus(wrapper, false, false);
   });
 
-  it('Should only show the registered tier in environments without a controlled tier (user has access)', async() => {
+  it('Should only show the registered tier in environments without a controlled tier (user has access)', async () => {
     environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
     const wrapper = component({userAccessTiers: ['registered']});
     expectAccessStatusRtOnly(wrapper, true);
   });
 
-  it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async() => {
+  it('Should only show the registered tier in environments without a controlled tier (user does not have access)', async () => {
     environment.accessTiersVisibleToUsers = [AccessTierShortNames.Registered];
 
     const wrapper = component({userAccessTiers: []});

@@ -23,13 +23,13 @@ describe('AdminInstitutionSpec', () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
   });
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
   });
 
-  it('should display all institution', async() => {
+  it('should display all institution', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('tbody').first().find('tr').length).toBe(4);

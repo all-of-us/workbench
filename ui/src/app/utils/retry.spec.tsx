@@ -13,13 +13,13 @@ const functionStub = {
 
 
 describe('IndexUtils', () => {
-  it('should not retry if successful', async() => {
+  it('should not retry if successful', async () => {
     const successfulFunctionSpy = jest.spyOn(functionStub, 'successfulFunction');
     await apiCallWithGatewayTimeoutRetries(() => functionStub.successfulFunction());
     expect(successfulFunctionSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should retry three times by default using apiCallWithGatewayTimeout', async() => {
+  it('should retry three times by default using apiCallWithGatewayTimeout', async () => {
     const failedFunctionSpy = jest.spyOn(functionStub, 'failedFunction');
     await apiCallWithGatewayTimeoutRetries(() => functionStub.failedFunction(), 3, 1).catch(() => {});
     expect(failedFunctionSpy).toHaveBeenCalledTimes(4);

@@ -30,12 +30,12 @@ beforeEach(() => {
   };
 });
 
-it('should render', async() => {
+it('should render', async () => {
   const wrapper = mount(<DemographicSurvey {...props} />);
   expect(wrapper.exists()).toBeTruthy();
 });
 
-it('should load existing profile data', async() => {
+it('should load existing profile data', async () => {
   const {demographicSurvey} = props.profile;
   demographicSurvey.race = [Race.AIAN, Race.AA];
   demographicSurvey.genderIdentityList = [GenderIdentity.MAN];
@@ -63,7 +63,7 @@ it('should load existing profile data', async() => {
   expect(wrapper.find('[data-test-id="dropdown-ethnicity"]').first().prop('value')).toEqual(Ethnicity.HISPANIC);
 });
 
-it('should handle error when submitting the survey', async() => {
+it('should handle error when submitting the survey', async () => {
   const {demographicSurvey} = props.profile;
   demographicSurvey.race = [Race.AIAN, Race.AA];
   demographicSurvey.genderIdentityList = [GenderIdentity.MAN];

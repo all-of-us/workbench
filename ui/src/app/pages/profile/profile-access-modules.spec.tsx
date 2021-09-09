@@ -10,7 +10,7 @@ import {ProfileAccessModules} from './profile-access-modules';
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 
 describe('Profile Access Modules', () => {
-    beforeEach(async() => {
+    beforeEach(async () => {
         serverConfigStore.set({config: defaultServerConfig});
     });
 
@@ -23,7 +23,7 @@ describe('Profile Access Modules', () => {
         expect(wrapper.exists()).toBeTruthy();
     });
 
-    it('should display all modules as incomplete by default', async() => {
+    it('should display all modules as incomplete by default', async () => {
         const wrapper = component();
         const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
         expect(profileCardCompleteButtons.length).toBe(4);

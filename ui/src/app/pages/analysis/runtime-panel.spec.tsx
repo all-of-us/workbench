@@ -48,7 +48,7 @@ describe('RuntimePanel', () => {
 
   const iconsDir = '/assets/icons';
 
-  const component = async(propOverrides?: object) => {
+  const component = async (propOverrides?: object) => {
     const allProps = {...props, ...propOverrides};
     const c = mount(<RuntimePanelWrapper {...allProps}/>);
     await waitOneTickAndUpdate(c);
@@ -102,7 +102,7 @@ describe('RuntimePanel', () => {
     jest.useRealTimers();
   });
 
-  const pickDropdownOption = async(wrapper, id, label) => {
+  const pickDropdownOption = async (wrapper, id, label) => {
     wrapper.find(id).first().simulate('click');
     const item = wrapper.find(`${id} .p-dropdown-item`).find({'aria-label': label}).first();
     expect(item.exists()).toBeTruthy();
@@ -118,7 +118,7 @@ describe('RuntimePanel', () => {
     return wrapper.find(id).first().prop('value');
   };
 
-  const enterNumberInput = async(wrapper, id, value) => {
+  const enterNumberInput = async (wrapper, id, value) => {
     // TODO: Find a way to invoke this without props.
     act(() => {wrapper.find(id).first().prop('onChange')({value} as any);});
     await waitOneTickAndUpdate(wrapper);
@@ -173,7 +173,7 @@ describe('RuntimePanel', () => {
 
   const pickPreset = (wrapper, {displayName}) => pickDropdownOption(wrapper, '#runtime-presets-menu', displayName);
 
-  const mustClickButton = async(wrapper, label) => {
+  const mustClickButton = async (wrapper, label) => {
     const createButton = wrapper.find(Button).find({'aria-label': label}).first();
     expect(createButton.exists()).toBeTruthy();
     expect(createButton.prop('disabled')).toBeFalsy();
@@ -182,7 +182,7 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  it('should show loading spinner while loading', async() => {
+  it('should show loading spinner while loading', async () => {
     const wrapper = await component();
 
     // Check before ticking - stub returns the runtime asynchronously.
@@ -195,7 +195,7 @@ describe('RuntimePanel', () => {
     expect(!wrapper.exists(Spinner));
   });
 
-  it('should show Create panel when no runtime', async() => {
+  it('should show Create panel when no runtime', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -208,7 +208,7 @@ describe('RuntimePanel', () => {
     expect(computeDefaults.text()).toEqual('- Default: compute size of 4 CPUs, 15 GB memory, and a 100 GB disk');
   });
 
-  it('should allow creation when no runtime exists with defaults', async() => {
+  it('should allow creation when no runtime exists with defaults', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -224,7 +224,7 @@ describe('RuntimePanel', () => {
     }
   });
 
-  it('should show customize after create', async() => {
+  it('should show customize after create', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -236,7 +236,7 @@ describe('RuntimePanel', () => {
     expect(wrapperAfter.find('#runtime-cpu').exists()).toBeTruthy();
   });
 
-  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
+  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async () => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
@@ -268,7 +268,7 @@ describe('RuntimePanel', () => {
     );
   });
 
-  it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
+  it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async () => {
     // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
@@ -304,7 +304,7 @@ describe('RuntimePanel', () => {
     expect(pick(a)).toEqual(pick(b));
   };
 
-  it('should allow creation when runtime has error status', async() => {
+  it('should allow creation when runtime has error status', async () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
     runtimeStoreStub.runtime = runtimeApiStub.runtime;
 
@@ -316,7 +316,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
-  it('should disable controls when runtime has non-updateable status', async() => {
+  it('should disable controls when runtime has non-updateable status', async () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
     runtimeStoreStub.runtime = runtimeApiStub.runtime;
 
@@ -327,7 +327,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
-  it('should allow creation with GCE config', async() => {
+  it('should allow creation with GCE config', async () => {
     // skip this test after enabling pd
     if (enablePd) {
       return;
@@ -356,7 +356,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
-  it('should allow creation with Dataproc config', async() => {
+  it('should allow creation with Dataproc config', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -400,7 +400,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
-  it('should allow configuration via GCE preset', async() => {
+  it('should allow configuration via GCE preset', async () => {
     // skip this test after enabling pd
     if (enablePd) {
       return;
@@ -429,7 +429,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
-  it('should allow configuration via dataproc preset', async() => {
+  it('should allow configuration via dataproc preset', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -450,7 +450,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis',
-    async() => {
+    async () => {
       // skip this test after enabling pd
       if (enablePd) {
         return;
@@ -478,7 +478,7 @@ describe('RuntimePanel', () => {
     });
 
   it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is HailGenomicsAnalysis',
-    async() => {
+    async () => {
       const runtime = {...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
@@ -506,7 +506,7 @@ describe('RuntimePanel', () => {
       expect(getNumWorkers(wrapper)).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers);
     });
 
-  it('should allow configuration via dataproc preset from modified form', async() => {
+  it('should allow configuration via dataproc preset from modified form', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -543,7 +543,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
-  it('should tag as user override after preset modification', async() => {
+  it('should tag as user override after preset modification', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
 
@@ -562,7 +562,7 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.UserOverride);
   });
 
-  it('should tag as preset if configuration matches', async() => {
+  it('should tag as preset if configuration matches', async () => {
     // skip this test after enabling pd
     if (enablePd) {
       return;
@@ -586,7 +586,7 @@ describe('RuntimePanel', () => {
       .toEqual(RuntimeConfigurationType.GeneralAnalysis);
   });
 
-  it('should restrict memory options by cpu', async() => {
+  it('should restrict memory options by cpu', async () => {
     const wrapper = await component();
 
     wrapper.find('div[id="runtime-cpu"]').first().simulate('click');
@@ -600,13 +600,13 @@ describe('RuntimePanel', () => {
     expect(memoryOptions.map(m => m.text())).toEqual(['7.2', '30', '52']);
   });
 
-  it('should disable the Next button if there are no changes and runtime is running', async() => {
+  it('should disable the Next button if there are no changes and runtime is running', async () => {
     const wrapper = await component();
 
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
-  it('should respect divergent sets of valid machine types across compute types', async() => {
+  it('should respect divergent sets of valid machine types across compute types', async () => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, 1);
@@ -619,7 +619,7 @@ describe('RuntimePanel', () => {
     expect(getMainRam(wrapper)).toBe(15);
   });
 
-  it('should carry over valid main machine type across compute types', async() => {
+  it('should carry over valid main machine type across compute types', async () => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, 2);
@@ -632,7 +632,7 @@ describe('RuntimePanel', () => {
     expect(getMainRam(wrapper)).toBe(7.5);
   });
 
-  it('should warn user about reboot if there are updates that require one - increase disk size', async() => {
+  it('should warn user about reboot if there are updates that require one - increase disk size', async () => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
@@ -642,7 +642,7 @@ describe('RuntimePanel', () => {
   });
 
   it('should not warn user for updates where not needed - number of workers',
-    async() => {
+    async () => {
       const runtime = {
         ...runtimeApiStub.runtime,
         gceConfig: null,
@@ -659,7 +659,7 @@ describe('RuntimePanel', () => {
       expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
     });
 
-  it('should not warn user for updates where not needed - number of preemptibles', async() => {
+  it('should not warn user for updates where not needed - number of preemptibles', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStoreStub.runtime = runtime;
 
@@ -671,7 +671,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
   });
 
-  it('should warn user about reboot if there are updates that require one - CPU', async() => {
+  it('should warn user about reboot if there are updates that require one - CPU', async () => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
@@ -680,7 +680,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should warn user about reboot if there are updates that require one - Memory', async() => {
+  it('should warn user about reboot if there are updates that require one - Memory', async () => {
     const wrapper = await component();
 
     // 15 GB -> 26 GB
@@ -690,7 +690,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should warn user about deletion if there are updates that require one - Compute Type', async() => {
+  it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
@@ -699,7 +699,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should warn user about deletion if there are updates that require one - Decrease Disk', async() => {
+  it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
@@ -708,7 +708,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should warn the user about deletion if there are updates that require one - Worker CPU', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker CPU', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStoreStub.runtime = runtime;
 
@@ -721,7 +721,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should warn the user about deletion if there are updates that require one - Worker RAM', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker RAM', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStoreStub.runtime = runtime;
 
@@ -734,7 +734,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should warn the user about deletion if there are updates that require one - Worker Disk', async() => {
+  it('should warn the user about deletion if there are updates that require one - Worker Disk', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStoreStub.runtime = runtime;
 
@@ -745,7 +745,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
-  it('should retain original inputs when hitting cancel from the Confirm panel', async() => {
+  it('should retain original inputs when hitting cancel from the Confirm panel', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig()};
     runtimeStoreStub.runtime = runtime;
 
@@ -773,7 +773,7 @@ describe('RuntimePanel', () => {
     expect(getWorkerDiskSize(wrapper)).toBe(100);
   });
 
-  it('should disable Next button if Runtime is in between states', async() => {
+  it('should disable Next button if Runtime is in between states', async () => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), status: RuntimeStatus.Creating};
     runtimeStoreStub.runtime = runtime;
 
@@ -783,7 +783,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
-  it('should send an updateRuntime API call if runtime changes do not require a delete', async() => {
+  it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
     const wrapper = await component();
 
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
@@ -798,7 +798,7 @@ describe('RuntimePanel', () => {
     expect(deleteSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('should send a delete call if an update requires delete', async() => {
+  it('should send a delete call if an update requires delete', async () => {
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
@@ -809,7 +809,7 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
-  it('should show create button if runtime is deleted', async() => {
+  it('should show create button if runtime is deleted', async () => {
     const runtime = {...runtimeApiStub.runtime, status: RuntimeStatus.Deleted};
     runtimeStoreStub.runtime = runtime;
 
@@ -818,7 +818,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(Button).find({'aria-label': 'Create'}).first().exists()).toBeTruthy();
   });
 
-  it('should add additional options when the compute type changes', async() => {
+  it('should add additional options when the compute type changes', async () => {
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
@@ -830,7 +830,7 @@ describe('RuntimePanel', () => {
     expect(wrapper.exists('span[id="worker-disk"]')).toBeTruthy();
   });
 
-  it('should update the cost estimator when the compute profile changes', async() => {
+  it('should update the cost estimator when the compute profile changes', async () => {
     const wrapper = await component();
 
     const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
@@ -869,7 +869,7 @@ describe('RuntimePanel', () => {
     expect(storageCost().text()).toEqual('$0.14/hr');
   });
 
-  it('should update the cost estimator when master machine changes', async() => {
+  it('should update the cost estimator when master machine changes', async () => {
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
@@ -903,7 +903,7 @@ describe('RuntimePanel', () => {
     expect(storageCost().text()).toEqual('$0.12/hr');
   });
 
-  it('should allow runtime deletion', async() => {
+  it('should allow runtime deletion', async () => {
     const wrapper = await component();
 
     wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
@@ -916,7 +916,7 @@ describe('RuntimePanel', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('should allow cancelling runtime deletion', async() => {
+  it('should allow cancelling runtime deletion', async () => {
     const wrapper = await component();
 
     wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
@@ -931,20 +931,20 @@ describe('RuntimePanel', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('should display the Running runtime status icon in state Running', async() => {
+  it('should display the Running runtime status icon in state Running', async () => {
     const wrapper = await component();
 
     expect(wrapper.find('[data-test-id="runtime-status-icon-Running"]')).toBeTruthy();
   });
 
-  it('should display a compute-none when there is no runtime', async() => {
+  it('should display a compute-none when there is no runtime', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
     expect(wrapper.find('[data-test-id="runtime-status-icon-None"]')).toBeTruthy();
   });
 
-  it('should prevent runtime creation when disk size is invalid', async() => {
+  it('should prevent runtime creation when disk size is invalid', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
@@ -980,7 +980,7 @@ describe('RuntimePanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should prevent runtime update when disk size is invalid', async() => {
+  it('should prevent runtime update when disk size is invalid', async () => {
     const wrapper = await component();
     const getNextButton = () => wrapper.find({'aria-label': 'Next'}).first();
 
@@ -1003,7 +1003,7 @@ describe('RuntimePanel', () => {
     expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should prevent runtime creation when running cost is too high for free tier', async() => {
+  it('should prevent runtime creation when running cost is too high for free tier', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     const wrapper = await component();
@@ -1020,7 +1020,7 @@ describe('RuntimePanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should prevent runtime creation when running cost is too high for paid tier', async() => {
+  it('should prevent runtime creation when running cost is too high for paid tier', async () => {
     runtimeApiStub.runtime = null;
     runtimeStoreStub.runtime = null;
     currentWorkspaceStore.next({
@@ -1066,7 +1066,7 @@ describe('RuntimePanel', () => {
     expect(createPanel.exists()).toBeFalsy();
   });
 
-  it('should allow creating gce with GPU', async() => {
+  it('should allow creating gce with GPU', async () => {
     if (!enableGpu) {
       return;
     }
@@ -1095,7 +1095,7 @@ describe('RuntimePanel', () => {
     }
   });
 
-  it('should allow creating gce without GPU', async() => {
+  it('should allow creating gce without GPU', async () => {
     if (!enableGpu) {
       return;
     }

@@ -65,7 +65,7 @@ describe('WorkspaceShare', () => {
     });
   });
 
-  it('display correct users', async() => {
+  it('display correct users', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -79,7 +79,7 @@ describe('WorkspaceShare', () => {
       .toEqual(expectedUsers.map(u => u.email));
   });
 
-  it('displays correct role info', async() => {
+  it('displays correct role info', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -89,7 +89,7 @@ describe('WorkspaceShare', () => {
     expect(wrapper.find(getSelectString(lunaRole)).length).toBe(0);
   });
 
-  it('removes user correctly', async() => {
+  it('removes user correctly', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -99,7 +99,7 @@ describe('WorkspaceShare', () => {
     expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
   });
 
-  it('adds user correctly', async() => {
+  it('adds user correctly', async () => {
     const clock = Lolex.install({shouldAdvanceTime: true});
     const wrapper = component();
     wrapper.find('[data-test-id="search"]').simulate('change', {target: {value: 'luna'}});
@@ -119,7 +119,7 @@ describe('WorkspaceShare', () => {
     expect(wrapper.find(dataString).length).toBe(0);
   });
 
-  it('does not allow self role change', async() => {
+  it('does not allow self role change', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -127,7 +127,7 @@ describe('WorkspaceShare', () => {
       .props()['isDisabled']).toBe(true);
   });
 
-  it('saves acl correctly after changes made', async() => {
+  it('saves acl correctly after changes made', async () => {
     const clock = Lolex.install({shouldAdvanceTime: true});
     const wrapper = component();
     wrapper.find('[data-test-id="search"]').simulate('change', {target: {value: 'luna'}});

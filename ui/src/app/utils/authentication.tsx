@@ -119,7 +119,7 @@ export const hasBillingScope = () => {
  * be returned. In this case, you'll need to provide something for the user to deliberately click on
  * and retry ensureBillingScope in reaction to the click.
  */
-export const ensureBillingScope = async() => {
+export const ensureBillingScope = async () => {
   if (!hasBillingScope()) {
     const options = new gapi.auth2.SigninOptionsBuilder();
     options.setScope('https://www.googleapis.com/auth/cloud-billing');

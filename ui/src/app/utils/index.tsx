@@ -472,7 +472,7 @@ export const useToggle = (): [boolean, Function] => {
 };
 
 export const withAsyncErrorHandling = fp.curry(
-  (handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async(...args) => {
+  (handler: (error: Error) => void, fnToTry: (...args: any[]) => Promise<any>) => async (...args) => {
     try {
       return await fnToTry(...args);
     } catch (error) {

@@ -32,7 +32,7 @@ beforeEach(() => {
   };
 });
 
-it('should render', async() => {
+it('should render', async () => {
   const wrapper = mount(<AccountCreationSurvey {...props} />);
   expect(wrapper.exists()).toBeTruthy();
 });

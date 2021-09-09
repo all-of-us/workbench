@@ -34,13 +34,13 @@ describe('AdminInstitutionEditSpec', () => {
     registerApiClient(InstitutionApi, new InstitutionApiStub());
   });
 
-  it('should render', async() => {
+  it('should render', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
   });
 
-  it('should throw error for existing Institution if display name is more than 80 characters', async() => {
+  it('should throw error for existing Institution if display name is more than 80 characters', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -52,7 +52,7 @@ describe('AdminInstitutionEditSpec', () => {
       .toContain('Display name must be 80 characters or less');
   });
 
-  it('should hide/show controlled card when controlled tier disabled/enabled', async() => {
+  it('should hide/show controlled card when controlled tier disabled/enabled', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -66,21 +66,21 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
   });
 
-  it('should show CT card when institution has controlled tier access enabled', async() => {
+  it('should show CT card when institution has controlled tier access enabled', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeTruthy();
   });
 
-  it('should hide CT card when institution has controlled tier access disabled', async() => {
+  it('should hide CT card when institution has controlled tier access disabled', async () => {
     const wrapper = component('Non CT Access');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="ct-card-container"]').exists()).toBeFalsy();
   });
 
-  it('should not change eRA Required and tier enabled switches when changing tier requirement ', async() => {
+  it('should not change eRA Required and tier enabled switches when changing tier requirement ', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -103,7 +103,7 @@ describe('AdminInstitutionEditSpec', () => {
   });
 
 
-  it('should update and save institution tier requirement', async() => {
+  it('should update and save institution tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -135,7 +135,7 @@ describe('AdminInstitutionEditSpec', () => {
     expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').length).toBe(0);
   });
 
-  it('should show appropriate section after changing agreement type in Registered Tier requirement', async() => {
+  it('should show appropriate section after changing agreement type in Registered Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -174,7 +174,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('should update RT and CT requirements simultaneously when both changed', async() => {
+  it('should update RT and CT requirements simultaneously when both changed', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -207,7 +207,7 @@ describe('AdminInstitutionEditSpec', () => {
     .toBe('correctEmail@domain.com');
   });
 
-  it('should show appropriate section after changing agreement type in Controlled Tier requirement', async() => {
+  it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -249,7 +249,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('Should display error in case of invalid email Address Format in Registered Tier requirement', async() => {
+  it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -297,7 +297,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async() => {
+  it('Should display error in case of invalid email Address Format in Controlled Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -347,7 +347,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async() => {
+  it('Should display error in case of invalid email Domain Format in Registered Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -394,7 +394,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async() => {
+  it('Should display error in case of invalid email Domain Format in Controlled Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -448,7 +448,7 @@ describe('AdminInstitutionEditSpec', () => {
 
   });
 
-  it('Should ignore empty string in email Domain in Registered Tier requirement', async() => {
+  it('Should ignore empty string in email Domain in Registered Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -466,7 +466,7 @@ describe('AdminInstitutionEditSpec', () => {
       .toBe('validEmail.com,\njustSomeRandom.domain');
   });
 
-  it('Should ignore empty string in email Domain in Controlled Tier requirement', async() => {
+  it('Should ignore empty string in email Domain in Controlled Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -488,7 +488,7 @@ describe('AdminInstitutionEditSpec', () => {
     .toBe('validEmail.com,\njustSomeRandom.domain');
   });
 
-  it('Should ignore whitespaces in email address in Registered Tier requirement', async() => {
+  it('Should ignore whitespaces in email address in Registered Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
@@ -506,7 +506,7 @@ describe('AdminInstitutionEditSpec', () => {
       .toBe('someDomain.com,\njustSomeRandom.domain');
   });
 
-  it('Should ignore whitespaces in email address in Controlled Tier requirement', async() => {
+  it('Should ignore whitespaces in email address in Controlled Tier requirement', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();

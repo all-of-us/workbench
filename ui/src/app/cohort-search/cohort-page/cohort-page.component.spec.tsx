@@ -40,7 +40,7 @@ describe('CohortPage', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should render one search group for each includes/excludes item', async() => {
+  it('should render one search group for each includes/excludes item', async () => {
     const mockGetCohort = jest.spyOn(cohortsApi(), 'getCohort');
     const {id, namespace} = workspaceDataStub;
     const wrapper = component();

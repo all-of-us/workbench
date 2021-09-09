@@ -60,7 +60,7 @@ describe('AttributesPageV2', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should not call api and render a single dropdown for Height in Physical Measurements', async() => {
+  it('should not call api and render a single dropdown for Height in Physical Measurements', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(mockCountParticipants).toHaveBeenCalledTimes(0);
@@ -73,7 +73,7 @@ describe('AttributesPageV2', () => {
     expect(wrapper.find('[data-test-id="attributes-add-btn"]').first().props().disabled).toBeFalsy();
   });
 
-  it('should not call api and render two dropdowns for BP in Physical Measurements', async() => {
+  it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
     props.node = CriteriaWithAttributesStubVariables[1];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -87,7 +87,7 @@ describe('AttributesPageV2', () => {
     expect(wrapper.find('[data-test-id="attributes-add-btn"]').first().props().disabled).toBeFalsy();
   });
 
-  it('should call api for attributes for Labs and Measurements nodes', async() => {
+  it('should call api for attributes for Labs and Measurements nodes', async () => {
     props.node = CriteriaWithAttributesStubVariables[2];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -97,7 +97,7 @@ describe('AttributesPageV2', () => {
     expect(mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId).toHaveBeenCalledTimes(0);
   });
 
-  it('should call api for attributes for non COPE Survey nodes', async() => {
+  it('should call api for attributes for non COPE Survey nodes', async () => {
     ppiSurveys.next({[workspaceDataStub.cdrVersionId]: RootSurveyStubVariables});
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[3];
@@ -109,7 +109,7 @@ describe('AttributesPageV2', () => {
     expect(mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId).toHaveBeenCalledTimes(0);
   });
 
-  it('should call api for survey versions for COPE questions', async() => {
+  it('should call api for survey versions for COPE questions', async () => {
     ppiSurveys.next({[workspaceDataStub.cdrVersionId]: RootSurveyStubVariables});
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[4];
@@ -121,7 +121,7 @@ describe('AttributesPageV2', () => {
     expect(mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId).toHaveBeenCalledTimes(0);
   });
 
-  it('should call api for attributes and survey versions (Question and Answer conceptId call) for COPE answers', async() => {
+  it('should call api for attributes and survey versions (Question and Answer conceptId call) for COPE answers', async () => {
     ppiSurveys.next({[workspaceDataStub.cdrVersionId]: RootSurveyStubVariables});
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[5];
@@ -133,7 +133,7 @@ describe('AttributesPageV2', () => {
     expect(mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId).toHaveBeenCalledTimes(1);
   });
 
-  it('should call api for attributes and survey versions (Question conceptId call) for COPE Select a Value answers', async() => {
+  it('should call api for attributes and survey versions (Question conceptId call) for COPE Select a Value answers', async () => {
     ppiSurveys.next({[workspaceDataStub.cdrVersionId]: RootSurveyStubVariables});
     ppiQuestions.next(SurveyQuestionStubVariables);
     props.node = CriteriaWithAttributesStubVariables[6];
@@ -145,7 +145,7 @@ describe('AttributesPageV2', () => {
     expect(mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId).toHaveBeenCalledTimes(0);
   });
 
-  it('should render a single input for EQUAL operator and disable calculate button when empty', async() => {
+  it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
     const wrapper = component();
     const numericalDropdown = getNumericalDropdown(wrapper, '0');
     numericalDropdown.props.onChange({

@@ -25,12 +25,12 @@ beforeEach(() => {
   };
 });
 
-it('should render', async() => {
+it('should render', async () => {
   const wrapper = mount(<AccountCreationTos {...props} />);
   expect(wrapper.exists()).toBeTruthy();
 });
 
-it('should enable checkboxes and next button with user input', async() => {
+it('should enable checkboxes and next button with user input', async () => {
   const wrapper = mount(<AccountCreationTos {...props} />);
 
   expect(getPrivacyCheckbox(wrapper).prop('disabled')).toBeTruthy();
@@ -55,7 +55,7 @@ it('should enable checkboxes and next button with user input', async() => {
   expect(getNextButton(wrapper).prop('disabled')).toBeFalsy();
 });
 
-it('should call onComplete when next button is pressed', async() => {
+it('should call onComplete when next button is pressed', async () => {
   const wrapper = mount(<AccountCreationTos {...props} />);
 
   wrapper.setState({hasReadEntireTos: true});
@@ -67,7 +67,7 @@ it('should call onComplete when next button is pressed', async() => {
   expect(onCompleteSpy).toHaveBeenCalled();
 });
 
-it('should enable NEXT button and checkboxes should be selected if page is re-visited after Institution Page', async() => {
+it('should enable NEXT button and checkboxes should be selected if page is re-visited after Institution Page', async () => {
   props.afterPrev = true;
   const wrapper = mount(<AccountCreationTos {...props} />);
 

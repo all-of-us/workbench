@@ -262,7 +262,7 @@ const handleTerraShibbolethCallback = (token: string, spinnerProps: WithSpinnerO
     onDismiss: () => {
       spinnerProps.hideSpinner();
     }
-  })(async() => {
+  })(async () => {
     spinnerProps.showSpinner();
     await profileApi().updateNihToken({jwt: token});
     spinnerProps.hideSpinner();
@@ -279,7 +279,7 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
     onDismiss: () => {
       spinnerProps.hideSpinner();
     }
-  })(async() => {
+  })(async () => {
     spinnerProps.showSpinner();
     await profileApi().linkRasAccount({ authCode: code, redirectUrl: buildRasRedirectUrl() });
     spinnerProps.hideSpinner();
@@ -289,14 +289,14 @@ const handleRasCallback = (code: string, spinnerProps: WithSpinnerOverlayProps, 
   return handler();
 };
 
-const selfBypass = async(spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
+const selfBypass = async (spinnerProps: WithSpinnerOverlayProps, reloadProfile: Function) => {
   spinnerProps.showSpinner();
   await bypassAll(allModules, true);
   spinnerProps.hideSpinner();
   reloadProfile();
 };
 
-const syncExternalModules = async() => {
+const syncExternalModules = async () => {
   const aborter = new AbortController();
   try {
     await Promise.all([
@@ -314,7 +314,7 @@ const syncExternalModules = async() => {
 const Refresh = (props: {showSpinner: Function}) => <Button
     type='primary'
     style={styles.refreshButton}
-    onClick={async() => {
+    onClick={async () => {
       props.showSpinner();
       await syncExternalModules();
       location.reload(); // will also hide spinner
@@ -547,7 +547,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
         <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
         <Button
             style={{marginLeft: '0.5rem'}}
-            onClick={async() => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
+            onClick={async () => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
       </FlexRow>}
       <FadeBox style={styles.fadeBox}>
         <div style={styles.pleaseComplete}>

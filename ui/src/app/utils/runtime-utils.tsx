@@ -355,7 +355,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
 
     const getRuntime = withAsyncErrorHandling(
       () => runtimeStore.set({workspaceNamespace: null, runtime: null, runtimeLoaded: false}),
-      async() => {
+      async () => {
         let leoRuntime;
         try {
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
@@ -378,7 +378,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
   }, [currentWorkspaceNamespace]);
 };
 
-export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
+export const maybeInitializeRuntime = async (workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
   if (workspaceNamespace in compoundRuntimeOpStore.get()) {
     await new Promise<void>((resolve, reject) => {
       signal.addEventListener('abort', reject);
@@ -405,7 +405,7 @@ export const useDisk = (currentWorkspaceNamespace) => {
     }
     const getDisk = withAsyncErrorHandling(
       () => diskStore.set({workspaceNamespace: null, persistentDisk: null}),
-      async() => {
+      async () => {
         let pd;
         try {
           pd = await disksApi().getDisk(currentWorkspaceNamespace);
@@ -446,7 +446,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
         [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
         [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
     );
-    const initializePolling = async() => {
+    const initializePolling = async () => {
       if (!!runtimeStatus) {
         try {
           await LeoRuntimeInitializer.initialize({
@@ -467,7 +467,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject
     initializePolling();
   }, [runtimeStatus]);
 
-  const setStatusRequest = async(req) => {
+  const setStatusRequest = async (req) => {
     await switchCase(req,
       [RuntimeStatusRequest.DeleteRuntime, () => {
         return runtimeApi().deleteRuntime(currentWorkspaceNamespace, false);
@@ -523,7 +523,7 @@ export const useCustomRuntime = (currentWorkspaceNamespace, detachablePd):
   useEffect(() => {
     let mounted = true;
     const aborter = new AbortController();
-    const runAction = async() => {
+    const runAction = async () => {
       // Only delete if the runtime already exists.
       // TODO: It is likely more correct here to use the LeoRuntimeInitializer wait for the runtime
       // to reach a terminal status before attempting deletion.
