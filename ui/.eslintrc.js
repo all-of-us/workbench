@@ -83,12 +83,12 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'error',
     'dot-notation': 'error',
     'no-throw-literal': 'error',
-    'no-fallthrough': 'errpr', // For switch statements
+    'no-fallthrough': 'error', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'error',
     'no-unused-expressions': ['error', {'allowShortCircuit': true, 'allowTernary': true}],
     'react/jsx-curly-spacing': ['error', {'when': 'never'}],
-    'react/jsx-uses-vars': 'errpr',
+    'react/jsx-uses-vars': 'error',
     'no-var': 'error',
     'radix': 'error', // Add radix on parseInt
     'eqeqeq': ['error', 'always', {'null': 'ignore'}],
