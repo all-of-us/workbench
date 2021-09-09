@@ -94,7 +94,8 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendInstitutionUserInstructions(String contactEmail, String userInstructions)
+  public void sendInstitutionUserInstructions(
+      String contactEmail, String userInstructions, final String username)
       throws MessagingException {
 
     // TODO(RW-6482): Use a templating system rather than manual oneoff escaping.
@@ -102,7 +103,8 @@ public class MailServiceImpl implements MailService {
     // the strings should not be trusted as HTML.
     String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
     final String htmlMessage =
-        buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions));
+        buildHtml(
+            INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions, username));
 
     sendWithRetries(
         Collections.singletonList(contactEmail),
@@ -169,7 +171,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime));
+            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -195,7 +197,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime));
+            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -248,11 +250,12 @@ public class MailServiceImpl implements MailService {
   }
 
   private Map<EmailSubstitutionField, String> instructionsSubstitutionMap(
-      final String instructions) {
+      final String instructions, final String username) {
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.INSTRUCTIONS, instructions)
+        .put(EmailSubstitutionField.USED_CREDITS, username)
         .build();
   }
 
@@ -273,6 +276,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.USED_CREDITS, formatCurrency(currentUsage))
         .put(EmailSubstitutionField.CREDIT_BALANCE, formatCurrency(remainingBalance))
         .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
@@ -286,17 +290,19 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.FREE_CREDITS_RESOLUTION, getFreeCreditsResolutionText())
         .build();
   }
 
   private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
-      Instant expirationTime) {
+      Instant expirationTime, String username) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
+        .put(EmailSubstitutionField.USERNAME, username)
         .put(EmailSubstitutionField.URL, getURLAsHref())
         .build();
   }

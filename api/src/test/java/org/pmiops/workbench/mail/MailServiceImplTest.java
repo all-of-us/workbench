@@ -100,7 +100,9 @@ public class MailServiceImplTest extends SpringTest {
   @Test
   public void testSendInstructions() throws Exception {
     service.sendInstitutionUserInstructions(
-        "asdf@gmail.com", "Ask for help at help@myinstitute.org <script>window.alert()</script>>");
+        "asdf@gmail.com",
+        "Ask for help at help@myinstitute.org <script>window.alert()</script>>",
+        "asdf@fake-research");
     verify(mandrillApi, times(1))
         .send(
             argThat(
