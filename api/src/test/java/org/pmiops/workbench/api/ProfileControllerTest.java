@@ -291,8 +291,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     DUCC_VERSION = userService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUserOrThrow(FULL_USER_NAME)).thenReturn(googleUser);
-    when(mockDirectoryService.createUser(
-            GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
+    when(mockDirectoryService.createUser(GIVEN_NAME, FAMILY_NAME, FULL_USER_NAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
