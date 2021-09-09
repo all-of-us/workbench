@@ -1,16 +1,16 @@
-import {AccessRenewal} from 'app/pages/access/access-renewal';
-
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {profileStore, serverConfigStore} from 'app/utils/stores';
-import {mount} from 'enzyme';
-import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {mount} from 'enzyme';
+import SpyInstance = jest.SpyInstance;
+
+import {AccessRenewal} from 'app/pages/access/access-renewal';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
+import {AccessModule, InstitutionApi, ProfileApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {findNodesByExactText, findNodesContainingText, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import SpyInstance = jest.SpyInstance;
 
 const EXPIRY_DAYS = 365
 const oneYearFromNow = () => Date.now() + 1000 * 60 * 60 * 24 * EXPIRY_DAYS

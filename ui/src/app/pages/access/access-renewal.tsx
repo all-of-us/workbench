@@ -1,3 +1,7 @@
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+const {useState, useEffect} = React;
+
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -12,14 +16,16 @@ import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
-import {getAccessModuleBypassTime, getAccessModuleCompletionTime, maybeDaysRemaining, redirectToTraining} from 'app/utils/access-utils';
+import {
+  getAccessModuleBypassTime,
+  getAccessModuleCompletionTime,
+  getExpirationTimeFor,
+  maybeDaysRemaining,
+  redirectToTraining
+} from 'app/utils/access-utils';
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-
-const {useState, useEffect} = React;
 
 const renewalStyle = {
   h1: {
@@ -178,8 +184,13 @@ const ActionButton = (
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
 
 const RenewalCard = withStyle(renewalStyle.card)(
-  ({step, TitleComponent, lastCompletionTime, nextReviewTime, bypassTime = null, children, style}) => {
+  ({step, TitleComponent, modules, moduleName, children, style}) => {
+    const lastCompletionTime = getAccessModuleCompletionTime(modules, moduleName);
+    const nextReviewTime = getExpirationTimeFor(modules, moduleName)
+    const bypassTime = getAccessModuleBypassTime(modules, moduleName)
+
     const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(lastCompletionTime, bypassTime, nextReviewTime);
+
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><TitleComponent/></div>
@@ -226,9 +237,6 @@ export const AccessRenewal = fp.flow(
   }, []);
 
 
-  // Helpers
-  const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
-
   const wasBypassed = moduleName => switchCase(moduleName,
       [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
       [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
@@ -236,7 +244,7 @@ export const AccessRenewal = fp.flow(
       [AccessModule.PROFILECONFIRMATION, () => false],
       [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
 
-  const completeOrBypassed = moduleName => wasBypassed(moduleName) || !isExpiring(getExpirationTimeFor(moduleName));
+  const completeOrBypassed = moduleName => wasBypassed(moduleName) || !isExpiring(getExpirationTimeFor(modules, moduleName));
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
 
   // Render
@@ -272,25 +280,27 @@ export const AccessRenewal = fp.flow(
     <div style={{...renewalStyle.h2, margin: '1rem 0'}}>Please complete the following steps</div>
     <div style={{display: 'grid', gridTemplateColumns: 'auto 1fr', marginBottom: '1rem', alignItems: 'center', gap: '1rem'}}>
       {/* Profile */}
-      <RenewalCard step={1}
-        TitleComponent={() => 'Update your profile'}
-        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.PROFILECONFIRMATION)}
-        nextReviewTime={getExpirationTimeFor(AccessModule.PROFILECONFIRMATION)}>
+      <RenewalCard
+          step={1}
+          TitleComponent={() => 'Update your profile'}
+          modules={modules}
+          moduleName={AccessModule.PROFILECONFIRMATION}>
         <div style={{marginBottom: '0.5rem'}}>Please update your profile information if any of it has changed recently.</div>
         <div>Note that you are obliged by the Terms of Use of the Workbench to provide keep your profile
           information up-to-date at all times.
         </div>
-        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.PROFILECONFIRMATION))}
+        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(modules, AccessModule.PROFILECONFIRMATION))}
           actionButtonText='Review'
           completedButtonText='Confirmed'
           onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}
           wasBypassed={wasBypassed(AccessModule.PROFILECONFIRMATION)} />
       </RenewalCard>
       {/* Publications */}
-      <RenewalCard step={2}
-        TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
-        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.PUBLICATIONCONFIRMATION)}
-        nextReviewTime={getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION)}>
+      <RenewalCard
+          step={2}
+          TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
+          modules={modules}
+          moduleName={AccessModule.PUBLICATIONCONFIRMATION}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
@@ -299,7 +309,7 @@ export const AccessRenewal = fp.flow(
              please contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
-          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION))}
+          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(modules, AccessModule.PUBLICATIONCONFIRMATION))}
             actionButtonText='Confirm'
             completedButtonText='Confirmed'
             onClick={async() => {
@@ -311,12 +321,12 @@ export const AccessRenewal = fp.flow(
             disabled={publications === null}
             style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
           <RadioButton id={noReportId}
-            disabled={!isExpiring(getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION))}
+            disabled={!isExpiring(getExpirationTimeFor(modules, AccessModule.PUBLICATIONCONFIRMATION))}
             style={{justifySelf: 'end'}} checked={publications === true}
             onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
           <RadioButton id={reportId}
-            disabled={!isExpiring(getExpirationTimeFor(AccessModule.PUBLICATIONCONFIRMATION))}
+            disabled={!isExpiring(getExpirationTimeFor(modules, AccessModule.PUBLICATIONCONFIRMATION))}
             style={{justifySelf: 'end'}}
             checked={publications === false}
             onChange={() => setPublications(false)}/>
@@ -324,21 +334,21 @@ export const AccessRenewal = fp.flow(
         </div>
       </RenewalCard>
       {/* Compliance Training */}
-      {enableComplianceTraining && <RenewalCard step={3}
-        TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
-        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.COMPLIANCETRAINING)}
-        nextReviewTime={getExpirationTimeFor(AccessModule.COMPLIANCETRAINING)}
-        bypassTime={getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)}>
-        <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
+      {enableComplianceTraining && <RenewalCard
+          step={3}
+          TitleComponent={() => <div><AoU/> Responsible Conduct of Research Training</div>}
+          modules={modules}
+          moduleName={AccessModule.COMPLIANCETRAINING}>
+      <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING))
+        {isExpiring(getExpirationTimeFor(modules, AccessModule.COMPLIANCETRAINING))
         && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING) &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
-          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING))}
+          <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(modules, AccessModule.COMPLIANCETRAINING))}
             actionButtonText='Complete Training'
             completedButtonText='Completed'
             onClick={() => {
@@ -346,7 +356,7 @@ export const AccessRenewal = fp.flow(
               redirectToTraining();
             }}
             wasBypassed={wasBypassed(AccessModule.COMPLIANCETRAINING)}/>
-          {isExpiring(getExpirationTimeFor(AccessModule.COMPLIANCETRAINING))
+          {isExpiring(getExpirationTimeFor(modules, AccessModule.COMPLIANCETRAINING))
           && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)
           && <Button
             disabled={refreshButtonDisabled}
@@ -359,13 +369,13 @@ export const AccessRenewal = fp.flow(
         </FlexRow>
       </RenewalCard>}
       {/* DUCC */}
-      <RenewalCard step={enableComplianceTraining ? 4 : 3}
-        TitleComponent={() => 'Sign Data User Code of Conduct'}
-        lastCompletionTime={getAccessModuleCompletionTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)}
-        nextReviewTime={getExpirationTimeFor(AccessModule.DATAUSERCODEOFCONDUCT)}
-        bypassTime={getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)}>
+      <RenewalCard
+          step={enableComplianceTraining ? 4 : 3}
+          TitleComponent={() => 'Sign Data User Code of Conduct'}
+          modules={modules}
+          moduleName={AccessModule.DATAUSERCODEOFCONDUCT}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
-        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(AccessModule.DATAUSERCODEOFCONDUCT))}
+        <ActionButton isModuleExpiring={isExpiring(getExpirationTimeFor(modules, AccessModule.DATAUSERCODEOFCONDUCT))}
           actionButtonText='View & Sign'
           completedButtonText='Completed'
           onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}
