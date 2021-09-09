@@ -104,7 +104,7 @@
     "enableFireCloudV2Billing" : false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": false,
+    "enableUnifiedUserAccessCron": true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {
