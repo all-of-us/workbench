@@ -64,7 +64,7 @@ module.exports = {
     '@typescript-eslint/semi': 'error',
     'simple-import-sort/sort': 'error',
     'space-before-function-paren': ['error', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-    'spaced-comment': ['warn', 'always', {'block': {'balanced': true}}],
+    'spaced-comment': ['error', 'always', {'block': {'balanced': true}}],
 
     /* Functionality */
     'constructor-super': 'error',
@@ -87,15 +87,15 @@ module.exports = {
     'no-use-before-define': 'off', // Needed for TS
     '@typescript-eslint/no-use-before-define': 'error',
     'no-unused-expressions': ['error', {'allowShortCircuit': true, 'allowTernary': true}],
-    'react/jsx-curly-spacing': ['warn', {'when': 'never'}],
-    'react/jsx-uses-vars': 'warn',
+    'react/jsx-curly-spacing': ['error', {'when': 'never'}],
+    'react/jsx-uses-vars': 'errpr',
     'no-var': 'error',
-    'radix': 'warn', // Add radix on parseInt
+    'radix': 'error', // Add radix on parseInt
     'eqeqeq': ['error', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    'eol-last': 'warn',
-    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'eol-last': 'error',
+    'max-len': ['error', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}],
     'prefer-const': ['error', {'destructuring': 'all'}],
   }
 };
