@@ -1,6 +1,5 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-const {useState, useEffect} = React;
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -24,6 +23,8 @@ import {
 import {useNavigation} from 'app/utils/navigation';
 import {profileStore, serverConfigStore, useStore} from 'app/utils/stores';
 import {AccessModule, AccessModuleStatus} from 'generated/fetch';
+
+const {useState, useEffect} = React;
 
 const renewalStyle = {
   h1: {
