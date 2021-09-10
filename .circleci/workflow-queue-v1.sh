@@ -199,8 +199,8 @@ while [[ "${is_running}" == "true" ]]; do
     printf "\n%s\n%s\n\n" "Jobs that have been created:" "${created_jobs}"
 
     # Find finished jobs only.
-    finished_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"success|failed\")))")
-    printf "\n%s\n%s\n\n" "Jobs that are finished:" "${finished_jobs}"
+    failed_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"failed\")))")
+    printf "\n%s\n%s\n\n" "Jobs that are failed:" "${failed_jobs}"
 
     # Find running/queued jobs only.
     running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
@@ -215,8 +215,8 @@ while [[ "${is_running}" == "true" ]]; do
     not_created_jobs=(`echo ${JOB_LIST[@]} ${created_job_names[@]} | tr ' ' '\n' | sort | uniq -u `)
     printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
 
-    # Wait while there is a job still is running or there is a job that has not been created.
-    if [[ $running_jobs ]] || [[ $not_created_jobs ]]; then
+    # Wait while there are jobs in running/queued OR there are jobs that have not been created and no failed jobs.
+    if [[ $running_jobs ]] || ( [[ ! $failed_jobs ]] && [[ $not_created_jobs ]] ); then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
