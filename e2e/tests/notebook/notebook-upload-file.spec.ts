@@ -30,19 +30,6 @@ describe('Python Kernel Notebook Test', () => {
 
     const notebook = await dataPage.createNotebook(pyNotebookName);
 
-    /*
-    await dataPage.openAnalysisPage();
-
-    const analysis = new WorkspaceAnalysisPage(page);
-    await analysis.waitForLoad();
-
-    const card = await analysis.findNotebookCard(pyNotebookName);
-    await card.clickResourceName();
-
-    const previewPage = new NotebookPreviewPage(page);
-    const notebook = await previewPage.openEditMode(pyNotebookName);
-*/
-
     // Select File menu => Open to open Upload tab.
     const newPage = await notebook.openUploadFilePage();
 
