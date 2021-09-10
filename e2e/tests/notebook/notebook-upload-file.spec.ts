@@ -13,7 +13,7 @@ import { takeScreenshot } from 'utils/save-file-utils';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Python Kernel Notebook Test', () => {
+describe('Notebook Upload File Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -23,7 +23,7 @@ describe('Python Kernel Notebook Test', () => {
   const pyFileName = 'nbstripoutput-filter.py';
   const pyFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${pyFileName}`);
 
-  test('Run Python code and download notebook', async () => {
+  test('Upload file and run Python code', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
