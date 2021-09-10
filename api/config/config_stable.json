@@ -47,7 +47,7 @@
     "extractionPetServiceAccount": "pet-116281557770103257351@aouwgscohortextraction-stable.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction-stable",
     "extractionMethodConfigurationName": "GvsExtractCohortFromSampleNames",
-    "extractionMethodConfigurationVersion": 2,
+    "extractionMethodConfigurationVersion": 3,
     "extractionCohortsDataset": "fc-aou-cdr-stable-ct.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-stable-ct.wgs_extraction_destination",
     "extractionTempTablesDataset": "fc-aou-cdr-stable-ct.wgs_extraction_temp_tables"
@@ -105,7 +105,7 @@
     "enableGpu": false,
     "enablePersistentDisk": false,
     "enableAccessModuleRewrite" : true,
-    "enableUnifiedUserAccessCron": false,
+    "enableUnifiedUserAccessCron": true,
     "enableStandardSourceDomains": false
   },
   "actionAudit": {

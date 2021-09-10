@@ -110,6 +110,12 @@
       "namespace": "aou-rw-7172272a",
       "id": "howtorunnotebooksinthebackground",
       "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "Demo - Hypertension Prevalence",
+      "namespace": "aou-rw-1f867de7",
+      "id": "duplicateofd16htnrevisionaftercodereview",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

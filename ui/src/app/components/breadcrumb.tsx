@@ -5,8 +5,7 @@ import {
   withCurrentCohort,
   withCurrentCohortReview,
   withCurrentConceptSet,
-  withCurrentWorkspace,
-  withRouteConfigData
+  withCurrentWorkspace
 } from 'app/utils';
 import {
   BreadcrumbType
@@ -147,8 +146,7 @@ interface Props {
   cohort: Cohort;
   cohortReview: CohortReview;
   conceptSet: ConceptSet;
-  routeConfigData: any;
-  reactRouteData: RouteDataStore;
+  routeData: RouteDataStore;
 }
 
 interface State {
@@ -160,8 +158,7 @@ export const Breadcrumb = fp.flow(
   withCurrentCohort(),
   withCurrentCohortReview(),
   withCurrentConceptSet(),
-  withRouteConfigData(),
-  withStore(routeDataStore, 'reactRouteData'),
+  withStore(routeDataStore, 'routeData'),
 )(
   class extends React.Component<Props, State> {
     constructor(props) {
@@ -219,7 +216,7 @@ export const Breadcrumb = fp.flow(
           : undefined;
 
       return getTrail(
-        this.props.routeConfigData.breadcrumb || this.props.reactRouteData.breadcrumb,
+        this.props.routeData.breadcrumb,
         this.props.workspace,
         this.props.cohort,
         this.props.cohortReview,

@@ -1,4 +1,3 @@
-import {routeConfigDataStore} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 import * as fp from 'lodash/fp';
@@ -44,15 +43,11 @@ export const useQuery = (): URLSearchParams => {
   return parseQueryParams(location.search);
 };
 
-// TODO angular2react: This isn't really the right place to be making the store updates but it's the
-// best place I found while we're using both angular and react routers
 export const withRouteData = WrappedComponent => ({intermediaryRoute = false, routeData, ...props}) => {
   const params = useParams();
 
   useEffect(() => {
     if (!intermediaryRoute) {
-      routeConfigDataStore.next(routeData);
-
       if (!fp.isEqual(routeDataStore.get(), routeData)) {
         routeDataStore.set(routeData);
       }

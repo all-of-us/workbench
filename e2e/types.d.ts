@@ -2,6 +2,8 @@ export interface ICredentialConfig {
   USER_NAME: string;
   PASSWORD: string;
   INSTITUTION_CONTACT_EMAIL: string;
+  LOGIN_GOV_PASSWORD: string;
+  LOGIN_GOV_2FA_SECRET: string;
   // This is passed via a file to leave open the future option to allow token
   // refresh during a Puppeteer test run, and also limits logging exposure of the token.
   USER_ACCESS_TOKEN_FILE: string;
@@ -31,6 +33,7 @@ export interface IEnvConfig {
   ADMIN_TEST_USER: string;
   DEFAULT_CDR_VERSION_NAME: string;
   ALTERNATIVE_CDR_VERSION_NAME: string;
+  LOGIN_GOV_USER: string;
 }
 
 export interface IPageUrl {

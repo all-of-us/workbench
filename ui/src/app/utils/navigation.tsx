@@ -25,7 +25,6 @@ export const currentCohortStore = new BehaviorSubject<FetchCohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<FetchCohortReview>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<FetchConceptSet>(undefined);
 export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
-export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefined);
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
