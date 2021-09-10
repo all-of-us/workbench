@@ -99,7 +99,7 @@ const syncAndReload = fp.flow(
 
 // Helper Functions
 
-const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= serverConfigStore.get().config.accessRenewalLookback;
+const isExpiring = (expiration: number): boolean => daysFromNow(expiration) <= serverConfigStore.get().config.accessRenewalLookback;
 const isModuleExpiring = (status: AccessModuleStatus): boolean => isExpiring(status.expirationEpochMillis);
 
 const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModuleStatus[]) => {
