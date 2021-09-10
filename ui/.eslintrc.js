@@ -7,7 +7,6 @@ module.exports = {
     'prefer-arrow',
     '@typescript-eslint',
     'simple-import-sort',
-    'prettier',
     'jest'
   ],
   extends: [],
@@ -30,8 +29,6 @@ module.exports = {
 
   // The eslint rules can be found here: https://eslint.org/docs/rules/
   rules: {
-    // 'prettier/prettier': 'warn', // Possibly use prettier to handle some formatting
-
     /* Best Practices */
     'no-multi-spaces': 'error',
 
