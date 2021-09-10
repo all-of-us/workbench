@@ -167,7 +167,7 @@ const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterf
   </Button>;
 
 interface ActionButtonInterface {
-  status: AccessModuleStatus;
+  moduleStatus: AccessModuleStatus;
   actionButtonText: string;
   completedButtonText: string;
   onClick: Function;
@@ -175,9 +175,9 @@ interface ActionButtonInterface {
   style?: React.CSSProperties;
 }
 const ActionButton = (
-  {status, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
-  const wasBypassed = !!status.bypassEpochMillis;
-  return wasBypassed || !isModuleExpiring(status)
+  {moduleStatus, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
+  const wasBypassed = !!moduleStatus.bypassEpochMillis;
+  return wasBypassed || !isModuleExpiring(moduleStatus)
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
@@ -287,14 +287,13 @@ export const AccessRenewal = fp.flow(
         <ActionButton
             actionButtonText='Review'
             completedButtonText='Confirmed'
-            status={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
+            moduleStatus={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
             onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
       {/* Publications */}
       <RenewalCard
           step={2}
           TitleComponent={() => 'Report any publications or presentations based on your research using the Researcher Workbench'}
-          modules={modules}
           moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}>
         <div>The <AoU/> Publication and Presentation Policy requires that you report any upcoming publication or
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
@@ -307,7 +306,7 @@ export const AccessRenewal = fp.flow(
           <ActionButton
               actionButtonText='Confirm'
               completedButtonText='Confirmed'
-              status={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}
+              moduleStatus={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}
               onClick={async() => {
                 setLoading(true);
                 await confirmPublications();
@@ -347,7 +346,7 @@ export const AccessRenewal = fp.flow(
           <ActionButton
               actionButtonText='Complete Training'
               completedButtonText='Completed'
-              status={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
+              moduleStatus={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
               onClick={() => {
                 setRefreshButtonDisabled(false);
                 redirectToTraining();
@@ -371,7 +370,7 @@ export const AccessRenewal = fp.flow(
         <ActionButton
             actionButtonText='View & Sign'
             completedButtonText='Completed'
-            status={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
+            moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
             onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
     </div>
