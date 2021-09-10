@@ -3,7 +3,7 @@ import {act} from 'react-dom/test-utils';
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import {Button, Link} from 'app/components/buttons';
+import {Button, AoULink} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
 import {ConfirmDelete, Props, RuntimePanelWrapper} from 'app/pages/analysis/runtime-panel';
@@ -908,7 +908,7 @@ describe('RuntimePanel', () => {
   it('should allow runtime deletion', async() => {
     const wrapper = await component();
 
-    wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
+    wrapper.find(AoULink).find({'aria-label': 'Delete Environment'}).first().simulate('click');
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
 
     await mustClickButton(wrapper, 'Delete');
@@ -921,7 +921,7 @@ describe('RuntimePanel', () => {
   it('should allow cancelling runtime deletion', async() => {
     const wrapper = await component();
 
-    wrapper.find(Link).find({'aria-label': 'Delete Environment'}).first().simulate('click');
+    wrapper.find(AoULink).find({'aria-label': 'Delete Environment'}).first().simulate('click');
     expect(wrapper.find(ConfirmDelete).exists()).toBeTruthy();
 
     // Click cancel

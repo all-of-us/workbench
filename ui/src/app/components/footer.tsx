@@ -1,4 +1,4 @@
-import { Link, StyledAnchorTag } from 'app/components/buttons';
+import { AoULink, StyledAnchorTag } from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SemiBoldHeader} from 'app/components/headers';
 import {AoU} from 'app/components/text-wrappers';
@@ -168,7 +168,7 @@ const WorkbenchFooter = withUserProfile()(
                                        analyticsFn={tracker.SupportFAQ}>
                   FAQs
                 </NewTabFooterAnchorTag>
-                <Link style={styles.footerAnchor} onClick={() => {
+                <AoULink style={styles.footerAnchor} onClick={() => {
                   tracker.ContactUs('Zendesk');
                   openZendeskWidget(
                     this.props.profileState.profile.givenName,
@@ -178,7 +178,7 @@ const WorkbenchFooter = withUserProfile()(
                   ); }
                 } href='#'>
                   Contact Us
-                </Link>
+                </AoULink>
               </FlexColumn>
             </FlexRow>
           </FooterSection>

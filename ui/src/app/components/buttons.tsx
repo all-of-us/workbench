@@ -5,10 +5,10 @@ import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
-import {useNavigation} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
+import { Link } from 'react-router-dom';
 
 
 export const styles = reactStyles({
@@ -330,7 +330,7 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   >{children}</Clickable>;
 };
 
-export const Link = ({disabled = false, style = {}, children, ...props}) => {
+export const AoULink = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
     style: {color: colors.accent},
     hover: {textDecoration: 'underline'}
@@ -342,27 +342,41 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
 };
 
 export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {}, ...props}) => {
-  const [, navigateByUrl] = useNavigation();
   const inlineAnchor = {
     display: 'inline-block',
     color: colors.accent
   };
 
   // TODO RW-7154: change to react-router Link
-  return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
-              }
-            }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+  // return <a href={href}
+  //           onClick={e => {
+  //             if (analyticsFn) {
+  //               analyticsFn();
+  //             }
+  //             // This does same page navigation iff there is no key pressed and target is not set.
+  //             if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
+  //               navigateByUrl(href, {
+  //                 preventDefaultIfNoKeysPressed: true,
+  //                 event: e
+  //               });
+  //             }
+  //           }}
+  //           style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+  return <Link
+      to={href}
+      style={{...inlineAnchor, ...style}}
+      onClick={e => {
+        if (analyticsFn) {
+          analyticsFn();
+        }
+
+        if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
+
+        }
+      }}
+  >
+    {children}
+  </Link>
 };
 
 interface SlidingFabState {

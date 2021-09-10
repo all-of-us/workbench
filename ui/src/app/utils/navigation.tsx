@@ -52,6 +52,12 @@ export const useNavigation = () => {
   return [navigate, navigateByUrl];
 };
 
+export const preventDefaultIfNoKeysPressed = (e: React.MouseEvent) => {
+  if (!(e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+  }
+}
+
 interface NavigateExtras {
   queryParams?: object;
   preventDefaultIfNoKeysPressed?: boolean;

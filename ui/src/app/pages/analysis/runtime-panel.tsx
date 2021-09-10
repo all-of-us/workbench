@@ -1,4 +1,4 @@
-import {Button, Clickable, Link} from 'app/components/buttons';
+import {Button, Clickable, AoULink} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {ErrorMessage, WarningMessage} from 'app/components/messages';
@@ -1563,25 +1563,25 @@ const RuntimePanel = fp.flow(
            }
         {runtimeCtx.unattachedPdExists && !runtimeExists ?
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-                <Link
+                <AoULink
                     style={{...styles.deleteLink, ...(
                           (disableControls) ?
                               {color: colorWithWhiteness(colors.dark, .4)} : {}
                       )}}
                     aria-label='Delete Persistent Disk'
                     disabled={disableControls}
-                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</Link>
+                    onClick={() => setPanelContent(PanelContent.DeleteUnattachedPd)}>Delete Persistent Disk</AoULink>
                 {!pdSizeReduced ? renderCreateButton() : renderNextButton()}
             </FlexRow> :
             <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-              <Link
+              <AoULink
                   style={{...styles.deleteLink, ...(
                         (disableControls || !runtimeExists) ?
                             {color: colorWithWhiteness(colors.dark, .4)} : {}
                     )}}
                   aria-label='Delete Environment'
                   disabled={disableControls || !runtimeExists}
-                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</Link>
+                  onClick={() => setPanelContent(PanelContent.DeleteRuntime)}>Delete Environment</AoULink>
               {runtimeExists || (pdExists && pdSizeReduced) ? renderNextButton() : renderCreateButton()}
             </FlexRow>
         }
