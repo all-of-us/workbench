@@ -9,6 +9,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
+import {preventDefaultIfNoKeysPressed} from "../utils/navigation";
 
 
 export const styles = reactStyles({
@@ -347,21 +348,6 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
     color: colors.accent
   };
 
-  // TODO RW-7154: change to react-router Link
-  // return <a href={href}
-  //           onClick={e => {
-  //             if (analyticsFn) {
-  //               analyticsFn();
-  //             }
-  //             // This does same page navigation iff there is no key pressed and target is not set.
-  //             if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-  //               navigateByUrl(href, {
-  //                 preventDefaultIfNoKeysPressed: true,
-  //                 event: e
-  //               });
-  //             }
-  //           }}
-  //           style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
   return <Link
       to={href}
       style={{...inlineAnchor, ...style}}
@@ -371,7 +357,7 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
         }
 
         if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-
+          preventDefaultIfNoKeysPressed(e)
         }
       }}
   >
