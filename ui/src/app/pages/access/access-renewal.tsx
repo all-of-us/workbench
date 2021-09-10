@@ -117,12 +117,14 @@ const withInvalidDateHandling = date => {
   }
 };
 
-const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
-  const userCompletedModule = !!lastConfirmedTime;
-  const userBypassedModule = !!bypassTime;
-  const lastConfirmedDate = withInvalidDateHandling(lastConfirmedTime);
-  const nextReviewDate = withInvalidDateHandling(nextReviewTime);
-  const bypassDate = withInvalidDateHandling(bypassTime);
+const computeDisplayDates = (status: AccessModuleStatus) => {
+  const {completionEpochMillis, expirationEpochMillis, bypassEpochMillis} = status;
+
+  const userCompletedModule = !!completionEpochMillis;
+  const userBypassedModule = !!bypassEpochMillis;
+  const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
+  const nextReviewDate = withInvalidDateHandling(expirationEpochMillis);
+  const bypassDate = withInvalidDateHandling(bypassEpochMillis);
 
   return cond(
     // User has bypassed module
@@ -131,8 +133,8 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
     [!userCompletedModule && !userBypassedModule, () =>
       ({lastConfirmedDate: 'Unavailable (not completed)', nextReviewDate: 'Unavailable (not completed)'})],
     // User completed training, but is in the lookback window
-    [userCompletedModule && isExpiring(nextReviewTime), () => {
-      const daysRemaining = daysFromNow(nextReviewTime);
+    [userCompletedModule && isExpiring(expirationEpochMillis), () => {
+      const daysRemaining = daysFromNow(expirationEpochMillis);
       const daysRemainingDisplay = daysRemaining >= 0 ? `(${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})` : '(expired)';
       return {
         lastConfirmedDate,
@@ -140,17 +142,12 @@ const computeDisplayDates = (lastConfirmedTime, bypassTime, nextReviewTime) => {
       };
     }],
     // User completed training and is up to date
-    [userCompletedModule && !isExpiring(nextReviewTime), () => {
-      const daysRemaining = daysFromNow(nextReviewTime);
+    [userCompletedModule && !isExpiring(expirationEpochMillis), () => {
+      const daysRemaining = daysFromNow(expirationEpochMillis);
       return {lastConfirmedDate, nextReviewDate: `${nextReviewDate} (${daysRemaining} day${daysRemaining !== 1 ? 's' : ''})`};
     }]
   );
 };
-
-const computeDisplayDates2 = (status: AccessModuleStatus) => {
-  const {completionEpochMillis, expirationEpochMillis, bypassEpochMillis} = status;
-  return computeDisplayDates(completionEpochMillis, bypassEpochMillis, expirationEpochMillis);
-}
 
 
 // Helper / Stateless Components
@@ -205,7 +202,7 @@ const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 1
 
 const RenewalCard = withStyle(renewalStyle.card)(
   ({step, TitleComponent, moduleStatus, children, style}) => {
-    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates2(moduleStatus);
+    const {lastConfirmedDate, nextReviewDate} = computeDisplayDates(moduleStatus);
     return <FlexColumn style={style}>
       <div style={renewalStyle.h3}>STEP {step}</div>
       <div style={renewalStyle.h3}><TitleComponent/></div>
