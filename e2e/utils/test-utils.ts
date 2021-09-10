@@ -32,9 +32,11 @@ declare const window: Window &
     setTestAccessTokenOverride: any;
   };
 
-export async function signInWithAccessToken(page: Page,
-                                            tokenFilename = config.USER_ACCESS_TOKEN_FILE,
-                                            postSignInPage: AuthenticatedPage = new HomePage(page)): Promise<void> {
+export async function signInWithAccessToken(
+  page: Page,
+  tokenFilename = config.USER_ACCESS_TOKEN_FILE,
+  postSignInPage: AuthenticatedPage = new HomePage(page)
+): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
   logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);

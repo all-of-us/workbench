@@ -54,7 +54,9 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    logger.error(`Failed to find the document title contains "${titleSubstr}". Actual page title is "${await page.title()}"`);
+    logger.error(
+      `Failed to find the document title contains "${titleSubstr}". Actual page title is "${await page.title()}"`
+    );
     logger.error(err.stack);
     throw new Error(err);
   }
