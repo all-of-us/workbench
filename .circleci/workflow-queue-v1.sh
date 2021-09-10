@@ -15,8 +15,8 @@ WORKFLOW_NAME="build-test-deploy"
 PROJECT_SLUG="all-of-us/workbench"
 
 # List of jobs in build-test-deploy workflow on master branch.
-JOBS=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test" "api-integration-test" "api-local-test")
-JOBS+=("api-unit-test" "wait_until_previous_workflow_done" "ui-unit-test" "puppeteer-env-setup" "api-bigquery-test")
+JOB_LIST=("puppeteer-test-2-1" "ui-deploy-to-test" "api-deploy-to-test" "api-integration-test" "api-local-test")
+JOB_LIST+=("api-unit-test" "wait_until_previous_workflow_done" "ui-unit-test" "puppeteer-env-setup" "api-bigquery-test")
 
 
 #********************
@@ -83,38 +83,66 @@ fetch_older_pipelines() {
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | select(.start_time < \"${1}\") | [{workflow_id: .workflows.workflow_id}] | unique | .[] | .workflow_id")
 }
 
-fetch_active_jobs() {
-  printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
+fetch_jobs() {
+  printf '%s\n' "Fetching created jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
   local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
   local curl_result=$(circle_get "${get_path}")
+
   if [[ ! "${curl_result}" ]]; then
     printf "Curl request failed. workflow_id \"${1}\"."
     exit 1
   fi
 
-  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
-  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
-
   jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
   jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch }"
+  jq_filter=".branch==\"${BRANCH}\" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
 
   __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
 
-# V1 "/project/" api response does not show jobs that have not been queued or started.
-# We need to check all expected jobs are found api response.
-found_all_jobs() {
-  printf '%s\n' "Check if all jobs have started."
-  running_jobs=${1}
-  for name in ${JOBS}; do
-    printf '%s\n' "name: ${name}"
-    if [[ ! " ${running_jobs[*]} " =~ " ${name} " ]]; then
-      false
-    fi
-  done
-  return
+fetch_running_jobs() {
+  printf '%s\n' "Fetching running jobs in workflow_id \"${1}\" on \"${BRANCH}\" branch."
+  local get_path="project/${PROJECT_SLUG}/tree/${BRANCH}?shallow=true"
+  local curl_result=$(circle_get "${get_path}")
+
+  if [[ ! "${curl_result}" ]]; then
+    printf "Curl request failed. workflow_id \"${1}\"."
+    exit 1
+  fi
+
+  jq_object="{ workflow_name: .workflows.workflow_name, workflow_id: .workflows.workflow_id, "
+  jq_object+="job_name: .workflows.job_name, build_num, start_time, status, branch, build_url }"
+  jq_filter=".branch==\"${BRANCH}\" and (.status | test(\"running|queued\")) "
+  jq_filter+=" and .workflows.workflow_name==\"${WORKFLOW_NAME}\" and .workflows.workflow_id==\"${1}\""
+
+  __=$(echo "${curl_result}" | jq -r ".[] | select(${jq_filter}) | ${jq_object}")
 }
 
+compare_arrays() {
+  arg1=$1[@]
+  array1=("${!arg1}")
+
+  arg2=$2[@]
+  array2=("${!arg2}")
+
+  # ${#array1[*]} returns the number of elements in array
+  if [ ${#array1[*]} != ${#array2[*]} ]; then
+    printf "%s\n" "arrays size are not equals"
+    false; return
+  fi
+  printf "%s\n" "arrays size are equals"
+
+  # ${!array1[*]} which returns a list of indexes.
+  for ii in ${!array1[*]}; do
+    if [ "${array1[$ii]}" != "${array2[$ii]}" ]; then
+      printf "%s\n" "arrays are not equals"
+      false; return
+    fi
+  done
+
+  printf "%s\n" "arrays are equals"
+  true; return
+}
 
 #********************
 # RUNNING
@@ -144,40 +172,49 @@ if [[ -z $pipeline_workflow_ids ]]; then
   printf "%s\n" "No workflow currently running on master branch."
   exit 0
 fi
+# Filter out duplicate workflow id.
+workflow_ids=$(echo $pipeline_workflow_ids | tr ' ' '\n' | sort --u)
+printf "%s\n%s\n\n" "Currently running workflow_ids:" "${workflow_ids}"
 
-unique_workflow_id=$(echo $pipeline_workflow_ids | sort --u)
-printf "%s\n%s\n\n" "Currently running workflow_id are:" "${unique_workflow_id}"
 
-
-# Wait as long as "pipelines" variable is not empty until max time has reached.
-# Max wait time until workflows have finished is 45 minutes because e2e tests may take a long time to finish.
+# Max wait time until workflows have finished is 60 minutes.
+# Because there could be several master jobs running/waiting in queue. Also because e2e tests take a while to finish.
 # DISCLAIMER This max time may not be enough.
-max_time=$((45 * 60))
+max_time=$((60 * 60))
 is_running=true
 waited_time=0
-# sleep_time and time_counter must be same.
-sleep_time="20s"
-sleep_time_counter=20
+# sleep 30 seconds. The sleep_time and time_counter must be same.
+sleep_time="30s"
+sleep_time_counter=30
 
 while [[ "${is_running}" == "true" ]]; do
   printf "\n***\n"
 
-  for id in ${unique_workflow_id}; do
+  for id in ${workflow_ids}; do
     is_running=false
-    # Find all running/queued jobs in this workflow_id.
-    fetch_active_jobs "${id}"
-    active_jobs=$__
-    printf "\n%s\n%s\n" "Active workflow and jobs:" "${active_jobs}"
 
-    # Is there any job that has not started at all?
-    jobs=$(echo $active_jobs | jq .job_name)
-    printf "\n%s\n" "jobs:" "${jobs}"
+    # Find jobs that have been created (listed jobs in api response): Include jobs with status running, queued, failed, success.
+    fetch_jobs "${id}"
+    created_jobs=$__
 
-    found_all_jobs ${jobs}
-    found_all=$__
-    printf "\n%s\n" "found_all:" "${found_all}"
+    # Find failed jobs only.
+    failed_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"failed\")))")
+    printf "\n%s\n%s\n\n" "Find jobs that have failed:" "${failed_jobs}"
 
-    if [[ $active_jobs ]] || [[ ! $found_all ]]; then
+    # Find running/queued jobs only.
+    running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
+    printf "\n%s\n%s\n\n" "Find jobs that are running or queued:" "${running_jobs}"
+
+    # Find job names that have not been created: Include downstream jobs.
+    created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
+
+    # V1 "/project/" api response does not show jobs that have not been created.
+    # We need to compare created jobs list against expected jobs list.
+    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_job_names[@]} | tr ' ' '\n' | sort | uniq -u `)
+    printf "\n%s\n" "Jobs that have not been created:" "${not_created_jobs}"
+
+    # Wait while there are jobs in running/queued OR there are jobs that have not been created and no failed jobs.
+    if [[ $running_jobs ]] || ( [[ ! $failed_jobs ]] && [[ $not_created_jobs ]] ); then
       printf "\n%s\n" "Waiting for previously submitted pipelines to finish. sleep ${sleep_time}. Please wait..."
       sleep $sleep_time
       waited_time=$((sleep_time_counter + waited_time))
@@ -194,4 +231,4 @@ while [[ "${is_running}" == "true" ]]; do
   fi
 done
 
-printf "\n%s\n" "Finished waiting. Final is_running=${is_running}";
+printf "\n%s\n%s\n" "Finished waiting." "is_running=${is_running}";
