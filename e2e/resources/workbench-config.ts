@@ -39,7 +39,7 @@ const local: IEnvConfig = {
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
 // workbench test environment
@@ -54,7 +54,7 @@ const test: IEnvConfig = {
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
 // workbench staging environment
@@ -69,7 +69,7 @@ const staging: IEnvConfig = {
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
 // NOT WORKING: workbench stable environment
@@ -84,7 +84,7 @@ const stable: IEnvConfig = {
   READER_USER: 'TODO - NOT AVAILABLE',
   ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
   ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
 // workbench perf environment
@@ -99,7 +99,7 @@ const perf: IEnvConfig = {
   ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
   ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org'
 };
 
 const environment = {
