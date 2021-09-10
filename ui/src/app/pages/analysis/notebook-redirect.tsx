@@ -197,20 +197,20 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 
     const icon = progressCardIcons.get(cardState);
     return <div data-test-id={isCurrent ? 'current-progress-card' : ''}
-                style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
-      styles.progressCard}>
+      style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
+        styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
-                            data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
+        data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
         <React.Fragment>
           {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
-          <ClrIcon shape={icon.shape} style={isComplete ?
-          {...styles.progressIcon, ...styles.progressIconDone,
-            transform: icon.rotation} :
-            {...styles.progressIcon, transform: icon.rotation}}/>}
+            <ClrIcon shape={icon.shape} style={isComplete ?
+              {...styles.progressIcon, ...styles.progressIconDone,
+                transform: icon.rotation} :
+              {...styles.progressIcon, transform: icon.rotation}}/>}
         </React.Fragment>}
-        <div style={styles.progressText}>
-          {renderText()}
-        </div>
+      <div style={styles.progressText}>
+        {renderText()}
+      </div>
     </div>;
   };
 
@@ -425,7 +425,7 @@ export const NotebookRedirect = fp.flow(
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
-               data-test-id='notebook-redirect'>
+            data-test-id='notebook-redirect'>
             <h2 style={{lineHeight: 0}}>
               {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
               {this.getNotebookName()}
@@ -435,7 +435,7 @@ export const NotebookRedirect = fp.flow(
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
             {Array.from(progressCardStates, ([key, _], index) => {
               return <ProgressCard key={index} progressState={progress} cardState={key}
-                                   creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
+                creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
             })}
           </div>
           <FlexRow style={styles.reminderText}>

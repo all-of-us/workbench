@@ -250,7 +250,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
 
     // Finally, we distinguish between the two types of InstitutionMembershipRequirements in terms of user messaging.
     const selectedInstitutionObj = fp.find((institution) =>
-        institution.shortName === institutionShortName, institutions);
+      institution.shortName === institutionShortName, institutions);
     if (selectedInstitutionObj.registeredTierMembershipRequirement === InstitutionMembershipRequirement.ADDRESSES) {
       // Institution requires an exact email address match and the email is not in allowed emails list
       return <EmailAddressMismatchErrorMessage/>;
@@ -328,7 +328,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     const errors = this.validate();
 
     return <div id='account-creation-institution'
-                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
+      style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       <FlexRow>
         <FlexColumn style={{marginTop: '0.5rem', marginRight: '2rem'}}>
@@ -353,11 +353,11 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               Your institution will be notified that you have registered using your institutional credentials.
             </div>
             <Dropdown
-                data-test-id='institution-dropdown'
-                style={styles.wideInputSize}
-                options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
-                value={institutionShortName}
-                onChange={(e) => this.onInstitutionChange(e.value)}
+              data-test-id='institution-dropdown'
+              style={styles.wideInputSize}
+              options={institutions.map(inst => ({'value': inst.shortName, 'label': inst.displayName}))}
+              value={institutionShortName}
+              onChange={(e) => this.onInstitutionChange(e.value)}
             />
             {this.state.institutionLoadError &&
             <ErrorDiv data-test-id='data-load-error'>
@@ -369,29 +369,29 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               <label style={styles.text}>
                 Don't see your institution listed? Help us add it to our growing list by </label>
               <a href={'https://www.researchallofus.org/institutional-agreements/'} target='_blank'
-                 style={{color: colors.accent}}
-                 onClick={() => {
-                   AnalyticsTracker.Registration.InstitutionNotListed();
-                 }}>
+                style={{color: colors.accent}}
+                onClick={() => {
+                  AnalyticsTracker.Registration.InstitutionNotListed();
+                }}>
                 submitting a request.
               </a>
             </div>
             <TextInputWithLabel containerStyle={{marginTop: '1rem', width: null}}
-                                value={contactEmail}
-                                inputId='contact-email'
-                                inputName='contactEmail'
-                                inputStyle={{width: '14rem'}}
-                                labelContent={<div>
-                                  <label style={styles.boldText}>
+              value={contactEmail}
+              inputId='contact-email'
+              inputName='contactEmail'
+              inputStyle={{width: '14rem'}}
+              labelContent={<div>
+                <label style={styles.boldText}>
                                     Your institutional email address
-                                  </label>
-                                  <div style={{...styles.text, fontSize: 14}}>
+                </label>
+                <div style={{...styles.text, fontSize: 14}}>
                                     This will be the primary email contact for your new account.
-                                  </div>
-                                </div>}
-                                invalid={!this.isEmailValid()}
-                                onBlur={() => this.onEmailBlur()}
-                                onChange={email => this.updateContactEmail(email)}>
+                </div>
+              </div>}
+              invalid={!this.isEmailValid()}
+              onBlur={() => this.onEmailBlur()}
+              onChange={email => this.updateContactEmail(email)}>
               <div style={{...inputStyles.iconArea}}>
                 <ValidationIcon data-test-id='email-validation-icon' validSuccess={this.isEmailValid()}/>
               </div>
@@ -406,12 +406,12 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </FlexRow>
               <div>
                 <Dropdown data-test-id='role-dropdown'
-                          style={styles.wideInputSize}
-                          placeholder={getRoleOptions(institutions, institutionShortName) ?
-                              '' : 'First select an institution above'}
-                          options={getRoleOptions(institutions, institutionShortName)}
-                          value={institutionalRoleEnum}
-                          onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
+                  style={styles.wideInputSize}
+                  placeholder={getRoleOptions(institutions, institutionShortName) ?
+                    '' : 'First select an institution above'}
+                  options={getRoleOptions(institutions, institutionShortName)}
+                  value={institutionalRoleEnum}
+                  onChange={(e) => this.updateAffiliationValue('institutionalRoleEnum', e.value)}/>
               </div>
             </div>
             {institutionalRoleEnum === InstitutionalRole.OTHER && <div style={{marginTop: '.5rem'}}>
@@ -422,17 +422,17 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
                 <PubliclyDisplayed style={{marginLeft: '1rem'}}/>
               </FlexRow>
               <TextInputWithLabel value={institutionalRoleOtherText}
-                                  inputStyle={styles.wideInputSize}
-                                  inputId='institutionalRoleOtherText'
-                                  inputName='institutionalRoleOtherText'
-                                  onChange={v => this.updateAffiliationValue('institutionalRoleOtherText', v)}/>
+                inputStyle={styles.wideInputSize}
+                inputId='institutionalRoleOtherText'
+                inputName='institutionalRoleOtherText'
+                onChange={v => this.updateAffiliationValue('institutionalRoleOtherText', v)}/>
             </div>
             }
           </div>
           }
           <FormSection style={{paddingBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
-                    onClick={() => this.props.onPreviousClick(this.state.profile)}>
+              onClick={() => this.props.onPreviousClick(this.state.profile)}>
               Previous
             </Button>
             <TooltipTrigger content={errors && <div data-test-id='validation-errors'>
@@ -442,11 +442,11 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
               </BulletAlignedUnorderedList>
             </div>} disabled={!errors}>
               <Button data-test-id='submit-button'
-                      disabled={loadingInstitutions || errors != null}
-                      onClick={() => {
-                        AnalyticsTracker.Registration.InstitutionPage();
-                        this.props.onComplete(this.state.profile);
-                      }}>
+                disabled={loadingInstitutions || errors != null}
+                onClick={() => {
+                  AnalyticsTracker.Registration.InstitutionPage();
+                  this.props.onComplete(this.state.profile);
+                }}>
                 Next
               </Button>
             </TooltipTrigger>

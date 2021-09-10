@@ -61,15 +61,15 @@ const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= fa
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
     <label style={styles.semiBold}>{label}</label>
     <Dropdown
-        style={{
-          minWidth: '70px',
-          width: '14rem',
-          ...dropdownStyle
-        }}
-        options={options}
-        onChange={(e) => onChange(e)}
-        value={initialValue}
-        disabled={disabled}
+      style={{
+        minWidth: '70px',
+        width: '14rem',
+        ...dropdownStyle
+      }}
+      options={options}
+      onChange={(e) => onChange(e)}
+      value={initialValue}
+      disabled={disabled}
     />
   </FlexColumn>;
 };
@@ -78,12 +78,12 @@ const ToggleWithLabelAndToggledText = ({label, initialValue, disabled, onToggle,
   return <FlexColumn data-test-id={dataTestId} style={{width: '8rem', flex: '0 0 auto'}}>
     <label>{label}</label>
     <Toggle
-        name={initialValue ? 'BYPASSED' : ''}
-        checked={initialValue}
-        disabled={disabled}
-        onToggle={(checked) => onToggle(checked)}
-        height={18}
-        width={33}
+      name={initialValue ? 'BYPASSED' : ''}
+      checked={initialValue}
+      disabled={disabled}
+      onToggle={(checked) => onToggle(checked)}
+      height={18}
+      width={33}
     />
   </FlexColumn>;
 };
@@ -117,15 +117,15 @@ interface FreeCreditsProps {
 
 const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
   const inputStyle = isAboveLimit ?
-  {...styles.textInput,
-    backgroundColor: colorWithWhiteness(colors.danger, .95),
-    borderColor: colors.danger,
-    color: colors.danger,
-  } :
-  {...styles.textInput,
-    ...styles.backgroundColorDark,
-    color: colors.disabled,
-  };
+    {...styles.textInput,
+      backgroundColor: colorWithWhiteness(colors.danger, .95),
+      borderColor: colors.danger,
+      color: colors.danger,
+    } :
+    {...styles.textInput,
+      ...styles.backgroundColorDark,
+      color: colors.disabled,
+    };
 
   return <React.Fragment>
     <TextInputWithLabel
@@ -303,15 +303,15 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
     await this.setState(fp.flow(
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionShortName'], institutionShortName),
       fp.set(
-          ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
+        ['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionDisplayName'],
         verifiedInstitutionOptions.find(
-              institution => institution.shortName === institutionShortName,
-              verifiedInstitutionOptions
-          ).displayName
+          institution => institution.shortName === institutionShortName,
+          verifiedInstitutionOptions
+        ).displayName
       ),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionRoleEnum'], undefined),
       fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], undefined)
-      ));
+    ));
     await this.validateEmail();
   }
 
@@ -430,13 +430,13 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
       institutionMembership: {truthiness: true}
     });
     return <FadeBox
-        style={{
-          margin: 'auto',
-          paddingTop: '1rem',
-          width: '96.25%',
-          minWidth: '1232px',
-          color: colors.primary
-        }}
+      style={{
+        margin: 'auto',
+        paddingTop: '1rem',
+        width: '96.25%',
+        minWidth: '1232px',
+        color: colors.primary
+      }}
     >
       {emailValidationError && <div>{emailValidationError}</div>}
       {institutionsLoadingError && <div>{institutionsLoadingError}</div>}
@@ -445,14 +445,14 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         <FlexRow style={{alignItems: 'center'}}>
           <RouterLink to='/admin/users'>
             <ClrIcon
-                shape='arrow'
-                size={37}
-                style={{
-                  backgroundColor: colorWithWhiteness(colors.accent, .85),
-                  color: colors.accent,
-                  borderRadius: '18px',
-                  transform: 'rotate(270deg)'
-                }}
+              shape='arrow'
+              size={37}
+              style={{
+                backgroundColor: colorWithWhiteness(colors.accent, .85),
+                color: colors.accent,
+                borderRadius: '18px',
+                transform: 'rotate(270deg)'
+              }}
             />
           </RouterLink>
           <SmallHeader style={{marginTop: 0, marginLeft: '0.5rem'}}>
@@ -461,33 +461,33 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         </FlexRow>
         <FlexRow style={{width: '100%', marginTop: '1rem', alignItems: 'center', justifyContent: 'space-between'}}>
           <FlexRow
-              style={{
-                alignItems: 'center',
-                backgroundColor: colorWithWhiteness(colors.primary, .85),
-                borderRadius: '5px',
-                padding: '0 .5rem',
-                height: '1.625rem',
-                width: '17.5rem'
-              }}
+            style={{
+              alignItems: 'center',
+              backgroundColor: colorWithWhiteness(colors.primary, .85),
+              borderRadius: '5px',
+              padding: '0 .5rem',
+              height: '1.625rem',
+              width: '17.5rem'
+            }}
           >
             <label style={{fontWeight: 600}}>
               Account access
             </label>
             <Toggle
-                name={updatedProfile.disabled ? 'Disabled' : 'Enabled'}
-                checked={!updatedProfile.disabled}
-                disabled={true}
-                data-test-id='account-access-toggle'
-                onToggle={() => {}}
-                style={{marginLeft: 'auto', paddingBottom: '0px'}}
-                height={18}
-                width={33}
+              name={updatedProfile.disabled ? 'Disabled' : 'Enabled'}
+              checked={!updatedProfile.disabled}
+              disabled={true}
+              data-test-id='account-access-toggle'
+              onToggle={() => {}}
+              style={{marginLeft: 'auto', paddingBottom: '0px'}}
+              height={18}
+              width={33}
             />
           </FlexRow>
           <TooltipTrigger
-              data-test-id='user-admin-errors-tooltip'
-              content={
-                errors && this.isSaveDisabled(errors) &&
+            data-test-id='user-admin-errors-tooltip'
+            content={
+              errors && this.isSaveDisabled(errors) &&
                 <BulletAlignedUnorderedList>
                   {errors.verifiedInstitutionalAffiliation && <li>Verified institutional affiliation can't be unset or left blank</li>}
                   {errors.institutionShortName && <li>You must choose an institution</li>}
@@ -495,12 +495,12 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                   {errors.institutionalRoleOtherText && <li>You must describe the user's role if you select Other</li>}
                   {errors.institutionMembership && <li>The user's contact email does not match the selected institution</li>}
                 </BulletAlignedUnorderedList>
-              }
+            }
           >
             <Button
-                type='primary'
-                disabled={this.isSaveDisabled(errors)}
-                onClick={() => this.updateAccountProperties()}
+              type='primary'
+              disabled={this.isSaveDisabled(errors)}
+              onClick={() => this.updateAccountProperties()}
             >
               Save
             </Button>
@@ -509,41 +509,41 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
         <FlexRow>
           <FlexColumn style={{width: '33%', marginRight: '1rem'}}>
             <TextInputWithLabel
-                labelText={'User name'}
-                placeholder={updatedProfile.givenName + ' ' + updatedProfile.familyName}
-                inputId={'userFullName'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'User name'}
+              placeholder={updatedProfile.givenName + ' ' + updatedProfile.familyName}
+              inputId={'userFullName'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Access tiers'}
-                placeholder={
-                  fp.flow(
-                    fp.map(fp.capitalize),
-                    fp.join(', '))
-                  (updatedProfile.accessTierShortNames)
-                }
-                inputId={'accessTiers'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'Access tiers'}
+              placeholder={
+                fp.flow(
+                  fp.map(fp.capitalize),
+                  fp.join(', '))
+                (updatedProfile.accessTierShortNames)
+              }
+              inputId={'accessTiers'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Username'}
-                placeholder={updatedProfile.username}
-                inputId={'username'}
-                disabled={true}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
+              labelText={'Username'}
+              placeholder={updatedProfile.username}
+              inputId={'username'}
+              disabled={true}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Contact email'}
-                value={updatedProfile.contactEmail}
-                inputId={'contactEmail'}
-                inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
-                containerStyle={styles.textInputContainer}
-                onChange={email => this.setContactEmail(email)}
+              labelText={'Contact email'}
+              value={updatedProfile.contactEmail}
+              inputId={'contactEmail'}
+              inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
+              containerStyle={styles.textInputContainer}
+              onChange={email => this.setContactEmail(email)}
             />
             <FreeCreditsUsage
               isAboveLimit={this.usageIsAboveLimit()}
@@ -552,23 +552,23 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
           </FlexColumn>
           <FlexColumn style={{width: '33%'}}>
             <DropdownWithLabel
-                label={'Free credit limit'}
-                options={this.getFreeCreditLimitOptions()}
-                onChange={async (event) => this.setFreeTierCreditDollarLimit(event.value)}
-                initialValue={updatedProfile.freeTierDollarQuota}
-                dropdownStyle={{width: '4.5rem'}}
-                dataTestId={'freeTierDollarQuota'}
+              label={'Free credit limit'}
+              options={this.getFreeCreditLimitOptions()}
+              onChange={async (event) => this.setFreeTierCreditDollarLimit(event.value)}
+              initialValue={updatedProfile.freeTierDollarQuota}
+              dropdownStyle={{width: '4.5rem'}}
+              dataTestId={'freeTierDollarQuota'}
             />
             {verifiedInstitutionOptions && <DropdownWithLabel
-                label={'Verified institution'}
-                options={this.getInstitutionDropdownOptions()}
-                onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
-                initialValue={
-                  updatedProfile.verifiedInstitutionalAffiliation
-                      ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
-                      : undefined
-                }
-                dataTestId={'verifiedInstitution'}
+              label={'Verified institution'}
+              options={this.getInstitutionDropdownOptions()}
+              onChange={async (event) => this.setVerifiedInstitutionOnProfile(event.value)}
+              initialValue={
+                updatedProfile.verifiedInstitutionalAffiliation
+                  ? updatedProfile.verifiedInstitutionalAffiliation.institutionShortName
+                  : undefined
+              }
+              dataTestId={'verifiedInstitution'}
             />}
             {emailValidationResponse && !emailValidationResponse.isValidMember && <EmailValidationErrorMessage
               emailValidationResponse={emailValidationResponse}
@@ -582,8 +582,8 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 options={this.getRoleOptionsForProfile() || []}
                 onChange={(event) => this.setInstitutionalRoleOnProfile(event.value)}
                 initialValue={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
-                    ? updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
-                    : undefined
+                  ? updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum
+                  : undefined
                 }
                 dataTestId={'institutionalRole'}
                 disabled={!updatedProfile.verifiedInstitutionalAffiliation.institutionShortName}
@@ -608,41 +608,41 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
               <label style={{fontWeight: 600}}>Bypass access to:</label>
               <FlexRow style={{marginTop: '.5rem'}}>
                 <ToggleWithLabelAndToggledText
-                    label={'2-factor auth'}
-                    initialValue={!!updatedProfile.twoFactorAuthBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'twoFactorAuthBypassToggle'}
+                  label={'2-factor auth'}
+                  initialValue={!!updatedProfile.twoFactorAuthBypassTime}
+                  disabled={true}
+                  onToggle={() => {}}
+                  dataTestId={'twoFactorAuthBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
-                    label={'Compliance training'}
-                    initialValue={!!updatedProfile.complianceTrainingBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'complianceTrainingBypassToggle'}
+                  label={'Compliance training'}
+                  initialValue={!!updatedProfile.complianceTrainingBypassTime}
+                  disabled={true}
+                  onToggle={() => {}}
+                  dataTestId={'complianceTrainingBypassToggle'}
                 />
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
                 <ToggleWithLabelAndToggledText
-                    label={'eRA Commons'}
-                    initialValue={!!updatedProfile.eraCommonsBypassTime}
-                    disabled={true}
-                    onToggle={(checked) => checked}
-                    dataTestId={'eraCommonsBypassToggle'}
+                  label={'eRA Commons'}
+                  initialValue={!!updatedProfile.eraCommonsBypassTime}
+                  disabled={true}
+                  onToggle={(checked) => checked}
+                  dataTestId={'eraCommonsBypassToggle'}
                 />
                 <ToggleWithLabelAndToggledText
-                    label={'Data User Code of Conduct'}
-                    initialValue={!!updatedProfile.dataUseAgreementBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'dataUseAgreementBypassToggle'}
+                  label={'Data User Code of Conduct'}
+                  initialValue={!!updatedProfile.dataUseAgreementBypassTime}
+                  disabled={true}
+                  onToggle={() => {}}
+                  dataTestId={'dataUseAgreementBypassToggle'}
                 />
                 {enableRasLoginGovLinking && <ToggleWithLabelAndToggledText
-                    label={'RAS Login.gov Link'}
-                    initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'rasLinkLoginGovBypassToggle'}
+                  label={'RAS Login.gov Link'}
+                  initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
+                  disabled={true}
+                  onToggle={() => {}}
+                  dataTestId={'rasLinkLoginGovBypassToggle'}
                 />}
               </FlexRow>
             </div>

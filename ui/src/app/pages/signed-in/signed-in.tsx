@@ -128,20 +128,20 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     <NavBar/>
     <FlexRow style={{position: 'relative', flex: '1 0 auto'}}>
       <div
-          style={styles.backgroundImage}
+        style={styles.backgroundImage}
       />
       {/* We still want people to be able to access the homepage, etc. even if they shouldn't */}
       {/* know about CDR details; they'll be blocked from other routes by not having access too */}
       {
         config && (
-            tiers || (
-                profileState.profile &&
+          tiers || (
+            profileState.profile &&
                 !hasRegisteredAccess(profileState.profile.accessTierShortNames)
-            )) && <div
+          )) && <div
           style={
             hideFooter
-                ? {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
-                : styles.appContainer
+              ? {...styles.appContainer, paddingLeft: 0, paddingRight: 0}
+              : styles.appContainer
           }
         >
           <SignedInRoutes/>
@@ -150,7 +150,7 @@ export const SignedIn = (spinnerProps: WithSpinnerOverlayProps) => {
     </FlexRow>
     {!hideFooter && environment.enableFooter &&
       <Footer
-          type={FooterTypeEnum.Workbench}
+        type={FooterTypeEnum.Workbench}
       />
     }
     <InactivityMonitor/>

@@ -245,29 +245,29 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
-    return <div style={styles.listItem}>
-      <input type='checkbox' value={name} onChange={() => onChange()}
-             style={styles.listItemCheckbox} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', color: colors.primary}}>{name}</div>
-    </div>;
-  };
+  return <div style={styles.listItem}>
+    <input type='checkbox' value={name} onChange={() => onChange()}
+      style={styles.listItemCheckbox} checked={checked}/>
+    <div style={{lineHeight: '1.5rem', color: colors.primary}}>{name}</div>
+  </div>;
+};
 
 const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
   name: string, onChange: Function, checked: boolean, cohortId: number, namespace: string, wid: string}>
     = ({name, onChange, checked, cohortId, namespace, wid}) => {
       return <div style={styles.listItem}>
         <input type='checkbox' value={name} onChange={() => onChange()}
-               style={styles.listItemCheckbox} checked={checked}/>
+          style={styles.listItemCheckbox} checked={checked}/>
         <FlexRow style={{lineHeight: '1.5rem', color: colors.primary, width: '100%'}}>
           <div>{name}</div>
           <div style={{marginLeft: 'auto', paddingRight: '1rem'}}>
             <a href={'/workspaces/' + namespace + '/' + wid + '/data/cohorts/' + cohortId + '/review/cohort-description'}
-            target='_blank'>
+              target='_blank'>
               <ClrIcon size='20' shape='bar-chart'/>
             </a>
           </div>
-    </FlexRow>
-  </div>;
+        </FlexRow>
+      </div>;
     };
 
 const Subheader = (props) => {
@@ -290,7 +290,7 @@ const DataDictionaryDescription: React.FunctionComponent<DataDictionaryPopupProp
       <div style={styles.dataDictionarySubheader}>Data Provenance</div>
       <div style={styles.dataDictionaryText}>
         {dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ?
-        `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
+          `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
     </FlexColumn> : <div style={{display: 'flex', justifyContent: 'center'}}>
       <Spinner style={{height: 36, width: 36, margin: '0.5rem'}}/></div>}
   </div>;
@@ -310,7 +310,7 @@ interface ValueListItemState {
 }
 
 export class ValueListItem extends React.Component<
-  ValueListItemProps, ValueListItemState> {
+ValueListItemProps, ValueListItemState> {
 
   constructor(props) {
     super(props);
@@ -328,10 +328,10 @@ export class ValueListItem extends React.Component<
       parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
       domain === Domain.PHYSICALMEASUREMENTCSS ? Domain.MEASUREMENT.toString() : domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
-        this.setState({dataDictionaryEntry});
-      }).catch(e => {
-        this.setState({dataDictionaryEntryError: true});
-      });
+      this.setState({dataDictionaryEntry});
+    }).catch(e => {
+      this.setState({dataDictionaryEntryError: true});
+    });
   }
 
   toggleDataDictionaryEntry() {
@@ -356,7 +356,7 @@ export class ValueListItem extends React.Component<
     }}>
       <FlexRow style={{width: '100%'}}>
         <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-               style={{...styles.listItemCheckbox, marginTop: 11, marginLeft: 0, marginRight: 0}} checked={checked}/>
+          style={{...styles.listItemCheckbox, marginTop: 11, marginLeft: 0, marginRight: 0}} checked={checked}/>
         <div style={{width: '100%'}}>
           <FlexRow style={{justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
             <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
@@ -378,22 +378,22 @@ const PlusLink = ({dataTestId, path, disable}: {dataTestId: string, path: string
   const [, navigateByUrl] = useNavigation();
 
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
-                         content='Requires Owner or Writer permission'>
+    content='Requires Owner or Writer permission'>
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
-               onClick={e => {
-                 navigateByUrl(path, {
-                   preventDefaultIfNoKeysPressed: true,
-                   event: e
-                 });
-               }}>
+      onClick={e => {
+        navigateByUrl(path, {
+          preventDefaultIfNoKeysPressed: true,
+          event: e
+        });
+      }}>
       <ClrIcon shape='plus-circle' class='is-solid' size={16}
-               style={stylesFunction.plusIconColor(disable)}/>
+        style={stylesFunction.plusIconColor(disable)}/>
     </Clickable></TooltipTrigger>;
 };
 
 const StepNumber = ({step, style = {}}) => {
   return <CircleWithText text={step} width='23.78px' height='23.78px'
-                         style={{fill: colorWithWhiteness(colors.primary, 0.5), ...style}}/>;
+    style={{fill: colorWithWhiteness(colors.primary, 0.5), ...style}}/>;
 };
 
 const BoxHeader = ({step = '', header = '', subHeader = '', style = {}, ...props}) => {
@@ -595,7 +595,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
       // If any domains were dropped, we want to drop any domain/value pair selections.
       const droppedDomains = Array.from(prevState.selectedDomains)
-          .filter(d => !this.state.selectedDomains.has(d));
+        .filter(d => !this.state.selectedDomains.has(d));
       if (droppedDomains.length > 0) {
         this.setState(({selectedDomains, selectedDomainValuePairs}) => ({
           selectedDomainValuePairs: selectedDomainValuePairs.filter(p => selectedDomains.has(p.domain))
@@ -604,7 +604,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
 
       // After a state update, first check whether any new domains have been added.
       const newDomains = Array.from(this.state.selectedDomains)
-          .filter(d => !prevState.selectedDomains.has(d));
+        .filter(d => !prevState.selectedDomains.has(d));
       if (!newDomains.length) {
         return;
       }
@@ -713,7 +713,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       let prepackagedList = Object.keys(PrepackagedConceptSet);
       if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
         prepackagedList = prepackagedList
-            .filter(prepack => !fp.startsWith('FITBIT', prepack));
+          .filter(prepack => !fp.startsWith('FITBIT', prepack));
       }
       if (!serverConfigStore.get().config.enableGenomicExtraction ||
           !getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
@@ -800,7 +800,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       }
       // Sort the values selected as per the order display rather than appending top end
       valuesSelected = valuesSelected.sort((a, b) =>
-          valueSets.findIndex(({value}) => a.value === value) -
+        valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
       this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
     }
@@ -974,8 +974,8 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         cohortIds: this.state.selectedCohortIds,
         prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
         values: this.state.selectedDomainValuePairs
-            .filter(values => values.domain === domain)
-            .map( domainValue => domainValue.value)
+          .filter(values => values.domain === domain)
+          .map( domainValue => domainValue.value)
       };
       let newPreviewInformation;
       try {
@@ -1100,7 +1100,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
       const text = value.value;
       const dataTestId = 'data-test-id-' + text;
       return <TooltipTrigger data-test-id={dataTestId} side='top' content={text}
-                             disabled={this.isEllipsisActive(text)}>
+        disabled={this.isEllipsisActive(text)}>
         <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}} title={text}>
           {text}
         </div>
@@ -1127,18 +1127,18 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
         }
       });
       return filteredPreviewData && filteredPreviewData.values.length > 0 ?
-          this.renderPreviewDataTable(filteredPreviewData) :
-          this.renderPreviewDataTableSectionMessage(filteredPreviewData);
+        this.renderPreviewDataTable(filteredPreviewData) :
+        this.renderPreviewDataTableSectionMessage(filteredPreviewData);
     }
 
     renderPreviewDataTable(filteredPreviewData: DataSetPreviewInfo) {
       return <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
-                 scrollable={true} style={{width: '100%'}}
-                 value={this.getDataTableValue(filteredPreviewData.values)}>
+        scrollable={true} style={{width: '100%'}}
+        value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
           <Column key={value.value} header={this.getHeaderValue(value)}
-                  headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
-                  bodyStyle={{hyphens: 'auto'}} field={value.value}/>
+            headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
+            bodyStyle={{hyphens: 'auto'}} field={value.value}/>
         )}
       </DataTable>;
     }
@@ -1151,7 +1151,7 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
             {filteredPreviewData.errorText && <div>{filteredPreviewData.errorText}</div>}
             {/* If there is no error that means no data was return */}
             {!filteredPreviewData.errorText && <div>No Results found for {domainDisplayed}</div>}
-            </div>
+          </div>
         }
       </div>;
     }
@@ -1205,20 +1205,20 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
                   <ImmutableListItem name='All Participants' data-test-id='all-participant'
-                                     checked={includesAllParticipants}
-                                     onChange={
-                                       () => this.selectPrePackagedCohort()}/>
+                    checked={includesAllParticipants}
+                    onChange={
+                      () => this.selectPrePackagedCohort()}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
                     <ImmutableWorkspaceCohortListItem key={cohort.id} name={cohort.name}
-                                      data-test-id='cohort-list-item'
-                                      checked={selectedCohortIds.includes(cohort.id)}
-                                      cohortId={cohort.id}
-                                      namespace={namespace}
-                                      wid={id}
-                                      onChange={
-                                        () => this.selectCohort(cohort)}/>
-                    )
+                      data-test-id='cohort-list-item'
+                      checked={selectedCohortIds.includes(cohort.id)}
+                      cohortId={cohort.id}
+                      namespace={namespace}
+                      wid={id}
+                      onChange={
+                        () => this.selectCohort(cohort)}/>
+                  )
                   }
                   {loadingResources && <Spinner style={{position: 'relative', top: '0.5rem',
                     left: '7rem'}}/>}
@@ -1229,45 +1229,45 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
               <div style={{display: 'flex', backgroundColor: colors.white,
                 border: `1px solid ${colors.light}`}}>
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
-                    <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
-                               style={{paddingRight: '1rem'}}>
-                      <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
-                    </BoxHeader>
+                  <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
+                    style={{paddingRight: '1rem'}}>
+                    <PlusLink dataTestId='concept-sets-link' path={conceptSetsPath} disable={!this.canWrite}/>
+                  </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
                     {this.getPrePackagedList()
-                        .map((prepackaged: PrepackagedConceptSet) => {
-                          const p = PrepackagedConceptSet[prepackaged];
-                          return <ImmutableListItem name={p} data-test-id='prePackage-concept-set-item'
-                                                key={prepackaged}
-                                                checked={selectedPrepackagedConceptSets.has(p)}
-                                                onChange={() => this.selectPrePackagedConceptSet(
-                                                  p, !selectedPrepackagedConceptSets.has(p))
-                                                }/>;
-                        })}
+                      .map((prepackaged: PrepackagedConceptSet) => {
+                        const p = PrepackagedConceptSet[prepackaged];
+                        return <ImmutableListItem name={p} data-test-id='prePackage-concept-set-item'
+                          key={prepackaged}
+                          checked={selectedPrepackagedConceptSets.has(p)}
+                          onChange={() => this.selectPrePackagedConceptSet(
+                            p, !selectedPrepackagedConceptSets.has(p))
+                          }/>;
+                      })}
                     <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
-                        <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
-                                          data-test-id='concept-set-list-item'
-                                          checked={selectedConceptSetIds.includes(conceptSet.id)}
-                                          onChange={
-                                          () => this.selectConceptSet(
-                                            conceptSet, !selectedConceptSetIds.includes(conceptSet.id))
-                                          }/>)
+                      <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
+                        data-test-id='concept-set-list-item'
+                        checked={selectedConceptSetIds.includes(conceptSet.id)}
+                        onChange={
+                          () => this.selectConceptSet(
+                            conceptSet, !selectedConceptSetIds.includes(conceptSet.id))
+                        }/>)
                     }
                     {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
                       left: '10rem'}}/>}
                   </div>
                 </div>
                 <div style={{width: '55%'}}>
-                    <BoxHeader step='3' header='Select Values' subHeader='Columns'>
+                  <BoxHeader step='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
-                                manageOwnState={false}
-                                disabled={selectedDomains.size === 0}
-                                data-test-id='select-all'
-                                onChange={() => this.selectAllValues()}
-                                checked={this.allValuesSelected} />
+                        manageOwnState={false}
+                        disabled={selectedDomains.size === 0}
+                        data-test-id='select-all'
+                        onChange={() => this.selectAllValues()}
+                        checked={this.allValuesSelected} />
                       <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
                         {this.allValuesSelected ? 'Deselect All' : 'Select All'}
                       </div>
@@ -1309,34 +1309,34 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
             <div style={styles.previewDataHeaderBox}>
               <FlexColumn>
-              <div style={{display: 'flex', alignItems: 'flex-end'}}>
-                <div style={styles.previewDataHeader}>
-                  <div>
-                    <StepNumber step='4'/>
-                  </div>
-                  <label style={{marginLeft: '0.5rem', color: colors.primary}}>
+                <div style={{display: 'flex', alignItems: 'flex-end'}}>
+                  <div style={styles.previewDataHeader}>
+                    <div>
+                      <StepNumber step='4'/>
+                    </div>
+                    <label style={{marginLeft: '0.5rem', color: colors.primary}}>
                     Preview Dataset
-                  </label>
-                </div>
-                <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
+                    </label>
+                  </div>
+                  <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
                   A visualization of your data table based on concept sets
                   and values you selected above. Once complete, export for analysis
+                  </div>
                 </div>
-              </div>
               </FlexColumn>
               <Clickable data-test-id='preview-button'
-                         style={{
-                           marginTop: '0.5rem',
-                           cursor: this.disableSave() ? 'not-allowed' : 'pointer',
-                           height: '1.8rem',
-                           width: '6.5rem',
-                           color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) : colors.accent
-                         }}
-                         disabled={this.disableSave()}
-                         onClick={() => {
-                           AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
-                           this.getPreviewList();
-                         }}>
+                style={{
+                  marginTop: '0.5rem',
+                  cursor: this.disableSave() ? 'not-allowed' : 'pointer',
+                  height: '1.8rem',
+                  width: '6.5rem',
+                  color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) : colors.accent
+                }}
+                disabled={this.disableSave()}
+                onClick={() => {
+                  AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
+                  this.getPreviewList();
+                }}>
                   View Preview Table
               </Clickable>
             </div>
@@ -1349,17 +1349,17 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
                     const domainEnumValue = Domain[domain.replace(/_/g, '')];
                     const previewRow: DataSetPreviewInfo = value[1];
                     return <TooltipTrigger key={domain}
-                                           content={
-                                             'Preview for domain '
+                      content={
+                        'Preview for domain '
                                              + formatDomainString(domain)
                                              + ' is still loading. It may take up to one minute'
-                                           }
-                                           disabled={!previewRow.isLoading}
-                                           side='top'>
+                      }
+                      disabled={!previewRow.isLoading}
+                      side='top'>
                       <Clickable
-                                 disabled={previewRow.isLoading}
-                                 onClick={() => this.setState({selectedPreviewDomain: domainEnumValue})}
-                                 style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === domainEnumValue)}>
+                        disabled={previewRow.isLoading}
+                        onClick={() => this.setState({selectedPreviewDomain: domainEnumValue})}
+                        style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === domainEnumValue)}>
                         <FlexRow style={{alignItems: 'center', overflow: 'auto', wordBreak: 'break-all'}}>
                           {formatDomainString(domain)}
                           {previewRow.isLoading &&
@@ -1383,27 +1383,27 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           </div>
         </FadeBox>
         <div style={styles.stickyFooter}>
-            <TooltipTrigger data-test-id='save-tooltip'
-                            content='Requires Owner or Writer permission' disabled={this.canWrite}>
-              {this.isCreatingNewDataset ?
-                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
-                        onClick ={() => this.setState({modalState: ModalState.Create})}
-                        disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
+          <TooltipTrigger data-test-id='save-tooltip'
+            content='Requires Owner or Writer permission' disabled={this.canWrite}>
+            {this.isCreatingNewDataset ?
+              <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                onClick ={() => this.setState({modalState: ModalState.Create})}
+                disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
                   Create Dataset
-                </Button> :
-                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
-                        onClick ={() => this.saveDataset()}
-                        disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
+              </Button> :
+              <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                onClick ={() => this.saveDataset()}
+                disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
                   Save Dataset
-                </Button>}
-            </TooltipTrigger>
+              </Button>}
+          </TooltipTrigger>
 
           <TooltipTrigger data-test-id='export-tooltip'
-                          content={exportError}
-                          disabled={!exportError}>
+            content={exportError}
+            disabled={!exportError}>
             <Button style={{marginBottom: '2rem'}} data-test-id='analyze-button'
-                    onClick ={() => this.onClickExport()}
-                    disabled={this.disableSave() || !!exportError}>
+              onClick ={() => this.onClickExport()}
+              disabled={this.disableSave() || !!exportError}>
               Analyze
             </Button>
           </TooltipTrigger>
@@ -1413,24 +1413,24 @@ export const DatasetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), wi
           switchCase(this.state.modalState,
             [ModalState.Create, () =>
               <CreateModal entityName='Dataset'
-                           getExistingNames={async () => {
-                             const resources = await workspacesApi()
-                               .getWorkspaceResources(namespace, id, {typesToFetch: [ResourceType.DATASET]});
-                             return resources.map(resource => resource.dataSet.name);
-                           }}
-                           save={(name, desc) => this.createDataset(name, desc)}
-                           close={() => this.setState({modalState: ModalState.None})}/>],
+                getExistingNames={async () => {
+                  const resources = await workspacesApi()
+                    .getWorkspaceResources(namespace, id, {typesToFetch: [ResourceType.DATASET]});
+                  return resources.map(resource => resource.dataSet.name);
+                }}
+                save={(name, desc) => this.createDataset(name, desc)}
+                close={() => this.setState({modalState: ModalState.None})}/>],
             [ModalState.Export, () =>
               <ExportDatasetModal dataset={dataSet}
-                                  closeFunction={() => this.setState({modalState: ModalState.None})}/>],
+                closeFunction={() => this.setState({modalState: ModalState.None})}/>],
             [ModalState.Extract, () =>
               <GenomicExtractionModal dataSet={dataSet}
-                                      workspaceNamespace={namespace}
-                                      workspaceFirecloudName={id}
-                                      title={'Would you like to extract genomic variant data as VCF files?'}
-                                      cancelText={'Skip'}
-                                      confirmText={'Extract & Continue'}
-                                      closeFunction={() => this.setState({modalState: ModalState.Export})}/>
+                workspaceNamespace={namespace}
+                workspaceFirecloudName={id}
+                title={'Would you like to extract genomic variant data as VCF files?'}
+                cancelText={'Skip'}
+                confirmText={'Extract & Continue'}
+                closeFunction={() => this.setState({modalState: ModalState.Export})}/>
             ]
           )
         }

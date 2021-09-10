@@ -59,12 +59,12 @@ export const CohortReviewResourceCard = fp.flow(
 
   async delete() {
     return cohortReviewApi().deleteCohortReview(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohortReview.cohortReviewId)
-        .then(() => {
-          this.props.onUpdate();
-        });
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      this.props.resource.cohortReview.cohortReviewId)
+      .then(() => {
+        this.props.onUpdate();
+      });
   }
 
   rename(name, description) {
@@ -74,10 +74,10 @@ export const CohortReviewResourceCard = fp.flow(
       description: description
     };
     cohortReviewApi().updateCohortReview(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohortReview.cohortReviewId,
-        request
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      this.props.resource.cohortReview.cohortReviewId,
+      request
     ).then(() => {
       this.props.onUpdate();
     }).catch(error => console.error(error)
@@ -91,15 +91,15 @@ export const CohortReviewResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showRenameModal &&
         <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
+          resourceType={getType(resource)}
+          onCancel={() => this.setState({showRenameModal: false})}
+          oldDescription={getDescription(resource)}
+          oldName={getDisplayName(resource)}
+          existingNames={this.props.existingNameList}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

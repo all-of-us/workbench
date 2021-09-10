@@ -177,7 +177,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       <div style={styles.mainHeader}>Complete Registration</div>
       {unsafeAllowSelfBypass &&
         <div data-test-id='self-bypass'
-             style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
+          style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
             <span>Bypass action is complete. <GetStartedButton/>
             </span>}
@@ -185,12 +185,12 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
             [Test environment] Self-service bypass is enabled:
             {anyBypassActionsRemaining &&
               <Button style={{marginLeft: '0.5rem'}}
-                      onClick={() => this.setAllModulesBypassState(true)}
-                      disabled={bypassInProgress}>Bypass all</Button>}
+                onClick={() => this.setAllModulesBypassState(true)}
+                disabled={bypassInProgress}>Bypass all</Button>}
             {!anyBypassActionsRemaining &&
               <Button style={{marginLeft: '0.5rem'}}
-                      onClick={() => this.setAllModulesBypassState(false)}
-                      disabled={bypassInProgress}>Un-bypass all</Button>}
+                onClick={() => this.setAllModulesBypassState(false)}
+                disabled={bypassInProgress}>Un-bypass all</Button>}
           </span>
           }
         </div>
@@ -210,34 +210,34 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
             <FlexSpacer/>
             {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'
-                      style={{backgroundColor: colors.success,
-                        width: 'max-content',
-                        cursor: 'default'}}>
+                style={{backgroundColor: colors.success,
+                  width: 'max-content',
+                  cursor: 'default'}}>
                 {card.completedText}
                 <ClrIcon shape='check' style={{marginLeft: '0.5rem'}}/>
               </Button> :
-            <Button onClick={() => this.isLoading(i) ? true : this.onCardClick(card)}
-                    style={{width: 'max-content',
-                      cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
-                    disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {this.state.accessTaskKeyToButtonAsRefresh.get(card.key) ?
-                <div>
+              <Button onClick={() => this.isLoading(i) ? true : this.onCardClick(card)}
+                style={{width: 'max-content',
+                  cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
+                disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
+                {this.state.accessTaskKeyToButtonAsRefresh.get(card.key) ?
+                  <div>
                   Refresh
-                  <ClrIcon shape='refresh' style={{marginLeft: '0.5rem'}}/>
-                </div> : card.buttonText}
-              {this.isLoading(i) ? <Spinner style={{marginLeft: '0.5rem', width: 20, height: 20}}/> : null}
-            </Button>}
+                    <ClrIcon shape='refresh' style={{marginLeft: '0.5rem'}}/>
+                  </div> : card.buttonText}
+                {this.isLoading(i) ? <Spinner style={{marginLeft: '0.5rem', width: 20, height: 20}}/> : null}
+              </Button>}
           </ResourceCardBase>;
         })}
       </FlexRow>
 
       {eraCommonsError && <AlertDanger data-test-id='era-commons-error'
-                                        style={{margin: '0px 1rem 1rem 0px'}}>
-          <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+        style={{margin: '0px 1rem 1rem 0px'}}>
+        <ClrIcon shape='exclamation-triangle' class='is-solid'/>
           Error Linking NIH Username: {eraCommonsError} Please try again!
       </AlertDanger>}
       {rasLoginGovLinkError && <AlertDanger data-test-id='ras-login-gov-error'
-                                       style={{margin: '0px 1rem 1rem 0px'}}>
+        style={{margin: '0px 1rem 1rem 0px'}}>
         <ClrIcon shape='exclamation-triangle' class='is-solid'/>
         Error Linking login.gov account: {rasLoginGovLinkError} Please try again!
       </AlertDanger>}
@@ -252,7 +252,7 @@ export const RegistrationDashboard = fp.flow(withNavigation)(class extends React
       </AlertWarning>}
       {this.allTasksCompleted() &&
         <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
-             data-test-id='success-message'>
+          data-test-id='success-message'>
           You successfully completed all the required steps to access the Researcher Workbench. <GetStartedButton/>
         </div>
       }

@@ -61,8 +61,8 @@ export class ConfirmDeleteModal
               If you still wish to delete this workspace and all items within it, type DELETE below to confirm.
             </div>
             <TextInput placeholder='type DELETE to confirm'
-                       style={{marginTop: '0.5rem'}}
-                       onChange={this.validateDeleteText} onBlur=''/>
+              style={{marginTop: '0.5rem'}}
+              onChange={this.validateDeleteText} onBlur=''/>
           </div>
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>

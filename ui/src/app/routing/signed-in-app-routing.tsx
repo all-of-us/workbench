@@ -121,13 +121,13 @@ export const SignedInRoutes = () => {
     </AppRoute>
     <AppRoute exact path={NIH_CALLBACK_PATH}>
       {environment.enableDataAccessRequirements ?
-          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
-          <HomepagePage routeData={{title: 'Homepage'}}/>}
+        <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+        <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
     <AppRoute exact path={RAS_CALLBACK_PATH}>
       {environment.enableDataAccessRequirements ?
-          <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
-          <HomepagePage routeData={{title: 'Homepage'}}/>}
+        <DataAccessRequirementsPage routeData={{title: 'Data Access Requirements'}}/> :
+        <HomepagePage routeData={{title: 'Homepage'}}/>}
     </AppRoute>
     <AppRoute exact path='/library' guards={[expiredGuard, registrationGuard]}>
       <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>

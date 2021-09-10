@@ -38,7 +38,7 @@ describe('ConceptAddModal', () => {
     const wrapper = component();
     const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === activeDomainTab.domain.toString());
     expect(wrapper.find('[data-test-id="add-concept-title"]').first().text())
-        .toBe('Add ' + stubConceptsInDomain.length + ' Concepts to '
+      .toBe('Add ' + stubConceptsInDomain.length + ' Concepts to '
             + activeDomainTab.name + ' Concept Set');
 
   });
@@ -46,8 +46,8 @@ describe('ConceptAddModal', () => {
   it('displays option to add to existing concept set if concept set in domain exists', async () => {
     const wrapper = component();
     const stubSetsInDomain = conceptSetsApi.conceptSets
-        .filter(s => s.domain === activeDomainTab.domain)
-        .map(s => s.name);
+      .filter(s => s.domain === activeDomainTab.domain)
+      .map(s => s.name);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeTruthy();
     const foundSets = wrapper.find('[data-test-id="existing-set"]').map((s) => s.text());
@@ -62,7 +62,7 @@ describe('ConceptAddModal', () => {
     expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-id="create-new-set"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-id="toggle-existing-set"]')
-        .first().prop('disabled')).toBe(true);
+      .first().prop('disabled')).toBe(true);
 
   });
 
@@ -77,25 +77,25 @@ describe('ConceptAddModal', () => {
   it('disables save button if user enters an invalid name for a new set', async () => {
     const wrapper = component();
     const stubSetsInDomain = conceptSetsApi.conceptSets
-        .filter(s => s.domain === activeDomainTab.domain)
-        .map(s => s.name);
+      .filter(s => s.domain === activeDomainTab.domain)
+      .map(s => s.name);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="toggle-new-set"]').first().simulate('click');
 
     // empty name cannot be saved
     expect(wrapper.find('[data-test-id="save-concept-set"]')
-        .first().prop('disabled')).toBe(true);
+      .first().prop('disabled')).toBe(true);
 
     // existing name cannot be saved
     wrapper.find('[data-test-id="create-new-set-name"]').find('input')
-        .simulate('change', {target: {value: stubSetsInDomain[0]}});
+      .simulate('change', {target: {value: stubSetsInDomain[0]}});
     expect(wrapper.find('[data-test-id="save-concept-set"]')
-        .first().prop('disabled')).toBe(true);
+      .first().prop('disabled')).toBe(true);
 
     wrapper.find('[data-test-id="create-new-set-name"]').find('input')
-        .simulate('change', {target: {value: 'newsetname!!!'}});
+      .simulate('change', {target: {value: 'newsetname!!!'}});
     expect(wrapper.find('[data-test-id="save-concept-set"]')
-        .first().prop('disabled')).toBe(false);
+      .first().prop('disabled')).toBe(false);
 
   });
 

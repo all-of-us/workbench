@@ -82,8 +82,8 @@ const DomainCard: React.FunctionComponent<{
   const {name, participantCount} = enableStandardSourceDomains ? conceptDomainCard : conceptDomainInfo;
   return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
     <Clickable style={styles.domainBoxHeader}
-         onClick={browseInDomain}
-         data-test-id='domain-box-name'>{name}</Clickable>
+      onClick={browseInDomain}
+      data-test-id='domain-box-name'>{name}</Clickable>
     <div style={styles.conceptText}>
       {updating ? <Spinner size={42}/> : <React.Fragment>
         <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain.
@@ -91,7 +91,7 @@ const DomainCard: React.FunctionComponent<{
       <div><b>{participantCount.toLocaleString()}</b> participants in domain.</div>
     </div>
     <Clickable style={styles.domainBoxLink}
-               onClick={browseInDomain}>Select Concepts</Clickable>
+      onClick={browseInDomain}>Select Concepts</Clickable>
   </DomainCardBase>;
 };
 
@@ -208,11 +208,11 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
             console.error(e);
           })
         : cohortBuilderApi().findDomainInfos(namespace, id)
-        .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
-        .catch((e) => {
-          this.setState({domainInfoError: true});
-          console.error(e);
-        });
+          .then(conceptDomainInfo => this.setState({conceptDomainList: conceptDomainInfo.items}))
+          .catch((e) => {
+            this.setState({domainInfoError: true});
+            console.error(e);
+          });
       const getSurveyInfo = cohortBuilderApi().findSurveyModules(namespace, id)
         .then(surveysInfo => this.setState({conceptSurveysList: surveysInfo.items}))
         .catch((e) => {
@@ -364,12 +364,12 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
               fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
             <TextInput style={styles.searchBar} data-test-id='concept-search-input'
-                       placeholder='Search concepts in domain'
-                       value={currentInputString}
-                       onChange={(e) => this.setState({currentInputString: e})}
-                       onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
+              placeholder='Search concepts in domain'
+              value={currentInputString}
+              onChange={(e) => this.setState({currentInputString: e})}
+              onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
             {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()} data-test-id='clear-search'>
-                <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
+              <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
             </Clickable>}
           </div>
           {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
@@ -377,8 +377,8 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
           </AlertDanger>)}
           {showSearchError && <AlertDanger style={styles.inputAlert}>
               Minimum concept search length is three characters.
-              <AlertClose style={{width: 'unset'}}
-                          onClick={() => this.setState({showSearchError: false})}/>
+            <AlertClose style={{width: 'unset'}}
+              onClick={() => this.setState({showSearchError: false})}/>
           </AlertDanger>}
           {loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
             <div>
@@ -392,16 +392,16 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                     // TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137
                     <React.Fragment>
                       {domainCards.some(domain => domainsLoading.includes(domain.domain))
-                      ? <Spinner size={42}/>
-                      : domainCards.every(domain => domain.conceptCount === 0)
-                        ? 'No Domain Results. Please type in a new search term.'
-                        : domainCards
-                          .filter(domain => domain.conceptCount !== 0)
-                          .map((domain, i) => <DomainCard conceptDomainCard={domain}
-                                                          conceptDomainInfo={null}
-                                                          browseInDomain={() => this.browseDomain(domain.domain)}
-                                                          key={i} data-test-id='domain-box'
-                                                          updating={domainsLoading.includes(domain.domain)}/>)
+                        ? <Spinner size={42}/>
+                        : domainCards.every(domain => domain.conceptCount === 0)
+                          ? 'No Domain Results. Please type in a new search term.'
+                          : domainCards
+                            .filter(domain => domain.conceptCount !== 0)
+                            .map((domain, i) => <DomainCard conceptDomainCard={domain}
+                              conceptDomainInfo={null}
+                              browseInDomain={() => this.browseDomain(domain.domain)}
+                              key={i} data-test-id='domain-box'
+                              updating={domainsLoading.includes(domain.domain)}/>)
                       }
                     </React.Fragment> :
                     <React.Fragment>
@@ -410,12 +410,12 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                         : domainInfos.every(domain => domain.allConceptCount === 0)
                           ? 'No Domain Results. Please type in a new search term.'
                           : domainInfos
-                          .filter(domain => domain.allConceptCount !== 0)
-                          .map((domain, i) => <DomainCard conceptDomainCard={null}
-                                                          conceptDomainInfo={domain}
-                                                          browseInDomain={() => this.browseDomain(domain.domain)}
-                                                          key={i} data-test-id='domain-box'
-                                                          updating={domainsLoading.includes(domain.domain)}/>)
+                            .filter(domain => domain.allConceptCount !== 0)
+                            .map((domain, i) => <DomainCard conceptDomainCard={null}
+                              conceptDomainInfo={domain}
+                              browseInDomain={() => this.browseDomain(domain.domain)}
+                              key={i} data-test-id='domain-box'
+                              updating={domainsLoading.includes(domain.domain)}/>)
                       }
                     </React.Fragment>
                 }
@@ -433,9 +433,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                       : conceptSurveysList
                         .filter(survey => survey.questionCount > 0)
                         .map((survey) => <SurveyCard survey={survey}
-                                                     key={survey.orderNumber}
-                                                     browseSurvey={() => this.browseDomain(Domain.SURVEY, survey.name)}
-                                                     updating={surveysLoading.includes(survey.name)}/>)
+                          key={survey.orderNumber}
+                          browseSurvey={() => this.browseDomain(Domain.SURVEY, survey.name)}
+                          updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
               {/* TODO cleanup with https://precisionmedicineinitiative.atlassian.net/browse/RW-7137 */}
@@ -451,9 +451,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                       : physicalMeasurementsCard.conceptCount === 0
                         ? 'No Program Physical Measurement Results. Please type in a new search term.'
                         : <PhysicalMeasurementsCard physicalMeasurementCard={physicalMeasurementsCard}
-                                                    physicalMeasurementInfo={null}
-                                                    browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
-                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
+                          physicalMeasurementInfo={null}
+                          browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
+                          updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
                   }
                 </div>
               </React.Fragment>}
@@ -469,9 +469,9 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                       : physicalMeasurementsInfo.allConceptCount === 0
                         ? 'No Program Physical Measurement Results. Please type in a new search term.'
                         : <PhysicalMeasurementsCard physicalMeasurementCard={null}
-                                                    physicalMeasurementInfo={physicalMeasurementsInfo}
-                                                    browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
-                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
+                          physicalMeasurementInfo={physicalMeasurementsInfo}
+                          browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
+                          updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
                   }
                 </div>
               </React.Fragment>}

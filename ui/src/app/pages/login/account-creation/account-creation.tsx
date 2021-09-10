@@ -68,10 +68,10 @@ export const MultiSelectWithLabel = (props) => {
     <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
     <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
       <MultiSelect className='create-account__degree-select' placeholder={props.placeholder}
-                   filter={false}
-                   value={props.value} onChange={props.onChange}
-                   options={props.options} data-test-id={props.dataTestId}
-                   style={{...styles.sectionInput, overflowY: 'none'}}/>
+        filter={false}
+        value={props.value} onChange={props.onChange}
+        options={props.options} data-test-id={props.dataTestId}
+        style={{...styles.sectionInput, overflowY: 'none'}}/>
       {props.children}
     </FlexRow>
   </FlexColumn>;
@@ -153,13 +153,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState({usernameCheckInProgress: true, usernameConflictError: false});
     this.usernameCheckTimeout = global.setTimeout(() => {
       profileApi().isUsernameTaken(username)
-          .then((body) => {
-            this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
-          })
-          .catch((error) => {
-            console.error(error);
-            this.setState({usernameCheckInProgress: false});
-          });
+        .then((body) => {
+          this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
+        })
+        .catch((error) => {
+          console.error(error);
+          this.setState({usernameCheckInProgress: false});
+        });
     }, 300);
   }
 
@@ -317,9 +317,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <li>minimum of 3 characters</li>
           <li>maximum of 64 characters</li>
         </ul>
-          <br/>Usernames cannot begin or end with a period (.) and may not
+        <br/>Usernames cannot begin or end with a period (.) and may not
           contain more than one period (.) in a row.</div>}
-                        style={{marginLeft: '0.5rem'}}>
+        style={{marginLeft: '0.5rem'}}>
           <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
         </TooltipTrigger>
       </div>;
@@ -327,7 +327,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const errors = this.validate();
 
     return <div id='account-creation'
-                style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
+      style={{paddingTop: '1.5rem', paddingRight: '3rem', paddingLeft: '1rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
       <FlexRow>
         <FlexColumn style={{marginRight: '2rem'}}>
@@ -345,14 +345,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                     login to the Workbench. This is a separate account and not related to any
                     personal or professional Google accounts you may have.</div>
                   <TextInputWithLabel
-                      value={username}
-                      inputId='username'
-                      inputName='username'
-                      placeholder='New Username'
-                      invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                      containerStyle={{width: '26rem', marginTop: '1.25rem'}}
-                      labelText={usernameLabelText}
-                      onChange={v => this.usernameChanged(v)}
+                    value={username}
+                    inputId='username'
+                    inputName='username'
+                    placeholder='New Username'
+                    invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                    containerStyle={{width: '26rem', marginTop: '1.25rem'}}
+                    labelText={usernameLabelText}
+                    onChange={v => this.usernameChanged(v)}
                   >
                     <div style={inputStyles.iconArea}>
                       <ValidationIcon validSuccess={this.isUsernameValid()}/>
@@ -386,24 +386,24 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <FlexColumn>
               <FlexRow style={{marginTop: '.25rem'}}>
                 <TextInputWithLabel value={givenName}
-                                    inputId='givenName'
-                                    inputName='givenName'
-                                    placeholder='First Name'
-                                    invalid={givenName.length > nameLength}
-                                    labelText='First Name'
-                                    onChange={value => this.updateProfileObject('givenName', value)} />
+                  inputId='givenName'
+                  inputName='givenName'
+                  placeholder='First Name'
+                  invalid={givenName.length > nameLength}
+                  labelText='First Name'
+                  onChange={value => this.updateProfileObject('givenName', value)} />
                 {givenName.length > nameLength &&
                 <ErrorMessage id='givenNameError'>
                   First Name must be {nameLength} characters or less.
                 </ErrorMessage>}
                 <TextInputWithLabel value={familyName}
-                                    inputId='familyName'
-                                    inputName='familyName'
-                                    placeholder='Last Name'
-                                    invalid={familyName.length > nameLength}
-                                    containerStyle={styles.multiInputSpacing}
-                                    onChange={v => this.updateProfileObject('familyName', v)}
-                                    labelText='Last Name'/>
+                  inputId='familyName'
+                  inputName='familyName'
+                  placeholder='Last Name'
+                  invalid={familyName.length > nameLength}
+                  containerStyle={styles.multiInputSpacing}
+                  onChange={v => this.updateProfileObject('familyName', v)}
+                  labelText='Last Name'/>
                 {familyName.length > nameLength &&
                 <ErrorMessage id='familyNameError'>
                   Last Name must be {nameLength} character or less.
@@ -411,47 +411,47 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               <div style={{marginTop: '1rem'}}>
                 <MultiSelectWithLabel placeholder={'Select one or more'}
-                                      options={AccountCreationOptions.degree}
-                                      value={this.state.profile.degrees}
-                                      labelText={<div>Your degrees <span style={styles.optionalText}>
+                  options={AccountCreationOptions.degree}
+                  value={this.state.profile.degrees}
+                  labelText={<div>Your degrees <span style={styles.optionalText}>
                                         (optional)</span></div>}
-                                      onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
+                  onChange={(e) => this.setState(fp.set(['profile', 'degrees'], e.value))}
                 />
               </div>
             </FlexColumn>
           </Section>
           <Section
             header={<React.Fragment>
-                <div>Your institutional mailing address</div>
-                <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
-              </React.Fragment>
+              <div>Your institutional mailing address</div>
+              <div style={styles.asideText}>We will use your address if we need to send correspondence about the program.</div>
+            </React.Fragment>
             }
             style={{marginTop: '2rem'}}
           >
             <FlexColumn style={{lineHeight: '1rem'}}>
               <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='streetAddress' inputName='streetAddress'
-                                    placeholder='Street Address' value={streetAddress1} labelText='Street Address 1'
-                                    onChange={value => this.updateAddress('streetAddress1', value)}/>
+                  placeholder='Street Address' value={streetAddress1} labelText='Street Address 1'
+                  onChange={value => this.updateAddress('streetAddress1', value)}/>
                 <TextInputWithLabel dataTestId='streetAddress2' inputName='streetAddress2' placeholder='Street Address 2'
-                                    value={streetAddress2} labelText='Street Address 2'
-                                    containerStyle={styles.multiInputSpacing}
-                                    onChange={value => this.updateAddress('streetAddress2', value)}/>
+                  value={streetAddress2} labelText='Street Address 2'
+                  containerStyle={styles.multiInputSpacing}
+                  onChange={value => this.updateAddress('streetAddress2', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
-                                    onChange={value => this.updateAddress('city', value)}/>
+                  onChange={value => this.updateAddress('city', value)}/>
                 <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
-                                    containerStyle={styles.multiInputSpacing}
-                                    onChange={value => this.updateAddress('state', value)}/>
+                  containerStyle={styles.multiInputSpacing}
+                  onChange={value => this.updateAddress('state', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '1rem'}}>
                 <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip code'
-                                    value={zipCode} labelText='Zip code'
-                                    onChange={value => this.updateAddress('zipCode', value)}/>
+                  value={zipCode} labelText='Zip code'
+                  onChange={value => this.updateAddress('zipCode', value)}/>
                 <TextInputWithLabel dataTestId='country' inputName='country' placeholder='Country' value={country}
-                                    labelText='Country' containerStyle={styles.multiInputSpacing}
-                                    onChange={value => this.updateAddress('country', value)}/>
+                  labelText='Country' containerStyle={styles.multiInputSpacing}
+                  onChange={value => this.updateAddress('country', value)}/>
               </FlexRow>
             </FlexColumn>
           </Section>
@@ -464,15 +464,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <div
                 style={{...styles.asideText, marginTop: '.125px'}}>
                   This information will be posted publicly on the <AoU/> Research Hub website to inform program participants.
-                  <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
+                <span style={{marginLeft: 2, fontSize: 12}}>(2000 character limit)</span>
               </div>
               <div style={{marginTop: '.5rem'}}>
                 <FlexRow style={{color: colors.accent, alignItems: 'center'}}>
                   <div
-                      style={{cursor: 'pointer', fontSize: 14}}
-                      onClick={() => this.setState(
-                        (previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb})
-                      )}
+                    style={{cursor: 'pointer', fontSize: 14}}
+                    onClick={() => this.setState(
+                      (previousState) => ({showMostInterestedInKnowingBlurb: !previousState.showMostInterestedInKnowingBlurb})
+                    )}
                   >
                     <AoU/> participants are most interested in knowing:
                   </div>
@@ -529,7 +529,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           <FormSection style={{marginTop: '4rem', paddingBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
-                    onClick={() => this.props.onPreviousClick(this.state.profile)}>
+              onClick={() => this.props.onPreviousClick(this.state.profile)}>
               Previous
             </Button>
             <TooltipTrigger content={errors && <React.Fragment>
@@ -541,11 +541,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <Button disabled={this.state.usernameCheckInProgress ||
                                 this.isUsernameValidationError() ||
                                 Boolean(errors)}
-                      style={{'height': '2rem', 'width': '10rem'}}
-                      onClick={() => {
-                        AnalyticsTracker.Registration.CreateAccountPage();
-                        this.props.onComplete(this.state.profile);
-                      }}>
+              style={{'height': '2rem', 'width': '10rem'}}
+              onClick={() => {
+                AnalyticsTracker.Registration.CreateAccountPage();
+                this.props.onComplete(this.state.profile);
+              }}>
                 Next
               </Button>
             </TooltipTrigger>

@@ -314,8 +314,8 @@ export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter
       <div id='cohort-search-container' style={styles.searchContent}>
         {domain === Domain.PERSON && <div style={styles.titleBar}>
           <Clickable data-test-id='cohort-search-back-arrow'
-                     style={styles.backArrow}
-                     onClick={() => this.checkUnsavedChanges()}>
+            style={styles.backArrow}
+            onClick={() => this.checkUnsavedChanges()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
@@ -326,20 +326,20 @@ export const CohortSearch = fp.flow(withCurrentCohortSearchContext(), withRouter
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {domain === Domain.PERSON ? <div data-test-id='demographics' style={{flex: 1, overflow: 'auto'}}>
-              <Demographics
-                criteriaType={type}
-                select={this.addSelection}
-                selectedIds={selectedIds}
-                selections={selections}/>
-            </div>
+            <Demographics
+              criteriaType={type}
+              select={this.addSelection}
+              selectedIds={selectedIds}
+              selections={selections}/>
+          </div>
             : <CriteriaSearch backFn={() => this.checkUnsavedChanges()}
-                              cohortContext={cohortContext}/>}
+              cohortContext={cohortContext}/>}
         </div>
       </div>
       <Button type='primary'
-              style={styles.finishButton}
-              disabled={!!selectedIds && selectedIds.length === 0}
-              onClick={() => setSidebarActiveIconStore.next('criteria')}>
+        style={styles.finishButton}
+        disabled={!!selectedIds && selectedIds.length === 0}
+        onClick={() => setSidebarActiveIconStore.next('criteria')}>
         Finish & Review
       </Button>
       {showUnsavedModal && <Modal>

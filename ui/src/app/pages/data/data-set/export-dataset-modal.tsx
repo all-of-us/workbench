@@ -70,15 +70,15 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
       return {
         name: dataset ? dataset.name : 'dataset',
         ...(dataset.id
-            ? { dataSetId: dataset.id }
-            : {
-              dataSetId: dataset.id,
-              includesAllParticipants: dataset.includesAllParticipants,
-              conceptSetIds: dataset.conceptSets.map(cs => cs.id),
-              cohortIds: dataset.cohorts.map(c => c.id),
-              domainValuePairs: dataset.domainValuePairs,
-              prePackagedConceptSet: dataset.prePackagedConceptSet
-            })
+          ? { dataSetId: dataset.id }
+          : {
+            dataSetId: dataset.id,
+            includesAllParticipants: dataset.includesAllParticipants,
+            conceptSetIds: dataset.conceptSets.map(cs => cs.id),
+            cohortIds: dataset.cohorts.map(c => c.id),
+            domainValuePairs: dataset.domainValuePairs,
+            prePackagedConceptSet: dataset.prePackagedConceptSet
+          })
       };
     }
 
@@ -219,15 +219,15 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
             <div style={{marginTop: '1rem'}}>
               <Select value={creatingNewNotebook ? '' : notebookName}
-                      data-test-id='select-notebook'
-                      options={selectOptions}
-                      onChange={(v) => onNotebookSelect(v)}/>
+                data-test-id='select-notebook'
+                options={selectOptions}
+                onChange={(v) => onNotebookSelect(v)}/>
             </div>
 
             {creatingNewNotebook && <React.Fragment>
-                <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-                <TextInput onChange={v => setNotebookName(v)}
-                           value={notebookName} data-test-id='notebook-name-input'/>
+              <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+              <TextInput onChange={v => setNotebookName(v)}
+                value={notebookName} data-test-id='notebook-name-input'/>
             </React.Fragment>}
 
             <div style={headerStyles.formLabel}>
@@ -247,9 +247,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
                 </label>)}
 
             {kernelType === KernelTypeEnum.Python && <React.Fragment>
-                <div style={headerStyles.formLabel}>
+              <div style={headerStyles.formLabel}>
                     Select analysis tool for genetic variant data
-                </div>
+              </div>
               {genomicsToolRadioButton('Hail', DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL)}
               {genomicsToolRadioButton('PLINK', DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK)}
               {genomicsToolRadioButton('Other VCF-compatible tool', DataSetExportRequest.GenomicsAnalysisToolEnum.NONE)}
@@ -257,9 +257,9 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
 
             <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
               <Button type={'secondarySmall'}
-                      disabled={loadingNotebook}
-                      data-test-id='code-preview-button'
-                      onClick={() => onCodePreviewClick()}>
+                disabled={loadingNotebook}
+                data-test-id='code-preview-button'
+                onClick={() => onCodePreviewClick()}>
                 {codePreview ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
               {loadingNotebook && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
@@ -269,16 +269,16 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(withCur
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
-                    data-test-id='export-dataset-modal-cancel-button'
-                    onClick={closeFunction}
-                    style={{marginRight: '2rem'}}>
+              data-test-id='export-dataset-modal-cancel-button'
+              onClick={closeFunction}
+              style={{marginRight: '2rem'}}>
               Cancel
             </Button>
             <TooltipTrigger content={summarizeErrors(errors)} data-test-id='export-dataset-tooltip'>
               <Button type='primary'
-                      data-test-id='export-data-set'
-                      disabled={!fp.isEmpty(errors)}
-                      onClick={() => exportDataset()}>
+                data-test-id='export-data-set'
+                disabled={!fp.isEmpty(errors)}
+                onClick={() => exportDataset()}>
                 Export
               </Button>
             </TooltipTrigger>

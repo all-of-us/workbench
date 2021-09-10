@@ -457,7 +457,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       switch (type) {
         case 'number':
           return <NumberInput style={{padding: '0 0.25rem', width: '3rem'}} value={values[field]}
-                   min={0} onChange={v => this.inputChange(index, field, v)}/>;
+            min={0} onChange={v => this.inputChange(index, field, v)}/>;
         case 'date':
           return <div style={styles.date}>
             <DatePicker
@@ -484,7 +484,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           </div>
           {calculateError && <div style={styles.error}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                     shape='exclamation-triangle' size='22'/>
+              shape='exclamation-triangle' size='22'/>
             Sorry, the request cannot be completed. Please try again or contact Support in the left
             hand navigation.
           </div>}
@@ -508,11 +508,11 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
                 }
                 <div style={styles.modifier}>
                   <Dropdown value={operator}
-                            style={styles.select}
-                            onChange={(e) => this.selectChange(e.value, i)}
-                            options={options}
-                            optionValue='value'
-                            itemTemplate={(e) => this.optionTemplate(e, name)}/>
+                    style={styles.select}
+                    onChange={(e) => this.selectChange(e.value, i)}
+                    options={options}
+                    optionValue='value'
+                    itemTemplate={(e) => this.optionTemplate(e, name)}/>
                   {operator && name !== ModifierType.ENCOUNTERS && <div style={{paddingTop: '1rem'}}>
                     {this.renderInput(i, '0', mod.type)}
                     {operator === Operator.BETWEEN && <React.Fragment>
@@ -525,13 +525,13 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
             })
           }
           <CalculateFooter addButtonText='APPLY MODIFIERS'
-                           addFn={() => this.updateMods()}
-                           backFn={() => this.props.closeModifiers()}
-                           calculateFn={() => this.calculate()}
-                           calculating={calculating}
-                           count={count}
-                           disableAdd={formErrors.length > 0 || formUntouched}
-                           disableCalculate={disableCalculate}/>
+            addFn={() => this.updateMods()}
+            backFn={() => this.props.closeModifiers()}
+            calculateFn={() => this.calculate()}
+            calculating={calculating}
+            count={count}
+            disableAdd={formErrors.length > 0 || formUntouched}
+            disableCalculate={disableCalculate}/>
         </div>
       </div>;
     }

@@ -28,10 +28,10 @@ describe('CohortPage', () => {
   const component = () => {
     return mount(<Router history={history}>
       <CohortPage setCohortChanged={() => {}}
-      setShowWarningModal={() => {}}
-      setUpdatingCohort={() => {}}
-      hideSpinner={() => {}}
-      showSpinner={() => {}}/>
+        setShowWarningModal={() => {}}
+        setUpdatingCohort={() => {}}
+        hideSpinner={() => {}}
+        showSpinner={() => {}}/>
     </Router>);
   };
 

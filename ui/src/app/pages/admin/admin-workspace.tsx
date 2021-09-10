@@ -119,21 +119,21 @@ const NameCell = (props: NameCellProps) => {
   const fileTooLarge = () => <FlexRow>
     {filenameSpan()}
     <TooltipTrigger
-        content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
+      content={`Files larger than ${formatMB(MAX_NOTEBOOK_READ_SIZE_BYTES)} MB are too large to preview`}
     ><Button style={styles.previewButton} disabled={true}>Preview</Button>
     </TooltipTrigger>
   </FlexRow>;
 
   const navigateToPreview = () => navigate(
-      ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
-      { queryParams: { accessReason: accessReason } });
+    ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
+    { queryParams: { accessReason: accessReason } });
 
   const fileWithPreviewButton = () => <FlexRow>
     {filenameSpan()}
     <TooltipTrigger content='Please enter an access reason below' disabled={accessReason && accessReason.trim()}>
       <Button style={styles.previewButton}
-              disabled={!accessReason || !accessReason.trim()}
-              onClick={navigateToPreview}>Preview</Button>
+        disabled={!accessReason || !accessReason.trim()}
+        onClick={navigateToPreview}>Preview</Button>
     </TooltipTrigger>
   </FlexRow>;
 
@@ -174,10 +174,10 @@ const FileDetailsTable = (props: FileDetailsProps) => {
         location: parseLocation(file, bucket),
         rawName: file.name,
         nameCell: <NameCell
-            file={file}
-            bucket={bucket}
-            workspaceNamespace={workspaceNamespace}
-            accessReason={accessReason}/>,
+          file={file}
+          bucket={bucket}
+          workspaceNamespace={workspaceNamespace}
+          accessReason={accessReason}/>,
         size: formatMB(file.sizeInBytes),
       };
     }).sort((a, b) => {
@@ -190,13 +190,13 @@ const FileDetailsTable = (props: FileDetailsProps) => {
 
   return <FlexColumn>
     <DataTable
-        data-test-id='object-details-table'
-        value={tableData}
-        style={styles.fileDetailsTable}
-        scrollable={true}
-        paginator={true}
-        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
-        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
+      data-test-id='object-details-table'
+      value={tableData}
+      style={styles.fileDetailsTable}
+      scrollable={true}
+      paginator={true}
+      paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'
+      currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'>
       <Column field='location' header='Location'/>
       <Column field='nameCell' header='Filename'/>
       <Column field='size' header='File size (MB)' style={{textAlign: 'right'}}/>
@@ -411,14 +411,14 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             </WorkspaceInfoField>
           </div>
           {files && <FileDetailsTable
-              workspaceNamespace={workspace.namespace}
-              data={files}
-              bucket={resources.cloudStorage.storageBucketPath}/>}
+            workspaceNamespace={workspace.namespace}
+            data={files}
+            bucket={resources.cloudStorage.storageBucketPath}/>}
           <h3>Research Purpose</h3>
           <div className='research-purpose' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Primary purpose of project'>
               {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map((researchPurposeItem, i) =>
-                  <div key={i}>{researchPurposeItem}</div>)}
+                <div key={i}>{researchPurposeItem}</div>)}
             </WorkspaceInfoField>
             <WorkspaceInfoField labelText='Reason for choosing All of Us'>
               {workspace.researchPurpose.reasonForAllOfUs}
@@ -462,18 +462,18 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
             <PurpleLabel style={styles.narrowWithMargin}>Status</PurpleLabel>
           </FlexRow>
           {resources.runtimes.map((runtime, i) =>
-              <FlexRow key={i}>
-                <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
-                <div style={styles.narrowWithMargin}>{runtime.googleProject}</div>
-                <div style={styles.narrowWithMargin}>{new Date(runtime.createdDate).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{new Date(runtime.dateAccessed).toDateString()}</div>
-                <div style={styles.narrowWithMargin}>{runtime.status}</div>
-                <Button onClick={() =>
-                  this.setState({runtimeToDelete: runtime, confirmDeleteRuntime: true})}
-                  disabled={runtimeToDelete && runtimeToDelete.runtimeName === runtime.runtimeName}>
+            <FlexRow key={i}>
+              <div style={styles.narrowWithMargin}>{runtime.runtimeName}</div>
+              <div style={styles.narrowWithMargin}>{runtime.googleProject}</div>
+              <div style={styles.narrowWithMargin}>{new Date(runtime.createdDate).toDateString()}</div>
+              <div style={styles.narrowWithMargin}>{new Date(runtime.dateAccessed).toDateString()}</div>
+              <div style={styles.narrowWithMargin}>{runtime.status}</div>
+              <Button onClick={() =>
+                this.setState({runtimeToDelete: runtime, confirmDeleteRuntime: true})}
+              disabled={runtimeToDelete && runtimeToDelete.runtimeName === runtime.runtimeName}>
                   Delete
-                </Button>
-              </FlexRow>
+              </Button>
+            </FlexRow>
           )}
         </FlexColumn>
       </div>
@@ -487,15 +487,15 @@ class AdminWorkspaceImpl extends React.Component<Props, State> {
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'
-                    onClick={() => this.cancelDeleteRuntime()}>Cancel</Button>
+              onClick={() => this.cancelDeleteRuntime()}>Cancel</Button>
             <Button style={{marginLeft: '0.5rem'}}
-                    onClick={() => {
-                      this.setState({confirmDeleteRuntime: false});
-                      this.deleteRuntime();
-                    }}
+              onClick={() => {
+                this.setState({confirmDeleteRuntime: false});
+                this.deleteRuntime();
+              }}
             >Delete</Button>
           </ModalFooter>
-      </Modal>}
+        </Modal>}
     </div>;
   }
 }

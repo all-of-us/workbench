@@ -135,11 +135,11 @@ export const CohortActions = fp.flow(
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a
-               style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('cohort')}>
-                {cohort.name}
-             </a>
+            <a
+              style={{color: colors.accent, margin: '0 4px'}}
+              onClick={() => this.navigateTo('cohort')}>
+              {cohort.name}
+            </a>
              has been saved.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>

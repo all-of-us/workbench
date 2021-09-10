@@ -341,9 +341,9 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
         <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
           {domain === Domain.DRUG && <div>
             <StyledAnchorTag
-                href='https://mor.nlm.nih.gov/RxNav/'
-                target='_blank'
-                rel='noopener noreferrer'>
+              href='https://mor.nlm.nih.gov/RxNav/'
+              target='_blank'
+              rel='noopener noreferrer'>
               Explore
             </StyledAnchorTag>
             &nbsp;drugs by brand names outside of <AoU/>
@@ -351,18 +351,18 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
           {domain === Domain.SURVEY && <div>
             Find more information about each survey in the&nbsp;
             <StyledAnchorTag
-                href='https://www.researchallofus.org/survey-explorer/'
-                target='_blank'
-                rel='noopener noreferrer'>
+              href='https://www.researchallofus.org/survey-explorer/'
+              target='_blank'
+              rel='noopener noreferrer'>
               Survey Explorer
             </StyledAnchorTag>
           </div>}
           {this.showDataBrowserLink && <div>
             Explore Source information on the&nbsp;
             <StyledAnchorTag
-                href={environment.publicUiUrl}
-                target='_blank'
-                rel='noopener noreferrer'>
+              href={environment.publicUiUrl}
+              target='_blank'
+              rel='noopener noreferrer'>
               Data Browser
             </StyledAnchorTag>
           </div>}
@@ -371,29 +371,29 @@ export const CriteriaSearch = fp.flow(withCurrentWorkspace(), withRouter)(class 
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
         <style>{growlCSS}</style>
         <Growl ref={(el) => this.growl = el}
-               style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
+          style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
-            source={source}
-            selectedSurvey={selectedSurvey}
-            autocompleteSelection={autocompleteSelection}
-            back={this.back}
-            groupSelections={groupSelections}
-            node={hierarchyNode}
-            scrollToMatch={this.setScroll}
-            searchTerms={treeSearchTerms}
-            select={this.addSelection}
-            selectedIds={this.getListSearchSelectedIds()}
-            selectOption={this.setAutocompleteSelection}
-            setSearchTerms={this.setTreeSearchTerms}/>}
-         {/* List View (using duplicated version of ListSearch) */}
+          source={source}
+          selectedSurvey={selectedSurvey}
+          autocompleteSelection={autocompleteSelection}
+          back={this.back}
+          groupSelections={groupSelections}
+          node={hierarchyNode}
+          scrollToMatch={this.setScroll}
+          searchTerms={treeSearchTerms}
+          select={this.addSelection}
+          selectedIds={this.getListSearchSelectedIds()}
+          selectOption={this.setAutocompleteSelection}
+          setSearchTerms={this.setTreeSearchTerms}/>}
+        {/* List View (using duplicated version of ListSearch) */}
         {!this.initTree && cohortContext.domain && <div style={this.searchContentStyle('list')}>
           <ListSearch hierarchy={this.showHierarchy}
-                      searchContext={cohortContext}
-                      searchTerms={conceptSearchTerms}
-                      select={this.addSelection}
-                      selectedIds={this.getListSearchSelectedIds()}/>
+            searchContext={cohortContext}
+            searchTerms={conceptSearchTerms}
+            select={this.addSelection}
+            selectedIds={this.getListSearchSelectedIds()}/>
         </div>}
       </div>
-     </div>;
+    </div>;
   }
 });

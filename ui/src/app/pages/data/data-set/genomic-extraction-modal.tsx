@@ -35,7 +35,7 @@ interface Props {
 }
 
 export const GenomicExtractionModal = ({
-    dataSet, workspaceNamespace, workspaceFirecloudName, closeFunction, title, cancelText, confirmText}: Props) => {
+  dataSet, workspaceNamespace, workspaceFirecloudName, closeFunction, title, cancelText, confirmText}: Props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{status: number, message: string}>(null);
   const isClientError = error && 400 <= error.status && error.status < 500;
@@ -44,8 +44,8 @@ export const GenomicExtractionModal = ({
   const extractsForWorkspace = genomicExtractions && genomicExtractions[workspaceNamespace] || [];
   const mostRecentExtract: GenomicExtractionJob = fp.flow(
     fp.filter((extract: GenomicExtractionJob) => extract.datasetName === dataSet.name),
-      // This, incidentally to the implementation of orderBy, puts falsey values at the front...
-      // ... which is actually what we want, but it's kind of bad to rely on implementation detail
+    // This, incidentally to the implementation of orderBy, puts falsey values at the front...
+    // ... which is actually what we want, but it's kind of bad to rely on implementation detail
     fp.orderBy((extract: GenomicExtractionJob) => extract.completionTime, 'desc'),
     fp.head
   )(extractsForWorkspace);
@@ -105,30 +105,30 @@ export const GenomicExtractionModal = ({
         { cancelText || 'Cancel' }
       </Button>
       <Button data-test-id='extract-button'
-              disabled={loading || isClientError}
-              style={{marginLeft: '0.5rem'}}
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  const job = await dataSetApi().extractGenomicData(
-                    workspaceNamespace, workspaceFirecloudName, dataSet.id);
-                  updateGenomicExtractionStore(
-                    workspaceNamespace,
-                    fp.concat(
-                      genomicExtractionStore.get()[workspaceNamespace] || [],
-                      job
-                    )
-                  );
-                  closeFunction();
-                } catch (e) {
-                  const errJson = await e.json().catch(() => {}) || {};
-                  setError({
-                    status: e.status,
-                    message: errJson.message || 'unknown error'
-                  });
-                }
-                setLoading(false);
-              }}>
+        disabled={loading || isClientError}
+        style={{marginLeft: '0.5rem'}}
+        onClick={async () => {
+          setLoading(true);
+          try {
+            const job = await dataSetApi().extractGenomicData(
+              workspaceNamespace, workspaceFirecloudName, dataSet.id);
+            updateGenomicExtractionStore(
+              workspaceNamespace,
+              fp.concat(
+                genomicExtractionStore.get()[workspaceNamespace] || [],
+                job
+              )
+            );
+            closeFunction();
+          } catch (e) {
+            const errJson = await e.json().catch(() => {}) || {};
+            setError({
+              status: e.status,
+              message: errJson.message || 'unknown error'
+            });
+          }
+          setLoading(false);
+        }}>
         { confirmText || 'Extract' }
       </Button>
     </ModalFooter>

@@ -83,15 +83,15 @@ const getUserConfirmation = (message, callback) => {
 
   ReactDOM.render(
     <Modal>
-        <ModalTitle>Warning!</ModalTitle>
-        <ModalBody>
-          {message}
-        </ModalBody>
-        <ModalFooter>
-          <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
-          <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
-        </ModalFooter>
-      </Modal>, modal);
+      <ModalTitle>Warning!</ModalTitle>
+      <ModalBody>
+        {message}
+      </ModalBody>
+      <ModalFooter>
+        <Button type='link' onClick={() => withCleanup(false)}>Cancel</Button>
+        <Button type='primary' onClick={() => withCleanup(true)}>Discard Changes</Button>
+      </ModalFooter>
+    </Modal>, modal);
 };
 
 export const AppRouter = ({children}): React.ReactElement => {
@@ -105,8 +105,8 @@ export const AppRoute = ({path, guards = [], exact, intermediaryRoute = false, c
 
   return <Route exact={exact} path={path}>
     {redirectPath
-        ? <Redirect to={redirectPath}/>
-        : (children)
+      ? <Redirect to={redirectPath}/>
+      : (children)
     }
   </Route>;
 };

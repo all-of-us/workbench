@@ -348,7 +348,7 @@ export class LeoRuntimeInitializer {
       if (isAbortError(e)) {
         return this.reject(
           new LeoRuntimeInitializationAbortedError('Abort signal received during runtime API call',
-          this.currentRuntime));
+            this.currentRuntime));
       } else if (e instanceof ExceededActionCountError) {
         // This is a signal that we should hard-abort the polling loop due to reaching the max
         // number of delete or create actions allowed.

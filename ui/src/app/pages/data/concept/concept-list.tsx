@@ -198,21 +198,21 @@ export const ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         </div>
         <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
           <Button type='primary'
-                  style={styles.saveButton}
-                  disabled={this.disableSaveConceptButton}
-                  onClick={() => this.onSaveConceptSetClick()}>
+            style={styles.saveButton}
+            disabled={this.disableSaveConceptButton}
+            onClick={() => this.onSaveConceptSetClick()}>
             Save Concept Set
           </Button>
           <Button type='link'
-                  style={{color: colors.primary, left: 0}}
-                  onClick={() => setSidebarActiveIconStore.next(null)}>
+            style={{color: colors.primary, left: 0}}
+            onClick={() => setSidebarActiveIconStore.next(null)}>
             Close
           </Button>
         </FlexRowWrap>
         {conceptAddModalOpen && <ConceptAddModal activeDomainTab={this.getDomainCount()}
-                         selectedConcepts={this.props.concept}
-                         onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
-                         onClose={() => this.closeConceptAddModal()}/>}
-        </div>;
+          selectedConcepts={this.props.concept}
+          onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
+          onClose={() => this.closeConceptAddModal()}/>}
+      </div>;
     }
   });

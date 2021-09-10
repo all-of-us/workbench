@@ -492,17 +492,17 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       return <span>
         {data &&
           <i className='pi pi-filter'
-             style={filtered ? filterIcons.active : filterIcons.default}
-             onClick={(e) => {
-               const {name} = fields.find(it => it.field === column);
-               triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${name} - Review Participant List`);
-               fl.toggle(e);
-               if (column === 'participantId') {
-                 ip.focus();
-               }
-             }}/>}
+            style={filtered ? filterIcons.active : filterIcons.default}
+            onClick={(e) => {
+              const {name} = fields.find(it => it.field === column);
+              triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${name} - Review Participant List`);
+              fl.toggle(e);
+              if (column === 'participantId') {
+                ip.focus();
+              }
+            }}/>}
         <OverlayPanel style={styles.filterOverlay} className='filterOverlay'
-                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
             <NumberInput
@@ -518,8 +518,8 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
             }}>
               <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
-                     checked={filters[colType].includes(opt.value)} value={opt.value}
-                     onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
+                checked={filters[colType].includes(opt.value)} value={opt.value}
+                onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
               <label style={{paddingLeft: '0.4rem'}}> {opt.name} </label>
             </div>
           ))}
@@ -576,7 +576,7 @@ export const ParticipantsTable = fp.flow(withCurrentCohortReview(), withCurrentW
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
           shape='exclamation-triangle' size='22'/>
-          {message}
+        {message}
       </div>;
     };
 

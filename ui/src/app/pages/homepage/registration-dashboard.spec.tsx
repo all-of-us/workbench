@@ -96,13 +96,13 @@ describe('RegistrationDashboard', () => {
     let wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(0);
     expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
-    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
 
     // Now mark loginGov link succeed
     props.rasLoginGovLinked = true;
     wrapper = component();
     expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
-    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+      .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
   });
 
 

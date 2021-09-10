@@ -166,82 +166,82 @@ export const ConceptAddModal = withCurrentWorkspace()
         Add {selectedConceptsInDomain.length} Concepts to
         {' '}{activeDomainTab.name} Concept Set</ModalTitle>
       {loading ?
-          <div style={{display: 'flex', justifyContent: 'center'}}>
-            <Spinner style={{alignContent: 'center'}}/>
-          </div> :
-      <ModalBody>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          <Spinner style={{alignContent: 'center'}}/>
+        </div> :
         <ModalBody>
-          <FlexRow>
-            <TooltipTrigger content={
-              <div>No concept sets in domain '{activeDomainTab.name}'</div>}
-                            disabled={conceptSets.length > 0}>
+          <ModalBody>
+            <FlexRow>
+              <TooltipTrigger content={
+                <div>No concept sets in domain '{activeDomainTab.name}'</div>}
+              disabled={conceptSets.length > 0}>
+                <div>
+                  <RadioButton value={addingToExistingSet}
+                    checked={addingToExistingSet}
+                    disabled={conceptSets.length === 0}
+                    data-test-id='toggle-existing-set'
+                    onChange={() => {
+                      this.setState({
+                        addingToExistingSet: true,
+                        nameTouched: false});
+                    }}
+                  />
+                  <label style={styles.label}>Choose existing set</label>
+                </div>
+              </TooltipTrigger>
               <div>
-                <RadioButton value={addingToExistingSet}
-                            checked={addingToExistingSet}
-                            disabled={conceptSets.length === 0}
-                            data-test-id='toggle-existing-set'
-                            onChange={() => {
-                              this.setState({
-                              addingToExistingSet: true,
-                              nameTouched: false});
-                            }}
-                />
-                <label style={styles.label}>Choose existing set</label>
+                <RadioButton value={!addingToExistingSet}
+                  checked={!addingToExistingSet}
+                  style={{marginLeft: '0.7rem'}}
+                  data-test-id='toggle-new-set'
+                  onChange={() => {this.setState({addingToExistingSet: false}); }}/>
+                <label style={styles.label}>Create new set</label>
               </div>
-            </TooltipTrigger>
-            <div>
-              <RadioButton value={!addingToExistingSet}
-                         checked={!addingToExistingSet}
-                         style={{marginLeft: '0.7rem'}}
-                         data-test-id='toggle-new-set'
-                         onChange={() => {this.setState({addingToExistingSet: false}); }}/>
-              <label style={styles.label}>Create new set</label>
-            </div>
-          </FlexRow>
-        </ModalBody>
-        {addingToExistingSet ? (
+            </FlexRow>
+          </ModalBody>
+          {addingToExistingSet ? (
             <ModalBody data-test-id='add-to-existing'>
               <select data-test-id='existing-set-select'
-                      style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
-                      placeholder='Select Concept Set'
-                      onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
+                style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
+                placeholder='Select Concept Set'
+                onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
                 {conceptSets.map((set: ConceptSet, i) =>
-                    <option data-test-id='existing-set' key={i} value={i}>
-                      {set.name}
-                    </option>)}
+                  <option data-test-id='existing-set' key={i} value={i}>
+                    {set.name}
+                  </option>)}
               </select>
             </ModalBody>
-            ) :
-          (<ModalBody data-test-id='create-new-set'>
-            <TextInput placeholder='Name' value={name}
-                       data-test-id='create-new-set-name'
-                       onChange={(v) => {
-                         this.setState({name: v, nameTouched: true});
-                       }}/>
-            <ValidationError>
-              {summarizeErrors(nameTouched && errors && errors.name)}
-            </ValidationError>
-            <textarea style={{marginTop: '1rem'}} placeholder='Add a Description'
-                      value={newSetDescription}
-                      onChange={(v) => {
-                        this.setState({newSetDescription: v.target.value});
-                      }}/>
-          </ModalBody>)}
-        {errorSaving &&
+          ) :
+            (<ModalBody data-test-id='create-new-set'>
+              <TextInput placeholder='Name' value={name}
+                data-test-id='create-new-set-name'
+                onChange={(v) => {
+                  this.setState({name: v, nameTouched: true});
+                }}/>
+              <ValidationError>
+                {summarizeErrors(nameTouched && errors && errors.name)}
+              </ValidationError>
+              <textarea style={{marginTop: '1rem'}} placeholder='Add a Description'
+                value={newSetDescription}
+                onChange={(v) => {
+                  this.setState({newSetDescription: v.target.value});
+                }}/>
+            </ModalBody>)}
+          {errorSaving &&
           <AlertDanger>Error saving concepts to set; please try again!</AlertDanger>}
-        {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
-        <ModalFooter>
-          <Button type='secondary' onClick={onClose}>Cancel</Button>
-          <TooltipTrigger content={addingToExistingSet && <div>Cannot add more concepts to
-            <b> {selectedSet && selectedSet.name}. </b> Concept count exceeds {CONCEPT_SET_CONCEPT_LIMIT}</div>}
+          {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
+          <ModalFooter>
+            <Button type='secondary' onClick={onClose}>Cancel</Button>
+            <TooltipTrigger content={addingToExistingSet && <div>Cannot add more concepts to
+              <b> {selectedSet && selectedSet.name}. </b> Concept count exceeds {CONCEPT_SET_CONCEPT_LIMIT}</div>}
             disabled={!this.disableSave(errors)}>
-          <Button style={{marginLeft: '0.5rem'}}
-                  disabled={this.disableSave(errors)}
-                  data-test-id='save-concept-set'
-                  onClick={() => this.saveConcepts()}>Save</Button>
-          </TooltipTrigger>
-        </ModalFooter>
-      </ModalBody>}
+              <Button style={{marginLeft: '0.5rem'}}
+                disabled={this.disableSave(errors)}
+                data-test-id='save-concept-set'
+                onClick={() => this.saveConcepts()}>Save</Button>
+            </TooltipTrigger>
+          </ModalFooter>
+        </ModalBody>}
       {saving && <SpinnerOverlay/>}
     </Modal>;
   }

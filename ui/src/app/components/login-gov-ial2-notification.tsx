@@ -73,11 +73,11 @@ const LoginGovIAL2Notification = () => {
     <div style={styles.text}>Please verify your identity by 10/06/2021.
     </div>
     <Button
-        type='primary'
-        style={styles.button}
-        onClick={() => environment.enableDataAccessRequirements ?
-            navigate(['data-access-requirements']) :
-            location.replace('/?workbenchAccessTasks=true')}>
+      type='primary'
+      style={styles.button}
+      onClick={() => environment.enableDataAccessRequirements ?
+        navigate(['data-access-requirements']) :
+        location.replace('/?workbenchAccessTasks=true')}>
       <div style={styles.buttonText}>LEARN MORE</div>
     </Button>
   </FlexRow>;

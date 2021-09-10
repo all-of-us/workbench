@@ -34,21 +34,21 @@ export const InvalidBillingBanner = fp.flow(
     footer={
       <div style={{display: 'flex', flexDirection: 'column'}}>
         <Button style={{height: '38px', width: '70%', fontWeight: 400}}
-                onClick={() => {
-                  openZendeskWidget(
-                    props.profileState.profile.givenName,
-                    props.profileState.profile.familyName,
-                    props.profileState.profile.username,
-                    props.profileState.profile.contactEmail,
-                  );
-                }}
+          onClick={() => {
+            openZendeskWidget(
+              props.profileState.profile.givenName,
+              props.profileState.profile.familyName,
+              props.profileState.profile.username,
+              props.profileState.profile.contactEmail,
+            );
+          }}
         >
           Request Extension
         </Button>
         {enableBillingUpgrade && <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}
-                                    onClick={() => {
-                                      props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
-                                    }}>
+          onClick={() => {
+            props.navigate(['workspaces', props.workspace.namespace, props.workspace.id, 'edit']);
+          }}>
             Provide billing account
         </a>}
       </div>

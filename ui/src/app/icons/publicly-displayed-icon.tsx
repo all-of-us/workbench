@@ -62,5 +62,5 @@ export const PubliclyDisplayed = (props) => {
         </TooltipTrigger>
       </label>
     </div>
-   </div>;
+  </div>;
 };

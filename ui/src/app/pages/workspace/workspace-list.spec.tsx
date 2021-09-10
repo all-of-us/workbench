@@ -48,7 +48,7 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
-        .map(c => c.text());
+      .map(c => c.text());
     expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
   });
 

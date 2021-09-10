@@ -41,11 +41,11 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="user-phone-number"]').first().prop('disabled')).toBeFalsy();
 
     expect(wrapper.find('[data-test-id="user-full-name"]').first().prop('value'))
-    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
+      .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
         + ' ' + 'MacTesterson!@#$%^&*()><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-phone-number"]').first().prop('value')).toBeUndefined();
     expect(wrapper.find('[data-test-id="user-contact-email"]').first().prop('value'))
-    .toEqual('tester@mactesterson.edu><script>alert("hello");</script>');
+      .toEqual('tester@mactesterson.edu><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-workbench-id"]').first().prop('value')).toEqual('tester@fake-research-aou.org');
     expect(wrapper.find('[data-test-id="user-institution"]').first().prop('value')).toEqual('The Broad Institute');
 
@@ -71,18 +71,18 @@ describe('CreateBillingAccountModal', () => {
     expect(wrapper.find('[data-test-id="step-3-modal"]').exists()).toBeTruthy();
 
     expect(wrapper.find('[data-test-id="user-full-name-text"]').first().props().children)
-    .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
+      .toEqual('Tester!@#$%^&*()><script>alert("hello");</script>'
         + ' ' + 'MacTesterson!@#$%^&*()><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-phone-number-text"]').first().props().children)
-    .toEqual('1234567890');
+      .toEqual('1234567890');
     expect(wrapper.find('[data-test-id="user-contact-email-text"]').first().props().children)
-    .toEqual('tester@mactesterson.edu><script>alert("hello");</script>');
+      .toEqual('tester@mactesterson.edu><script>alert("hello");</script>');
     expect(wrapper.find('[data-test-id="user-workbench-id-text"]').first().props().children)
-    .toEqual('tester@fake-research-aou.org');
+      .toEqual('tester@fake-research-aou.org');
     expect(wrapper.find('[data-test-id="user-institution-text"]').first().props().children)
-    .toEqual('The Broad Institute');
+      .toEqual('The Broad Institute');
     expect(wrapper.find('[data-test-id="use-credit-card-text"]').first().props().children)
-    .toEqual('Credit credit');
+      .toEqual('Credit credit');
     expect(wrapper.find('[data-test-id="nih-funded-text"]').first().props().children).toEqual('N/A');
   });
 });

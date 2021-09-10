@@ -108,8 +108,8 @@ const LibraryTab: React.FunctionComponent<{
   title: string, icon: string, onClick: Function, selected: boolean}> =
   ({title, icon, onClick, selected}) => {
     return <Clickable style={selected ? {...styles.menuLink, ...styles.menuLinkSelected}
-    : styles.menuLink}
-                      onClick={onClick} hover={styles.menuLinkSelected}>
+      : styles.menuLink}
+    onClick={onClick} hover={styles.menuLinkSelected}>
       <img src={icon} style={styles.iconStyling}/>
       {title}
     </Clickable>;
@@ -237,9 +237,9 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
           {this.libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
               <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
-                          onClick={() => this.setState({currentTab: tab})}
-                          data-test-id={tab.title}/>
-                {i !== this.libraryTabs.length - 1 &&
+                onClick={() => this.setState({currentTab: tab})}
+                data-test-id={tab.title}/>
+              {i !== this.libraryTabs.length - 1 &&
                 <hr style={styles.libraryTabDivider}/>}
             </React.Fragment>;
           })}
@@ -266,9 +266,9 @@ export const WorkspaceLibrary = (class extends React.Component<Props, State> {
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {currentTab.filter(this.state.workspaceList, this.state.featuredWorkspaces).map(wp => {
                   return <WorkspaceCard key={wp.workspace.name}
-                                        workspace={wp.workspace}
-                                        accessLevel={wp.accessLevel}
-                                        reload={() => this.updateWorkspaces()}/>;
+                    workspace={wp.workspace}
+                    accessLevel={wp.accessLevel}
+                    reload={() => this.updateWorkspaces()}/>;
                 })}
               </div>)}
           </div>

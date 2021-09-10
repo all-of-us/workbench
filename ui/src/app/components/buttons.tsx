@@ -247,15 +247,15 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = f
 export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <LocalInteractive tagName='div'
-                 style={{
-                   color: disabled ? colors.disabled : colors.accent,
-                   cursor: disabled ? 'auto' : 'pointer',
-                   ...style
-                 }}
-                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
-                 disabled={disabled}
-                 {...props}>
-        <Icon disabled={disabled} style={style}/>
+      style={{
+        color: disabled ? colors.disabled : colors.accent,
+        cursor: disabled ? 'auto' : 'pointer',
+        ...style
+      }}
+      hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
+      disabled={disabled}
+      {...props}>
+      <Icon disabled={disabled} style={style}/>
     </LocalInteractive>
   </TooltipTrigger>;
 };
@@ -336,8 +336,8 @@ export const Link = ({disabled = false, style = {}, children, ...props}) => {
     hover: {textDecoration: 'underline'}
   };
   return <Clickable
-      disabled={disabled} {...props}
-      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
+    disabled={disabled} {...props}
+    {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
   >{children}</Clickable>;
 };
 
@@ -350,19 +350,19 @@ export const StyledAnchorTag = ({href, children, analyticsFn = null, style = {},
 
   // TODO RW-7154: change to react-router Link
   return <a href={href}
-            onClick={e => {
-              if (analyticsFn) {
-                analyticsFn();
-              }
-              // This does same page navigation iff there is no key pressed and target is not set.
-              if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
-                navigateByUrl(href, {
-                  preventDefaultIfNoKeysPressed: true,
-                  event: e
-                });
-              }
-            }}
-            style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
+    onClick={e => {
+      if (analyticsFn) {
+        analyticsFn();
+      }
+      // This does same page navigation iff there is no key pressed and target is not set.
+      if (props.target === undefined && !href.startsWith('https://') && !href.startsWith('http://')) {
+        navigateByUrl(href, {
+          preventDefaultIfNoKeysPressed: true,
+          event: e
+        });
+      }
+    }}
+    style={{...inlineAnchor, ...style}} {...props}>{children}</a>;
 };
 
 interface SlidingFabState {
@@ -390,11 +390,11 @@ export class SlidingFabReact extends React.Component<SlidingFabProps, SlidingFab
     const {expanded, disable, iconShape, tooltip, tooltipContent} = this.props;
     return <div style={styles.slidingButtonContainer}>
       <div data-test-id='sliding-button'
-           style={disable ? {...styles.slidingButton,
-             ...styles.slidingButtonDisable} : styles.slidingButton}
-           onMouseEnter={() => this.setState({hovering: true})}
-           onMouseLeave={() => this.setState({hovering: false})}
-           onClick={() => disable ? {} : this.props.submitFunction()}>
+        style={disable ? {...styles.slidingButton,
+          ...styles.slidingButtonDisable} : styles.slidingButton}
+        onMouseEnter={() => this.setState({hovering: true})}
+        onMouseLeave={() => this.setState({hovering: false})}
+        onClick={() => disable ? {} : this.props.submitFunction()}>
         <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
           <div style={styles.slidingButtonContent}>
             <div style={hovering ? {...styles.slidingButtonText,

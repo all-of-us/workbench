@@ -53,6 +53,8 @@ module.exports = {
     /* Style */
     'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
     '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+    "indent": "off",
+    '@typescript-eslint/indent': ['error', 2],
     '@typescript-eslint/naming-convention': ['error',
       {'selector': 'class', 'format': ['PascalCase']},
       {'selector': 'interface', 'format': ['PascalCase']}

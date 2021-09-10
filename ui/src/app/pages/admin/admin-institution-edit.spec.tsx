@@ -19,10 +19,10 @@ describe('AdminInstitutionEditSpec', () => {
     return mount(<MemoryRouter initialEntries={[`/admin/institution/edit/${institution}`]}>
       <Route path='/admin/institution/edit/:institutionId'>
         <AdminInstitutionEdit
-            hideSpinner={() => {
-            }}
-            showSpinner={() => {
-            }}
+          hideSpinner={() => {
+          }}
+          showSpinner={() => {
+          }}
         />
       </Route>
     </MemoryRouter>);
@@ -110,9 +110,9 @@ describe('AdminInstitutionEditSpec', () => {
 
     // Value before test.
     expect(wrapper.find('[data-test-id="rtEmailDomainInput"]').first().prop('value'))
-    .toBe('verily.com,\ngoogle.com');
+      .toBe('verily.com,\ngoogle.com');
     expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').first().prop('value'))
-    .toBe('foo@verily.com');
+      .toBe('foo@verily.com');
 
     const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     ctAgreementTypeDropDown.props.onChange({
@@ -122,15 +122,15 @@ describe('AdminInstitutionEditSpec', () => {
     });
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {target: {value: 'domain.com'}});
+      .simulate('change', {target: {value: 'domain.com'}});
 
     wrapper.find('[data-test-id="save-institution-button"]').first().simulate('click');
     // RT no change
     expect(wrapper.find('[data-test-id="rtEmailDomainInput"]').first().prop('value'))
-    .toBe('verily.com,\n' + 'google.com');
+      .toBe('verily.com,\n' + 'google.com');
     // CT changed to email domains
     expect(wrapper.find('[data-test-id="ctEmailDomainInput"]').first().prop('value'))
-    .toBe('domain.com');
+      .toBe('domain.com');
     // CT email addressed become empty
     expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').length).toBe(0);
   });
@@ -185,26 +185,26 @@ describe('AdminInstitutionEditSpec', () => {
     const rtAgreementTypeDropDown = wrapper.find('[data-test-id="rt-agreement-dropdown"]').instance() as Dropdown;
     const ctAgreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     rtAgreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
     ctAgreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
     wrapper.find('[data-test-id="rtEmailDomainInput"]').first()
-    .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
+      .simulate('change', {target: {value: 'someDomain.com,\njustSomeRandom.domain,\n,'}});
     wrapper.find('[data-test-id="rtEmailDomainInput"]').first().simulate('blur');
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first()
-    .simulate('change', {target: {value: 'correctEmail@domain.com'}});
+      .simulate('change', {target: {value: 'correctEmail@domain.com'}});
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first().simulate('blur');
 
     expect(wrapper.find('[data-test-id="rtEmailDomainInput"]').first().prop('value'))
-    .toBe('someDomain.com,\njustSomeRandom.domain');
+      .toBe('someDomain.com,\njustSomeRandom.domain');
     expect(wrapper.find('[data-test-id="ctEmailAddressInput"]').first().prop('value'))
-    .toBe('correctEmail@domain.com');
+      .toBe('correctEmail@domain.com');
   });
 
   it('should show appropriate section after changing agreement type in Controlled Tier requirement', async () => {
@@ -232,10 +232,10 @@ describe('AdminInstitutionEditSpec', () => {
     expect(ctEmailDomainLabel.props.children).toBe('Accepted Email Domains');
 
     agreementTypeDropDown.props.onChange(
-        {
-          originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}
-        });
+      {
+        originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}
+      });
     await waitOneTickAndUpdate(wrapper);
 
     ctEmailAddressDiv = wrapper.find('[data-test-id="ctEmailAddress"]');
@@ -308,8 +308,8 @@ describe('AdminInstitutionEditSpec', () => {
     expect(ctEmailAddressError.length).toBe(0);
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.ADDRESSES,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.ADDRESSES}});
     await waitOneTickAndUpdate(wrapper);
 
     // In case of a single entry which is not in the correct format
@@ -317,13 +317,13 @@ describe('AdminInstitutionEditSpec', () => {
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailAddressError"]');
     expect(ctEmailAddressError.first().props().children)
-    .toBe('Following Email Addresses are not valid : ctInvalidEmail@domain');
+      .toBe('Following Email Addresses are not valid : ctInvalidEmail@domain');
 
     // Multiple Email Address entries with a mix of correct (someEmail@broadinstitute.org') and incorrect format
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first()
-    .simulate('change', {
-      target: {
-        value:
+      .simulate('change', {
+        target: {
+          value:
             'invalidEmail@domain@org,\n' +
             'correctEmail@someDomain.org,\n' +
             ' correctEmail.123.hello@someDomain567.org.com   \n' +
@@ -331,16 +331,16 @@ describe('AdminInstitutionEditSpec', () => {
             ' justDomain.org,\n' +
             'someEmail@broadinstitute.org\n' +
             'nope@just#plain#wrong'
-      }
-    });
+        }
+      });
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailAddressError"]');
     expect(ctEmailAddressError.first().props().children)
-    .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
+      .toBe('Following Email Addresses are not valid : invalidEmail@domain@org , invalidEmail , justDomain.org , nope@just#plain#wrong');
 
     // Single correct format Email Address entries
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first()
-    .simulate('change', {target: {value: 'correctEmail@domain.com'}});
+      .simulate('change', {target: {value: 'correctEmail@domain.com'}});
     wrapper.find('[data-test-id="ctEmailAddressInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailAddressError"]');
     expect(ctEmailAddressError.length).toBe(0);
@@ -410,38 +410,38 @@ describe('AdminInstitutionEditSpec', () => {
     expect(ctEmailAddressError.length).toBe(0);
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {target: {value: 'invalidEmail@domain'}});
+      .simulate('change', {target: {value: 'invalidEmail@domain'}});
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailDomainError"]');
     expect(ctEmailAddressError.first().props().children)
-    .toBe('Following Email Domains are not valid : invalidEmail@domain');
+      .toBe('Following Email Domains are not valid : invalidEmail@domain');
 
     // Multiple Entries with correct and incorrect Email Domain format
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {
-      target: {
-        value:
+      .simulate('change', {
+        target: {
+          value:
             'someEmailAddress@domain@org,\n' +
             'someDomain123.org.com        ,\n' +
             ' justSomeText,\n' +
             ' justDomain.org,\n' +
             'broadinstitute.org#wrongTest'
-      }
-    });
+        }
+      });
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailDomainError"]');
     expect(ctEmailAddressError.first().props().children)
-    .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
+      .toBe('Following Email Domains are not valid : someEmailAddress@domain@org , ' +
         'justSomeText , broadinstitute.org#wrongTest');
 
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {target: {value: 'domain.com'}});
+      .simulate('change', {target: {value: 'domain.com'}});
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
     ctEmailAddressError = wrapper.find('[data-test-id="ctEmailDomainError"]');
     expect(ctEmailAddressError.length).toBe(0);
@@ -476,16 +476,16 @@ describe('AdminInstitutionEditSpec', () => {
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
+      .simulate('change', {target: {value: 'validEmail.com,\n     ,\njustSomeRandom.domain,\n,'}});
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
     expect(wrapper.find('[data-test-id="ctEmailDomainInput"]').first().prop('value'))
-    .toBe('validEmail.com,\njustSomeRandom.domain');
+      .toBe('validEmail.com,\njustSomeRandom.domain');
   });
 
   it('Should ignore whitespaces in email address in Registered Tier requirement', async () => {
@@ -520,15 +520,15 @@ describe('AdminInstitutionEditSpec', () => {
 
     const agreementTypeDropDown = wrapper.find('[data-test-id="ct-agreement-dropdown"]').instance() as Dropdown;
     agreementTypeDropDown.props.onChange(
-        {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
-          target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
+      {originalEvent: undefined, value: InstitutionMembershipRequirement.DOMAINS,
+        target: {name: 'name', id: '', value: InstitutionMembershipRequirement.DOMAINS}});
     await waitOneTickAndUpdate(wrapper);
 
     // Single Entry with incorrect Email Domain format
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first()
-    .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
+      .simulate('change', {target: {value: '  someDomain.com,\njustSomeRandom.domain   ,\n,'}});
     wrapper.find('[data-test-id="ctEmailDomainInput"]').first().simulate('blur');
     expect(wrapper.find('[data-test-id="ctEmailDomainInput"]').first().prop('value'))
-    .toBe('someDomain.com,\njustSomeRandom.domain');
+      .toBe('someDomain.com,\njustSomeRandom.domain');
   });
 });

@@ -191,17 +191,17 @@ export class SelectionInfo extends React.Component<SelectionInfoProps, Selection
     return <FlexColumn style={styles.selectionItem}>
       {index > 0 && <div style={{padding: '0.3rem 0rem 0.3rem 1rem'}}>OR&nbsp;</div>}
       <FlexRow style={{alignItems: 'baseline'}}>
-      <button style={styles.removeSelection} onClick={() => removeSelection()}>
-        <ClrIcon shape='times-circle'/>
-      </button>
-      <FlexColumn style={{width: 'calc(100% - 1rem)'}}>
-        {selection.group && <div>Group</div>}
-        <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
-          <div style={styles.itemName} ref={(e) => this.name = e}>
-            {itemName}
-          </div>
-        </TooltipTrigger>
-      </FlexColumn>
+        <button style={styles.removeSelection} onClick={() => removeSelection()}>
+          <ClrIcon shape='times-circle'/>
+        </button>
+        <FlexColumn style={{width: 'calc(100% - 1rem)'}}>
+          {selection.group && <div>Group</div>}
+          <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
+            <div style={styles.itemName} ref={(e) => this.name = e}>
+              {itemName}
+            </div>
+          </TooltipTrigger>
+        </FlexColumn>
       </FlexRow>
     </FlexColumn>;
   }
@@ -333,23 +333,23 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
           {standardConcepts.length > 0 && <div style={{marginBottom: '0.5rem'}}>
             <div style={styles.selectionHeader}>Standard Concepts</div>
             {standardConcepts.map((selection, index) => <SelectionInfo key={index}
-                                                                       index={index}
-                                                                       selection={selection}
-                                                                       removeSelection={() => this.removeCriteria(selection)}/>)}
+              index={index}
+              selection={selection}
+              removeSelection={() => this.removeCriteria(selection)}/>)}
           </div>}
           {sourceConcepts.length > 0 && <div>
             <div style={styles.selectionHeader}>Source Concepts</div>
             {sourceConcepts.map((selection, index) => <SelectionInfo key={index}
-                                                                     index={index}
-                                                                     selection={selection}
-                                                                     removeSelection={() => this.removeCriteria(selection)}/>)}
+              index={index}
+              selection={selection}
+              removeSelection={() => this.removeCriteria(selection)}/>)}
           </div>}
         </React.Fragment>;
       } else {
         return criteria.map((selection, index) => <SelectionInfo key={index}
-                                                                 index={index}
-                                                                 selection={selection}
-                                                                 removeSelection={() => this.removeCriteria(selection)}/>);
+          index={index}
+          selection={selection}
+          removeSelection={() => this.removeCriteria(selection)}/>);
       }
     }
 
@@ -360,54 +360,54 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
         <FlexRow style={styles.navIcons}>
           {showModifiersSlide &&
             <Clickable style={{marginRight: '1rem'}}
-                       onClick={() => this.setState({showModifiersSlide: false})}>
+              onClick={() => this.setState({showModifiersSlide: false})}>
               <img src={proIcons.arrowLeft}
-                   style={{height: '21px', width: '18px'}}
-                   alt='Go back'/>
+                style={{height: '21px', width: '18px'}}
+                alt='Go back'/>
             </Clickable>
           }
           <Clickable style={{marginRight: '1rem'}}
-                     onClick={() => this.closeSidebar()}>
+            onClick={() => this.closeSidebar()}>
             <img src={proIcons.times}
-                 style={{height: '27px', width: '17px'}}
-                 alt='Close'/>
+              style={{height: '27px', width: '17px'}}
+              alt='Close'/>
           </Clickable>
         </FlexRow>
-          {!this.showAttributesOrModifiers && <React.Fragment>
-            <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
-            <div style={styles.selectionContainer}>
-              {!!criteria && <div style={this.showModifierButton
-                ? {...styles.selectionList, height: 'calc(100% - 2rem)'}
-                : styles.selectionList}>
-                {!!criteria && criteria.length > 0 && this.renderSelections()}
-              </div>}
-              {this.showModifierButton && <div style={styles.modifierButtonContainer}>
-                <Button type='secondaryLight' style={styles.modifierButton}
-                        onClick={() => this.setState({showModifiersSlide: true})}>
-                  {cohortContext.item.modifiers.length > 0
-                    ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
-                    : 'APPLY MODIFIERS'
-                  }
-                </Button>
-              </div>}
-            </div>
-            <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
-              <Button type='primary'
-                      style={styles.saveButton}
-                      disabled={disableSave}
-                      onClick={() => saveCriteria()}>Save Criteria</Button>
-              <Button type='link'
-                      style={{color: colors.primary, marginRight: '0.5rem'}}
-                      onClick={() => back()}>
-                Back
+        {!this.showAttributesOrModifiers && <React.Fragment>
+          <h3 style={{...styles.sectionTitle, marginTop: 0}}>Add selected criteria to cohort</h3>
+          <div style={styles.selectionContainer}>
+            {!!criteria && <div style={this.showModifierButton
+              ? {...styles.selectionList, height: 'calc(100% - 2rem)'}
+              : styles.selectionList}>
+              {!!criteria && criteria.length > 0 && this.renderSelections()}
+            </div>}
+            {this.showModifierButton && <div style={styles.modifierButtonContainer}>
+              <Button type='secondaryLight' style={styles.modifierButton}
+                onClick={() => this.setState({showModifiersSlide: true})}>
+                {cohortContext.item.modifiers.length > 0
+                  ? '(' + cohortContext.item.modifiers.length + ')  MODIFIERS APPLIED'
+                  : 'APPLY MODIFIERS'
+                }
               </Button>
-            </FlexRowWrap>
-          </React.Fragment>}
-          {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
-                                                                       closeModifiers={(modifiers) => this.closeModifiers(modifiers)}/>}
-          {!!attributesSelection && <AttributesPage back={() => this.closeSidebar()}
-                                                    close={() => attributesSelectionStore.next(undefined)}
-                                                    node={attributesSelection}/>}
+            </div>}
+          </div>
+          <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
+            <Button type='primary'
+              style={styles.saveButton}
+              disabled={disableSave}
+              onClick={() => saveCriteria()}>Save Criteria</Button>
+            <Button type='link'
+              style={{color: colors.primary, marginRight: '0.5rem'}}
+              onClick={() => back()}>
+                Back
+            </Button>
+          </FlexRowWrap>
+        </React.Fragment>}
+        {showModifiersSlide && !attributesSelection && <ModifierPage selections={criteria}
+          closeModifiers={(modifiers) => this.closeModifiers(modifiers)}/>}
+        {!!attributesSelection && <AttributesPage back={() => this.closeSidebar()}
+          close={() => attributesSelectionStore.next(undefined)}
+          node={attributesSelection}/>}
       </div>;
     }
   }

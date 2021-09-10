@@ -11,21 +11,21 @@ const devAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.D
 const featuredWsAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
 
 describe('authorities', () => {
-    it('should correctly authorize INSTITUTION_ADMIN', async () => {
-        expect(hasAuthorityForAction(noAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();
-        expect(hasAuthorityForAction(accessAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();
+  it('should correctly authorize INSTITUTION_ADMIN', async () => {
+    expect(hasAuthorityForAction(noAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();
+    expect(hasAuthorityForAction(accessAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeFalsy();
 
-        expect(hasAuthorityForAction(instAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeTruthy();
-        expect(hasAuthorityForAction(devAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeTruthy();
-    });
+    expect(hasAuthorityForAction(instAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeTruthy();
+    expect(hasAuthorityForAction(devAuth, AuthorityGuardedAction.INSTITUTION_ADMIN)).toBeTruthy();
+  });
 
-    it('should correctly authorize SHOW_ADMIN_MENU as a special case', async () => {
-        expect(hasAuthorityForAction(noAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeFalsy();
-        // FEATUREDWORKSPACEADMIN does not guard anything in the admin menu
-        expect(hasAuthorityForAction(featuredWsAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeFalsy();
-        // ACCESSCONTROLADMIN does
-        expect(hasAuthorityForAction(accessAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeTruthy();
-        // DEVELOPER enables everything
-        expect(hasAuthorityForAction(devAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeTruthy();
-    });
+  it('should correctly authorize SHOW_ADMIN_MENU as a special case', async () => {
+    expect(hasAuthorityForAction(noAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeFalsy();
+    // FEATUREDWORKSPACEADMIN does not guard anything in the admin menu
+    expect(hasAuthorityForAction(featuredWsAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeFalsy();
+    // ACCESSCONTROLADMIN does
+    expect(hasAuthorityForAction(accessAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeTruthy();
+    // DEVELOPER enables everything
+    expect(hasAuthorityForAction(devAuth, AuthorityGuardedAction.SHOW_ADMIN_MENU)).toBeTruthy();
+  });
 });

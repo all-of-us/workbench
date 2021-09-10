@@ -43,7 +43,7 @@ export const EmailDomainMismatchErrorMessage = () => {
 };
 
 export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, institutionShortName: string):
-    Array<{ label: string, value: InstitutionalRole }> => {
+Array<{ label: string, value: InstitutionalRole }> => {
   if (isBlank(institutionShortName)) {
     return [];
   }
@@ -59,11 +59,11 @@ export const getRoleOptions = (institutions: Array<PublicInstitutionDetails>, in
   const {organizationTypeEnum} = matchedInstitution;
   const availableRoles: Array<InstitutionalRole> =
       AccountCreationOptions.institutionalRolesByOrganizationType
-      .find(obj => obj.type === organizationTypeEnum)
-          .roles;
+        .find(obj => obj.type === organizationTypeEnum)
+        .roles;
 
   return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-      availableRoles.includes(option.value)
+    availableRoles.includes(option.value)
   );
 };
 

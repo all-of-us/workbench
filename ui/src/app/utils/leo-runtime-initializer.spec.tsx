@@ -203,7 +203,7 @@ describe('RuntimeInitializer', () => {
         },
         status: RuntimeStatus.Deleted
       };
-});
+    });
 
     LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,
@@ -341,7 +341,7 @@ describe('RuntimeInitializer', () => {
 
     expect.assertions(2);
     try {
-     await runInitializerAndTimers({maxDeleteCount: 1});
+      await runInitializerAndTimers({maxDeleteCount: 1});
     } catch (error) {
       expect(mockDeleteRuntime).toHaveBeenCalledTimes(1);
       expect(error.message).toMatch(/max runtime delete count/i);

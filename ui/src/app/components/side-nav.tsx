@@ -165,57 +165,57 @@ export const SideNavItem = (props: SideNavItemProps) => {
   };
 
   return <Clickable
-      // data-test-id is the text within the SideNavItem, with whitespace removed
-      // and appended with '-menu-item'
-      data-test-id={props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={getSideNavItemStyles(props.active, hovering, props.disabled)}
-      onClick={() => {
-        if (props.parentOnClick && !props.disabled) {
-          props.parentOnClick();
-        }
-        onClick();
-      }}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+    // data-test-id is the text within the SideNavItem, with whitespace removed
+    // and appended with '-menu-item'
+    data-test-id={props.content.toString().replace(/\s/g, '') + '-menu-item'}
+    style={getSideNavItemStyles(props.active, hovering, props.disabled)}
+    onClick={() => {
+      if (props.parentOnClick && !props.disabled) {
+        props.parentOnClick();
+      }
+      onClick();
+    }}
+    onMouseEnter={() => setHovering(true)}
+    onMouseLeave={() => setHovering(false)}
   >
     <div
-        style={{...styles.flex,
-          flex: '1 0 auto'
-        }}
+      style={{...styles.flex,
+        flex: '1 0 auto'
+      }}
     >
-        <span
-            style={
-              props.icon || props.hasProfileImage
-                  ? {...styles.flex}
-                  : {...styles.noIconMargin}
-            }
-        >
-          {
-            props.icon && <ClrIcon
-                shape={props.icon}
-                className={'is-solid'}
-                style={styles.navIcon}
-                size={iconSize}
-            />
-          }
-          {
-            props.hasProfileImage && <img
-                src={getProfilePictureSrc()}
-                style={styles.profileImage}
-            />
-          }
-          {props.content}
-        </span>
+      <span
+        style={
+          props.icon || props.hasProfileImage
+            ? {...styles.flex}
+            : {...styles.noIconMargin}
+        }
+      >
+        {
+          props.icon && <ClrIcon
+            shape={props.icon}
+            className={'is-solid'}
+            style={styles.navIcon}
+            size={iconSize}
+          />
+        }
+        {
+          props.hasProfileImage && <img
+            src={getProfilePictureSrc()}
+            style={styles.profileImage}
+          />
+        }
+        {props.content}
+      </span>
       {
         props.containsSubItems
         && <ClrIcon
-            shape='angle'
-            style={
-              subItemsOpen
-                  ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
-                  : styles.dropdownIcon
-            }
-            size={iconSize}
+          shape='angle'
+          style={
+            subItemsOpen
+              ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+              : styles.dropdownIcon
+          }
+          size={iconSize}
         />
       }
     </div>
@@ -248,120 +248,120 @@ export const SideNav = (props: SideNavProps) => {
 
   return <div style={styles.sideNav}>
     <SideNavItem
-        hasProfileImage={true}
-        content={`${profile.givenName} ${profile.familyName}`}
-        parentOnClick={() => onToggleUser()}
-        onToggleSideNav={() => onToggleSideNav()}
-        containsSubItems={true}
+      hasProfileImage={true}
+      content={`${profile.givenName} ${profile.familyName}`}
+      parentOnClick={() => onToggleUser()}
+      onToggleSideNav={() => onToggleSideNav()}
+      containsSubItems={true}
     />
     {
       showUserOptions && <SideNavItem
-          content={'Profile'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href='/profile'
-          active={profileActive()}
+        content={'Profile'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href='/profile'
+        active={profileActive()}
       />
     }
     {
       showUserOptions && <SideNavItem
-          content={'Sign Out'}
-          onToggleSideNav={() => onToggleSideNav()}
-          parentOnClick={() => {
-            signOut();
-            navigateSignOut();
-          }}
+        content={'Sign Out'}
+        onToggleSideNav={() => onToggleSideNav()}
+        parentOnClick={() => {
+          signOut();
+          navigateSignOut();
+        }}
       />
     }
     <SideNavItem
-        icon='home'
-        content='Home'
-        onToggleSideNav={() => onToggleSideNav()}
-        href='/'
-        active={homeActive()}
+      icon='home'
+      content='Home'
+      onToggleSideNav={() => onToggleSideNav()}
+      href='/'
+      active={homeActive()}
     />
     <SideNavItem
-        icon='applications'
-        content='Your Workspaces'
-        onToggleSideNav={() => onToggleSideNav()}
-        href={'/workspaces'}
-        active={workspacesActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+      icon='applications'
+      content='Your Workspaces'
+      onToggleSideNav={() => onToggleSideNav()}
+      href={'/workspaces'}
+      active={workspacesActive()}
+      disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
     />
     <SideNavItem
-        icon='star'
-        content='Featured Workspaces'
-        onToggleSideNav={() => onToggleSideNav()}
-        href={'/library'}
-        active={libraryActive()}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+      icon='star'
+      content='Featured Workspaces'
+      onToggleSideNav={() => onToggleSideNav()}
+      href={'/library'}
+      active={libraryActive()}
+      disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
     />
     <SideNavItem
-        icon='help'
-        content={'User Support Hub'}
-        onToggleSideNav={() => onToggleSideNav()}
-        parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
-        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
+      icon='help'
+      content={'User Support Hub'}
+      onToggleSideNav={() => onToggleSideNav()}
+      parentOnClick={() => window.open(supportUrls.helpCenter, '_blank')}
+      disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
     />
     <SideNavItem
-        icon='envelope'
-        content={'Contact Us'}
-        onToggleSideNav={() => onToggleSideNav()}
-        parentOnClick={() => openContactWidget()}
+      icon='envelope'
+      content={'Contact Us'}
+      onToggleSideNav={() => onToggleSideNav()}
+      parentOnClick={() => openContactWidget()}
     />
     {hasAuthorityForAction(profile, AuthorityGuardedAction.SHOW_ADMIN_MENU) && <SideNavItem
-        icon='user'
-        content='Admin'
-        parentOnClick={() => onToggleAdmin()}
-        onToggleSideNav={() => onToggleSideNav()}
-        containsSubItems={true}
+      icon='user'
+      content='Admin'
+      parentOnClick={() => onToggleAdmin()}
+      onToggleSideNav={() => onToggleSideNav()}
+      containsSubItems={true}
     />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.USER_ADMIN) && showAdminOptions && <SideNavItem
-          content={'User Admin'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'/admin/user'}
-          active={userAdminActive()}
+        content={'User Admin'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'/admin/user'}
+        active={userAdminActive()}
       />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.USER_AUDIT) && showAdminOptions && <SideNavItem
-          content={'User Audit'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'/admin/user-audit/'}
-          active={userAuditActive()}
+        content={'User Audit'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'/admin/user-audit/'}
+        active={userAuditActive()}
       />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.SERVICE_BANNER) && showAdminOptions && <SideNavItem
-          content={'Service Banners'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'/admin/banner'}
-          active={bannerAdminActive()}
+        content={'Service Banners'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'/admin/banner'}
+        active={bannerAdminActive()}
       />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_ADMIN) && showAdminOptions && <SideNavItem
-          content={'Workspaces'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'admin/workspaces'}
-          active={workspaceAdminActive()}
+        content={'Workspaces'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'admin/workspaces'}
+        active={workspaceAdminActive()}
       />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.WORKSPACE_AUDIT) && showAdminOptions && <SideNavItem
-          content={'Workspace Audit'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'/admin/workspace-audit/'}
-          active={workspaceAuditActive()}
+        content={'Workspace Audit'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'/admin/workspace-audit/'}
+        active={workspaceAuditActive()}
       />
     }
     {
       hasAuthorityForAction(profile, AuthorityGuardedAction.INSTITUTION_ADMIN) && showAdminOptions && <SideNavItem
-          content={'Institution Admin'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={'admin/institution'}
-          active={workspaceAdminActive()}
+        content={'Institution Admin'}
+        onToggleSideNav={() => onToggleSideNav()}
+        href={'admin/institution'}
+        active={workspaceAdminActive()}
       />
     }
   </div>;

@@ -2,14 +2,14 @@ import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {convertToResource} from 'app/utils/resources';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-    BillingStatus,
-    Cohort,
-    CohortReview,
-    ConceptSet,
-    DataSet,
-    FileDetail,
-    ResourceType,
-    WorkspaceResource,
+  BillingStatus,
+  Cohort,
+  CohortReview,
+  ConceptSet,
+  DataSet,
+  FileDetail,
+  ResourceType,
+  WorkspaceResource,
 } from 'generated/fetch';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';

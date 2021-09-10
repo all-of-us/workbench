@@ -42,21 +42,21 @@ describe('DataSetPage', () => {
 
   const component = () => {
     return mount(
-        <MemoryRouter
-            initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/data-sets/${stubDataSet().id}`]}
-        >
-          <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
-            <DatasetPage
-                hideSpinner={() => {}}
-                showSpinner={() => {}}
-                match={{params: {
-                    ns: workspaceDataStub.namespace,
-                    wsid: workspaceDataStub.id,
-                    dataSetId: stubDataSet().id
-                  }}}
-            />
-          </Route>
-        </MemoryRouter>
+      <MemoryRouter
+        initialEntries={[`/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/data/data-sets/${stubDataSet().id}`]}
+      >
+        <Route exact path="/workspaces/:ns/:wsid/data/data-sets/:dataSetId">
+          <DatasetPage
+            hideSpinner={() => {}}
+            showSpinner={() => {}}
+            match={{params: {
+              ns: workspaceDataStub.namespace,
+              wsid: workspaceDataStub.id,
+              dataSetId: stubDataSet().id
+            }}}
+          />
+        </Route>
+      </MemoryRouter>
     );
   };
 
@@ -88,7 +88,7 @@ describe('DataSetPage', () => {
 
     // First Concept set in concept set list has domain "Condition"
     const conditionConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').first()
-        .find('input').first();
+      .find('input').first();
     conditionConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -100,7 +100,7 @@ describe('DataSetPage', () => {
 
     // Second Concept set in concept set list has domain "Measurement"
     const measurementConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
-        .find('input').first();
+      .find('input').first();
     measurementConceptSet.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -117,7 +117,7 @@ describe('DataSetPage', () => {
 
       // Select Condition Concept set
       const conditionConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').first()
-          .find('input').first();
+        .find('input').first();
       conditionConceptSet.simulate('change');
       await waitOneTickAndUpdate(wrapper);
       let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -129,7 +129,7 @@ describe('DataSetPage', () => {
 
       // Select second concept set which is Measurement domain
       const measurementConceptSet = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
-          .find('input').first();
+        .find('input').first();
       measurementConceptSet.simulate('change');
       await waitOneTickAndUpdate(wrapper);
       valueListItems = wrapper.find('[data-test-id="value-list-items"]');
@@ -147,7 +147,7 @@ describe('DataSetPage', () => {
       // Select another condition concept set
       const secondConditionConceptSet =
           wrapper.find('[data-test-id="concept-set-list-item"]').at(2)
-          .find('input').first();
+            .find('input').first();
       secondConditionConceptSet.simulate('change');
       await waitOneTickAndUpdate(wrapper);
       valueListItems = wrapper.find('[data-test-id="value-list-items"]');

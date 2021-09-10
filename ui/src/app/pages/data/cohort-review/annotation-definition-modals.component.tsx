@@ -157,13 +157,13 @@ export const AddAnnotationDefinitionModal = withRouter(class extends React.Compo
 });
 
 export const EditAnnotationDefinitionsModal = withRouter(class extends React.Component<
-  {
-    onClose: Function,
-    annotationDefinitions: CohortAnnotationDefinition[],
-    setAnnotationDefinitions: Function
-  },
-  {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
-    renameError: boolean}
+{
+  onClose: Function,
+  annotationDefinitions: CohortAnnotationDefinition[],
+  setAnnotationDefinitions: Function
+},
+{editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
+  renameError: boolean}
 > {
   constructor(props) {
     super(props);
@@ -251,7 +251,7 @@ export const EditAnnotationDefinitionsModal = withRouter(class extends React.Com
                       }
                     }}
                   />
-                :
+                  :
                   <div style={styles.defName}>
                     {columnName}
                   </div>

@@ -298,9 +298,9 @@ export const SidebarContent = fp.flow(
     const {namespace, id} = this.props.workspace;
     this.getAnnotations(namespace, id, cohortReviewId, participant.participantId);
     cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(namespace, id, cohortId)
-    .then(({items}) => {
-      this.setState({annotationDefinitions: items});
-    });
+      .then(({items}) => {
+        this.setState({annotationDefinitions: items});
+      });
   }
 
   componentDidUpdate(prevProps: SidebarProps, prevState: SidebarState): void {
@@ -412,16 +412,16 @@ export const SidebarContent = fp.flow(
         />;
       })}
       {editingDefinitions && <EditAnnotationDefinitionsModal
-          onClose={() => this.closeEditDefinitionsModal()}
-          annotationDefinitions={annotationDefinitions}
-          setAnnotationDefinitions={(v) => this.setState({annotationDefinitions: v})}>
+        onClose={() => this.closeEditDefinitionsModal()}
+        annotationDefinitions={annotationDefinitions}
+        setAnnotationDefinitions={(v) => this.setState({annotationDefinitions: v})}>
       </EditAnnotationDefinitionsModal>}
       {creatingDefinition && <AddAnnotationDefinitionModal
-          annotationDefinitions={annotationDefinitions}
-          cohortId={cohortReview.cohortId}
-          onCancel={() => this.setState({creatingDefinition: false})}
-          onCreate={(ad) => this.definitionCreated(ad)}
-          workspace={this.props.workspace}>
+        annotationDefinitions={annotationDefinitions}
+        cohortId={cohortReview.cohortId}
+        onCancel={() => this.setState({creatingDefinition: false})}
+        onCreate={(ad) => this.definitionCreated(ad)}
+        workspace={this.props.workspace}>
       </AddAnnotationDefinitionModal>}
     </React.Fragment>;
   }

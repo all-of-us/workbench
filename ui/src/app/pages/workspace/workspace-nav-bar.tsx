@@ -96,17 +96,17 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
 
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() =>
-      setUserHasDismissedAlert(dismissedInLocalStorage())
+    setUserHasDismissedAlert(dismissedInLocalStorage())
   );
 
   const NewVersionFlag = () => <Clickable
-      data-test-id='new-version-flag'
-      propagateDataTestId={true}
-      onClick={() => {
-        localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
-        setUserHasDismissedAlert(true);
-        setShowModal(true);
-      }}>
+    data-test-id='new-version-flag'
+    propagateDataTestId={true}
+    onClick={() => {
+      localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
+      setUserHasDismissedAlert(true);
+      setShowModal(true);
+    }}>
     <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
       <ClrIcon shape='flag' class='is-solid'/>
     </span>
@@ -116,9 +116,9 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {getCdrVersion(workspace, cdrVersionTiersResponse).name}
     {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
     {showModal && <CdrVersionUpgradeModal
-        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
-        onClose={() => setShowModal(false)}
-        upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
+      defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
+      onClose={() => setShowModal(false)}
+      upgrade={() => navigate(['workspaces', namespace, id, 'duplicate'])}
     />}
   </FlexRow>;
 };

@@ -73,20 +73,20 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = ({canDelete
     content={<React.Fragment>
       <TooltipTrigger>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
-                        disabled={canEdit}>
+          disabled={canEdit}>
           <MenuItem icon='pencil'
-                    onClick={onEdit}
-                    disabled={!canEdit}>
+            onClick={onEdit}
+            disabled={!canEdit}>
             Rename
           </MenuItem>
         </TooltipTrigger>
         <MenuItem icon='copy'
-                  onClick={onCopy}>
+          onClick={onCopy}>
           Copy to another Workspace
         </MenuItem>
       </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                      disabled={canDelete}>
+        disabled={canDelete}>
         <MenuItem icon='trash' onClick={onDelete} disabled={!canDelete}>
           Delete
         </MenuItem>
@@ -316,50 +316,50 @@ export const ConceptSearch = fp.flow(
               <div style={styles.conceptSetHeader}>
                 <FlexRow>
                   <ConceptSetMenu canDelete={accessLevel === WorkspaceAccessLevel.OWNER}
-                                  canEdit={WorkspacePermissionsUtil.canWrite(accessLevel)}
-                                  onDelete={() => this.setState({deleting: true})}
-                                  onEdit={() => this.setState({editing: true})}
-                                  onCopy={() => this.setState({copying: true})}/>
+                    canEdit={WorkspacePermissionsUtil.canWrite(accessLevel)}
+                    onDelete={() => this.setState({deleting: true})}
+                    onEdit={() => this.setState({editing: true})}
+                    onCopy={() => this.setState({copying: true})}/>
                   <div style={styles.conceptSetMetadataWrapper}>
                     {editing ?
                       <FlexColumn>
                         <TextInput value={editName} disabled={editSaving}
-                                   id='edit-name'
-                                   style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
-                                   onChange={v => this.setState({editName: v})}/>
+                          id='edit-name'
+                          style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
+                          onChange={v => this.setState({editName: v})}/>
                         <TextAreaWithLengthValidationMessage initialText={editDescription}
-                                                             id='edit-description'
-                                                             textBoxStyleOverrides={{width: '100%'}}
-                                                             maxCharacters={1000}
-                                                             tooLongWarningCharacters={950}
-                                                             onChange={v => this.setState({editDescription: v})}/>
+                          id='edit-description'
+                          textBoxStyleOverrides={{width: '100%'}}
+                          maxCharacters={1000}
+                          tooLongWarningCharacters={950}
+                          onChange={v => this.setState({editDescription: v})}/>
                         <div style={{margin: '0.5rem 0'}}>
                           <TooltipTrigger content={this.tooltipContent(errors)}
-                                          disabled={!errors}>
-                          <Button type='primary' style={{marginRight: '0.5rem'}}
-                                  data-test-id='save-edit-concept-set'
-                                  disabled={editSaving || errors}
-                                  onClick={() => this.submitEdits()}>Save</Button>
+                            disabled={!errors}>
+                            <Button type='primary' style={{marginRight: '0.5rem'}}
+                              data-test-id='save-edit-concept-set'
+                              disabled={editSaving || errors}
+                              onClick={() => this.submitEdits()}>Save</Button>
                           </TooltipTrigger>
                           <Button type='secondary' disabled={editSaving}
-                                  data-test-id='cancel-edit-concept-set'
-                                  onClick={() => this.setState({
-                                    editing: false,
-                                    editName: conceptSet.name,
-                                    editDescription: conceptSet.description
-                                  })}>Cancel</Button>
+                            data-test-id='cancel-edit-concept-set'
+                            onClick={() => this.setState({
+                              editing: false,
+                              editName: conceptSet.name,
+                              editDescription: conceptSet.description
+                            })}>Cancel</Button>
                         </div>
                       </FlexColumn> :
                       <React.Fragment>
                         <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
                           {conceptSet.name}
                           <Clickable disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
-                                     style={{marginLeft: '.5rem'}}
-                                     data-test-id='edit-concept-set'
-                                     onClick={() => this.setState({editing: true})}>
+                            style={{marginLeft: '.5rem'}}
+                            data-test-id='edit-concept-set'
+                            onClick={() => this.setState({editing: true})}>
                             <EditComponentReact enableHoverEffect={true}
-                                                disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
-                                                style={{marginTop: '0.1rem'}}/>
+                              disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}
+                              style={{marginTop: '0.1rem'}}/>
                           </Clickable>
                         </div>
                         <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
@@ -369,7 +369,7 @@ export const ConceptSearch = fp.flow(
                           }
                           {conceptSet.description.length > 250 &&
                             <span style={styles.showMore}
-                                  onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
+                              onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
                               Show {showMoreDescription ? 'less' : 'more'}
                             </span>
                           }
@@ -390,33 +390,33 @@ export const ConceptSearch = fp.flow(
           }
         </React.Fragment>}
         {!loading && <CriteriaSearch backFn={() => this.props.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
-                        cohortContext={this.searchContext}
-                        conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}/>}
+          cohortContext={this.searchContext}
+          conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}/>}
         <Button style={{float: 'right', marginBottom: '2rem'}}
-                disabled={this.disableFinishButton}
-                onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
+          disabled={this.disableFinishButton}
+          onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
       </FadeBox>
       {!loading && deleting &&
       <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
-                          receiveDelete={() => this.onDeleteConceptSet()}
-                          resourceName={conceptSet.name}
-                          resourceType={ResourceType.CONCEPTSET}/>}
+        receiveDelete={() => this.onDeleteConceptSet()}
+        resourceName={conceptSet.name}
+        resourceType={ResourceType.CONCEPTSET}/>}
       {error && <Modal>
         <ModalTitle>Error: {errorMessage}</ModalTitle>
         <ModalFooter>
           <Button type='secondary'
-                  onClick={() => this.setState({error: false})}>Close</Button>
+            onClick={() => this.setState({error: false})}>Close</Button>
         </ModalFooter>
       </Modal>}
       {copying && <CopyModal fromWorkspaceNamespace={namespace}
-                             fromWorkspaceFirecloudName={id}
-                             fromResourceName={conceptSet.name}
-                             fromCdrVersionId={cdrVersionId}
-                             fromAccessTierShortName={accessTierShortName}
-                             resourceType={ResourceType.CONCEPTSET}
-                             onClose={() => this.setState({copying: false})}
-                             onCopy={() => this.setState({copySaving: false})}
-                             saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
+        fromWorkspaceFirecloudName={id}
+        fromResourceName={conceptSet.name}
+        fromCdrVersionId={cdrVersionId}
+        fromAccessTierShortName={accessTierShortName}
+        resourceType={ResourceType.CONCEPTSET}
+        onClose={() => this.setState({copying: false})}
+        onCopy={() => this.setState({copySaving: false})}
+        saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
       }
     </React.Fragment>;
   }

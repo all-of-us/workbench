@@ -306,7 +306,7 @@ export const InteractiveNotebook = fp.flow(
         case PreviewErrorMode.ERROR:
           return (<div style={{...styles.previewMessageBase, ...styles.previewError}}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                     shape='exclamation-triangle' size='30'/>
+              shape='exclamation-triangle' size='30'/>
             {previewErrorMessage}
           </div>);
       }
@@ -330,33 +330,33 @@ export const InteractiveNotebook = fp.flow(
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}
               </div>) : (
-                  <div style={{display: 'flex'}}>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Edit();
-                             this.startEditMode();
-                           }}>
-                        <EditComponentReact enableHoverEffect={false}
-                                            disabled={!this.canStartRuntimes}
-                                            style={styles.navBarIcon}/>
+              <div style={{display: 'flex'}}>
+                <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                  <div style={this.buttonStyleObj}
+                    onClick={() => {
+                      AnalyticsTracker.Notebooks.Edit();
+                      this.startEditMode();
+                    }}>
+                    <EditComponentReact enableHoverEffect={false}
+                      disabled={!this.canStartRuntimes}
+                      style={styles.navBarIcon}/>
                         Edit {this.notebookInUse && '(In Use)'}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-                      <div style={this.buttonStyleObj}
-                           onClick={() => {
-                             AnalyticsTracker.Notebooks.Run();
-                             this.onPlaygroundModeClick();
-                           }}>
-                        <IconButton icon={PlaygroundIcon}
-                                    disabled={!this.canStartRuntimes}
-                                    style={styles.navBarIcon}/>
-                        Run (Playground Mode)
-                      </div>
-                    </TooltipTrigger>
                   </div>
-              )
+                </TooltipTrigger>
+                <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                  <div style={this.buttonStyleObj}
+                    onClick={() => {
+                      AnalyticsTracker.Notebooks.Run();
+                      this.onPlaygroundModeClick();
+                    }}>
+                    <IconButton icon={PlaygroundIcon}
+                      disabled={!this.canStartRuntimes}
+                      style={styles.navBarIcon}/>
+                        Run (Playground Mode)
+                  </div>
+                </TooltipTrigger>
+              </div>
+            )
             }
           </div>
           <div style={styles.previewDiv}>

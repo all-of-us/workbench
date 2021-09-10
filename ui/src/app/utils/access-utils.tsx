@@ -174,8 +174,8 @@ export const getRegistrationTasks = (navigate): RegistrationTask[] => serverConf
   }
 ]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
-      throw new Error('Cannot load registration tasks before config loaded');
-    })();
+  throw new Error('Cannot load registration tasks before config loaded');
+})();
 
 export const getRegistrationTasksMap = (navigate) => getRegistrationTasks(navigate).reduce((acc, curr) => {
   acc[curr.key] = curr;
@@ -270,11 +270,11 @@ export const bypassAll = async (accessModules: AccessModule[], isBypassed: boole
 };
 
 export const GetStartedButton = ({style = {marginLeft: '0.5rem'}}) => <Button
-    style={style}
-    onClick={() => {
-      // After a registration status change, to be safe, we reload the application. This results in
-      // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
-      // have been dependent on the user's registration status, e.g. CDR config information.
-      location.replace('/');
-    }}>Get Started</Button>;
+  style={style}
+  onClick={() => {
+    // After a registration status change, to be safe, we reload the application. This results in
+    // rerendering of the homepage, but also reruns some application bootstrapping / caching which may
+    // have been dependent on the user's registration status, e.g. CDR config information.
+    location.replace('/');
+  }}>Get Started</Button>;
 

@@ -115,10 +115,10 @@ export const CohortReview = fp.flow(
           : <React.Fragment>
             {ableToReview && <CreateReviewModal canceled={() => this.goBack()} cohort={cohort} created={() => this.reviewCreated()}/>}
             {unableToReview && <Modal onRequestClose={() => this.goBack()}>
-                <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
-                <ModalFooter>
-                    <Button style={{}} type='primary' onClick={() => this.goBack()}>Return to cohorts</Button>
-                </ModalFooter>
+              <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
+              <ModalFooter>
+                <Button style={{}} type='primary' onClick={() => this.goBack()}>Return to cohorts</Button>
+              </ModalFooter>
             </Modal>}
           </React.Fragment>}
       </React.Fragment>;

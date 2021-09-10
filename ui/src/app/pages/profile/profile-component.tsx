@@ -76,223 +76,223 @@ export const ProfileComponent = fp.flow(
   withProfileErrorModal,
   withNavigation,
   withRouter
-  )(class extends React.Component<
-    ProfilePageProps,
-    ProfilePageState
+)(class extends React.Component<
+ProfilePageProps,
+ProfilePageState
 > {
 
-    constructor(props) {
-      super(props);
+  constructor(props) {
+    super(props);
 
-      this.state = {
-        currentProfile: this.initializeProfile(),
-        institutions: [],
-        showDemographicSurveyModal: false,
-        updating: false,
-      };
-    }
-    static displayName = 'ProfilePage';
+    this.state = {
+      currentProfile: this.initializeProfile(),
+      institutions: [],
+      showDemographicSurveyModal: false,
+      updating: false,
+    };
+  }
+  static displayName = 'ProfilePage';
 
-    saveProfileWithRenewal = withSuccessModal({
-      title: 'Your profile has been updated',
+  saveProfileWithRenewal = withSuccessModal({
+    title: 'Your profile has been updated',
+    message: 'You will be redirected to the access renewal page upon closing this dialog.',
+    onDismiss: () => this.props.navigate(['access-renewal'])
+  }, this.saveProfile.bind(this));
+
+  confirmProfile = fp.flow(
+    withSuccessModal({
+      title: 'You have confirmed your profile is accurate',
       message: 'You will be redirected to the access renewal page upon closing this dialog.',
       onDismiss: () => this.props.navigate(['access-renewal'])
-    }, this.saveProfile.bind(this));
+    }),
+    withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
+  )(async () => {
+    this.setState({updating: true});
+    await profileApi().confirmProfile();
+    this.setState({updating: false});
+  });
 
-    confirmProfile = fp.flow(
-      withSuccessModal({
-        title: 'You have confirmed your profile is accurate',
-        message: 'You will be redirected to the access renewal page upon closing this dialog.',
-        onDismiss: () => this.props.navigate(['access-renewal'])
-      }),
-      withErrorModal({ title: 'Failed To Confirm Profile', message: 'An error occurred trying to confirm your profile. Please try again.'})
-    )(async () => {
-      this.setState({updating: true});
-      await profileApi().confirmProfile();
-      this.setState({updating: false});
-    });
-
-    async componentDidMount() {
-      this.props.hideSpinner();
-      try {
-        const {institutions} = await institutionApi().getPublicInstitutionDetails();
-        this.setState({institutions});
-      } catch (e) {
-        reportError(e);
-      }
+  async componentDidMount() {
+    this.props.hideSpinner();
+    try {
+      const {institutions} = await institutionApi().getPublicInstitutionDetails();
+      this.setState({institutions});
+    } catch (e) {
+      reportError(e);
     }
+  }
 
-    initializeProfile() {
-      if (!this.props.profileState.profile) {
-        return this.createInitialProfile();
-      }
-      if (!this.props.profileState.profile.address) {
-        this.props.profileState.profile.address = {
-          streetAddress1: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: ''
-        };
-      }
-      return this.props.profileState.profile;
+  initializeProfile() {
+    if (!this.props.profileState.profile) {
+      return this.createInitialProfile();
     }
-
-    createInitialProfile(): Profile {
-      return {
-        ...this.props.profileState.profile,
-        demographicSurvey: {}
+    if (!this.props.profileState.profile.address) {
+      this.props.profileState.profile.address = {
+        streetAddress1: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: ''
       };
     }
+    return this.props.profileState.profile;
+  }
 
-    componentDidUpdate(prevProps) {
-      const {profileState: {profile}} = this.props;
+  createInitialProfile(): Profile {
+    return {
+      ...this.props.profileState.profile,
+      demographicSurvey: {}
+    };
+  }
 
-      if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-        this.setState({currentProfile: profile}); // for when profile loads after component load
-      }
+  componentDidUpdate(prevProps) {
+    const {profileState: {profile}} = this.props;
+
+    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
+      this.setState({currentProfile: profile}); // for when profile loads after component load
     }
+  }
 
-    getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
-      const {institutions, currentProfile} = this.state;
-      if (currentProfile) {
-        const selectedOrgType = institutions.find(
-          inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
-        if (selectedOrgType) {
-          const sel = selectedOrgType.organizationTypeEnum;
+  getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
+    const {institutions, currentProfile} = this.state;
+    if (currentProfile) {
+      const selectedOrgType = institutions.find(
+        inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
+      if (selectedOrgType) {
+        const sel = selectedOrgType.organizationTypeEnum;
 
-          const availableRoles: Array<InstitutionalRole> =
+        const availableRoles: Array<InstitutionalRole> =
            AccountCreationOptions.institutionalRolesByOrganizationType
-               .find(obj => obj.type === sel)
-               .roles;
+             .find(obj => obj.type === sel)
+             .roles;
 
-          return AccountCreationOptions.institutionalRoleOptions.filter(option =>
-           availableRoles.includes(option.value)
-       );
-        }
+        return AccountCreationOptions.institutionalRoleOptions.filter(option =>
+          availableRoles.includes(option.value)
+        );
       }
     }
+  }
 
-    saveProfileErrorMessage(errors) {
-      return <React.Fragment>
+  saveProfileErrorMessage(errors) {
+    return <React.Fragment>
       <div>You must correct errors before saving: </div>
       <BulletAlignedUnorderedList>
-      {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
+        {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
       </BulletAlignedUnorderedList>
     </React.Fragment>;
+  }
+
+  async saveProfile(profile: Profile): Promise<Profile> {
+    const {profileState: {reload}} = this.props;
+
+    this.setState({updating: true});
+
+    try {
+      await profileApi().updateProfile(profile);
+      await reload();
+      return profile;
+    } catch (error) {
+      reportError(error);
+      const errorResponse = await convertAPIError(error);
+      this.props.showProfileErrorModal(errorResponse.message);
+      console.error(error);
+      return Promise.reject();
+    } finally {
+      this.setState({updating: false});
     }
+  }
 
-    async saveProfile(profile: Profile): Promise<Profile> {
-      const {profileState: {reload}} = this.props;
-
-      this.setState({updating: true});
-
-      try {
-        await profileApi().updateProfile(profile);
-        await reload();
-        return profile;
-      } catch (error) {
-        reportError(error);
-        const errorResponse = await convertAPIError(error);
-        this.props.showProfileErrorModal(errorResponse.message);
-        console.error(error);
-        return Promise.reject();
-      } finally {
-        this.setState({updating: false});
-      }
-    }
-
-    render() {
-      const {
-        profileState: {
-          profile
-        },
-      } = this.props;
-      const {currentProfile, updating, showDemographicSurveyModal} = this.state;
-      const {
+  render() {
+    const {
+      profileState: {
+        profile
+      },
+    } = this.props;
+    const {currentProfile, updating, showDemographicSurveyModal} = this.state;
+    const {
       givenName, familyName, areaOfResearch, professionalUrl,
-        address: {
+      address: {
         streetAddress1,
         streetAddress2,
-          zipCode,
-          city,
-            state,
-            country
-        }
+        zipCode,
+        city,
+        state,
+        country
+      }
     } = currentProfile;
 
 
-      const profileExpiration = fp.flow(
-        fp.find({moduleName: AccessModule.PROFILECONFIRMATION}),
-        fp.get('expirationEpochMillis'),
-      )(profile.accessModules.modules);
-      const hasExpired = profileExpiration && profileExpiration < Date.now();
+    const profileExpiration = fp.flow(
+      fp.find({moduleName: AccessModule.PROFILECONFIRMATION}),
+      fp.get('expirationEpochMillis'),
+    )(profile.accessModules.modules);
+    const hasExpired = profileExpiration && profileExpiration < Date.now();
 
-      const urlError = professionalUrl
+    const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
-      const errorMessages = {
-        ...urlError,
-        ...validate({
-          givenName,
-          familyName, areaOfResearch,
-          streetAddress1,
-          streetAddress2,
-          zipCode,
-          city,
-          state,
-          country
-        },
-          validators, {
-            prettify: v => ({
-              givenName: 'First Name',
-              familyName: 'Last Name',
-              areaOfResearch: 'Current Research'
-            }[v] || validate.prettify(v))
-          })
+    const errorMessages = {
+      ...urlError,
+      ...validate({
+        givenName,
+        familyName, areaOfResearch,
+        streetAddress1,
+        streetAddress2,
+        zipCode,
+        city,
+        state,
+        country
+      },
+      validators, {
+        prettify: v => ({
+          givenName: 'First Name',
+          familyName: 'Last Name',
+          areaOfResearch: 'Current Research'
+        }[v] || validate.prettify(v))
+      })
+    };
+    const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
+
+    const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
+      let errorText = profile && errors && errors[valueKey];
+      if (valueKey && !Array.isArray(valueKey)) {
+        valueKey = [valueKey];
+      }
+      if (valueKey && valueKey.length > 1) {
+        errorText = profile && errors && errors[valueKey[1]];
+      }
+      const inputProps = {
+        value: fp.get(valueKey, currentProfile) || '',
+        onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
+        invalid: !!errorText,
+        style: props.style,
+        maxCharacters: props.maxCharacters,
+        tooLongWarningCharacters: props.tooLongWarningCharacters,
+        ...props
       };
-      const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
+      const id = props.id || valueKey;
 
-      const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
-        let errorText = profile && errors && errors[valueKey];
-        if (valueKey && !Array.isArray(valueKey)) {
-          valueKey = [valueKey];
-        }
-        if (valueKey && valueKey.length > 1) {
-          errorText = profile && errors && errors[valueKey[1]];
-        }
-        const inputProps = {
-          value: fp.get(valueKey, currentProfile) || '',
-          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
-          invalid: !!errorText,
-          style: props.style,
-          maxCharacters: props.maxCharacters,
-          tooLongWarningCharacters: props.tooLongWarningCharacters,
-          ...props
-        };
-        const id = props.id || valueKey;
-
-        return <div style={{marginBottom: 40}}>
+      return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
         {isLong ? <TextAreaWithLengthValidationMessage
-            id={id} data-test-id={id}
-            heightOverride={styles.longInputHeightStyle}
-            initialText={inputProps.value}
-            maxCharacters={inputProps.maxCharacters}
-            tooLongWarningCharacters={inputProps.tooLongWarningCharacters}
-            {...inputProps}
-            textBoxStyleOverrides={{...styles.longInputContainerStyle, ...inputProps.style}}
-          /> :
-            <TooltipTrigger content='This field cannot be edited' disabled={!props.disabled}>
-          <TextInput data-test-id={props.id || valueKey}
-            {...inputProps}
-            style={{...styles.inputStyle, ...inputProps.style}}
-          /></TooltipTrigger>}
+          id={id} data-test-id={id}
+          heightOverride={styles.longInputHeightStyle}
+          initialText={inputProps.value}
+          maxCharacters={inputProps.maxCharacters}
+          tooLongWarningCharacters={inputProps.tooLongWarningCharacters}
+          {...inputProps}
+          textBoxStyleOverrides={{...styles.longInputContainerStyle, ...inputProps.style}}
+        /> :
+          <TooltipTrigger content='This field cannot be edited' disabled={!props.disabled}>
+            <TextInput data-test-id={props.id || valueKey}
+              {...inputProps}
+              style={{...styles.inputStyle, ...inputProps.style}}
+            /></TooltipTrigger>}
         <ValidationError>{errorText}</ValidationError>
       </div>;
-      };
+    };
 
-      return <FadeBox style={styles.fadebox}>
+    return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
         {(!profile || updating) && <SpinnerOverlay/>}
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
@@ -333,11 +333,11 @@ export const ProfileComponent = fp.flow(
                 <div style={styles.inputLabel}>Your Role</div>
                 {profile.verifiedInstitutionalAffiliation &&
                   <Dropdown style={{width: '12.5rem'}}
-                            data-test-id='role-dropdown'
-                            placeholder='Your Role'
-                            options={this.getRoleOptions()}
-                            disabled={true}
-                            value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
+                    data-test-id='role-dropdown'
+                    placeholder='Your Role'
+                    options={this.getRoleOptions()}
+                    disabled={true}
+                    value={currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum}/>}
 
                 {currentProfile.verifiedInstitutionalAffiliation &&
                 currentProfile.verifiedInstitutionalAffiliation.institutionalRoleEnum &&
@@ -435,19 +435,19 @@ export const ProfileComponent = fp.flow(
               <div style={styles.title}>Free credits balance</div>
               <hr style={{...styles.verticalLine}}/>
               {profile && <FlexRow style={styles.freeCreditsBox}>
-                  <FlexColumn style={{marginLeft: '0.8rem'}}>
-                      <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
-                      <div>Remaining <AoU/> free credits:</div>
-                  </FlexColumn>
-                  <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
-                    <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
-                    <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
-                  </FlexColumn>
+                <FlexColumn style={{marginLeft: '0.8rem'}}>
+                  <div style={{marginTop: '0.4rem'}}><AoU/> free credits used:</div>
+                  <div>Remaining <AoU/> free credits:</div>
+                </FlexColumn>
+                <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+                  <div style={{marginTop: '0.4rem', fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierUsage)}</div>
+                  <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
+                </FlexColumn>
               </FlexRow>}
             </div>
             {environment.enableDataAccessRequirements ?
-                <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
-                <ProfileAccessModules profile={profile}/>}
+              <DataAccessPanel userAccessTiers={profile.accessTierShortNames}/> :
+              <ProfileAccessModules profile={profile}/>}
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
               <div style={styles.title}>Optional Demographics Survey</div>
               <hr style={{...styles.verticalLine}}/>
@@ -473,7 +473,7 @@ export const ProfileComponent = fp.flow(
 
           <div style={{display: 'flex', marginBottom: '2rem'}}>
             <Button type='link'
-                    onClick={() => this.setState({currentProfile: profile})}
+              onClick={() => this.setState({currentProfile: profile})}
             >
               Cancel
             </Button>
@@ -496,21 +496,21 @@ export const ProfileComponent = fp.flow(
           </div>
         </div>
         {showDemographicSurveyModal && <Modal width={850}>
-            <DemographicSurvey
-                profile={currentProfile}
-                onCancelClick={() => {
-                  this.setState({showDemographicSurveyModal: false});
-                }}
-                saveProfile={(profileWithDemoSurvey) => {
-                  this.saveProfile(profileWithDemoSurvey);
-                  this.setState({showDemographicSurveyModal: false});
-                }}
-                enableCaptcha={false}
-                enablePrevious={false}
-                showStepCount={false}
-            />
+          <DemographicSurvey
+            profile={currentProfile}
+            onCancelClick={() => {
+              this.setState({showDemographicSurveyModal: false});
+            }}
+            saveProfile={(profileWithDemoSurvey) => {
+              this.saveProfile(profileWithDemoSurvey);
+              this.setState({showDemographicSurveyModal: false});
+            }}
+            enableCaptcha={false}
+            enablePrevious={false}
+            showStepCount={false}
+          />
         </Modal>}
       </div>
     </FadeBox>;
-    }
-  });
+  }
+});

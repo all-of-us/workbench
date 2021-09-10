@@ -34,26 +34,26 @@ const MessageWithIcon = ({
   };
 
   return <FlexRow
-      style={{
-        alignItems: 'center',
-        backgroundColor: colorWithWhiteness(color[messageType], .9),
-        border: `1px solid ${color[messageType]}`,
-        borderRadius: '5px',
-        color: colors.dark,
-        marginTop: '.5rem',
-        padding: '.5rem 0px',
-      }}
+    style={{
+      alignItems: 'center',
+      backgroundColor: colorWithWhiteness(color[messageType], .9),
+      border: `1px solid ${color[messageType]}`,
+      borderRadius: '5px',
+      color: colors.dark,
+      marginTop: '.5rem',
+      padding: '.5rem 0px',
+    }}
   >
     <ClrIcon
-        style={{
-          color: color[messageType],
-          flex: '0 0 auto',
-          marginLeft: '.5rem',
-          ...position[iconPosition]
-        }}
-        shape={icon[messageType]}
-        size={iconSize}
-        class={'is-solid'}
+      style={{
+        color: color[messageType],
+        flex: '0 0 auto',
+        marginLeft: '.5rem',
+        ...position[iconPosition]
+      }}
+      shape={icon[messageType]}
+      size={iconSize}
+      class={'is-solid'}
     />
     <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
       {children}
@@ -71,9 +71,9 @@ export const WarningMessage = ({
   children
 }) => {
   return <MessageWithIcon
-      messageType={'warning'}
-      iconSize={iconSize}
-      iconPosition={iconPosition}
+    messageType={'warning'}
+    iconSize={iconSize}
+    iconPosition={iconPosition}
   >
     {children}
   </MessageWithIcon>;
@@ -89,10 +89,10 @@ export const ErrorMessage = ({
   children
 }) => {
   return <MessageWithIcon
-      messageType={'error'}
-      iconSize={iconSize}
-      iconPosition={iconPosition}
-    >
+    messageType={'error'}
+    iconSize={iconSize}
+    iconPosition={iconPosition}
+  >
     {children}
   </MessageWithIcon>;
 };

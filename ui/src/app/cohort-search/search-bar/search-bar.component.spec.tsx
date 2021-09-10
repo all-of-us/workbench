@@ -27,10 +27,10 @@ describe('SearchBar', () => {
   });
   it('should render', () => {
     const wrapper = shallow(<SearchBar node={nodeStub}
-                                       searchTerms={''}
-                                       setIngredients={() => {}}
-                                       selectOption={() => {}}
-                                       setInput={() => {}}/>);
+      searchTerms={''}
+      setIngredients={() => {}}
+      selectOption={() => {}}
+      setInput={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
 });

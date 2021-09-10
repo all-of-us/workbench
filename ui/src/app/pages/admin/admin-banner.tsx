@@ -98,27 +98,27 @@ export class AdminBanner extends React.Component<WithSpinnerOverlayProps, AdminB
       <BoldHeader style={{fontSize: 18}}>Service Banners</BoldHeader>
       <Header style={{...styles.smallHeaderStyles, marginTop: '0.5rem'}}>Banner Headline</Header>
       <TextInput onChange={(v) => this.setState({bannerHeadline: v})}
-                 value={bannerHeadline} data-test-id='banner-headline-input'
-                 placeholder='Type headline text'/>
+        value={bannerHeadline} data-test-id='banner-headline-input'
+        placeholder='Type headline text'/>
       <Header style={styles.smallHeaderStyles}>Banner Description</Header>
       <TextArea value={bannerDescription}
-                onChange={v => this.setState({bannerDescription: v})}
-                data-test-id='banner-description-input'
-                placeholder='Type descriptive banner text'/>
+        onChange={v => this.setState({bannerDescription: v})}
+        data-test-id='banner-description-input'
+        placeholder='Type descriptive banner text'/>
       <Header style={styles.smallHeaderStyles}>Read More Button/CTA <span style={{fontWeight: 400,
         fontSize: 12}}>(Optional)</span></Header>
       <TextInput onChange={(v) => this.setState({readMoreLink: v})}
-                 value={readMoreLink} data-test-id='read-more-link-input'
-                 placeholder='Paste button link'/>
+        value={readMoreLink} data-test-id='read-more-link-input'
+        placeholder='Paste button link'/>
       <TooltipTrigger content={!bannerEnabled && !!errors && 'Headline and description are required.'} side='right'>
         <div style={{marginTop: '1.5rem', display: 'flex', alignItems: 'center', width: '3rem'}}>
-            <ReactSwitch checked={bannerEnabled}
-                         disabled={!bannerEnabled && errors}
-                         checkedIcon={false}
-                         height={17}
-                         onChange={(checked) => this.handleBannerToggle(checked)}
-                         uncheckedIcon={false}
-                         width={34}/>
+          <ReactSwitch checked={bannerEnabled}
+            disabled={!bannerEnabled && errors}
+            checkedIcon={false}
+            height={17}
+            onChange={(checked) => this.handleBannerToggle(checked)}
+            uncheckedIcon={false}
+            width={34}/>
           <div style={{textTransform: 'uppercase', color: colors.primary, marginLeft: 4}}>
             {bannerEnabled ? 'On' : 'Off'}
           </div>

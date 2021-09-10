@@ -205,15 +205,15 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              <Button data-test-id='unpublish-button'
-                      disabled={publishing}
-                      type='secondary'
-                      onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
-              <Button data-test-id='publish-button'
-                      onClick={() => this.publishUnpublishWorkspace(true)}
-                      disabled={publishing}
-                      style={{marginLeft: '0.5rem'}}>Publish</Button>
-        </div>}
+            <Button data-test-id='unpublish-button'
+              disabled={publishing}
+              type='secondary'
+              onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+            <Button data-test-id='publish-button'
+              onClick={() => this.publishUnpublishWorkspace(true)}
+              disabled={publishing}
+              style={{marginLeft: '0.5rem'}}>Publish</Button>
+          </div>}
       </FlexColumn>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
@@ -223,8 +223,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
           </TooltipTrigger>
           <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
             maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0}
-                  data-test-id='workspaceShareButton'
-                  onClick={() => this.setState({sharing: true})}>Share</Button>
+          data-test-id='workspaceShareButton'
+          onClick={() => this.setState({sharing: true})}>Share</Button>
         </div>
         {workspaceUserRoles.length > 0 ?
           <React.Fragment>
@@ -271,11 +271,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withCdrVersions())
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}
-                                  accessLevel={workspace.accessLevel}
-                                  userEmail={profile.username}
-                                  onClose={() => this.onShare()}
-                                  userRoles={workspaceUserRoles}
-                                  data-test-id='workspaceShareModal'/>}
+        accessLevel={workspace.accessLevel}
+        userEmail={profile.username}
+        onClose={() => this.onShare()}
+        userRoles={workspaceUserRoles}
+        data-test-id='workspaceShareModal'/>}
     </div>;
   }
 });

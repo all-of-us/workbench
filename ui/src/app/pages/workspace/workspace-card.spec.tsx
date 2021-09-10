@@ -15,9 +15,9 @@ describe('WorkspaceCard', () => {
   const component = (accessLevel: WorkspaceAccessLevel) => {
     return mount(
       <WorkspaceCard
-       accessLevel={accessLevel}
-       reload={reload}
-       workspace={workspaceStubs[0]}
+        accessLevel={accessLevel}
+        reload={reload}
+        workspace={workspaceStubs[0]}
       />,
       {attachTo: document.getElementById('root')}
     );

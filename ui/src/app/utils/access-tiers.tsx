@@ -3,13 +3,13 @@ import * as fp from 'lodash/fp';
 import {switchCase} from './index';
 
 export enum AccessTierShortNames {
-    Registered = 'registered',
-    Controlled = 'controlled',
+  Registered = 'registered',
+  Controlled = 'controlled',
 }
 
 export enum AccessTierDisplayNames {
-    Registered = 'Registered Tier',
-    Controlled = 'Controlled Tier',
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier',
 }
 
 /**
@@ -23,6 +23,6 @@ export function hasRegisteredAccess(accessTierShortNames: Array<string>): boolea
 }
 
 export const displayNameForTier = (shortName: string) => switchCase(shortName,
-    [AccessTierShortNames.Registered, () => AccessTierDisplayNames.Registered],
-    [AccessTierShortNames.Controlled, () => AccessTierDisplayNames.Controlled],
+  [AccessTierShortNames.Registered, () => AccessTierDisplayNames.Registered],
+  [AccessTierShortNames.Controlled, () => AccessTierDisplayNames.Controlled],
 );

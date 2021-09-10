@@ -75,14 +75,14 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
             {children}
           </div>
           {isComplete && <Button disabled={true}
-                                data-test-id='completed-button'
-                                style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
-              <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
-            </Button>
+            data-test-id='completed-button'
+            style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
+            <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
+          </Button>
           }
           {!isComplete && <Button data-test-id='incomplete-button'
-                                  type='purplePrimary' style={styles.button}
-                                  onClick={completeStep}>{ incompleteButtonText }</Button>}
+            type='purplePrimary' style={styles.button}
+            onClick={completeStep}>{ incompleteButtonText }</Button>}
         </FlexColumn>
       </FlexColumn>
     );

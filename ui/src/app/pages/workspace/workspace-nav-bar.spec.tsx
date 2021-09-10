@@ -27,7 +27,7 @@ describe('WorkspaceNavBar', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.set({config: {
       gsuiteDomain: 'fake-research-aou.org',
-        enableResearchReviewPrompt: true
+      enableResearchReviewPrompt: true
     }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
@@ -65,7 +65,7 @@ describe('WorkspaceNavBar', () => {
     const wrapper = component();
 
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
-        .toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+      .toEqual(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
 
     expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeFalsy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();
@@ -79,7 +79,7 @@ describe('WorkspaceNavBar', () => {
     const wrapper = component();
 
     expect(wrapper.find({'data-test-id': 'cdr-version'}).first().text())
-        .toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
+      .toEqual(CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION);
 
     expect(wrapper.find({'data-test-id': 'new-version-flag'}).exists()).toBeTruthy();
     expect(wrapper.find({'data-test-id': 'cdr-version-upgrade-modal'}).exists()).toBeFalsy();

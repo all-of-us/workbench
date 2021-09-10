@@ -47,12 +47,12 @@ describe('Access Renewal Page', () => {
   function removeOneModule(toBeRemoved) {
     const oldProfile = profileStore.get().profile;
     const newModules = fp.map(({moduleName, expirationEpochMillis, bypassEpochMillis, completionEpochMillis}) =>
-        (moduleName === toBeRemoved ? {} : {
-          moduleName : moduleName,
-          bypassEpochMillis: bypassEpochMillis,
-          completionEpochMillis: completionEpochMillis,
-          expirationEpochMillis: expirationEpochMillis}),
-        oldProfile.accessModules.modules);
+      (moduleName === toBeRemoved ? {} : {
+        moduleName : moduleName,
+        bypassEpochMillis: bypassEpochMillis,
+        completionEpochMillis: completionEpochMillis,
+        expirationEpochMillis: expirationEpochMillis}),
+    oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
@@ -76,8 +76,8 @@ describe('Access Renewal Page', () => {
       expirationEpochMillis: expirationEpochMillis,
       // profile and publiction is not bypassable.
       bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION)
-          ? null
-          : completionFn(),
+        ? null
+        : completionFn(),
       completionEpochMillis: completionEpochMillis
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile);
@@ -247,7 +247,7 @@ describe('Access Renewal Page', () => {
   it('should show the correct state when modules are disabled', async () => {
     serverConfigStore.set({config: {
       ...defaultServerConfig,
-        enableComplianceTraining: false
+      enableComplianceTraining: false
     }});
 
     const wrapper = component();

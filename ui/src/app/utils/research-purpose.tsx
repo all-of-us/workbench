@@ -28,7 +28,7 @@ const styles = {
 
 function researchPurposeDivs(primaryPurposeItems: Array<ResearchPurposeItem>, researchPurpose: ResearchPurpose) {
   return primaryPurposeItems.filter((item) =>
-      researchPurpose[item.shortName]).map((item) => {
+    researchPurpose[item.shortName]).map((item) => {
     const headerContent = <div style={styles.researchPurposeItemHeader}>{item.shortDescription}</div>;
     let descriptiveContent = <div style={styles.researchPurposeItemDescription}>{item.longDescription}</div>;
     if (item.shortName === 'otherPurpose') {

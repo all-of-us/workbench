@@ -66,7 +66,7 @@ export const WorkspaceWrapper = fp.flow(
     };
 
     if (
-        !currentWorkspaceStore.getValue()
+      !currentWorkspaceStore.getValue()
         || currentWorkspaceStore.getValue().namespace !== ns
         || currentWorkspaceStore.getValue().id !== wsid
     ) {
@@ -91,16 +91,16 @@ export const WorkspaceWrapper = fp.flow(
 
   return <React.Fragment>
     {workspace
-        ? <React.Fragment>
-          {!routeData.minimizeChrome && <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab}/>}
-          <HelpSidebar pageKey={routeData.pageKey}/>
-          <div style={{marginRight: '45px', height: !routeData.contentFullHeightOverride ? 'auto' : '100%'}}>
-            <WorkspaceRoutes/>
-          </div>
-        </React.Fragment>
-        : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-          <Spinner />
+      ? <React.Fragment>
+        {!routeData.minimizeChrome && <WorkspaceNavBar tabPath={routeData.workspaceNavBarTab}/>}
+        <HelpSidebar pageKey={routeData.pageKey}/>
+        <div style={{marginRight: '45px', height: !routeData.contentFullHeightOverride ? 'auto' : '100%'}}>
+          <WorkspaceRoutes/>
         </div>
+      </React.Fragment>
+      : <div style={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        <Spinner />
+      </div>
     }
   </React.Fragment>;
 });

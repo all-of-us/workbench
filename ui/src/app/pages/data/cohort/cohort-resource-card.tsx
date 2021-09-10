@@ -98,27 +98,27 @@ export const CohortResourceCard = fp.flow(
   maybeDelete() {
     const {resource} = this.props;
     return dataSetApi().getDataSetByResourceId(
-        resource.workspaceNamespace,
-        resource.workspaceFirecloudName,
-        getType(resource),
-        getId(resource))
-        .then(dataSetList => {
-          if (dataSetList && dataSetList.items.length > 0) {
-            this.setState({referencingDataSets: dataSetList.items});
-          } else {
-            return this.deleteCohort();
-          }
-        });
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
+      getType(resource),
+      getId(resource))
+      .then(dataSetList => {
+        if (dataSetList && dataSetList.items.length > 0) {
+          this.setState({referencingDataSets: dataSetList.items});
+        } else {
+          return this.deleteCohort();
+        }
+      });
   }
 
   deleteCohort() {
     return cohortsApi().deleteCohort(
-        this.props.resource.workspaceNamespace,
-        this.props.resource.workspaceFirecloudName,
-        this.props.resource.cohort.id)
-        .then(() => {
-          this.props.onUpdate();
-        });
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      this.props.resource.cohort.id)
+      .then(() => {
+        this.props.onUpdate();
+      });
   }
 
   duplicate() {
@@ -166,26 +166,26 @@ export const CohortResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   resourceType={getType(resource)}
-                   onCancel={() => this.setState({showRenameModal: false})}
-                   oldDescription={getDescription(resource)}
-                   oldName={getDisplayName(resource)}
-                   existingNames={this.props.existingNameList}/>
+        resourceType={getType(resource)}
+        onCancel={() => this.setState({showRenameModal: false})}
+        oldDescription={getDescription(resource)}
+        oldName={getDisplayName(resource)}
+        existingNames={this.props.existingNameList}/>
       }
       {this.state.referencingDataSets.length > 0 && <DataSetReferenceModal
-          referencedResource={resource}
-          dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
-          onCancel={() => {
-            this.setState({referencingDataSets: []});
-          }}
-          deleteResource={() => {
-            this.setState({referencingDataSets: []});
-            return this.deleteCohort();
-          }}/>
+        referencedResource={resource}
+        dataSets={fp.join(', ' , this.state.referencingDataSets.map((data) => data.name))}
+        onCancel={() => {
+          this.setState({referencingDataSets: []});
+        }}
+        deleteResource={() => {
+          this.setState({referencingDataSets: []});
+          return this.deleteCohort();
+        }}/>
       }
       {menuOnly ?
-          <ResourceActionsMenu actions={this.actions}/> :
-          <ResourceCard resource={resource} actions={this.actions}/>}
+        <ResourceActionsMenu actions={this.actions}/> :
+        <ResourceCard resource={resource} actions={this.actions}/>}
     </React.Fragment>;
   }
 });

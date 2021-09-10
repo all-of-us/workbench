@@ -29,12 +29,12 @@ interface Props extends WithSpinnerOverlayProps {
 }
 
 export const NotebookList = withCurrentWorkspace()(class extends React.Component<
-  Props, {
-    notebookList: FileDetail[],
-    notebookNameList: string[],
-    creating: boolean,
-    loading: boolean
-  }> {
+Props, {
+  notebookList: FileDetail[],
+  notebookNameList: string[],
+  creating: boolean,
+  loading: boolean
+}> {
   constructor(props) {
     super(props);
     this.state = {notebookList: [], notebookNameList: [], creating: false, loading: false};

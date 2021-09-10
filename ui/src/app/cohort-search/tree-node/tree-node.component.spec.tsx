@@ -53,25 +53,25 @@ describe('TreeNode', () => {
   });
   it('should create', () => {
     const wrapper = mount(<TreeNode autocompleteSelection={undefined}
-                                      groupSelections={[]}
-                                      node={treeNodeStub}
-                                      scrollToMatch={() => {}}
-                                      searchTerms={''}
-                                      select={() => {}}
-                                      selectedIds={[]}
-                                      source ='cohort'
-                                      setAttributes={() => {}}/>);
+      groupSelections={[]}
+      node={treeNodeStub}
+      scrollToMatch={() => {}}
+      searchTerms={''}
+      select={() => {}}
+      selectedIds={[]}
+      source ='cohort'
+      setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
   it('should display Versioned if SURVEY is COPE', () => {
     const wrapper = mount(<TreeNode autocompleteSelection={undefined}
-                                    groupSelections={[]}
-                                    node={surveyCOPETreeNodeStub}
-                                    scrollToMatch={() => {}}
-                                    searchTerms={''}
-                                    select={() => {}}
-                                    selectedIds={[]}
-                                    setAttributes={() => {}}/>);
+      groupSelections={[]}
+      node={surveyCOPETreeNodeStub}
+      scrollToMatch={() => {}}
+      searchTerms={''}
+      select={() => {}}
+      selectedIds={[]}
+      setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="displayName"]').text()).toContain('COVID-19 Participant Experience (COPE) Survey -  Versioned');
   });

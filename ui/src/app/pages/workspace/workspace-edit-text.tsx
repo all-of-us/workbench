@@ -44,8 +44,8 @@ export const ResearchPurposeDescription =
       answers below will be made available publicly in the <a target='_blank'
       href='https://www.researchallofus.org/research-projects-directory/'>Research Hub
       Directory </a> on our public website. <b>Your responses will not be used to make decisions about data access.</b>
-      <hr/>
-      <i>Note that you are required to create separate workspaces for each project
+    <hr/>
+    <i>Note that you are required to create separate workspaces for each project
         for which you access </i> All of Us <i>data, hence the responses below are expected
         to be specific to the project for which you are creating this particular
         workspace.</i>

@@ -40,7 +40,7 @@ describe('NotebookRedirect', () => {
     const c = mount(<Router history={history}>
       <Route path='/workspaces/:ns/:wsid/notebooks/:nbName'>
         <NotebookRedirect hideSpinner={() => {}}
-                          showSpinner={() => {}}/>
+          showSpinner={() => {}}/>
       </Route>
     </Router>);
     await waitOneTickAndUpdate(c);

@@ -48,7 +48,7 @@ export const nameValidationFormat = (existingNames, resourceType: ResourceType) 
         message: 'already exists'
       }
     })
-  :
+    :
     ({
       presence: {allowEmpty: false},
       format: {
@@ -104,11 +104,11 @@ export class RenameModal extends React.Component<Props, States> {
     const errors = validate(
       {newName: newName},
       {newName: nameValidationFormat(existingNames, resourceType)}
-      );
+    );
     return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>
-         <div style={headerStyles.formLabel}>New Name:</div>
+        <div style={headerStyles.formLabel}>New Name:</div>
         <TextInput autoFocus id='new-name'
           onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
@@ -117,16 +117,16 @@ export class RenameModal extends React.Component<Props, States> {
         {!hideDescription && <div style={{marginTop: '1rem'}}>
           <label data-test-id='descriptionLabel' style={styles.fieldHeader}>Description: </label>
           <textarea value={resourceDescription || ''}
-                    onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
+            onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
         </div> }
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button data-test-id='rename-button'
-                  disabled={!!errors || saving}
-                  style={{marginLeft: '0.5rem'}}
-                  onClick={() => this.onRename()}>
+            disabled={!!errors || saving}
+            style={{marginLeft: '0.5rem'}}
+            onClick={() => this.onRename()}>
             Rename {toDisplay(resourceType)}
           </Button>
         </TooltipTrigger>

@@ -45,32 +45,32 @@ export const WorkspaceRoutes = () => {
   return <Switch>
     <AppRoute exact path={`${path}/about`}>
       <WorkspaceAboutPage
-          routeData={{
-            title: 'View Workspace Details',
-            breadcrumb: BreadcrumbType.Workspace,
-            workspaceNavBarTab: 'about',
-            pageKey: 'about'
-          }}
+        routeData={{
+          title: 'View Workspace Details',
+          breadcrumb: BreadcrumbType.Workspace,
+          workspaceNavBarTab: 'about',
+          pageKey: 'about'
+        }}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/duplicate`}>
       <WorkspaceEditPage
-          routeData={{
-            title: 'Duplicate Workspace',
-            breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-            pageKey: 'duplicate'
-          }}
-          workspaceEditMode={WorkspaceEditMode.Duplicate}
+        routeData={{
+          title: 'Duplicate Workspace',
+          breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+          pageKey: 'duplicate'
+        }}
+        workspaceEditMode={WorkspaceEditMode.Duplicate}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/edit`}>
       <WorkspaceEditPage
-          routeData={{
-            title: 'Edit Workspace',
-            breadcrumb: BreadcrumbType.WorkspaceEdit,
-            pageKey: 'edit'
-          }}
-          workspaceEditMode={WorkspaceEditMode.Edit}
+        routeData={{
+          title: 'Edit Workspace',
+          breadcrumb: BreadcrumbType.WorkspaceEdit,
+          pageKey: 'edit'
+        }}
+        workspaceEditMode={WorkspaceEditMode.Edit}
       />
     </AppRoute>
     <AppRoute exact path={`${path}/notebooks`}>

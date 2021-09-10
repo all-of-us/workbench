@@ -135,7 +135,7 @@ export const ConceptSetActions = fp.flow(withCurrentWorkspace(), withNavigation,
           <div style={{marginTop: '0.25rem'}}>
             The concept set
             <a style={{color: colors.accent, margin: '0 4px'}}
-               onClick={() => this.navigateTo('conceptSet')}>
+              onClick={() => this.navigateTo('conceptSet')}>
               {conceptSet.name}
             </a>
             has been saved.

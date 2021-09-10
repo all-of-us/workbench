@@ -94,19 +94,19 @@ const Workspaces = () => {
       <FlexRow style={{alignItems: 'center'}}>
         <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
         <ClrIcon
-            shape='plus-circle'
-            size={30}
-            className={'is-solid'}
-            style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenCreatePage();
-              navigate(['workspaces', 'build']);
-            }}
+          shape='plus-circle'
+          size={30}
+          className={'is-solid'}
+          style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+          onClick={() => {
+            AnalyticsTracker.Workspaces.OpenCreatePage();
+            navigate(['workspaces', 'build']);
+          }}
         />
       </FlexRow>
       <span
-          style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-          onClick={() => navigate(['workspaces'])}
+        style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+        onClick={() => navigate(['workspaces'])}
       >
         See all workspaces
       </span>
@@ -117,17 +117,17 @@ const Workspaces = () => {
 
 const GettingStarted = () => {
   return <div data-test-id='getting-started'
-              style={{
-                backgroundColor: addOpacity(colors.primary, .1).toString(),
-                color: colors.primary,
-                borderRadius: 10,
-                margin: '2em 0em'}}>
+    style={{
+      backgroundColor: addOpacity(colors.primary, .1).toString(),
+      color: colors.primary,
+      borderRadius: 10,
+      margin: '2em 0em'}}>
     <div style={{margin: '1em 2em'}}>
       <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
       <CustomBulletList>
         <CustomBulletListItem bullet='→'>
           Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
-                                    target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
+            target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
           Workbench Google account. This will keep your workbench browser sessions isolated from
           your other Google accounts.
         </CustomBulletListItem>
@@ -137,7 +137,7 @@ const GettingStarted = () => {
         </CustomBulletListItem>
         <CustomBulletListItem bullet='→'>
           Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
-                                              target='_blank'>support materials</StyledAnchorTag> and forum topics.
+            target='_blank'>support materials</StyledAnchorTag> and forum topics.
         </CustomBulletListItem>
       </CustomBulletList>
     </div>
@@ -303,11 +303,11 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
       }
       this.setState({
         eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
-            (() => !!(this.getRegistrationTasksMap()['eraCommons']
-              .completionTimestamp(profile)))() : true),
+          (() => !!(this.getRegistrationTasksMap()['eraCommons']
+            .completionTimestamp(profile)))() : true),
         rasLoginGovLinked: (serverConfigStore.get().config.enableRasLoginGovLinking ?
-            (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
-              .completionTimestamp(profile)))() : true),
+          (() => !!(this.getRegistrationTasksMap()['rasLoginGov']
+            .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted:
           (() => !!(this.getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))()
@@ -333,7 +333,7 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
 
   async checkWorkspaces() {
     return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
-        .then(response => this.setState({userWorkspacesResponse: response}));
+      .then(response => this.setState({userWorkspacesResponse: response}));
   }
 
   userHasWorkspaces(): boolean {
@@ -357,31 +357,31 @@ export const Homepage = fp.flow(withUserProfile(), withNavigation, withRouter)(c
           {/* The elements inside this fadeBox will be changed as part of ongoing
           homepage redesign work */}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
-              {accessTasksLoaded ?
-                (accessTasksRemaining ?
-                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
-                                            eraCommonsLinked={eraCommonsLinked}
-                                            eraCommonsLoading={eraCommonsLoading}
-                                            rasLoginGovLinkError={rasLoginGovLinkError}
-                                            rasLoginGovLinked={rasLoginGovLinked}
-                                            rasLoginGovLoading={rasLoginGovLoading}
-                                            trainingCompleted={trainingCompleted}
-                                            firstVisitTraining={firstVisitTraining}
-                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
-                    ) : (
-                        <React.Fragment>
-                          <Workspaces/>
-                            {userWorkspacesResponse &&
+            {accessTasksLoaded ?
+              (accessTasksRemaining ?
+                (<RegistrationDashboard eraCommonsError={eraCommonsError}
+                  eraCommonsLinked={eraCommonsLinked}
+                  eraCommonsLoading={eraCommonsLoading}
+                  rasLoginGovLinkError={rasLoginGovLinkError}
+                  rasLoginGovLinked={rasLoginGovLinked}
+                  rasLoginGovLoading={rasLoginGovLoading}
+                  trainingCompleted={trainingCompleted}
+                  firstVisitTraining={firstVisitTraining}
+                  twoFactorAuthCompleted={twoFactorAuthCompleted}
+                  dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
+                ) : (
+                  <React.Fragment>
+                    <Workspaces/>
+                    {userWorkspacesResponse &&
                               (this.userHasWorkspaces() ?
-                                    <RecentResources workspaces={userWorkspacesResponse.items}/> :
-                                    <GettingStarted/>
+                                <RecentResources workspaces={userWorkspacesResponse.items}/> :
+                                <GettingStarted/>
                               )
-                            }
-                        </React.Fragment>
-                      )
-                ) :
-                <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+                    }
+                  </React.Fragment>
+                )
+              ) :
+              <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
         </FadeBox>
       </FlexColumn>

@@ -226,7 +226,7 @@ export const allModules: AccessModule[] = [
 ];
 
 const LoginGovTooltip = () => <TooltipTrigger
-    content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
+  content={'For additional security, we require you to verify your identity by uploading a photo of your ID.'}>
   <InfoIcon style={{margin: '0 0.3rem'}}/>
 </TooltipTrigger>;
 
@@ -248,9 +248,9 @@ const bypassedOrCompletedText = (status: AccessModuleStatus) => {
   const userBypassedModule = !!bypassEpochMillis;
 
   return cond(
-      [userCompletedModule, () => `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`],
-      [userBypassedModule, () => `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`],
-      // return nothing if there's no text
+    [userCompletedModule, () => `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`],
+    [userBypassedModule, () => `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`],
+    // return nothing if there's no text
     () => null
   );
 };
@@ -312,13 +312,13 @@ const syncExternalModules = async () => {
 };
 
 const Refresh = (props: {showSpinner: Function}) => <Button
-    type='primary'
-    style={styles.refreshButton}
-    onClick={async () => {
-      props.showSpinner();
-      await syncExternalModules();
-      location.reload(); // will also hide spinner
-    }} >
+  type='primary'
+  style={styles.refreshButton}
+  onClick={async () => {
+    props.showSpinner();
+    await syncExternalModules();
+    location.reload(); // will also hide spinner
+  }} >
   <Repeat style={styles.refreshIcon}/> Refresh
 </Button>;
 
@@ -365,17 +365,17 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
     // getRegistrationTask() has onClick() functions for every module, which is generally what we want
     // but we pop up a modal for Two Factor Auth instead of using the standard task
     const moduleAction = registrationTask && (moduleName === AccessModule.TWOFACTORAUTH ?
-        () => setShowTwoFactorAuthModal(true) :
-        registrationTask.onClick);
+      () => setShowTwoFactorAuthModal(true) :
+      registrationTask.onClick);
 
     return active ?
-        <Clickable onClick={() => {
-          setShowRefresh(true);
-          moduleAction();
-        }}>
-          <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
-        </Clickable> :
-        <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
+      <Clickable onClick={() => {
+        setShowRefresh(true);
+        moduleAction();
+      }}>
+        <FlexRow style={styles.activeModuleBox}>{children}</FlexRow>
+      </Clickable> :
+      <FlexRow style={styles.inactiveModuleBox}>{children}</FlexRow>;
   };
 
   const Module = () => {
@@ -396,8 +396,8 @@ const MaybeModule = ({moduleName, active, spinnerProps}: ModuleProps): JSX.Eleme
         </FlexColumn>
       </ModuleBox>
       {showTwoFactorAuthModal && <TwoFactorAuthModal
-          onClick={() => setShowTwoFactorAuthModal(false)}
-          onCancel={() => setShowTwoFactorAuthModal(false)}/>}
+        onClick={() => setShowTwoFactorAuthModal(false)}
+        onCancel={() => setShowTwoFactorAuthModal(false)}/>}
     </FlexRow>;
   };
 
@@ -422,7 +422,7 @@ const ModulesForCard = (props: {modules: AccessModule[], activeModule: AccessMod
   const {modules, activeModule, spinnerProps} = props;
   return <FlexColumn style={styles.modulesContainer}>
     {modules.map(moduleName =>
-        <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule} spinnerProps={spinnerProps}/>
+      <MaybeModule key={moduleName} moduleName={moduleName} active={moduleName === activeModule} spinnerProps={spinnerProps}/>
     )}
   </FlexColumn>;
 };
@@ -444,12 +444,12 @@ const Physical = physical;
 const Wearable = wearable;
 
 const renderIcon = (iconName: string) => switchCase(iconName,
-    ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
-    ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
-    ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
-    ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
-    ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
-    ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
+  ['individual', () => <Individual style={styles.rtDetailsIcon}/>],
+  ['identifying', () => <Identifying style={styles.rtDetailsIcon}/>],
+  ['electronic', () => <Electronic style={styles.rtDetailsIcon}/>],
+  ['survey', () => <Survey style={styles.rtDetailsIcon}/>],
+  ['physical', () => <Physical style={styles.rtDetailsIcon}/>],
+  ['wearable', () => <Wearable style={styles.rtDetailsIcon}/>]
 );
 
 const DataDetail = (props: {icon: string, text: string}) => {
@@ -541,21 +541,21 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)((spinnerPro
   const {config: {unsafeAllowSelfBypass}} = useStore(serverConfigStore);
 
   return <FlexColumn style={styles.pageWrapper}>
-      <DARHeader/>
-      {profile && !activeModule && <Completed/>}
-      {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
-        <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
-        <Button
-            style={{marginLeft: '0.5rem'}}
-            onClick={async () => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
-      </FlexRow>}
-      <FadeBox style={styles.fadeBox}>
-        <div style={styles.pleaseComplete}>
+    <DARHeader/>
+    {profile && !activeModule && <Completed/>}
+    {unsafeAllowSelfBypass && activeModule && <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
+      <div style={styles.selfBypassText}>[Test environment] Self-service bypass is enabled</div>
+      <Button
+        style={{marginLeft: '0.5rem'}}
+        onClick={async () => await selfBypass(spinnerProps, reload)}>Bypass all</Button>
+    </FlexRow>}
+    <FadeBox style={styles.fadeBox}>
+      <div style={styles.pleaseComplete}>
           Please complete the necessary steps to gain access to the <AoU/> datasets.
-        </div>
-        <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
-        {/* TODO RW-7059 - Step 2 ControlledTierCard */}
-        <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>
-      </FadeBox>
-    </FlexColumn>;
+      </div>
+      <RegisteredTierCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+      {/* TODO RW-7059 - Step 2 ControlledTierCard */}
+      <DuccCard activeModule={activeModule} spinnerProps={spinnerProps}/>
+    </FadeBox>
+  </FlexColumn>;
 });

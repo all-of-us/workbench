@@ -25,8 +25,8 @@ export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
     style={{animation: '1s linear infinite spin', ...style}} {...props}
   >
     <circle cx='36' cy='36' r='33' stroke={dark ? styles.darkBackground.stroke : '#000'}
-            strokeOpacity={dark ? styles.darkBackground.strokeOpacity : '.1'}
-            fill='none' strokeWidth='5' />
+      strokeOpacity={dark ? styles.darkBackground.strokeOpacity : '.1'}
+      fill='none' strokeWidth='5' />
     <path d='M14.3 60.9A33 33 0 0 1 36 3' stroke='#0079b8' fill='none' strokeWidth='5' />
   </svg>;
 };
@@ -44,9 +44,9 @@ export interface SpinnerOverlayProps {
 }
 
 export const SpinnerOverlay = ({dark = false,
-                                 opacity = 0,
-                                 overrideStylesOverlay= {},
-                                 overrideStylesSquare = {}}: SpinnerOverlayProps) => {
+  opacity = 0,
+  overrideStylesOverlay= {},
+  overrideStylesSquare = {}}: SpinnerOverlayProps) => {
   return <div style={{...styles.overlay, ...overrideStylesOverlay,
     backgroundColor: Color(overrideStylesOverlay.backgroundColor || styles.overlay.backgroundColor)
       .alpha(opacity).toString()}}>

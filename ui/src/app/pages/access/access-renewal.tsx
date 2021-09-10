@@ -63,7 +63,7 @@ const reloadProfile = withErrorModal({
   title: 'Could Not Load Profile',
   message: 'Profile could not be reloaded. Please refresh the page to get your updated profile'
 },
-  profileStore.get().reload
+profileStore.get().reload
 );
 
 const confirmPublications = fp.flow(
@@ -144,17 +144,17 @@ interface CompletedButtonInterface {
 }
 
 const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterface) => <Button disabled={true}
-    data-test-id='completed-button'
-    style={{
-      height: '1.6rem',
-      marginTop: 'auto',
-      backgroundColor: colors.success,
-      width: 'max-content',
-      cursor: 'default',
-      ...style
-    }}>
-    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
-  </Button>;
+  data-test-id='completed-button'
+  style={{
+    height: '1.6rem',
+    marginTop: 'auto',
+    backgroundColor: colors.success,
+    width: 'max-content',
+    cursor: 'default',
+    ...style
+  }}>
+  <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
+</Button>;
 
 interface ActionButtonInterface {
   isModuleExpiring: boolean;
@@ -170,9 +170,9 @@ const ActionButton = (
   return wasBypassed || !isModuleExpiring
     ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
-        onClick={onClick}
-        disabled={disabled}
-        style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
+      onClick={onClick}
+      disabled={disabled}
+      style={{marginTop: 'auto', height: '1.6rem', width: 'max-content', ...style}}>{actionButtonText}</Button>;
 };
 
 const BackArrow = withCircleBackground(() => <Arrow style={{height: 21, width: 18}}/>);
@@ -203,7 +203,7 @@ export const AccessRenewal = fp.flow(
   // State
   const {profile: {
     accessModules: {modules}},
-    profile
+  profile
   } = useStore(profileStore);
   const {config: {enableComplianceTraining}} = useStore(serverConfigStore);
   const [publications, setPublications] = useState<boolean>(null);
@@ -230,11 +230,11 @@ export const AccessRenewal = fp.flow(
   const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
 
   const wasBypassed = moduleName => switchCase(moduleName,
-      [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
-      [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
-      // these cannot be bypassed
-      [AccessModule.PROFILECONFIRMATION, () => false],
-      [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
+    [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
+    [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
+    // these cannot be bypassed
+    [AccessModule.PROFILECONFIRMATION, () => false],
+    [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
 
   const completeOrBypassed = moduleName => wasBypassed(moduleName) || !isExpiring(getExpirationTimeFor(moduleName));
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
@@ -255,7 +255,7 @@ export const AccessRenewal = fp.flow(
           <Clickable onClick={() => history.back()}><BackArrow style={{height: '1.5rem', width: '1.5rem'}}/></Clickable>
           <div style={styles.h1}>Yearly Researcher Workbench access renewal</div>
         </React.Fragment>
-        )
+      )
       }
       <div style={allModulesCompleteOrBypassed ? {gridColumn: '1 / span 2'} : {gridColumnStart: 2}}>
         Researchers are required to complete a number of steps as part of the annual renewal
@@ -295,7 +295,7 @@ export const AccessRenewal = fp.flow(
              presentation resulting from the use of <AoU/> Research Program Data at least two weeks before the date of publication.
              If you are lead on or part of a publication or presentation that hasn’t been reported to the
              program, <a target='_blank' style={{textDecoration: 'underline'}}
-              href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
+          href={'https://redcap.pmi-ops.org/surveys/?s=MKYL8MRD4N'}>please report it now.</a> For any questions,
              please contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>

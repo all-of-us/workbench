@@ -65,7 +65,7 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
 }
 
 async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
-    apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
+  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
   try {
     return await apiCall();
   } catch (ex) {
@@ -74,7 +74,7 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
     }
     await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
     return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
-        apiCall, maxRetries, retryCount + 1, initialWaitTime);
+      apiCall, maxRetries, retryCount + 1, initialWaitTime);
   }
 }
 

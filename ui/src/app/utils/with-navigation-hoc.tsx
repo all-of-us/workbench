@@ -5,6 +5,6 @@ export const withNavigation = WrappedComponent => ({...props}) => {
   const [navigate, navigateByUrl] = useNavigation();
 
   return <WrappedComponent navigate={navigate}
-                           navigateByUrl={navigateByUrl}
-                           {...props}/>;
+    navigateByUrl={navigateByUrl}
+    {...props}/>;
 };

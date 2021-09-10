@@ -1,13 +1,13 @@
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {
-    Cohort,
-    CohortReview,
-    ConceptSet,
-    DataSet,
-    FileDetail,
-    ResourceType,
-    WorkspaceAccessLevel,
-    WorkspaceResource
+  Cohort,
+  CohortReview,
+  ConceptSet,
+  DataSet,
+  FileDetail,
+  ResourceType,
+  WorkspaceAccessLevel,
+  WorkspaceResource
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
@@ -22,15 +22,15 @@ const isNotebook = (resource: WorkspaceResource): boolean => !!resource.notebook
 
 function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
-      [rt => rt === ResourceType.COHORT, () => 'Cohort'],
-      [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
-      [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
-      [rt => rt === ResourceType.DATASET, () => 'Dataset'],
-      [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
+    [rt => rt === ResourceType.COHORT, () => 'Cohort'],
+    [rt => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
+    [rt => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
+    [rt => rt === ResourceType.DATASET, () => 'Dataset'],
+    [rt => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
 
-      [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
-      [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
-      [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
+    [rt => rt === ResourceType.COHORTSEARCHGROUP, () => 'Group'],
+    [rt => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
+    [rt => rt === ResourceType.WORKSPACE, () => 'Workspace'],
   ])(resourceType);
 }
 
@@ -48,31 +48,31 @@ const getTypeString = (resource: WorkspaceResource): string => toDisplay(getType
 
 function getDescription(resource: WorkspaceResource): string {
   return fp.cond([
-      [isCohort, r => r.cohort.description],
-      [isCohortReview, r => r.cohortReview.description],
-      [isConceptSet, r => r.conceptSet.description],
-      [isDataSet, r => r.dataSet.description],
-      [isNotebook, fp.stubString /* notebooks don't have descriptions */]
+    [isCohort, r => r.cohort.description],
+    [isCohortReview, r => r.cohortReview.description],
+    [isConceptSet, r => r.conceptSet.description],
+    [isDataSet, r => r.dataSet.description],
+    [isNotebook, fp.stubString /* notebooks don't have descriptions */]
   ])(resource);
 }
 
 function getDisplayName(resource: WorkspaceResource): string {
   return fp.cond([
-      [isCohort, r => r.cohort.name],
-      [isCohortReview, r => r.cohortReview.cohortName],
-      [isConceptSet, r => r.conceptSet.name],
-      [isDataSet, r => r.dataSet.name],
-      [isNotebook, r => dropNotebookFileSuffix(r.notebook.name)],
+    [isCohort, r => r.cohort.name],
+    [isCohortReview, r => r.cohortReview.cohortName],
+    [isConceptSet, r => r.conceptSet.name],
+    [isDataSet, r => r.dataSet.name],
+    [isNotebook, r => dropNotebookFileSuffix(r.notebook.name)],
   ])(resource);
 }
 
 function getId(resource: WorkspaceResource): number {
   // Notebooks do not have IDs
   return fp.cond([
-      [isCohort, r => r.cohort.id],
-      [isCohortReview, r => r.cohortReview.cohortReviewId],
-      [isConceptSet, r => r.conceptSet.id],
-      [isDataSet, r => r.dataSet.id],
+    [isCohort, r => r.cohort.id],
+    [isCohortReview, r => r.cohortReview.cohortReviewId],
+    [isConceptSet, r => r.conceptSet.id],
+    [isDataSet, r => r.dataSet.id],
   ])(resource);
 }
 
@@ -111,17 +111,17 @@ function convertToResource(
 }
 
 export {
-    isCohort,
-    isCohortReview,
-    isConceptSet,
-    isDataSet,
-    isNotebook,
-    getTypeString,
-    toDisplay,
-    getDescription,
-    getDisplayName,
-    getId,
-    getResourceUrl,
-    getType,
-    convertToResource,
+  isCohort,
+  isCohortReview,
+  isConceptSet,
+  isDataSet,
+  isNotebook,
+  getTypeString,
+  toDisplay,
+  getDescription,
+  getDisplayName,
+  getId,
+  getResourceUrl,
+  getType,
+  convertToResource,
 };

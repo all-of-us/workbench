@@ -40,21 +40,21 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
         creationTime: 0
       },
     ]},
-    {
-      accessTierShortName: AccessTierShortNames.Controlled,
-      accessTierDisplayName: AccessTierDisplayNames.Controlled,
-      defaultCdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
-      versions: [
-        {
-          name: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION,
-          cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
-          accessTierShortName: AccessTierShortNames.Controlled,
-          archivalStatus: ArchivalStatus.LIVE,
-          hasFitbitData: true,
-          hasWgsData: true,
-          creationTime: 0
-        }
-      ]}
+  {
+    accessTierShortName: AccessTierShortNames.Controlled,
+    accessTierDisplayName: AccessTierDisplayNames.Controlled,
+    defaultCdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
+    versions: [
+      {
+        name: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION,
+        cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
+        accessTierShortName: AccessTierShortNames.Controlled,
+        archivalStatus: ArchivalStatus.LIVE,
+        hasFitbitData: true,
+        hasWgsData: true,
+        creationTime: 0
+      }
+    ]}
   ]
 };
 

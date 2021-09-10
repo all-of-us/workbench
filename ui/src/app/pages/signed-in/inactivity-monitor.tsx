@@ -34,7 +34,7 @@ const getInactivityElapsedMs = () => {
 
 const secondsToText = (seconds: number) => {
   return seconds % 60 === 0 && seconds > 60 ?
-      `${seconds / 60} minutes` : `${seconds} seconds`;
+    `${seconds / 60} minutes` : `${seconds} seconds`;
 };
 
 const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {

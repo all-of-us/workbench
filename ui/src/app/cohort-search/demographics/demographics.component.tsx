@@ -106,8 +106,8 @@ function sortByCountThenName(critA, critB) {
   const B = critB.count || 0;
   const diff = B - A;
   return diff === 0
-        ? (critA.name > critB.name ? 1 : -1)
-        : diff;
+    ? (critA.name > critB.name ? 1 : -1)
+    : diff;
 }
 
 interface Props {
@@ -380,9 +380,9 @@ export class Demographics extends React.Component<Props, State> {
                 onChange={(v) => this.onMaxChange(v)}/>
             </div>
             <Button style={{marginLeft: '1rem'}}
-                    type='primary'
-                    disabled={selectedIds.includes(this.ageParameterId)}
-                    onClick={() => this.addAgeSelection()}>
+              type='primary'
+              disabled={selectedIds.includes(this.ageParameterId)}
+              onClick={() => this.addAgeSelection()}>
               Add Selection
             </Button>
           </div>

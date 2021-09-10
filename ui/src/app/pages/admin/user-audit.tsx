@@ -34,9 +34,9 @@ export const UserAudit = (spinnerProps: WithSpinnerOverlayProps) => {
 
   const {username = ''} = useParams<{username: string}>();
   return <AuditPageComponent auditSubjectType='User'
-                             buttonLabel='Username without domain'
-                             initialAuditSubject={username}
-                             getNextAuditPath={getNextAuditPath}
-                             queryAuditLog={queryAuditLog}
-                             getAdminPageUrl={getAdminPageUrl}/>;
+    buttonLabel='Username without domain'
+    initialAuditSubject={username}
+    getNextAuditPath={getNextAuditPath}
+    queryAuditLog={queryAuditLog}
+    getAdminPageUrl={getAdminPageUrl}/>;
 };

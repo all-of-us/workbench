@@ -87,7 +87,7 @@ const thirtyDaysPlusExpiration: Profile = {
 
 describe('maybeDaysRemaining', () => {
   it('returns undefined when the profile has no accessModules', () => {
-     expect(maybeDaysRemaining(noModules)).toBeUndefined();
+    expect(maybeDaysRemaining(noModules)).toBeUndefined();
   });
 
   it('returns undefined when the profile has no expirable accessModules', () => {
@@ -95,7 +95,7 @@ describe('maybeDaysRemaining', () => {
   });
 
   it('returns undefined when the profile has no accessModules with expirations', () => {
-     expect(maybeDaysRemaining(noExpModules)).toBeUndefined();
+    expect(maybeDaysRemaining(noExpModules)).toBeUndefined();
   });
 
   it('returns undefined when the accessModules have expirations past the window', () => {

@@ -10,22 +10,22 @@ import {ProfileAccessModules} from './profile-access-modules';
 const profile = ProfileStubVariables.PROFILE_STUB as Profile;
 
 describe('Profile Access Modules', () => {
-    beforeEach(async () => {
-        serverConfigStore.set({config: defaultServerConfig});
-    });
+  beforeEach(async () => {
+    serverConfigStore.set({config: defaultServerConfig});
+  });
 
-    const component = () => {
-        return mount(<ProfileAccessModules profile={profile}/>);
-    };
+  const component = () => {
+    return mount(<ProfileAccessModules profile={profile}/>);
+  };
 
-    it('Should render', async () => {
-        const wrapper = component();
-        expect(wrapper.exists()).toBeTruthy();
-    });
+  it('Should render', async () => {
+    const wrapper = component();
+    expect(wrapper.exists()).toBeTruthy();
+  });
 
-    it('should display all modules as incomplete by default', async () => {
-        const wrapper = component();
-        const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
-        expect(profileCardCompleteButtons.length).toBe(4);
-    });
+  it('should display all modules as incomplete by default', async () => {
+    const wrapper = component();
+    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
+    expect(profileCardCompleteButtons.length).toBe(4);
+  });
 });

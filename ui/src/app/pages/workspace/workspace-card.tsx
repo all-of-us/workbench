@@ -79,46 +79,46 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
     content={
       <React.Fragment>
         <MenuItem icon='copy'
-                  onClick={() => {
-                    // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
-                    // this on the workspace object once users are able to publish their own workspaces
-                    workspace.published ?
-                      AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
-                      AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
-                    navigate([wsPathPrefix, 'duplicate']);
-                  }}>
+          onClick={() => {
+            // Using workspace.published here to identify Featured Workspaces. At some point, we will need a separate property for
+            // this on the workspace object once users are able to publish their own workspaces
+            workspace.published ?
+              AnalyticsTracker.Workspaces.DuplicateFeatured(workspace.name) :
+              AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
+            navigate([wsPathPrefix, 'duplicate']);
+          }}>
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenEditPage('Card');
-                      navigate([wsPathPrefix, 'edit']);
-                    }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenEditPage('Card');
+              navigate([wsPathPrefix, 'edit']);
+            }}
+            disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Edit
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenShareModal('Card');
-                      onShare();
-                    }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenShareModal('Card');
+              onShare();
+            }}
+            disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='trash'
-                    onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
-                      onDelete();
-                    }}
-                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
+              onDelete();
+            }}
+            disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Delete
           </MenuItem>
         </TooltipTrigger>
@@ -234,8 +234,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 <FlexRow style={{ alignItems: 'flex-start' }}>
                   <Clickable>
                     <div style={styles.workspaceName}
-                         data-test-id='workspace-card-name'
-                         onClick={() => this.onClick()}>
+                      data-test-id='workspace-card-name'
+                      onClick={() => this.onClick()}>
                       {workspace.name}
                     </div>
                   </Clickable>
@@ -244,8 +244,8 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                   workspace.researchPurpose.reviewRequested === true &&
                   workspace.researchPurpose.approved === false &&
                   <div style={{color: colors.danger}}>
-                      <ClrIcon shape='exclamation-triangle' className='is-solid'
-                               style={{fill: colors.danger}}/>
+                    <ClrIcon shape='exclamation-triangle' className='is-solid'
+                      style={{fill: colors.danger}}/>
                       Rejected
                   </div>
                 }
@@ -274,33 +274,33 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         </WorkspaceCardBase>
         {confirmDeleting &&
         <ConfirmDeleteModal data-test-id='confirm-delete-modal'
-                            resourceType={ResourceType.WORKSPACE}
-                            resourceName={workspace.name}
-                            receiveDelete={() => {
-                              AnalyticsTracker.Workspaces.Delete();
-                              this.deleteWorkspace();
-                            }}
-                            closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
+          resourceType={ResourceType.WORKSPACE}
+          resourceName={workspace.name}
+          receiveDelete={() => {
+            AnalyticsTracker.Workspaces.Delete();
+            this.deleteWorkspace();
+          }}
+          closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
         {showShareModal && <WorkspaceShare data-test-id='workspace-share-modal'
-                                           workspace={{...workspace, accessLevel}}
-                                           onClose={() => this.handleShareDialogClose()} />}
+          workspace={{...workspace, accessLevel}}
+          onClose={() => this.handleShareDialogClose()} />}
         {showResearchPurposeReviewModal && <Modal data-test-id='workspace-review-modal'>
-            <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
-            <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
-                <div>
+          <ModalTitle>Please review Research Purpose for Workspace '{workspace.name}'</ModalTitle>
+          <ModalBody style={{display: 'flex', flexDirection: 'column'}}>
+            <div>
                     Now that you have had some time to explore the Researcher Workbench for your project,
                     please review your workspace description to make sure it is accurate. As a reminder,
                     project descriptions are publicly cataloged in the <AouTitle/>'s <a
-                    href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
+                href='https://www.researchallofus.org/research-projects-directory/' target='_blank'>
                     Research Project Directory</a> for participants and public to review.
-                </div>
-            </ModalBody>
-            <ModalFooter>
-                <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
-                        onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
-                <Button type='secondary'
-                        onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
-            </ModalFooter>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='primary' style={{marginLeft: '1rem', marginRight: '1rem'}}
+              onClick={() => this.handleReviewResearchPurpose()}>REVIEW NOW</Button>
+            <Button type='secondary'
+              onClick={() => this.setState({showResearchPurposeReviewModal: false})}>REVIEW LATER</Button>
+          </ModalFooter>
         </Modal>}
       </React.Fragment>;
 

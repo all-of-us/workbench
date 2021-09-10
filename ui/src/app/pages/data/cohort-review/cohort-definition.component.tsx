@@ -131,25 +131,25 @@ export class CohortDefinition extends React.Component<{review: CohortReview}, {d
       if (param.domain === Domain.PERSON) {
         return {items: param.type === CriteriaType.DECEASED ? `${domainToTitle(domain)}
                       | ${param.name}` :
-            `${domainToTitle(domain)}
+          `${domainToTitle(domain)}
                       | ${this.operatorConversion(param.type)} | ${param.name}`,
-          domain: param.domain};
+        domain: param.domain};
       } else if (param.domain === Domain.VISIT) {
         return {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
           domain: param.domain};
       } else {
         return domain === Domain.CONDITION || domain === Domain.PROCEDURE ?
-        {items: `${domainToTitle(domain)} | ${param.type} | ${typeMatched.customString}`,
-          domain: param.domain} :
-        {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
-          domain: param.domain};
+          {items: `${domainToTitle(domain)} | ${param.type} | ${typeMatched.customString}`,
+            domain: param.domain} :
+          {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
+            domain: param.domain};
       }
     });
     return this.removeDuplicates(noModArray);
   }
 
 
-// utils
+  // utils
   getGroupedData(p, t) {
     const groupedData = p.reduce((acc, i) => {
       const key = i[t];

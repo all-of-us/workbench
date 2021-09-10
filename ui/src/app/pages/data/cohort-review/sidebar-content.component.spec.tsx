@@ -20,11 +20,11 @@ describe('SidebarContent', () => {
 
   it('should render', () => {
     const wrapper = mount(
-        <MemoryRouter>
-          <SidebarContent
-              participant={cohortReviewStubs[0].participantCohortStatuses[0]}
-          />
-        </MemoryRouter>
+      <MemoryRouter>
+        <SidebarContent
+          participant={cohortReviewStubs[0].participantCohortStatuses[0]}
+        />
+      </MemoryRouter>
     );
     expect(wrapper.exists()).toBeTruthy();
   });
