@@ -140,7 +140,6 @@ export async function createWorkspace(
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
   await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
-  logger.info(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
   return workspaceName;
 }
 
