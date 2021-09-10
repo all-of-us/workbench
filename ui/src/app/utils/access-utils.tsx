@@ -250,6 +250,11 @@ export const getAccessModuleStatusByName = (profile: Profile, moduleName: Access
   return profile.accessModules.modules.find(a => a.moduleName === moduleName);
 };
 
+export const getAccessModuleCompletionTime = (accessModules: Array<AccessModuleStatus>, moduleName: AccessModule): number => {
+  const module = accessModules.find(a => a.moduleName === moduleName);
+  return module ? module.completionEpochMillis : null;
+};
+
 export const getAccessModuleBypassTime = (accessModules: Array<AccessModuleStatus>, moduleName: AccessModule): number => {
   const module = accessModules.find(a => a.moduleName === moduleName);
   return module ? module.bypassEpochMillis : null;
