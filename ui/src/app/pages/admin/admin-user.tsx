@@ -30,6 +30,7 @@ import {
 } from 'app/utils/institutions';
 import {MatchParams, serverConfigStore} from 'app/utils/stores';
 import {
+  AccessModuleStatus,
   AccountPropertyUpdate,
   CheckEmailResponse,
   InstitutionalRole,
@@ -142,6 +143,23 @@ const FreeCreditsUsage = ({isAboveLimit, usage}: FreeCreditsProps) => {
     {isAboveLimit && <div style={{color: colors.danger}}>Update free credit limit</div>}
   </React.Fragment>;
 };
+
+interface AccessModuleProps {
+  module: AccessModuleStatus;
+}
+const AccessModule = ({module}: AccessModuleProps) => {
+  return <FlexColumn>
+    <div>Module name: {module.moduleName}</div>
+    <div>Subject to Access Renewal?</div>
+  </FlexColumn>;
+}
+
+interface AccessModulesProps {
+  modules: Array<AccessModuleStatus>;
+}
+const AccessModules = ({modules}: AccessModulesProps) => <div>
+  {modules.map(m => <AccessModule moduleX={m}/>)}
+</div>;
 
 interface Props extends WithSpinnerOverlayProps, RouteComponentProps<MatchParams> {}
 
@@ -607,48 +625,7 @@ export const AdminUser = withRouter(class extends React.Component<Props, State> 
                 containerStyle={styles.textInputContainer}
               />
             }
-            <div style={{marginTop: '1rem', width: '15rem'}}>
-              <label style={{fontWeight: 600}}>Bypass access to:</label>
-              <FlexRow style={{marginTop: '.5rem'}}>
-                <ToggleWithLabelAndToggledText
-                    label={'2-factor auth'}
-                    initialValue={!!updatedProfile.twoFactorAuthBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'twoFactorAuthBypassToggle'}
-                />
-                <ToggleWithLabelAndToggledText
-                    label={'Compliance training'}
-                    initialValue={!!updatedProfile.complianceTrainingBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'complianceTrainingBypassToggle'}
-                />
-              </FlexRow>
-              <FlexRow style={{marginTop: '1rem'}}>
-                <ToggleWithLabelAndToggledText
-                    label={'eRA Commons'}
-                    initialValue={!!updatedProfile.eraCommonsBypassTime}
-                    disabled={true}
-                    onToggle={(checked) => checked}
-                    dataTestId={'eraCommonsBypassToggle'}
-                />
-                <ToggleWithLabelAndToggledText
-                    label={'Data User Code of Conduct'}
-                    initialValue={!!updatedProfile.dataUseAgreementBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'dataUseAgreementBypassToggle'}
-                />
-                {enableRasLoginGovLinking && <ToggleWithLabelAndToggledText
-                    label={'RAS Login.gov Link'}
-                    initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
-                    disabled={true}
-                    onToggle={() => {}}
-                    dataTestId={'rasLinkLoginGovBypassToggle'}
-                />}
-              </FlexRow>
-            </div>
+          <AccessModules modules={updatedProfile.accessModules.modules}/>
           </FlexColumn>
         </FlexRow>
       </FlexColumn>}
