@@ -16,7 +16,6 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {cond, daysFromNow, displayDateWithoutHours, switchCase, useId, withStyle} from 'app/utils';
 import {
-  getAccessModuleBypassTime,
   maybeDaysRemaining,
   redirectToTraining
 } from 'app/utils/access-utils';
@@ -101,14 +100,12 @@ const syncAndReload = fp.flow(
 // Helper Functions
 
 const isExpiring = (nextReview: number): boolean => daysFromNow(nextReview) <= serverConfigStore.get().config.accessRenewalLookback;
+const isModuleExpiring = (status: AccessModuleStatus): boolean => isExpiring(status.expirationEpochMillis);
 
-const getExpirationTimeFor = (modules: Array<AccessModuleStatus>, moduleName: AccessModule): number => fp.flow(
-    fp.find({moduleName: moduleName}),
-    fp.get('expirationEpochMillis'))
-(modules);
-
-const isModuleExpiring = (modules: Array<AccessModuleStatus>, moduleName: AccessModule): boolean =>
-    isExpiring(getExpirationTimeFor(modules, moduleName));
+const isExpiringAndNotBypassed = (moduleName: AccessModule, modules: AccessModuleStatus[]) => {
+  const status = modules.find(m => m.moduleName === moduleName);
+  return isModuleExpiring(status) && !status.bypassEpochMillis;
+}
 
 const withInvalidDateHandling = date => {
   if (!date) {
@@ -118,9 +115,7 @@ const withInvalidDateHandling = date => {
   }
 };
 
-const computeDisplayDates = (status: AccessModuleStatus) => {
-  const {completionEpochMillis, expirationEpochMillis, bypassEpochMillis} = status;
-
+const computeDisplayDates = ({completionEpochMillis, expirationEpochMillis, bypassEpochMillis}: AccessModuleStatus) => {
   const userCompletedModule = !!completionEpochMillis;
   const userBypassedModule = !!bypassEpochMillis;
   const lastConfirmedDate = withInvalidDateHandling(completionEpochMillis);
@@ -171,17 +166,8 @@ const CompletedButton = ({buttonText, wasBypassed, style}: CompletedButtonInterf
     <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : buttonText}
   </Button>;
 
-const wasBypassed = (modules, moduleName) => switchCase(moduleName,
-    [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
-    [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
-    // these cannot be bypassed
-    [AccessModule.PROFILECONFIRMATION, () => false],
-    [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
-
-
 interface ActionButtonInterface {
-  modules: AccessModuleStatus[];
-  moduleName: AccessModule;
+  status: AccessModuleStatus;
   actionButtonText: string;
   completedButtonText: string;
   onClick: Function;
@@ -189,10 +175,10 @@ interface ActionButtonInterface {
   style?: React.CSSProperties;
 }
 const ActionButton = (
-  {modules, moduleName, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
-
-  return wasBypassed(modules, moduleName) || !isModuleExpiring(modules, moduleName)
-    ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed(modules, moduleName)} style={style}/>
+  {status, actionButtonText, completedButtonText, onClick, disabled, style}: ActionButtonInterface) => {
+  const wasBypassed = !!status.bypassEpochMillis;
+  return wasBypassed || !isModuleExpiring(status)
+    ? <CompletedButton buttonText={completedButtonText} wasBypassed={wasBypassed} style={style}/>
     : <Button
         onClick={onClick}
         disabled={disabled}
@@ -249,7 +235,12 @@ export const AccessRenewal = fp.flow(
     getProfile();
   }, []);
 
-  const completeOrBypassed = moduleName => wasBypassed(modules, moduleName) || !isExpiring(getExpirationTimeFor(modules, moduleName));
+  const completeOrBypassed = moduleName => {
+    const status = modules.find(m => m.moduleName === moduleName);
+    const wasBypassed = !!status.bypassEpochMillis;
+    return wasBypassed || !isExpiring(status.expirationEpochMillis);
+  }
+
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
 
   // Render
@@ -294,10 +285,9 @@ export const AccessRenewal = fp.flow(
           information up-to-date at all times.
         </div>
         <ActionButton
-            modules={modules}
-            moduleName={AccessModule.PROFILECONFIRMATION}
             actionButtonText='Review'
             completedButtonText='Confirmed'
+            status={modules.find(m => m.moduleName === AccessModule.PROFILECONFIRMATION)}
             onClick={() => navigateByUrl('profile', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
       {/* Publications */}
@@ -315,10 +305,9 @@ export const AccessRenewal = fp.flow(
         </div>
         <div style={{marginTop: 'auto', display: 'grid', columnGap: '0.25rem', gridTemplateColumns: 'auto 1rem 1fr', alignItems: 'center'}}>
           <ActionButton
-              modules={modules}
-              moduleName={AccessModule.PUBLICATIONCONFIRMATION}
               actionButtonText='Confirm'
               completedButtonText='Confirmed'
+              status={modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION)}
               onClick={async() => {
                 setLoading(true);
                 await confirmPublications();
@@ -326,16 +315,19 @@ export const AccessRenewal = fp.flow(
               }}
               disabled={publications === null}
               style={{gridRow: '1 / span 2', marginRight: '0.25rem'}}/>
-          <RadioButton id={noReportId}
-            disabled={!isModuleExpiring(modules, AccessModule.PUBLICATIONCONFIRMATION)}
-            style={{justifySelf: 'end'}} checked={publications === true}
-            onChange={() => setPublications(true)}/>
+          <RadioButton
+              id={noReportId}
+              disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
+              style={{justifySelf: 'end'}}
+              checked={publications === true}
+              onChange={() => setPublications(true)}/>
           <label htmlFor={noReportId}> At this time, I have nothing to report </label>
-          <RadioButton id={reportId}
-            disabled={!isModuleExpiring(modules, AccessModule.PUBLICATIONCONFIRMATION)}
-            style={{justifySelf: 'end'}}
-            checked={publications === false}
-            onChange={() => setPublications(false)}/>
+          <RadioButton
+              id={reportId}
+              disabled={!isModuleExpiring(modules.find(m => m.moduleName === AccessModule.PUBLICATIONCONFIRMATION))}
+              style={{justifySelf: 'end'}}
+              checked={publications === false}
+              onChange={() => setPublications(false)}/>
           <label htmlFor={reportId}>Report submitted</label>
         </div>
       </RenewalCard>
@@ -347,22 +339,20 @@ export const AccessRenewal = fp.flow(
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING) && !wasBypassed(modules, AccessModule.COMPLIANCETRAINING) &&
+        {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
         <FlexRow style={{marginTop: 'auto'}}>
           <ActionButton
-              modules={modules}
-              moduleName={AccessModule.COMPLIANCETRAINING}
               actionButtonText='Complete Training'
               completedButtonText='Completed'
+              status={modules.find(m => m.moduleName === AccessModule.COMPLIANCETRAINING)}
               onClick={() => {
                 setRefreshButtonDisabled(false);
                 redirectToTraining();
               }}/>
-          {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING) && !wasBypassed(modules, AccessModule.COMPLIANCETRAINING)
-          && <Button
+          {isExpiringAndNotBypassed(AccessModule.COMPLIANCETRAINING, modules) && <Button
             disabled={refreshButtonDisabled}
             onClick={async() => {
               setLoading(true);
@@ -379,10 +369,9 @@ export const AccessRenewal = fp.flow(
           moduleStatus={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}>
         <div>Please review and sign the data user code of conduct consenting to the <AoU/> data use policy.</div>
         <ActionButton
-            modules={modules}
-            moduleName={AccessModule.DATAUSERCODEOFCONDUCT}
             actionButtonText='View & Sign'
             completedButtonText='Completed'
+            status={modules.find(m => m.moduleName === AccessModule.DATAUSERCODEOFCONDUCT)}
             onClick={() => navigateByUrl('data-code-of-conduct', {queryParams: {renewal: 1}})}/>
       </RenewalCard>
     </div>
