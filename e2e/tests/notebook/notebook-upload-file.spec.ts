@@ -115,6 +115,4 @@ describe('Python Kernel Notebook Test', () => {
     await analysisPage.deleteResource(pyNotebookName, ResourceCard.Notebook);
     await analysisPage.waitForLoad();
   });
-
-
 });

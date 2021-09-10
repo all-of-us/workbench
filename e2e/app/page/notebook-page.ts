@@ -13,7 +13,7 @@ import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
-import expect from "expect";
+import expect from 'expect';
 
 // CSS selectors
 const CssSelector = {
@@ -112,7 +112,7 @@ export default class NotebookPage extends NotebookFrame {
 
   async acceptDataUsePolicyDialog(page: Page): Promise<void> {
     const expectedMessage =
-        'It is All of Us data use policy to not upload data or files containing personally identifiable information';
+      'It is All of Us data use policy to not upload data or files containing personally identifiable information';
     page.on('dialog', async (dialog) => {
       await page.waitForTimeout(500);
       const modalMessage = dialog.message();
@@ -130,11 +130,11 @@ export default class NotebookPage extends NotebookFrame {
     const [fileChooser] = await Promise.all([
       page.waitForFileChooser({ timeout: 5000 }),
       page
-          .waitForSelector(uploadButtonSelector)
-          .then((button) => button.click({ delay: 10 }))
-          .then(() => {
-            page.waitForTimeout(500);
-          })
+        .waitForSelector(uploadButtonSelector)
+        .then((button) => button.click({ delay: 10 }))
+        .then(() => {
+          page.waitForTimeout(500);
+        })
     ]);
     await fileChooser.accept([pyFilePath]);
   }
