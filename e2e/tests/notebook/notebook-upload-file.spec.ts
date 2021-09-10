@@ -3,14 +3,12 @@ import ReplaceFileModal from 'app/modal/replace-file-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Link from 'app/element/link';
 import { ResourceCard } from 'app/text-labels';
-import NotebookPage from 'app/page/notebook-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
 import path from 'path';
 import { getPropValue } from 'utils/element-utils';
 import { waitForText } from 'utils/waits-utils';
 import { takeScreenshot } from 'utils/save-file-utils';
-import { Page } from 'puppeteer';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -46,7 +44,7 @@ describe('Python Kernel Notebook Test', () => {
 */
 
     // Select File menu => Open to open Upload tab.
-    const newPage = await openUploadFilePage(notebook);
+    const newPage = await notebook.openUploadFilePage();
 
     // Before upload file starts, check upload button that uploads the file doesn't exist.
     const fileUploadButtonSelector =
@@ -54,33 +52,13 @@ describe('Python Kernel Notebook Test', () => {
       `[.//input[@class="filename_input" and @value="${pyFileName}"]]//button[text()="Upload"]`;
     await newPage.waitForXPath(fileUploadButtonSelector, { hidden: true });
 
-    // Handle "Data Use Policy" dialog: verify message and close dialog.
-    const expectedModelMessage =
-      'It is All of Us data use policy to not upload data or files containing personally identifiable information';
-    newPage.on('dialog', async (dialog) => {
-      await newPage.waitForTimeout(500);
-      const modalMessage = dialog.message();
-      expect(modalMessage).toContain(expectedModelMessage);
-      await dialog.accept();
-      await newPage.waitForTimeout(500);
-      console.log('Accept "Data Use Policy" dialog');
-    });
+    // The first dialog that open up is "Data Use Policy" dialog: verify message and close dialog.
+    await notebook.acceptDataUsePolicyDialog(newPage);
 
     // Upload button that triggers file selection dialog.
-    const uploadButtonSelector = 'input#upload_span_input';
+    await notebook.chooseFile(newPage, pyFilePath);
 
-    const [fileChooser] = await Promise.all([
-      newPage.waitForFileChooser({ timeout: 5000 }),
-      newPage
-        .waitForSelector(uploadButtonSelector)
-        .then((button) => button.click({ delay: 10 }))
-        .then(() => {
-          newPage.waitForTimeout(500);
-        })
-    ]);
-    await fileChooser.accept([pyFilePath]);
-
-    // Upload Cancel button is visible.
+    // Cancel upload button is visible for selected file.
     const cancelFileUploadButtonSelector =
       '//*[@id="notebook_list"]//*[contains(@class, "new-file")]' +
       `[.//input[@class="filename_input" and @value="${pyFileName}"]]//button[text()="Cancel"]`;
@@ -91,7 +69,7 @@ describe('Python Kernel Notebook Test', () => {
     await uploadButton.focus();
     await uploadButton.click({ delay: 10 });
 
-    // Handle "Replace file" dialog if found: Do not overwrite, click CANCEL button to close dialog.
+    // Handle "Replace file" dialog if found: Do not overwrite existing file, click CANCEL button to dismiss dialog.
     // Previously uploaded file persist because same workspace is used during the day.
     const replaceFileMessage = `There is already a file named "${pyFileName}". Do you want to replace it?`;
     const replaceFileModal = new ReplaceFileModal(newPage);
@@ -104,7 +82,7 @@ describe('Python Kernel Notebook Test', () => {
       console.log(`Cancel to close "Replace file" "${pyFileName}" dialog`);
     }
 
-    // Check for file existences by find it and compare file size.
+    // Check file size is valid.
     const fileSizeXpath =
       '//*[@id="notebook_list"]//*[contains(@class,"list_item")]' +
       `[.//a[@class="item_link"]/*[normalize-space()="${pyFileName}"]]//*[contains(@class, "file_size")]`;
@@ -115,10 +93,9 @@ describe('Python Kernel Notebook Test', () => {
 
     // In case page has to be checked after finish.
     await takeScreenshot(newPage, 'notebook-upload-file-test.png');
+
     await newPage.close();
-
     await page.bringToFront();
-
     await notebook.waitForKernelIdle();
 
     const codeCell = notebook.findCell(1);
@@ -139,17 +116,5 @@ describe('Python Kernel Notebook Test', () => {
     await analysisPage.waitForLoad();
   });
 
-  async function openUploadFilePage(notebook: NotebookPage): Promise<Page> {
-    // Select File menu => Open.
-    await notebook.selectFileOpenMenu();
 
-    // New tab opens.
-    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
-    const newPage = await newTarget.page();
-
-    // Upload button that triggers file selection dialog.
-    const uploadButtonSelector = 'input#upload_span_input';
-    await newPage.waitForSelector(uploadButtonSelector, { visible: true });
-    return newPage;
-  }
 });

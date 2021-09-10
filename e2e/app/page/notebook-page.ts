@@ -13,6 +13,7 @@ import Link from 'app/element/link';
 import NotebookFrame from './notebook-frame';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
+import expect from "expect";
 
 // CSS selectors
 const CssSelector = {
@@ -93,6 +94,49 @@ export default class NotebookPage extends NotebookFrame {
   getWorkspaceLink(): Link {
     const selector = '//a[contains(@href, "/data")]';
     return new Link(this.page, selector);
+  }
+
+  async openUploadFilePage(): Promise<Page> {
+    // Select File menu => Open.
+    await this.selectFileOpenMenu();
+
+    // New tab opens. "browser" is a Jest-Puppeteer global variable.
+    const newTarget = await browser.waitForTarget((target) => target.opener() === page.target());
+    const newPage = await newTarget.page();
+
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    await newPage.waitForSelector(uploadButtonSelector, { visible: true });
+    return newPage;
+  }
+
+  async acceptDataUsePolicyDialog(page: Page): Promise<void> {
+    const expectedMessage =
+        'It is All of Us data use policy to not upload data or files containing personally identifiable information';
+    page.on('dialog', async (dialog) => {
+      await page.waitForTimeout(500);
+      const modalMessage = dialog.message();
+      // If this is not the Data Use Policy dialog, error is thrown.
+      expect(modalMessage).toContain(expectedMessage);
+      await dialog.accept();
+      await page.waitForTimeout(500);
+      console.log('Accept "Data Use Policy" dialog');
+    });
+  }
+
+  async chooseFile(page: Page, pyFilePath: string): Promise<void> {
+    // Upload button that triggers file selection dialog.
+    const uploadButtonSelector = 'input#upload_span_input';
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser({ timeout: 5000 }),
+      page
+          .waitForSelector(uploadButtonSelector)
+          .then((button) => button.click({ delay: 10 }))
+          .then(() => {
+            page.waitForTimeout(500);
+          })
+    ]);
+    await fileChooser.accept([pyFilePath]);
   }
 
   /**
