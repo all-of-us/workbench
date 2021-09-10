@@ -7,6 +7,8 @@ const userCredential: ICredentialConfig = {
   USER_NAME: process.env.USER_NAME,
   PASSWORD: process.env.PASSWORD,
   INSTITUTION_CONTACT_EMAIL: 'aou-dev-registration@broadinstitute.org',
+  LOGIN_GOV_PASSWORD: process.env.LOGIN_GOV_PASSWORD,
+  LOGIN_GOV_2FA_SECRET: process.env.LOGIN_GOV_2FA_SECRET,
   // This is passed via a file to leave open the future option to allow token
   // refresh during a Puppeteer test run, and also limits logging exposure of the token.
   USER_ACCESS_TOKEN_FILE: 'signin-tokens/puppeteer-access-token.txt',
@@ -36,7 +38,8 @@ const local: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
 };
 
 // workbench test environment
@@ -50,7 +53,8 @@ const test: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS'
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3 with WGS',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
 };
 
 // workbench staging environment
@@ -64,7 +68,8 @@ const staging: IEnvConfig = {
   ACCESS_TEST_USER: process.env.ACCESS_TEST_USER || 'puppet-access-tester-1@staging.fake-research-aou.org',
   ADMIN_TEST_USER: process.env.ADMIN_TEST_USER || 'puppeteer-admin-1@staging.fake-research-aou.org',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
 };
 
 // NOT WORKING: workbench stable environment
@@ -78,7 +83,8 @@ const stable: IEnvConfig = {
   WRITER_USER: 'TODO - NOT AVAILABLE',
   READER_USER: 'TODO - NOT AVAILABLE',
   ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
-  ADMIN_TEST_USER: 'TODO - NOT AVAILABLE'
+  ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
 };
 
 // workbench perf environment
@@ -92,7 +98,8 @@ const perf: IEnvConfig = {
   ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
   ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
   DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3'
+  ALTERNATIVE_CDR_VERSION_NAME: 'Synthetic Dataset v3',
+  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
 };
 
 const environment = {
