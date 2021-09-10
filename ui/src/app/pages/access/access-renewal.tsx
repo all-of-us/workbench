@@ -349,8 +349,7 @@ export const AccessRenewal = fp.flow(
       <div> You are required to complete the refreshed ethics training courses to understand the privacy safeguards and
           the compliance requirements for using the <AoU/> Dataset.
         </div>
-        {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING)
-        && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING) &&
+        {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING) && !wasBypassed(modules, AccessModule.COMPLIANCETRAINING) &&
           <div style={{borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`, marginTop: '0.5rem', paddingTop: '0.5rem'}}>
             When you have completed the training click the refresh button or reload the page.
           </div>}
@@ -364,8 +363,7 @@ export const AccessRenewal = fp.flow(
                 setRefreshButtonDisabled(false);
                 redirectToTraining();
               }}/>
-          {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING)
-          && !getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)
+          {isModuleExpiring(modules, AccessModule.COMPLIANCETRAINING) && !wasBypassed(modules, AccessModule.COMPLIANCETRAINING)
           && <Button
             disabled={refreshButtonDisabled}
             onClick={async() => {
