@@ -18,7 +18,7 @@ import { useParams } from 'react-router-dom';
 
 export const WorkspaceWrapper = fp.flow(
   withCurrentWorkspace()
-)(({workspace, routeConfigData, hideSpinner}) => {
+)(({workspace, hideSpinner}) => {
   useEffect(() => hideSpinner(), []);
   const routeData = useStore(routeDataStore);
 
