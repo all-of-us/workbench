@@ -11,7 +11,7 @@ import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {cookiesEnabled} from 'app/utils/cookies';
-import {profileStore, ProfileStore, RouteDataStore, useStore} from 'app/utils/stores';
+import {profileStore, ProfileStore, useStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {useEffect, useRef, useState} from 'react';
 
@@ -100,7 +100,7 @@ const shouldShowStatusAlert = (statusAlertId, statusAlertMessage) => {
   }
 };
 
-export const NavBar = (routeData: RouteDataStore) => {
+export const NavBar = () => {
   const [showSideNav, setShowSideNav] = useState(false);
   const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [statusAlertDetails, setStatusAlertDetails] = useState({
@@ -199,7 +199,7 @@ export const NavBar = (routeData: RouteDataStore) => {
         </div>
       }
     </div>
-    <Breadcrumb routeData={routeData}/>
+    <Breadcrumb/>
     {window.location.pathname !== '/access-renewal' && <AccessRenewalNotificationMaybe/>}
     {window.location.pathname !== '/data-access-requirements' && <LoginGovIAL2NotificationMaybe/>}
     {

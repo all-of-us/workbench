@@ -55,7 +55,7 @@ export const withRouteData = WrappedComponent => ({intermediaryRoute = false, ro
     }
   }, [routeData]);
 
-  return <WrappedComponent routeData={routeData} {...props}/>;
+  return <WrappedComponent {...props}/>;
 };
 
 export const withFullHeight = WrappedComponent => ({...props}) => {
