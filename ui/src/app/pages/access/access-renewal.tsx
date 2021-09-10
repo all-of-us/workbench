@@ -241,17 +241,6 @@ export const AccessRenewal = fp.flow(
     return wasBypassed || !isExpiring(status.expirationEpochMillis);
   }
 
-  // Helpers
-  const getExpirationTimeFor = moduleName => fp.flow(fp.find({moduleName: moduleName}), fp.get('expirationEpochMillis'))(modules);
-
-  const wasBypassed = moduleName => switchCase(moduleName,
-    [AccessModule.DATAUSERCODEOFCONDUCT, () => !!getAccessModuleBypassTime(modules, AccessModule.DATAUSERCODEOFCONDUCT)],
-    [AccessModule.COMPLIANCETRAINING, () => !!getAccessModuleBypassTime(modules, AccessModule.COMPLIANCETRAINING)],
-    // these cannot be bypassed
-    [AccessModule.PROFILECONFIRMATION, () => false],
-    [AccessModule.PUBLICATIONCONFIRMATION, () => false]);
-
-  const completeOrBypassed = moduleName => wasBypassed(moduleName) || !isExpiring(getExpirationTimeFor(moduleName));
   const allModulesCompleteOrBypassed = fp.flow(fp.map('moduleName'), fp.all(completeOrBypassed))(modules);
 
   // Render
