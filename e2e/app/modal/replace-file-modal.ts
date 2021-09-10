@@ -1,5 +1,4 @@
 import { ElementHandle, Page } from 'puppeteer';
-import NotebookFrame from 'app/page/notebook-frame';
 import * as fp from 'lodash/fp';
 import { getPropValue } from 'utils/element-utils';
 
@@ -10,14 +9,8 @@ export enum Xpath {
 }
 
 // Note: this does not extended the standard e2e Modal component.
-export default class ReplaceFileModal extends NotebookFrame {
-  constructor(page: Page) {
-    super(page);
-  }
-
-  async waitUntilClose(): Promise<void> {
-    await (await this.getIFrame()).waitForXPath(Xpath.modal, { hidden: true });
-  }
+export default class ReplaceFileModal {
+  constructor(private readonly page: Page) {}
 
   async clickCancelButton(): Promise<void> {
     const button = await this.getCancelButton();
