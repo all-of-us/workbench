@@ -129,7 +129,7 @@ if [[ -z $pipeline_workflow_ids ]]; then
 fi
 
 # Filter out duplicate workflow id.
-workflow_ids=$(echo $pipeline_workflow_ids | tr ' ' '\n' | sort --u)
+workflow_ids=$(echo "${pipeline_workflow_ids}" | tr ' ' '\n' | sort --u)
 printf "%s\n%s\n\n" "Currently running workflow_ids:" "${workflow_ids}"
 
 
@@ -153,19 +153,19 @@ while [[ "${is_running}" == "true" ]]; do
     # Created jobs have status running, queued, failed, or success.
     fetch_jobs "${id}"
     created_jobs=$__
-    created_job_names=$(echo ${created_jobs} | jq -r ".job_name")
+    created_job_names=$(echo "${created_jobs}" | jq -r ".job_name")
 
     # Find failed jobs only.
-    failed_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"failed\")))")
+    failed_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"failed\")))")
 
     # Find running/queued jobs only.
-    running_jobs=$(echo ${created_jobs} | jq ". | select((.status | test(\"running|queued\")))")
+    running_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"running|queued\")))")
     printf "\n%s\n%s\n\n" "Find jobs that are running or queued:" "${running_jobs}"
 
     # Find out if any job has not been created.
     # V1 "/project/" api response does not show jobs that have not been created.
     # We need to compare created jobs list against expected jobs list.
-    not_created_jobs=(`echo ${JOB_LIST[@]} ${created_job_names[@]} | tr ' ' '\n' | sort | uniq -u `)
+    not_created_jobs=(`echo "${JOB_LIST[@]}" "${created_job_names[@]}" | tr ' ' '\n' | sort | uniq -u `)
 
     # Wait while there are jobs in running/queued OR there are jobs that have not been created and no failed jobs.
     if [[ $running_jobs ]] || ( [[ -z $failed_jobs ]] && [[ $not_created_jobs ]] ); then
