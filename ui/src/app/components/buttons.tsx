@@ -5,11 +5,11 @@ import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
+import {preventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
-import {preventDefaultIfNoKeysPressed} from "../utils/navigation";
 
 
 export const styles = reactStyles({

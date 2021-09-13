@@ -16,6 +16,7 @@ import {
 } from 'testing/stubs/cohort-builder-service-stub'
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {AttributesPage, Props} from './attributes-page.component';
+import { MemoryRouter } from 'react-router-dom';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -26,7 +27,7 @@ let mockFindSurveyVersionByQuestionConceptId: SpyInstance;
 let mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId: SpyInstance;
 
 function component(): ReactWrapper {
-  return mount(<AttributesPage {...props}/>);
+  return mount(<MemoryRouter><AttributesPage {...props}/></MemoryRouter>);
 }
 
 function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {

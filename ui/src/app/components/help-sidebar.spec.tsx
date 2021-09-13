@@ -40,6 +40,7 @@ import {ConfirmDeleteModal} from './confirm-delete-modal';
 import {HelpSidebar} from './help-sidebar';
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "testing/stubs/data-set-api-stub";
+import { MemoryRouter } from 'react-router-dom';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -66,6 +67,15 @@ jest.mock('app/pages/workspace/workspace-share', () => {
   return {
     WorkspaceShare: () => <MockWorkspaceShare/>
   };
+}).mock('react-router-dom', () => {
+  // Mock out Link because we need to use setProps so we can't wrap this in a MemoryRouter
+  const originalModule = jest.requireActual('react-router-dom');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    Link: ({ children }) => <div>{children}</div>,
+  }
 });
 
 describe('HelpSidebar', () => {

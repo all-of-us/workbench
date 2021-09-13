@@ -34,6 +34,7 @@ import {Dropdown} from "primereact/dropdown";
 import * as Authentication from "app/utils/authentication";
 import SpyInstance = jest.SpyInstance;
 import { mockNavigate } from 'setupTests';
+import { MemoryRouter } from 'react-router-dom';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);
 
@@ -55,7 +56,7 @@ describe('WorkspaceEdit', () => {
   let workspaceEditMode: WorkspaceEditMode;
 
   const component = () => {
-    return mount(<WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/>);
+    return mount(<MemoryRouter><WorkspaceEdit cancel={() => {}} hideSpinner={() => {}} showSpinner={() => {}} workspaceEditMode={workspaceEditMode}/></MemoryRouter>);
   };
 
   beforeEach(async () => {
