@@ -61,7 +61,7 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile,  load, reload, updateCache});
   }
 
-  function setBypassTimes(completionFn) {
+  function setBypassTimes(bypassFn) {
     const oldProfile = profileStore.get().profile;
     const newModules = fp.map((moduleStatus) => ({
       ...moduleStatus,
@@ -69,7 +69,7 @@ describe('Access Renewal Page', () => {
           // profile and publication are not bypassable.
           (moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION || moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION)
           ? null
-          : completionFn(),
+          : bypassFn(),
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile,  load, reload, updateCache});
