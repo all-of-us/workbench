@@ -156,7 +156,8 @@ while [[ "${is_running}" == "true" ]]; do
     created_job_names=$(echo "${created_jobs}" | jq -r ".job_name")
 
     # Find failed jobs only.
-    failed_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"failed\")))")
+    jq_job_filter="(.status | test(\"failed\")) and (.job_name | test(\"ui-deploy-to-test|api-deploy-to-test\")))"
+    failed_jobs=$(echo "${created_jobs}" | jq ". | select(${jq_job_filter})")
 
     # Find running/queued jobs only.
     running_jobs=$(echo "${created_jobs}" | jq ". | select((.status | test(\"running|queued\")))")
@@ -165,7 +166,7 @@ while [[ "${is_running}" == "true" ]]; do
     # Find out if any job has not been created.
     # V1 "/project/" api response does not show jobs that have not been created.
     # We need to compare created jobs list against expected jobs list.
-    not_created_jobs=(`echo "${JOB_LIST[@]}" "${created_job_names[@]}" | tr ' ' '\n' | sort | uniq -u `)
+    not_created_jobs=$(echo "${JOB_LIST[@]}" "${created_job_names[@]}" | tr ' ' '\n' | sort | uniq -u)
 
     # Wait while there are jobs in running/queued OR there are jobs that have not been created and no failed jobs.
     if [[ $running_jobs ]] || ( [[ -z $failed_jobs ]] && [[ $not_created_jobs ]] ); then
