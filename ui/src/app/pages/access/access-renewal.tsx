@@ -238,6 +238,8 @@ export const AccessRenewal = fp.flow(
   const completeOrBypassed = moduleName => {
     const status = modules.find(m => m.moduleName === moduleName);
     const wasBypassed = !!status.bypassEpochMillis;
+    const tmp = !isExpiring(status.expirationEpochMillis);
+
     return wasBypassed || !isExpiring(status.expirationEpochMillis);
   }
 

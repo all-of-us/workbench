@@ -32,37 +32,29 @@ describe('Access Renewal Page', () => {
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
-  function updateOneModuleExpirationTime(updateModuleName, time) {
+  function removeOneModule(toBeRemoved) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis, completionEpochMillis, bypassEpochMillis}) => ({
-      moduleName,
-      completionEpochMillis: completionEpochMillis,
-      bypassEpochMillis: bypassEpochMillis,
-      expirationEpochMillis: moduleName === updateModuleName ? time : expirationEpochMillis
-    }), oldProfile.accessModules.modules);
+    const newModules = oldProfile.accessModules.modules.filter(m => m.moduleName !== toBeRemoved);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
-  function removeOneModule(toBeRemoved) {
+  function updateOneModuleExpirationTime(updateModuleName, time) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis, bypassEpochMillis, completionEpochMillis}) =>
-        (moduleName === toBeRemoved ? {} : {
-          moduleName : moduleName,
-          bypassEpochMillis: bypassEpochMillis,
-          completionEpochMillis: completionEpochMillis,
-          expirationEpochMillis: expirationEpochMillis}),
-        oldProfile.accessModules.modules);
+    const newModules = [
+      ...oldProfile.accessModules.modules.filter(m => m.moduleName !== updateModuleName),
+      {
+        ...oldProfile.accessModules.modules.find(m => m.moduleName === updateModuleName),
+        expirationEpochMillis: time
+      }];
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile, load, reload, updateCache});
   }
 
   function setCompletionTimes(completionFn) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis, bypassEpochMillis}) => ({
-      moduleName,
-      expirationEpochMillis: expirationEpochMillis,
-      bypassEpochMillis: bypassEpochMillis,
+    const newModules = fp.map((moduleStatus) => ({
+      ...moduleStatus,
       completionEpochMillis: completionFn()
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
@@ -71,14 +63,13 @@ describe('Access Renewal Page', () => {
 
   function setBypassTimes(completionFn) {
     const oldProfile = profileStore.get().profile;
-    const newModules = fp.map(({moduleName, expirationEpochMillis, completionEpochMillis}) => ({
-      moduleName,
-      expirationEpochMillis: expirationEpochMillis,
-      // profile and publication are not bypassable.
-      bypassEpochMillis: (moduleName === AccessModule.PROFILECONFIRMATION || moduleName === AccessModule.PUBLICATIONCONFIRMATION)
+    const newModules = fp.map((moduleStatus) => ({
+      ...moduleStatus,
+      bypassEpochMillis:
+          // profile and publication are not bypassable.
+          (moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION || moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION)
           ? null
           : completionFn(),
-      completionEpochMillis: completionEpochMillis
     }), oldProfile.accessModules.modules);
     const newProfile = fp.set(['accessModules', 'modules'], newModules, oldProfile)
     profileStore.set({profile: newProfile,  load, reload, updateCache});
@@ -299,7 +290,7 @@ describe('Access Renewal Page', () => {
     updateOneModuleExpirationTime(AccessModule.DATAUSERCODEOFCONDUCT, oneYearFromNow());
 
     // these modules will not be returned in AccessModules because they are disabled
-    removeOneModule('complianceTraining');
+    removeOneModule(AccessModule.COMPLIANCETRAINING);
 
     await waitOneTickAndUpdate(wrapper);
 
